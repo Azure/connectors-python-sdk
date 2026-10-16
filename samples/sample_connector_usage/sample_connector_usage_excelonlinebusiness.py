@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Excel Online (Business) Connector SDK Sample
+Excel Online (Business) sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Excel Online Business connector SDK
+This sample demonstrates how to use the Excel Online Business client from the Azure Connectors Python SDK
 to work with Excel files stored in SharePoint document libraries.
 
 Prerequisites:
@@ -24,10 +24,8 @@ Usage:
 
     python sample_connector_usage_excelonlinebusiness.py
 """
-
-import asyncio
 import os
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.excelonlinebusiness import (
     ExcelonlinebusinessClient,
@@ -55,7 +53,7 @@ TABLE_NAME = os.environ.get("EXCELONLINE_TABLE_NAME", "")
 SOURCE_URL = os.environ.get("EXCELONLINE_SOURCE_URL", "")
 
 
-async def example_1_list_table_rows():
+def example_1_list_table_rows():
     """Example 1: List rows in an Excel table."""
     print("\n=== Example 1: List Table Rows ===")
 
@@ -67,11 +65,11 @@ async def example_1_list_table_rows():
         print("  $env:EXCELONLINE_SOURCE_URL = '<sharepoint-site-url>'  (optional)")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with ExcelonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with ExcelonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                rows = [item async for item in client.get_items_async(
+                rows = [item for item in client.list_items(
                     drive=DRIVE_ID,
                     file=FILE_ID,
                     table=TABLE_NAME,
@@ -94,7 +92,7 @@ async def example_1_list_table_rows():
                 print(f"Error: {ex}")
 
 
-async def example_2_get_specific_row():
+def example_2_get_specific_row():
     """Example 2: Get a specific row by key value."""
     print("\n=== Example 2: Get Specific Row ===")
 
@@ -110,11 +108,11 @@ async def example_2_get_specific_row():
         print("  $env:EXCELONLINE_ID_COLUMN = '<key-column-name>'  (optional)")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with ExcelonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with ExcelonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_item_async(
+                result = client.get_item(
                     drive=DRIVE_ID,
                     file=FILE_ID,
                     table=TABLE_NAME,
@@ -137,7 +135,7 @@ async def example_2_get_specific_row():
                 print(f"Error: {ex}")
 
 
-async def example_3_list_workbook_comments():
+def example_3_list_workbook_comments():
     """Example 3: List comments in an Excel workbook."""
     print("\n=== Example 3: List Workbook Comments ===")
 
@@ -147,18 +145,17 @@ async def example_3_list_workbook_comments():
         print("  $env:EXCELONLINE_FILE_ID = '<file-id>'")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with ExcelonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with ExcelonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_comments_async(
+                comments = list(client.list_comments(
                     drive=DRIVE_ID,
                     file=FILE_ID,
                     source=SOURCE_URL if SOURCE_URL else None,
-                )
+                ))
 
-                if result and "value" in result:
-                    comments = result["value"]
+                if comments:
                     print(f"Found {len(comments)} comment(s):")
                     for comment in comments[:5]:
                         comment_id = comment.get("id", "N/A")
@@ -175,7 +172,7 @@ async def example_3_list_workbook_comments():
                 print(f"Error: {ex}")
 
 
-async def example_4_create_table():
+def example_4_create_table():
     """Example 4: Create a new table in an Excel workbook."""
     print("\n=== Example 4: Create Table ===")
 
@@ -192,9 +189,9 @@ async def example_4_create_table():
         print("  $env:EXCELONLINE_COLUMN_NAMES = 'Name;Email;Phone'  (optional)")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with ExcelonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with ExcelonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 table_input = TableToCreate(
                     table_name=new_table_name,
@@ -202,7 +199,7 @@ async def example_4_create_table():
                     columns_names=column_names if column_names else None,
                 )
 
-                result = await client.create_table_async(
+                result = client.create_table(
                     input=table_input,
                     drive=DRIVE_ID,
                     file=FILE_ID,
@@ -222,7 +219,7 @@ async def example_4_create_table():
                 print(f"Error: {ex}")
 
 
-async def example_5_update_row():
+def example_5_update_row():
     """Example 5: Update a row in an Excel table."""
     print("\n=== Example 5: Update Row ===")
 
@@ -238,9 +235,9 @@ async def example_5_update_row():
         print("  $env:EXCELONLINE_ID_COLUMN = '<key-column-name>'  (optional)")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with ExcelonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with ExcelonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Create an Item with the fields to update
                 # The dynamic_properties dict contains column-value pairs
@@ -251,7 +248,7 @@ async def example_5_update_row():
                     }
                 )
 
-                result = await client.patch_item_async(
+                result = client.patch_item(
                     input=update_data,
                     drive=DRIVE_ID,
                     file=FILE_ID,
@@ -275,9 +272,9 @@ async def example_5_update_row():
                 print(f"Error: {ex}")
 
 
-async def main():
+def main():
     """Run all examples."""
-    print("Excel Online (Business) Connector SDK - Sample Usage")
+    print("Excel Online (Business) sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
 
     if not CONNECTION_RUNTIME_URL:
@@ -286,15 +283,15 @@ async def main():
         print("Format: https://[region].azure-apihub.net/apim/excelonlinebusiness/[connection-id]")
         return
 
-    await example_1_list_table_rows()
-    await example_2_get_specific_row()
-    await example_3_list_workbook_comments()
-    await example_4_create_table()
-    await example_5_update_row()
+    example_1_list_table_rows()
+    example_2_get_specific_row()
+    example_3_list_workbook_comments()
+    example_4_create_table()
+    example_5_update_row()
 
     print("\n" + "=" * 60)
     print("Sample completed!")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

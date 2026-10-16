@@ -1,7 +1,7 @@
 """
-Microsoft Forms Connector SDK Sample
+Microsoft Forms sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Microsoft Forms connector SDK.
+This sample demonstrates how to use the Microsoft Forms client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Microsoft Forms connection
@@ -19,11 +19,9 @@ Usage:
 
     python sample_connector_usage_microsoftforms.py
 """
-
-import asyncio
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
 from azure.connectors.microsoftforms import MicrosoftformsClient
@@ -34,14 +32,13 @@ from azure.connectors.microsoftforms import MicrosoftformsClient
 CONNECTION_RUNTIME_URL = os.environ.get("MICROSOFTFORMS_CONNECTION_URL", "")
 
 
-async def example_1_list_forms() -> list[dict]:
+def example_1_list_forms() -> list[dict]:
     """Example 1: List available forms."""
     print("\n=== Example 1: List Forms ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with MicrosoftformsClient(CONNECTION_RUNTIME_URL, credential) as client:
-            forms_response = await client.list_forms_async()
-            forms = forms_response.get("value", []) if forms_response else []
+    with DefaultAzureCredential() as credential:
+        with MicrosoftformsClient(CONNECTION_RUNTIME_URL, credential) as client:
+            forms = list(client.list_forms())
 
             print(f"Found {len(forms)} forms")
             for form in forms[:5]:
@@ -50,13 +47,13 @@ async def example_1_list_forms() -> list[dict]:
             return forms
 
 
-async def example_2_get_form_details(form_id: str) -> None:
+def example_2_get_form_details(form_id: str) -> None:
     """Example 2: Get details for one form."""
     print("\n=== Example 2: Get Form Details ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with MicrosoftformsClient(CONNECTION_RUNTIME_URL, credential) as client:
-            details = await client.get_form_details_by_id_async(form_id=form_id)
+    with DefaultAzureCredential() as credential:
+        with MicrosoftformsClient(CONNECTION_RUNTIME_URL, credential) as client:
+            details = client.get_form_details_by_id(form_id=form_id)
 
             if not details:
                 print("No details returned")
@@ -68,34 +65,34 @@ async def example_2_get_form_details(form_id: str) -> None:
             print(f"Last Modified: {details.get('modifiedDate')}")
 
 
-async def example_3_get_questions(form_id: str) -> None:
+def example_3_get_questions(form_id: str) -> None:
     """Example 3: Get form questions."""
     print("\n=== Example 3: Get Questions ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with MicrosoftformsClient(CONNECTION_RUNTIME_URL, credential) as client:
-            await client.get_questions_async(form_id=form_id)
+    with DefaultAzureCredential() as credential:
+        with MicrosoftformsClient(CONNECTION_RUNTIME_URL, credential) as client:
+            client.get_questions(form_id=form_id)
             print("Question metadata request completed.")
 
 
-async def main() -> None:
+def main() -> None:
     """Run all examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: MICROSOFTFORMS_CONNECTION_URL environment variable not set.")
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Microsoft Forms Connector SDK - Sample Usage")
+    print("Microsoft Forms sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:
-        forms = await example_1_list_forms()
+        forms = example_1_list_forms()
 
         if forms:
             first_form_id = forms[0].get("id")
             if first_form_id:
-                await example_2_get_form_details(first_form_id)
-                await example_3_get_questions(first_form_id)
+                example_2_get_form_details(first_form_id)
+                example_3_get_questions(first_form_id)
             else:
                 print("No form id found in first record; skipping detail examples.")
         else:
@@ -108,4 +105,4 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

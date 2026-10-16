@@ -5,20 +5,104 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "SharepointonlineClient",
+    "ApplicationPermissionIdentity",
+    "ApprovalData",
+    "ApproveHubSiteJoinResponse",
+    "BlobDataSetsMetadata",
+    "BlobMetadata",
+    "BlobMetadataPage",
+    "BlobMetadataResponse",
+    "CopyFileParameters",
+    "CopyFolderParameters",
+    "CreateAgreementsSolutionDocumentInput",
+    "CreateApprovalRequestInput",
+    "CreateContentAssemblyDocumentInput",
+    "CreateNewDocumentSetParameters",
+    "CreateNewDocumentSetResponse",
+    "CreateNewFolderParameters",
+    "CreateNewFolderResponse",
+    "DataSet",
+    "DataSetsList",
+    "DataSetsMetadata",
+    "DeletedItem",
+    "DeletedItemList",
+    "FileCheckInParameters",
+    "FormFieldMetadata",
+    "GetItemChangesMetadataResponse",
+    "GetItemChangesResponse",
+    "GetItemResponse",
+    "GroupPermissionIdentity",
+    "HubSiteJoinApprovalOutput",
+    "Item",
+    "ItemGrantAccessBody",
+    "ItemPermissionAddBody",
+    "ItemPermissionCreateLinkBody",
+    "ItemPermissionRecipient",
+    "ItemPermissionUpdateBody",
+    "ItemReference",
+    "ItemsList",
+    "MoveFileParameters",
+    "MoveFolderParameters",
+    "ObjectEntity",
+    "PassThroughNativeQuery",
+    "PatchFileItemInput",
+    "PatchFileItemResponse",
+    "PatchFileItemWithPredictedValuesParameters",
+    "PatchItemInput",
+    "PatchItemResponse",
+    "Permission",
+    "PermissionIdentitySet",
+    "PermissionsList",
+    "PostItemInput",
+    "PostItemResponse",
+    "Procedure",
+    "PublishedResult",
+    "SPBlobMetadataResponse",
+    "SPContentType",
+    "SPForASelectedFileResponse",
+    "SPListEntity",
+    "SPListExpandedUser",
+    "SPListItemAttachment",
+    "SetApprovalStatusOutput",
+    "SharePointHttpRequestBodyParameters",
+    "SharePointIds",
+    "SharingInvitation",
+    "SharingLink",
+    "SharingLinkPermission",
+    "SharingLinkPermissionIdentitySet",
+    "SharingLinkUserPermissionIdentity",
+    "SubmitDocGenFormInput",
+    "Table",
+    "TableCapabilitiesMetadata",
+    "TableCountRestrictionsMetadata",
+    "TableFilterRestrictionsMetadata",
+    "TableForm",
+    "TableMetadata",
+    "TableSelectRestrictionsMetadata",
+    "TableSortRestrictionsMetadata",
+    "TablesList",
+    "TabularDataSetsMetadata",
+    "UserPermissionIdentity",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -29,7 +113,7 @@ class CreateAgreementsSolutionDocumentInput:
     Agreements Solution - Generate document within Agreements Solution workspace
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -42,48 +126,74 @@ class SPBlobMetadataResponse:
     Response for Agreements Solution - Generate document within Agreements Solution workspace
     """
 
-    item_id: Optional[int] = field(
+    item_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ItemId"},
     )
     """
     The value that can be used to Get or Update file properties in libraries.
     """
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """The unique id of the file or folder."""
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """The name of the file or folder."""
-    display_name: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """The unique id of the file or folder."""
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """The name of the file or folder."""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the file or folder."""
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
-    """The path of the file or folder."""
-    last_modified: Optional[str] = field(
+    path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
+    """The path of the file or folder."""
+    last_modified: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "LastModified"},
     )
     """The date and time the file or folder was last modified."""
-    size: Optional[int] = field(default=None, metadata={"wire_name": "Size"})
-    """The size of the file or folder."""
-    media_type: Optional[str] = field(
+    size: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Size"},
+    )
+    """The size of the file or folder."""
+    media_type: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "MediaType"},
     )
     """The media type of the file or folder."""
-    is_folder: Optional[bool] = field(
+    is_folder: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsFolder"},
     )
     """
     A boolean value (true, false) to indicate whether or not the blob is a
     folder.
     """
-    e_tag: Optional[str] = field(default=None, metadata={"wire_name": "ETag"})
-    """The etag of the file or folder."""
-    file_locator: Optional[str] = field(
+    e_tag: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "ETag"},
+    )
+    """The etag of the file or folder."""
+    file_locator: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "FileLocator"},
     )
     """The filelocator of the file or folder."""
@@ -95,7 +205,12 @@ class TablesList:
     Response for Get all lists and libraries
     """
 
-    value: Optional[List[Table]] = None
+    value: Optional[
+        List[Table | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of Tables"""
 
 
@@ -105,8 +220,9 @@ class ApproveHubSiteJoinResponse:
     Response for Approve hub site join request
     """
 
-    approval_token: Optional[str] = field(
+    approval_token: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ApprovalToken"},
     )
     """Approval Token"""
@@ -118,7 +234,7 @@ class SharingLinkPermission:
     Response for Create sharing link for a file or folder
     """
 
-    link: Optional[SharingLink] = None
+    link: Optional[SharingLink | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -127,41 +243,66 @@ class BlobMetadata:
     Response for Copy file (deprecated)
     """
 
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """The unique id of the file or folder."""
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """The name of the file or folder."""
-    display_name: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """The unique id of the file or folder."""
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """The name of the file or folder."""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the file or folder."""
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
-    """The path of the file or folder."""
-    last_modified: Optional[str] = field(
+    path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
+    """The path of the file or folder."""
+    last_modified: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "LastModified"},
     )
     """The date and time the file or folder was last modified."""
-    size: Optional[int] = field(default=None, metadata={"wire_name": "Size"})
-    """The size of the file or folder."""
-    media_type: Optional[str] = field(
+    size: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Size"},
+    )
+    """The size of the file or folder."""
+    media_type: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "MediaType"},
     )
     """The media type of the file or folder."""
-    is_folder: Optional[bool] = field(
+    is_folder: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsFolder"},
     )
     """
     A boolean value (true, false) to indicate whether or not the blob is a
     folder.
     """
-    e_tag: Optional[str] = field(default=None, metadata={"wire_name": "ETag"})
-    """The etag of the file or folder."""
-    file_locator: Optional[str] = field(
+    e_tag: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "ETag"},
+    )
+    """The etag of the file or folder."""
+    file_locator: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "FileLocator"},
     )
     """The filelocator of the file or folder."""
@@ -173,41 +314,66 @@ class BlobMetadataResponse:
     Response for Update file
     """
 
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """The unique id of the file or folder."""
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """The name of the file or folder."""
-    display_name: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """The unique id of the file or folder."""
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """The name of the file or folder."""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the file or folder."""
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
-    """The path of the file or folder."""
-    last_modified: Optional[str] = field(
+    path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
+    """The path of the file or folder."""
+    last_modified: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "LastModified"},
     )
     """The date and time the file or folder was last modified."""
-    size: Optional[int] = field(default=None, metadata={"wire_name": "Size"})
-    """The size of the file or folder."""
-    media_type: Optional[str] = field(
+    size: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Size"},
+    )
+    """The size of the file or folder."""
+    media_type: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "MediaType"},
     )
     """The media type of the file or folder."""
-    is_folder: Optional[bool] = field(
+    is_folder: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsFolder"},
     )
     """
     A boolean value (true, false) to indicate whether or not the blob is a
     folder.
     """
-    e_tag: Optional[str] = field(default=None, metadata={"wire_name": "ETag"})
-    """The etag of the file or folder."""
-    file_locator: Optional[str] = field(
+    e_tag: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "ETag"},
+    )
+    """The etag of the file or folder."""
+    file_locator: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "FileLocator"},
     )
     """The filelocator of the file or folder."""
@@ -219,7 +385,7 @@ class CreateNewDocumentSetResponse:
     Response for Create new document set
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -232,7 +398,7 @@ class CreateNewFolderResponse:
     Response for Create new folder
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -245,35 +411,45 @@ class SPListExpandedUser:
     Response for Resolve person
     """
 
-    claims: Optional[str] = field(
+    claims: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Claims"},
     )
     """user claims"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """user title"""
-    email: Optional[str] = field(default=None, metadata={"wire_name": "Email"})
-    """user email"""
-    picture: Optional[str] = field(
+    email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Email"},
+    )
+    """user email"""
+    picture: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Picture"},
     )
     """user picture"""
-    department: Optional[str] = field(
+    department: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Department"},
     )
     """user department"""
-    job_title: Optional[str] = field(
+    job_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "JobTitle"},
     )
     """user job title"""
-    type_: Optional[str] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.type"},
     )
 
@@ -284,50 +460,66 @@ class TableForm:
     Response for Get form metadata (preview)
     """
 
-    form_id: Optional[str] = field(
+    form_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FormID"},
     )
     """Gets or sets the form ID"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """Gets or sets the form display name"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "Type"})
-    """Gets or sets the form type"""
-    link: Optional[str] = field(default=None, metadata={"wire_name": "Link"})
-    """Gets or sets the form link/URL"""
-    created_by: Optional[str] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Type"},
+    )
+    """Gets or sets the form type"""
+    link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Link"},
+    )
+    """Gets or sets the form link/URL"""
+    created_by: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "CreatedBy"},
     )
     """Gets or sets the user who created the form"""
-    created: Optional[str] = field(
+    created: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Created"},
     )
     """Gets or sets the date the form was created"""
-    modified: Optional[str] = field(
+    modified: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Modified"},
     )
     """Gets or sets the date the form was last modified"""
-    modified_by: Optional[str] = field(
+    modified_by: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ModifiedBy"},
     )
     """Gets or sets the user who last modified the form"""
-    output_format: Optional[str] = field(
+    output_format: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OutputFormat"},
     )
     """
     Gets or sets the output format (e.g. \"Word document\", \"PDF document\",
     \"None\")
     """
-    fields_metadata: Optional[List[FormFieldMetadata]] = field(
+    fields_metadata: Optional[List[FormFieldMetadata | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FieldsMetadata"},
     )
     """Gets or sets Form Fields"""
@@ -339,7 +531,7 @@ class SubmitDocGenFormInput:
     Generate a document from a form (preview)
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -352,10 +544,16 @@ class ItemsList:
     Response for Get files (properties only)
     """
 
-    value: Optional[List[Item]] = None
-    """List of Items"""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[Item | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of Items"""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -367,7 +565,7 @@ class PostItemInput:
     Create item
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -380,7 +578,7 @@ class PostItemResponse:
     Response for Create item
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -393,7 +591,7 @@ class GetItemResponse:
     Response for Get item
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -406,7 +604,7 @@ class PatchItemInput:
     Update item
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -419,7 +617,7 @@ class PatchItemResponse:
     Response for Update item
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -432,7 +630,7 @@ class CreateApprovalRequestInput:
     Create an approval request for an item or file
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -445,10 +643,7 @@ class ApprovalData:
     Response for Create an approval request for an item or file
     """
 
-    approval_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "ApprovalId"},
-    )
+    approval_id: str = dataclass_field(metadata={"wire_name": "ApprovalId"})
     """The ID of the approval request created"""
 
 
@@ -458,7 +653,7 @@ class GetItemChangesResponse:
     Response for Get changes for an item or a file (properties only)
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -471,8 +666,9 @@ class Item:
     Response for Get file properties
     """
 
-    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dynamicProperties"},
     )
 
@@ -483,7 +679,7 @@ class PatchFileItemInput:
     Update file properties
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -496,7 +692,7 @@ class PatchFileItemResponse:
     Response for Update file properties
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -509,25 +705,33 @@ class SetApprovalStatusOutput:
     Response for Set content approval status
     """
 
-    e_tag: Optional[str] = field(default=None, metadata={"wire_name": "ETag"})
-    """ETag of the item after the approval status was set"""
-    approval_link: Optional[str] = field(
+    e_tag: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "ETag"},
+    )
+    """ETag of the item after the approval status was set"""
+    approval_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "ApprovalLink"},
     )
     """A link to the item that needs approval"""
-    publish_start_date: Optional[str] = field(
+    publish_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PublishStartDate"},
     )
     """Date time at which the item will be Published"""
-    content_approval_status: Optional[str] = field(
+    content_approval_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContentApprovalStatus"},
     )
     """The content approval status of the list item"""
-    scheduled_version: Optional[str] = field(
+    scheduled_version: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ScheduledVersion"},
     )
     """The version of the item that has been scheduled"""
@@ -539,15 +743,21 @@ class SPListItemAttachment:
     Response for Get attachments
     """
 
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """File identifier"""
-    absolute_uri: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """File identifier"""
+    absolute_uri: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "AbsoluteUri"},
     )
     """Link to attachment"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """Name"""
@@ -559,7 +769,12 @@ class DeletedItemList:
     Response for When a file is deleted
     """
 
-    value: Optional[List[DeletedItem]] = None
+    value: Optional[
+        List[DeletedItem | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of Deleted Items"""
 
 
@@ -569,7 +784,7 @@ class CreateContentAssemblyDocumentInput:
     Generate document using Microsoft Syntex (preview)
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -582,15 +797,21 @@ class Table:
     Response for Get list views
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """The name of the table. The name is used at runtime."""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """The name of the table. The name is used at runtime."""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the table."""
-    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DynamicProperties"},
     )
     """Additional table properties provided by the connector to the clients."""
@@ -602,7 +823,12 @@ class DataSetsList:
     Response for Get datasets
     """
 
-    value: Optional[List[DataSet]] = None
+    value: Optional[
+        List[DataSet | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of datasets"""
 
 
@@ -612,26 +838,30 @@ class TableMetadata:
     Response for Agreements Solution - Get template fields
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Table name"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Table title"""
-    x_ms_permission: Optional[str] = field(
+    x_ms_permission: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "x-ms-permission"},
     )
     """Table permission"""
-    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = field(
+    x_ms_capabilities: Optional[TableCapabilitiesMetadata | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "x-ms-capabilities"},
     )
-    schema: Optional[ObjectEntity] = None
-    referenced_entities: Optional[ObjectEntity] = field(
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    referenced_entities: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "referencedEntities"},
     )
-    web_url: Optional[str] = field(
+    web_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "webUrl"},
     )
     """URL link"""
@@ -643,7 +873,7 @@ class ObjectEntity:
     Response for Get thumbnail size options
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -656,10 +886,15 @@ class SPListEntity:
     Response for Returns User fields for a list
     """
 
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """The Id of the SPField"""
-    entity_type: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """The Id of the SPField"""
+    entity_type: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "EntityType"},
     )
     """What type of entity (field) this is"""
@@ -671,7 +906,7 @@ class GetItemChangesMetadataResponse:
     Response for Get metadata about the return type of the GetItemChanges operation
     """
 
-    schema: Optional[ObjectEntity] = None
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -680,8 +915,9 @@ class ApplicationPermissionIdentity:
     Definition: ApplicationPermissionIdentity
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Application display name"""
@@ -693,15 +929,17 @@ class BlobDataSetsMetadata:
     Definition: BlobDataSetsMetadata
     """
 
-    source: Optional[str] = None
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Blob dataset source"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Blob dataset display name"""
-    url_encoding: Optional[str] = field(
+    url_encoding: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "urlEncoding"},
     )
     """Blob dataset url encoding"""
@@ -713,7 +951,12 @@ class BlobMetadataPage:
     Definition: BlobMetadataPage
     """
 
-    value: Optional[List[BlobMetadata]] = None
+    value: Optional[
+        List[BlobMetadata | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Blob metadata collection."""
 
 
@@ -723,23 +966,19 @@ class CopyFileParameters:
     Definition: CopyFileParameters
     """
 
-    source_file_id: Optional[str] = field(
-        default=None,
+    source_file_id: str = dataclass_field(
         metadata={"wire_name": "sourceFileId"},
     )
     """File Identifier"""
-    destination_dataset: Optional[str] = field(
-        default=None,
+    destination_dataset: str = dataclass_field(
         metadata={"wire_name": "destinationDataset"},
     )
     """Example: https://contoso.sharepoint.com/sites/sitename"""
-    destination_folder_path: Optional[str] = field(
-        default=None,
+    destination_folder_path: str = dataclass_field(
         metadata={"wire_name": "destinationFolderPath"},
     )
     """Destination Folder"""
-    name_conflict_behavior: Optional[int] = field(
-        default=None,
+    name_conflict_behavior: int = dataclass_field(
         metadata={"wire_name": "nameConflictBehavior"},
     )
     """Pick one of the options available"""
@@ -751,23 +990,19 @@ class CopyFolderParameters:
     Definition: CopyFolderParameters
     """
 
-    source_folder_id: Optional[str] = field(
-        default=None,
+    source_folder_id: str = dataclass_field(
         metadata={"wire_name": "sourceFolderId"},
     )
     """File Identifier"""
-    destination_dataset: Optional[str] = field(
-        default=None,
+    destination_dataset: str = dataclass_field(
         metadata={"wire_name": "destinationDataset"},
     )
     """Example: https://contoso.sharepoint.com/sites/sitename"""
-    destination_folder_path: Optional[str] = field(
-        default=None,
+    destination_folder_path: str = dataclass_field(
         metadata={"wire_name": "destinationFolderPath"},
     )
     """Destination Folder"""
-    name_conflict_behavior: Optional[int] = field(
-        default=None,
+    name_conflict_behavior: int = dataclass_field(
         metadata={"wire_name": "nameConflictBehavior"},
     )
     """Pick one of the options available"""
@@ -779,15 +1014,15 @@ class CreateNewDocumentSetParameters:
     Definition: CreateNewDocumentSetParameters
     """
 
-    path: Optional[str] = None
+    path: str
     """Example: folder1/folder2/dsName"""
-    content_type_id: Optional[str] = field(
-        default=None,
+    content_type_id: str = dataclass_field(
         metadata={"wire_name": "contentTypeId"},
     )
     """Example: 0x0120D520"""
-    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DynamicProperties"},
     )
 
@@ -798,7 +1033,7 @@ class CreateNewFolderParameters:
     Definition: CreateNewFolderParameters
     """
 
-    path: Optional[str] = None
+    path: str
     """Example: folder1/folder2/folder3"""
 
 
@@ -808,14 +1043,24 @@ class DataSet:
     Definition: DataSet
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """Dataset name"""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """Dataset name"""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """Dataset display name"""
-    query: Optional[List[PassThroughNativeQuery]] = None
+    query: Optional[
+        List[PassThroughNativeQuery | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Pass-through Native Queries"""
 
 
@@ -825,8 +1070,18 @@ class DataSetsMetadata:
     Definition: DataSetsMetadata
     """
 
-    tabular: Optional[TabularDataSetsMetadata] = None
-    blob: Optional[BlobDataSetsMetadata] = None
+    tabular: Optional[
+        TabularDataSetsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    blob: Optional[
+        BlobDataSetsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -835,33 +1090,45 @@ class DeletedItem:
     Definition: DeletedItem
     """
 
-    id: Optional[int] = field(default=None, metadata={"wire_name": "ID"})
+    id: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID"},
+    )
     """List item id"""
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
     """
     File name of the item in document libraries, display name of the item in
     lists
     """
-    file_name_with_extension: Optional[str] = field(
+    file_name_with_extension: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FileNameWithExtension"},
     )
     """
     File name with extension of the item in document libraries, same as Name of
     the item in lists
     """
-    deleted_by_user_name: Optional[str] = field(
+    deleted_by_user_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DeletedByUserName"},
     )
     """The name of the user who deleted this item"""
-    time_deleted: Optional[str] = field(
+    time_deleted: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TimeDeleted"},
     )
     """When this item was deleted"""
-    is_folder: Optional[bool] = field(
+    is_folder: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsFolder"},
     )
     """A true/false value to indicate if the item is a folder"""
@@ -873,12 +1140,9 @@ class FileCheckInParameters:
     Definition: FileCheckInParameters
     """
 
-    comment: Optional[str] = None
+    comment: str
     """Type comments describing what has changed in this version"""
-    checkin_type: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "checkinType"},
-    )
+    checkin_type: int = dataclass_field(metadata={"wire_name": "checkinType"})
     """Select the type of version you would like to check in"""
 
 
@@ -888,22 +1152,33 @@ class FormFieldMetadata:
     Definition: FormFieldMetadata
     """
 
-    id: Optional[str] = field(default=None, metadata={"wire_name": "ID"})
-    """Gets or sets the field ID"""
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """Gets or sets the field Name"""
-    is_required: Optional[bool] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID"},
+    )
+    """Gets or sets the field ID"""
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """Gets or sets the field Name"""
+    is_required: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "IsRequired"},
     )
     """Gets or sets a value indicating whether the field is required"""
-    data_type: Optional[str] = field(
+    data_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DataType"},
     )
     """Gets or sets the field data type"""
-    default_value: Optional[str] = field(
+    default_value: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DefaultValue"},
     )
     """Gets or sets the default value"""
@@ -915,8 +1190,9 @@ class GroupPermissionIdentity:
     Definition: GroupPermissionIdentity
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Group display name"""
@@ -928,23 +1204,27 @@ class HubSiteJoinApprovalOutput:
     Definition: HubSiteJoinApprovalOutput
     """
 
-    requesting_site_url: Optional[str] = field(
+    requesting_site_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RequestingSiteUrl"},
     )
     """Requesting Site Url"""
-    requesting_site_id: Optional[str] = field(
+    requesting_site_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RequestingSiteId"},
     )
     """Requesting Site Id"""
-    requesting_site_title: Optional[str] = field(
+    requesting_site_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RequestingSiteTitle"},
     )
     """Requesting Site Title"""
-    approval_correlation_id: Optional[str] = field(
+    approval_correlation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ApprovalCorrelationId"},
     )
     """Approval Correlation Id"""
@@ -956,22 +1236,21 @@ class ItemGrantAccessBody:
     Definition: ItemGrantAccessBody
     """
 
-    recipients: Optional[str] = None
+    recipients: str
     """A collection of recipients who will receive the sharing invitation"""
-    role_value: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "roleValue"},
-    )
+    role_value: str = dataclass_field(metadata={"wire_name": "roleValue"})
     """Specify a role that is to be granted to the recipients"""
-    email_body: Optional[str] = field(
+    email_body: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "emailBody"},
     )
     """
     A plain text formatted message that is included in the sharing invitation
     """
-    send_email: Optional[bool] = field(
+    send_email: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sendEmail"},
     )
     """
@@ -985,33 +1264,31 @@ class ItemPermissionAddBody:
     Definition: ItemPermissionAddBody
     """
 
-    recipients: Optional[List[ItemPermissionRecipient]] = None
+    recipients: List[ItemPermissionRecipient | Mapping[str, Any]]
     """
     A collection of recipients who will receive access and the sharing
     invitation.
     """
-    roles: Optional[List[str]] = None
+    roles: List[str]
     """
     Specify the roles that are be granted to the recipients of the sharing
     invitation.
     """
-    require_sign_in: Optional[bool] = field(
-        default=None,
+    require_sign_in: bool = dataclass_field(
         metadata={"wire_name": "requireSignIn"},
     )
     """
     Specifies where the recipient of the invitation is required to sign-in to
     view the shared item.
     """
-    send_invitation: Optional[bool] = field(
-        default=None,
+    send_invitation: bool = dataclass_field(
         metadata={"wire_name": "sendInvitation"},
     )
     """
     Specifies if an email or post is generated (true) or if the permission is
     just created (false).
     """
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A plain text formatted message that is included in the sharing invitation.
     Maximum length 2000 characters.
@@ -1024,15 +1301,16 @@ class ItemPermissionCreateLinkBody:
     Definition: ItemPermissionCreateLinkBody
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """The type of sharing link to create"""
-    scope: Optional[str] = None
+    scope: str
     """
     Choose who your sharing link gives access to. \"Anyone\" option will only
     work if your administrator has enabled it.
     """
-    expiration_date_time: Optional[str] = field(
+    expiration_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "expirationDateTime"},
     )
     """
@@ -1047,7 +1325,7 @@ class ItemPermissionRecipient:
     Definition: ItemPermissionRecipient
     """
 
-    email: Optional[str] = None
+    email: str
     """
     The email address for the recipient, if the recipient has an associated
     email address.
@@ -1060,7 +1338,7 @@ class ItemPermissionUpdateBody:
     Definition: ItemPermissionUpdateBody
     """
 
-    roles: Optional[List[str]] = None
+    roles: List[str]
     """Specify updated roles for this permission."""
 
 
@@ -1070,12 +1348,13 @@ class ItemReference:
     Definition: ItemReference
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the parent item"""
-    path: Optional[str] = None
+    path: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Path that can be used to navigate to the parent item"""
-    sharepoint_ids: Optional[SharePointIds] = field(
+    sharepoint_ids: Optional[SharePointIds | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sharepointIds"},
     )
 
@@ -1086,23 +1365,19 @@ class MoveFileParameters:
     Definition: MoveFileParameters
     """
 
-    source_file_id: Optional[str] = field(
-        default=None,
+    source_file_id: str = dataclass_field(
         metadata={"wire_name": "sourceFileId"},
     )
     """File Identifier"""
-    destination_dataset: Optional[str] = field(
-        default=None,
+    destination_dataset: str = dataclass_field(
         metadata={"wire_name": "destinationDataset"},
     )
     """Example: https://contoso.sharepoint.com/sites/sitename"""
-    destination_folder_path: Optional[str] = field(
-        default=None,
+    destination_folder_path: str = dataclass_field(
         metadata={"wire_name": "destinationFolderPath"},
     )
     """Destination Folder"""
-    name_conflict_behavior: Optional[int] = field(
-        default=None,
+    name_conflict_behavior: int = dataclass_field(
         metadata={"wire_name": "nameConflictBehavior"},
     )
     """Pick one of the options available"""
@@ -1114,23 +1389,19 @@ class MoveFolderParameters:
     Definition: MoveFolderParameters
     """
 
-    source_folder_id: Optional[str] = field(
-        default=None,
+    source_folder_id: str = dataclass_field(
         metadata={"wire_name": "sourceFolderId"},
     )
     """File Identifier"""
-    destination_dataset: Optional[str] = field(
-        default=None,
+    destination_dataset: str = dataclass_field(
         metadata={"wire_name": "destinationDataset"},
     )
     """Example: https://contoso.sharepoint.com/sites/sitename"""
-    destination_folder_path: Optional[str] = field(
-        default=None,
+    destination_folder_path: str = dataclass_field(
         metadata={"wire_name": "destinationFolderPath"},
     )
     """Destination Folder"""
-    name_conflict_behavior: Optional[int] = field(
-        default=None,
+    name_conflict_behavior: int = dataclass_field(
         metadata={"wire_name": "nameConflictBehavior"},
     )
     """Pick one of the options available"""
@@ -1142,8 +1413,9 @@ class PassThroughNativeQuery:
     Definition: PassThroughNativeQuery
     """
 
-    language: Optional[str] = field(
+    language: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Language"},
     )
     """Query language"""
@@ -1155,13 +1427,15 @@ class PatchFileItemWithPredictedValuesParameters:
     Definition: PatchFileItemWithPredictedValuesParameters
     """
 
-    model_id: Optional[str] = field(
+    model_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "modelId"},
     )
     """Enter modelId of the Model which is used for prediction"""
-    predict_result: Optional[str] = field(
+    predict_result: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "predictResult"},
     )
     """Enter request content in JSON"""
@@ -1173,27 +1447,37 @@ class Permission:
     Definition: Permission
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Permission id"""
-    granted_to: Optional[PermissionIdentitySet] = field(
+    granted_to: Optional[PermissionIdentitySet | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "grantedTo"},
     )
-    granted_to_identities: Optional[List[SharingLinkPermissionIdentitySet]] = field(
+    granted_to_identities: Optional[
+        List[SharingLinkPermissionIdentitySet | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "grantedToIdentities"},
     )
     """
     For link type permissions, the details of the users to whom permission was
     granted
     """
-    invitation: Optional[SharingInvitation] = None
-    inherited_from: Optional[ItemReference] = field(
+    invitation: Optional[
+        SharingInvitation | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    inherited_from: Optional[ItemReference | Mapping[str, Any]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "inheritedFrom"},
     )
-    link: Optional[SharingLink] = None
-    roles: Optional[List[str]] = None
+    link: Optional[SharingLink | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    roles: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """The type of permission - read, write, owner, member"""
 
 
@@ -1203,9 +1487,24 @@ class PermissionIdentitySet:
     Definition: PermissionIdentitySet
     """
 
-    application: Optional[ApplicationPermissionIdentity] = None
-    group: Optional[GroupPermissionIdentity] = None
-    user: Optional[UserPermissionIdentity] = None
+    application: Optional[
+        ApplicationPermissionIdentity | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    group: Optional[
+        GroupPermissionIdentity | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    user: Optional[
+        UserPermissionIdentity | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1214,7 +1513,12 @@ class PermissionsList:
     Definition: PermissionsList
     """
 
-    value: Optional[List[Permission]] = None
+    value: Optional[
+        List[Permission | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of Permissions"""
 
 
@@ -1224,10 +1528,15 @@ class Procedure:
     Definition: Procedure
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """Procedure name"""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """Procedure name"""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """Procedure display name"""
@@ -1239,8 +1548,7 @@ class PublishedResult:
     Definition: PublishedResult
     """
 
-    is_file_published: Optional[bool] = field(
-        default=None,
+    is_file_published: bool = dataclass_field(
         metadata={"wire_name": "IsFilePublished"},
     )
     """
@@ -1255,13 +1563,13 @@ class SharePointHttpRequestBodyParameters:
     Definition: SharePointHttpRequestBodyParameters
     """
 
-    method: Optional[str] = None
+    method: str
     """Http Method"""
-    uri: Optional[str] = None
+    uri: str
     """Example: _api/web/lists/getbytitle('Documents')"""
-    headers: Optional[Dict[str, str]] = None
+    headers: Optional[Dict[str, str]] = dataclass_field(default=None, kw_only=True)
     """Enter JSON object of request headers"""
-    body: Optional[str] = None
+    body: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Enter request content in JSON"""
 
 
@@ -1271,41 +1579,48 @@ class SharePointIds:
     Definition: SharePointIds
     """
 
-    list_id: Optional[str] = field(
+    list_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "listId"},
     )
     """The unique identifier (guid) for the item's list in SharePoint"""
-    list_item_id: Optional[str] = field(
+    list_item_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "listItemId"},
     )
     """An integer identifier for the item within the containing list"""
-    list_item_unique_id: Optional[str] = field(
+    list_item_unique_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "listItemUniqueId"},
     )
     """
     The unique identifier (guid) for the item within OneDrive for Business or a
     SharePoint site
     """
-    site_id: Optional[str] = field(
+    site_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "siteId"},
     )
     """The unique identifier (guid) for the item's site collection (SPSite)"""
-    site_url: Optional[str] = field(
+    site_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "siteUrl"},
     )
     """The SharePoint URL for the site that contains the item"""
-    tenant_id: Optional[str] = field(
+    tenant_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tenantId"},
     )
     """The unique identifier (guid) for the tenancy"""
-    web_id: Optional[str] = field(
+    web_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "webId"},
     )
     """The unique identifier (guid) for the item's site (SPWeb)"""
@@ -1317,12 +1632,13 @@ class SharingInvitation:
     Definition: SharingInvitation
     """
 
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The email address provided for the recipient of the sharing invitation
     """
-    sign_in_required: Optional[bool] = field(
+    sign_in_required: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "signInRequired"},
     )
     """
@@ -1337,8 +1653,9 @@ class SharingLink:
     Definition: SharingLink
     """
 
-    web_url: Optional[str] = field(
+    web_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "webUrl"},
     )
     """A link to the item"""
@@ -1350,7 +1667,12 @@ class SharingLinkPermissionIdentitySet:
     Definition: SharingLinkPermissionIdentitySet
     """
 
-    user: Optional[SharingLinkUserPermissionIdentity] = None
+    user: Optional[
+        SharingLinkUserPermissionIdentity | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1359,12 +1681,13 @@ class SharingLinkUserPermissionIdentity:
     Definition: SharingLinkUserPermissionIdentity
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """User display name"""
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User email"""
 
 
@@ -1374,9 +1697,17 @@ class SPContentType:
     Definition: SPContentType
     """
 
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
+    id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
     """Content type Id"""
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
     """Content type name"""
 
 
@@ -1386,15 +1717,21 @@ class SPForASelectedFileResponse:
     Definition: SPForASelectedFileResponse
     """
 
-    id: Optional[int] = field(default=None, metadata={"wire_name": "ID"})
-    """File Identifier"""
-    item_url: Optional[str] = field(
+    id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID"},
+    )
+    """File Identifier"""
+    item_url: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "itemUrl"},
     )
     """File Url"""
-    file_name: Optional[str] = field(
+    file_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "fileName"},
     )
     """File Name"""
@@ -1406,34 +1743,49 @@ class TableCapabilitiesMetadata:
     Definition: TableCapabilitiesMetadata
     """
 
-    sort_restrictions: Optional[TableSortRestrictionsMetadata] = field(
+    sort_restrictions: Optional[
+        TableSortRestrictionsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sortRestrictions"},
     )
-    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = field(
+    filter_restrictions: Optional[
+        TableFilterRestrictionsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "filterRestrictions"},
     )
-    select_restrictions: Optional[TableSelectRestrictionsMetadata] = field(
+    select_restrictions: Optional[
+        TableSelectRestrictionsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "selectRestrictions"},
     )
-    count_restrictions: Optional[TableCountRestrictionsMetadata] = field(
+    count_restrictions: Optional[
+        TableCountRestrictionsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "countRestrictions"},
     )
-    is_only_server_pagable: Optional[bool] = field(
+    is_only_server_pagable: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isOnlyServerPagable"},
     )
     """Server paging restrictions"""
-    filter_function_support: Optional[List[str]] = field(
+    filter_function_support: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "filterFunctionSupport"},
     )
     """List of supported filter capabilities"""
-    server_paging_options: Optional[List[str]] = field(
+    server_paging_options: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "serverPagingOptions"},
     )
     """List of supported server-driven paging capabilities"""
@@ -1445,7 +1797,7 @@ class TableCountRestrictionsMetadata:
     Definition: TableCountRestrictionsMetadata
     """
 
-    countable: Optional[bool] = None
+    countable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether this table has countable columns"""
 
 
@@ -1455,15 +1807,17 @@ class TableFilterRestrictionsMetadata:
     Definition: TableFilterRestrictionsMetadata
     """
 
-    filterable: Optional[bool] = None
+    filterable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether this table has filterable columns"""
-    non_filterable_properties: Optional[List[str]] = field(
+    non_filterable_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nonFilterableProperties"},
     )
     """List of non filterable properties"""
-    required_properties: Optional[List[str]] = field(
+    required_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "requiredProperties"},
     )
     """List of required properties"""
@@ -1475,7 +1829,7 @@ class TableSelectRestrictionsMetadata:
     Definition: TableSelectRestrictionsMetadata
     """
 
-    selectable: Optional[bool] = None
+    selectable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether this table has selectable columns"""
 
 
@@ -1485,15 +1839,17 @@ class TableSortRestrictionsMetadata:
     Definition: TableSortRestrictionsMetadata
     """
 
-    sortable: Optional[bool] = None
+    sortable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether this table has sortable columns"""
-    unsortable_properties: Optional[List[str]] = field(
+    unsortable_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "unsortableProperties"},
     )
     """List of unsortable properties"""
-    ascending_only_properties: Optional[List[str]] = field(
+    ascending_only_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ascendingOnlyProperties"},
     )
     """List of properties which support ascending order only"""
@@ -1505,25 +1861,29 @@ class TabularDataSetsMetadata:
     Definition: TabularDataSetsMetadata
     """
 
-    source: Optional[str] = None
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Dataset source"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Dataset display name"""
-    url_encoding: Optional[str] = field(
+    url_encoding: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "urlEncoding"},
     )
     """Dataset url encoding"""
-    table_display_name: Optional[str] = field(
+    table_display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tableDisplayName"},
     )
     """Table display name"""
-    table_plural_name: Optional[str] = field(
+    table_plural_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tablePluralName"},
     )
     """Table plural display name"""
@@ -1535,12 +1895,13 @@ class UserPermissionIdentity:
     Definition: UserPermissionIdentity
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """User display name"""
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User email"""
 
 
@@ -1552,16 +1913,16 @@ class SharepointonlineClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -1572,8 +1933,8 @@ class SharepointonlineClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -1581,8 +1942,8 @@ class SharepointonlineClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -1594,7 +1955,7 @@ class SharepointonlineClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -1610,15 +1971,49 @@ class SharepointonlineClient(ConnectorClientBase):
         return "sharepointonline"
 
     def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
-        parsed_next_link = urlsplit(next_link)
-        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
             if next_link.startswith("/"):
                 return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
             if next_link.startswith("?"):
-                return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
 
-        parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
         connection_hostname = parsed_connection.hostname
         if next_link_hostname is None or connection_hostname is None:
@@ -1635,7 +2030,11 @@ class SharepointonlineClient(ConnectorClientBase):
                 parsed_next_link.scheme == parsed_connection.scheme
                 and next_link_port == connection_port
             ):
-                return next_link
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
 
             raise ValueError(
                 "Pagination URL origin "
@@ -1648,13 +2047,13 @@ class SharepointonlineClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def create_agreements_solution_document_async(
+    def create_agreements_solution_document(
         self,
-        input: CreateAgreementsSolutionDocumentInput,
+        input: CreateAgreementsSolutionDocumentInput | Mapping[str, Any],
         dataset: str,
         template: str,
-        document_name: Optional[str] = None,
         *,
+        document_name: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1667,6 +2066,25 @@ class SharepointonlineClient(ConnectorClientBase):
         Use this action to create documents based on modern templates in a
         Agreements Solution workspace. This is behind a payment wall currently
         in planning (either license or PayG).
+
+        Swagger operation ID: `CreateAgreementsSolutionDocument`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            template: Agreements Solution template.
+            document_name: Document file name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1686,7 +2104,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1700,6 +2118,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1707,7 +2126,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_all_tables_async(
+    def list_all_tables(
         self,
         dataset: str,
         *,
@@ -1715,11 +2134,30 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get all lists and libraries
 
         Get all lists and libraries.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetAllTables`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1727,29 +2165,50 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/alltables"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def approve_hub_site_join_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def approve_hub_site_join(
         self,
         dataset: str,
         joining_site_id: str,
@@ -1765,6 +2224,22 @@ class SharepointonlineClient(ConnectorClientBase):
         Approve hub site join request. This will return an approval token that
         can be used to complete the join request using the join hub site
         action.
+
+        Swagger operation ID: `ApproveHubSiteJoin`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            joining_site_id: Id of the requesting site.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1780,7 +2255,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1794,6 +2269,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1801,11 +2277,11 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def cancel_hub_site_join_approval_async(
+    def cancel_hub_site_join_approval(
         self,
         dataset: str,
-        approval_correlation_id: Optional[str] = None,
         *,
+        approval_correlation_id: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1817,6 +2293,23 @@ class SharepointonlineClient(ConnectorClientBase):
         Cancel hub join request. If applicable, you should specify the same
         Approval Correlation Id as used in the \"Set hub site join status to
         pending\" action.
+
+        Swagger operation ID: `CancelHubSiteJoinApproval`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            approval_correlation_id: Approval correlation identifier for this
+                request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1833,7 +2326,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1847,11 +2340,12 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def create_sharing_link_async(
+    def create_sharing_link(
         self,
-        input: ItemPermissionCreateLinkBody,
+        input: ItemPermissionCreateLinkBody | Mapping[str, Any],
         dataset: str,
         table: str,
         id: int,
@@ -1865,6 +2359,25 @@ class SharepointonlineClient(ConnectorClientBase):
         Create sharing link for a file or folder
 
         Create sharing link for a file or folder.
+
+        Swagger operation ID: `CreateSharingLink`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint library name.
+            id: Id of the file or folder item.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1883,7 +2396,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/createLink"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1897,6 +2410,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1904,13 +2418,13 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def copy_file_async(
+    def copy_file(
         self,
         dataset: str,
         source: str,
         destination: str,
-        overwrite: Optional[bool] = None,
         *,
+        overwrite: Optional[bool] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1920,6 +2434,25 @@ class SharepointonlineClient(ConnectorClientBase):
         Copy file (deprecated)
 
         Copies a file to a SharePoint site.
+
+        Swagger operation ID: `CopyFile`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            source: Path to the source file.
+            destination: Path to the destination file.
+            overwrite: Whether or not to overwrite the destination file if it
+                exists.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1945,7 +2478,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1959,6 +2492,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1966,9 +2500,9 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def copy_file_2_async(
+    def copy_file_2(
         self,
-        input: CopyFileParameters,
+        input: CopyFileParameters | Mapping[str, Any],
         dataset: str,
         *,
         timeout: Optional[float] = None,
@@ -1982,6 +2516,23 @@ class SharepointonlineClient(ConnectorClientBase):
         Copies a file. Works in a similar way to the \"Copy to\" command in
         SharePoint libraries. Returns information about the new file after
         copy.
+
+        Swagger operation ID: `CopyFileAsync`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1990,7 +2541,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/copyFileAsync"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2004,6 +2555,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2011,9 +2563,9 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def copy_folder_async(
+    def copy_folder(
         self,
-        input: CopyFolderParameters,
+        input: CopyFolderParameters | Mapping[str, Any],
         dataset: str,
         *,
         timeout: Optional[float] = None,
@@ -2027,6 +2579,23 @@ class SharepointonlineClient(ConnectorClientBase):
         Copies a folder. Works in a similar way to the \"Copy to\" command in
         SharePoint libraries. Returns information about the new folder after
         copy.
+
+        Swagger operation ID: `CopyFolderAsync`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2035,7 +2604,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/copyFolderAsync"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2049,6 +2618,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2056,7 +2626,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_file_async(
+    def create_file(
         self,
         input: bytes,
         dataset: str,
@@ -2073,6 +2643,25 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Uploads a file to a SharePoint site. Make sure to pick an existing
         library.
+
+        Swagger operation ID: `CreateFile`.
+
+        Args:
+            input: The binary request body.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            folder_path: Must start with an existing library. Add folders if
+                needed.
+            name: Name of the file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2091,7 +2680,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST",
             request_url,
             body=input,
@@ -2108,6 +2697,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2115,7 +2705,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_file_metadata_async(
+    def get_file_metadata(
         self,
         dataset: str,
         id: str,
@@ -2131,6 +2721,22 @@ class SharepointonlineClient(ConnectorClientBase):
         Gets information about the file such as size, etag, created date, etc.
         Uses a file identifier to pick the file. Use \"Get file properties\"
         action to get to the values stored in the columns in the library.
+
+        Swagger operation ID: `GetFileMetadata`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            id: Select a file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2140,7 +2746,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2154,6 +2760,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2161,7 +2768,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_file_async(
+    def update_file(
         self,
         input: bytes,
         dataset: str,
@@ -2176,6 +2783,23 @@ class SharepointonlineClient(ConnectorClientBase):
         Update file
 
         Updates the contents of the file specified by the file identifier.
+
+        Swagger operation ID: `UpdateFile`.
+
+        Args:
+            input: The binary request body.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            id: Select a file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2185,7 +2809,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT",
             request_url,
             body=input,
@@ -2202,6 +2826,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2209,7 +2834,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_file_async(
+    def delete_file(
         self,
         dataset: str,
         id: str,
@@ -2223,6 +2848,22 @@ class SharepointonlineClient(ConnectorClientBase):
         Delete file
 
         Deletes the file specified by the file identifier.
+
+        Swagger operation ID: `DeleteFile`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            id: Select a file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2232,7 +2873,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2246,14 +2887,15 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_file_content_async(
+    def get_file_content(
         self,
         dataset: str,
         id: str,
-        infer_content_type: Optional[bool] = None,
         *,
+        infer_content_type: Optional[bool] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2264,6 +2906,23 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Gets file contents using the file identifier. The contents can be
         copied somewhere else, or be used as an attachment.
+
+        Swagger operation ID: `GetFileContent`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            id: Select a file.
+            infer_content_type: Infer content-type based on extension.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2282,7 +2941,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2296,11 +2955,12 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
 
-    async def get_file_thumbnail_async(
+    def get_file_thumbnail(
         self,
         dataset: str,
         id: str,
@@ -2315,6 +2975,23 @@ class SharepointonlineClient(ConnectorClientBase):
         Get file thumbnail
 
         Gets the thumbnail of a file by its file identifier.
+
+        Swagger operation ID: `GetFileThumbnail`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            id: Select a file.
+            size: The size of the thumbnail to retrieve.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2332,7 +3009,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2346,11 +3023,12 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
 
-    async def list_root_folder_async(
+    def list_root_folder(
         self,
         dataset: str,
         *,
@@ -2358,39 +3036,79 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List root folder
 
         Returns files in the root SharePoint folder.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListRootFolder`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/{quote(quote(str(dataset), safe=''), safe='')}/folders"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_folder_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_folder(
         self,
         dataset: str,
         id: str,
@@ -2399,11 +3117,31 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List folder
 
         Returns files contained in a SharePoint folder.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListFolder`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            id: Unique identifier of the folder.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2412,29 +3150,50 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/folders"
             f"/{quote(str(id), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_file_metadata_by_path_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_file_metadata_by_path(
         self,
         dataset: str,
         path: str,
@@ -2450,6 +3209,22 @@ class SharepointonlineClient(ConnectorClientBase):
         Gets information about the file such as size, etag, created date, etc.
         Uses a file path to pick the file. Use \"Get file properties\" action
         to get to the values stored in the columns in the library.
+
+        Swagger operation ID: `GetFileMetadataByPath`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            path: Select a file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2466,7 +3241,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2480,6 +3255,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2487,12 +3263,12 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_file_content_by_path_async(
+    def get_file_content_by_path(
         self,
         dataset: str,
         path: str,
-        infer_content_type: Optional[bool] = None,
         *,
+        infer_content_type: Optional[bool] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2502,6 +3278,23 @@ class SharepointonlineClient(ConnectorClientBase):
         Get file content using path
 
         Gets file contents using the file path.
+
+        Swagger operation ID: `GetFileContentByPath`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            path: Select a file.
+            infer_content_type: Infer content-type based on extension.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2523,7 +3316,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2537,11 +3330,12 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
 
-    async def get_folder_metadata_async(
+    def get_folder_metadata(
         self,
         dataset: str,
         id: str,
@@ -2556,6 +3350,22 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Gets information about the folder. Uses a file identifier to pick the
         folder.
+
+        Swagger operation ID: `GetFolderMetadata`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            id: Select a folder.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2571,7 +3381,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2585,6 +3395,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2592,7 +3403,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_folder_metadata_by_path_async(
+    def get_folder_metadata_by_path(
         self,
         dataset: str,
         path: str,
@@ -2607,6 +3418,22 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Gets information about the folder. Uses a folder path to pick the
         folder.
+
+        Swagger operation ID: `GetFolderMetadataByPath`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            path: Select a folder.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2623,7 +3450,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2637,6 +3464,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2644,9 +3472,9 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def http_request_async(
+    def http_request(
         self,
-        input: SharePointHttpRequestBodyParameters,
+        input: SharePointHttpRequestBodyParameters | Mapping[str, Any],
         dataset: str,
         *,
         timeout: Optional[float] = None,
@@ -2660,6 +3488,23 @@ class SharepointonlineClient(ConnectorClientBase):
         Construct a SharePoint REST API to invoke. Note - This action may
         execute any SharePoint REST API you have access to. Please proceed with
         caution.
+
+        Swagger operation ID: `HttpRequest`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2668,7 +3513,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/httprequest"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2682,15 +3527,16 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def join_hub_site_async(
+    def join_hub_site(
         self,
         dataset: str,
         hub_site_id: str,
+        *,
         approval_token: Optional[str] = None,
         approval_correlation_id: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2703,6 +3549,25 @@ class SharepointonlineClient(ConnectorClientBase):
         to complete the join successfully if that hub requires approval. If
         applicable, you should specify the same Approval Correlation Id as used
         in the \"Set hub site join status to pending\" action.
+
+        Swagger operation ID: `JoinHubSite`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            hub_site_id: Id of the hub site.
+            approval_token: Approval token for this request.
+            approval_correlation_id: Approval correlation identifier for this
+                request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2728,7 +3593,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2742,11 +3607,12 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def move_file_async(
+    def move_file(
         self,
-        input: MoveFileParameters,
+        input: MoveFileParameters | Mapping[str, Any],
         dataset: str,
         *,
         timeout: Optional[float] = None,
@@ -2760,6 +3626,23 @@ class SharepointonlineClient(ConnectorClientBase):
         Moves a file. Works in a similar way to the \"Move to\" command in
         SharePoint libraries. Returns information about the new file after
         move.
+
+        Swagger operation ID: `MoveFileAsync`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2768,7 +3651,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/moveFileAsync"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2782,6 +3665,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2789,9 +3673,9 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def move_folder_async(
+    def move_folder(
         self,
-        input: MoveFolderParameters,
+        input: MoveFolderParameters | Mapping[str, Any],
         dataset: str,
         *,
         timeout: Optional[float] = None,
@@ -2805,6 +3689,23 @@ class SharepointonlineClient(ConnectorClientBase):
         Moves a folder. Works in a similar way to the \"Move to\" command in
         SharePoint libraries. Returns information about the new folder after
         move.
+
+        Swagger operation ID: `MoveFolderAsync`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2813,7 +3714,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/moveFolderAsync"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2827,6 +3728,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2834,11 +3736,11 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def notify_hub_site_join_approval_started_async(
+    def notify_hub_site_join_approval_started(
         self,
         dataset: str,
-        approval_correlation_id: Optional[str] = None,
         *,
+        approval_correlation_id: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2851,6 +3753,23 @@ class SharepointonlineClient(ConnectorClientBase):
         Approval Correlation Id is an optional parameter that helps SharePoint
         identify a particular hub join request. The requesting site can only
         have one pending request at a given time.
+
+        Swagger operation ID: `NotifyHubSiteJoinApprovalStarted`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            approval_correlation_id: Approval correlation identifier for this
+                request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2867,7 +3786,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2881,9 +3800,10 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_tables_async(
+    def list_tables(
         self,
         dataset: str,
         *,
@@ -2891,41 +3811,81 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get lists
 
         Gets SharePoint lists from a site.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetTables`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/{quote(quote(str(dataset), safe=''), safe='')}/tables"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def create_new_document_set_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def create_new_document_set(
         self,
-        input: CreateNewDocumentSetParameters,
+        input: CreateNewDocumentSetParameters | Mapping[str, Any],
         dataset: str,
         table: str,
         *,
@@ -2938,6 +3898,24 @@ class SharepointonlineClient(ConnectorClientBase):
         Create new document set
 
         Creates a new document set list item.
+
+        Swagger operation ID: `CreateNewDocumentSet`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint library name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2948,7 +3926,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/createnewdocumentset"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2962,6 +3940,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2969,13 +3948,13 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_new_folder_async(
+    def create_new_folder(
         self,
-        input: CreateNewFolderParameters,
+        input: CreateNewFolderParameters | Mapping[str, Any],
         dataset: str,
         table: str,
-        view: Optional[str] = None,
         *,
+        view: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2985,6 +3964,26 @@ class SharepointonlineClient(ConnectorClientBase):
         Create new folder
 
         Creates a new folder or folder path.
+
+        Swagger operation ID: `CreateNewFolder`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list or library name.
+            view: Avoid column threshold issues by only using columns defined
+                in a view.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3003,7 +4002,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3017,6 +4016,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3024,14 +4024,14 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def search_for_user_async(
+    def search_for_user(
         self,
         dataset: str,
         table: str,
         entity_id: str,
         search_value: str,
-        view: Optional[str] = None,
         *,
+        view: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3043,6 +4043,26 @@ class SharepointonlineClient(ConnectorClientBase):
         Returns a single matching user value so it can be assigned to a column
         of type person. If there are no matches, or multiple matches, this
         action will error out.
+
+        Swagger operation ID: `SearchForUser`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: Pick the list or library that the column is in.
+            entity_id: Pick the column you want to assign the value to.
+            search_value: Use the email address, or the full name of the user.
+            view: Avoid column threshold issues by only using columns defined
+                in a view.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3067,7 +4087,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3081,6 +4101,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3088,7 +4109,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_table_form_async(
+    def get_table_form(
         self,
         dataset: str,
         table: str,
@@ -3108,6 +4129,23 @@ class SharepointonlineClient(ConnectorClientBase):
         part of AI in SharePoint Public Preview. For more info on getting
         started, see:
         https://learn.microsoft.com/sharepoint/dev/declarative-customization/structured-documents.
+
+        Swagger operation ID: `GetTableForm`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            form: Form identifier.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3119,7 +4157,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/{quote(quote(str(form), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3133,6 +4171,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3140,14 +4179,14 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def submit_doc_gen_form_async(
+    def submit_doc_gen_form(
         self,
-        input: SubmitDocGenFormInput,
+        input: SubmitDocGenFormInput | Mapping[str, Any],
         dataset: str,
         table: str,
         form: str,
-        view: Optional[str] = None,
         *,
+        view: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3161,6 +4200,26 @@ class SharepointonlineClient(ConnectorClientBase):
         data source. Document generation forms is a part of AI in SharePoint
         Public Preview. For more info on getting started, see:
         https://learn.microsoft.com/sharepoint/dev/declarative-customization/structured-documents.
+
+        Swagger operation ID: `SubmitDocGenForm`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint document library name.
+            form: Form identifier.
+            view: This parameter does nothing. Please do not use.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3181,7 +4240,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3195,6 +4254,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3202,22 +4262,22 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_file_items_async(
+    def list_file_items(
         self,
         dataset: str,
         table: str,
+        *,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
         top: Optional[int] = None,
         folder_path: Optional[str] = None,
         view_scope_option: Optional[str] = None,
         view: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get files (properties only)
 
@@ -3228,8 +4288,35 @@ class SharepointonlineClient(ConnectorClientBase):
         On-Premises Data Gateway, the name of the library to connect to may
         need to be entered manually.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetFileItems`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint library name.
+            filter: An ODATA filter query to restrict the entries returned
+                (e.g. stringColumn eq 'string' OR numberColumn lt 123).
+            orderby: An ODATA orderBy query for specifying the order of
+                entries.
+            top: Total number of entries to retrieve (default = all).
+            folder_path: Select a folder, or leave blank for the whole library.
+            view_scope_option: Return entries contained in sub-folders (default
+                = true).
+            view: Avoid column threshold issues by only using columns defined
+                in a view.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3272,11 +4359,18 @@ class SharepointonlineClient(ConnectorClientBase):
             query_params.append(f"view={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -3289,45 +4383,81 @@ class SharepointonlineClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_items_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_items(
         self,
         dataset: str,
         table: str,
+        *,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
         top: Optional[int] = None,
         folder_path: Optional[str] = None,
         view_scope_option: Optional[str] = None,
         view: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get items
 
         Gets items from a SharePoint list.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetItems`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            filter: An ODATA filter query to restrict the entries returned
+                (e.g. stringColumn eq 'string' OR numberColumn lt 123).
+            orderby: An ODATA orderBy query for specifying the order of
+                entries.
+            top: Total number of entries to retrieve (default = all).
+            folder_path: Select a folder, or leave blank for the whole list.
+            view_scope_option: Return entries contained in sub-folders (default
+                = true).
+            view: Avoid column threshold issues by only using columns defined
+                in a view.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3370,11 +4500,18 @@ class SharepointonlineClient(ConnectorClientBase):
             query_params.append(f"view={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -3387,29 +4524,38 @@ class SharepointonlineClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def post_item_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def post_item(
         self,
-        input: PostItemInput,
+        input: PostItemInput | Mapping[str, Any],
         dataset: str,
         table: str,
-        view: Optional[str] = None,
         *,
+        view: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3419,6 +4565,26 @@ class SharepointonlineClient(ConnectorClientBase):
         Create item
 
         Creates a new item in a SharePoint list.
+
+        Swagger operation ID: `PostItem`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            view: Avoid column threshold issues by only using columns defined
+                in a view.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3437,7 +4603,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3451,6 +4617,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3458,13 +4625,13 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_item_async(
+    def get_item(
         self,
         dataset: str,
         table: str,
         id: int,
-        view: Optional[str] = None,
         *,
+        view: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3474,6 +4641,25 @@ class SharepointonlineClient(ConnectorClientBase):
         Get item
 
         Gets a single item by its id from a SharePoint list.
+
+        Swagger operation ID: `GetItem`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            id: Unique identifier of item to be retrieved.
+            view: Avoid column threshold issues by only using columns defined
+                in a view.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3493,7 +4679,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3507,6 +4693,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3514,7 +4701,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_item_async(
+    def delete_item(
         self,
         dataset: str,
         table: str,
@@ -3529,6 +4716,23 @@ class SharepointonlineClient(ConnectorClientBase):
         Delete item
 
         Deletes an item from a SharePoint list.
+
+        Swagger operation ID: `DeleteItem`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            id: Unique identifier of item to be deleted.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3540,7 +4744,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3554,16 +4758,17 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def patch_item_async(
+    def patch_item(
         self,
-        input: PatchItemInput,
+        input: PatchItemInput | Mapping[str, Any],
         dataset: str,
         table: str,
         id: int,
-        view: Optional[str] = None,
         *,
+        view: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3573,6 +4778,27 @@ class SharepointonlineClient(ConnectorClientBase):
         Update item
 
         Updates an item in a SharePoint list.
+
+        Swagger operation ID: `PatchItem`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            id: Unique identifier of item to be updated.
+            view: Avoid column threshold issues by only using columns defined
+                in a view.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3592,7 +4818,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3606,6 +4832,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3613,9 +4840,9 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_approval_request_async(
+    def create_approval_request(
         self,
-        input: CreateApprovalRequestInput,
+        input: CreateApprovalRequestInput | Mapping[str, Any],
         dataset: str,
         table: str,
         id: int,
@@ -3630,6 +4857,26 @@ class SharepointonlineClient(ConnectorClientBase):
         Create an approval request for an item or file
 
         Creates an approval request for an item or file.
+
+        Swagger operation ID: `CreateApprovalRequest`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list or library name.
+            id: Id of the item the approval request is being created for.
+            approval_type: Select an approval type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3649,7 +4896,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3663,6 +4910,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3670,16 +4918,16 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_item_changes_async(
+    def get_item_changes(
         self,
         dataset: str,
         table: str,
         id: int,
         since: str,
+        *,
         until: Optional[str] = None,
         include_drafts: Optional[bool] = None,
         view: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3690,6 +4938,31 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Returns information about columns that have changed within a given time
         window. Note: The list must have Versioning turned on.
+
+        Swagger operation ID: `GetItemChanges`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list or library name.
+            id: Id of the item you want to fetch changes for.
+            since: Trigger Window Start token or an item version label (ex:
+                3.0) or an ISO 8601 date (YYYY-MM-DDThh:mmZ).
+            until: Trigger Window End token or an item version label (ex: 3.0)
+                or an ISO 8601 date (YYYY-MM-DDThh:mmZ). If blank, defaults to
+                latest version.
+            include_drafts: Boolean for whether to consider changes from minor
+                (draft) versions.
+            view: Returns only columns defined in a view.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3724,7 +4997,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3738,6 +5011,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3745,9 +5019,9 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def check_in_file_async(
+    def check_in_file(
         self,
-        input: FileCheckInParameters,
+        input: FileCheckInParameters | Mapping[str, Any],
         dataset: str,
         table: str,
         id: int,
@@ -3762,6 +5036,25 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Check in a checked out file in a document library, which makes the
         version of the document available to others.
+
+        Swagger operation ID: `CheckInFile`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint library name.
+            id: Id of the list item the file is attached to.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3774,7 +5067,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/checkinfile"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3788,9 +5081,10 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def check_out_file_async(
+    def check_out_file(
         self,
         dataset: str,
         table: str,
@@ -3807,6 +5101,23 @@ class SharepointonlineClient(ConnectorClientBase):
         Check out a file in a document library to prevent others from editing
         the document, and your changes from being visible until the documented
         is checked in.
+
+        Swagger operation ID: `CheckOutFile`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint library name.
+            id: Id of the list item the file is attached to.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3819,7 +5130,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/checkoutfile"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3833,9 +5144,10 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def discard_file_check_out_async(
+    def discard_file_check_out(
         self,
         dataset: str,
         table: str,
@@ -3855,6 +5167,23 @@ class SharepointonlineClient(ConnectorClientBase):
         versions, a new version is created each time you check a file back into
         the library. By discarding the checkout, you can avoid making new
         versions when you haven't made any changes to the file.
+
+        Swagger operation ID: `DiscardFileCheckOut`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint library name.
+            id: Id of the list item the file is attached to.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3867,7 +5196,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/discardfilecheckout"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3881,15 +5210,16 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_file_item_async(
+    def get_file_item(
         self,
         dataset: str,
         table: str,
         id: int,
-        view: Optional[str] = None,
         *,
+        view: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3904,6 +5234,25 @@ class SharepointonlineClient(ConnectorClientBase):
         the contents of the file. When using this with the On-Premises Data
         Gateway, the name of the library to connect to may need to be entered
         manually.
+
+        Swagger operation ID: `GetFileItem`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint library name.
+            id: Unique identifier of item to be retrieved.
+            view: Avoid column threshold issues by only using columns defined
+                in a view.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3924,7 +5273,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3938,6 +5287,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3945,9 +5295,9 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def grant_access_async(
+    def grant_access(
         self,
-        input: ItemGrantAccessBody,
+        input: ItemGrantAccessBody | Mapping[str, Any],
         dataset: str,
         table: str,
         id: int,
@@ -3961,6 +5311,26 @@ class SharepointonlineClient(ConnectorClientBase):
         Grant access to an item or a folder
 
         Grant access to an item or a folder in SharePoint to specific people.
+
+        Swagger operation ID: `GrantAccess`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list or library name.
+            id: Unique identifier of the item or folder you want to grant
+                access to.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3973,7 +5343,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/grantaccess"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3987,16 +5357,17 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def patch_file_item_async(
+    def patch_file_item(
         self,
-        input: PatchFileItemInput,
+        input: PatchFileItemInput | Mapping[str, Any],
         dataset: str,
         table: str,
         id: int,
-        view: Optional[str] = None,
         *,
+        view: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4009,6 +5380,27 @@ class SharepointonlineClient(ConnectorClientBase):
         specified by the item id. Use \"Update file\" action to update file
         contents. When using this with the On-Premises Data Gateway, the name
         of the library to connect to may need to be entered manually.
+
+        Swagger operation ID: `PatchFileItem`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint library name.
+            id: Unique identifier of item to be updated.
+            view: Avoid column threshold issues by only using columns defined
+                in a view.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4029,7 +5421,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4043,6 +5435,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4050,9 +5443,9 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def patch_file_item_with_predicted_values_async(
+    def patch_file_item_with_predicted_values(
         self,
-        input: PatchFileItemWithPredictedValuesParameters,
+        input: PatchFileItemWithPredictedValuesParameters | Mapping[str, Any],
         dataset: str,
         table: str,
         id: int,
@@ -4067,6 +5460,25 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Updates the values stored in library columns for a file analyzed by the
         model specified by the ModelId.
+
+        Swagger operation ID: `PatchFileItemWithPredictedValues`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: Library Name.
+            id: Unique identifier of item to be updated.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4079,7 +5491,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/patchfileitemwithpredictedvalues"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4093,6 +5505,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4100,15 +5513,15 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def set_approval_status_async(
+    def set_approval_status(
         self,
         dataset: str,
         table: str,
         id: int,
         approval_action: str,
+        *,
         comments: Optional[str] = None,
         entity_tag: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4121,6 +5534,26 @@ class SharepointonlineClient(ConnectorClientBase):
         has content approval turned on. You must provide an ETag for pages and
         files. You can get the ETag using the Get File Metadata action. This
         action is only available for SharePoint Online and SharePoint 2019.
+
+        Swagger operation ID: `SetApprovalStatus`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint library name.
+            id: Id of the item you are setting the status of.
+            approval_action: Pick the approval action.
+            comments: Add the comments from the approver.
+            entity_tag: Add an ETag (required for files and pages).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4150,7 +5583,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4164,6 +5597,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4171,7 +5605,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def unshare_item_async(
+    def unshare_item(
         self,
         dataset: str,
         table: str,
@@ -4187,6 +5621,23 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Delete all links giving access to an item or a file and remove all
         people with direct access except for owners.
+
+        Swagger operation ID: `UnshareItem`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list or library name.
+            id: Unique identifier of the item or file you want to stop sharing.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4199,7 +5650,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/unshare"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4213,9 +5664,10 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_item_attachments_async(
+    def list_item_attachments(
         self,
         dataset: str,
         table: str,
@@ -4225,13 +5677,34 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get attachments
 
         Returns the list of attachments for the specified list item. You can
         add a \"Get attachment content\" step and use the \"File identifier\"
         property returned by this action to get to the contents of the file.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetItemAttachments`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            item_id: Id of the list item to get attachments from.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4243,29 +5716,50 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/{quote(quote(str(item_id), safe=''), safe='')}"
             f"/attachments"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def create_attachment_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def create_attachment(
         self,
         input: bytes,
         dataset: str,
@@ -4282,6 +5776,25 @@ class SharepointonlineClient(ConnectorClientBase):
         Add attachment
 
         Adds a new attachment to the specified list item.
+
+        Swagger operation ID: `CreateAttachment`.
+
+        Args:
+            input: The binary request body.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            item_id: Id of the list item to attach the file to.
+            display_name: File name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4301,7 +5814,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST",
             request_url,
             body=input,
@@ -4318,6 +5831,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4325,7 +5839,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_attachment_async(
+    def delete_attachment(
         self,
         dataset: str,
         table: str,
@@ -4341,6 +5855,24 @@ class SharepointonlineClient(ConnectorClientBase):
         Delete attachment
 
         Deletes the specified attachment.
+
+        Swagger operation ID: `DeleteAttachment`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            item_id: Id of the list item the file is attached to.
+            attachment_id: File identifier for the attachment.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4354,7 +5886,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/{quote(str(attachment_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4368,9 +5900,10 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_attachment_content_async(
+    def get_attachment_content(
         self,
         dataset: str,
         table: str,
@@ -4387,6 +5920,24 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Returns file contents using the file identifier. The contents can be
         copied somewhere else, or be used as an attachment.
+
+        Swagger operation ID: `GetAttachmentContent`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            item_id: Id of the list item the file is attached to.
+            attachment_id: File identifier for the attachment.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4401,7 +5952,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/$value"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4415,20 +5966,21 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
 
-    async def create_content_assembly_document_async(
+    def create_content_assembly_document(
         self,
-        input: CreateContentAssemblyDocumentInput,
+        input: CreateContentAssemblyDocumentInput | Mapping[str, Any],
         dataset: str,
         table: str,
         template: str,
+        *,
         folder_path: Optional[str] = None,
         file_name: Optional[str] = None,
         view: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4441,6 +5993,28 @@ class SharepointonlineClient(ConnectorClientBase):
         Microsoft Syntex. This preview requires a Syntex license. Pricing is
         subject to change. For more info see:
         https://docs.microsoft.com/en-us/microsoft-365/contentunderstanding/content-assembly.
+
+        Swagger operation ID: `CreateContentAssemblyDocument`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint document library name.
+            template: Document template.
+            folder_path: Must start with an existing library.
+            file_name: Document file name.
+            view: This parameter does nothing. Please do not use.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4471,7 +6045,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4485,6 +6059,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4492,7 +6067,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_table_views_async(
+    def list_table_views(
         self,
         dataset: str,
         table: str,
@@ -4501,11 +6076,31 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get list views
 
         Gets views from a SharePoint list.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetTableViews`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4515,35 +6110,56 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/views"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def extract_folder_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def extract_folder(
         self,
         dataset: str,
         source: str,
         destination: str,
-        overwrite: Optional[bool] = None,
         *,
+        overwrite: Optional[bool] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4553,6 +6169,25 @@ class SharepointonlineClient(ConnectorClientBase):
         Extract folder
 
         Extracts an archive file into a SharePoint folder (example: .zip).
+
+        Swagger operation ID: `ExtractFolderV2`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            source: Path to the source file.
+            destination: Path to the destination folder.
+            overwrite: Whether or not to overwrite the destination file if it
+                exists.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4578,7 +6213,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4592,6 +6227,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4599,43 +6235,82 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_data_sets_async(
+    def list_data_sets(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get datasets
 
         Gets the most recently used SharePoint sites.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetDataSets`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/datasets"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_agreements_solution_templates_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_agreements_solution_templates(
         self,
         dataset: str,
         *,
@@ -4643,11 +6318,30 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Agreements Solution - Get Templates
 
         Gets templates from a Agreements Solution workspace.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetAgreementsSolutionTemplates`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4656,29 +6350,50 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/agreements"
             f"/templates"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_agreements_solution_template_fields_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_agreements_solution_template_fields(
         self,
         dataset: str,
         template: str,
@@ -4692,6 +6407,22 @@ class SharepointonlineClient(ConnectorClientBase):
         Agreements Solution - Get template fields
 
         Gets fields from template in a Agreements Solution workspace.
+
+        Swagger operation ID: `GetAgreementsSolutionTemplateFields`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            template: Agreements Solution template.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4703,7 +6434,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/fields"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4717,6 +6448,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4724,7 +6456,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_tables_for_libraries_async(
+    def list_tables_for_libraries(
         self,
         dataset: str,
         *,
@@ -4732,11 +6464,30 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get libraries
 
         Get libraries
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetTablesForLibraries`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4745,29 +6496,50 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/tablesfor"
             f"/libraries"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_thumbnail_size_options_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_thumbnail_size_options(
         self,
         *,
         timeout: Optional[float] = None,
@@ -4779,10 +6551,24 @@ class SharepointonlineClient(ConnectorClientBase):
         Get thumbnail size options
 
         Internal operation to get thumbnail size options.
+
+        Swagger operation ID: `GetThumbnailSizeOptions`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/getThumbnailSizeOptions"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4796,6 +6582,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4803,13 +6590,13 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_table_async(
+    def get_table(
         self,
         dataset: str,
         table: str,
+        *,
         view: Optional[str] = None,
         content_type_id: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4819,6 +6606,25 @@ class SharepointonlineClient(ConnectorClientBase):
         Get list metadata
 
         Gets metadata from a SharePoint list.
+
+        Swagger operation ID: `GetTable`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            view: Avoid column threshold issues by only using columns defined
+                in a view.
+            content_type_id: Contentype Id to filter columns by content type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4842,7 +6648,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4856,6 +6662,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4863,7 +6670,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_tables_for_lists_and_libraries_async(
+    def list_tables_for_lists_and_libraries(
         self,
         dataset: str,
         *,
@@ -4871,11 +6678,30 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get lists and libraries
 
         Get lists and libraries
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetTablesForListsAndLibraries`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4884,43 +6710,86 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/tablesfor"
             f"/listsandlibraries"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_entities_for_user_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_entities_for_user(
         self,
         dataset: str,
         table: str,
-        view: Optional[str] = None,
         *,
+        view: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Returns User fields for a list
 
         Returns User fields for a list.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetEntitiesForUser`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            view: Avoid column threshold issues by only using columns defined
+                in a view.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4939,29 +6808,50 @@ class SharepointonlineClient(ConnectorClientBase):
             query_params.append(f"view={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_table_forms_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_table_forms(
         self,
         dataset: str,
         table: str,
@@ -4970,11 +6860,31 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get list forms
 
         Gets forms from a SharePoint list.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetTableForms`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4984,29 +6894,50 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/forms"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_doc_gen_forms_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_doc_gen_forms(
         self,
         dataset: str,
         table: str,
@@ -5015,12 +6946,32 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get document generation forms
 
         Gets published document generation forms from a SharePoint document
         library.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetDocGenForms`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint document library name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5030,29 +6981,50 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/docgenforms"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_doc_gen_form_fields_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_doc_gen_form_fields(
         self,
         dataset: str,
         table: str,
@@ -5067,6 +7039,23 @@ class SharepointonlineClient(ConnectorClientBase):
         Get document generation form fields
 
         Gets fields from a document generation form in a SharePoint list.
+
+        Swagger operation ID: `GetDocGenFormFields`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            form: Form identifier.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5079,7 +7068,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/fields"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5093,6 +7082,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5100,45 +7090,84 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_view_scope_options_async(
+    def list_view_scope_options(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get SPViewScope options to use for folder querying behavior
 
         Default - Only query current folder (non-recursive). Return both Files
         and Folders. RecursiveAll - Recursively query the folder. Return both
         Files and Folders.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetViewScopeOptions`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/getViewScopeOptions"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_tables_for_lightweight_approval_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_tables_for_lightweight_approval(
         self,
         dataset: str,
         *,
@@ -5146,11 +7175,30 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get lists and libraries where lightweight approvals is enabled
 
         Get lists and libraries where lightweight approvals is enabled
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetTablesForLightweightApproval`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5159,29 +7207,50 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/tablesfor"
             f"/lightweightapproval"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_approval_types_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_approval_types(
         self,
         *,
         timeout: Optional[float] = None,
@@ -5193,10 +7262,24 @@ class SharepointonlineClient(ConnectorClientBase):
         Get available approval request types
 
         Internal operation to get the available approval request types.
+
+        Swagger operation ID: `GetApprovalTypes`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/getApprovalTypes"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5210,6 +7293,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5217,7 +7301,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_approval_schema_async(
+    def get_approval_schema(
         self,
         approval_type: int,
         *,
@@ -5231,6 +7315,21 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Internal operation to fetch the schema for approval request creation
         based on the approval type.
+
+        Swagger operation ID: `GetApprovalSchema`.
+
+        Args:
+            approval_type: Type of approval request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/getApprovalSchema"
         query_params = []
@@ -5241,7 +7340,7 @@ class SharepointonlineClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5255,6 +7354,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5262,7 +7362,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_item_changes_metadata_async(
+    def get_item_changes_metadata(
         self,
         dataset: str,
         table: str,
@@ -5276,6 +7376,22 @@ class SharepointonlineClient(ConnectorClientBase):
         Get metadata about the return type of the GetItemChanges operation
 
         Get metadata about the return type of the GetItemChanges operation.
+
+        Swagger operation ID: `GetItemChangesMetadata`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list or library name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5288,7 +7404,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/changes"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5302,6 +7418,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5309,7 +7426,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_tables_for_approval_async(
+    def list_tables_for_approval(
         self,
         dataset: str,
         *,
@@ -5317,11 +7434,30 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get libraries where Content Approval is supported
 
         Get libraries where Content Approval is supported
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetTablesForApproval`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5330,29 +7466,50 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/tablesfor"
             f"/approval"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_day_of_week_options_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_day_of_week_options(
         self,
         *,
         timeout: Optional[float] = None,
@@ -5364,10 +7521,24 @@ class SharepointonlineClient(ConnectorClientBase):
         When to send updates
 
         Internal operation to get day of week options.
+
+        Swagger operation ID: `GetDayOfWeekOptions`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/getDayOfWeekOptions"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5381,6 +7552,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5388,7 +7560,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_content_assembly_templates_async(
+    def list_content_assembly_templates(
         self,
         dataset: str,
         table: str,
@@ -5397,11 +7569,31 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get document library templates
 
         Gets templates from a SharePoint document library.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetContentAssemblyTemplates`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint document library name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5411,29 +7603,50 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/templates"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_content_assembly_placeholders_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_content_assembly_placeholders(
         self,
         dataset: str,
         table: str,
@@ -5448,6 +7661,23 @@ class SharepointonlineClient(ConnectorClientBase):
         Get placeholders from template
 
         Gets placeholders from template in a SharePoint document library.
+
+        Swagger operation ID: `GetContentAssemblyPlaceholders`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint document library name.
+            template: Document template.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5460,7 +7690,7 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/placeholders"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5474,6 +7704,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.smtp import SmtpClient
 from azure.connectors.smtp import (
-    SmtpClient,
     Email,
     Attachment,
 )
@@ -15,6 +15,7 @@ from azure.connectors.sdk import (
 )
 from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import model_instance
 
 
 class TestSmtpClientInitialization:
@@ -50,7 +51,7 @@ class TestSmtpClientInitialization:
         client = SmtpClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -124,11 +125,11 @@ class TestSendEmail:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.send_email_async(input=email_input)
+            await client.send_email(input=email_input)
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -155,11 +156,11 @@ class TestSendEmail:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.send_email_async(input=email_input)
+            await client.send_email(input=email_input)
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -197,11 +198,11 @@ class TestSendEmail:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.send_email_async(input=email_input)
+            await client.send_email(input=email_input)
 
             mock_send.assert_called_once()
 
@@ -234,11 +235,11 @@ class TestSendEmail:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.send_email_async(input=email_input)
+            await client.send_email(input=email_input)
 
             mock_send.assert_called_once()
 
@@ -261,11 +262,11 @@ class TestSendEmail:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            await client.send_email_async(input=email_input)
+            await client.send_email(input=email_input)
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -285,12 +286,12 @@ class TestSendEmail:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.send_email_async(input=email_input)
+                await client.send_email(input=email_input)
 
             assert exc_info.value.status_code == 400
 
@@ -343,14 +344,14 @@ class TestDataClasses:
             from_="sender@contoso.com",
             to="recipient@contoso.com",
             c_c="copy@contoso.com",
-            attachments=[Attachment(content_data="filedata")],
+            attachments=[model_instance(Attachment, content_data="filedata")],
         )
 
         assert to_wire(email) == {
             "From": "sender@contoso.com",
             "To": "recipient@contoso.com",
             "CC": "copy@contoso.com",
-            "Attachments": [{"ContentData": "filedata"}],
+            "Attachments": [{"ContentData": "filedata", "ContentType": "value"}],
         }
 
     def test_email_with_defaults(self):
@@ -397,11 +398,11 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            await client.send_email_async(input=email_input)
+            await client.send_email(input=email_input)
 
     @pytest.mark.asyncio
     async def test_html_body_email(self, mock_credential):
@@ -421,11 +422,11 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            await client.send_email_async(input=email_input)
+            await client.send_email(input=email_input)
 
     @pytest.mark.asyncio
     async def test_multiple_consecutive_sends(self, mock_credential):
@@ -439,7 +440,7 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
@@ -449,7 +450,7 @@ class TestEdgeCases:
                 subject="First Email",
                 body="First message"
             )
-            await client.send_email_async(input=email1)
+            await client.send_email(input=email1)
 
             email2 = Email(
                 from_="sender@contoso.com",
@@ -457,7 +458,7 @@ class TestEdgeCases:
                 subject="Second Email",
                 body="Second message"
             )
-            await client.send_email_async(input=email2)
+            await client.send_email(input=email2)
 
             assert mock_send.call_count == 2
 
@@ -479,11 +480,11 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            await client.send_email_async(input=email_input)
+            await client.send_email(input=email_input)
 
     @pytest.mark.asyncio
     async def test_long_recipient_list(self, mock_credential):
@@ -504,8 +505,8 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            await client.send_email_async(input=email_input)
+            await client.send_email(input=email_input)

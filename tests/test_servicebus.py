@@ -6,8 +6,8 @@ import json
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.servicebus import ServicebusClient
 from azure.connectors.servicebus import (
-    ServicebusClient,
     ServiceBusMessage,
     SendMessagesInput,
     CreateTopicSubscriptionInput,
@@ -17,16 +17,17 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 DISCOVERY_OPERATIONS = [
-    ("get_entities", {}, "/entities"),
-    ("get_system_properties", {}, "/systemproperties"),
-    ("get_queues", {}, "/queues"),
-    ("get_session_options", {}, "/sessionoptions"),
-    ("get_topics", {}, "/topics"),
+    ("list_entities", {}, "/entities"),
+    ("list_system_properties", {}, "/systemproperties"),
+    ("list_queues", {}, "/queues"),
+    ("list_session_options", {}, "/sessionoptions"),
+    ("list_topics", {}, "/topics"),
     (
-        "get_subscriptions",
+        "list_subscriptions",
         {"topic_name": "topic/one"},
         "/topics/topic%252Fone/subscriptions",
     ),
@@ -71,7 +72,7 @@ class TestServicebusClientInitialization:
         client = ServicebusClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -137,10 +138,10 @@ class TestSendMessage:
 
         mock_response = MockResponse(200)
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
             message = ServiceBusMessage(content_data="Test message")
-            await client.send_message_async(input=message, entity_name="myqueue")
+            await client.send_message(input=message, entity_name="myqueue")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -157,10 +158,10 @@ class TestSendMessage:
 
         mock_response = MockResponse(200)
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
             message = ServiceBusMessage(content_data="Test message")
-            await client.send_message_async(
+            await client.send_message(
                 input=message,
                 entity_name="myqueue",
                 system_properties="true"
@@ -183,10 +184,10 @@ class TestSendMessages:
 
         mock_response = MockResponse(200)
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
             input_data: SendMessagesInput = [ServiceBusMessage(content_data="message")]
-            await client.send_messages_async(input=input_data, entity_name="myqueue")
+            await client.send_messages(input=input_data, entity_name="myqueue")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -203,11 +204,11 @@ class TestSendMessages:
 
         mock_response = MockResponse(400, '{"error": "Invalid batch format"}')
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 input_data: SendMessagesInput = []
-                await client.send_messages_async(input=input_data, entity_name="myqueue")
+                await client.send_messages(input=input_data, entity_name="myqueue")
 
             assert exc_info.value.status_code == 400
 
@@ -257,18 +258,19 @@ class TestDiscoveryOperations:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
+        is_pageable = operation.startswith("list_")
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(
                 status=200,
-                text='{"value": ["item"]}',
+                text='["item"]' if is_pageable else '{"value": ["item"]}',
             ),
         ) as mock_send:
-            method = getattr(client, f"{operation}_async")
-            result = await method(**operation_args)
+            method = getattr(client, f"{operation}")
+            result = await resolve_generated_result(method(**operation_args))
 
             mock_send.assert_called_once_with(
                 "GET",
@@ -279,7 +281,8 @@ class TestDiscoveryOperations:
                 client_request_id=None,
                 response_hook=None,
             )
-            assert result == {"value": ["item"]}
+            expected_result = ["item"] if is_pageable else {"value": ["item"]}
+            assert result == expected_result
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
@@ -301,13 +304,13 @@ class TestDiscoveryOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=500, text="Server error"),
         ):
-            method = getattr(client, f"{operation}_async")
+            method = getattr(client, f"{operation}")
             with pytest.raises(ConnectorException) as exc_info:
-                await method(**operation_args)
+                await resolve_generated_result(method(**operation_args))
 
             assert expected_path in exc_info.value.operation
             assert exc_info.value.status_code == 500
@@ -326,9 +329,9 @@ class TestCompleteMessageInQueue:
 
         mock_response = MockResponse(200)
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            await client.complete_message_in_queue_async(
+            await client.complete_message_in_queue(
                 queue_name="myqueue",
                 lock_token="token-123"
             )
@@ -347,17 +350,17 @@ class TestCompleteMessageInQueue:
             credential=mock_credential
         )
 
-        mock_response = MockResponse(404, '{"error": "Lock token expired"}')
+        mock_response = MockResponse(500, '{"error": "Server error"}')
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.complete_message_in_queue_async(
+                await client.complete_message_in_queue(
                     queue_name="myqueue",
                     lock_token="expired-token"
                 )
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestAbandonMessageInQueue:
@@ -373,9 +376,9 @@ class TestAbandonMessageInQueue:
 
         mock_response = MockResponse(200)
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            await client.abandon_message_in_queue_async(
+            await client.abandon_message_in_queue(
                 queue_name="myqueue",
                 lock_token="token-123"
             )
@@ -395,10 +398,10 @@ class TestAbandonMessageInQueue:
 
         mock_response = MockResponse(404, '{"error": "Lock token expired"}')
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.abandon_message_in_queue_async(
+                await client.abandon_message_in_queue(
                     queue_name="myqueue",
                     lock_token="expired-token"
                 )
@@ -419,9 +422,9 @@ class TestDeferMessageInQueue:
 
         mock_response = MockResponse(200)
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            await client.defer_message_in_queue_async(
+            await client.defer_message_in_queue(
                 queue_name="myqueue",
                 lock_token="token-123"
             )
@@ -440,10 +443,10 @@ class TestDeferMessageInQueue:
 
         mock_response = MockResponse(404, '{"error": "Lock token expired"}')
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.defer_message_in_queue_async(
+                await client.defer_message_in_queue(
                     queue_name="myqueue",
                     lock_token="expired-token"
                 )
@@ -465,9 +468,9 @@ class TestGetDeferredMessageFromQueue:
         response_data = {"contentData": "Deferred message", "sequenceNumber": 42}
         mock_response = MockResponse(200, json.dumps(response_data))
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            result = await client.get_deferred_message_from_queue_async(
+            result = await client.get_deferred_message_from_queue(
                 queue_name="myqueue",
                 sequence_number="42"
             )
@@ -487,10 +490,10 @@ class TestGetDeferredMessageFromQueue:
 
         mock_response = MockResponse(404, '{"error": "Message not found"}')
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_deferred_message_from_queue_async(
+                await client.get_deferred_message_from_queue(
                     queue_name="myqueue",
                     sequence_number="999"
                 )
@@ -511,9 +514,9 @@ class TestDeadLetterMessageInQueue:
 
         mock_response = MockResponse(200)
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            await client.dead_letter_message_in_queue_async(
+            await client.dead_letter_message_in_queue(
                 queue_name="myqueue",
                 lock_token="token-123",
                 dead_letter_reason="Processing failed"
@@ -534,10 +537,10 @@ class TestDeadLetterMessageInQueue:
 
         mock_response = MockResponse(404, '{"error": "Lock token expired"}')
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.dead_letter_message_in_queue_async(
+                await client.dead_letter_message_in_queue(
                     queue_name="myqueue",
                     lock_token="expired-token",
                     dead_letter_reason="Failed"
@@ -559,9 +562,9 @@ class TestRenewLockOnMessageInQueue:
 
         mock_response = MockResponse(200)
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            await client.renew_lock_on_message_in_queue_async(
+            await client.renew_lock_on_message_in_queue(
                 queue_name="myqueue",
                 lock_token="token-123"
             )
@@ -584,9 +587,9 @@ class TestCloseSessionInQueue:
 
         mock_response = MockResponse(200)
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            await client.close_session_in_queue_async(
+            await client.close_session_in_queue(
                 queue_name="myqueue",
                 session_id="session-123"
             )
@@ -604,17 +607,17 @@ class TestCloseSessionInQueue:
             credential=mock_credential
         )
 
-        mock_response = MockResponse(404, '{"error": "Session not found"}')
+        mock_response = MockResponse(500, '{"error": "Server error"}')
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.close_session_in_queue_async(
+                await client.close_session_in_queue(
                     queue_name="myqueue",
                     session_id="nonexistent"
                 )
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestRenewLockOnSessionInQueue:
@@ -630,9 +633,9 @@ class TestRenewLockOnSessionInQueue:
 
         mock_response = MockResponse(200)
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            await client.renew_lock_on_session_in_queue_async(
+            await client.renew_lock_on_session_in_queue(
                 queue_name="myqueue",
                 session_id="session-123"
             )
@@ -651,10 +654,10 @@ class TestRenewLockOnSessionInQueue:
 
         mock_response = MockResponse(404, '{"error": "Session not found"}')
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.renew_lock_on_session_in_queue_async(
+                await client.renew_lock_on_session_in_queue(
                     queue_name="myqueue",
                     session_id="nonexistent"
                 )
@@ -675,9 +678,9 @@ class TestCompleteMessageInTopic:
 
         mock_response = MockResponse(200)
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            await client.complete_message_in_topic_async(
+            await client.complete_message_in_topic(
                 topic_name="mytopic",
                 subscription_name="mysub",
                 lock_token="token-123"
@@ -696,18 +699,18 @@ class TestCompleteMessageInTopic:
             credential=mock_credential
         )
 
-        mock_response = MockResponse(404, '{"error": "Lock token expired"}')
+        mock_response = MockResponse(500, '{"error": "Server error"}')
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.complete_message_in_topic_async(
+                await client.complete_message_in_topic(
                     topic_name="mytopic",
                     subscription_name="mysub",
                     lock_token="expired-token"
                 )
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestAbandonMessageInTopic:
@@ -723,9 +726,9 @@ class TestAbandonMessageInTopic:
 
         mock_response = MockResponse(200)
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            await client.abandon_message_in_topic_async(
+            await client.abandon_message_in_topic(
                 topic_name="mytopic",
                 subscription_name="mysub",
                 lock_token="token-123"
@@ -745,10 +748,10 @@ class TestAbandonMessageInTopic:
 
         mock_response = MockResponse(404, '{"error": "Lock token expired"}')
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.abandon_message_in_topic_async(
+                await client.abandon_message_in_topic(
                     topic_name="mytopic",
                     subscription_name="mysub",
                     lock_token="expired-token"
@@ -771,10 +774,10 @@ class TestCreateTopicSubscription:
         response_data = {"subscriptionName": "newsub"}
         mock_response = MockResponse(201, json.dumps(response_data))
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
             input_data = CreateTopicSubscriptionInput()
-            result = await client.create_topic_subscription_async(
+            result = await client.create_topic_subscription(
                 input=input_data,
                 topic_name="mytopic",
                 subscription_name="newsub"
@@ -795,11 +798,11 @@ class TestCreateTopicSubscription:
 
         mock_response = MockResponse(400, '{"error": "Invalid subscription name"}')
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 input_data = CreateTopicSubscriptionInput()
-                await client.create_topic_subscription_async(
+                await client.create_topic_subscription(
                     input=input_data,
                     topic_name="mytopic",
                     subscription_name="invalid"
@@ -821,9 +824,9 @@ class TestDeleteTopicSubscription:
 
         mock_response = MockResponse(200)
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            await client.delete_topic_subscription_async(
+            await client.delete_topic_subscription(
                 topic_name="mytopic",
                 subscription_name="mysub"
             )
@@ -841,17 +844,17 @@ class TestDeleteTopicSubscription:
             credential=mock_credential
         )
 
-        mock_response = MockResponse(404, '{"error": "Subscription not found"}')
+        mock_response = MockResponse(500, '{"error": "Server error"}')
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.delete_topic_subscription_async(
+                await client.delete_topic_subscription(
                     topic_name="mytopic",
                     subscription_name="nonexistent"
                 )
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestDeadLetterMessageInTopic:
@@ -867,9 +870,9 @@ class TestDeadLetterMessageInTopic:
 
         mock_response = MockResponse(200)
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            await client.dead_letter_message_in_topic_async(
+            await client.dead_letter_message_in_topic(
                 topic_name="mytopic",
                 subscription_name="mysub",
                 lock_token="token-123",
@@ -893,9 +896,9 @@ class TestCloseSessionInTopic:
 
         mock_response = MockResponse(200)
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            await client.close_session_in_topic_async(
+            await client.close_session_in_topic(
                 topic_name="mytopic",
                 subscription_name="mysub",
                 session_id="session-456"
@@ -919,9 +922,9 @@ class TestRenewLockOnSessionInTopic:
 
         mock_response = MockResponse(200)
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            await client.renew_lock_on_session_in_topic_async(
+            await client.renew_lock_on_session_in_topic(
                 topic_name="mytopic",
                 subscription_name="mysub",
                 session_id="session-456"

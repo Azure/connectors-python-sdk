@@ -8,10 +8,12 @@ import pytest
 
 from azure.core.credentials import AzureKeyCredential
 import azure.connectors.revai as revai_module
-from azure.connectors.revai import AlignmentInput, RevaiClient, TranscriptionInput
+from azure.connectors.aio.revai import RevaiClient
+from azure.connectors.revai import AlignmentInput, TranscriptionInput
 from azure.connectors.sdk import ConnectorException
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import (
+    generated_pager_response_text,
     get_generated_operations,
     invoke_generated_operation,
 )
@@ -22,16 +24,16 @@ SUCCESS_CONTRACTS = {
     "alignment": ("POST", "/alignment/v1/jobs", True),
     "alignment_delete": ("DELETE", "/alignment/v1/jobs/value", False),
     "alignment_get": ("GET", "/alignment/v1/jobs/value", False),
-    "alignment_transcript_get": (
+    "list_alignment_transcript_get": (
         "GET",
         "/alignment/v1/jobs/value/transcript",
         False,
     ),
-    "alignments_get": ("GET", "/alignment/v1/jobs", False),
+    "list_alignments_get": ("GET", "/alignment/v1/jobs", False),
     "analysis": ("POST", "/sentiment_analysis/v1/jobs", True),
     "analysis_delete": ("DELETE", "/sentiment_analysis/v1/jobs/value", False),
     "analysis_get": ("GET", "/sentiment_analysis/v1/jobs/value", False),
-    "analysis_result_get": (
+    "list_analysis_result_get": (
         "GET",
         "/sentiment_analysis/v1/jobs/value/result",
         False,
@@ -45,12 +47,12 @@ SUCCESS_CONTRACTS = {
     "extraction": ("POST", "/topic_extraction/v1/jobs", True),
     "extraction_delete": ("DELETE", "/topic_extraction/v1/jobs/value", False),
     "extraction_get": ("GET", "/topic_extraction/v1/jobs/value", False),
-    "extraction_result_get": (
+    "list_extraction_result_get": (
         "GET",
         "/topic_extraction/v1/jobs/value/result",
         False,
     ),
-    "extractions_get": ("GET", "/topic_extraction/v1/jobs", False),
+    "list_extractions_get": ("GET", "/topic_extraction/v1/jobs", False),
     "identification": ("POST", "/languageid/v1/jobs", True),
     "identification_delete": ("DELETE", "/languageid/v1/jobs/value", False),
     "identification_get": ("GET", "/languageid/v1/jobs/value", False),
@@ -59,8 +61,8 @@ SUCCESS_CONTRACTS = {
         "/languageid/v1/jobs/value/result",
         False,
     ),
-    "identifications_get": ("GET", "/languageid/v1/jobs", False),
-    "transcript_get": (
+    "list_identifications_get": ("GET", "/languageid/v1/jobs", False),
+    "list_transcript_get": (
         "GET",
         "/speechtotext/v1/jobs/value/transcript",
         False,
@@ -68,8 +70,8 @@ SUCCESS_CONTRACTS = {
     "transcription": ("POST", "/speechtotext/v1/jobs", True),
     "transcription_delete": ("DELETE", "/speechtotext/v1/jobs/value", False),
     "transcription_get": ("GET", "/speechtotext/v1/jobs/value", False),
-    "transcriptions_get": ("GET", "/speechtotext/v1/jobs", False),
-    "vocabularies_get": ("GET", "/speechtotext/v1/vocabularies", False),
+    "list_transcriptions_get": ("GET", "/speechtotext/v1/jobs", False),
+    "list_vocabularies_get": ("GET", "/speechtotext/v1/vocabularies", False),
     "vocabulary": ("POST", "/speechtotext/v1/vocabularies", True),
     "vocabulary_delete": (
         "DELETE",
@@ -79,7 +81,14 @@ SUCCESS_CONTRACTS = {
     "vocabulary_get": ("GET", "/speechtotext/v1/vocabularies/value", False),
 }
 ALL_OPERATIONS = list(SUCCESS_CONTRACTS)
-NO_RESULT_OPERATIONS = {"analysises_get"}
+NO_RESULT_OPERATIONS = {
+    "analysises_get",
+}
+PAGEABLE_OPERATIONS = {
+    operation
+    for operation in ALL_OPERATIONS
+    if operation.startswith("list_")
+}
 
 
 class TestRevaiClient:
@@ -137,12 +146,17 @@ class TestRevaiClient:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
+        response_text = (
+            generated_pager_response_text(getattr(client, operation))
+            if operation in PAGEABLE_OPERATIONS
+            else '{"ok": true}'
+        )
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
-            return_value=MockResponse(status=200, text='{"ok": true}'),
+            return_value=MockResponse(status=200, text=response_text),
         ) as mock_send:
             result = await invoke_generated_operation(client, operation, revai_module)
 
@@ -150,7 +164,13 @@ class TestRevaiClient:
         assert method == expected_method
         assert url.endswith(expected_url_suffix)
         assert (mock_send.call_args.kwargs["body"] is not None) is expects_body
-        expected_result = None if operation in NO_RESULT_OPERATIONS else {"ok": True}
+        expected_result = (
+            None
+            if operation in NO_RESULT_OPERATIONS
+            else [{"ok": True}]
+            if operation in PAGEABLE_OPERATIONS
+            else {"ok": True}
+        )
         assert result == expected_result
 
     @pytest.mark.asyncio
@@ -163,12 +183,13 @@ class TestRevaiClient:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=200, text='{"id": "job-1"}'),
         ) as mock_send:
-            result = await client.transcription_async(
+            result = await client.transcription(
                 input=TranscriptionInput(
+                    notification_config={"url": "https://example.com/callback"},
                     source_config={"url": "https://example.com/audio.wav"},
                     metadata="sample",
                 ),
@@ -190,11 +211,11 @@ class TestRevaiClient:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=200, text='{"id": "alignment-1"}'),
         ) as mock_send:
-            await client.alignment_async(
+            await client.alignment(
                 input=AlignmentInput(
                     source_config={"url": "https://example.com/audio.wav"},
                     transcript_text="Hello world",
@@ -215,11 +236,11 @@ class TestRevaiClient:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=204, text=""),
         ):
-            result = await client.account_get_async()
+            result = await client.account_get()
 
         assert result is None
 
@@ -238,7 +259,7 @@ class TestRevaiClient:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=400, text="bad request"),
         ):

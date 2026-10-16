@@ -1,9 +1,7 @@
-"""Etsy connector SDK sample."""
-
-import asyncio
+"""Etsy sample for the Azure Connectors Python SDK."""
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
 from azure.connectors.etsy import EtsyClient
@@ -12,20 +10,20 @@ from azure.connectors.etsy import EtsyClient
 CONNECTION_RUNTIME_URL = os.environ.get("ETSY_CONNECTION_URL", "")
 
 
-async def main() -> None:
+def main() -> None:
     """Ping the Etsy connector."""
     if not CONNECTION_RUNTIME_URL:
         print("Set ETSY_CONNECTION_URL to run this sample.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
         try:
-            async with EtsyClient(CONNECTION_RUNTIME_URL, credential) as client:
-                result = await client.ping_async()
+            with EtsyClient(CONNECTION_RUNTIME_URL, credential) as client:
+                result = client.ping()
                 print(f"Result: {result}")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

@@ -5,20 +5,48 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "RepliconClient",
+    "BulkGetProjectDetails3Input",
+    "BulkGetTimeEnteredSummaryInput",
+    "BulkGetTimeEnteredSummaryResponse",
+    "CreateProjectOrApplyModificationsInput",
+    "CreateProjectOrApplyModificationsResponse",
+    "CreateTaskHierarchyOrApplyModificationsInput",
+    "CreateTaskHierarchyOrApplyModificationsResponse",
+    "Date",
+    "Duration",
+    "GetDescendantTaskDetailsInput",
+    "GetDescendantTaskDetailsResponse",
+    "GetTimesheetSummaryInput",
+    "GetTimesheetSummaryResponse",
+    "MoveTaskInput",
+    "ProjectDetailsResponse",
+    "PutProjectTeamMemberAssignmentsInput",
+    "PutResourceAssignmentsInput",
+    "TaskListServiceGetDataInput",
+    "TaskListServiceGetDataResponse",
+    "TenantEndpointDetails",
+    "UserListServiceGetDataInput",
+    "UserListServiceGetDataResponse",
+    "WebhookSubscriptionResponse",
+    "WebhookSubscriptionsRestAPIInput",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -29,7 +57,7 @@ class BulkGetProjectDetails3Input:
     Get Project Details
     """
 
-    projects: Optional[List[Dict[str, Any]]] = None
+    projects: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """projects"""
 
 
@@ -39,7 +67,7 @@ class ProjectDetailsResponse:
     Response for Get Project Details
     """
 
-    d: Optional[List[Dict[str, Any]]] = None
+    d: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """d"""
 
 
@@ -49,17 +77,19 @@ class CreateProjectOrApplyModificationsInput:
     Create Project Or Apply Modifications
     """
 
-    target: Optional[Dict[str, Any]] = None
+    target: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """project target"""
-    modifications: Optional[Dict[str, Any]] = None
+    modifications: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """modifications"""
-    project_modification_option_uri: Optional[str] = field(
+    project_modification_option_uri: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "projectModificationOptionUri"},
     )
     """project modification option uri"""
-    unit_of_work_id: Optional[str] = field(
+    unit_of_work_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "unitOfWorkId"},
     )
     """unit of work id"""
@@ -71,7 +101,7 @@ class CreateProjectOrApplyModificationsResponse:
     Response for Create Project Or Apply Modifications
     """
 
-    d: Optional[Dict[str, Any]] = None
+    d: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """d"""
 
 
@@ -81,19 +111,21 @@ class UserListServiceGetDataInput:
     Get User List
     """
 
-    page: Optional[str] = None
+    page: Optional[str] = dataclass_field(default=None, kw_only=True)
     """page"""
-    pagesize: Optional[str] = None
+    pagesize: Optional[str] = dataclass_field(default=None, kw_only=True)
     """page size"""
-    column_uris: Optional[List[str]] = field(
+    column_uris: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "columnUris"},
     )
     """column uris"""
-    sort: Optional[List[Any]] = None
+    sort: Optional[List[Any]] = dataclass_field(default=None, kw_only=True)
     """sort"""
-    filter_expression: Optional[Dict[str, Any]] = field(
+    filter_expression: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "filterExpression"},
     )
     """filter expression"""
@@ -105,7 +137,7 @@ class UserListServiceGetDataResponse:
     Response for Get User List
     """
 
-    d: Optional[Dict[str, Any]] = None
+    d: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """d"""
 
 
@@ -115,8 +147,9 @@ class GetDescendantTaskDetailsInput:
     Get Descendant Task Details
     """
 
-    parent_uri: Optional[str] = field(
+    parent_uri: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parentUri"},
     )
     """parent uri"""
@@ -128,7 +161,7 @@ class GetDescendantTaskDetailsResponse:
     Response for Get Descendant Task Details
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -141,20 +174,23 @@ class CreateTaskHierarchyOrApplyModificationsInput:
     Create Task Hierarchy Or Apply Modifications
     """
 
-    project: Optional[Dict[str, Any]] = None
+    project: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """project"""
-    task_hierarchy: Optional[List[Dict[str, Any]]] = field(
+    task_hierarchy: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "taskHierarchy"},
     )
     """task hierarchy"""
-    task_modification_option_uri: Optional[str] = field(
+    task_modification_option_uri: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "taskModificationOptionUri"},
     )
     """task modification option uri"""
-    unit_of_work_id: Optional[str] = field(
+    unit_of_work_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "unitOfWorkId"},
     )
     """unit of work id"""
@@ -166,7 +202,7 @@ class CreateTaskHierarchyOrApplyModificationsResponse:
     Response for Create Task Hierarchy Or Apply Modifications
     """
 
-    d: Optional[List[Dict[str, Any]]] = None
+    d: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """d"""
 
 
@@ -176,18 +212,21 @@ class MoveTaskInput:
     Move Task
     """
 
-    task_uri: Optional[str] = field(
+    task_uri: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "taskUri"},
     )
     """task uri"""
-    target_uri: Optional[str] = field(
+    target_uri: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "targetUri"},
     )
     """target uri"""
-    move_task_method_uri: Optional[str] = field(
+    move_task_method_uri: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "moveTaskMethodUri"},
     )
     """move task method uri"""
@@ -199,19 +238,21 @@ class TaskListServiceGetDataInput:
     Task List Service Get Data
     """
 
-    page: Optional[str] = None
+    page: Optional[str] = dataclass_field(default=None, kw_only=True)
     """page"""
-    pagesize: Optional[str] = None
+    pagesize: Optional[str] = dataclass_field(default=None, kw_only=True)
     """page size"""
-    column_uris: Optional[List[str]] = field(
+    column_uris: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "columnUris"},
     )
     """column uris"""
-    sort: Optional[List[Any]] = None
+    sort: Optional[List[Any]] = dataclass_field(default=None, kw_only=True)
     """sort"""
-    filter_expression: Optional[Dict[str, Any]] = field(
+    filter_expression: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "filterExpression"},
     )
     """filter expression"""
@@ -223,7 +264,7 @@ class TaskListServiceGetDataResponse:
     Response for Task List Service Get Data
     """
 
-    d: Optional[Dict[str, Any]] = None
+    d: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """d"""
 
 
@@ -233,8 +274,9 @@ class GetTimesheetSummaryInput:
     Get Timesheet Summary
     """
 
-    timesheet_uri: Optional[str] = field(
+    timesheet_uri: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "timesheetUri"},
     )
     """timesheet uri"""
@@ -246,7 +288,7 @@ class GetTimesheetSummaryResponse:
     Response for Get Timesheet Summary
     """
 
-    d: Optional[Dict[str, Any]] = None
+    d: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """d"""
 
 
@@ -256,8 +298,9 @@ class BulkGetTimeEnteredSummaryInput:
     Get Time Entered Summary
     """
 
-    task_uris: Optional[List[str]] = field(
+    task_uris: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "taskUris"},
     )
     """task uris"""
@@ -269,7 +312,7 @@ class BulkGetTimeEnteredSummaryResponse:
     Response for Get Time Entered Summary
     """
 
-    d: Optional[List[Dict[str, Any]]] = None
+    d: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """d"""
 
 
@@ -279,15 +322,13 @@ class WebhookSubscriptionsRestAPIInput:
     Subscribe to Event triggers
     """
 
-    event_type: Optional[str] = field(
+    event_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "eventType"},
     )
     """Event type to subscribe to"""
-    target_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "targetUrl"},
-    )
+    target_url: str = dataclass_field(metadata={"wire_name": "targetUrl"})
     """target url"""
 
 
@@ -297,35 +338,41 @@ class WebhookSubscriptionResponse:
     Response for Subscribe to Event triggers
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """identity of the webhook event"""
-    created_timestamp: Optional[str] = field(
+    created_timestamp: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdTimestamp"},
     )
     """created time stamp of the webhook event"""
-    updated_timestamp: Optional[str] = field(
+    updated_timestamp: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "updatedTimestamp"},
     )
     """updated time stamp of the webhook event"""
-    event_type: Optional[str] = field(
+    event_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "eventType"},
     )
     """event Type of the webhook event"""
-    target_url: Optional[str] = field(
+    target_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "targetUrl"},
     )
     """target Url of the webhook event"""
-    shared_secret: Optional[str] = field(
+    shared_secret: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sharedSecret"},
     )
     """shared Secret of the webhook event"""
-    auth_type: Optional[str] = field(
+    auth_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "authType"},
     )
     """auth Type of the webhook event"""
@@ -337,13 +384,15 @@ class PutProjectTeamMemberAssignmentsInput:
     Put Project Team Member Assignments
     """
 
-    project_uri: Optional[str] = field(
+    project_uri: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "projectUri"},
     )
     """project uri"""
-    resource_uris: Optional[List[str]] = field(
+    resource_uris: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resourceUris"},
     )
     """resource uris"""
@@ -355,13 +404,15 @@ class PutResourceAssignmentsInput:
     Rewrite Resource Assignment of a task
     """
 
-    task_uri: Optional[str] = field(
+    task_uri: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "taskUri"},
     )
     """task uri"""
-    resource_uris: Optional[List[str]] = field(
+    resource_uris: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resourceUris"},
     )
     """resource uris"""
@@ -373,7 +424,7 @@ class TenantEndpointDetails:
     Response for Get Tenant End Point Details
     """
 
-    d: Optional[Dict[str, Any]] = None
+    d: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """d"""
 
 
@@ -383,11 +434,11 @@ class Date:
     Definition: Date
     """
 
-    day: Optional[int] = None
+    day: Optional[int] = dataclass_field(default=None, kw_only=True)
     """day"""
-    month: Optional[int] = None
+    month: Optional[int] = dataclass_field(default=None, kw_only=True)
     """month"""
-    year: Optional[int] = None
+    year: Optional[int] = dataclass_field(default=None, kw_only=True)
     """year"""
 
 
@@ -397,15 +448,15 @@ class Duration:
     Definition: Duration
     """
 
-    hours: Optional[int] = None
+    hours: Optional[int] = dataclass_field(default=None, kw_only=True)
     """hours"""
-    microseconds: Optional[int] = None
+    microseconds: Optional[int] = dataclass_field(default=None, kw_only=True)
     """microseconds"""
-    milliseconds: Optional[int] = None
+    milliseconds: Optional[int] = dataclass_field(default=None, kw_only=True)
     """milliseconds"""
-    minutes: Optional[int] = None
+    minutes: Optional[int] = dataclass_field(default=None, kw_only=True)
     """minutes"""
-    seconds: Optional[int] = None
+    seconds: Optional[int] = dataclass_field(default=None, kw_only=True)
     """seconds"""
 
 
@@ -417,16 +468,16 @@ class RepliconClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -437,8 +488,8 @@ class RepliconClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -446,8 +497,8 @@ class RepliconClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -459,7 +510,7 @@ class RepliconClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -474,9 +525,9 @@ class RepliconClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "replicon"
 
-    async def bulk_get_project_details3_async(
+    def bulk_get_project_details3(
         self,
-        input: BulkGetProjectDetails3Input,
+        input: BulkGetProjectDetails3Input | Mapping[str, Any],
         host_url: str,
         *,
         timeout: Optional[float] = None,
@@ -488,6 +539,23 @@ class RepliconClient(ConnectorClientBase):
         Get Project Details
 
         Get the project details from Replicon
+
+        Swagger operation ID: `BulkGetProjectDetails3`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            host_url: Replicon Host Url.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -501,7 +569,7 @@ class RepliconClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -515,6 +583,7 @@ class RepliconClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -522,9 +591,9 @@ class RepliconClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_project_or_apply_modifications_async(
+    def create_project_or_apply_modifications(
         self,
-        input: CreateProjectOrApplyModificationsInput,
+        input: CreateProjectOrApplyModificationsInput | Mapping[str, Any],
         host_url: str,
         *,
         timeout: Optional[float] = None,
@@ -536,6 +605,23 @@ class RepliconClient(ConnectorClientBase):
         Create Project Or Apply Modifications
 
         Create Project Or Apply Modifications in Replicon
+
+        Swagger operation ID: `CreateProjectOrApplyModifications`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            host_url: Replicon Host Url.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -549,7 +635,7 @@ class RepliconClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -563,6 +649,7 @@ class RepliconClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -570,9 +657,9 @@ class RepliconClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def user_list_service_get_data_async(
+    def user_list_service_get_data(
         self,
-        input: UserListServiceGetDataInput,
+        input: UserListServiceGetDataInput | Mapping[str, Any],
         host_url: str,
         *,
         timeout: Optional[float] = None,
@@ -584,6 +671,23 @@ class RepliconClient(ConnectorClientBase):
         Get User List
 
         Get User List Data from Replicon
+
+        Swagger operation ID: `UserListServiceGetData`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            host_url: Replicon Host Url.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -597,7 +701,7 @@ class RepliconClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -611,6 +715,7 @@ class RepliconClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -618,9 +723,9 @@ class RepliconClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_descendant_task_details_async(
+    def get_descendant_task_details(
         self,
-        input: GetDescendantTaskDetailsInput,
+        input: GetDescendantTaskDetailsInput | Mapping[str, Any],
         host_url: str,
         *,
         timeout: Optional[float] = None,
@@ -632,6 +737,23 @@ class RepliconClient(ConnectorClientBase):
         Get Descendant Task Details
 
         Get Hierarchial Task Details from Replicon
+
+        Swagger operation ID: `GetDescendantTaskDetails`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            host_url: Replicon Host Url.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -645,7 +767,7 @@ class RepliconClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -659,6 +781,7 @@ class RepliconClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -666,9 +789,9 @@ class RepliconClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_task_hierarchy_or_apply_modifications_async(
+    def create_task_hierarchy_or_apply_modifications(
         self,
-        input: CreateTaskHierarchyOrApplyModificationsInput,
+        input: CreateTaskHierarchyOrApplyModificationsInput | Mapping[str, Any],
         host_url: str,
         *,
         timeout: Optional[float] = None,
@@ -680,6 +803,23 @@ class RepliconClient(ConnectorClientBase):
         Create Task Hierarchy Or Apply Modifications
 
         Create Task Hierarchy Or Apply Modifications to a Replicon Task
+
+        Swagger operation ID: `CreateTaskHierarchyOrApplyModifications`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            host_url: Replicon Host Url.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -695,7 +835,7 @@ class RepliconClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -709,6 +849,7 @@ class RepliconClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -716,9 +857,9 @@ class RepliconClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def move_task_async(
+    def move_task(
         self,
-        input: MoveTaskInput,
+        input: MoveTaskInput | Mapping[str, Any],
         host_url: str,
         *,
         timeout: Optional[float] = None,
@@ -730,6 +871,23 @@ class RepliconClient(ConnectorClientBase):
         Move Task
 
         Move Task to a new Parent
+
+        Swagger operation ID: `MoveTask`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            host_url: Replicon Host Url.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -743,7 +901,7 @@ class RepliconClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -757,11 +915,12 @@ class RepliconClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def task_list_service_get_data_async(
+    def task_list_service_get_data(
         self,
-        input: TaskListServiceGetDataInput,
+        input: TaskListServiceGetDataInput | Mapping[str, Any],
         host_url: str,
         *,
         timeout: Optional[float] = None,
@@ -773,6 +932,23 @@ class RepliconClient(ConnectorClientBase):
         Task List Service Get Data
 
         Get Task List Service Data From Replicon
+
+        Swagger operation ID: `TaskListServiceGetData`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            host_url: Replicon Host Url.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -786,7 +962,7 @@ class RepliconClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -800,6 +976,7 @@ class RepliconClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -807,9 +984,9 @@ class RepliconClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_timesheet_summary_async(
+    def get_timesheet_summary(
         self,
-        input: GetTimesheetSummaryInput,
+        input: GetTimesheetSummaryInput | Mapping[str, Any],
         host_url: str,
         *,
         timeout: Optional[float] = None,
@@ -821,6 +998,23 @@ class RepliconClient(ConnectorClientBase):
         Get Timesheet Summary
 
         Get Timesheet Summary from Replicon
+
+        Swagger operation ID: `GetTimesheetSummary`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            host_url: Replicon Host Url.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -834,7 +1028,7 @@ class RepliconClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -848,6 +1042,7 @@ class RepliconClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -855,9 +1050,9 @@ class RepliconClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def bulk_get_time_entered_summary_async(
+    def bulk_get_time_entered_summary(
         self,
-        input: BulkGetTimeEnteredSummaryInput,
+        input: BulkGetTimeEnteredSummaryInput | Mapping[str, Any],
         host_url: str,
         *,
         timeout: Optional[float] = None,
@@ -869,6 +1064,23 @@ class RepliconClient(ConnectorClientBase):
         Get Time Entered Summary
 
         Get Time Entered by Task Uri from Replicon
+
+        Swagger operation ID: `BulkGetTimeEnteredSummary`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            host_url: Replicon Host Url.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -882,7 +1094,7 @@ class RepliconClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -896,6 +1108,7 @@ class RepliconClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -903,9 +1116,9 @@ class RepliconClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def put_project_team_member_assignments_async(
+    def put_project_team_member_assignments(
         self,
-        input: PutProjectTeamMemberAssignmentsInput,
+        input: PutProjectTeamMemberAssignmentsInput | Mapping[str, Any],
         host_url: str,
         *,
         timeout: Optional[float] = None,
@@ -917,6 +1130,23 @@ class RepliconClient(ConnectorClientBase):
         Put Project Team Member Assignments
 
         Rewrite Team Member assignment of Project
+
+        Swagger operation ID: `PutProjectTeamMemberAssignments`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            host_url: Replicon Host Url.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -930,7 +1160,7 @@ class RepliconClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -944,11 +1174,12 @@ class RepliconClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def put_resource_assignments_async(
+    def put_resource_assignments(
         self,
-        input: PutResourceAssignmentsInput,
+        input: PutResourceAssignmentsInput | Mapping[str, Any],
         host_url: str,
         *,
         timeout: Optional[float] = None,
@@ -960,6 +1191,23 @@ class RepliconClient(ConnectorClientBase):
         Rewrite Resource Assignment of a task
 
         Update the Resource assignment to a specified task
+
+        Swagger operation ID: `PutResourceAssignments`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            host_url: Replicon Host Url.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -973,7 +1221,7 @@ class RepliconClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -987,9 +1235,10 @@ class RepliconClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_my_tenant_endpoint_details_async(
+    def get_my_tenant_endpoint_details(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1001,13 +1250,27 @@ class RepliconClient(ConnectorClientBase):
         Get Tenant End Point Details
 
         Get End Point Details of the Tenant
+
+        Swagger operation ID: `GetMyTenantEndpointDetails`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/DiscoveryService1.svc/GetMyTenantEndpointDetails"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1021,6 +1284,7 @@ class RepliconClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

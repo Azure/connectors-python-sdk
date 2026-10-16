@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Office 365 Users Connector SDK Sample
+Office 365 Users sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Office 365 Users connector SDK.
+This sample demonstrates how to use the Office 365 Users client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Office 365 Users connection
@@ -21,10 +21,8 @@ Usage:
 
     python sample_connector_usage_office365users.py
 """
-
-import asyncio
 import os
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.office365users import Office365usersClient
 
@@ -36,15 +34,15 @@ CONNECTION_RUNTIME_URL = os.environ.get(
 )
 
 
-async def example_1_get_my_profile():
+def example_1_get_my_profile():
     """Example 1: Get the current user's profile."""
     print("\n=== Example 1: Get My Profile ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with Office365usersClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with Office365usersClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                profile = await client.my_profile_async()
+                profile = client.my_profile()
 
                 if profile:
                     print("My Profile:")
@@ -62,7 +60,7 @@ async def example_1_get_my_profile():
                 print(f"Error: {ex}")
 
 
-async def example_2_get_user_profile():
+def example_2_get_user_profile():
     """Example 2: Get a specific user's profile."""
     print("\n=== Example 2: Get User Profile ===")
 
@@ -72,11 +70,11 @@ async def example_2_get_user_profile():
         print("Example: $env:TEST_USER_ID = 'john.doe@contoso.com'")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with Office365usersClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with Office365usersClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                profile = await client.user_profile_async(id=user_id)
+                profile = client.user_profile(id=user_id)
 
                 if profile:
                     print(f"User Profile for '{user_id}':")
@@ -94,7 +92,7 @@ async def example_2_get_user_profile():
                 print(f"Error: {ex}")
 
 
-async def example_3_get_manager():
+def example_3_get_manager():
     """Example 3: Get a user's manager."""
     print("\n=== Example 3: Get Manager ===")
 
@@ -104,11 +102,11 @@ async def example_3_get_manager():
         print("Example: $env:TEST_USER_ID = 'john.doe@contoso.com'")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with Office365usersClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with Office365usersClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                manager = await client.manager_async(id=user_id)
+                manager = client.manager(id=user_id)
 
                 if manager:
                     print(f"Manager for '{user_id}':")
@@ -124,7 +122,7 @@ async def example_3_get_manager():
                 print(f"Error: {ex}")
 
 
-async def example_4_get_direct_reports():
+def example_4_get_direct_reports():
     """Example 4: Get a user's direct reports."""
     print("\n=== Example 4: Get Direct Reports ===")
 
@@ -134,16 +132,16 @@ async def example_4_get_direct_reports():
         print("Example: $env:TEST_USER_ID = 'john.doe@contoso.com'")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with Office365usersClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with Office365usersClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                reports = await client.direct_reports_async(id=user_id)
+                reports = list(client.list_direct_reports(id=user_id))
 
-                if reports and "value" in reports:
+                if reports:
                     print(f"Direct reports for '{user_id}':")
-                    print(f"  Found {len(reports['value'])} reports")
-                    for report in reports["value"][:5]:  # Show first 5
+                    print(f"  Found {len(reports)} reports")
+                    for report in reports[:5]:  # Show first 5
                         display_name = report.get("displayName", "N/A")
                         job_title = report.get("jobTitle", "N/A")
                         print(f"    - {display_name} ({job_title})")
@@ -156,7 +154,7 @@ async def example_4_get_direct_reports():
                 print(f"Error: {ex}")
 
 
-async def example_5_search_users():
+def example_5_search_users():
     """Example 5: Search for users."""
     print("\n=== Example 5: Search Users ===")
 
@@ -166,11 +164,11 @@ async def example_5_search_users():
         print("Example: $env:TEST_SEARCH_TERM = 'John'")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with Office365usersClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with Office365usersClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                results = [item async for item in client.search_user_async(
+                results = [item for item in client.list_search_user(
                     search_term=search_term,
                     top=10,
                 )]
@@ -191,9 +189,9 @@ async def example_5_search_users():
                 print(f"Error: {ex}")
 
 
-async def main():
+def main():
     """Run all examples."""
-    print("Office 365 Users Connector SDK - Sample Usage")
+    print("Office 365 Users sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
 
     if not CONNECTION_RUNTIME_URL:
@@ -202,15 +200,15 @@ async def main():
         print("Format: https://[region].azure-apihub.net/apim/office365users/[connection-id]")
         return
 
-    await example_1_get_my_profile()
-    await example_2_get_user_profile()
-    await example_3_get_manager()
-    await example_4_get_direct_reports()
-    await example_5_search_users()
+    example_1_get_my_profile()
+    example_2_get_user_profile()
+    example_3_get_manager()
+    example_4_get_direct_reports()
+    example_5_search_users()
 
     print("\n" + "=" * 60)
     print("Sample completed!")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

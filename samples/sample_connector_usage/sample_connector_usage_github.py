@@ -1,7 +1,7 @@
 """
-GitHub Connector SDK Sample
+GitHub sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the GitHub connector SDK.
+This sample demonstrates how to use the GitHub client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with GitHub connection
@@ -17,11 +17,9 @@ Usage:
 
     python sample_connector_usage_github.py
 """
-
-import asyncio
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
 from azure.connectors.github import GithubClient, IssueBasicDetailsModel
@@ -32,46 +30,45 @@ from azure.connectors.github import GithubClient, IssueBasicDetailsModel
 CONNECTION_RUNTIME_URL = os.environ.get("GITHUB_CONNECTION_URL", "")
 
 
-async def example_1_get_authenticated_user() -> None:
+def example_1_get_authenticated_user() -> None:
     """Example 1: Get authenticated GitHub user."""
     print("\n=== Example 1: Get Authenticated User ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with GithubClient(CONNECTION_RUNTIME_URL, credential) as client:
-            user = await client.get_user_async()
+    with DefaultAzureCredential() as credential:
+        with GithubClient(CONNECTION_RUNTIME_URL, credential) as client:
+            user = client.get_user()
             print(f"Authenticated as: {user.get('login') if user else 'unknown'}")
 
 
-async def example_2_list_issues(repository_owner: str, repository_name: str) -> None:
+def example_2_list_issues(repository_owner: str, repository_name: str) -> None:
     """Example 2: List open issues in a repository."""
     print("\n=== Example 2: List Issues ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with GithubClient(CONNECTION_RUNTIME_URL, credential) as client:
-            issues = await client.get_issues_async(
+    with DefaultAzureCredential() as credential:
+        with GithubClient(CONNECTION_RUNTIME_URL, credential) as client:
+            issue_list = list(client.list_issues(
                 repository_owner=repository_owner,
                 repository_name=repository_name,
                 state="open",
                 per_page=5,
-            )
+            ))
 
-            issue_list = issues if isinstance(issues, list) else []
             print(f"Found {len(issue_list)} issues")
             for issue in issue_list[:5]:
                 print(f"  - #{issue.get('number')}: {issue.get('title')}")
 
 
-async def example_3_create_issue(repository_owner: str, repository_name: str) -> None:
+def example_3_create_issue(repository_owner: str, repository_name: str) -> None:
     """Example 3: Create a new issue in a repository."""
     print("\n=== Example 3: Create Issue ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with GithubClient(CONNECTION_RUNTIME_URL, credential) as client:
+    with DefaultAzureCredential() as credential:
+        with GithubClient(CONNECTION_RUNTIME_URL, credential) as client:
             request = IssueBasicDetailsModel(
                 title="SDK sample issue",
                 body="Created from github Python SDK sample.",
             )
-            created = await client.create_issue_async(
+            created = client.create_issue(
                 input=request,
                 repository_owner=repository_owner,
                 repository_name=repository_name,
@@ -80,7 +77,7 @@ async def example_3_create_issue(repository_owner: str, repository_name: str) ->
             print(f"Created issue: #{created.get('number') if created else 'n/a'}")
 
 
-async def main() -> None:
+def main() -> None:
     """Run GitHub connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: GITHUB_CONNECTION_URL environment variable not set.")
@@ -91,12 +88,12 @@ async def main() -> None:
     repository_owner = "octocat"
     repository_name = "hello-world"
 
-    print("GitHub Connector SDK - Sample Usage")
+    print("GitHub sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:
-        await example_1_get_authenticated_user()
-        await example_2_list_issues(repository_owner, repository_name)
+        example_1_get_authenticated_user()
+        example_2_list_issues(repository_owner, repository_name)
         # Uncomment after confirming write permissions.
         # await example_3_create_issue(repository_owner, repository_name)
 
@@ -107,4 +104,4 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

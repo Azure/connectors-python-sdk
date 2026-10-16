@@ -5,20 +5,70 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "PowerbiClient",
+    "Alert",
+    "Columns",
+    "CreateGoalRequest",
+    "CreateGoalResponse",
+    "CreateScorecardRequest",
+    "CreatedScorecard",
+    "Datasets",
+    "DynamicPowerBiButtonClickedTriggerResult",
+    "EffectiveIdentity",
+    "EvaluatedAlert",
+    "ExecuteDatasetQueriesJsonInput",
+    "ExecuteDatasetQueriesJsonResponse",
+    "ExportFilter",
+    "ExportPayloadPaginatedReport",
+    "ExportPayloadPowerBIReport",
+    "ExportReportPage",
+    "ExportReportSettings",
+    "FetchedGoal",
+    "FetchedGoals",
+    "GetGoalCheckinResponse",
+    "GetGoalCheckinsResponse",
+    "GoalChanged",
+    "GoalNotes",
+    "GoalRefreshIssue",
+    "GoalRefreshIssues",
+    "GoalStatusChanged",
+    "GoalValueChanged",
+    "GoalValueCheckinNoteInput",
+    "GoalValueCheckinRequest",
+    "GoalValueCheckinUpdateRequest",
+    "GoalValueOrNoteUpserted",
+    "GoalsAssigned",
+    "Groups",
+    "IdentityBlob",
+    "ListedScorecard",
+    "ListedScorecards",
+    "PageBookmark",
+    "Payload",
+    "PowerBiButtonClickedOutputs",
+    "QueryExecutionResults",
+    "QuerySpecification",
+    "Reports",
+    "Tables",
+    "UpdateGoalRequest",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -29,7 +79,12 @@ class ListedScorecards:
     Response for Get scorecards
     """
 
-    value: Optional[List[ListedScorecard]] = None
+    value: Optional[
+        List[ListedScorecard | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of scorecards."""
 
 
@@ -39,7 +94,7 @@ class CreatedScorecard:
     Response for Create a scorecard
     """
 
-    id: Optional[str] = None
+    id: str
     """The unique identifier of the scorecard."""
 
 
@@ -49,7 +104,12 @@ class FetchedGoals:
     Response for Get multiple goals
     """
 
-    value: Optional[List[FetchedGoal]] = None
+    value: Optional[
+        List[FetchedGoal | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of the goals."""
 
 
@@ -59,7 +119,7 @@ class CreateGoalResponse:
     Response for Create a goal
     """
 
-    id: Optional[str] = None
+    id: str
     """The unique identifier of the goal."""
 
 
@@ -69,58 +129,67 @@ class FetchedGoal:
     Response for Get a goal
     """
 
-    id: Optional[str] = None
+    id: str
     """The unique identifier of the goal."""
-    name: Optional[str] = None
+    name: str
     """The name of the goal."""
-    owner: Optional[str] = None
+    owner: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The email address of the goal's owner."""
-    start_date: Optional[str] = field(
+    start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDate"},
     )
     """The start date for the goal. Example: 2021-07-15."""
-    completion_date: Optional[str] = field(
+    completion_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "completionDate"},
     )
     """The due date for the goal to be completed by. Example: 2021-07-29."""
-    parent_id: Optional[str] = field(
+    parent_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parentId"},
     )
     """If this goal is a subgoal, the unique id of its parent goal."""
-    current_value: Optional[float] = field(
+    current_value: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "currentValue"},
     )
     """The current value of the goal being tracked."""
-    current_value_timestamp: Optional[str] = field(
+    current_value_timestamp: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "currentValueTimestamp"},
     )
     """The timestamp when the current value of the goal was set."""
-    target_value: Optional[float] = field(
+    target_value: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "targetValue"},
     )
     """The target value of the goal."""
-    target_value_timestamp: Optional[str] = field(
+    target_value_timestamp: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "targetValueTimestamp"},
     )
     """The timestamp when the target value of the goal was set."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The status of the goal."""
-    status_timestamp: Optional[str] = field(
+    status_timestamp: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "statusTimestamp"},
     )
     """The timestamp when the status of the goal was set."""
-    cycle: Optional[str] = None
+    cycle: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Tracking cycle frequency interval shown on this goal's visuals."""
-    cycle_period: Optional[str] = field(
+    cycle_period: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "cyclePeriod"},
     )
     """Date to find out extra properties of tracking cycle."""
@@ -132,8 +201,7 @@ class GoalsAssigned:
     Response for When someone assigns a new owner to a goal
     """
 
-    assigned_goals: Optional[List[Dict[str, Any]]] = field(
-        default=None,
+    assigned_goals: List[Dict[str, Any]] = dataclass_field(
         metadata={"wire_name": "assignedGoals"},
     )
     """The list of goals that were assigned to the new owner."""
@@ -145,110 +213,131 @@ class GoalChanged:
     Response for When a goal changes
     """
 
-    id: Optional[str] = None
+    id: str
     """The unique identifier of the goal."""
-    old_name: Optional[str] = field(
+    old_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "oldName"},
     )
     """The name of the goal."""
-    old_owner: Optional[str] = field(
+    old_owner: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "oldOwner"},
     )
     """The email address of the goal's owner."""
-    old_start_date: Optional[str] = field(
+    old_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "oldStartDate"},
     )
     """The start date for the goal. Example: 2021-07-15."""
-    old_completion_date: Optional[str] = field(
+    old_completion_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "oldCompletionDate"},
     )
     """The due date for the goal to be completed by. Example: 2021-07-29."""
-    old_parent_id: Optional[str] = field(
+    old_parent_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "oldParentId"},
     )
     """If this goal is a subgoal, the unique id of its parent goal."""
-    old_current_value: Optional[float] = field(
+    old_current_value: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "oldCurrentValue"},
     )
     """The current value of the goal being tracked."""
-    old_target_value: Optional[float] = field(
+    old_target_value: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "oldTargetValue"},
     )
     """The target value of the goal."""
-    old_status: Optional[str] = field(
+    old_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "oldStatus"},
     )
     """The status of the goal."""
-    old_cycle: Optional[str] = field(
+    old_cycle: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "oldCycle"},
     )
     """Old tracking cycle frequency interval shown on this goal's visuals."""
-    old_cycle_period: Optional[str] = field(
+    old_cycle_period: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "oldCyclePeriod"},
     )
     """Old date to find out extra properties of tracking cycle."""
-    new_name: Optional[str] = field(
+    new_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "newName"},
     )
     """The name of the goal."""
-    new_owner: Optional[str] = field(
+    new_owner: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "newOwner"},
     )
     """The email address of the goal's owner."""
-    new_start_date: Optional[str] = field(
+    new_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "newStartDate"},
     )
     """The start date for the goal."""
-    new_completion_date: Optional[str] = field(
+    new_completion_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "newCompletionDate"},
     )
     """The due date for the goal to be completed by."""
-    new_parent_id: Optional[str] = field(
+    new_parent_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "newParentId"},
     )
     """If this goal is a subgoal, the unique id of its parent goal."""
-    new_current_value: Optional[float] = field(
+    new_current_value: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "newCurrentValue"},
     )
     """The current value of the goal being tracked."""
-    new_target_value: Optional[float] = field(
+    new_target_value: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "newTargetValue"},
     )
     """The target value of the goal."""
-    new_status: Optional[str] = field(
+    new_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "newStatus"},
     )
     """The status of the goal."""
-    new_cycle: Optional[str] = field(
+    new_cycle: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "newCycle"},
     )
     """New tracking cycle interval shown on this goal's visuals."""
-    new_cycle_period: Optional[str] = field(
+    new_cycle_period: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "newCyclePeriod"},
     )
     """New date to find out extra properties of tracking cycle."""
-    change_list: Optional[str] = field(
+    change_list: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "changeList"},
     )
     """Comma separated list of changes. Example: 'status,currentValue'."""
@@ -260,15 +349,17 @@ class GoalStatusChanged:
     Response for When status of a goal changes
     """
 
-    id: Optional[str] = None
+    id: str
     """The unique identifier of the goal."""
-    old_status: Optional[str] = field(
+    old_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "oldStatus"},
     )
     """The status of the goal."""
-    new_status: Optional[str] = field(
+    new_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "newStatus"},
     )
     """The status of the goal."""
@@ -280,15 +371,17 @@ class GoalValueChanged:
     Response for When current value of a goal changes
     """
 
-    id: Optional[str] = None
+    id: str
     """The unique identifier of the goal."""
-    old_current_value: Optional[float] = field(
+    old_current_value: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "oldCurrentValue"},
     )
     """The current value of the goal being tracked."""
-    new_current_value: Optional[float] = field(
+    new_current_value: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "newCurrentValue"},
     )
     """The current value of the goal being tracked."""
@@ -300,7 +393,7 @@ class GoalRefreshIssues:
     Response for When a data refresh for a goal fails
     """
 
-    issues: Optional[List[GoalRefreshIssue]] = None
+    issues: List[GoalRefreshIssue | Mapping[str, Any]]
     """Goal refresh issues."""
 
 
@@ -310,9 +403,9 @@ class GoalValueOrNoteUpserted:
     Response for When someone adds or edits a goal check-in
     """
 
-    values: Optional[List[Dict[str, Any]]] = None
+    values: List[Dict[str, Any]]
     """Added or updated check-ins."""
-    notes: Optional[List[Dict[str, Any]]] = None
+    notes: List[Dict[str, Any]]
     """Added or changed notes."""
 
 
@@ -322,31 +415,36 @@ class EvaluatedAlert:
     Response for When a data driven alert is triggered
     """
 
-    alert_title: Optional[str] = field(
+    alert_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "alertTitle"},
     )
     """The title of the alert."""
-    alert_threshold: Optional[float] = field(
+    alert_threshold: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "alertThreshold"},
     )
     """The threshold at which the alert is triggered."""
-    is_alert_triggered: Optional[bool] = field(
+    is_alert_triggered: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isAlertTriggered"},
     )
     """
     A boolean value (true, false) determining Whether or not the alert was
     triggered.
     """
-    tile_url: Optional[str] = field(
+    tile_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tileUrl"},
     )
     """URL linking to the dashboard tile where the alert is set up."""
-    tile_value: Optional[Any] = field(
+    tile_value: Optional[Any] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tileValue"},
     )
     """The value of the tile."""
@@ -358,8 +456,9 @@ class QueryExecutionResults:
     Response for Run a query against a dataset
     """
 
-    first_table_rows: Optional[List[Dict[str, Any]]] = field(
+    first_table_rows: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "firstTableRows"},
     )
     """Query results as an array of rows."""
@@ -371,7 +470,7 @@ class ExecuteDatasetQueriesJsonInput:
     Run a json query against a dataset
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -384,7 +483,7 @@ class ExecuteDatasetQueriesJsonResponse:
     Response for Run a json query against a dataset
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -400,7 +499,7 @@ class GetGoalCheckinsResponse:
     Response for Get goal check-ins
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of check-ins."""
 
 
@@ -410,13 +509,13 @@ class GetGoalCheckinResponse:
     Response for Get a goal check-in
     """
 
-    timestamp: Optional[str] = None
+    timestamp: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date that the check-in was made."""
-    value: Optional[float] = None
+    value: Optional[float] = dataclass_field(default=None, kw_only=True)
     """The value at the time of check in, if set."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The goal status at the time of check in."""
-    notes: Optional[GoalNotes] = None
+    notes: Optional[GoalNotes] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -425,7 +524,7 @@ class Groups:
     Response for ListGroups
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -434,18 +533,21 @@ class Alert:
     Response for Get alerts from Power BI
     """
 
-    alert_id: Optional[str] = field(
+    alert_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "alertId"},
     )
     """The ID of the alert."""
-    alert_title: Optional[str] = field(
+    alert_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "alertTitle"},
     )
     """The title of the alert."""
-    group_id: Optional[str] = field(
+    group_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "groupId"},
     )
     """The ID of the group."""
@@ -457,7 +559,7 @@ class Datasets:
     Response for ListDatasets
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -466,7 +568,7 @@ class Tables:
     Response for ListTables
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -475,12 +577,13 @@ class Reports:
     Response for Get Reports in Group
     """
 
-    odata_context: Optional[str] = field(
+    odata_context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "odata.context"},
     )
     """OData context"""
-    value: Optional[List[Any]] = None
+    value: Optional[List[Any]] = dataclass_field(default=None, kw_only=True)
     """The report collection"""
 
 
@@ -490,7 +593,7 @@ class Columns:
     Response for GetColumns
     """
 
-    schema: Optional[Dict[str, Any]] = None
+    schema: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -499,14 +602,16 @@ class QuerySpecification:
     Definition: QuerySpecification
     """
 
-    query: Optional[str] = None
+    query: str
     """The text of the query. Can be multiline text."""
-    serializer_settings: Optional[Dict[str, Any]] = field(
+    serializer_settings: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "serializerSettings"},
     )
-    impersonated_user_name: Optional[str] = field(
+    impersonated_user_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "impersonatedUserName"},
     )
     """A user identity in UPN format to run the query as another user."""
@@ -518,9 +623,9 @@ class CreateScorecardRequest:
     Definition: CreateScorecardRequest
     """
 
-    name: Optional[str] = None
+    name: str
     """Scorecard name"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Scorecard  description"""
 
 
@@ -530,11 +635,11 @@ class ListedScorecard:
     Definition: ListedScorecard
     """
 
-    id: Optional[str] = None
+    id: str
     """The unique identifier of the scorecard."""
-    name: Optional[str] = None
+    name: str
     """The name of the scorecard."""
-    contact: Optional[str] = None
+    contact: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Contact information for the scorecard."""
 
 
@@ -544,33 +649,36 @@ class CreateGoalRequest:
     Definition: CreateGoalRequest
     """
 
-    name: Optional[str] = None
+    name: str
     """The name of the goal."""
-    owner: Optional[str] = None
+    owner: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The email address of the goal's owner. Example: foo@bar.com"""
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The current value of the goal being tracked."""
-    target: Optional[str] = None
+    target: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The target value of the goal."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The current status the goal."""
-    start_date: Optional[str] = field(
+    start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDate"},
     )
     """The start date for the goal. Example: 2021-07-15."""
-    completion_date: Optional[str] = field(
+    completion_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "completionDate"},
     )
     """The date for the goal to be completed by. Example: 2021-07-29."""
-    note: Optional[str] = None
+    note: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Note to attach to the initial check-in on goal creation. Can be multiline
     text
     """
-    parent_id: Optional[str] = field(
+    parent_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parentId"},
     )
     """If this goal is a subgoal, the unique id of its parent goal."""
@@ -582,23 +690,25 @@ class UpdateGoalRequest:
     Definition: UpdateGoalRequest
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """If provided, the new name of the goal."""
-    owner: Optional[str] = None
+    owner: Optional[str] = dataclass_field(default=None, kw_only=True)
     """If provided, the email address of the new goal owner."""
-    value: Optional[float] = None
+    value: Optional[float] = dataclass_field(default=None, kw_only=True)
     """If provided, sets the new value of the goal."""
-    target: Optional[float] = None
+    target: Optional[float] = dataclass_field(default=None, kw_only=True)
     """If provided, sets the new goal target."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """If provided, sets the new status of the goal."""
-    start_date: Optional[str] = field(
+    start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDate"},
     )
     """If provided, the new start date for the goal. Example: 2021-07-15."""
-    completion_date: Optional[str] = field(
+    completion_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "completionDate"},
     )
     """
@@ -613,14 +723,15 @@ class GoalRefreshIssue:
     Definition: GoalRefreshIssue
     """
 
-    connection_type: Optional[str] = field(
+    connection_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "connectionType"},
     )
     """The connection type, either Current or Target."""
-    timestamp: Optional[str] = None
+    timestamp: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The timestamp of when the failed refresh happened."""
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of the error."""
 
 
@@ -630,12 +741,12 @@ class GoalValueCheckinRequest:
     Definition: GoalValueCheckinRequest
     """
 
-    timestamp: Optional[str] = None
+    timestamp: str
     """Check-in date. Example: 2021-07-21"""
-    value: Optional[float] = None
-    status: Optional[str] = None
+    value: Optional[float] = dataclass_field(default=None, kw_only=True)
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Status of the goal."""
-    note: Optional[str] = None
+    note: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Can be multiline text"""
 
 
@@ -645,8 +756,8 @@ class GoalValueCheckinUpdateRequest:
     Definition: GoalValueCheckinUpdateRequest
     """
 
-    value: Optional[float] = None
-    status: Optional[str] = None
+    value: Optional[float] = dataclass_field(default=None, kw_only=True)
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Status of the goal."""
 
 
@@ -659,7 +770,7 @@ class Payload:
     Definition: Payload
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -672,13 +783,14 @@ class ExportPayloadPowerBIReport:
     Definition: ExportPayloadPowerBIReport
     """
 
-    format: Optional[str] = None
+    format: str
     """
     The export format for the Power BI report. The supported formats are: PPTX
     (PowerPoint), PDF, and PNG
     """
-    power_b_i_report_export_configuration: Optional[Dict[str, Any]] = field(
+    power_b_i_report_export_configuration: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PowerBIReportExportConfiguration"},
     )
     """Power BI report Export to file configuration"""
@@ -690,14 +802,15 @@ class ExportPayloadPaginatedReport:
     Definition: ExportPayloadPaginatedReport
     """
 
-    format: Optional[str] = None
+    format: str
     """
     The export format for the paginated report. The supported formats are: PPTX
     (PowerPoint), PDF, ACCESSIBLEPDF (Accessible PDF), XLSX (Excel), DOCX
     (Word), CSV, XML, MHTML, and Image (BMP, EMF, GIF, JPEG, PNG, or TIFF).
     """
-    paginated_report_configuration: Optional[Dict[str, Any]] = field(
+    paginated_report_configuration: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "paginatedReportConfiguration"},
     )
     """paginatedReportConfiguration"""
@@ -709,10 +822,11 @@ class ExportReportSettings:
     Definition: ExportReportSettings
     """
 
-    locale: Optional[str] = None
+    locale: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The locale to apply"""
-    include_hidden_pages: Optional[bool] = field(
+    include_hidden_pages: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "includeHiddenPages"},
     )
     """
@@ -728,9 +842,9 @@ class PageBookmark:
     Definition: PageBookmark
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The bookmark name"""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The bookmark state"""
 
 
@@ -740,7 +854,7 @@ class ExportFilter:
     Definition: ExportFilter
     """
 
-    filter: Optional[str] = None
+    filter: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The filter to apply"""
 
 
@@ -750,17 +864,24 @@ class ExportReportPage:
     Definition: ExportReportPage
     """
 
-    page_name: Optional[str] = field(
+    page_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageName"},
     )
     """The page name"""
-    visual_name: Optional[str] = field(
+    visual_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "visualName"},
     )
     """(Optional) Visual name to be exported"""
-    bookmark: Optional[PageBookmark] = None
+    bookmark: Optional[
+        PageBookmark | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """(Optional) The bookmark to be applied on the page"""
 
 
@@ -770,7 +891,7 @@ class EffectiveIdentity:
     Definition: EffectiveIdentity
     """
 
-    username: Optional[str] = None
+    username: str
     """
     The effective username reflected by a token for applying RLS rules (For
     OnPrem model, username can be composed of alpha-numerical characters or any
@@ -778,31 +899,33 @@ class EffectiveIdentity:
     also username cannot contain spaces. For Cloud model, username can be
     composed of all ASCII characters. username must be up to 256 characters)
     """
-    datasets: Optional[List[str]] = None
+    datasets: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """An array of datasets for which this identity applies"""
-    roles: Optional[List[str]] = None
+    roles: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     An array of RLS roles reflected by a token when applying RLS rules
     (identity can contain up to 50 roles, role can be composed of any character
     besides ',' and must be up to 50 characters)
     """
-    custom_data: Optional[str] = field(
+    custom_data: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customData"},
     )
     """
     The value of customdata to be used for applying RLS rules. Only supported
     for live connections to Azure Analysis Services.
     """
-    identity_blob: Optional[IdentityBlob] = field(
+    identity_blob: Optional[IdentityBlob | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "identityBlob"},
     )
     """
     A blob for specifying the identity. Only supported for datasets with Direct
     Query connection to SQL Azure
     """
-    reports: Optional[List[str]] = None
+    reports: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     An array of reports for which this identity applies, Only supported for
     paginated reports
@@ -815,7 +938,7 @@ class IdentityBlob:
     Definition: IdentityBlob
     """
 
-    value: Optional[str] = None
+    value: str
     """OAuth2 access token for SQL Azure"""
 
 
@@ -825,7 +948,7 @@ class DynamicPowerBiButtonClickedTriggerResult:
     Definition: DynamicPowerBiButtonClickedTriggerResult
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -838,8 +961,9 @@ class PowerBiButtonClickedOutputs:
     Definition: PowerBiButtonClickedOutputs
     """
 
-    power_bi_inputs: Optional[Dict[str, Any]] = field(
+    power_bi_inputs: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PowerBiInputs"},
     )
 
@@ -852,16 +976,16 @@ class PowerbiClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -872,8 +996,8 @@ class PowerbiClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -881,8 +1005,8 @@ class PowerbiClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -894,7 +1018,7 @@ class PowerbiClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -909,7 +1033,84 @@ class PowerbiClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "powerbi"
 
-    async def get_scorecards_async(
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
+            if next_link.startswith("?"):
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
+
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
+    def list_scorecards(
         self,
         groupid: str,
         *,
@@ -917,11 +1118,30 @@ class PowerbiClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get scorecards
 
         Gets a list of Power BI scorecards in the specified workspace.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetScorecards`.
+
+        Args:
+            groupid: The unique identifier of the workspace.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -935,31 +1155,52 @@ class PowerbiClient(ConnectorClientBase):
         query_params.append("pbi_source=" + quote("powerAutomate", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def create_scorecard_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def create_scorecard(
         self,
-        input: CreateScorecardRequest,
+        input: CreateScorecardRequest | Mapping[str, Any],
         groupid: str,
         *,
         timeout: Optional[float] = None,
@@ -971,6 +1212,23 @@ class PowerbiClient(ConnectorClientBase):
         Create a scorecard
 
         Creates a scorecard for Power BI goals.
+
+        Swagger operation ID: `CreateScorecard`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            groupid: The unique identifier of the workspace.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -985,7 +1243,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -999,6 +1257,7 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1006,7 +1265,7 @@ class PowerbiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_multiple_goals_async(
+    def list_multiple_goals(
         self,
         groupid: str,
         scorecard_id: str,
@@ -1015,11 +1274,31 @@ class PowerbiClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get multiple goals
 
         Get a list of Power BI goals in the specified scorecard.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetMultipleGoals`.
+
+        Args:
+            groupid: The unique identifier of the workspace.
+            scorecard_id: The unique identifier of the scorecard.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1035,31 +1314,52 @@ class PowerbiClient(ConnectorClientBase):
         query_params.append("pbi_source=" + quote("powerAutomate", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def create_goal_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def create_goal(
         self,
-        input: CreateGoalRequest,
+        input: CreateGoalRequest | Mapping[str, Any],
         groupid: str,
         scorecard_id: str,
         *,
@@ -1072,6 +1372,24 @@ class PowerbiClient(ConnectorClientBase):
         Create a goal
 
         Creates a Power BI goal on the specified scorecard.
+
+        Swagger operation ID: `CreateGoal`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            groupid: The unique identifier of the workspace.
+            scorecard_id: The unique identifier of the scorecard.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1087,7 +1405,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1101,6 +1419,7 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1108,7 +1427,7 @@ class PowerbiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_goal_async(
+    def get_goal(
         self,
         groupid: str,
         scorecard_id: str,
@@ -1123,6 +1442,23 @@ class PowerbiClient(ConnectorClientBase):
         Get a goal
 
         Gets the specified Power BI goal on a scorecard.
+
+        Swagger operation ID: `GetGoal`.
+
+        Args:
+            groupid: The unique identifier of the workspace.
+            scorecard_id: The unique identifier of the scorecard.
+            goal_id: The unique identifier of the goal.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1139,7 +1475,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1153,6 +1489,7 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1160,9 +1497,9 @@ class PowerbiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_goal_async(
+    def update_goal(
         self,
-        input: UpdateGoalRequest,
+        input: UpdateGoalRequest | Mapping[str, Any],
         groupid: str,
         scorecard_id: str,
         goal_id: str,
@@ -1176,6 +1513,25 @@ class PowerbiClient(ConnectorClientBase):
         Update a goal
 
         Updates the Power BI goal's state.
+
+        Swagger operation ID: `UpdateGoal`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            groupid: The unique identifier of the workspace.
+            scorecard_id: The unique identifier of the scorecard.
+            goal_id: The unique identifier of the goal.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1191,7 +1547,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1205,11 +1561,12 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def execute_dataset_query_async(
+    def execute_dataset_query(
         self,
-        input: QuerySpecification,
+        input: QuerySpecification | Mapping[str, Any],
         groupid: str,
         datasetid: str,
         *,
@@ -1222,6 +1579,24 @@ class PowerbiClient(ConnectorClientBase):
         Run a query against a dataset
 
         Use the Power BI REST API to run a query.
+
+        Swagger operation ID: `ExecuteDatasetQuery`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            groupid: The unique identifier of the workspace.
+            datasetid: The unique identifier of the dataset.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1238,7 +1613,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1252,6 +1627,7 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1259,9 +1635,9 @@ class PowerbiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def execute_dataset_queries_json_async(
+    def execute_dataset_queries_json(
         self,
-        input: ExecuteDatasetQueriesJsonInput,
+        input: ExecuteDatasetQueriesJsonInput | Mapping[str, Any],
         groupid: str,
         datasetid: str,
         *,
@@ -1274,6 +1650,24 @@ class PowerbiClient(ConnectorClientBase):
         Run a json query against a dataset
 
         Use the Power BI REST API to run a query in json format.
+
+        Swagger operation ID: `ExecuteDatasetQueriesJson`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            groupid: The unique identifier of the workspace.
+            datasetid: The unique identifier of the dataset.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1291,7 +1685,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1305,6 +1699,7 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1312,9 +1707,9 @@ class PowerbiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_rows_async(
+    def add_rows(
         self,
-        input: Payload,
+        input: Payload | Mapping[str, Any],
         groupid: str,
         datasetid: str,
         tablename: str,
@@ -1328,6 +1723,25 @@ class PowerbiClient(ConnectorClientBase):
         Add rows to a dataset
 
         Use Power BI REST API to add rows to a dataset.
+
+        Swagger operation ID: `AddRows`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            groupid: The unique identifier of the workspace.
+            datasetid: The unique identifier of the dataset.
+            tablename: The name of the table.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1346,7 +1760,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1360,9 +1774,10 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def goal_value_checkin_note_async(
+    def goal_value_checkin_note(
         self,
         input: GoalValueCheckinNoteInput,
         groupid: str,
@@ -1379,6 +1794,25 @@ class PowerbiClient(ConnectorClientBase):
         Add a note to a check-in
 
         Appends a new note to a check-in of a Power BI goal.
+
+        Swagger operation ID: `GoalValueCheckinNote`.
+
+        Args:
+            input: The request body.
+            groupid: The unique identifier of the workspace.
+            scorecard_id: The unique identifier of the scorecard.
+            goal_id: The unique identifier of the goal.
+            goal_checkin: Example: 2021-07-21.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1396,7 +1830,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1410,11 +1844,12 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def goal_value_checkin_async(
+    def goal_value_checkin(
         self,
-        input: GoalValueCheckinRequest,
+        input: GoalValueCheckinRequest | Mapping[str, Any],
         groupid: str,
         scorecard_id: str,
         goal_id: str,
@@ -1428,6 +1863,25 @@ class PowerbiClient(ConnectorClientBase):
         Create a check-in
 
         Creates a Power BI goal check-in.
+
+        Swagger operation ID: `GoalValueCheckin`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            groupid: The unique identifier of the workspace.
+            scorecard_id: The unique identifier of the scorecard.
+            goal_id: The unique identifier of the goal.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1444,7 +1898,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1458,9 +1912,10 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_goal_checkins_async(
+    def list_goal_checkins(
         self,
         groupid: str,
         scorecard_id: str,
@@ -1470,11 +1925,32 @@ class PowerbiClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get goal check-ins
 
         Get all check-ins on a Power BI goal.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetGoalCheckins`.
+
+        Args:
+            groupid: The unique identifier of the workspace.
+            scorecard_id: The unique identifier of the scorecard.
+            goal_id: The unique identifier of the goal.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1491,31 +1967,52 @@ class PowerbiClient(ConnectorClientBase):
         query_params.append("$expand=" + quote("notes", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def update_goal_checkin_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def update_goal_checkin(
         self,
-        input: GoalValueCheckinUpdateRequest,
+        input: GoalValueCheckinUpdateRequest | Mapping[str, Any],
         groupid: str,
         scorecard_id: str,
         goal_id: str,
@@ -1530,6 +2027,26 @@ class PowerbiClient(ConnectorClientBase):
         Update a check-in
 
         Updates a Power BI goal check-in.
+
+        Swagger operation ID: `UpdateGoalCheckin`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            groupid: The unique identifier of the workspace.
+            scorecard_id: The unique identifier of the scorecard.
+            goal_id: The unique identifier of the goal.
+            goal_checkin: Example: 2021-07-21.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1546,7 +2063,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1560,9 +2077,10 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_goal_checkin_async(
+    def get_goal_checkin(
         self,
         groupid: str,
         scorecard_id: str,
@@ -1578,6 +2096,24 @@ class PowerbiClient(ConnectorClientBase):
         Get a goal check-in
 
         Get a check-in on a Power BI goal.
+
+        Swagger operation ID: `GetGoalCheckin`.
+
+        Args:
+            groupid: The unique identifier of the workspace.
+            scorecard_id: The unique identifier of the scorecard.
+            goal_id: The unique identifier of the goal.
+            goal_checkin: Example: 2021-07-21.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1595,7 +2131,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1609,6 +2145,7 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1616,7 +2153,7 @@ class PowerbiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def refresh_dataset_async(
+    def refresh_dataset(
         self,
         groupid: str,
         datasetid: str,
@@ -1630,6 +2167,22 @@ class PowerbiClient(ConnectorClientBase):
         Refresh a dataset
 
         Use Power BI REST API to refresh a powerbi dataset.
+
+        Swagger operation ID: `RefreshDataset`.
+
+        Args:
+            groupid: The unique identifier of the workspace.
+            datasetid: The unique identifier of the dataset.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1646,7 +2199,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1660,11 +2213,12 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def initiate_export_to_file_for_pbi_reports_async(
+    def initiate_export_to_file_for_pbi_reports(
         self,
-        input: ExportPayloadPowerBIReport,
+        input: ExportPayloadPowerBIReport | Mapping[str, Any],
         groupid: str,
         reportid: str,
         *,
@@ -1677,6 +2231,24 @@ class PowerbiClient(ConnectorClientBase):
         Export To File for Power BI Reports
 
         Use Power BI Rest API to inititate export for Power BI reports
+
+        Swagger operation ID: `InitiateExportToFileForPbiReports`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            groupid: The unique identifier of the workspace.
+            reportid: The unique identifier of a pbi report.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1689,7 +2261,7 @@ class PowerbiClient(ConnectorClientBase):
             f"/ExportTo"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1703,13 +2275,14 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
 
-    async def initiate_export_to_file_for_paginated_reports_async(
+    def initiate_export_to_file_for_paginated_reports(
         self,
-        input: ExportPayloadPaginatedReport,
+        input: ExportPayloadPaginatedReport | Mapping[str, Any],
         groupid: str,
         reportid: str,
         *,
@@ -1722,6 +2295,24 @@ class PowerbiClient(ConnectorClientBase):
         Export To File for Paginated Reports
 
         Use Power BI Rest API to inititate export for paginated reports
+
+        Swagger operation ID: `InitiateExportToFileForPaginatedReports`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            groupid: The unique identifier of the workspace.
+            reportid: The unique identifier of a paginated report.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1734,7 +2325,7 @@ class PowerbiClient(ConnectorClientBase):
             f"/ExportToPaginatedReports"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1748,91 +2339,170 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
 
-    async def list_groups_async(
+    def list_groups(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         ListGroups
 
         Get Groups for Power BI.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListGroups`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/myorg/groups"
         query_params = []
         query_params.append("pbi_source=" + quote("powerAutomate", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_alerts_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_alerts(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get alerts from Power BI
 
         Return a list of alerts for a signed in user.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetAlerts`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/metadata/v201606/alerts"
         query_params = []
         query_params.append("pbi_source=" + quote("powerAutomate", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_datasets_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_datasets(
         self,
         groupid: str,
         *,
@@ -1840,11 +2510,30 @@ class PowerbiClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         ListDatasets
 
         Get datasets for Power BI group.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListDatasets`.
+
+        Args:
+            groupid: The unique identifier of the workspace.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1854,29 +2543,50 @@ class PowerbiClient(ConnectorClientBase):
         query_params.append("pbi_source=" + quote("powerAutomate", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_tables_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_tables(
         self,
         groupid: str,
         datasetid: str,
@@ -1885,11 +2595,31 @@ class PowerbiClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         ListTables
 
         Get tables for Power BI dataset.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListTables`.
+
+        Args:
+            groupid: The unique identifier of the workspace.
+            datasetid: The unique identifier of the dataset.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1905,29 +2635,50 @@ class PowerbiClient(ConnectorClientBase):
         query_params.append("pbi_source=" + quote("powerAutomate", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_reports_in_group_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_reports_in_group(
         self,
         groupid: str,
         *,
@@ -1935,39 +2686,79 @@ class PowerbiClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Reports in Group
 
         Returns a list of reports from the specified workspace.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetReportsInGroup`.
+
+        Args:
+            groupid: The unique identifier of the workspace.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/myorg/groups/{quote(str(groupid), safe='')}/reports"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_columns_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_columns(
         self,
         groupid: str,
         datasetid: str,
@@ -1982,6 +2773,23 @@ class PowerbiClient(ConnectorClientBase):
         GetColumns
 
         Get columns for Power BI dataset table.
+
+        Swagger operation ID: `GetColumns`.
+
+        Args:
+            groupid: The unique identifier of the workspace.
+            datasetid: The unique identifier of the dataset.
+            tablename: The name of the table.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2000,7 +2808,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2014,6 +2822,7 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

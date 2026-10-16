@@ -5,20 +5,40 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "AzureblobClient",
+    "BlobDataSetsMetadata",
+    "BlobMetadata",
+    "BlobMetadataPage",
+    "BlobMetadataResponse",
+    "DataSetsMetadata",
+    "DataWithSensitivityLabelInfo",
+    "ListOfBlobsWithSensitivityLabels",
+    "ObjectEntity",
+    "SensitivityLabelMetadata",
+    "SharedAccessSignature",
+    "SharedAccessSignatureBlobPolicy",
+    "StorageAccount",
+    "StorageAccountList",
+    "TabularDataSetsMetadata",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -29,41 +49,66 @@ class BlobMetadata:
     Response for Copy blob
     """
 
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """The unique id of the file or folder."""
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """The name of the file or folder."""
-    display_name: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """The unique id of the file or folder."""
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """The name of the file or folder."""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the file or folder."""
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
-    """The path of the file or folder."""
-    last_modified: Optional[str] = field(
+    path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
+    """The path of the file or folder."""
+    last_modified: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "LastModified"},
     )
     """The date and time the file or folder was last modified."""
-    size: Optional[int] = field(default=None, metadata={"wire_name": "Size"})
-    """The size of the file or folder."""
-    media_type: Optional[str] = field(
+    size: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Size"},
+    )
+    """The size of the file or folder."""
+    media_type: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "MediaType"},
     )
     """The media type of the file or folder."""
-    is_folder: Optional[bool] = field(
+    is_folder: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsFolder"},
     )
     """
     A boolean value (true, false) to indicate whether or not the blob is a
     folder.
     """
-    e_tag: Optional[str] = field(default=None, metadata={"wire_name": "ETag"})
-    """The etag of the file or folder."""
-    file_locator: Optional[str] = field(
+    e_tag: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "ETag"},
+    )
+    """The etag of the file or folder."""
+    file_locator: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "FileLocator"},
     )
     """The filelocator of the file or folder."""
@@ -75,8 +120,9 @@ class SharedAccessSignature:
     Response for Create SAS URI by path
     """
 
-    web_url: Optional[str] = field(
+    web_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebUrl"},
     )
     """A URL to an object with access token."""
@@ -88,8 +134,9 @@ class SharedAccessSignatureBlobPolicy:
     Response for Get available access policies
     """
 
-    group_policy_identifier: Optional[str] = field(
+    group_policy_identifier: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "GroupPolicyIdentifier"},
     )
     """
@@ -97,37 +144,42 @@ class SharedAccessSignatureBlobPolicy:
     (e.g. Start time and End time) have precedence over input parameters
     mentioned in actions.
     """
-    permissions: Optional[str] = field(
+    permissions: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Permissions"},
     )
     """The permissions specified on the SAS (Values separated by comma)."""
-    start_time: Optional[str] = field(
+    start_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StartTime"},
     )
     """
     The date and time at which the SAS becomes valid (example:
     '2017-11-01T15:30:00+00:00'). Default = now().
     """
-    expiry_time: Optional[str] = field(
+    expiry_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExpiryTime"},
     )
     """
     The date and time after which the SAS is no longer valid (example:
     '2017-12-01T15:30:00+00:00'). Default = now() + 24h.
     """
-    access_protocol: Optional[str] = field(
+    access_protocol: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccessProtocol"},
     )
     """
     The allowed protocols (https only, or http and https). Null if you don't
     want to restrict protocol.
     """
-    ip_address_or_range: Optional[str] = field(
+    ip_address_or_range: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IpAddressOrRange"},
     )
     """
@@ -142,46 +194,74 @@ class DataWithSensitivityLabelInfo:
     Response for Get Blob Metadata
     """
 
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """The unique id of the file or folder."""
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """The name of the file or folder."""
-    display_name: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """The unique id of the file or folder."""
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """The name of the file or folder."""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the file or folder."""
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
-    """The path of the file or folder."""
-    last_modified: Optional[str] = field(
+    path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
+    """The path of the file or folder."""
+    last_modified: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "LastModified"},
     )
     """The date and time the file or folder was last modified."""
-    size: Optional[int] = field(default=None, metadata={"wire_name": "Size"})
-    """The size of the file or folder."""
-    media_type: Optional[str] = field(
+    size: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Size"},
+    )
+    """The size of the file or folder."""
+    media_type: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "MediaType"},
     )
     """The media type of the file or folder."""
-    is_folder: Optional[bool] = field(
+    is_folder: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsFolder"},
     )
     """
     A boolean value (true, false) to indicate whether or not the blob is a
     folder.
     """
-    e_tag: Optional[str] = field(default=None, metadata={"wire_name": "ETag"})
-    """The etag of the file or folder."""
-    file_locator: Optional[str] = field(
+    e_tag: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "ETag"},
+    )
+    """The etag of the file or folder."""
+    file_locator: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "FileLocator"},
     )
     """The filelocator of the file or folder."""
-    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = field(
+    sensitivity_label_info: Optional[
+        List[SensitivityLabelMetadata | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SensitivityLabelInfo"},
     )
     """Sensitivity label metadata info list"""
@@ -193,10 +273,16 @@ class ListOfBlobsWithSensitivityLabels:
     Response for Lists blobs
     """
 
-    value: Optional[List[DataWithSensitivityLabelInfo]] = None
-    """List of Blobs"""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[DataWithSensitivityLabelInfo | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of Blobs"""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -208,15 +294,22 @@ class BlobMetadataPage:
     Response for Lists blobs in the root folder
     """
 
-    value: Optional[List[BlobMetadata]] = None
-    """Blob metadata collection."""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[BlobMetadata | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """Blob metadata collection."""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """An Url which can be used to retrieve the next page."""
-    next_page_marker: Optional[str] = field(
+    next_page_marker: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextPageMarker"},
     )
     """A marker which can be used to retrieve the next page."""
@@ -228,7 +321,12 @@ class StorageAccountList:
     Response for Get storage accounts
     """
 
-    value: Optional[List[StorageAccount]] = None
+    value: Optional[
+        List[StorageAccount | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of storage account names"""
 
 
@@ -238,7 +336,7 @@ class ObjectEntity:
     Definition: Object
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -251,41 +349,66 @@ class BlobMetadataResponse:
     Definition: BlobMetadataResponse
     """
 
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """The unique id of the file or folder."""
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """The name of the file or folder."""
-    display_name: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """The unique id of the file or folder."""
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """The name of the file or folder."""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the file or folder."""
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
-    """The path of the file or folder."""
-    last_modified: Optional[str] = field(
+    path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
+    """The path of the file or folder."""
+    last_modified: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "LastModified"},
     )
     """The date and time the file or folder was last modified."""
-    size: Optional[int] = field(default=None, metadata={"wire_name": "Size"})
-    """The size of the file or folder."""
-    media_type: Optional[str] = field(
+    size: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Size"},
+    )
+    """The size of the file or folder."""
+    media_type: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "MediaType"},
     )
     """The media type of the file or folder."""
-    is_folder: Optional[bool] = field(
+    is_folder: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsFolder"},
     )
     """
     A boolean value (true, false) to indicate whether or not the blob is a
     folder.
     """
-    e_tag: Optional[str] = field(default=None, metadata={"wire_name": "ETag"})
-    """The etag of the file or folder."""
-    file_locator: Optional[str] = field(
+    e_tag: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "ETag"},
+    )
+    """The etag of the file or folder."""
+    file_locator: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "FileLocator"},
     )
     """The filelocator of the file or folder."""
@@ -297,41 +420,47 @@ class SensitivityLabelMetadata:
     Definition: SensitivityLabelMetadata
     """
 
-    sensitivity_label_id: Optional[str] = field(
+    sensitivity_label_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sensitivityLabelId"},
     )
     """SensitivityLabel Id."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel name."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """SensitivityLabel displayName info"""
-    tooltip: Optional[str] = None
+    tooltip: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel details on tooltip."""
-    priority: Optional[int] = None
+    priority: Optional[int] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel priority."""
-    color: Optional[str] = None
+    color: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel color."""
-    is_encrypted: Optional[bool] = field(
+    is_encrypted: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isEncrypted"},
     )
     """ is  SensitivityLabel Encrypted."""
-    is_enabled: Optional[bool] = field(
+    is_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isEnabled"},
     )
     """Whether  SensitivityLabel is Enabled."""
-    is_parent: Optional[bool] = field(
+    is_parent: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isParent"},
     )
     """Whether  SensitivityLabel is Parent."""
-    parent_sensitivity_label_id: Optional[str] = field(
+    parent_sensitivity_label_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parentSensitivityLabelId"},
     )
     """Parent  SensitivityLabel Id."""
@@ -343,10 +472,15 @@ class StorageAccount:
     Definition: StorageAccount
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """The name of the storage account."""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """The name of the storage account."""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the storage account."""
@@ -358,8 +492,18 @@ class DataSetsMetadata:
     Definition: DataSetsMetadata
     """
 
-    tabular: Optional[TabularDataSetsMetadata] = None
-    blob: Optional[BlobDataSetsMetadata] = None
+    tabular: Optional[
+        TabularDataSetsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    blob: Optional[
+        BlobDataSetsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -368,25 +512,29 @@ class TabularDataSetsMetadata:
     Definition: TabularDataSetsMetadata
     """
 
-    source: Optional[str] = None
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Dataset source"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Dataset display name"""
-    url_encoding: Optional[str] = field(
+    url_encoding: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "urlEncoding"},
     )
     """Dataset url encoding"""
-    table_display_name: Optional[str] = field(
+    table_display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tableDisplayName"},
     )
     """Table display name"""
-    table_plural_name: Optional[str] = field(
+    table_plural_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tablePluralName"},
     )
     """Table plural display name"""
@@ -398,15 +546,17 @@ class BlobDataSetsMetadata:
     Definition: BlobDataSetsMetadata
     """
 
-    source: Optional[str] = None
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Blob dataset source"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Blob dataset display name"""
-    url_encoding: Optional[str] = field(
+    url_encoding: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "urlEncoding"},
     )
     """Blob dataset url encoding"""
@@ -420,16 +570,16 @@ class AzureblobClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -440,8 +590,8 @@ class AzureblobClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -449,8 +599,8 @@ class AzureblobClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -462,7 +612,7 @@ class AzureblobClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -478,15 +628,49 @@ class AzureblobClient(ConnectorClientBase):
         return "azureblob"
 
     def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
-        parsed_next_link = urlsplit(next_link)
-        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
             if next_link.startswith("/"):
                 return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
             if next_link.startswith("?"):
-                return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
 
-        parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
         connection_hostname = parsed_connection.hostname
         if next_link_hostname is None or connection_hostname is None:
@@ -503,7 +687,11 @@ class AzureblobClient(ConnectorClientBase):
                 parsed_next_link.scheme == parsed_connection.scheme
                 and next_link_port == connection_port
             ):
-                return next_link
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
 
             raise ValueError(
                 "Pagination URL origin "
@@ -516,13 +704,13 @@ class AzureblobClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def copy_file_async(
+    def copy_file(
         self,
         dataset: str,
         source: str,
         destination: str,
-        overwrite: Optional[bool] = None,
         *,
+        overwrite: Optional[bool] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -538,6 +726,26 @@ class AzureblobClient(ConnectorClientBase):
         action. If source and destination are present in same storage account,
         please use relative path. Otherwise, maximum size of a source for copy
         blob operation is 50 MB.
+
+        Swagger operation ID: `CopyFile_V2`.
+
+        Args:
+            dataset: Azure Storage account name or blob endpoint.
+            source: Specify the url to source blob.
+            destination: Specify the destination blob path, including the
+                target blob name.
+            overwrite: Should the destination blob be overwritten
+                (true/false)?.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -564,7 +772,7 @@ class AzureblobClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -578,6 +786,7 @@ class AzureblobClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -585,7 +794,7 @@ class AzureblobClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_block_blob_async(
+    def create_block_blob(
         self,
         input: bytes,
         storage_account_name: str,
@@ -601,6 +810,24 @@ class AzureblobClient(ConnectorClientBase):
         Create block blob
 
         This operation uploads a block blob to Azure Blob Storage.
+
+        Swagger operation ID: `CreateBlockBlob_V2`.
+
+        Args:
+            input: The binary request body.
+            storage_account_name: The storage account name.
+            folder_path: Specify folder path to upload.
+            name: Specify name of the blob to create.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -622,7 +849,7 @@ class AzureblobClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST",
             request_url,
             body=input,
@@ -639,9 +866,10 @@ class AzureblobClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def create_file_async(
+    def create_file(
         self,
         input: bytes,
         dataset: str,
@@ -657,6 +885,24 @@ class AzureblobClient(ConnectorClientBase):
         Create blob
 
         This operation uploads a blob to Azure Blob Storage.
+
+        Swagger operation ID: `CreateFile_V2`.
+
+        Args:
+            input: The binary request body.
+            dataset: Azure Storage account name or blob endpoint.
+            folder_path: Specify folder path to upload.
+            name: Specify name of the blob to create.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -678,7 +924,7 @@ class AzureblobClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST",
             request_url,
             body=input,
@@ -695,6 +941,7 @@ class AzureblobClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -702,9 +949,9 @@ class AzureblobClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_share_link_by_path_async(
+    def create_share_link_by_path(
         self,
-        input: SharedAccessSignatureBlobPolicy,
+        input: SharedAccessSignatureBlobPolicy | Mapping[str, Any],
         storage_account_name: str,
         path: str,
         *,
@@ -717,6 +964,24 @@ class AzureblobClient(ConnectorClientBase):
         Create SAS URI by path
 
         This operation creates a SAS link for a blob using the path.
+
+        Swagger operation ID: `CreateShareLinkByPath_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            storage_account_name: Azure Storage account name or blob endpoint.
+            path: The unique path of the blob.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -733,7 +998,7 @@ class AzureblobClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -747,6 +1012,7 @@ class AzureblobClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -754,7 +1020,7 @@ class AzureblobClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_file_async(
+    def delete_file(
         self,
         dataset: str,
         id: str,
@@ -768,6 +1034,22 @@ class AzureblobClient(ConnectorClientBase):
         Delete blob
 
         This operation deletes a blob.
+
+        Swagger operation ID: `DeleteFile_V2`.
+
+        Args:
+            dataset: Azure Storage account name or blob endpoint.
+            id: Specify the blob to delete.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -778,7 +1060,7 @@ class AzureblobClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -792,15 +1074,16 @@ class AzureblobClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def extract_folder_async(
+    def extract_folder(
         self,
         dataset: str,
         source: str,
         destination: str,
-        overwrite: Optional[bool] = None,
         *,
+        overwrite: Optional[bool] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -810,6 +1093,25 @@ class AzureblobClient(ConnectorClientBase):
         Extract archive to folder
 
         This operation extracts an archive blob into a folder (example: .zip).
+
+        Swagger operation ID: `ExtractFolder_V3`.
+
+        Args:
+            dataset: Azure Storage account name or blob endpoint.
+            source: Specify the path to the archive blob.
+            destination: Specify the path in Azure Blob Storage to extract the
+                archive contents.
+            overwrite: Should destination blob be overwritten (true/false)?.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -836,7 +1138,7 @@ class AzureblobClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -850,6 +1152,7 @@ class AzureblobClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -857,7 +1160,7 @@ class AzureblobClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_access_policies_async(
+    def list_access_policies(
         self,
         storage_account_name: str,
         path: str,
@@ -866,11 +1169,31 @@ class AzureblobClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get available access policies
 
         This operation gets available shared access policies for a blob.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetAccessPolicies_V2`.
+
+        Args:
+            storage_account_name: Azure Storage account name or blob endpoint.
+            path: The unique path of the blob.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -886,36 +1209,57 @@ class AzureblobClient(ConnectorClientBase):
         query_params.append(f"path={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_file_content_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_file_content(
         self,
         dataset: str,
         id: str,
+        *,
         infer_content_type: Optional[bool] = None,
         extract_sensitivity_label: Optional[bool] = None,
         purview_account_name: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -925,6 +1269,26 @@ class AzureblobClient(ConnectorClientBase):
         Get blob content
 
         This operation retrieves blob contents using id.
+
+        Swagger operation ID: `GetFileContent_V2`.
+
+        Args:
+            dataset: Azure Storage account name or blob endpoint.
+            id: Specify the blob.
+            infer_content_type: Infer content-type based on extension.
+            extract_sensitivity_label: Specify whether to extract MIP labels.
+            purview_account_name: Default collection will be queried unless
+                specified.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -954,7 +1318,7 @@ class AzureblobClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -968,18 +1332,19 @@ class AzureblobClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
 
-    async def get_file_content_by_path_async(
+    def get_file_content_by_path(
         self,
         dataset: str,
         path: str,
+        *,
         infer_content_type: Optional[bool] = None,
         extract_sensitivity_label: Optional[bool] = None,
         purview_account_name: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -989,6 +1354,26 @@ class AzureblobClient(ConnectorClientBase):
         Get blob content using path
 
         This operation retrieves blob contents using path.
+
+        Swagger operation ID: `GetFileContentByPath_V2`.
+
+        Args:
+            dataset: Azure Storage account name or blob endpoint.
+            path: Specify unique path to the blob.
+            infer_content_type: Infer content-type based on extension.
+            extract_sensitivity_label: Specify whether to extract MIP labels.
+            purview_account_name: Default collection will be queried unless
+                specified.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1021,7 +1406,7 @@ class AzureblobClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1035,17 +1420,18 @@ class AzureblobClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
 
-    async def get_file_metadata_async(
+    def get_file_metadata(
         self,
         dataset: str,
         id: str,
+        *,
         extract_sensitivity_label: Optional[bool] = None,
         purview_account_name: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1055,6 +1441,25 @@ class AzureblobClient(ConnectorClientBase):
         Get Blob Metadata
 
         This operation retrieves blob metadata using blob id.
+
+        Swagger operation ID: `GetFileMetadata_V2`.
+
+        Args:
+            dataset: Azure Storage account name or blob endpoint.
+            id: Specify the blob.
+            extract_sensitivity_label: Specify whether to extract MIP labels.
+            purview_account_name: Default collection will be queried unless
+                specified.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1078,7 +1483,7 @@ class AzureblobClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1092,6 +1497,7 @@ class AzureblobClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1099,13 +1505,13 @@ class AzureblobClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_file_metadata_by_path_async(
+    def get_file_metadata_by_path(
         self,
         dataset: str,
         path: str,
+        *,
         extract_sensitivity_label: Optional[bool] = None,
         purview_account_name: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1115,6 +1521,25 @@ class AzureblobClient(ConnectorClientBase):
         Get Blob Metadata using path
 
         This operation retrieves blob metadata using path.
+
+        Swagger operation ID: `GetFileMetadataByPath_V2`.
+
+        Args:
+            dataset: Azure Storage account name or blob endpoint.
+            path: Specify unique path to the blob.
+            extract_sensitivity_label: Specify whether to extract MIP labels.
+            purview_account_name: Default collection will be queried unless
+                specified.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1142,7 +1567,7 @@ class AzureblobClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1156,6 +1581,7 @@ class AzureblobClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1163,27 +1589,47 @@ class AzureblobClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_folder_async(
+    def list_folder(
         self,
         dataset: str,
         id: str,
-        next_page_marker: Optional[str] = None,
+        *,
         use_flat_listing: Optional[bool] = None,
         extract_sensitivity_label: Optional[bool] = None,
         purview_account_name: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Lists blobs
 
         This operation lists blobs in a container.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListFolder_V4`.
+
+        Args:
+            dataset: Azure Storage account name or blob endpoint.
+            id: Specify the folder.
+            use_flat_listing: Whether or not to list blobs in flat listing\".
+            extract_sensitivity_label: Specify whether to extract MIP labels.
+            purview_account_name: Default collection will be queried unless
+                specified.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1194,11 +1640,6 @@ class AzureblobClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
         query_params = []
-        if next_page_marker is not None:
-            value = str(next_page_marker)
-            if isinstance(next_page_marker, bool):
-                value = value.lower()
-            query_params.append(f"nextPageMarker={quote(value, safe='')}")
         if use_flat_listing is not None:
             value = str(use_flat_listing)
             if isinstance(use_flat_listing, bool):
@@ -1216,11 +1657,18 @@ class AzureblobClient(ConnectorClientBase):
             query_params.append(f"purviewAccountName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1233,39 +1681,63 @@ class AzureblobClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def list_root_folder_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_root_folder(
         self,
         dataset: str,
-        next_page_marker: Optional[str] = None,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Lists blobs in the root folder
 
         This operation lists blobs in the Azure Blob Storage root folder.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListRootFolder_V4`.
+
+        Args:
+            dataset: Azure Storage account name or blob endpoint.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1276,18 +1748,20 @@ class AzureblobClient(ConnectorClientBase):
         )
         query_params = []
         query_params.append("useFlatListing=" + quote("false", safe=''))
-        if next_page_marker is not None:
-            value = str(next_page_marker)
-            if isinstance(next_page_marker, bool):
-                value = value.lower()
-            query_params.append(f"nextPageMarker={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1300,23 +1774,32 @@ class AzureblobClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def set_blob_tier_by_path_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def set_blob_tier_by_path(
         self,
         storage_account_name: str,
         path: str,
@@ -1332,6 +1815,23 @@ class AzureblobClient(ConnectorClientBase):
 
         This operation sets a tier for a block blob on a standard storage
         account using the path.
+
+        Swagger operation ID: `SetBlobTierByPath_V2`.
+
+        Args:
+            storage_account_name: Azure Storage account name or blob endpoint.
+            path: The unique path of the blob.
+            new_tier: The new tier for the blob.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1352,7 +1852,7 @@ class AzureblobClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1366,9 +1866,10 @@ class AzureblobClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def update_file_async(
+    def update_file(
         self,
         input: bytes,
         dataset: str,
@@ -1383,6 +1884,23 @@ class AzureblobClient(ConnectorClientBase):
         Update blob
 
         This operation updates a blob in Azure Blob Storage.
+
+        Swagger operation ID: `UpdateFile_V2`.
+
+        Args:
+            input: The binary request body.
+            dataset: Azure Storage account name or blob endpoint.
+            id: Specify the blob to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1393,7 +1911,7 @@ class AzureblobClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT",
             request_url,
             body=input,
@@ -1410,6 +1928,7 @@ class AzureblobClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1417,41 +1936,80 @@ class AzureblobClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_data_sets_async(
+    def list_data_sets(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get storage accounts
 
         This operation list the user's Azure Storage Account.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetDataSets`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/codeless/GetDataSets"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
 
 # Trigger Operations

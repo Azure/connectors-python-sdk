@@ -7,11 +7,13 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.microsoftforms import MicrosoftformsClient, TRIGGER_OPERATIONS
+from azure.connectors.aio.microsoftforms import MicrosoftformsClient
+from azure.connectors.microsoftforms import TRIGGER_OPERATIONS
 from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestMicrosoftformsClientInitialization:
@@ -47,7 +49,7 @@ class TestMicrosoftformsClientInitialization:
         client = MicrosoftformsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -120,22 +122,21 @@ class TestListFormsAsync:
             credential=mock_credential,
         )
         mock_response = MockResponse(
-            status=200, text='{"value": [{"id": "form-1", "title": "Survey"}]}')
+            status=200, text='[{"id": "form-1", "title": "Survey"}]')
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_forms_async()
+            result = await resolve_generated_result(client.list_forms())
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
             assert path.endswith("/formapi/api/forms")
-            assert result is not None
-            assert "value" in result
+            assert result == [{"id": "form-1", "title": "Survey"}]
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -148,12 +149,12 @@ class TestListFormsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.list_forms_async()
+                await resolve_generated_result(client.list_forms())
 
 
 class TestGetFormDetailsByIdAsync:
@@ -170,11 +171,11 @@ class TestGetFormDetailsByIdAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_form_details_by_id_async(form_id="form-123")
+            result = await client.get_form_details_by_id(form_id="form-123")
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -195,12 +196,12 @@ class TestGetFormDetailsByIdAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.get_form_details_by_id_async(form_id="missing")
+                await client.get_form_details_by_id(form_id="missing")
 
 
 class TestGetQuestionsAsync:
@@ -218,11 +219,11 @@ class TestGetQuestionsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_questions_async(form_id="form-123")
+            result = await client.get_questions(form_id="form-123")
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -241,9 +242,9 @@ class TestGetQuestionsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.get_questions_async(form_id="form-123")
+                await client.get_questions(form_id="form-123")

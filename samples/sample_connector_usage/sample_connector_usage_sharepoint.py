@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-SharePoint Online Connector SDK Sample
+SharePoint Online sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the SharePoint Online connector SDK.
+This sample demonstrates how to use the SharePoint Online client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with SharePoint Online connection
@@ -23,12 +23,10 @@ Usage:
 
     python sample_connector_usage_sharepoint.py
 """
-
-import asyncio
 import os
 
 try:
-    from azure.identity.aio import DefaultAzureCredential
+    from azure.identity import DefaultAzureCredential
     from azure.connectors import ConnectorException
     from azure.connectors.sharepointonline import (
         PatchItemInput,
@@ -55,15 +53,15 @@ SHAREPOINT_SITE_URL = os.environ.get(
 )
 
 
-async def example_1_get_lists():
+def example_1_get_lists():
     """Example 1: Get all lists and libraries from a SharePoint site."""
     print("\n=== Example 1: Get Lists and Libraries ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                lists = await client.get_tables_async(dataset=SHAREPOINT_SITE_URL)
+                lists = client.list_tables(dataset=SHAREPOINT_SITE_URL)
 
                 if lists and 'value' in lists:
                     print(f"Found {len(lists['value'])} lists and libraries:")
@@ -81,17 +79,17 @@ async def example_1_get_lists():
                 print(f"Error: {ex}")
 
 
-async def example_2_get_list_items():
+def example_2_get_list_items():
     """Example 2: Get items from a SharePoint list."""
     print("\n=== Example 2: Get List Items ===")
 
     list_name = os.environ.get("TEST_LIST_NAME", "18050732-97a3-4509-b510-a094a5a35947")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                items = [item async for item in client.get_items_async(
+                items = [item for item in client.list_items(
                     dataset=SHAREPOINT_SITE_URL,
                     table=list_name,
                 )]
@@ -115,21 +113,21 @@ async def example_2_get_list_items():
                 print(f"Error: {ex}")
 
 
-async def example_3_create_list_item():
+def example_3_create_list_item():
     """Example 3: Create a new item in a SharePoint list."""
     print("\n=== Example 3: Create List Item ===")
 
     list_name = os.environ.get("TEST_LIST_NAME", "Tasks")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 new_item = PostItemInput(
                     additional_properties={'Title': 'Test Task from Python SDK'},
                 )
 
-                created = await client.post_item_async(
+                created = client.post_item(
                     dataset=SHAREPOINT_SITE_URL,
                     table=list_name,
                     input=new_item,
@@ -141,7 +139,7 @@ async def example_3_create_list_item():
                     print(f"Title: {created.get('Title', 'N/A')}")
 
                     # Clean up: delete the item we just created
-                    await client.delete_item_async(
+                    client.delete_item(
                         dataset=SHAREPOINT_SITE_URL,
                         table=list_name,
                         id=int(item_id),
@@ -158,22 +156,22 @@ async def example_3_create_list_item():
                 print(f"Error: {ex}")
 
 
-async def example_4_update_list_item():
+def example_4_update_list_item():
     """Example 4: Create, update, and delete a list item."""
     print("\n=== Example 4: Update List Item (Full CRUD) ===")
 
     list_name = os.environ.get("TEST_LIST_NAME", "Tasks")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # CREATE
                 print("Creating item...")
                 new_item = PostItemInput(
                     additional_properties={'Title': 'Task to Update'},
                 )
-                created = await client.post_item_async(
+                created = client.post_item(
                     dataset=SHAREPOINT_SITE_URL,
                     table=list_name,
                     input=new_item,
@@ -183,7 +181,7 @@ async def example_4_update_list_item():
 
                 # READ
                 print("Reading item...")
-                item = await client.get_item_async(
+                item = client.get_item(
                     dataset=SHAREPOINT_SITE_URL,
                     table=list_name,
                     id=int(item_id),
@@ -195,7 +193,7 @@ async def example_4_update_list_item():
                 updates = PatchItemInput(
                     additional_properties={'Title': 'Updated Task Title'},
                 )
-                await client.patch_item_async(
+                client.patch_item(
                     dataset=SHAREPOINT_SITE_URL,
                     table=list_name,
                     id=int(item_id),
@@ -203,7 +201,7 @@ async def example_4_update_list_item():
                 )
 
                 # Verify update
-                updated_item = await client.get_item_async(
+                updated_item = client.get_item(
                     dataset=SHAREPOINT_SITE_URL,
                     table=list_name,
                     id=int(item_id),
@@ -212,7 +210,7 @@ async def example_4_update_list_item():
 
                 # DELETE
                 print("Deleting item...")
-                await client.delete_item_async(
+                client.delete_item(
                     dataset=SHAREPOINT_SITE_URL,
                     table=list_name,
                     id=int(item_id),
@@ -226,20 +224,20 @@ async def example_4_update_list_item():
                 print(f"Error: {ex}")
 
 
-async def example_5_query_with_filters():
+def example_5_query_with_filters():
     """Example 5: Query list items with OData filters."""
     print("\n=== Example 5: Query with Filters ===")
 
     list_name = os.environ.get("TEST_LIST_NAME", "Tasks")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Create some test items first
                 print("Creating test items...")
                 for i in range(3):
-                    await client.post_item_async(
+                    client.post_item(
                         dataset=SHAREPOINT_SITE_URL,
                         table=list_name,
                         input=PostItemInput(
@@ -250,7 +248,7 @@ async def example_5_query_with_filters():
 
                 # Query with filters
                 print("\nQuerying items (ordered by creation date, top 5)...")
-                items = [item async for item in client.get_items_async(
+                items = [item for item in client.list_items(
                     dataset=SHAREPOINT_SITE_URL,
                     table=list_name,
                     filter=None,
@@ -269,7 +267,7 @@ async def example_5_query_with_filters():
                 print("\nCleaning up test items...")
                 for item in items[:3]:
                     if 'Test Item' in item.get('Title', ''):
-                        await client.delete_item_async(
+                        client.delete_item(
                             dataset=SHAREPOINT_SITE_URL,
                             table=list_name,
                             id=int(item['Id']),
@@ -283,17 +281,17 @@ async def example_5_query_with_filters():
                 print(f"Error: {ex}")
 
 
-async def example_6_file_operations():
+def example_6_file_operations():
     """Example 6: File operations - list folders and get file metadata."""
     print("\n=== Example 6: File Operations ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # List root folder
                 print("Listing root folder...")
-                root_folder = await client.list_root_folder_async(dataset=SHAREPOINT_SITE_URL)
+                root_folder = client.list_root_folder(dataset=SHAREPOINT_SITE_URL)
 
                 if root_folder and 'value' in root_folder:
                     print(f"Found {len(root_folder['value'])} items in root folder:")
@@ -307,7 +305,7 @@ async def example_6_file_operations():
 
                 # List a specific folder (Shared Documents is common)
                 print("\nListing 'Shared Documents' folder...")
-                folder = await client.list_folder_async(
+                folder = client.list_folder(
                     dataset=SHAREPOINT_SITE_URL,
                     id='/Shared Documents',
                 )
@@ -330,19 +328,19 @@ async def example_6_file_operations():
                 print(f"Error: {ex}")
 
 
-async def example_7_error_handling():
+def example_7_error_handling():
     """Example 7: Demonstrate error handling."""
     print("\n=== Example 7: Error Handling ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Attempt to get an item with an invalid ID
                 invalid_item_id = 99999
                 list_name = os.environ.get("TEST_LIST_NAME", "Tasks")
 
-                item = await client.get_item_async(
+                item = client.get_item(
                     dataset=SHAREPOINT_SITE_URL,
                     table=list_name,
                     id=invalid_item_id,
@@ -357,23 +355,23 @@ async def example_7_error_handling():
                 print(f"  Message: {ex}")
 
 
-async def main():
+def main():
     """Run all examples."""
-    print("SharePoint Online Connector SDK - Sample Usage")
+    print("SharePoint Online sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
     print()
 
-    await example_1_get_lists()
-    await example_2_get_list_items()
-    await example_3_create_list_item()
-    await example_4_update_list_item()
-    await example_5_query_with_filters()
-    await example_6_file_operations()
-    await example_7_error_handling()
+    example_1_get_lists()
+    example_2_get_list_items()
+    example_3_create_list_item()
+    example_4_update_list_item()
+    example_5_query_with_filters()
+    example_6_file_operations()
+    example_7_error_handling()
 
     print("\n" + "=" * 50)
     print("Sample completed!")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

@@ -1,11 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Zoho Sign connector SDK sample."""
-
-import asyncio
+"""Zoho Sign sample for the Azure Connectors Python SDK."""
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
 from azure.connectors.zohosign import ZohosignClient
@@ -15,38 +13,38 @@ CONNECTION_RUNTIME_URL = os.environ.get("ZOHOSIGN_CONNECTION_URL", "")
 REQUEST_ID = os.environ.get("ZOHOSIGN_REQUEST_ID", "")
 
 
-async def list_templates() -> None:
+def list_templates() -> None:
     """List available Zoho Sign templates."""
-    async with DefaultAzureCredential() as credential:
-        async with ZohosignClient(CONNECTION_RUNTIME_URL, credential) as client:
-            templates = await client.get_templates_async()
+    with DefaultAzureCredential() as credential:
+        with ZohosignClient(CONNECTION_RUNTIME_URL, credential) as client:
+            templates = list(client.list_templates())
             print(f"Templates: {templates}")
 
 
-async def get_document() -> None:
+def get_document() -> None:
     """Get a Zoho Sign document request."""
     if not REQUEST_ID:
         print("Set ZOHOSIGN_REQUEST_ID to retrieve a document request.")
         return
 
-    async with DefaultAzureCredential() as credential:
-        async with ZohosignClient(CONNECTION_RUNTIME_URL, credential) as client:
-            document = await client.get_document_async(request_id=int(REQUEST_ID))
+    with DefaultAzureCredential() as credential:
+        with ZohosignClient(CONNECTION_RUNTIME_URL, credential) as client:
+            document = client.get_document(request_id=int(REQUEST_ID))
             print(f"Document: {document}")
 
 
-async def main() -> None:
+def main() -> None:
     """Run the Zoho Sign examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: ZOHOSIGN_CONNECTION_URL environment variable not set.")
         return
 
     try:
-        await list_templates()
-        await get_document()
+        list_templates()
+        get_document()
     except ConnectorException as ex:
         print(f"Connector error: {ex}")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

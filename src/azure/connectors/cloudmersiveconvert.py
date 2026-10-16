@@ -5,19 +5,215 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Dict, List, Any, Mapping
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "CloudmersiveconvertClient",
+    "AddPdfAnnotationRequest",
+    "AlternateFileFormatCandidate",
+    "AutodetectDocumentValidationResult",
+    "AutodetectGetInfoResult",
+    "AutodetectToPngResult",
+    "Base64DecodeRequest",
+    "Base64DecodeResponse",
+    "Base64DetectRequest",
+    "Base64DetectResponse",
+    "Base64EncodeRequest",
+    "Base64EncodeResponse",
+    "ChangeLineEndingResponse",
+    "ClearXlsxCellRequest",
+    "ClearXlsxCellResponse",
+    "ConvertDataJsonToXmlInput",
+    "ConvertWebHtmlToPngResponse",
+    "ConvertedPngPage",
+    "CreateBlankDocxRequest",
+    "CreateBlankDocxResponse",
+    "CreateBlankSpreadsheetRequest",
+    "CreateBlankSpreadsheetResponse",
+    "CreateSpreadsheetFromDataRequest",
+    "CreateSpreadsheetFromDataResponse",
+    "CreateZipArchiveRequest",
+    "DeleteDocxTableRowRangeRequest",
+    "DeleteDocxTableRowRangeResponse",
+    "DeleteDocxTableRowRequest",
+    "DeleteDocxTableRowResponse",
+    "DetectLineEndingsResponse",
+    "DocumentValidationError",
+    "DocumentValidationResult",
+    "DocxBody",
+    "DocxCellStyle",
+    "DocxComment",
+    "DocxFooter",
+    "DocxHeader",
+    "DocxImage",
+    "DocxInsertCommentOnParagraphRequest",
+    "DocxInsertImageRequest",
+    "DocxInsertImageResponse",
+    "DocxPage",
+    "DocxParagraph",
+    "DocxRemoveObjectRequest",
+    "DocxRemoveObjectResponse",
+    "DocxRun",
+    "DocxSection",
+    "DocxSetFooterAddPageNumberRequest",
+    "DocxSetFooterRequest",
+    "DocxSetFooterResponse",
+    "DocxSetHeaderRequest",
+    "DocxSetHeaderResponse",
+    "DocxStyle",
+    "DocxTable",
+    "DocxTableCell",
+    "DocxTableRow",
+    "DocxTemplateApplicationRequest",
+    "DocxTemplateOperation",
+    "DocxText",
+    "DocxTopLevelComment",
+    "EditDocumentXlsxDeleteWorksheetResponse",
+    "ExifValue",
+    "FindRegexMatch",
+    "FindStringMatch",
+    "FindStringRegexRequest",
+    "FindStringRegexResponse",
+    "FindStringSimpleRequest",
+    "FindStringSimpleResponse",
+    "FinishEditingRequest",
+    "GetDocxBodyRequest",
+    "GetDocxBodyResponse",
+    "GetDocxCommentsHierarchicalResponse",
+    "GetDocxCommentsResponse",
+    "GetDocxGetCommentsHierarchicalRequest",
+    "GetDocxGetCommentsRequest",
+    "GetDocxHeadersAndFootersRequest",
+    "GetDocxHeadersAndFootersResponse",
+    "GetDocxImagesRequest",
+    "GetDocxImagesResponse",
+    "GetDocxPagesRequest",
+    "GetDocxPagesResponse",
+    "GetDocxSectionsRequest",
+    "GetDocxSectionsResponse",
+    "GetDocxStylesRequest",
+    "GetDocxStylesResponse",
+    "GetDocxTableByIndexRequest",
+    "GetDocxTableByIndexResponse",
+    "GetDocxTableRowRequest",
+    "GetDocxTableRowResponse",
+    "GetDocxTablesRequest",
+    "GetDocxTablesResponse",
+    "GetImageInfoResult",
+    "GetPdfAnnotationsResult",
+    "GetXlsxCellByIdentifierRequest",
+    "GetXlsxCellByIdentifierResponse",
+    "GetXlsxCellRequest",
+    "GetXlsxCellResponse",
+    "GetXlsxColumnsRequest",
+    "GetXlsxColumnsResponse",
+    "GetXlsxImagesRequest",
+    "GetXlsxImagesResponse",
+    "GetXlsxRowsAndCellsRequest",
+    "GetXlsxRowsAndCellsResponse",
+    "GetXlsxStylesRequest",
+    "GetXlsxStylesResponse",
+    "GetXlsxWorksheetsRequest",
+    "GetXlsxWorksheetsResponse",
+    "HtmlMdResult",
+    "HtmlTemplateApplicationRequest",
+    "HtmlTemplateApplicationResponse",
+    "HtmlTemplateOperation",
+    "HtmlToOfficeRequest",
+    "HtmlToPdfRequest",
+    "HtmlToPngRequest",
+    "HtmlToTextRequest",
+    "HtmlToTextResponse",
+    "InsertDocxCommentOnParagraphResponse",
+    "InsertDocxInsertParagraphRequest",
+    "InsertDocxInsertParagraphResponse",
+    "InsertDocxTableRowRequest",
+    "InsertDocxTableRowResponse",
+    "InsertDocxTablesRequest",
+    "InsertDocxTablesResponse",
+    "InsertXlsxWorksheetRequest",
+    "InsertXlsxWorksheetResponse",
+    "MultipageImageFormatConversionResult",
+    "PageConversionResult",
+    "PdfAnnotation",
+    "PdfDocument",
+    "PdfFormField",
+    "PdfFormFields",
+    "PdfMetadata",
+    "PdfPageText",
+    "PdfTextByPageResult",
+    "PdfToPngResult",
+    "PresentationResult",
+    "RemoveDocxHeadersAndFootersRequest",
+    "RemoveDocxHeadersAndFootersResponse",
+    "RemoveDocxPagesRequest",
+    "RemoveHtmlFromTextRequest",
+    "RemoveHtmlFromTextResponse",
+    "RemovePptxSlidesRequest",
+    "RemoveWhitespaceFromTextRequest",
+    "RemoveWhitespaceFromTextResponse",
+    "RemoveXlsxWorksheetRequest",
+    "ReplaceStringRegexRequest",
+    "ReplaceStringRegexResponse",
+    "ReplaceStringRequest",
+    "ReplaceStringSimpleRequest",
+    "ReplaceStringSimpleResponse",
+    "ScreenshotRequest",
+    "SetFormFieldValue",
+    "SetPdfFormFieldsRequest",
+    "SetPdfMetadataRequest",
+    "SetXlsxCellByIdentifierRequest",
+    "SetXlsxCellByIdentifierResponse",
+    "SetXlsxCellRequest",
+    "SetXlsxCellResponse",
+    "SplitDocumentResult",
+    "SplitDocxDocumentResult",
+    "SplitPdfResult",
+    "SplitPptxPresentationResult",
+    "SplitTextDocumentByLinesResult",
+    "SplitTextDocumentByStringResult",
+    "SplitXlsxWorksheetResult",
+    "TextConversionResult",
+    "TextDocumentElement",
+    "TextDocumentLine",
+    "TextEncodingDetectResponse",
+    "UpdateDocxTableCellRequest",
+    "UpdateDocxTableCellResponse",
+    "UpdateDocxTableRowRequest",
+    "UpdateDocxTableRowResponse",
+    "UrlToTextRequest",
+    "UrlToTextResponse",
+    "ViewerResponse",
+    "WorksheetResult",
+    "XlsxImage",
+    "XlsxSpreadsheetCell",
+    "XlsxSpreadsheetColumn",
+    "XlsxSpreadsheetRow",
+    "XlsxWorksheet",
+    "XmlAddAttributeWithXPathResult",
+    "XmlAddChildWithXPathResult",
+    "XmlFilterWithXPathResult",
+    "XmlQueryWithXQueryMultiResult",
+    "XmlQueryWithXQueryResult",
+    "XmlRemoveAllChildrenWithXPathResult",
+    "XmlRemoveWithXPathResult",
+    "XmlReplaceWithXPathResult",
+    "XmlSetValueWithXPathResult",
+    "ZipDirectory",
+    "ZipExtractResponse",
+    "ZipFile",
+]
 
 
 # Type Definitions
@@ -28,16 +224,18 @@ class CreateBlankDocxResponse:
     Response for Create a blank Word DOCX document
     """
 
-    edited_document_u_r_l: Optional[str] = field(
+    edited_document_u_r_l: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EditedDocumentURL"},
     )
     """
     URL to the edited XLSX file; file is stored in an in-memory cache and will
     be deleted. Call Finish-Editing to get the result document contents.
     """
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -49,16 +247,18 @@ class DeleteDocxTableRowResponse:
     Response for Deletes a table row in an existing table in a Word DOCX document
     """
 
-    edited_document_u_r_l: Optional[str] = field(
+    edited_document_u_r_l: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EditedDocumentURL"},
     )
     """
     URL to the edited DOCX file; file is stored in an in-memory cache and will
     be deleted. Call Finish-Editing to get the result document contents.
     """
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -70,16 +270,18 @@ class DeleteDocxTableRowRangeResponse:
     Response for Deletes a range of multiple table rows in an existing table in a Word
     """
 
-    edited_document_u_r_l: Optional[str] = field(
+    edited_document_u_r_l: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EditedDocumentURL"},
     )
     """
     URL to the edited DOCX file; file is stored in an in-memory cache and will
     be deleted. Call Finish-Editing to get the result document contents.
     """
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -91,13 +293,15 @@ class GetDocxBodyResponse:
     Response for Get body from a Word DOCX document
     """
 
-    body: Optional[DocxBody] = field(
+    body: Optional[DocxBody | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Body"},
     )
     """Body in the DOCX document"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -109,18 +313,21 @@ class GetDocxCommentsHierarchicalResponse:
     Response for Get comments from a Word DOCX document hierarchically
     """
 
-    comments: Optional[List[DocxTopLevelComment]] = field(
+    comments: Optional[List[DocxTopLevelComment | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Comments in the document"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
-    top_level_comment_count: Optional[int] = field(
+    top_level_comment_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TopLevelCommentCount"},
     )
     """The number of comments in the document"""
@@ -132,16 +339,19 @@ class GetDocxHeadersAndFootersResponse:
     Response for Get content of a footer from a Word DOCX document
     """
 
-    footers: Optional[List[DocxFooter]] = field(
+    footers: Optional[List[DocxFooter | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Footers"},
     )
-    headers: Optional[List[DocxHeader]] = field(
+    headers: Optional[List[DocxHeader | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Headers"},
     )
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -153,13 +363,15 @@ class GetDocxImagesResponse:
     Response for Get images from a Word DOCX document
     """
 
-    images: Optional[List[DocxImage]] = field(
+    images: Optional[List[DocxImage | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Images"},
     )
     """Images in the DOCX document"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -171,18 +383,21 @@ class GetDocxPagesResponse:
     Response for Get pages and content from a Word DOCX document
     """
 
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PageCount"},
     )
     """Count of pages"""
-    pages: Optional[List[DocxPage]] = field(
+    pages: Optional[List[DocxPage | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Pages"},
     )
     """Pages in the document"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -194,13 +409,15 @@ class GetDocxSectionsResponse:
     Response for Get sections from a Word DOCX document
     """
 
-    sections: Optional[List[DocxSection]] = field(
+    sections: Optional[List[DocxSection | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Sections"},
     )
     """Sections in the DOCX document"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -212,13 +429,15 @@ class GetDocxStylesResponse:
     Response for Get styles from a Word DOCX document
     """
 
-    styles: Optional[List[DocxStyle]] = field(
+    styles: Optional[List[DocxStyle | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Styles"},
     )
     """Styles in the DOCX document"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -230,13 +449,15 @@ class GetDocxTableRowResponse:
     Response for Gets the contents of an existing table row in an existing table in a W
     """
 
-    row_result: Optional[DocxTableRow] = field(
+    row_result: Optional[DocxTableRow | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RowResult"},
     )
     """Contents of the table row that was requested"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -248,13 +469,15 @@ class GetDocxTableByIndexResponse:
     Response for Get a specific table by index in a Word DOCX document
     """
 
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
-    table: Optional[DocxTable] = field(
+    table: Optional[DocxTable | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Table"},
     )
     """Requested Table in the DOCX file"""
@@ -266,13 +489,15 @@ class GetDocxTablesResponse:
     Response for Get all tables in Word DOCX document
     """
 
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
-    tables: Optional[List[DocxTable]] = field(
+    tables: Optional[List[DocxTable | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Tables"},
     )
     """Tables in the DOCX file"""
@@ -284,16 +509,18 @@ class InsertDocxCommentOnParagraphResponse:
     Response for Insert a new comment into a Word DOCX document attached to a paragraph
     """
 
-    edited_document_u_r_l: Optional[str] = field(
+    edited_document_u_r_l: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EditedDocumentURL"},
     )
     """
     URL to the edited DOCX file; file is stored in an in-memory cache and will
     be deleted. Call Finish-Editing to get the result document contents.
     """
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -305,16 +532,18 @@ class DocxInsertImageResponse:
     Response for Insert image into a Word DOCX document
     """
 
-    edited_document_u_r_l: Optional[str] = field(
+    edited_document_u_r_l: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EditedDocumentURL"},
     )
     """
     URL to the edited DOCX file; file is stored in an in-memory cache and will
     be deleted. Call Finish-Editing to get the result document contents.
     """
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -326,16 +555,18 @@ class InsertDocxInsertParagraphResponse:
     Response for Insert a new paragraph into a Word DOCX document
     """
 
-    edited_document_u_r_l: Optional[str] = field(
+    edited_document_u_r_l: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EditedDocumentURL"},
     )
     """
     URL to the edited DOCX file; file is stored in an in-memory cache and will
     be deleted. Call Finish-Editing to get the result document contents.
     """
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -347,16 +578,18 @@ class InsertDocxTablesResponse:
     Response for Insert a new table into a Word DOCX document
     """
 
-    edited_document_u_r_l: Optional[str] = field(
+    edited_document_u_r_l: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EditedDocumentURL"},
     )
     """
     URL to the edited DOCX file; file is stored in an in-memory cache and will
     be deleted. Call Finish-Editing to get the result document contents.
     """
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -368,16 +601,18 @@ class InsertDocxTableRowResponse:
     Response for Insert a new row into an existing table in a Word DOCX document
     """
 
-    edited_document_u_r_l: Optional[str] = field(
+    edited_document_u_r_l: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EditedDocumentURL"},
     )
     """
     URL to the edited DOCX file; file is stored in an in-memory cache and will
     be deleted. Call Finish-Editing to get the result document contents.
     """
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -389,8 +624,9 @@ class RemoveDocxHeadersAndFootersResponse:
     Response for Remove headers and footers from Word DOCX document
     """
 
-    edited_document_u_r_l: Optional[str] = field(
+    edited_document_u_r_l: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EditedDocumentURL"},
     )
     """
@@ -399,8 +635,9 @@ class RemoveDocxHeadersAndFootersResponse:
     in an in-memory cache and will be deleted. Call Finish-Editing to get the
     result document contents.
     """
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -412,16 +649,18 @@ class DocxRemoveObjectResponse:
     Response for Delete any object in a Word DOCX document
     """
 
-    edited_document_u_r_l: Optional[str] = field(
+    edited_document_u_r_l: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EditedDocumentURL"},
     )
     """
     URL to the edited DOCX file; file is stored in an in-memory cache and will
     be deleted. Call Finish-Editing to get the result document contents.
     """
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -433,16 +672,18 @@ class DocxSetFooterResponse:
     Response for Set the footer in a Word DOCX document
     """
 
-    edited_document_u_r_l: Optional[str] = field(
+    edited_document_u_r_l: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EditedDocumentURL"},
     )
     """
     URL to the edited DOCX file; file is stored in an in-memory cache and will
     be deleted. Call Finish-Editing to get the result document contents.
     """
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -454,16 +695,18 @@ class DocxSetHeaderResponse:
     Response for Set the header in a Word DOCX document
     """
 
-    edited_document_u_r_l: Optional[str] = field(
+    edited_document_u_r_l: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EditedDocumentURL"},
     )
     """
     URL to the edited DOCX file; file is stored in an in-memory cache and will
     be deleted. Call Finish-Editing to get the result document contents.
     """
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -475,16 +718,18 @@ class UpdateDocxTableCellResponse:
     Response for Update, set contents of a table cell in an existing table in a Word DO
     """
 
-    edited_document_u_r_l: Optional[str] = field(
+    edited_document_u_r_l: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EditedDocumentURL"},
     )
     """
     URL to the edited DOCX file; file is stored in an in-memory cache and will
     be deleted. Call Finish-Editing to get the result document contents.
     """
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -496,16 +741,18 @@ class UpdateDocxTableRowResponse:
     Response for Update, set contents of a table row in an existing table in a Word DOCX document
     """
 
-    edited_document_u_r_l: Optional[str] = field(
+    edited_document_u_r_l: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EditedDocumentURL"},
     )
     """
     URL to the edited DOCX file; file is stored in an in-memory cache and will
     be deleted. Call Finish-Editing to get the result document contents.
     """
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -517,16 +764,18 @@ class ClearXlsxCellResponse:
     Response for Clear cell contents in an Excel XLSX spreadsheet, worksheet by index
     """
 
-    edited_document_u_r_l: Optional[str] = field(
+    edited_document_u_r_l: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EditedDocumentURL"},
     )
     """
     URL to the edited XLSX file; file is stored in an in-memory cache and will
     be deleted. Call Finish-Editing to get the result document contents.
     """
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -538,16 +787,18 @@ class CreateBlankSpreadsheetResponse:
     Response for Create a blank Excel XLSX spreadsheet
     """
 
-    edited_document_u_r_l: Optional[str] = field(
+    edited_document_u_r_l: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EditedDocumentURL"},
     )
     """
     URL to the edited XLSX file; file is stored in an in-memory cache and will
     be deleted. Call Finish-Editing to get the result document contents.
     """
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -559,16 +810,18 @@ class CreateSpreadsheetFromDataResponse:
     Response for Create a new Excel XLSX spreadsheet from column and row data
     """
 
-    edited_document_u_r_l: Optional[str] = field(
+    edited_document_u_r_l: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EditedDocumentURL"},
     )
     """
     URL to the edited XLSX file; file is stored in an in-memory cache and will
     be deleted. Call Finish-Editing to get the result document contents.
     """
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -580,7 +833,7 @@ class EditDocumentXlsxDeleteWorksheetResponse:
     Response for Delete, remove worksheet from an Excel XLSX spreadsheet document
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -593,13 +846,15 @@ class GetXlsxCellByIdentifierResponse:
     Response for Get cell from an Excel XLSX spreadsheet, worksheet by cell identifier
     """
 
-    cell: Optional[XlsxSpreadsheetCell] = field(
+    cell: Optional[XlsxSpreadsheetCell | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Cell"},
     )
     """Requested Cell in the Excel XLSX document"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -611,13 +866,15 @@ class GetXlsxCellResponse:
     Response for Get cell from an Excel XLSX spreadsheet, worksheet by index
     """
 
-    cell: Optional[XlsxSpreadsheetCell] = field(
+    cell: Optional[XlsxSpreadsheetCell | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Cell"},
     )
     """Requested Cell in the Excel XLSX document"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -629,13 +886,15 @@ class GetXlsxColumnsResponse:
     Response for Get rows and cells from a Excel XLSX spreadsheet, worksheet
     """
 
-    columns: Optional[List[XlsxSpreadsheetColumn]] = field(
+    columns: Optional[List[XlsxSpreadsheetColumn | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Columns"},
     )
     """Spreadsheet Columns in the XLSX document"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -647,13 +906,15 @@ class GetXlsxImagesResponse:
     Response for Get images from a Excel XLSX spreadsheet, worksheet
     """
 
-    images: Optional[List[XlsxImage]] = field(
+    images: Optional[List[XlsxImage | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Images"},
     )
     """Spreadsheet Images in the XLSX document"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -665,13 +926,15 @@ class GetXlsxRowsAndCellsResponse:
     Response for Get rows and cells from a Excel XLSX spreadsheet, worksheet
     """
 
-    rows: Optional[List[XlsxSpreadsheetRow]] = field(
+    rows: Optional[List[XlsxSpreadsheetRow | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Rows"},
     )
     """Spreadsheet Rows in the Excel XLSX document"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -683,13 +946,15 @@ class GetXlsxStylesResponse:
     Response for Get styles from a Excel XLSX spreadsheet, worksheet
     """
 
-    cell_styles: Optional[List[DocxCellStyle]] = field(
+    cell_styles: Optional[List[DocxCellStyle | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CellStyles"},
     )
     """Cell styles"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -701,13 +966,15 @@ class GetXlsxWorksheetsResponse:
     Response for Get worksheets from a Excel XLSX spreadsheet
     """
 
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
-    worksheets: Optional[List[XlsxWorksheet]] = field(
+    worksheets: Optional[List[XlsxWorksheet | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Worksheets"},
     )
     """Worksheets in the Excel XLSX spreadsheet"""
@@ -719,16 +986,18 @@ class InsertXlsxWorksheetResponse:
     Response for Insert a new worksheet into an Excel XLSX spreadsheet
     """
 
-    edited_document_u_r_l: Optional[str] = field(
+    edited_document_u_r_l: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EditedDocumentURL"},
     )
     """
     URL to the edited XLSX file; file is stored in an in-memory cache and will
     be deleted. Call Finish-Editing to get the result document contents.
     """
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -740,16 +1009,18 @@ class SetXlsxCellByIdentifierResponse:
     Response for Set, update cell contents in an Excel XLSX spreadsheet, worksheet by c
     """
 
-    edited_document_u_r_l: Optional[str] = field(
+    edited_document_u_r_l: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EditedDocumentURL"},
     )
     """
     URL to the edited XLSX file; file is stored in an in-memory cache and will
     be deleted. Call Finish-Editing to get the result document contents.
     """
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -761,16 +1032,18 @@ class SetXlsxCellResponse:
     Response for Set, update cell contents in an Excel XLSX spreadsheet, worksheet by index
     """
 
-    edited_document_u_r_l: Optional[str] = field(
+    edited_document_u_r_l: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EditedDocumentURL"},
     )
     """
     URL to the edited XLSX file; file is stored in an in-memory cache and will
     be deleted. Call Finish-Editing to get the result document contents.
     """
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -782,7 +1055,7 @@ class ConvertDataJsonToXmlInput:
     Convert JSON to XML conversion
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -795,13 +1068,15 @@ class HtmlTemplateApplicationResponse:
     Response for Apply HTML template
     """
 
-    final_html: Optional[str] = field(
+    final_html: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FinalHtml"},
     )
     """Final HTML result of all operations on input"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if the operation was successful, false otherwise"""
@@ -813,7 +1088,7 @@ class ConvertWebHtmlToPngResponse:
     Response for Convert HTML string to PNG screenshot
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -826,13 +1101,15 @@ class HtmlToTextResponse:
     Response for Convert HTML string to text (txt)
     """
 
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
-    text_content_result: Optional[str] = field(
+    text_content_result: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TextContentResult"},
     )
     """Text content result from the HTML input"""
@@ -844,13 +1121,15 @@ class UrlToTextResponse:
     Response for Convert website URL page to text (txt)
     """
 
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
-    text_content_result: Optional[str] = field(
+    text_content_result: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TextContentResult"},
     )
     """Text content result from the URL website input"""
@@ -862,13 +1141,15 @@ class AddPdfAnnotationRequest:
     Definition: AddPdfAnnotationRequest
     """
 
-    annotations_to_add: Optional[List[PdfAnnotation]] = field(
+    annotations_to_add: Optional[List[PdfAnnotation | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AnnotationsToAdd"},
     )
     """Annotations to add to the PDF file"""
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Input file contents bytes for the file to modify"""
@@ -880,18 +1161,21 @@ class AlternateFileFormatCandidate:
     Definition: AlternateFileFormatCandidate
     """
 
-    detected_file_extension: Optional[str] = field(
+    detected_file_extension: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DetectedFileExtension"},
     )
     """Detected file extension of the file format, with a leading period"""
-    detected_mime_type: Optional[str] = field(
+    detected_mime_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DetectedMimeType"},
     )
     """MIME type of this file extension"""
-    probability: Optional[float] = field(
+    probability: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Probability"},
     )
     """
@@ -906,27 +1190,34 @@ class AutodetectDocumentValidationResult:
     Definition: AutodetectDocumentValidationResult
     """
 
-    document_is_valid: Optional[bool] = field(
+    document_is_valid: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DocumentIsValid"},
     )
     """True if the document is valid and has no errors, false otherwise"""
-    error_count: Optional[int] = field(
+    error_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ErrorCount"},
     )
     """Number of validation errors found in the document"""
-    errors_and_warnings: Optional[List[DocumentValidationError]] = field(
+    errors_and_warnings: Optional[
+        List[DocumentValidationError | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ErrorsAndWarnings"},
     )
     """Details of errors and warnings found"""
-    file_format_extension: Optional[str] = field(
+    file_format_extension: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FileFormatExtension"},
     )
-    warning_count: Optional[int] = field(
+    warning_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WarningCount"},
     )
     """Number of validation warnings found in the document"""
@@ -938,39 +1229,47 @@ class AutodetectGetInfoResult:
     Definition: AutodetectGetInfoResult
     """
 
-    alternate_file_type_candidates: Optional[List[AlternateFileFormatCandidate]] = field(
+    alternate_file_type_candidates: Optional[
+        List[AlternateFileFormatCandidate | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AlternateFileTypeCandidates"},
     )
     """Alternate file type options and their probability"""
-    author: Optional[str] = field(
+    author: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Author"},
     )
     """
     User name of the creator/author of the document, if available, null if not
     available
     """
-    date_modified: Optional[str] = field(
+    date_modified: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateModified"},
     )
     """
     The timestamp that the document was last modified, if available, null if
     not available
     """
-    detected_file_extension: Optional[str] = field(
+    detected_file_extension: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DetectedFileExtension"},
     )
     """Detected file extension of the file format, with a leading period"""
-    detected_mime_type: Optional[str] = field(
+    detected_mime_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DetectedMimeType"},
     )
     """MIME type of this file extension"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PageCount"},
     )
     """
@@ -979,8 +1278,9 @@ class AutodetectGetInfoResult:
     Contains 0 when the page count cannot be determined, or if the concept of
     page count does not apply (e.g. for an image)
     """
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if the operation was successful, false otherwise"""
@@ -992,13 +1292,15 @@ class AutodetectToPngResult:
     Definition: AutodetectToPngResult
     """
 
-    png_result_pages: Optional[List[ConvertedPngPage]] = field(
+    png_result_pages: Optional[List[ConvertedPngPage | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PngResultPages"},
     )
     """Array of converted pages"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if the operation was successful, false otherwise"""
@@ -1010,8 +1312,9 @@ class Base64DecodeRequest:
     Definition: Base64DecodeRequest
     """
 
-    base64_content_to_decode: Optional[str] = field(
+    base64_content_to_decode: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Base64ContentToDecode"},
     )
     """Input content to decode from Base 64 into binary"""
@@ -1023,13 +1326,15 @@ class Base64DecodeResponse:
     Definition: Base64DecodeResponse
     """
 
-    content_result: Optional[str] = field(
+    content_result: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContentResult"},
     )
     """Result of performing a base 64 decode operation, binary file content"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -1041,8 +1346,9 @@ class Base64DetectRequest:
     Definition: Base64DetectRequest
     """
 
-    base64_content_to_detect: Optional[str] = field(
+    base64_content_to_detect: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Base64ContentToDetect"},
     )
     """Input content text to detect if it is base 64 encoded"""
@@ -1054,13 +1360,15 @@ class Base64DetectResponse:
     Definition: Base64DetectResponse
     """
 
-    is_base64_encoded: Optional[bool] = field(
+    is_base64_encoded: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsBase64Encoded"},
     )
     """True if the input string is base 64 encoded, false otherwise"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -1072,8 +1380,9 @@ class Base64EncodeRequest:
     Definition: Base64EncodeRequest
     """
 
-    content_to_encode: Optional[str] = field(
+    content_to_encode: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContentToEncode"},
     )
     """Input content to encode into Base 64"""
@@ -1085,16 +1394,18 @@ class Base64EncodeResponse:
     Definition: Base64EncodeResponse
     """
 
-    base64_text_content_result: Optional[str] = field(
+    base64_text_content_result: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Base64TextContentResult"},
     )
     """
     Result of performing a base 64 encoding operation, a text string
     representing the encoded original file content
     """
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -1106,13 +1417,15 @@ class ChangeLineEndingResponse:
     Definition: ChangeLineEndingResponse
     """
 
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
-    text_content_result: Optional[str] = field(
+    text_content_result: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TextContentResult"},
     )
     """Text content result"""
@@ -1124,18 +1437,21 @@ class ClearXlsxCellRequest:
     Definition: ClearXlsxCellRequest
     """
 
-    cell_index: Optional[int] = field(
+    cell_index: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CellIndex"},
     )
     """0-based index of the cell, 0, 1, 2, ... in the row to clear"""
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -1144,13 +1460,15 @@ class ClearXlsxCellRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    row_index: Optional[int] = field(
+    row_index: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RowIndex"},
     )
     """0-based index of the row, 0, 1, 2, ... to clear"""
-    worksheet_to_update: Optional[XlsxWorksheet] = field(
+    worksheet_to_update: Optional[XlsxWorksheet | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WorksheetToUpdate"},
     )
     """
@@ -1165,12 +1483,17 @@ class ConvertedPngPage:
     Definition: ConvertedPngPage
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PageNumber"},
     )
     """Page number of the converted page, starting with 1"""
-    u_r_l: Optional[str] = field(default=None, metadata={"wire_name": "URL"})
+    u_r_l: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "URL"},
+    )
     """
     URL to the PNG file of this page; file is stored in an in-memory cache and
     will be deleted
@@ -1183,8 +1506,9 @@ class CreateBlankDocxRequest:
     Definition: CreateBlankDocxRequest
     """
 
-    initial_text: Optional[str] = field(
+    initial_text: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InitialText"},
     )
     """Optional; initial text to include in the document"""
@@ -1196,8 +1520,9 @@ class CreateBlankSpreadsheetRequest:
     Definition: CreateBlankSpreadsheetRequest
     """
 
-    worksheet_name: Optional[str] = field(
+    worksheet_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WorksheetName"},
     )
     """
@@ -1212,13 +1537,15 @@ class CreateSpreadsheetFromDataRequest:
     Definition: CreateSpreadsheetFromDataRequest
     """
 
-    rows: Optional[List[XlsxSpreadsheetRow]] = field(
+    rows: Optional[List[XlsxSpreadsheetRow | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Rows"},
     )
     """Required; Rows and cells to populate the spreadsheet with"""
-    worksheet_name: Optional[str] = field(
+    worksheet_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WorksheetName"},
     )
     """
@@ -1233,16 +1560,18 @@ class CreateZipArchiveRequest:
     Definition: CreateZipArchiveRequest
     """
 
-    directories_in_zip: Optional[List[ZipDirectory]] = field(
+    directories_in_zip: Optional[List[ZipDirectory | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DirectoriesInZip"},
     )
     """
     Top-level directories in the root directory of the zip; directories can
     contain sub-directories and files
     """
-    files_in_zip: Optional[List[ZipFile]] = field(
+    files_in_zip: Optional[List[ZipFile | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FilesInZip"},
     )
     """Top-level files in the root directory fo the zip file"""
@@ -1254,13 +1583,15 @@ class DeleteDocxTableRowRangeRequest:
     Definition: DeleteDocxTableRowRangeRequest
     """
 
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -1269,21 +1600,24 @@ class DeleteDocxTableRowRangeRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    table_path: Optional[str] = field(
+    table_path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TablePath"},
     )
     """Path to the table to delete the row from"""
-    table_row_row_index_end: Optional[int] = field(
+    table_row_row_index_end: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TableRowRowIndexEnd"},
     )
     """
     0-based index of the row to stop deleting rows (e.g. 0, 1, 2, ...) in the
     table
     """
-    table_row_row_index_start: Optional[int] = field(
+    table_row_row_index_start: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TableRowRowIndexStart"},
     )
     """
@@ -1298,13 +1632,15 @@ class DeleteDocxTableRowRequest:
     Definition: DeleteDocxTableRowRequest
     """
 
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -1313,13 +1649,15 @@ class DeleteDocxTableRowRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    table_path: Optional[str] = field(
+    table_path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TablePath"},
     )
     """Path to the table to delete the row from"""
-    table_row_row_index: Optional[int] = field(
+    table_row_row_index: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TableRowRowIndex"},
     )
     """0-based index of the row to delete (e.g. 0, 1, 2, ...) in the table"""
@@ -1331,21 +1669,24 @@ class DetectLineEndingsResponse:
     Definition: DetectLineEndingsResponse
     """
 
-    input_length: Optional[int] = field(
+    input_length: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputLength"},
     )
     """Length of the input string in characters"""
-    primary_newline_terminator: Optional[str] = field(
+    primary_newline_terminator: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PrimaryNewlineTerminator"},
     )
     """
     Characters used to terminate a newline; can be carriage return, linefeed,
     or carriage return + linefeed
     """
-    primary_newline_type: Optional[str] = field(
+    primary_newline_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PrimaryNewlineType"},
     )
     """
@@ -1353,8 +1694,9 @@ class DetectLineEndingsResponse:
     uses carriage return only); \"Unix\" (Unix and Linux OSes, and modern Mac
     OS); \"Windows\" (Windows operating systems)
     """
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -1366,19 +1708,29 @@ class DocumentValidationError:
     Definition: DocumentValidationError
     """
 
-    description: Optional[str] = field(
+    description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Description"},
     )
     """Description of the error"""
-    is_error: Optional[bool] = field(
+    is_error: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsError"},
     )
     """True if this is an error, false otherwise"""
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
+    path: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
     """XPath to the error"""
-    uri: Optional[str] = field(default=None, metadata={"wire_name": "Uri"})
+    uri: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Uri"},
+    )
     """URI of the part in question"""
 
 
@@ -1388,23 +1740,29 @@ class DocumentValidationResult:
     Definition: DocumentValidationResult
     """
 
-    document_is_valid: Optional[bool] = field(
+    document_is_valid: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DocumentIsValid"},
     )
     """True if the document is valid and has no errors, false otherwise"""
-    error_count: Optional[int] = field(
+    error_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ErrorCount"},
     )
     """Number of validation errors found in the document"""
-    errors_and_warnings: Optional[List[DocumentValidationError]] = field(
+    errors_and_warnings: Optional[
+        List[DocumentValidationError | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ErrorsAndWarnings"},
     )
     """Details of errors and warnings found"""
-    warning_count: Optional[int] = field(
+    warning_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WarningCount"},
     )
     """Number of validation warnings found in the document"""
@@ -1416,23 +1774,29 @@ class DocxBody:
     Definition: DocxBody
     """
 
-    all_paragraphs: Optional[List[DocxParagraph]] = field(
+    all_paragraphs: Optional[List[DocxParagraph | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AllParagraphs"},
     )
     """
     All paragraphs anywhere in the document; these objects are not sequentially
     placed but are scatted across document
     """
-    all_tables: Optional[List[DocxTable]] = field(
+    all_tables: Optional[List[DocxTable | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AllTables"},
     )
     """
     All tables anywhere in the document; these objects are not sequentially
     placed but are scatted across the document
     """
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
+    path: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
     """The Path of the location of this object; leave blank for new tables"""
 
 
@@ -1442,19 +1806,29 @@ class DocxCellStyle:
     Definition: DocxCellStyle
     """
 
-    built_in_id: Optional[int] = field(
+    built_in_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BuiltInID"},
     )
     """Built=in ID of the cell style"""
-    format_id: Optional[int] = field(
+    format_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FormatID"},
     )
     """Format ID of the cell style"""
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
     """Name of the style"""
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
+    path: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
     """The Path of the location of this object; leave blank for new rows"""
 
 
@@ -1464,50 +1838,65 @@ class DocxComment:
     Definition: DocxComment
     """
 
-    author: Optional[str] = field(
+    author: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Author"},
     )
     """Author name of the comment"""
-    author_initials: Optional[str] = field(
+    author_initials: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AuthorInitials"},
     )
     """Initials of the author of the comment"""
-    comment_date: Optional[str] = field(
+    comment_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CommentDate"},
     )
     """Date timestamp of the comment"""
-    comment_text: Optional[str] = field(
+    comment_text: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CommentText"},
     )
     """Text content of the comment"""
-    done: Optional[bool] = field(default=None, metadata={"wire_name": "Done"})
-    """True if this comment is marked as Done in Word, otherwise it is false"""
-    is_reply: Optional[bool] = field(
+    done: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Done"},
+    )
+    """True if this comment is marked as Done in Word, otherwise it is false"""
+    is_reply: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "IsReply"},
     )
     """True if this comment is a reply to another comment, false otherwise"""
-    is_top_level: Optional[bool] = field(
+    is_top_level: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsTopLevel"},
     )
     """
     True if the comment is at the top level, false if this comment is a child
     reply of another comment
     """
-    parent_comment_path: Optional[str] = field(
+    parent_comment_path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ParentCommentPath"},
     )
     """
     Path to the parent of this comment, if this comment is a reply, otherwise
     this value will be null
     """
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
+    path: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
     """Path to the comment in the document"""
 
 
@@ -1517,15 +1906,21 @@ class DocxFooter:
     Definition: DocxFooter
     """
 
-    paragraphs: Optional[List[DocxParagraph]] = field(
+    paragraphs: Optional[List[DocxParagraph | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Paragraphs"},
     )
     """Paragraphs in this footer"""
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
-    """The Path of the location of this object; leave blank for new tables"""
-    sections_with_footer: Optional[List[DocxSection]] = field(
+    path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
+    """The Path of the location of this object; leave blank for new tables"""
+    sections_with_footer: Optional[List[DocxSection | Mapping[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "SectionsWithFooter"},
     )
     """Sections that the footer is applied to"""
@@ -1537,15 +1932,21 @@ class DocxHeader:
     Definition: DocxHeader
     """
 
-    paragraphs: Optional[List[DocxParagraph]] = field(
+    paragraphs: Optional[List[DocxParagraph | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Paragraphs"},
     )
     """Paragraphs in this header"""
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
-    """The Path of the location of this object; leave blank for new tables"""
-    sections_with_header: Optional[List[DocxSection]] = field(
+    path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
+    """The Path of the location of this object; leave blank for new tables"""
+    sections_with_header: Optional[List[DocxSection | Mapping[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "SectionsWithHeader"},
     )
     """Sections that the header is applied to"""
@@ -1557,74 +1958,90 @@ class DocxImage:
     Definition: DocxImage
     """
 
-    image_contents_u_r_l: Optional[str] = field(
+    image_contents_u_r_l: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ImageContentsURL"},
     )
     """
     URL to the image contents; file is stored in an in-memory cache and will be
     deleted. Call Finish-Editing to get the contents.
     """
-    image_data_content_type: Optional[str] = field(
+    image_data_content_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ImageDataContentType"},
     )
     """Read-only; image data MIME content-type"""
-    image_data_embed_id: Optional[str] = field(
+    image_data_embed_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ImageDataEmbedId"},
     )
     """Read-only; internal ID for the image contents"""
-    image_description: Optional[str] = field(
+    image_description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ImageDescription"},
     )
     """The Description of the image"""
-    image_height: Optional[int] = field(
+    image_height: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ImageHeight"},
     )
     """
     Height of the image in EMUs (English Metric Units); set to 0 to default to
     page width and aspect-ratio based height
     """
-    image_id: Optional[int] = field(
+    image_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ImageId"},
     )
     """The Id of the image"""
-    image_internal_file_name: Optional[str] = field(
+    image_internal_file_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ImageInternalFileName"},
     )
     """Read-only; internal file name/path for the image"""
-    image_name: Optional[str] = field(
+    image_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ImageName"},
     )
     """The Name of the image"""
-    image_width: Optional[int] = field(
+    image_width: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ImageWidth"},
     )
     """
     Width of the image in EMUs (English Metric Units); set to 0 to default to
     page width and aspect-ratio based height
     """
-    inline_with_text: Optional[bool] = field(
+    inline_with_text: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InlineWithText"},
     )
     """True if the image is inline with the text; false if it is floating"""
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
-    """The Path of the location of this object; leave blank for new tables"""
-    x_offset: Optional[int] = field(
+    path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
+    """The Path of the location of this object; leave blank for new tables"""
+    x_offset: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "XOffset"},
     )
     """X (horizontal) offset of the image"""
-    y_offset: Optional[int] = field(
+    y_offset: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "YOffset"},
     )
     """Y (vertical) offset of the image"""
@@ -1636,18 +2053,21 @@ class DocxInsertCommentOnParagraphRequest:
     Definition: DocxInsertCommentOnParagraphRequest
     """
 
-    comment_to_insert: Optional[DocxComment] = field(
+    comment_to_insert: Optional[DocxComment | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CommentToInsert"},
     )
     """Comment to insert"""
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -1656,8 +2076,9 @@ class DocxInsertCommentOnParagraphRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    paragraph_path: Optional[str] = field(
+    paragraph_path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ParagraphPath"},
     )
     """
@@ -1673,26 +2094,30 @@ class DocxInsertImageRequest:
     Definition: DocxInsertImageRequest
     """
 
-    height_in_e_m_us: Optional[int] = field(
+    height_in_e_m_us: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HeightInEMUs"},
     )
     """Optional: The height of the image in EMUs"""
-    image_to_add: Optional[DocxImage] = field(
+    image_to_add: Optional[DocxImage | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ImageToAdd"},
     )
     """
     Optional: Image to add; if you supply in this object, do not supply
     InputImageFileBytes or InputImageFileUrl.
     """
-    input_document_file_bytes: Optional[str] = field(
+    input_document_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputDocumentFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_document_file_url: Optional[str] = field(
+    input_document_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputDocumentFileUrl"},
     )
     """
@@ -1701,16 +2126,18 @@ class DocxInsertImageRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    input_image_file_bytes: Optional[str] = field(
+    input_image_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputImageFileBytes"},
     )
     """
     Optional: Bytes of the input image file to operate on; if you supply this
     value do not supply InputImageFileUrl or ImageToAdd.
     """
-    input_image_file_url: Optional[str] = field(
+    input_image_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputImageFileUrl"},
     )
     """
@@ -1720,8 +2147,9 @@ class DocxInsertImageRequest:
     pass in the secure URL result from that operation as the URL here (this URL
     is not public).
     """
-    insert_path: Optional[str] = field(
+    insert_path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InsertPath"},
     )
     """
@@ -1729,8 +2157,9 @@ class DocxInsertImageRequest:
     InsertPath field using the Path value from an existing object. Used with
     InsertPlacement of BeforeExistingObject or AfterExistingObject
     """
-    insert_placement: Optional[str] = field(
+    insert_placement: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InsertPlacement"},
     )
     """
@@ -1741,8 +2170,9 @@ class DocxInsertImageRequest:
     object), AfterExistingObject (right after an existing object - fill in the
     InsertPath field using the Path value from an existing object)
     """
-    width_in_e_m_us: Optional[int] = field(
+    width_in_e_m_us: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WidthInEMUs"},
     )
     """Optional: The width of the image in EMUs"""
@@ -1754,13 +2184,15 @@ class DocxPage:
     Definition: DocxPage
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PageNumber"},
     )
     """Page number of this page, 1-based"""
-    paragraphs: Optional[List[DocxParagraph]] = field(
+    paragraphs: Optional[List[DocxParagraph | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Paragraphs"},
     )
     """
@@ -1775,23 +2207,30 @@ class DocxParagraph:
     Definition: DocxParagraph
     """
 
-    content_runs: Optional[List[DocxRun]] = field(
+    content_runs: Optional[List[DocxRun | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContentRuns"},
     )
     """
     The content runs in the paragraph - this is where text is stored; similar
     to a span in HTML
     """
-    paragraph_index: Optional[int] = field(
+    paragraph_index: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ParagraphIndex"},
     )
     """The index of the paragraph; 0-based"""
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
-    """The Path of the location of this object; leave blank for new tables"""
-    style_id: Optional[str] = field(
+    path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
+    """The Path of the location of this object; leave blank for new tables"""
+    style_id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "StyleID"},
     )
     """
@@ -1805,13 +2244,15 @@ class DocxRemoveObjectRequest:
     Definition: DocxRemoveObjectRequest
     """
 
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -1820,8 +2261,9 @@ class DocxRemoveObjectRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    path_to_object_to_remove: Optional[str] = field(
+    path_to_object_to_remove: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PathToObjectToRemove"},
     )
     """
@@ -1836,39 +2278,53 @@ class DocxRun:
     Definition: DocxRun
     """
 
-    bold: Optional[bool] = field(default=None, metadata={"wire_name": "Bold"})
-    """True to make the text bold, false otherwise"""
-    font_family: Optional[str] = field(
+    bold: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Bold"},
+    )
+    """True to make the text bold, false otherwise"""
+    font_family: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "FontFamily"},
     )
     """Font Family name for the text, e.g. \"Arial\" or \"Times New Roman\""""
-    font_size: Optional[str] = field(
+    font_size: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FontSize"},
     )
     """Font size in font points (e.g. \"24\")"""
-    italic: Optional[bool] = field(
+    italic: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Italic"},
     )
     """True to make the text italic, false otherwise"""
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
-    """The Path of the location of this object; leave blank for new tables"""
-    run_index: Optional[int] = field(
+    path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
+    """The Path of the location of this object; leave blank for new tables"""
+    run_index: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "RunIndex"},
     )
     """Index of the run, 0-based"""
-    text_items: Optional[List[DocxText]] = field(
+    text_items: Optional[List[DocxText | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TextItems"},
     )
     """
     Text items inside the run; this is where the actual text content is stored
     """
-    underline: Optional[str] = field(
+    underline: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Underline"},
     )
     """
@@ -1885,10 +2341,15 @@ class DocxSection:
     Definition: DocxSection
     """
 
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
-    """The Path of the location of this object; leave blank for new tables"""
-    starting_page_numbers: Optional[List[int]] = field(
+    path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
+    """The Path of the location of this object; leave blank for new tables"""
+    starting_page_numbers: Optional[List[int]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "StartingPageNumbers"},
     )
     """Page numbers that the section starts at, typically just one"""
@@ -1900,13 +2361,15 @@ class DocxSetFooterAddPageNumberRequest:
     Definition: DocxSetFooterAddPageNumberRequest
     """
 
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -1915,8 +2378,9 @@ class DocxSetFooterAddPageNumberRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    prepend_text: Optional[str] = field(
+    prepend_text: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PrependText"},
     )
     """
@@ -1931,18 +2395,21 @@ class DocxSetFooterRequest:
     Definition: DocxSetFooterRequest
     """
 
-    footer_to_apply: Optional[DocxFooter] = field(
+    footer_to_apply: Optional[DocxFooter | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FooterToApply"},
     )
     """Footer to apply"""
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -1959,18 +2426,21 @@ class DocxSetHeaderRequest:
     Definition: DocxSetHeaderRequest
     """
 
-    header_to_apply: Optional[DocxHeader] = field(
+    header_to_apply: Optional[DocxHeader | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HeaderToApply"},
     )
     """Header to apply"""
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -1987,32 +2457,45 @@ class DocxStyle:
     Definition: DocxStyle
     """
 
-    bold: Optional[bool] = field(default=None, metadata={"wire_name": "Bold"})
-    """Style applies bold formatting"""
-    font_family: Optional[str] = field(
+    bold: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Bold"},
+    )
+    """Style applies bold formatting"""
+    font_family: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "FontFamily"},
     )
     """Font family"""
-    font_size: Optional[str] = field(
+    font_size: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FontSize"},
     )
     """Font size"""
-    italic: Optional[bool] = field(
+    italic: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Italic"},
     )
     """Style applies italic formatting"""
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
-    """The Path of the location of this object; leave blank for new tables"""
-    style_id: Optional[str] = field(
+    path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
+    """The Path of the location of this object; leave blank for new tables"""
+    style_id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "StyleID"},
     )
     """ID of the style"""
-    underline: Optional[bool] = field(
+    underline: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Underline"},
     )
     """Style applies underline formatting"""
@@ -2024,23 +2507,27 @@ class DocxTable:
     Definition: DocxTable
     """
 
-    bottom_border_color: Optional[str] = field(
+    bottom_border_color: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BottomBorderColor"},
     )
     """HTML-style color hex value (do not include a #)"""
-    bottom_border_size: Optional[int] = field(
+    bottom_border_size: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BottomBorderSize"},
     )
     """Width of the border in points (1/72nd of an inch)"""
-    bottom_border_space: Optional[int] = field(
+    bottom_border_space: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BottomBorderSpace"},
     )
     """Spacing around the border in points (1/72nd of an inch)"""
-    bottom_border_type: Optional[str] = field(
+    bottom_border_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BottomBorderType"},
     )
     """
@@ -2051,23 +2538,27 @@ class DocxTable:
     ThinThickSmallGap, ThinThickThinLargeGap, ThinThickThinMediumGap,
     ThinThickThinSmallGap, ThreeDEmboss, ThreeDEngrave, Triple, Wave
     """
-    cell_horizontal_border_color: Optional[str] = field(
+    cell_horizontal_border_color: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CellHorizontalBorderColor"},
     )
     """HTML-style color hex value (do not include a #)"""
-    cell_horizontal_border_size: Optional[int] = field(
+    cell_horizontal_border_size: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CellHorizontalBorderSize"},
     )
     """Width of the border in points (1/72nd of an inch)"""
-    cell_horizontal_border_space: Optional[int] = field(
+    cell_horizontal_border_space: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CellHorizontalBorderSpace"},
     )
     """Spacing around the border in points (1/72nd of an inch)"""
-    cell_horizontal_border_type: Optional[str] = field(
+    cell_horizontal_border_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CellHorizontalBorderType"},
     )
     """
@@ -2078,23 +2569,27 @@ class DocxTable:
     ThinThickSmallGap, ThinThickThinLargeGap, ThinThickThinMediumGap,
     ThinThickThinSmallGap, ThreeDEmboss, ThreeDEngrave, Triple, Wave
     """
-    cell_vertical_border_color: Optional[str] = field(
+    cell_vertical_border_color: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CellVerticalBorderColor"},
     )
     """HTML-style color hex value (do not include a #)"""
-    cell_vertical_border_size: Optional[int] = field(
+    cell_vertical_border_size: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CellVerticalBorderSize"},
     )
     """Width of the border in points (1/72nd of an inch)"""
-    cell_vertical_border_space: Optional[int] = field(
+    cell_vertical_border_space: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CellVerticalBorderSpace"},
     )
     """Spacing around the border in points (1/72nd of an inch)"""
-    cell_vertical_border_type: Optional[str] = field(
+    cell_vertical_border_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CellVerticalBorderType"},
     )
     """
@@ -2105,23 +2600,27 @@ class DocxTable:
     ThinThickSmallGap, ThinThickThinLargeGap, ThinThickThinMediumGap,
     ThinThickThinSmallGap, ThreeDEmboss, ThreeDEngrave, Triple, Wave
     """
-    end_border_color: Optional[str] = field(
+    end_border_color: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EndBorderColor"},
     )
     """HTML-style color hex value (do not include a #)"""
-    end_border_size: Optional[int] = field(
+    end_border_size: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EndBorderSize"},
     )
     """Width of the border in points (1/72nd of an inch)"""
-    end_border_space: Optional[int] = field(
+    end_border_space: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EndBorderSpace"},
     )
     """Spacing around the border in points (1/72nd of an inch)"""
-    end_border_type: Optional[str] = field(
+    end_border_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EndBorderType"},
     )
     """
@@ -2132,23 +2631,27 @@ class DocxTable:
     ThinThickSmallGap, ThinThickThinLargeGap, ThinThickThinMediumGap,
     ThinThickThinSmallGap, ThreeDEmboss, ThreeDEngrave, Triple, Wave
     """
-    left_border_color: Optional[str] = field(
+    left_border_color: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "LeftBorderColor"},
     )
     """HTML-style color hex value (do not include a #)"""
-    left_border_size: Optional[int] = field(
+    left_border_size: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "LeftBorderSize"},
     )
     """Width of the border in points (1/72nd of an inch)"""
-    left_border_space: Optional[int] = field(
+    left_border_space: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "LeftBorderSpace"},
     )
     """Spacing around the border in points (1/72nd of an inch)"""
-    left_border_type: Optional[str] = field(
+    left_border_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "LeftBorderType"},
     )
     """
@@ -2159,27 +2662,35 @@ class DocxTable:
     ThinThickSmallGap, ThinThickThinLargeGap, ThinThickThinMediumGap,
     ThinThickThinSmallGap, ThreeDEmboss, ThreeDEngrave, Triple, Wave
     """
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
+    path: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
     """
     The Path of the location of this table object; leave blank for new tables
     """
-    right_border_color: Optional[str] = field(
+    right_border_color: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RightBorderColor"},
     )
     """HTML-style color hex value (do not include a #)"""
-    right_border_size: Optional[int] = field(
+    right_border_size: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RightBorderSize"},
     )
     """Width of the border in points (1/72nd of an inch)"""
-    right_border_space: Optional[int] = field(
+    right_border_space: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RightBorderSpace"},
     )
     """Spacing around the border in points (1/72nd of an inch)"""
-    right_border_type: Optional[str] = field(
+    right_border_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RightBorderType"},
     )
     """
@@ -2190,23 +2701,27 @@ class DocxTable:
     ThinThickSmallGap, ThinThickThinLargeGap, ThinThickThinMediumGap,
     ThinThickThinSmallGap, ThreeDEmboss, ThreeDEngrave, Triple, Wave
     """
-    start_border_color: Optional[str] = field(
+    start_border_color: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StartBorderColor"},
     )
     """HTML-style color hex value (do not include a #)"""
-    start_border_size: Optional[int] = field(
+    start_border_size: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StartBorderSize"},
     )
     """Width of the border in points (1/72nd of an inch)"""
-    start_border_space: Optional[int] = field(
+    start_border_space: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StartBorderSpace"},
     )
     """Spacing around the border in points (1/72nd of an inch)"""
-    start_border_type: Optional[str] = field(
+    start_border_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StartBorderType"},
     )
     """
@@ -2217,43 +2732,51 @@ class DocxTable:
     ThinThickSmallGap, ThinThickThinLargeGap, ThinThickThinMediumGap,
     ThinThickThinSmallGap, ThreeDEmboss, ThreeDEngrave, Triple, Wave
     """
-    table_id: Optional[str] = field(
+    table_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TableID"},
     )
     """The ID of the table; leave blank for new tables"""
-    table_indentation_mode: Optional[str] = field(
+    table_indentation_mode: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TableIndentationMode"},
     )
     """Table indentation type"""
-    table_indentation_width: Optional[int] = field(
+    table_indentation_width: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TableIndentationWidth"},
     )
     """Table indentation width"""
-    table_rows: Optional[List[DocxTableRow]] = field(
+    table_rows: Optional[List[DocxTableRow | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TableRows"},
     )
     """Rows in the table; this is where the contents is located"""
-    top_border_color: Optional[str] = field(
+    top_border_color: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TopBorderColor"},
     )
     """HTML-style color hex value (do not include a #)"""
-    top_border_size: Optional[int] = field(
+    top_border_size: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TopBorderSize"},
     )
     """Width of the border in points (1/72nd of an inch)"""
-    top_border_space: Optional[int] = field(
+    top_border_space: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TopBorderSpace"},
     )
     """Spacing around the border in points (1/72nd of an inch)"""
-    top_border_type: Optional[str] = field(
+    top_border_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TopBorderType"},
     )
     """
@@ -2264,10 +2787,15 @@ class DocxTable:
     ThinThickSmallGap, ThinThickThinLargeGap, ThinThickThinMediumGap,
     ThinThickThinSmallGap, ThreeDEmboss, ThreeDEngrave, Triple, Wave
     """
-    width: Optional[str] = field(default=None, metadata={"wire_name": "Width"})
-    """The Width of the table, or 0 if not specified"""
-    width_type: Optional[str] = field(
+    width: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Width"},
+    )
+    """The Width of the table, or 0 if not specified"""
+    width_type: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "WidthType"},
     )
     """The Width configuration type of the table"""
@@ -2279,45 +2807,56 @@ class DocxTableCell:
     Definition: DocxTableCell
     """
 
-    cell_index: Optional[int] = field(
+    cell_index: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CellIndex"},
     )
     """The index of the cell, 0-based"""
-    cell_shading_color: Optional[str] = field(
+    cell_shading_color: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CellShadingColor"},
     )
     """Color of the cell shading"""
-    cell_shading_fill: Optional[str] = field(
+    cell_shading_fill: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CellShadingFill"},
     )
     """Fill of the cell shading"""
-    cell_shading_pattern: Optional[str] = field(
+    cell_shading_pattern: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CellShadingPattern"},
     )
     """Pattern of the cell shading"""
-    cell_width: Optional[str] = field(
+    cell_width: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CellWidth"},
     )
     """Width of the cell"""
-    cell_width_mode: Optional[str] = field(
+    cell_width_mode: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CellWidthMode"},
     )
     """Width mode of the cell; can be auto (for automatic) or manual"""
-    paragraphs: Optional[List[DocxParagraph]] = field(
+    paragraphs: Optional[List[DocxParagraph | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Paragraphs"},
     )
     """
     Paragraphs inside the cell; this is where the contents of the cell are
     stored
     """
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
+    path: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
     """The Path of the location of this object; leave blank for new tables"""
 
 
@@ -2327,18 +2866,24 @@ class DocxTableRow:
     Definition: DocxTableRow
     """
 
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
+    path: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
     """
     The Path of the location of this table row object; leave blank for new
     tables
     """
-    row_cells: Optional[List[DocxTableCell]] = field(
+    row_cells: Optional[List[DocxTableCell | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RowCells"},
     )
     """Cells in the row; this is where the contents of the row is stored"""
-    row_index: Optional[int] = field(
+    row_index: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RowIndex"},
     )
     """Index of the row, 0-based"""
@@ -2350,8 +2895,9 @@ class DocxTemplateApplicationRequest:
     Definition: DocxTemplateApplicationRequest
     """
 
-    operations: Optional[List[DocxTemplateOperation]] = field(
+    operations: Optional[List[DocxTemplateOperation | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Operations"},
     )
     """Operations to apply to this template"""
@@ -2363,21 +2909,24 @@ class DocxTemplateOperation:
     Definition: DocxTemplateOperation
     """
 
-    action: Optional[int] = field(
+    action: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Action"},
     )
     """Operation action to take; possible values are \"Replace\""""
-    match_against: Optional[str] = field(
+    match_against: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "MatchAgainst"},
     )
     """
     For Replace operations, the string to match against (to be replaced with
     ReplaceWith string)
     """
-    replace_with: Optional[str] = field(
+    replace_with: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReplaceWith"},
     )
     """
@@ -2391,15 +2940,21 @@ class DocxText:
     Definition: DocxText
     """
 
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
-    """The Path of the location of this object; leave blank for new tables"""
-    text_content: Optional[str] = field(
+    path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
+    """The Path of the location of this object; leave blank for new tables"""
+    text_content: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "TextContent"},
     )
     """Text string containing the text content of this text content item"""
-    text_index: Optional[int] = field(
+    text_index: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TextIndex"},
     )
     """Index of the text content in the run; 0-based"""
@@ -2411,32 +2966,45 @@ class DocxTopLevelComment:
     Definition: DocxTopLevelComment
     """
 
-    author: Optional[str] = field(
+    author: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Author"},
     )
     """Author name of the comment"""
-    author_initials: Optional[str] = field(
+    author_initials: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AuthorInitials"},
     )
     """Initials of the author of the comment"""
-    comment_date: Optional[str] = field(
+    comment_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CommentDate"},
     )
     """Date timestamp of the comment"""
-    comment_text: Optional[str] = field(
+    comment_text: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CommentText"},
     )
     """Text content of the comment"""
-    done: Optional[bool] = field(default=None, metadata={"wire_name": "Done"})
-    """True if this comment is marked as Done in Word, otherwise it is false"""
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
-    """Path to the comment in the document"""
-    reply_child_comments: Optional[List[DocxComment]] = field(
+    done: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Done"},
+    )
+    """True if this comment is marked as Done in Word, otherwise it is false"""
+    path: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
+    """Path to the comment in the document"""
+    reply_child_comments: Optional[List[DocxComment | Mapping[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "ReplyChildComments"},
     )
     """Child comments, that are replies to this one"""
@@ -2448,17 +3016,23 @@ class ExifValue:
     Definition: ExifValue
     """
 
-    data_type: Optional[str] = field(
+    data_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DataType"},
     )
     """Date type of the EXIF value"""
-    data_value: Optional[str] = field(
+    data_value: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DataValue"},
     )
     """Value, formatted as a string of the EXIF value"""
-    tag: Optional[str] = field(default=None, metadata={"wire_name": "Tag"})
+    tag: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Tag"},
+    )
     """Tag name for the EXIF value"""
 
 
@@ -2468,30 +3042,35 @@ class FindRegexMatch:
     Definition: FindRegexMatch
     """
 
-    character_offset_end: Optional[int] = field(
+    character_offset_end: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CharacterOffsetEnd"},
     )
     """0-based index of the end of the match"""
-    character_offset_start: Optional[int] = field(
+    character_offset_start: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CharacterOffsetStart"},
     )
     """0-based index of the start of the match"""
-    containing_line: Optional[str] = field(
+    containing_line: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContainingLine"},
     )
     """Text content of the line containing the match"""
-    match_groups: Optional[List[str]] = field(
+    match_groups: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "MatchGroups"},
     )
     """
     Regular expression regex match groups; these correspond to the match values
     """
-    match_value: Optional[str] = field(
+    match_value: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "MatchValue"},
     )
     """The match value"""
@@ -2503,18 +3082,21 @@ class FindStringMatch:
     Definition: FindStringMatch
     """
 
-    character_offset_end: Optional[int] = field(
+    character_offset_end: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CharacterOffsetEnd"},
     )
     """0-based index of the end of the match"""
-    character_offset_start: Optional[int] = field(
+    character_offset_start: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CharacterOffsetStart"},
     )
     """0-based index of the start of the match"""
-    containing_line: Optional[str] = field(
+    containing_line: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContainingLine"},
     )
     """Text content of the line containing the match"""
@@ -2526,18 +3108,21 @@ class FindStringRegexRequest:
     Definition: FindStringRegexRequest
     """
 
-    match_case: Optional[bool] = field(
+    match_case: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "MatchCase"},
     )
     """Set to True to match case, False to ignore case"""
-    target_regex: Optional[str] = field(
+    target_regex: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TargetRegex"},
     )
     """Target input regular expression (regex) to find"""
-    text_content: Optional[str] = field(
+    text_content: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TextContent"},
     )
     """Input text content"""
@@ -2549,18 +3134,21 @@ class FindStringRegexResponse:
     Definition: FindStringRegexResponse
     """
 
-    match_count: Optional[int] = field(
+    match_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "MatchCount"},
     )
     """The number of matches"""
-    matches: Optional[List[FindRegexMatch]] = field(
+    matches: Optional[List[FindRegexMatch | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Matches"},
     )
     """Regular expression matches"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -2572,13 +3160,15 @@ class FindStringSimpleRequest:
     Definition: FindStringSimpleRequest
     """
 
-    target_string: Optional[str] = field(
+    target_string: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TargetString"},
     )
     """Target input string to find"""
-    text_content: Optional[str] = field(
+    text_content: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TextContent"},
     )
     """Input text content"""
@@ -2590,18 +3180,21 @@ class FindStringSimpleResponse:
     Definition: FindStringSimpleResponse
     """
 
-    match_count: Optional[int] = field(
+    match_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "MatchCount"},
     )
     """The number of matches"""
-    matches: Optional[List[FindStringMatch]] = field(
+    matches: Optional[List[FindStringMatch | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Matches"},
     )
     """Found matches"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -2613,8 +3206,9 @@ class FinishEditingRequest:
     Definition: FinishEditingRequest
     """
 
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """URL of a document being edited to get the contents of."""
@@ -2626,13 +3220,15 @@ class GetDocxBodyRequest:
     Definition: GetDocxBodyRequest
     """
 
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -2649,18 +3245,21 @@ class GetDocxCommentsResponse:
     Definition: GetDocxCommentsResponse
     """
 
-    comment_count: Optional[int] = field(
+    comment_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CommentCount"},
     )
     """The number of comments in the document"""
-    comments: Optional[List[DocxComment]] = field(
+    comments: Optional[List[DocxComment | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Comments in the document"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -2672,13 +3271,15 @@ class GetDocxGetCommentsHierarchicalRequest:
     Definition: GetDocxGetCommentsHierarchicalRequest
     """
 
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -2695,13 +3296,15 @@ class GetDocxGetCommentsRequest:
     Definition: GetDocxGetCommentsRequest
     """
 
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -2718,13 +3321,15 @@ class GetDocxHeadersAndFootersRequest:
     Definition: GetDocxHeadersAndFootersRequest
     """
 
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -2741,13 +3346,15 @@ class GetDocxImagesRequest:
     Definition: GetDocxImagesRequest
     """
 
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -2764,13 +3371,15 @@ class GetDocxPagesRequest:
     Definition: GetDocxPagesRequest
     """
 
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -2787,13 +3396,15 @@ class GetDocxSectionsRequest:
     Definition: GetDocxSectionsRequest
     """
 
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -2810,13 +3421,15 @@ class GetDocxStylesRequest:
     Definition: GetDocxStylesRequest
     """
 
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -2833,13 +3446,15 @@ class GetDocxTableByIndexRequest:
     Definition: GetDocxTableByIndexRequest
     """
 
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -2848,8 +3463,9 @@ class GetDocxTableByIndexRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    table_index: Optional[int] = field(
+    table_index: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TableIndex"},
     )
     """0-based index of the table to retrieve from the Word Document"""
@@ -2861,13 +3477,15 @@ class GetDocxTableRowRequest:
     Definition: GetDocxTableRowRequest
     """
 
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -2876,13 +3494,15 @@ class GetDocxTableRowRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    table_path: Optional[str] = field(
+    table_path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TablePath"},
     )
     """Path to the table to retrievew the row from"""
-    table_row_row_index: Optional[int] = field(
+    table_row_row_index: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TableRowRowIndex"},
     )
     """0-based index of the row to retrieve (e.g. 0, 1, 2, ...) in the table"""
@@ -2894,13 +3514,15 @@ class GetDocxTablesRequest:
     Definition: GetDocxTablesRequest
     """
 
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -2917,85 +3539,108 @@ class GetImageInfoResult:
     Definition: GetImageInfoResult
     """
 
-    bit_depth: Optional[int] = field(
+    bit_depth: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BitDepth"},
     )
     """Bit depth of the image"""
-    color_count: Optional[int] = field(
+    color_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ColorCount"},
     )
     """Unique colors in the image"""
-    color_space: Optional[str] = field(
+    color_space: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ColorSpace"},
     )
     """Color space of the image"""
-    color_type: Optional[str] = field(
+    color_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ColorType"},
     )
     """Color type of the image"""
-    comment: Optional[str] = field(
+    comment: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comment"},
     )
     """Comment string in the image"""
-    compression_level: Optional[int] = field(
+    compression_level: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CompressionLevel"},
     )
     """
     Compression level value from 0 (lowest quality) to 100 (highest quality)
     """
-    d_p_i: Optional[float] = field(default=None, metadata={"wire_name": "DPI"})
-    """DPI (pixels per unit, e.g. pixels per inch) of the image"""
-    d_p_i_unit: Optional[str] = field(
+    d_p_i: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "DPI"},
+    )
+    """DPI (pixels per unit, e.g. pixels per inch) of the image"""
+    d_p_i_unit: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DPIUnit"},
     )
     """Units of the DPI measurement; can be either in Inches or Centimeters"""
-    exif_profile_name: Optional[str] = field(
+    exif_profile_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExifProfileName"},
     )
     """Name of the EXIF profile used"""
-    exif_values: Optional[List[ExifValue]] = field(
+    exif_values: Optional[List[ExifValue | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExifValues"},
     )
     """EXIF tags and values embedded in the image"""
-    has_transparency: Optional[bool] = field(
+    has_transparency: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HasTransparency"},
     )
     """True if the image contains transparency, otherwise false"""
-    height: Optional[int] = field(
+    height: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Height"},
     )
     """Height in pixels of the image"""
-    image_format: Optional[str] = field(
+    image_format: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ImageFormat"},
     )
     """Image format"""
-    image_hash_signature: Optional[str] = field(
+    image_hash_signature: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ImageHashSignature"},
     )
     """SHA256 hash signature of the image"""
-    mime_type: Optional[str] = field(
+    mime_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "MimeType"},
     )
     """MIME type of the image format"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
-    width: Optional[int] = field(default=None, metadata={"wire_name": "Width"})
+    width: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Width"},
+    )
     """Width in pixels of the image"""
 
 
@@ -3005,16 +3650,18 @@ class GetPdfAnnotationsResult:
     Definition: GetPdfAnnotationsResult
     """
 
-    annotations: Optional[List[PdfAnnotation]] = field(
+    annotations: Optional[List[PdfAnnotation | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Annotations"},
     )
     """
     Annotations in the PDF file, ordered by placement from start to finish in
     the document
     """
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -3026,18 +3673,21 @@ class GetXlsxCellByIdentifierRequest:
     Definition: GetXlsxCellByIdentifierRequest
     """
 
-    cell_identifier: Optional[str] = field(
+    cell_identifier: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CellIdentifier"},
     )
     """Required; Excel cell identifier, e.g. A1, B22, C33, etc."""
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -3046,8 +3696,9 @@ class GetXlsxCellByIdentifierRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    worksheet_to_query: Optional[XlsxWorksheet] = field(
+    worksheet_to_query: Optional[XlsxWorksheet | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WorksheetToQuery"},
     )
     """
@@ -3062,18 +3713,21 @@ class GetXlsxCellRequest:
     Definition: GetXlsxCellRequest
     """
 
-    cell_index: Optional[int] = field(
+    cell_index: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CellIndex"},
     )
     """0-based index of the cell, 0, 1, 2, ... in the row to retrieve"""
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -3082,13 +3736,15 @@ class GetXlsxCellRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    row_index: Optional[int] = field(
+    row_index: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RowIndex"},
     )
     """0-based index of the row, 0, 1, 2, ... to retrieve"""
-    worksheet_to_query: Optional[XlsxWorksheet] = field(
+    worksheet_to_query: Optional[XlsxWorksheet | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WorksheetToQuery"},
     )
     """
@@ -3103,13 +3759,15 @@ class GetXlsxColumnsRequest:
     Definition: GetXlsxColumnsRequest
     """
 
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -3118,8 +3776,9 @@ class GetXlsxColumnsRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    worksheet_to_query: Optional[XlsxWorksheet] = field(
+    worksheet_to_query: Optional[XlsxWorksheet | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WorksheetToQuery"},
     )
     """
@@ -3134,13 +3793,15 @@ class GetXlsxImagesRequest:
     Definition: GetXlsxImagesRequest
     """
 
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -3149,8 +3810,9 @@ class GetXlsxImagesRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    worksheet_to_query: Optional[XlsxWorksheet] = field(
+    worksheet_to_query: Optional[XlsxWorksheet | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WorksheetToQuery"},
     )
     """
@@ -3165,13 +3827,15 @@ class GetXlsxRowsAndCellsRequest:
     Definition: GetXlsxRowsAndCellsRequest
     """
 
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -3180,8 +3844,9 @@ class GetXlsxRowsAndCellsRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    worksheet_to_query: Optional[XlsxWorksheet] = field(
+    worksheet_to_query: Optional[XlsxWorksheet | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WorksheetToQuery"},
     )
     """
@@ -3196,13 +3861,15 @@ class GetXlsxStylesRequest:
     Definition: GetXlsxStylesRequest
     """
 
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -3219,13 +3886,15 @@ class GetXlsxWorksheetsRequest:
     Definition: GetXlsxWorksheetsRequest
     """
 
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -3242,10 +3911,15 @@ class HtmlMdResult:
     Definition: HtmlMdResult
     """
 
-    html: Optional[str] = field(default=None, metadata={"wire_name": "Html"})
-    """Resulting HTML from the conversion"""
-    successful: Optional[bool] = field(
+    html: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Html"},
+    )
+    """Resulting HTML from the conversion"""
+    successful: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if operation was successful, false otherwise"""
@@ -3257,18 +3931,21 @@ class HtmlTemplateApplicationRequest:
     Definition: HtmlTemplateApplicationRequest
     """
 
-    html_template: Optional[str] = field(
+    html_template: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HtmlTemplate"},
     )
     """HTML template input as a string"""
-    html_template_url: Optional[str] = field(
+    html_template_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HtmlTemplateUrl"},
     )
     """URL to HTML template input"""
-    operations: Optional[List[HtmlTemplateOperation]] = field(
+    operations: Optional[List[HtmlTemplateOperation | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Operations"},
     )
     """Operations to apply to this template"""
@@ -3280,21 +3957,24 @@ class HtmlTemplateOperation:
     Definition: HtmlTemplateOperation
     """
 
-    action: Optional[int] = field(
+    action: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Action"},
     )
     """Operation action to take; possible values are \"Replace\""""
-    match_agsint: Optional[str] = field(
+    match_agsint: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "MatchAgsint"},
     )
     """
     For Replace operations, the string to match against (to be replaced with
     ReplaceWith string)
     """
-    replace_with: Optional[str] = field(
+    replace_with: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReplaceWith"},
     )
     """
@@ -3308,7 +3988,11 @@ class HtmlToOfficeRequest:
     Definition: HtmlToOfficeRequest
     """
 
-    html: Optional[str] = field(default=None, metadata={"wire_name": "Html"})
+    html: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Html"},
+    )
     """HTML to render to Office format"""
 
 
@@ -3318,8 +4002,9 @@ class HtmlToPdfRequest:
     Definition: HtmlToPdfRequest
     """
 
-    extra_loading_wait: Optional[int] = field(
+    extra_loading_wait: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExtraLoadingWait"},
     )
     """
@@ -3327,7 +4012,11 @@ class HtmlToPdfRequest:
     finished loading before taking the screenshot. Can be helpful for highly
     asynchronous websites.
     """
-    html: Optional[str] = field(default=None, metadata={"wire_name": "Html"})
+    html: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Html"},
+    )
     """HTML to render to PDF"""
 
 
@@ -3337,8 +4026,9 @@ class HtmlToPngRequest:
     Definition: HtmlToPngRequest
     """
 
-    extra_loading_wait: Optional[int] = field(
+    extra_loading_wait: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExtraLoadingWait"},
     )
     """
@@ -3346,10 +4036,15 @@ class HtmlToPngRequest:
     finished loading before taking the screenshot. Can be helpful for highly
     asynchronous websites.
     """
-    html: Optional[str] = field(default=None, metadata={"wire_name": "Html"})
-    """HTML to render to PNG (screenshot)"""
-    screenshot_height: Optional[int] = field(
+    html: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Html"},
+    )
+    """HTML to render to PNG (screenshot)"""
+    screenshot_height: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "ScreenshotHeight"},
     )
     """
@@ -3357,8 +4052,9 @@ class HtmlToPngRequest:
     1024, supply -1 to measure the full screen height of the page and attempt
     to take a screen-height screenshot
     """
-    screenshot_width: Optional[int] = field(
+    screenshot_width: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ScreenshotWidth"},
     )
     """
@@ -3374,7 +4070,11 @@ class HtmlToTextRequest:
     Definition: HtmlToTextRequest
     """
 
-    html: Optional[str] = field(default=None, metadata={"wire_name": "Html"})
+    html: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Html"},
+    )
     """HTML to extract the text from"""
 
 
@@ -3384,13 +4084,15 @@ class InsertDocxInsertParagraphRequest:
     Definition: InsertDocxInsertParagraphRequest
     """
 
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -3399,8 +4101,9 @@ class InsertDocxInsertParagraphRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    insert_path: Optional[str] = field(
+    insert_path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InsertPath"},
     )
     """
@@ -3408,8 +4111,9 @@ class InsertDocxInsertParagraphRequest:
     InsertPath field using the Path value from an existing object. Used with
     InsertPlacement of BeforeExistingObject or AfterExistingObject
     """
-    insert_placement: Optional[str] = field(
+    insert_placement: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InsertPlacement"},
     )
     """
@@ -3420,8 +4124,9 @@ class InsertDocxInsertParagraphRequest:
     object), AfterExistingObject (right after an existing object - fill in the
     InsertPath field using the Path value from an existing object)
     """
-    paragraph_to_insert: Optional[DocxParagraph] = field(
+    paragraph_to_insert: Optional[DocxParagraph | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ParagraphToInsert"},
     )
     """Table you would like to insert"""
@@ -3433,18 +4138,21 @@ class InsertDocxTableRowRequest:
     Definition: InsertDocxTableRowRequest
     """
 
-    existing_table_path: Optional[str] = field(
+    existing_table_path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExistingTablePath"},
     )
     """Required; the path to the existing table to modify"""
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -3453,8 +4161,9 @@ class InsertDocxTableRowRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    insert_placement: Optional[str] = field(
+    insert_placement: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InsertPlacement"},
     )
     """
@@ -3464,8 +4173,9 @@ class InsertDocxTableRowRequest:
     first row in the table, 1 being the second row in the table, 2 being the
     third row in the table, etc. to insert this row after
     """
-    row_to_insert: Optional[DocxTableRow] = field(
+    row_to_insert: Optional[DocxTableRow | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RowToInsert"},
     )
     """Table you would like to insert"""
@@ -3477,13 +4187,15 @@ class InsertDocxTablesRequest:
     Definition: InsertDocxTablesRequest
     """
 
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -3492,8 +4204,9 @@ class InsertDocxTablesRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    insert_path: Optional[str] = field(
+    insert_path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InsertPath"},
     )
     """
@@ -3501,8 +4214,9 @@ class InsertDocxTablesRequest:
     InsertPath field using the Path value from an existing object. Used with
     InsertPlacement of BeforeExistingObject or AfterExistingObject
     """
-    insert_placement: Optional[str] = field(
+    insert_placement: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InsertPlacement"},
     )
     """
@@ -3513,8 +4227,9 @@ class InsertDocxTablesRequest:
     object), AfterExistingObject (right after an existing object - fill in the
     InsertPath field using the Path value from an existing object)
     """
-    table_to_insert: Optional[DocxTable] = field(
+    table_to_insert: Optional[DocxTable | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TableToInsert"},
     )
     """Table you would like to insert"""
@@ -3526,13 +4241,15 @@ class InsertXlsxWorksheetRequest:
     Definition: InsertXlsxWorksheetRequest
     """
 
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -3541,8 +4258,9 @@ class InsertXlsxWorksheetRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    worksheet_to_insert: Optional[XlsxWorksheet] = field(
+    worksheet_to_insert: Optional[XlsxWorksheet | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WorksheetToInsert"},
     )
     """Workersheet to insert"""
@@ -3554,18 +4272,21 @@ class MultipageImageFormatConversionResult:
     Definition: MultipageImageFormatConversionResult
     """
 
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PageCount"},
     )
     """The number of pages in the converted output"""
-    pages: Optional[List[PageConversionResult]] = field(
+    pages: Optional[List[PageConversionResult | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Pages"},
     )
     """Converted page results"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
@@ -3577,13 +4298,15 @@ class PageConversionResult:
     Definition: PageConversionResult
     """
 
-    file_bytes: Optional[str] = field(
+    file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FileBytes"},
     )
     """File bytes (contents) of the image in converted file format"""
-    filename: Optional[str] = field(
+    filename: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Filename"},
     )
     """File name of the image in the converted file format"""
@@ -3595,63 +4318,78 @@ class PdfAnnotation:
     Definition: PdfAnnotation
     """
 
-    annotation_index: Optional[int] = field(
+    annotation_index: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AnnotationIndex"},
     )
     """The 0-based index of the annotation in the document"""
-    annotation_type: Optional[str] = field(
+    annotation_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AnnotationType"},
     )
     """Type of the annotation; possible values are Text"""
-    creation_date: Optional[str] = field(
+    creation_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CreationDate"},
     )
     """Date that the annotation was created"""
-    height: Optional[float] = field(
+    height: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Height"},
     )
     """Height of the annotation"""
-    left_x: Optional[float] = field(
+    left_x: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "LeftX"},
     )
     """Left X coordinate for the location of the annotation"""
-    modified_date: Optional[str] = field(
+    modified_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ModifiedDate"},
     )
     """Date that the annotation was last modified"""
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PageNumber"},
     )
     """The 1-based index of the page containing the annotation"""
-    subject: Optional[str] = field(
+    subject: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Subject"},
     )
     """Subject of the annotation"""
-    text_contents: Optional[str] = field(
+    text_contents: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TextContents"},
     )
     """Text contents of the annotation"""
-    title: Optional[str] = field(default=None, metadata={"wire_name": "Title"})
+    title: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Title"},
+    )
     """
     Title of the annotation; this is often the author of the annotation in
     Acrobat-created PDF files
     """
-    top_y: Optional[float] = field(
+    top_y: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TopY"},
     )
     """Top Y coordination of the location of the annotation"""
-    width: Optional[float] = field(
+    width: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Width"},
     )
     """Width of the annotation"""
@@ -3663,8 +4401,9 @@ class PdfDocument:
     Definition: PdfDocument
     """
 
-    document_contents: Optional[str] = field(
+    document_contents: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DocumentContents"},
     )
     """
@@ -3672,12 +4411,17 @@ class PdfDocument:
     document; otherwise will be set to null and the document contents will be
     available via the URL parameter
     """
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PageNumber"},
     )
     """Page number of the converted page, starting with 1 for the first page"""
-    u_r_l: Optional[str] = field(default=None, metadata={"wire_name": "URL"})
+    u_r_l: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "URL"},
+    )
     """
     URL to the PDF file of this worksheet; file is stored in an in-memory cache
     and will be deleted
@@ -3690,21 +4434,24 @@ class PdfFormField:
     Definition: PdfFormField
     """
 
-    field_combo_box_selected_index: Optional[int] = field(
+    field_combo_box_selected_index: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FieldComboBoxSelectedIndex"},
     )
     """
     Applies to ComboBox field types only; specifies the selected index of the
     combo box selection if available
     """
-    field_name: Optional[str] = field(
+    field_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FieldName"},
     )
     """Name of the form field"""
-    field_type: Optional[str] = field(
+    field_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FieldType"},
     )
     """
@@ -3712,8 +4459,9 @@ class PdfFormField:
     string), Checkbox (FieldValue can be \"true\" or \"false\"), ComboBox
     (FieldComboBoxSelectedIndex will also be populated), Other
     """
-    field_value: Optional[str] = field(
+    field_value: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FieldValue"},
     )
     """Value of the form field"""
@@ -3725,13 +4473,15 @@ class PdfFormFields:
     Definition: PdfFormFields
     """
 
-    form_fields: Optional[List[PdfFormField]] = field(
+    form_fields: Optional[List[PdfFormField | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FormFields"},
     )
     """Fields and field values found in the form"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if the operation was successful, false otherwise"""
@@ -3743,56 +4493,68 @@ class PdfMetadata:
     Definition: PdfMetadata
     """
 
-    author: Optional[str] = field(
+    author: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Author"},
     )
     """
     User name of the creator/author of the document, if available, null if not
     available
     """
-    creator: Optional[str] = field(
+    creator: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Creator"},
     )
     """Creator of the document"""
-    date_created: Optional[str] = field(
+    date_created: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateCreated"},
     )
     """
     The timestamp that the document was created, if available, null if not
     available
     """
-    date_modified: Optional[str] = field(
+    date_modified: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateModified"},
     )
     """
     The timestamp that the document was last modified, if available, null if
     not available
     """
-    keywords: Optional[str] = field(
+    keywords: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Keywords"},
     )
     """Keywords of the document"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PageCount"},
     )
     """The number of pages in the document"""
-    subject: Optional[str] = field(
+    subject: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Subject"},
     )
     """Subject of the document"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if the operation was successful, false otherwise"""
-    title: Optional[str] = field(default=None, metadata={"wire_name": "Title"})
+    title: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Title"},
+    )
     """Title of the document"""
 
 
@@ -3802,13 +4564,15 @@ class PdfPageText:
     Definition: PdfPageText
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PageNumber"},
     )
     """Page number of the page (1-based)"""
-    page_text: Optional[str] = field(
+    page_text: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PageText"},
     )
     """Text of the page"""
@@ -3820,13 +4584,15 @@ class PdfTextByPageResult:
     Definition: PdfTextByPageResult
     """
 
-    pages: Optional[List[PdfPageText]] = field(
+    pages: Optional[List[PdfPageText | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Pages"},
     )
     """Pages in the PDF"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if the operation was successful, false otherwise"""
@@ -3838,13 +4604,15 @@ class PdfToPngResult:
     Definition: PdfToPngResult
     """
 
-    png_result_pages: Optional[List[ConvertedPngPage]] = field(
+    png_result_pages: Optional[List[ConvertedPngPage | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PngResultPages"},
     )
     """Array of converted pages"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if the operation was successful, false otherwise"""
@@ -3856,20 +4624,26 @@ class PresentationResult:
     Definition: PresentationResult
     """
 
-    presentation_contents: Optional[str] = field(
+    presentation_contents: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PresentationContents"},
     )
     """Contents of the presentation in bytes"""
-    slide_number: Optional[int] = field(
+    slide_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SlideNumber"},
     )
     """
     Worksheet number of the converted page, starting with 1 for the left-most
     worksheet
     """
-    u_r_l: Optional[str] = field(default=None, metadata={"wire_name": "URL"})
+    u_r_l: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "URL"},
+    )
     """
     URL to the PPTX file of this slide; file is stored in an in-memory cache
     and will be deleted
@@ -3882,13 +4656,15 @@ class RemoveDocxHeadersAndFootersRequest:
     Definition: RemoveDocxHeadersAndFootersRequest
     """
 
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -3897,16 +4673,18 @@ class RemoveDocxHeadersAndFootersRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    remove_footers: Optional[bool] = field(
+    remove_footers: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RemoveFooters"},
     )
     """
     True if you would like to remove all footers from the input document, false
     otherwise
     """
-    remove_headers: Optional[bool] = field(
+    remove_headers: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RemoveHeaders"},
     )
     """
@@ -3921,18 +4699,21 @@ class RemoveDocxPagesRequest:
     Definition: RemoveDocxPagesRequest
     """
 
-    end_delete_page_number: Optional[int] = field(
+    end_delete_page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EndDeletePageNumber"},
     )
     """Page number (1-based) to stop deleting pages; inclusive"""
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -3941,8 +4722,9 @@ class RemoveDocxPagesRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    start_delete_page_number: Optional[int] = field(
+    start_delete_page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StartDeletePageNumber"},
     )
     """Page number (1-based) to start deleting pages; inclusive"""
@@ -3954,8 +4736,9 @@ class RemoveHtmlFromTextRequest:
     Definition: RemoveHtmlFromTextRequest
     """
 
-    text_containing_html: Optional[str] = field(
+    text_containing_html: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TextContainingHtml"},
     )
     """Input text string to remove the HTML from"""
@@ -3967,13 +4750,15 @@ class RemoveHtmlFromTextResponse:
     Definition: RemoveHtmlFromTextResponse
     """
 
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
-    text_content_result: Optional[str] = field(
+    text_content_result: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TextContentResult"},
     )
     """Result of performing a remove HTML from string operation"""
@@ -3985,18 +4770,21 @@ class RemovePptxSlidesRequest:
     Definition: RemovePptxSlidesRequest
     """
 
-    end_delete_slide_number: Optional[int] = field(
+    end_delete_slide_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EndDeleteSlideNumber"},
     )
     """Slide number (1-based) to stop deleting slides; inclusive"""
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -4005,8 +4793,9 @@ class RemovePptxSlidesRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    start_delete_slide_number: Optional[int] = field(
+    start_delete_slide_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StartDeleteSlideNumber"},
     )
     """Slide number (1-based) to start deleting slides; inclusive"""
@@ -4018,8 +4807,9 @@ class RemoveWhitespaceFromTextRequest:
     Definition: RemoveWhitespaceFromTextRequest
     """
 
-    text_containing_whitespace: Optional[str] = field(
+    text_containing_whitespace: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TextContainingWhitespace"},
     )
     """Input text string to remove the whitespace from"""
@@ -4031,13 +4821,15 @@ class RemoveWhitespaceFromTextResponse:
     Definition: RemoveWhitespaceFromTextResponse
     """
 
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
-    text_content_result: Optional[str] = field(
+    text_content_result: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TextContentResult"},
     )
     """Result of performing a remove whitespace from string operation"""
@@ -4049,13 +4841,15 @@ class RemoveXlsxWorksheetRequest:
     Definition: RemoveXlsxWorksheetRequest
     """
 
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -4064,8 +4858,9 @@ class RemoveXlsxWorksheetRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    worksheet_to_remove: Optional[XlsxWorksheet] = field(
+    worksheet_to_remove: Optional[XlsxWorksheet | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WorksheetToRemove"},
     )
     """
@@ -4081,24 +4876,27 @@ class ReplaceStringRegexRequest:
     Definition: ReplaceStringRegexRequest
     """
 
-    regular_expression_string: Optional[str] = field(
+    regular_expression_string: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RegularExpressionString"},
     )
     """
     Target input regular expression (regex) string to match and be replaced;
     supports all regular expression values
     """
-    replace_with_string: Optional[str] = field(
+    replace_with_string: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReplaceWithString"},
     )
     """
     Replacement for target string; supports referencing indexed regex matched
     values from RegularExpressionString, such as $1, $2, and so on
     """
-    text_content: Optional[str] = field(
+    text_content: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TextContent"},
     )
     """Input text content"""
@@ -4110,13 +4908,15 @@ class ReplaceStringRegexResponse:
     Definition: ReplaceStringRegexResponse
     """
 
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
-    text_content_result: Optional[str] = field(
+    text_content_result: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TextContentResult"},
     )
     """Result of performing a base 64 decode operation, binary file content"""
@@ -4128,13 +4928,15 @@ class ReplaceStringRequest:
     Definition: ReplaceStringRequest
     """
 
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -4143,18 +4945,21 @@ class ReplaceStringRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    match_case: Optional[bool] = field(
+    match_case: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "MatchCase"},
     )
     """True if the case should be matched, false for case insensitive match"""
-    match_string: Optional[str] = field(
+    match_string: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "MatchString"},
     )
     """String to search for and match against, to be replaced"""
-    replace_string: Optional[str] = field(
+    replace_string: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReplaceString"},
     )
     """String to replace the matched values with"""
@@ -4166,18 +4971,21 @@ class ReplaceStringSimpleRequest:
     Definition: ReplaceStringSimpleRequest
     """
 
-    replace_with_string: Optional[str] = field(
+    replace_with_string: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReplaceWithString"},
     )
     """Replacement for target string"""
-    target_string: Optional[str] = field(
+    target_string: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TargetString"},
     )
     """Target input string to match and be replaced"""
-    text_content: Optional[str] = field(
+    text_content: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TextContent"},
     )
     """Input text content"""
@@ -4189,13 +4997,15 @@ class ReplaceStringSimpleResponse:
     Definition: ReplaceStringSimpleResponse
     """
 
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
-    text_content_result: Optional[str] = field(
+    text_content_result: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TextContentResult"},
     )
     """Result of performing a replace string operation"""
@@ -4207,8 +5017,9 @@ class ScreenshotRequest:
     Definition: ScreenshotRequest
     """
 
-    extra_loading_wait: Optional[int] = field(
+    extra_loading_wait: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExtraLoadingWait"},
     )
     """
@@ -4217,8 +5028,9 @@ class ScreenshotRequest:
     asynchronous websites. Provide a value of 0 for the default of 5000
     milliseconds (5 seconds)
     """
-    screenshot_height: Optional[int] = field(
+    screenshot_height: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ScreenshotHeight"},
     )
     """
@@ -4226,15 +5038,20 @@ class ScreenshotRequest:
     1024, supply -1 to measure the full screen height of the page and attempt
     to take a screen-height screenshot
     """
-    screenshot_width: Optional[int] = field(
+    screenshot_width: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ScreenshotWidth"},
     )
     """
     Optional: Width of the screenshot in pixels; supply 0 to default to 1280 x
     1024
     """
-    url: Optional[str] = field(default=None, metadata={"wire_name": "Url"})
+    url: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Url"},
+    )
     """
     URL address of the website to screenshot. HTTP and HTTPS are both
     supported, as are custom ports.
@@ -4247,29 +5064,33 @@ class SetFormFieldValue:
     Definition: SetFormFieldValue
     """
 
-    checkbox_value: Optional[bool] = field(
+    checkbox_value: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckboxValue"},
     )
     """For fields of type Checkbox, the value to put into the field"""
-    combo_box_selected_index: Optional[int] = field(
+    combo_box_selected_index: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ComboBoxSelectedIndex"},
     )
     """
     For fields of type ComboBox; specifies the selected index of the combo box
     selection
     """
-    field_name: Optional[str] = field(
+    field_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FieldName"},
     )
     """
     Name of the field to set; you can call /convert/edit/pdf/form/get-fields to
     enumerate field names in a form
     """
-    text_value: Optional[str] = field(
+    text_value: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TextValue"},
     )
     """For fields of type Text, the text value to put into the field"""
@@ -4281,13 +5102,15 @@ class SetPdfFormFieldsRequest:
     Definition: SetPdfFormFieldsRequest
     """
 
-    field_values: Optional[List[SetFormFieldValue]] = field(
+    field_values: Optional[List[SetFormFieldValue | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FieldValues"},
     )
     """Field values to set"""
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Contents of the input file to set the fields on"""
@@ -4299,13 +5122,15 @@ class SetPdfMetadataRequest:
     Definition: SetPdfMetadataRequest
     """
 
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Input file contents bytes for the file to modify"""
-    metadata_to_set: Optional[PdfMetadata] = field(
+    metadata_to_set: Optional[PdfMetadata | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "MetadataToSet"},
     )
     """PDF metadata to set on the file"""
@@ -4317,25 +5142,29 @@ class SetXlsxCellByIdentifierRequest:
     Definition: SetXlsxCellByIdentifierRequest
     """
 
-    cell_identifier: Optional[str] = field(
+    cell_identifier: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CellIdentifier"},
     )
     """
     The Excel cell identifier (e.g. A1, B2, C33, etc.) of the cell to update
     """
-    cell_value: Optional[XlsxSpreadsheetCell] = field(
+    cell_value: Optional[XlsxSpreadsheetCell | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CellValue"},
     )
     """New Cell value to update/overwrite into the Excel XLSX spreadsheet"""
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -4344,8 +5173,9 @@ class SetXlsxCellByIdentifierRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    worksheet_to_update: Optional[XlsxWorksheet] = field(
+    worksheet_to_update: Optional[XlsxWorksheet | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WorksheetToUpdate"},
     )
     """
@@ -4360,23 +5190,27 @@ class SetXlsxCellRequest:
     Definition: SetXlsxCellRequest
     """
 
-    cell_index: Optional[int] = field(
+    cell_index: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CellIndex"},
     )
     """0-based index of the cell, 0, 1, 2, ... in the row to set"""
-    cell_value: Optional[XlsxSpreadsheetCell] = field(
+    cell_value: Optional[XlsxSpreadsheetCell | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CellValue"},
     )
     """New Cell value to update/overwrite into the Excel XLSX spreadsheet"""
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -4385,13 +5219,15 @@ class SetXlsxCellRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    row_index: Optional[int] = field(
+    row_index: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RowIndex"},
     )
     """0-based index of the row, 0, 1, 2, ... to set"""
-    worksheet_to_update: Optional[XlsxWorksheet] = field(
+    worksheet_to_update: Optional[XlsxWorksheet | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WorksheetToUpdate"},
     )
     """
@@ -4406,17 +5242,23 @@ class SplitDocumentResult:
     Definition: SplitDocumentResult
     """
 
-    document_contents: Optional[str] = field(
+    document_contents: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DocumentContents"},
     )
     """Contents of the document in bytes"""
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PageNumber"},
     )
     """Page number of the converted page, starting with 1 for the first page"""
-    u_r_l: Optional[str] = field(default=None, metadata={"wire_name": "URL"})
+    u_r_l: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "URL"},
+    )
     """
     URL to the DOCX file of this slide; file is stored in an in-memory cache
     and will be deleted
@@ -4429,12 +5271,16 @@ class SplitDocxDocumentResult:
     Definition: SplitDocxDocumentResult
     """
 
-    result_documents: Optional[List[SplitDocumentResult]] = field(
+    result_documents: Optional[
+        List[SplitDocumentResult | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResultDocuments"},
     )
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if the operation was successful, false otherwise"""
@@ -4446,13 +5292,15 @@ class SplitPdfResult:
     Definition: SplitPdfResult
     """
 
-    documents: Optional[List[PdfDocument]] = field(
+    documents: Optional[List[PdfDocument | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Documents"},
     )
     """PDF documents as output"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if the operation was successful, false otherwise"""
@@ -4464,12 +5312,16 @@ class SplitPptxPresentationResult:
     Definition: SplitPptxPresentationResult
     """
 
-    result_presentations: Optional[List[PresentationResult]] = field(
+    result_presentations: Optional[
+        List[PresentationResult | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResultPresentations"},
     )
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if the operation was successful, false otherwise"""
@@ -4481,17 +5333,20 @@ class SplitTextDocumentByLinesResult:
     Definition: SplitTextDocumentByLinesResult
     """
 
-    line_count: Optional[int] = field(
+    line_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "LineCount"},
     )
     """The count of lines in the text file"""
-    result_lines: Optional[List[TextDocumentLine]] = field(
+    result_lines: Optional[List[TextDocumentLine | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResultLines"},
     )
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if the operation was successful, false otherwise"""
@@ -4503,17 +5358,22 @@ class SplitTextDocumentByStringResult:
     Definition: SplitTextDocumentByStringResult
     """
 
-    element_count: Optional[int] = field(
+    element_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ElementCount"},
     )
     """The count of elements in the text file"""
-    result_elements: Optional[List[TextDocumentElement]] = field(
+    result_elements: Optional[
+        List[TextDocumentElement | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResultElements"},
     )
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if the operation was successful, false otherwise"""
@@ -4525,12 +5385,14 @@ class SplitXlsxWorksheetResult:
     Definition: SplitXlsxWorksheetResult
     """
 
-    result_worksheets: Optional[List[WorksheetResult]] = field(
+    result_worksheets: Optional[List[WorksheetResult | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResultWorksheets"},
     )
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if the operation was successful, false otherwise"""
@@ -4542,13 +5404,15 @@ class TextConversionResult:
     Definition: TextConversionResult
     """
 
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if the operation was successful, false otherwise"""
-    text_result: Optional[str] = field(
+    text_result: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TextResult"},
     )
     """
@@ -4563,13 +5427,15 @@ class TextDocumentElement:
     Definition: TextDocumentElement
     """
 
-    element_contents: Optional[str] = field(
+    element_contents: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ElementContents"},
     )
     """The text contents of a single element of a text file"""
-    element_number: Optional[int] = field(
+    element_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ElementNumber"},
     )
     """The 1-based line index of the element"""
@@ -4581,13 +5447,15 @@ class TextDocumentLine:
     Definition: TextDocumentLine
     """
 
-    line_contents: Optional[str] = field(
+    line_contents: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "LineContents"},
     )
     """The text contents of a single line of a text file"""
-    line_number: Optional[int] = field(
+    line_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "LineNumber"},
     )
     """The 1-based line index of the line"""
@@ -4599,13 +5467,15 @@ class TextEncodingDetectResponse:
     Definition: TextEncodingDetectResponse
     """
 
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
-    text_encoding: Optional[str] = field(
+    text_encoding: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TextEncoding"},
     )
     """
@@ -4620,23 +5490,27 @@ class UpdateDocxTableCellRequest:
     Definition: UpdateDocxTableCellRequest
     """
 
-    cell_to_update: Optional[DocxTableCell] = field(
+    cell_to_update: Optional[DocxTableCell | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CellToUpdate"},
     )
     """Table cell contents you would like to update the cell with"""
-    existing_table_path: Optional[str] = field(
+    existing_table_path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExistingTablePath"},
     )
     """Required; the path to the existing table to modify"""
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -4645,13 +5519,15 @@ class UpdateDocxTableCellRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    table_cell_index: Optional[int] = field(
+    table_cell_index: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TableCellIndex"},
     )
     """0-based index of the Table Cell (within the row) to update"""
-    table_row_index: Optional[int] = field(
+    table_row_index: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TableRowIndex"},
     )
     """0-based index of the Table Row to update"""
@@ -4663,18 +5539,21 @@ class UpdateDocxTableRowRequest:
     Definition: UpdateDocxTableRowRequest
     """
 
-    existing_table_path: Optional[str] = field(
+    existing_table_path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExistingTablePath"},
     )
     """Required; the path to the existing table to modify"""
-    input_file_bytes: Optional[str] = field(
+    input_file_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileBytes"},
     )
     """Optional: Bytes of the input file to operate on"""
-    input_file_url: Optional[str] = field(
+    input_file_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InputFileUrl"},
     )
     """
@@ -4683,13 +5562,15 @@ class UpdateDocxTableRowRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    row_to_update: Optional[DocxTableRow] = field(
+    row_to_update: Optional[DocxTableRow | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RowToUpdate"},
     )
     """Table row contents you would like to update the row with"""
-    table_row_index: Optional[int] = field(
+    table_row_index: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TableRowIndex"},
     )
     """0-based index of the Table Row to update"""
@@ -4701,7 +5582,11 @@ class UrlToTextRequest:
     Definition: UrlToTextRequest
     """
 
-    url: Optional[str] = field(default=None, metadata={"wire_name": "Url"})
+    url: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Url"},
+    )
     """URL of the website to extract the text from"""
 
 
@@ -4711,12 +5596,14 @@ class ViewerResponse:
     Definition: ViewerResponse
     """
 
-    html_embed: Optional[str] = field(
+    html_embed: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HtmlEmbed"},
     )
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
 
@@ -4727,23 +5614,30 @@ class WorksheetResult:
     Definition: WorksheetResult
     """
 
-    u_r_l: Optional[str] = field(default=None, metadata={"wire_name": "URL"})
+    u_r_l: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "URL"},
+    )
     """
     URL to the XLSX file of this worksheet; file is stored in an in-memory
     cache and will be deleted
     """
-    worksheet_contents: Optional[str] = field(
+    worksheet_contents: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WorksheetContents"},
     )
     """Contents of the worksheet in bytes"""
-    worksheet_name: Optional[str] = field(
+    worksheet_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WorksheetName"},
     )
     """The name of the worksheet"""
-    worksheet_number: Optional[int] = field(
+    worksheet_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WorksheetNumber"},
     )
     """
@@ -4758,30 +5652,38 @@ class XlsxImage:
     Definition: XlsxImage
     """
 
-    image_contents_u_r_l: Optional[str] = field(
+    image_contents_u_r_l: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ImageContentsURL"},
     )
     """
     URL to the image contents; file is stored in an in-memory cache and will be
     deleted. Call Finish-Editing to get the contents.
     """
-    image_data_content_type: Optional[str] = field(
+    image_data_content_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ImageDataContentType"},
     )
     """Read-only; image data MIME content-type"""
-    image_data_embed_id: Optional[str] = field(
+    image_data_embed_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ImageDataEmbedId"},
     )
     """Read-only; internal ID for the image contents"""
-    image_internal_file_name: Optional[str] = field(
+    image_internal_file_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ImageInternalFileName"},
     )
     """Read-only; internal file name/path for the image"""
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
+    path: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
     """The Path of the location of this object; leave blank for new rows"""
 
 
@@ -4791,24 +5693,32 @@ class XlsxSpreadsheetCell:
     Definition: XlsxSpreadsheetCell
     """
 
-    cell_identifier: Optional[str] = field(
+    cell_identifier: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CellIdentifier"},
     )
     """Cell reference of the cell, e.g. A1, Z22, etc."""
-    formula: Optional[str] = field(
+    formula: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Formula"},
     )
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
-    """The Path of the location of this object; leave blank for new rows"""
-    style_index: Optional[int] = field(
+    path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
+    """The Path of the location of this object; leave blank for new rows"""
+    style_index: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "StyleIndex"},
     )
     """Identifier for the style to apply to this style"""
-    text_value: Optional[str] = field(
+    text_value: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TextValue"},
     )
     """Text value of the cell"""
@@ -4820,12 +5730,17 @@ class XlsxSpreadsheetColumn:
     Definition: XlsxSpreadsheetColumn
     """
 
-    heading_cell: Optional[XlsxSpreadsheetCell] = field(
+    heading_cell: Optional[XlsxSpreadsheetCell | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HeadingCell"},
     )
     """Heading cell for this column"""
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
+    path: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
     """The Path of the location of this object; leave blank for new rows"""
 
 
@@ -4835,12 +5750,17 @@ class XlsxSpreadsheetRow:
     Definition: XlsxSpreadsheetRow
     """
 
-    cells: Optional[List[XlsxSpreadsheetCell]] = field(
+    cells: Optional[List[XlsxSpreadsheetCell | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Cells"},
     )
     """Spreadsheet Cells in the spreadsheet row"""
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
+    path: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
     """The Path of the location of this object; leave blank for new rows"""
 
 
@@ -4850,12 +5770,17 @@ class XlsxWorksheet:
     Definition: XlsxWorksheet
     """
 
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
+    path: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
     """
     The Path of the location of this object; leave blank for new worksheets
     """
-    worksheet_name: Optional[str] = field(
+    worksheet_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WorksheetName"},
     )
     """User-facing name of the worksheet tab"""
@@ -4867,18 +5792,21 @@ class XmlAddAttributeWithXPathResult:
     Definition: XmlAddAttributeWithXPathResult
     """
 
-    nodes_edited_count: Optional[int] = field(
+    nodes_edited_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NodesEditedCount"},
     )
     """Count of the matching results"""
-    resulting_xml_document: Optional[str] = field(
+    resulting_xml_document: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResultingXmlDocument"},
     )
     """Resulting, modified XML document"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if the operation was successful, false otherwise"""
@@ -4890,18 +5818,21 @@ class XmlAddChildWithXPathResult:
     Definition: XmlAddChildWithXPathResult
     """
 
-    nodes_edited_count: Optional[int] = field(
+    nodes_edited_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NodesEditedCount"},
     )
     """Count of the matching results"""
-    resulting_xml_document: Optional[str] = field(
+    resulting_xml_document: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResultingXmlDocument"},
     )
     """Resulting, modified XML document"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if the operation was successful, false otherwise"""
@@ -4913,18 +5844,21 @@ class XmlFilterWithXPathResult:
     Definition: XmlFilterWithXPathResult
     """
 
-    result_count: Optional[int] = field(
+    result_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResultCount"},
     )
     """Count of the matching results"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if the operation was successful, false otherwise"""
-    xml_nodes: Optional[List[str]] = field(
+    xml_nodes: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "XmlNodes"},
     )
     """Matching selected XML nodes as strings"""
@@ -4936,18 +5870,21 @@ class XmlQueryWithXQueryMultiResult:
     Definition: XmlQueryWithXQueryMultiResult
     """
 
-    error_message: Optional[str] = field(
+    error_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ErrorMessage"},
     )
     """If an error occurs, additional details on the error"""
-    resulting_xml: Optional[str] = field(
+    resulting_xml: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResultingXml"},
     )
     """Resulting XML result output"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if the operation was successful, false otherwise"""
@@ -4959,18 +5896,21 @@ class XmlQueryWithXQueryResult:
     Definition: XmlQueryWithXQueryResult
     """
 
-    error_message: Optional[str] = field(
+    error_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ErrorMessage"},
     )
     """If an error occurs, additional details on the error"""
-    resulting_xml: Optional[str] = field(
+    resulting_xml: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResultingXml"},
     )
     """Resulting XML result output"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if the operation was successful, false otherwise"""
@@ -4982,18 +5922,21 @@ class XmlRemoveAllChildrenWithXPathResult:
     Definition: XmlRemoveAllChildrenWithXPathResult
     """
 
-    nodes_edited_count: Optional[int] = field(
+    nodes_edited_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NodesEditedCount"},
     )
     """Count of the matching results"""
-    resulting_xml_document: Optional[str] = field(
+    resulting_xml_document: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResultingXmlDocument"},
     )
     """Resulting, modified XML document"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if the operation was successful, false otherwise"""
@@ -5005,25 +5948,29 @@ class XmlRemoveWithXPathResult:
     Definition: XmlRemoveWithXPathResult
     """
 
-    nodes_removed_count: Optional[int] = field(
+    nodes_removed_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NodesRemovedCount"},
     )
     """Count of the matching results"""
-    resulting_xml_document: Optional[str] = field(
+    resulting_xml_document: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResultingXmlDocument"},
     )
     """
     Resulting, modified XML document with matching nodes removed as a string
     """
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if the operation was successful, false otherwise"""
-    xml_nodes_removed: Optional[List[str]] = field(
+    xml_nodes_removed: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "XmlNodesRemoved"},
     )
     """Matching selected XML nodes as strings"""
@@ -5035,18 +5982,21 @@ class XmlReplaceWithXPathResult:
     Definition: XmlReplaceWithXPathResult
     """
 
-    nodes_edited_count: Optional[int] = field(
+    nodes_edited_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NodesEditedCount"},
     )
     """Count of the matching results"""
-    resulting_xml_document: Optional[str] = field(
+    resulting_xml_document: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResultingXmlDocument"},
     )
     """Resulting, modified XML document"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if the operation was successful, false otherwise"""
@@ -5058,18 +6008,21 @@ class XmlSetValueWithXPathResult:
     Definition: XmlSetValueWithXPathResult
     """
 
-    nodes_edited_count: Optional[int] = field(
+    nodes_edited_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NodesEditedCount"},
     )
     """Count of the matching results"""
-    resulting_xml_document: Optional[str] = field(
+    resulting_xml_document: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResultingXmlDocument"},
     )
     """Resulting, modified XML document"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if the operation was successful, false otherwise"""
@@ -5081,18 +6034,23 @@ class ZipDirectory:
     Definition: ZipDirectory
     """
 
-    directories_in_directory: Optional[List[ZipDirectory]] = field(
+    directories_in_directory: Optional[
+        List[ZipDirectory | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DirectoriesInDirectory"},
     )
     """Child directories contained directly in this directory"""
-    directory_name: Optional[str] = field(
+    directory_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DirectoryName"},
     )
     """Name of this directory"""
-    files_in_directory: Optional[List[ZipFile]] = field(
+    files_in_directory: Optional[List[ZipFile | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FilesInDirectory"},
     )
     """Child files contained directly in this directory"""
@@ -5104,21 +6062,24 @@ class ZipExtractResponse:
     Definition: ZipExtractResponse
     """
 
-    directories_in_zip: Optional[List[ZipDirectory]] = field(
+    directories_in_zip: Optional[List[ZipDirectory | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DirectoriesInZip"},
     )
     """
     Top-level directories in the root directory of the zip; directories can
     contain sub-directories and files
     """
-    files_in_zip: Optional[List[ZipFile]] = field(
+    files_in_zip: Optional[List[ZipFile | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FilesInZip"},
     )
     """Top-level files in the root directory fo the zip file"""
-    successful: Optional[bool] = field(
+    successful: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Successful"},
     )
     """True if the operation was successful, false otherwise"""
@@ -5130,13 +6091,15 @@ class ZipFile:
     Definition: ZipFile
     """
 
-    file_contents: Optional[str] = field(
+    file_contents: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FileContents"},
     )
     """Contents of this file"""
-    file_name: Optional[str] = field(
+    file_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FileName"},
     )
     """Name of this file"""
@@ -5150,16 +6113,16 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -5170,8 +6133,8 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -5179,8 +6142,8 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -5192,7 +6155,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -5207,9 +6170,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "cloudmersiveconvert"
 
-    async def edit_document_docx_create_blank_document_async(
+    def edit_document_docx_create_blank_document(
         self,
-        input: CreateBlankDocxRequest,
+        input: CreateBlankDocxRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5222,12 +6185,28 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Returns a blank Word DOCX Document format file. The file is blank, with
         no contents. Use additional editing commands such as Insert Paragraph
         or Insert Table or Insert Image to populate the document.
+
+        Swagger operation ID: `EditDocument_DocxCreateBlankDocument`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/create/blank"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5241,6 +6220,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5248,9 +6228,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_delete_pages_async(
+    def edit_document_docx_delete_pages(
         self,
-        input: RemoveDocxPagesRequest,
+        input: RemoveDocxPagesRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5262,12 +6242,28 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Returns the edited Word Document in the Word Document (DOCX) format
         file with the specified pages removed
+
+        Swagger operation ID: `EditDocument_DocxDeletePages`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/delete-pages"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5281,13 +6277,14 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
 
-    async def edit_document_docx_delete_table_row_async(
+    def edit_document_docx_delete_table_row(
         self,
-        input: DeleteDocxTableRowRequest,
+        input: DeleteDocxTableRowRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5299,13 +6296,29 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Deletes an existing table row in a Word DOCX Document and returns the
         result.
+
+        Swagger operation ID: `EditDocument_DocxDeleteTableRow`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/convert/edit/docx/delete-table-row"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5319,6 +6332,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5326,9 +6340,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_delete_table_row_range_async(
+    def edit_document_docx_delete_table_row_range(
         self,
-        input: DeleteDocxTableRowRangeRequest,
+        input: DeleteDocxTableRowRangeRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5340,13 +6354,29 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Deletes a range of 1 or more existing table rows in a Word DOCX
         Document and returns the result.
+
+        Swagger operation ID: `EditDocument_DocxDeleteTableRowRange`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/convert/edit/docx/delete-table-row/range"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5360,6 +6390,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5367,9 +6398,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_body_async(
+    def edit_document_docx_body(
         self,
-        input: GetDocxBodyRequest,
+        input: GetDocxBodyRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5381,12 +6412,28 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Returns the body defined in the Word Document (DOCX) format file; this
         is the main content part of a DOCX document
+
+        Swagger operation ID: `EditDocument_DocxBody`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/get-body"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5400,6 +6447,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5407,9 +6455,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_get_comments_hierarchical_async(
+    def edit_document_docx_get_comments_hierarchical(
         self,
-        input: GetDocxGetCommentsHierarchicalRequest,
+        input: GetDocxGetCommentsHierarchicalRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5422,13 +6470,29 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Returns the comments and review annotations stored in the Word Document
         (DOCX) format file hierarchically, where reply comments are nested as
         children under top-level comments in the results returned.
+
+        Swagger operation ID: `EditDocument_DocxGetCommentsHierarchical`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/convert/edit/docx/get-comments/hierarchical"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5442,6 +6506,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5449,9 +6514,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_get_headers_and_footers_async(
+    def edit_document_docx_get_headers_and_footers(
         self,
-        input: GetDocxHeadersAndFootersRequest,
+        input: GetDocxHeadersAndFootersRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5462,13 +6527,29 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Get content of a footer from a Word DOCX document
 
         Returns the footer content from a Word Document (DOCX) format file
+
+        Swagger operation ID: `EditDocument_DocxGetHeadersAndFooters`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/convert/edit/docx/get-headers-and-footers"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5482,6 +6563,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5489,9 +6571,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_get_images_async(
+    def edit_document_docx_get_images(
         self,
-        input: GetDocxImagesRequest,
+        input: GetDocxImagesRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5502,12 +6584,28 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Get images from a Word DOCX document
 
         Returns the images defined in the Word Document (DOCX) format file
+
+        Swagger operation ID: `EditDocument_DocxGetImages`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/get-images"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5521,6 +6619,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5528,9 +6627,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_pages_async(
+    def edit_document_docx_pages(
         self,
-        input: GetDocxPagesRequest,
+        input: GetDocxPagesRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5542,12 +6641,28 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Returns the pages and contents of each page defined in the Word
         Document (DOCX) format file
+
+        Swagger operation ID: `EditDocument_DocxPages`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/get-pages"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5561,6 +6676,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5568,9 +6684,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_get_sections_async(
+    def edit_document_docx_get_sections(
         self,
-        input: GetDocxSectionsRequest,
+        input: GetDocxSectionsRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5581,12 +6697,28 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Get sections from a Word DOCX document
 
         Returns the sections defined in the Word Document (DOCX) format file
+
+        Swagger operation ID: `EditDocument_DocxGetSections`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/get-sections"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5600,6 +6732,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5607,9 +6740,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_get_styles_async(
+    def edit_document_docx_get_styles(
         self,
-        input: GetDocxStylesRequest,
+        input: GetDocxStylesRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5620,12 +6753,28 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Get styles from a Word DOCX document
 
         Returns the styles defined in the Word Document (DOCX) format file
+
+        Swagger operation ID: `EditDocument_DocxGetStyles`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/get-styles"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5639,6 +6788,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5646,9 +6796,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_get_table_row_async(
+    def edit_document_docx_get_table_row(
         self,
-        input: GetDocxTableRowRequest,
+        input: GetDocxTableRowRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5660,12 +6810,28 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Gets the contents of an existing table row in a Word DOCX Document and
         returns the result.
+
+        Swagger operation ID: `EditDocument_DocxGetTableRow`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/get-table-row"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5679,6 +6845,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5686,9 +6853,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_get_table_by_index_async(
+    def edit_document_docx_get_table_by_index(
         self,
-        input: GetDocxTableByIndexRequest,
+        input: GetDocxTableByIndexRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5700,13 +6867,29 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Returns the specific table object by its 0-based index in an Office
         Word Document (DOCX)
+
+        Swagger operation ID: `EditDocument_DocxGetTableByIndex`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/convert/edit/docx/get-table/by-index"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5720,6 +6903,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5727,9 +6911,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_get_tables_async(
+    def edit_document_docx_get_tables(
         self,
-        input: GetDocxTablesRequest,
+        input: GetDocxTablesRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5740,12 +6924,28 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Get all tables in Word DOCX document
 
         Returns all the table objects in an Office Word Document (docx)
+
+        Swagger operation ID: `EditDocument_DocxGetTables`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/get-tables"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5759,6 +6959,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5766,9 +6967,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_insert_comment_on_paragraph_async(
+    def edit_document_docx_insert_comment_on_paragraph(
         self,
-        input: DocxInsertCommentOnParagraphRequest,
+        input: DocxInsertCommentOnParagraphRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5781,13 +6982,29 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Adds a new comment into a Word DOCX document attached to a paragraph
         and returns the result. Call Finish Editing on the output URL to
         complete the operation.
+
+        Swagger operation ID: `EditDocument_DocxInsertCommentOnParagraph`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/convert/edit/docx/insert-comment/on/paragraph"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5801,6 +7018,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5808,9 +7026,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_insert_image_async(
+    def edit_document_docx_insert_image(
         self,
-        input: DocxInsertImageRequest,
+        input: DocxInsertImageRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5822,12 +7040,28 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Set the footer in a Word Document (DOCX). Call Finish Editing on the
         output URL to complete the operation.
+
+        Swagger operation ID: `EditDocument_DocxInsertImage`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/insert-image"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5841,6 +7075,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5848,9 +7083,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_insert_paragraph_async(
+    def edit_document_docx_insert_paragraph(
         self,
-        input: InsertDocxInsertParagraphRequest,
+        input: InsertDocxInsertParagraphRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5864,13 +7099,29 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         at the beginning/end of a document, or before/after an existing object
         using its Path (location within the document). Call Finish Editing on
         the output URL to complete the operation.
+
+        Swagger operation ID: `EditDocument_DocxInsertParagraph`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/convert/edit/docx/insert-paragraph"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5884,6 +7135,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5891,9 +7143,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_insert_table_async(
+    def edit_document_docx_insert_table(
         self,
-        input: InsertDocxTablesRequest,
+        input: InsertDocxTablesRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5905,12 +7157,28 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Adds a new table into a DOCX and returns the result. Call Finish
         Editing on the output URL to complete the operation.
+
+        Swagger operation ID: `EditDocument_DocxInsertTable`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/insert-table"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5924,6 +7192,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5931,9 +7200,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_insert_table_row_async(
+    def edit_document_docx_insert_table_row(
         self,
-        input: InsertDocxTableRowRequest,
+        input: InsertDocxTableRowRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5945,13 +7214,29 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Adds a new table row into a DOCX Document and returns the result. Call
         Finish Editing on the output URL to complete the operation.
+
+        Swagger operation ID: `EditDocument_DocxInsertTableRow`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/convert/edit/docx/insert-table-row"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5965,6 +7250,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5972,9 +7258,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_remove_headers_and_footers_async(
+    def edit_document_docx_remove_headers_and_footers(
         self,
-        input: RemoveDocxHeadersAndFootersRequest,
+        input: RemoveDocxHeadersAndFootersRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5986,13 +7272,29 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Remove all headers, or footers, or both from a Word Document (DOCX).
         Call Finish Editing on the output URL to complete the operation.
+
+        Swagger operation ID: `EditDocument_DocxRemoveHeadersAndFooters`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/convert/edit/docx/remove-headers-and-footers"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6006,6 +7308,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6013,9 +7316,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_remove_object_async(
+    def edit_document_docx_remove_object(
         self,
-        input: DocxRemoveObjectRequest,
+        input: DocxRemoveObjectRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6030,12 +7333,28 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         delete. You can call other functions such as Get-Tables, Get-Images,
         Get-Body, etc. to get the paths of the objects in the document. Call
         Finish Editing on the output URL to complete the operation.
+
+        Swagger operation ID: `EditDocument_DocxRemoveObject`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/remove-object"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6049,6 +7368,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6056,9 +7376,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_replace_async(
+    def edit_document_docx_replace(
         self,
-        input: ReplaceStringRequest,
+        input: ReplaceStringRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6069,12 +7389,28 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Replace string in Word DOCX document
 
         Replace all instances of a string in an Office Word Document (docx)
+
+        Swagger operation ID: `EditDocument_DocxReplace`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/replace-all"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6088,13 +7424,14 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
 
-    async def edit_document_docx_set_footer_async(
+    def edit_document_docx_set_footer(
         self,
-        input: DocxSetFooterRequest,
+        input: DocxSetFooterRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6106,12 +7443,28 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Set the footer in a Word Document (DOCX). Call Finish Editing on the
         output URL to complete the operation.
+
+        Swagger operation ID: `EditDocument_DocxSetFooter`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/set-footer"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6125,6 +7478,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6132,9 +7486,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_set_footer_add_page_number_async(
+    def edit_document_docx_set_footer_add_page_number(
         self,
-        input: DocxSetFooterAddPageNumberRequest,
+        input: DocxSetFooterAddPageNumberRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6146,13 +7500,29 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Set the footer in a Word Document (DOCX) to contain a page number. Call
         Finish Editing on the output URL to complete the operation.
+
+        Swagger operation ID: `EditDocument_DocxSetFooterAddPageNumber`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/convert/edit/docx/set-footer/add-page-number"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6166,6 +7536,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6173,9 +7544,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_set_header_async(
+    def edit_document_docx_set_header(
         self,
-        input: DocxSetHeaderRequest,
+        input: DocxSetHeaderRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6187,12 +7558,28 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Set the header in a Word Document (DOCX). Call Finish Editing on the
         output URL to complete the operation.
+
+        Swagger operation ID: `EditDocument_DocxSetHeader`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/set-header"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6206,6 +7593,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6213,9 +7601,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_update_table_cell_async(
+    def edit_document_docx_update_table_cell(
         self,
-        input: UpdateDocxTableCellRequest,
+        input: UpdateDocxTableCellRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6228,13 +7616,29 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Sets the contents of a table cell into a DOCX Document and returns the
         result. Call Finish Editing on the output URL to complete the
         operation.
+
+        Swagger operation ID: `EditDocument_DocxUpdateTableCell`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/convert/edit/docx/update-table-cell"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6248,6 +7652,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6255,9 +7660,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_update_table_row_async(
+    def edit_document_docx_update_table_row(
         self,
-        input: UpdateDocxTableRowRequest,
+        input: UpdateDocxTableRowRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6271,13 +7676,29 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Sets the contents of a table row into a DOCX Document and returns the
         result. Call Finish Editing on the output URL to complete the
         operation.
+
+        Swagger operation ID: `EditDocument_DocxUpdateTableRow`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/convert/edit/docx/update-table-row"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6291,6 +7712,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6298,9 +7720,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_finish_editing_async(
+    def edit_document_finish_editing(
         self,
-        input: FinishEditingRequest,
+        input: FinishEditingRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6313,12 +7735,28 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Once done editing a document, download the result. Begin editing a
         document by calling begin-editing, then perform operations, then call
         finish-editing to get the result.
+
+        Swagger operation ID: `EditDocument_FinishEditing`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/finish-editing"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6332,13 +7770,14 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
 
-    async def edit_document_pptx_delete_slides_async(
+    def edit_document_pptx_delete_slides(
         self,
-        input: RemovePptxSlidesRequest,
+        input: RemovePptxSlidesRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6350,12 +7789,28 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Edits the input PowerPoint PPTX presentation document to remove the
         specified slides
+
+        Swagger operation ID: `EditDocument_PptxDeleteSlides`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/pptx/delete-slides"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6369,13 +7824,14 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
 
-    async def edit_document_pptx_replace_async(
+    def edit_document_pptx_replace(
         self,
-        input: ReplaceStringRequest,
+        input: ReplaceStringRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6387,12 +7843,28 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Replace all instances of a string in an Office PowerPoint Document
         (pptx)
+
+        Swagger operation ID: `EditDocument_PptxReplace`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/pptx/replace-all"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6406,13 +7878,14 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
 
-    async def edit_document_xlsx_clear_cell_by_index_async(
+    def edit_document_xlsx_clear_cell_by_index(
         self,
-        input: ClearXlsxCellRequest,
+        input: ClearXlsxCellRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6424,13 +7897,29 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Clears, sets to blank, the contents of a specific cell in an Excel XLSX
         spreadsheet, worksheet
+
+        Swagger operation ID: `EditDocument_XlsxClearCellByIndex`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/convert/edit/xlsx/clear-cell/by-index"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6444,6 +7933,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6451,9 +7941,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_xlsx_create_blank_spreadsheet_async(
+    def edit_document_xlsx_create_blank_spreadsheet(
         self,
-        input: CreateBlankSpreadsheetRequest,
+        input: CreateBlankSpreadsheetRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6464,12 +7954,28 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Create a blank Excel XLSX spreadsheet
 
         Returns a blank Excel XLSX Spreadsheet (XLSX) format file
+
+        Swagger operation ID: `EditDocument_XlsxCreateBlankSpreadsheet`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/xlsx/create/blank"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6483,6 +7989,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6490,9 +7997,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_xlsx_create_spreadsheet_from_data_async(
+    def edit_document_xlsx_create_spreadsheet_from_data(
         self,
-        input: CreateSpreadsheetFromDataRequest,
+        input: CreateSpreadsheetFromDataRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6504,13 +8011,29 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Returns a new Excel XLSX Spreadsheet (XLSX) format file populated with
         column and row data specified as input
+
+        Swagger operation ID: `EditDocument_XlsxCreateSpreadsheetFromData`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/convert/edit/xlsx/create/from/data"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6524,6 +8047,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6531,9 +8055,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_xlsx_delete_worksheet_async(
+    def edit_document_xlsx_delete_worksheet(
         self,
-        input: RemoveXlsxWorksheetRequest,
+        input: RemoveXlsxWorksheetRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6546,13 +8070,29 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Edits the input Excel XLSX spreadsheet document to remove the specified
         worksheet (tab). Use the Get Worksheets API to enumerate available
         worksheets in a spreadsheet.
+
+        Swagger operation ID: `EditDocument_XlsxDeleteWorksheet`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/convert/edit/xlsx/delete-worksheet"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6566,6 +8106,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6573,9 +8114,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_xlsx_get_cell_by_identifier_async(
+    def edit_document_xlsx_get_cell_by_identifier(
         self,
-        input: GetXlsxCellByIdentifierRequest,
+        input: GetXlsxCellByIdentifierRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6587,13 +8128,29 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Returns the value of a specific cell based on its identifier (e.g. A1,
         B22, C33, etc.) in the Excel Spreadsheet worksheet
+
+        Swagger operation ID: `EditDocument_XlsxGetCellByIdentifier`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/convert/edit/xlsx/get-cell/by-identifier"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6607,6 +8164,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6614,9 +8172,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_xlsx_get_cell_by_index_async(
+    def edit_document_xlsx_get_cell_by_index(
         self,
-        input: GetXlsxCellRequest,
+        input: GetXlsxCellRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6628,13 +8186,29 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Returns the value and definition of a specific cell in a specific row
         in the Excel Spreadsheet worksheet
+
+        Swagger operation ID: `EditDocument_XlsxGetCellByIndex`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/convert/edit/xlsx/get-cell/by-index"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6648,6 +8222,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6655,9 +8230,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_xlsx_get_columns_async(
+    def edit_document_xlsx_get_columns(
         self,
-        input: GetXlsxColumnsRequest,
+        input: GetXlsxColumnsRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6668,12 +8243,28 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Get rows and cells from a Excel XLSX spreadsheet, worksheet
 
         Returns the rows and cells defined in the Excel Spreadsheet worksheet
+
+        Swagger operation ID: `EditDocument_XlsxGetColumns`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/xlsx/get-columns"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6687,6 +8278,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6694,9 +8286,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_xlsx_get_images_async(
+    def edit_document_xlsx_get_images(
         self,
-        input: GetXlsxImagesRequest,
+        input: GetXlsxImagesRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6707,12 +8299,28 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Get images from a Excel XLSX spreadsheet, worksheet
 
         Returns the images defined in the Excel Spreadsheet worksheet
+
+        Swagger operation ID: `EditDocument_XlsxGetImages`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/xlsx/get-images"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6726,6 +8334,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6733,9 +8342,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_xlsx_get_rows_and_cells_async(
+    def edit_document_xlsx_get_rows_and_cells(
         self,
-        input: GetXlsxRowsAndCellsRequest,
+        input: GetXlsxRowsAndCellsRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6746,13 +8355,29 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Get rows and cells from a Excel XLSX spreadsheet, worksheet
 
         Returns the rows and cells defined in the Excel Spreadsheet worksheet
+
+        Swagger operation ID: `EditDocument_XlsxGetRowsAndCells`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/convert/edit/xlsx/get-rows-and-cells"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6766,6 +8391,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6773,9 +8399,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_xlsx_get_styles_async(
+    def edit_document_xlsx_get_styles(
         self,
-        input: GetXlsxStylesRequest,
+        input: GetXlsxStylesRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6786,12 +8412,28 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Get styles from a Excel XLSX spreadsheet, worksheet
 
         Returns the style defined in the Excel Spreadsheet
+
+        Swagger operation ID: `EditDocument_XlsxGetStyles`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/xlsx/get-styles"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6805,6 +8447,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6812,9 +8455,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_xlsx_get_worksheets_async(
+    def edit_document_xlsx_get_worksheets(
         self,
-        input: GetXlsxWorksheetsRequest,
+        input: GetXlsxWorksheetsRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6826,12 +8469,28 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Returns the worksheets (tabs) defined in the Excel Spreadsheet (XLSX)
         format file
+
+        Swagger operation ID: `EditDocument_XlsxGetWorksheets`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/xlsx/get-worksheets"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6845,6 +8504,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6852,9 +8512,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_xlsx_insert_worksheet_async(
+    def edit_document_xlsx_insert_worksheet(
         self,
-        input: InsertXlsxWorksheetRequest,
+        input: InsertXlsxWorksheetRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6865,13 +8525,29 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Insert a new worksheet into an Excel XLSX spreadsheet
 
         Inserts a new worksheet into an Excel Spreadsheet
+
+        Swagger operation ID: `EditDocument_XlsxInsertWorksheet`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/convert/edit/xlsx/insert-worksheet"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6885,6 +8561,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6892,9 +8569,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_xlsx_set_cell_by_identifier_async(
+    def edit_document_xlsx_set_cell_by_identifier(
         self,
-        input: SetXlsxCellByIdentifierRequest,
+        input: SetXlsxCellByIdentifierRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6907,13 +8584,29 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Sets, updates the contents of a specific cell in an Excel XLSX
         spreadsheet, worksheet using its cell identifier (e.g. A1, B22, C33) in
         the worksheet
+
+        Swagger operation ID: `EditDocument_XlsxSetCellByIdentifier`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/convert/edit/xlsx/set-cell/by-identifier"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6927,6 +8620,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6934,9 +8628,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_xlsx_set_cell_by_index_async(
+    def edit_document_xlsx_set_cell_by_index(
         self,
-        input: SetXlsxCellRequest,
+        input: SetXlsxCellRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6949,13 +8643,29 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Sets, updates the contents of a specific cell in an Excel XLSX
         spreadsheet, worksheet
+
+        Swagger operation ID: `EditDocument_XlsxSetCellByIndex`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/convert/edit/xlsx/set-cell/by-index"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6969,6 +8679,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6976,9 +8687,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def convert_web_html_to_docx_async(
+    def convert_web_html_to_docx(
         self,
-        input: HtmlToOfficeRequest,
+        input: HtmlToOfficeRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6989,10 +8700,26 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Convert HTML to Word DOCX Document
 
         Convert HTML to Office Word Document (DOCX) format
+
+        Swagger operation ID: `ConvertWeb_HtmlToDocx`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/convert/html/to/docx"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7006,13 +8733,14 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
 
-    async def convert_data_json_to_xml_async(
+    def convert_data_json_to_xml(
         self,
-        input: ConvertDataJsonToXmlInput,
+        input: ConvertDataJsonToXmlInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7023,10 +8751,26 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Convert JSON to XML conversion
 
         Convert a JSON object into XML
+
+        Swagger operation ID: `ConvertData_JsonToXml`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/convert/json/to/xml"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7040,6 +8784,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7047,9 +8792,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def convert_template_apply_html_template_async(
+    def convert_template_apply_html_template(
         self,
-        input: HtmlTemplateApplicationRequest,
+        input: HtmlTemplateApplicationRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7061,12 +8806,28 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Apply operations to fill in an HTML template, generating a final HTML
         result
+
+        Swagger operation ID: `ConvertTemplate_ApplyHtmlTemplate`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/template/html/apply"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7080,6 +8841,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7087,9 +8849,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def convert_web_html_to_pdf_async(
+    def convert_web_html_to_pdf(
         self,
-        input: HtmlToPdfRequest,
+        input: HtmlToPdfRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7101,10 +8863,26 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Fully renders a website and returns a PDF of the HTML. Javascript,
         HTML5, CSS and other advanced features are all supported.
+
+        Swagger operation ID: `ConvertWeb_HtmlToPdf`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/convert/web/html/to/pdf"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7118,13 +8896,14 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
 
-    async def convert_web_html_to_png_async(
+    def convert_web_html_to_png(
         self,
-        input: HtmlToPngRequest,
+        input: HtmlToPngRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7136,10 +8915,26 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Fully renders a website and returns a PNG (screenshot) of the HTML.
         Javascript, HTML5, CSS and other advanced features are all supported.
+
+        Swagger operation ID: `ConvertWeb_HtmlToPng`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/convert/web/html/to/png"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7153,6 +8948,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7160,9 +8956,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def convert_web_html_to_txt_async(
+    def convert_web_html_to_txt(
         self,
-        input: HtmlToTextRequest,
+        input: HtmlToTextRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7173,10 +8969,26 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Convert HTML string to text (txt)
 
         Converts an HTML string input into text (txt); extracts text from HTML
+
+        Swagger operation ID: `ConvertWeb_HtmlToTxt`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/convert/web/html/to/txt"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7190,6 +9002,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7197,9 +9010,9 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def convert_web_url_to_pdf_async(
+    def convert_web_url_to_pdf(
         self,
-        input: ScreenshotRequest,
+        input: ScreenshotRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7211,10 +9024,26 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Fully renders a website and returns a PDF of the full page. Javascript,
         HTML5, CSS and other advanced features are all supported.
+
+        Swagger operation ID: `ConvertWeb_UrlToPdf`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/convert/web/url/to/pdf"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7228,13 +9057,14 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
 
-    async def convert_web_url_to_screenshot_async(
+    def convert_web_url_to_screenshot(
         self,
-        input: ScreenshotRequest,
+        input: ScreenshotRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7247,12 +9077,28 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Fully renders a website and returns a PNG screenshot of the full page
         image. Javascript, HTML5, CSS and other advanced features are all
         supported.
+
+        Swagger operation ID: `ConvertWeb_UrlToScreenshot`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/web/url/to/screenshot"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7266,13 +9112,14 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
 
-    async def convert_web_url_to_txt_async(
+    def convert_web_url_to_txt(
         self,
-        input: UrlToTextRequest,
+        input: UrlToTextRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7283,10 +9130,26 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Convert website URL page to text (txt)
 
         Converts a website URL page into text (txt); extracts text from HTML
+
+        Swagger operation ID: `ConvertWeb_UrlToTxt`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/convert/web/url/to/txt"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7300,6 +9163,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Word Online (Business) Connector SDK Sample
+Word Online (Business) sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Word Online (Business) connector SDK.
+This sample demonstrates how to use the Word Online (Business) client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Word Online (Business) connection
@@ -20,10 +20,8 @@ Usage:
 
     python sample_connector_usage_wordonlinebusiness.py
 """
-
-import asyncio
 import os
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.wordonlinebusiness import (
     WordonlinebusinessClient,
@@ -42,7 +40,7 @@ DRIVE = os.environ.get("WORDONLINEBUSINESS_DRIVE", "")
 FILE = os.environ.get("WORDONLINEBUSINESS_FILE", "")
 
 
-async def example_1_populate_word_template():
+def example_1_populate_word_template():
     """Example 1: Populate a Microsoft Word template.
 
     Reads a Microsoft Word template and fills template fields with dynamic values
@@ -50,9 +48,9 @@ async def example_1_populate_word_template():
     """
     print("\n=== Example 1: Populate Word Template ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with WordonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with WordonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Create input with template field values
                 # The additional_properties dict contains the template field mappings
@@ -65,7 +63,7 @@ async def example_1_populate_word_template():
                     }
                 )
 
-                result = await client.create_file_item_async(
+                result = client.create_file_item(
                     input=input_data,
                     source=SOURCE,
                     drive=DRIVE,
@@ -80,16 +78,16 @@ async def example_1_populate_word_template():
                 print(f"Error: {ex}")
 
 
-async def example_2_create_word_document():
+def example_2_create_word_document():
     """Example 2: Create a Word document with content.
 
     Creates a new Microsoft Word file with the given content.
     """
     print("\n=== Example 2: Create Word Document ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with WordonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with WordonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Create document content
                 content = ContentBody(
@@ -97,7 +95,7 @@ async def example_2_create_word_document():
                             "It can include multiple paragraphs and formatting."
                 )
 
-                result = await client.create_word_file_with_content_async(
+                result = client.create_word_file_with_content(
                     input=content,
                     file_name="MyDocument.docx"
                 )
@@ -114,20 +112,20 @@ async def example_2_create_word_document():
                 print(f"Error: {ex}")
 
 
-async def example_3_create_word_document_without_filename():
+def example_3_create_word_document_without_filename():
     """Example 3: Create a Word document without specifying filename.
 
     Creates a new Microsoft Word file with auto-generated filename.
     """
     print("\n=== Example 3: Create Word Document (Auto-named) ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with WordonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with WordonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 content = ContentBody(content="Auto-generated document content.")
 
-                result = await client.create_word_file_with_content_async(input=content)
+                result = client.create_word_file_with_content(input=content)
 
                 if result:
                     print(f"Document created: {result}")
@@ -140,18 +138,18 @@ async def example_3_create_word_document_without_filename():
                 print(f"Error: {ex}")
 
 
-async def example_4_convert_word_to_pdf():
+def example_4_convert_word_to_pdf():
     """Example 4: Convert a Word document to PDF.
 
     Gets a PDF version of a selected Word file.
     """
     print("\n=== Example 4: Convert Word to PDF ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with WordonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with WordonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_file_pdf_async(
+                result = client.get_file_pdf(
                     source=SOURCE,
                     drive=DRIVE,
                     file=FILE
@@ -165,18 +163,18 @@ async def example_4_convert_word_to_pdf():
                 print(f"Error: {ex}")
 
 
-async def example_5_convert_with_sensitivity_labels():
+def example_5_convert_with_sensitivity_labels():
     """Example 5: Convert Word to PDF with sensitivity label extraction.
 
     Converts a Word document to PDF while extracting sensitivity label metadata.
     """
     print("\n=== Example 5: Convert with Sensitivity Labels ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with WordonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with WordonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_file_pdf_async(
+                result = client.get_file_pdf(
                     source=SOURCE,
                     drive=DRIVE,
                     file=FILE,
@@ -192,7 +190,7 @@ async def example_5_convert_with_sensitivity_labels():
                 print(f"Error: {ex}")
 
 
-async def main():
+def main():
     """Run all examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: WORDONLINEBUSINESS_CONNECTION_URL environment variable not set.")
@@ -205,14 +203,14 @@ async def main():
 
     print(f"Using connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
 
-    await example_1_populate_word_template()
-    await example_2_create_word_document()
-    await example_3_create_word_document_without_filename()
-    await example_4_convert_word_to_pdf()
-    await example_5_convert_with_sensitivity_labels()
+    example_1_populate_word_template()
+    example_2_create_word_document()
+    example_3_create_word_document_without_filename()
+    example_4_convert_word_to_pdf()
+    example_5_convert_with_sensitivity_labels()
 
     print("\n=== All examples completed ===")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

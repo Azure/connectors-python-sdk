@@ -5,20 +5,33 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "FreshserviceClient",
+    "AddNoteRequest",
+    "AddNoteResponse",
+    "CreateTicketRequest",
+    "CreateUpdateTicketResponse",
+    "ListTicketResponse",
+    "ListUsersResponse",
+    "TicketResponse",
+    "UpdateTicketRequest",
+    "UpdateTicketResponse",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -29,7 +42,7 @@ class AddNoteResponse:
     Response for Add a note to a ticket
     """
 
-    conversation: Optional[Dict[str, Any]] = None
+    conversation: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -38,7 +51,7 @@ class CreateUpdateTicketResponse:
     Response for Create a ticket
     """
 
-    ticket: Optional[Dict[str, Any]] = None
+    ticket: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -47,48 +60,52 @@ class ListTicketResponse:
     Response for When a ticket is created
     """
 
-    created_at: Optional[str] = None
+    created_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    department_id: Optional[int] = None
-    due_by: Optional[str] = None
+    department_id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    due_by: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    group_id: Optional[int] = None
+    group_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of Group to which the ticket is assigned."""
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Unique Id of the ticket."""
-    is_escalated: Optional[bool] = None
+    is_escalated: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Set to true if an escalation was sent."""
-    priority: Optional[int] = None
+    priority: Optional[int] = dataclass_field(default=None, kw_only=True)
     """A number representing the priority of the ticket."""
-    requester_id: Optional[int] = None
+    requester_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     User-id of the requester. For existing contacts, requester_id can be passed
     instead of email.
     """
-    responder_id: Optional[int] = None
+    responder_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of the agent to whom the ticket is assigned."""
-    source: Optional[int] = None
+    source: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     A number representing the channel through which the ticket was created.
     """
-    spam: Optional[bool] = None
+    spam: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Set as true if the ticket is marked as spam."""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """A number representing the status of the ticket."""
-    subject: Optional[str] = None
+    subject: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Ticket subject."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """Type property field as defined in ticket fields."""
-    updated_at: Optional[str] = None
+    updated_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    description_text: Optional[str] = None
+    description_text: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of the problem."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     HTML content of the ticket. Description and description_html should not be
     passed together.
     """
-    to_emails: Optional[List[str]] = None
+    to_emails: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Email addresses to which the incoming ticket email was sent."""
 
 
@@ -98,39 +115,39 @@ class CreateTicketRequest:
     Definition: CreateTicket_Request
     """
 
-    requester_id: Optional[int] = None
+    requester_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     User-id of the requester. One of the Requester ID, Requester Email and
     Requester Phone is required
     """
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Email of the requester. One of the Requester ID, Requester Email and
     Requester Phone is required
     """
-    phone: Optional[str] = None
+    phone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Phone number of the requester. One of the Requester ID, Requester Email and
     Requester Phone is required
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Name of the requester. This is a required field only if Requester Phone
     value is provided
     """
-    subject: Optional[str] = None
+    subject: str
     """The subject of the ticket."""
-    status: Optional[str] = None
+    status: str
     """Status of the ticket."""
-    priority: Optional[str] = None
+    priority: str
     """The priority of the ticket (such as Low, Medium, or High)."""
-    description: Optional[str] = None
+    description: str
     """The description of the ticket."""
-    urgency: Optional[str] = None
+    urgency: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Urgency of the problem (such as Low, Medium or High)."""
-    impact: Optional[str] = None
+    impact: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Impact of the problem (such as Low, Medium or High)."""
-    source: Optional[str] = None
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The channel through which the ticket was created."""
 
 
@@ -140,22 +157,22 @@ class UpdateTicketRequest:
     Definition: UpdateTicket_Request
     """
 
-    requester_id: Optional[int] = None
+    requester_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     User-id of the requester. For existing contacts, requester_id can be passed
     instead of email.
     """
-    subject: Optional[str] = None
+    subject: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The subject of the ticket."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Status of the ticket."""
-    priority: Optional[str] = None
+    priority: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The priority of the ticket (such as Low, Medium, or High)."""
-    urgency: Optional[str] = None
+    urgency: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Urgency of the problem (such as Low, Medium or High)."""
-    impact: Optional[str] = None
+    impact: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Impact of the problem (such as Low, Medium or High)."""
-    source: Optional[str] = None
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The channel through which the ticket was created."""
 
 
@@ -165,9 +182,9 @@ class AddNoteRequest:
     Definition: AddNote_Request
     """
 
-    body: Optional[str] = None
+    body: str
     """The note to be added to the ticket."""
-    private: Optional[bool] = None
+    private: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Set to true if message is private."""
 
 
@@ -177,85 +194,85 @@ class TicketResponse:
     Definition: Ticket_Response
     """
 
-    created_at: Optional[str] = None
+    created_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    deleted: Optional[bool] = None
+    deleted: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Set as true if the ticket is deleted/trashed. Deleted tickets will not be
     considered in any views except 'deleted' filter.
     """
-    department_id_value: Optional[int] = None
-    display_id: Optional[int] = None
+    department_id_value: Optional[int] = dataclass_field(default=None, kw_only=True)
+    display_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Ticket Id specific to your account."""
-    due_by: Optional[str] = None
+    due_by: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    group_id: Optional[int] = None
+    group_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of Group to which the ticket is assigned."""
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Unique Id of the ticket."""
-    impact: Optional[int] = None
+    impact: Optional[int] = dataclass_field(default=None, kw_only=True)
     """A number representing the impact of the problem."""
-    isescalated: Optional[bool] = None
+    isescalated: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Set to true if an escalation was sent."""
-    owner_id: Optional[str] = None
+    owner_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Id of the agent to whom the problem is assigned."""
-    priority: Optional[int] = None
+    priority: Optional[int] = dataclass_field(default=None, kw_only=True)
     """A number representing the priority of the ticket."""
-    requester_id: Optional[int] = None
+    requester_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     User-id of the requester. For existing contacts, requester_id can be passed
     instead of email.
     """
-    responder_id: Optional[int] = None
+    responder_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of the agent to whom the ticket is assigned."""
-    source: Optional[int] = None
+    source: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     A number representing the channel through which the ticket was created.
     """
-    spam: Optional[bool] = None
+    spam: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Set as true if the ticket is marked as spam."""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """A number representing the status of the ticket."""
-    subject: Optional[str] = None
+    subject: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Ticket subject."""
-    ticket_type: Optional[str] = None
+    ticket_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Type property field as defined in ticket fields."""
-    to_email: Optional[str] = None
+    to_email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address to which the incoming ticket email was sent."""
-    updated_at: Optional[str] = None
+    updated_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    urgency: Optional[int] = None
+    urgency: Optional[int] = dataclass_field(default=None, kw_only=True)
     """A number representing the urgency of the problem."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of the problem."""
-    description_html: Optional[str] = None
+    description_html: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     HTML content of the ticket. Description and description_html should not be
     passed together.
     """
-    status_name: Optional[str] = None
+    status_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Status of the ticket."""
-    priority_name: Optional[str] = None
+    priority_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Priority of the ticket."""
-    source_name: Optional[str] = None
+    source_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The channel through which the ticket was created."""
-    responder_name: Optional[str] = None
+    responder_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the agent to whom the ticket is assigned."""
-    to_emails: Optional[List[str]] = None
+    to_emails: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Email addresses to which the incoming ticket email was sent."""
-    department_name: Optional[str] = None
+    department_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the department."""
-    assoc_problem_id: Optional[int] = None
+    assoc_problem_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of the associated problem to the ticket."""
-    assoc_change_id: Optional[int] = None
+    assoc_change_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of the associated change to the problem."""
-    assoc_change_cause_id: Optional[int] = None
+    assoc_change_cause_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of the change causing the ticket."""
-    assoc_asset_id: Optional[int] = None
+    assoc_asset_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of the asset associated to the ticket."""
-    urgency_name: Optional[str] = None
+    urgency_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Urgency of the problem."""
-    impact_name: Optional[str] = None
+    impact_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Impact of the problem."""
 
 
@@ -265,7 +282,7 @@ class UpdateTicketResponse:
     Definition: UpdateTicket_Response
     """
 
-    ticket: Optional[Dict[str, Any]] = None
+    ticket: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 ListUsersResponse = List[Dict[str, Any]]
@@ -279,16 +296,16 @@ class FreshserviceClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -299,8 +316,8 @@ class FreshserviceClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -308,8 +325,8 @@ class FreshserviceClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -321,7 +338,7 @@ class FreshserviceClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -336,9 +353,9 @@ class FreshserviceClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "freshservice"
 
-    async def add_note_async(
+    def add_note(
         self,
-        input: AddNoteRequest,
+        input: AddNoteRequest | Mapping[str, Any],
         ticket_id: int,
         *,
         timeout: Optional[float] = None,
@@ -350,13 +367,30 @@ class FreshserviceClient(ConnectorClientBase):
         Add a note to a ticket
 
         Add a private or public note to a ticket.
+
+        Swagger operation ID: `AddNoteV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            ticket_id: The ticket id to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v2/tickets/{quote(str(ticket_id), safe='')}/notes"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -370,6 +404,7 @@ class FreshserviceClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -377,9 +412,9 @@ class FreshserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_ticket_async(
+    def create_ticket(
         self,
-        input: CreateTicketRequest,
+        input: CreateTicketRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -390,10 +425,26 @@ class FreshserviceClient(ConnectorClientBase):
         Create a ticket
 
         Create a ticket.
+
+        Swagger operation ID: `CreateTicketV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/v2/tickets"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -407,6 +458,7 @@ class FreshserviceClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -414,9 +466,9 @@ class FreshserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_ticket_async(
+    def update_ticket(
         self,
-        input: UpdateTicketRequest,
+        input: UpdateTicketRequest | Mapping[str, Any],
         ticket_id: int,
         *,
         timeout: Optional[float] = None,
@@ -428,13 +480,30 @@ class FreshserviceClient(ConnectorClientBase):
         Update a ticket
 
         Update a ticket (only specified values will be updated).
+
+        Swagger operation ID: `UpdateTicketV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            ticket_id: The ticket id to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v2/tickets/{quote(str(ticket_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -448,6 +517,7 @@ class FreshserviceClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

@@ -5,20 +5,44 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "AzuredigitaltwinsClient",
+    "AddModelsInput",
+    "AddRelationshipInput",
+    "AddTwinInput",
+    "GetComponentResult",
+    "GetModelByIdResponse",
+    "IncomingRelationship",
+    "ListIncomingRelationshipsResponse",
+    "ListModelsResponse",
+    "ListRelationshipsResponse",
+    "QueryResult",
+    "QueryTwinsInput",
+    "SendComponentTelemetryInput",
+    "SendTelemetryInput",
+    "TwinRelationship",
+    "TwinResult",
+    "UpdateComponentInput",
+    "UpdateModelInput",
+    "UpdateRelationshipInput",
+    "UpdateTwinInput",
+]
 
 
 # Type Definitions
@@ -32,15 +56,17 @@ class ListModelsResponse:
     Response for List Models
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Array values."""
-    continuation_token: Optional[str] = field(
+    continuation_token: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "continuationToken"},
     )
     """Continuation Token the next page of Twin Relationship."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of Models."""
@@ -52,19 +78,20 @@ class GetModelByIdResponse:
     Response for Get Model By Id
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The id of the model as specified in the model definition."""
-    upload_time: Optional[str] = field(
+    upload_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "uploadTime"},
     )
     """The time the model was uploaded to the service."""
-    decommissioned: Optional[bool] = None
+    decommissioned: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Indicates if the model is decommissioned. Decommissioned models cannot be
     referenced by newly created digital twins.
     """
-    model: Optional[Dict[str, Any]] = None
+    model: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Model reference."""
 
 
@@ -74,7 +101,7 @@ class UpdateModelInput:
     Update Model's Property
     """
 
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Request for the API."""
 
 
@@ -84,7 +111,7 @@ class TwinResult:
     Response for Get Twin by Id
     """
 
-    result: Optional[str] = None
+    result: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Results From the Twin."""
 
 
@@ -94,7 +121,7 @@ class AddTwinInput:
     Add Twin
     """
 
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Request for the API."""
 
 
@@ -104,7 +131,7 @@ class UpdateTwinInput:
     Update Twin
     """
 
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Request for the API."""
 
 
@@ -114,7 +141,7 @@ class GetComponentResult:
     Response for Get Component
     """
 
-    result: Optional[str] = None
+    result: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Results From the Twin."""
 
 
@@ -124,7 +151,7 @@ class UpdateComponentInput:
     Update Component
     """
 
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Request for the API."""
 
 
@@ -134,30 +161,39 @@ class TwinRelationship:
     Response for Get Relationship by Id
     """
 
-    source_id: Optional[str] = field(
+    source_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "$sourceId"},
     )
     """Source Id."""
-    relationship_id: Optional[str] = field(
+    relationship_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "$relationshipId"},
     )
     """Relationship Id."""
-    target_id: Optional[str] = field(
+    target_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "$targetId"},
     )
     """Target Id."""
-    relationship_name: Optional[str] = field(
+    relationship_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "$relationshipName"},
     )
     """Relationship Name."""
-    etag: Optional[str] = field(default=None, metadata={"wire_name": "$etag"})
-    """E Tag Link."""
-    additional_properties: Optional[str] = field(
+    etag: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "$etag"},
+    )
+    """E Tag Link."""
+    additional_properties: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "additionalProperties"},
     )
     """Property Values."""
@@ -169,7 +205,7 @@ class AddRelationshipInput:
     Add Relationship
     """
 
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Request for the API."""
 
 
@@ -179,7 +215,7 @@ class UpdateRelationshipInput:
     Update Relationship
     """
 
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Request for the API."""
 
 
@@ -189,15 +225,17 @@ class ListIncomingRelationshipsResponse:
     Response for List Incoming Relationships
     """
 
-    value: Optional[List[IncomingRelationship]] = None
+    value: List[IncomingRelationship | Mapping[str, Any]]
     """The collection of Incoming relationships."""
-    continuation_token: Optional[str] = field(
+    continuation_token: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "continuationToken"},
     )
     """Continuation Token the next page of Twin Relationship."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of Incoming Relationship."""
@@ -209,7 +247,7 @@ class SendTelemetryInput:
     Send Telemetry
     """
 
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Send Telemetry Inputs."""
 
 
@@ -219,7 +257,7 @@ class SendComponentTelemetryInput:
     Send Component Telemetry
     """
 
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Send Component Telemetry Inputs."""
 
 
@@ -229,15 +267,17 @@ class ListRelationshipsResponse:
     Response for List Relationships
     """
 
-    value: Optional[List[TwinRelationship]] = None
+    value: List[TwinRelationship | Mapping[str, Any]]
     """The collection of twin relationships."""
-    continuation_token: Optional[str] = field(
+    continuation_token: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "continuationToken"},
     )
     """Continuation Token the next page of Twin Relationship."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of Twin Relationship."""
@@ -249,10 +289,11 @@ class QueryTwinsInput:
     Query API
     """
 
-    query: Optional[str] = None
+    query: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Query the Twins."""
-    continuation_token: Optional[str] = field(
+    continuation_token: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "continuationToken"},
     )
     """Link to get next set of items."""
@@ -264,10 +305,11 @@ class QueryResult:
     Response for Query API
     """
 
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Results From the Twin."""
-    continuation_token: Optional[str] = field(
+    continuation_token: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "continuationToken"},
     )
     """Link to get next set of items."""
@@ -279,23 +321,27 @@ class IncomingRelationship:
     Definition: IncomingRelationship
     """
 
-    source_id: Optional[str] = field(
+    source_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "$sourceId"},
     )
     """Source Id."""
-    relationship_id: Optional[str] = field(
+    relationship_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "$relationshipId"},
     )
     """Relationship Id."""
-    relationship_name: Optional[str] = field(
+    relationship_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "$relationshipName"},
     )
     """Relationship Name."""
-    relationship_link: Optional[str] = field(
+    relationship_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "$relationshipLink"},
     )
     """Relationship Link."""
@@ -309,16 +355,16 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -329,8 +375,8 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -338,8 +384,8 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -351,7 +397,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -367,15 +413,49 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         return "azuredigitaltwins"
 
     def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
-        parsed_next_link = urlsplit(next_link)
-        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
             if next_link.startswith("/"):
                 return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
             if next_link.startswith("?"):
-                return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
 
-        parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
         connection_hostname = parsed_connection.hostname
         if next_link_hostname is None or connection_hostname is None:
@@ -392,7 +472,11 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 parsed_next_link.scheme == parsed_connection.scheme
                 and next_link_port == connection_port
             ):
-                return next_link
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
 
             raise ValueError(
                 "Pagination URL origin "
@@ -405,7 +489,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def add_models_async(
+    def add_models(
         self,
         input: AddModelsInput,
         *,
@@ -419,6 +503,21 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
         Uploads one or more models. When any error occurs, no models are
         uploaded.
+
+        Swagger operation ID: `AddModels`.
+
+        Args:
+            input: The request body.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/models"
         query_params = []
@@ -426,7 +525,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -440,6 +539,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -447,24 +547,42 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_models_async(
+    def list_models(
         self,
+        *,
         dependencies_for: Optional[str] = None,
         include_model_definition: Optional[str] = None,
-        continuation_token: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List Models
 
         Retrieves model metadata and, optionally, model definitions.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListModels`.
+
+        Args:
+            dependencies_for: The set of the models which will have their
+                dependencies retrieved. If omitted, all models are retrieved.
+            include_model_definition: When true the model definition will be
+                returned as part of the result.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/models"
         query_params = []
@@ -479,18 +597,20 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             if isinstance(include_model_definition, bool):
                 value = value.lower()
             query_params.append(f"includeModelDefinition={quote(value, safe='')}")
-        if continuation_token is not None:
-            value = str(continuation_token)
-            if isinstance(continuation_token, bool):
-                value = value.lower()
-            query_params.append(f"continuationToken={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -503,23 +623,32 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def delete_model_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def delete_model(
         self,
         modelid: str,
         *,
@@ -533,6 +662,22 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
         Deletes a model. A model can only be deleted if no other models
         reference it.
+
+        Swagger operation ID: `DeleteModel`.
+
+        Args:
+            modelid: The id of the Model. The id is unique within the service
+                and case sensitive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -543,7 +688,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -557,13 +702,14 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_model_by_id_async(
+    def get_model_by_id(
         self,
         modelid: str,
-        include_model_definition: Optional[str] = None,
         *,
+        include_model_definition: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -573,6 +719,24 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         Get Model By Id
 
         Retrieves model metadata and, optionally, the model definition.
+
+        Swagger operation ID: `GetModelById`.
+
+        Args:
+            modelid: The id of the Model. The id is unique within the service
+                and case sensitive.
+            include_model_definition: When true the model definition will be
+                returned as part of the result.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -588,7 +752,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -602,6 +766,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -609,9 +774,9 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_model_async(
+    def update_model(
         self,
-        input: UpdateModelInput,
+        input: UpdateModelInput | Mapping[str, Any],
         modelid: str,
         *,
         timeout: Optional[float] = None,
@@ -623,6 +788,24 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         Update Model's Property
 
         Updates the metadata for a model.
+
+        Swagger operation ID: `UpdateModel`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            modelid: The id of the Model. The id is unique within the service
+                and case sensitive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -633,7 +816,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -647,9 +830,10 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_twin_by_id_async(
+    def get_twin_by_id(
         self,
         twinid: str,
         *,
@@ -662,6 +846,22 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         Get Twin by Id
 
         Retrieves a digital twin and its data.
+
+        Swagger operation ID: `GetTwinById`.
+
+        Args:
+            twinid: The id of the digital twin. The id is unique within the
+                service and case sensitive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -672,7 +872,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -686,6 +886,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -693,7 +894,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_twin_async(
+    def delete_twin(
         self,
         twinid: str,
         *,
@@ -707,6 +908,22 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
         Deletes a digital twin. All relationships referencing the digital twin
         must already be deleted.
+
+        Swagger operation ID: `DeleteTwin`.
+
+        Args:
+            twinid: The id of the digital twin. The id is unique within the
+                service and case sensitive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -717,7 +934,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -731,11 +948,12 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def add_twin_async(
+    def add_twin(
         self,
-        input: AddTwinInput,
+        input: AddTwinInput | Mapping[str, Any],
         twinid: str,
         *,
         timeout: Optional[float] = None,
@@ -747,6 +965,24 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         Add Twin
 
         Adds or replaces a digital twin.
+
+        Swagger operation ID: `AddTwin`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            twinid: The id of the digital twin. The id is unique within the
+                service and case sensitive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -757,7 +993,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -771,6 +1007,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -778,9 +1015,9 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_twin_async(
+    def update_twin(
         self,
-        input: UpdateTwinInput,
+        input: UpdateTwinInput | Mapping[str, Any],
         twinid: str,
         *,
         timeout: Optional[float] = None,
@@ -792,6 +1029,24 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         Update Twin
 
         Updates properties on a twin.
+
+        Swagger operation ID: `UpdateTwin`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            twinid: The id of the digital twin. The id is unique within the
+                service and case sensitive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -802,7 +1057,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -816,9 +1071,10 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_component_async(
+    def get_component(
         self,
         twinid: str,
         component_path: str,
@@ -832,6 +1088,23 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         Get Component
 
         Retrieves a component from a digital twin.
+
+        Swagger operation ID: `GetComponent`.
+
+        Args:
+            twinid: The id of the digital twin. The id is unique within the
+                service and case sensitive.
+            component_path: The name of the DTDL component.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -845,7 +1118,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -859,6 +1132,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -866,9 +1140,9 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_component_async(
+    def update_component(
         self,
-        input: UpdateComponentInput,
+        input: UpdateComponentInput | Mapping[str, Any],
         twinid: str,
         component_path: str,
         *,
@@ -881,6 +1155,25 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         Update Component
 
         Updates integer properties on a component of a twin.
+
+        Swagger operation ID: `UpdateComponent`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            twinid: The id of the digital twin. The id is unique within the
+                service and case sensitive.
+            component_path: The name of the DTDL component.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -894,7 +1187,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -908,9 +1201,10 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_relationship_by_id_async(
+    def get_relationship_by_id(
         self,
         twinid: str,
         relationship_id: str,
@@ -924,6 +1218,24 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         Get Relationship by Id
 
         Retrieves a relationship between two digital twins.
+
+        Swagger operation ID: `GetRelationshipById`.
+
+        Args:
+            twinid: The id of the digital twin. The id is unique within the
+                service and case sensitive.
+            relationship_id: The id of the relationship. The id is unique
+                within the digital twin and case sensitive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -937,7 +1249,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -951,6 +1263,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -958,7 +1271,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_relationship_async(
+    def delete_relationship(
         self,
         twinid: str,
         relationship_id: str,
@@ -972,6 +1285,24 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         Delete Relationship
 
         Deletes a relationship between two digital twins.
+
+        Swagger operation ID: `DeleteRelationship`.
+
+        Args:
+            twinid: The id of the digital twin. The id is unique within the
+                service and case sensitive.
+            relationship_id: The id of the relationship. The id is unique
+                within the digital twin and case sensitive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -985,7 +1316,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -999,11 +1330,12 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def add_relationship_async(
+    def add_relationship(
         self,
-        input: AddRelationshipInput,
+        input: AddRelationshipInput | Mapping[str, Any],
         twinid: str,
         relationship_id: str,
         *,
@@ -1016,6 +1348,26 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         Add Relationship
 
         Adds a relationship between two digital twins.
+
+        Swagger operation ID: `AddRelationship`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            twinid: The id of the digital twin. The id is unique within the
+                service and case sensitive.
+            relationship_id: The id of the relationship. The id is unique
+                within the digital twin and case sensitive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1029,7 +1381,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1043,6 +1395,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1050,9 +1403,9 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_relationship_async(
+    def update_relationship(
         self,
-        input: UpdateRelationshipInput,
+        input: UpdateRelationshipInput | Mapping[str, Any],
         twinid: str,
         relationship_id: str,
         *,
@@ -1065,6 +1418,26 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         Update Relationship
 
         Updates integer properties on a relationship between two digital twins.
+
+        Swagger operation ID: `UpdateRelationship`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            twinid: The id of the digital twin. The id is unique within the
+                service and case sensitive.
+            relationship_id: The id of the relationship. The id is unique
+                within the digital twin and case sensitive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1078,7 +1451,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1092,25 +1465,42 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def list_incoming_relationships_async(
+    def list_incoming_relationships(
         self,
         twinid: str,
-        continuation_token: Optional[str] = None,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List Incoming Relationships
 
         Retrieves all incoming relationships for a digital twin.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListIncomingRelationships`.
+
+        Args:
+            twinid: The id of the digital twin. The id is unique within the
+                service and case sensitive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1120,18 +1510,20 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         )
         query_params = []
         query_params.append("api-version=" + quote("2020-10-31", safe=''))
-        if continuation_token is not None:
-            value = str(continuation_token)
-            if isinstance(continuation_token, bool):
-                value = value.lower()
-            query_params.append(f"continuationToken={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1144,25 +1536,34 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def send_telemetry_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def send_telemetry(
         self,
-        input: SendTelemetryInput,
+        input: SendTelemetryInput | Mapping[str, Any],
         twinid: str,
         *,
         timeout: Optional[float] = None,
@@ -1174,6 +1575,24 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         Send Telemetry
 
         Sends telemetry on behalf of a digital twin.
+
+        Swagger operation ID: `SendTelemetry`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            twinid: The id of the digital twin. The id is unique within the
+                service and case sensitive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1184,7 +1603,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1198,11 +1617,12 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def send_component_telemetry_async(
+    def send_component_telemetry(
         self,
-        input: SendComponentTelemetryInput,
+        input: SendComponentTelemetryInput | Mapping[str, Any],
         twinid: str,
         component_path: str,
         *,
@@ -1215,6 +1635,25 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         Send Component Telemetry
 
         Sends telemetry on behalf of a component in a digital twin.
+
+        Swagger operation ID: `SendComponentTelemetry`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            twinid: The id of the digital twin. The id is unique within the
+                service and case sensitive.
+            component_path: The name of the DTDL component.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1229,7 +1668,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1243,25 +1682,42 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def list_relationships_async(
+    def list_relationships(
         self,
         twinid: str,
-        continuation_token: Optional[str] = None,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List Relationships
 
         Retrieves all outgoing relationships from a digital twin.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListRelationships`.
+
+        Args:
+            twinid: The id of the digital twin. The id is unique within the
+                service and case sensitive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1269,18 +1725,20 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         )
         query_params = []
         query_params.append("api-version=" + quote("2020-10-31", safe=''))
-        if continuation_token is not None:
-            value = str(continuation_token)
-            if isinstance(continuation_token, bool):
-                value = value.lower()
-            query_params.append(f"continuationToken={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1293,25 +1751,34 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def query_twins_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def query_twins(
         self,
-        input: QueryTwinsInput,
+        input: QueryTwinsInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1323,6 +1790,22 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
         Executes a query that allows traversing relationships and filtering by
         property values.
+
+        Swagger operation ID: `QueryTwins`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/query"
         query_params = []
@@ -1330,7 +1813,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1344,6 +1827,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

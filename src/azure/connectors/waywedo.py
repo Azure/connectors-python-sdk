@@ -5,20 +5,49 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "WaywedoClient",
+    "ChecklistComment",
+    "ChecklistCreateWebHookInput",
+    "ChecklistInstance",
+    "ChecklistInstancesInput",
+    "ChecklistStep",
+    "ChecklistStepCompletedWebHookInput",
+    "ChecklistStepsCompleteInput",
+    "ChecklistStepsCompleteResponse",
+    "CollaboratorsAddInput",
+    "CollaboratorsAddResponse",
+    "CommentAddInput",
+    "CompletedStep",
+    "FinishChecklistWebHookInput",
+    "GenerateAcceptancePDFWebHookInput",
+    "GetAllChecklistInstancesResponse",
+    "InviteSupervisorWebHookInput",
+    "NewCommentWebHookInput",
+    "Procedure",
+    "ProcedureAcceptance",
+    "User",
+    "UsersInput",
+    "UsersPostResponse",
+    "WebhookRegistered",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -29,24 +58,19 @@ class CommentAddInput:
     Add a comment to a checklist instance step
     """
 
-    instance_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "instanceId"},
-    )
+    instance_id: str = dataclass_field(metadata={"wire_name": "instanceId"})
     """Select the checklist instance"""
-    step_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "stepId"},
-    )
+    step_id: str = dataclass_field(metadata={"wire_name": "stepId"})
     """Select the step of the checklist instance"""
-    user_id: Optional[int] = field(
+    user_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userId"},
     )
     """Select the user creating the comment"""
-    message: Optional[str] = None
+    message: str
     """Specify the comment to add"""
-    bot: Optional[str] = None
+    bot: str
     """The name of the bot creating the comment"""
 
 
@@ -56,46 +80,57 @@ class ChecklistComment:
     Response for Add a comment to a checklist instance step
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the comment."""
-    type_: Optional[int] = field(default=None, metadata={"wire_name": "type"})
-    """The type of comment; either 1 (standard) or 2 (attachment)."""
-    procedure_id: Optional[int] = field(
+    type_: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    """The type of comment; either 1 (standard) or 2 (attachment)."""
+    procedure_id: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "procedureId"},
     )
     """The unique ID of the procedure."""
-    procedure_title: Optional[str] = field(
+    procedure_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "procedureTitle"},
     )
     """The title of the procedure."""
-    instance_id: Optional[str] = field(
+    instance_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "instanceId"},
     )
     """The unique ID of the checklist instance."""
-    step_id: Optional[str] = field(
+    step_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "stepId"},
     )
     """The unique ID of the checklist step."""
-    instance_title: Optional[str] = field(
+    instance_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "instanceTitle"},
     )
     """The title of the checklist instance."""
-    comment: Optional[str] = None
+    comment: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The comment text added to the step."""
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date and time the comment was created."""
-    created_by: Optional[str] = field(
+    created_by: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdBy"},
     )
     """The email address of the user who created the comment."""
-    image_url: Optional[str] = field(
+    image_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "imageUrl"},
     )
     """The URL to the attached file. Valid for 5 minutes."""
@@ -107,24 +142,23 @@ class ChecklistInstancesInput:
     Create Checklist Instance
     """
 
-    procedure_id: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "procedureId"},
-    )
+    procedure_id: int = dataclass_field(metadata={"wire_name": "procedureId"})
     """Select a checklist master"""
-    title: Optional[str] = None
+    title: str
     """The title of the checklist instance"""
-    user_id: Optional[int] = field(
+    user_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userId"},
     )
     """Select the user to add as a collaborator"""
-    company_role_id: Optional[int] = field(
+    company_role_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "companyRoleId"},
     )
     """Select the company role to add as a collaborator."""
-    bot: Optional[str] = None
+    bot: str
     """The name of the bot creating the instance"""
 
 
@@ -134,33 +168,37 @@ class ChecklistInstance:
     Response for Create Checklist Instance
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the checklist instance."""
-    procedure_id: Optional[int] = field(
+    procedure_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "procedureId"},
     )
     """The unique ID of the procedure."""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The title of the checklist instance."""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The URL to the checklist instance."""
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date and time the checklist instance was started."""
-    created_by: Optional[str] = field(
+    created_by: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdBy"},
     )
     """The email address of the user who started the checklist instance."""
-    finished: Optional[str] = None
+    finished: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date and time the checklist instance was finished."""
-    earliest_due: Optional[str] = field(
+    earliest_due: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "earliestDue"},
     )
     """The earliest date and time the checklist instance could be due."""
-    latest_due: Optional[str] = field(
+    latest_due: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "latestDue"},
     )
     """The latest date and time the checklist instance could be due."""
@@ -172,11 +210,11 @@ class ChecklistStep:
     Response for Find Checklist Step
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the instance step."""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The title of the instance step."""
-    ordinal: Optional[int] = None
+    ordinal: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of the instance step."""
 
 
@@ -186,12 +224,9 @@ class ChecklistStepsCompleteInput:
     Complete a Checklist Step
     """
 
-    user_id: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "userId"},
-    )
+    user_id: int = dataclass_field(metadata={"wire_name": "userId"})
     """Select the user completing the step"""
-    bot: Optional[str] = None
+    bot: str
     """The name of the bot that completed the checklist step"""
 
 
@@ -201,7 +236,7 @@ class ChecklistStepsCompleteResponse:
     Response for Complete a Checklist Step
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -214,17 +249,18 @@ class CollaboratorsAddInput:
     Add Collaborators to a Checklist Instance
     """
 
-    checklist_instance_id: Optional[str] = field(
-        default=None,
+    checklist_instance_id: str = dataclass_field(
         metadata={"wire_name": "checklistInstanceId"},
     )
     """Select the checklist instance"""
-    user_ids: Optional[List[int]] = field(
+    user_ids: Optional[List[int]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userIds"},
     )
-    company_role_ids: Optional[List[int]] = field(
+    company_role_ids: Optional[List[int]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "companyRoleIds"},
     )
 
@@ -235,7 +271,7 @@ class CollaboratorsAddResponse:
     Response for Add Collaborators to a Checklist Instance
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -248,24 +284,29 @@ class Procedure:
     Response for Find Checklist
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the procedure."""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The title of the procedure."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The publishing status of the procedure."""
-    summary: Optional[str] = None
+    summary: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The summary of the procedure."""
-    created_by: Optional[str] = field(
+    created_by: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdBy"},
     )
     """The email of the user that created the procedure."""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The URL of the procedure."""
-    restricted: Optional[bool] = None
+    restricted: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the procedure is restricted or not."""
-    type_: Optional[int] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """The type of procedure; 1 (standard) or 2 (checklist)"""
 
 
@@ -275,19 +316,21 @@ class User:
     Response for Find User
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the user."""
-    first_name: Optional[str] = field(
+    first_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "firstName"},
     )
     """The first name of the user."""
-    last_name: Optional[str] = field(
+    last_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastName"},
     )
     """The last name of the user."""
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The email address of the user."""
 
 
@@ -297,31 +340,22 @@ class UsersInput:
     Add a New User
     """
 
-    first_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "firstName"},
-    )
+    first_name: str = dataclass_field(metadata={"wire_name": "firstName"})
     """The first name of the user."""
-    last_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "lastName"},
-    )
+    last_name: str = dataclass_field(metadata={"wire_name": "lastName"})
     """The last name of the user."""
-    email: Optional[str] = None
+    email: str
     """The email address of the user."""
-    security_role: Optional[int] = field(
-        default=None,
+    security_role: int = dataclass_field(
         metadata={"wire_name": "securityRole"},
     )
     """Select a security role."""
-    company_roles: Optional[List[int]] = field(
+    company_roles: Optional[List[int]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "companyRoles"},
     )
-    time_zone_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "timeZoneId"},
-    )
+    time_zone_id: str = dataclass_field(metadata={"wire_name": "timeZoneId"})
     """Select the user's timezone."""
 
 
@@ -331,7 +365,7 @@ class UsersPostResponse:
     Response for Add a New User
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -344,10 +378,7 @@ class ChecklistCreateWebHookInput:
     When a checklist instance is started
     """
 
-    callback_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callbackUrl"},
-    )
+    callback_url: str = dataclass_field(metadata={"wire_name": "callbackUrl"})
     """The URL to call when action occurs."""
 
 
@@ -357,14 +388,15 @@ class WebhookRegistered:
     Response for When a checklist instance is started
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the Webhook registration."""
-    callbackurl: Optional[str] = None
+    callbackurl: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The URL to call when action occurs."""
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date and time the webhook was registered."""
-    web_hook_event: Optional[str] = field(
+    web_hook_event: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "webHookEvent"},
     )
     """The name of the webhook event."""
@@ -376,10 +408,7 @@ class NewCommentWebHookInput:
     When a comment is added to a checklist
     """
 
-    callback_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callbackUrl"},
-    )
+    callback_url: str = dataclass_field(metadata={"wire_name": "callbackUrl"})
     """The URL to call when action occurs."""
 
 
@@ -389,10 +418,7 @@ class FinishChecklistWebHookInput:
     When a checklist is finished
     """
 
-    callback_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callbackUrl"},
-    )
+    callback_url: str = dataclass_field(metadata={"wire_name": "callbackUrl"})
     """The URL to call when action occurs."""
 
 
@@ -402,10 +428,7 @@ class InviteSupervisorWebHookInput:
     When a supervisor is invited
     """
 
-    callback_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callbackUrl"},
-    )
+    callback_url: str = dataclass_field(metadata={"wire_name": "callbackUrl"})
     """The URL to call when action occurs."""
 
 
@@ -415,10 +438,7 @@ class GenerateAcceptancePDFWebHookInput:
     When a procedure is accepted
     """
 
-    callback_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callbackUrl"},
-    )
+    callback_url: str = dataclass_field(metadata={"wire_name": "callbackUrl"})
     """The URL to call when action occurs."""
 
 
@@ -428,10 +448,7 @@ class ChecklistStepCompletedWebHookInput:
     When a checklist step is completed
     """
 
-    callback_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callbackUrl"},
-    )
+    callback_url: str = dataclass_field(metadata={"wire_name": "callbackUrl"})
     """The URL to call when action occurs."""
 
 
@@ -441,10 +458,16 @@ class GetAllChecklistInstancesResponse:
     Response for Get All Checklist Instances
     """
 
-    results: Optional[List[ChecklistInstance]] = None
-    """The list of checklist instances."""
-    total: Optional[int] = field(
+    results: Optional[
+        List[ChecklistInstance | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The list of checklist instances."""
+    total: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "_total"},
     )
     """The total number of checklist instances."""
@@ -456,30 +479,34 @@ class CompletedStep:
     Definition: CompletedStep
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the checklist step completion."""
-    instance_id: Optional[str] = field(
+    instance_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "instanceId"},
     )
     """The unique ID of the checklist instance."""
-    procedure_id: Optional[int] = field(
+    procedure_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "procedureId"},
     )
     """The unique ID of the procedure."""
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date and time the checklist step was completed."""
-    created_by: Optional[str] = field(
+    created_by: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdBy"},
     )
     """The email address of the user that completed the checklist step."""
-    due: Optional[str] = None
+    due: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date and time the checklist step was due."""
-    step: Optional[ChecklistStep] = None
-    decision_choices: Optional[List[str]] = field(
+    step: Optional[ChecklistStep | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    decision_choices: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "decisionChoices"},
     )
     """The list of choices made if the step is a decision point."""
@@ -491,27 +518,31 @@ class ProcedureAcceptance:
     Definition: ProcedureAcceptance
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the procedure acceptance"""
-    accepted: Optional[str] = None
+    accepted: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date and time the procedure was accepted."""
-    created_by: Optional[str] = field(
+    created_by: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdBy"},
     )
     """The email address of the user that accepted the procedure."""
-    file_name: Optional[str] = field(
+    file_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "fileName"},
     )
     """The file name of the generated PDF."""
-    attachment_url: Optional[str] = field(
+    attachment_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "attachmentUrl"},
     )
     """The URL to the generated PDF. Valid for 5 minutes."""
-    procedure_title: Optional[str] = field(
+    procedure_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "procedureTitle"},
     )
     """The title of the accepted procedure."""
@@ -525,16 +556,16 @@ class WaywedoClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -545,8 +576,8 @@ class WaywedoClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -554,8 +585,8 @@ class WaywedoClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -567,7 +598,7 @@ class WaywedoClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -582,9 +613,86 @@ class WaywedoClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "waywedo"
 
-    async def comment_add_async(
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
+            if next_link.startswith("?"):
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
+
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
+    def comment_add(
         self,
-        input: CommentAddInput,
+        input: CommentAddInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -595,12 +703,28 @@ class WaywedoClient(ConnectorClientBase):
         Add a comment to a checklist instance step
 
         Adds a new comment to an Activated Checklist Instance step.
+
+        Swagger operation ID: `Comment_Add`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/v1/ChecklistInstanceComments"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -614,6 +738,7 @@ class WaywedoClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -621,9 +746,9 @@ class WaywedoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def checklist_instances_async(
+    def checklist_instances(
         self,
-        input: ChecklistInstancesInput,
+        input: ChecklistInstancesInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -634,10 +759,26 @@ class WaywedoClient(ConnectorClientBase):
         Create Checklist Instance
 
         Creates a new activated checklist instance.
+
+        Swagger operation ID: `ChecklistInstances_Post`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/ChecklistInstances"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -651,6 +792,7 @@ class WaywedoClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -658,7 +800,7 @@ class WaywedoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def checklist_instances_get_async(
+    def checklist_instances_get(
         self,
         instance_id: str,
         *,
@@ -671,13 +813,28 @@ class WaywedoClient(ConnectorClientBase):
         Get A Checklist Instance
 
         Retrieve a specific checklist instance by ID
+
+        Swagger operation ID: `ChecklistInstances_Get`.
+
+        Args:
+            instance_id: The ID of the checklist instance.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1/ChecklistInstances/{quote(str(instance_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -691,6 +848,7 @@ class WaywedoClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -698,7 +856,7 @@ class WaywedoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def checklist_instances_activity_async(
+    def list_checklist_instances_activity(
         self,
         instance_id: str,
         *,
@@ -706,11 +864,30 @@ class WaywedoClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Checklist Instance Activity
 
         Retrieve all activity for a checklist instance
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ChecklistInstances_Activity`.
+
+        Args:
+            instance_id: Select the checklist instance.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -719,42 +896,83 @@ class WaywedoClient(ConnectorClientBase):
             f"/{quote(str(instance_id), safe='')}"
             f"/Activity"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def find_steps_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_find_steps(
         self,
         instance_id: str,
-        query: Optional[str] = None,
         *,
+        query: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Find Checklist Step
 
         Find a step of a checklist instance
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `Find_Steps`.
+
+        Args:
+            instance_id: Select the checklist instance.
+            query: Search for a step title.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -768,29 +986,50 @@ class WaywedoClient(ConnectorClientBase):
             query_params.append(f"query={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def checklist_steps_get_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def checklist_steps_get(
         self,
         instance_id: str,
         step_id: str,
@@ -804,6 +1043,22 @@ class WaywedoClient(ConnectorClientBase):
         Get A Checklist Step
 
         Retrieve a specific checklist step by ID
+
+        Swagger operation ID: `ChecklistSteps_Get`.
+
+        Args:
+            instance_id: The ID of the checklist instance.
+            step_id: The ID of the checklist step.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -814,7 +1069,7 @@ class WaywedoClient(ConnectorClientBase):
             f"/{quote(str(step_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -828,6 +1083,7 @@ class WaywedoClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -835,9 +1091,9 @@ class WaywedoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def checklist_steps_complete_async(
+    def checklist_steps_complete(
         self,
-        input: ChecklistStepsCompleteInput,
+        input: ChecklistStepsCompleteInput | Mapping[str, Any],
         instance_id: str,
         step_id: str,
         *,
@@ -850,6 +1106,24 @@ class WaywedoClient(ConnectorClientBase):
         Complete a Checklist Step
 
         Mark a specific step in a checklist instance as complete.
+
+        Swagger operation ID: `ChecklistSteps_Complete`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            instance_id: Select the checklist instance.
+            step_id: Select the checklist step.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -861,7 +1135,7 @@ class WaywedoClient(ConnectorClientBase):
             f"/Complete"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -875,6 +1149,7 @@ class WaywedoClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -882,9 +1157,9 @@ class WaywedoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def collaborators_add_async(
+    def collaborators_add(
         self,
-        input: CollaboratorsAddInput,
+        input: CollaboratorsAddInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -895,10 +1170,26 @@ class WaywedoClient(ConnectorClientBase):
         Add Collaborators to a Checklist Instance
 
         Adds one or more collaborators to a checklist instance.
+
+        Swagger operation ID: `Collaborators_Add`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/Collaborators"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -912,6 +1203,7 @@ class WaywedoClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -919,19 +1211,38 @@ class WaywedoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def find_checklist_async(
+    def list_find_checklist(
         self,
-        query: Optional[str] = None,
         *,
+        query: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Find Checklist
 
         Search for a checklist by title
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `Find_Checklist`.
+
+        Args:
+            query: The title of the checklist.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/Procedures"
         query_params = []
@@ -943,29 +1254,50 @@ class WaywedoClient(ConnectorClientBase):
             query_params.append(f"query={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def procedures_get_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def procedures_get(
         self,
         procedure_id: int,
         *,
@@ -978,13 +1310,28 @@ class WaywedoClient(ConnectorClientBase):
         Get A Checklist Or Procedure
 
         Retrieve a specific checklist or procedure by ID
+
+        Swagger operation ID: `Procedures_Get`.
+
+        Args:
+            procedure_id: The ID of the checklist or procedure.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1/Procedures/{quote(str(procedure_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -998,6 +1345,7 @@ class WaywedoClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1005,20 +1353,40 @@ class WaywedoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def find_checklist_instances_async(
+    def list_find_checklist_instances(
         self,
         procedure_id: int,
-        query: Optional[str] = None,
         *,
+        query: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Find Checklist Instance
 
         Search for a checklist instance by title.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `Find_Checklist_Instances`.
+
+        Args:
+            procedure_id: Select a checklist.
+            query: The title of the checklist instance.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1035,41 +1403,81 @@ class WaywedoClient(ConnectorClientBase):
             query_params.append(f"query={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def find_user_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_find_user(
         self,
-        query: Optional[str] = None,
         *,
+        query: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Find User
 
         Search for a user by name or email.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `Find_User`.
+
+        Args:
+            query: The name or email address of the user.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/Users"
         query_params = []
@@ -1080,31 +1488,52 @@ class WaywedoClient(ConnectorClientBase):
             query_params.append(f"query={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def users_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def users(
         self,
-        input: UsersInput,
+        input: UsersInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1115,10 +1544,26 @@ class WaywedoClient(ConnectorClientBase):
         Add a New User
 
         Creates and invites a new user.
+
+        Swagger operation ID: `Users_Post`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/Users"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1132,6 +1577,7 @@ class WaywedoClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1139,21 +1585,42 @@ class WaywedoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_all_checklist_instances_async(
+    def list_all_checklist_instances(
         self,
+        *,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
         status: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get All Checklist Instances
 
         Retrieve a list of all activated checklist instances.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetAll_ChecklistInstances`.
+
+        Args:
+            limit: Maximum number of results to fetch.
+            offset: The number of records skipped.
+            status: The status of instances returned.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/ChecklistInstances"
         query_params = []
@@ -1174,27 +1641,48 @@ class WaywedoClient(ConnectorClientBase):
             query_params.append(f"status={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("results", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
 
 # Trigger Operations

@@ -1,16 +1,14 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """Sample usage for the FTP connector client."""
-
-import asyncio
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors.ftp import FtpClient
 
 
-async def main() -> None:
+def main() -> None:
     """Run a simple FTP sample flow."""
     connection_url = os.getenv("FTP_CONNECTION_URL")
     if not connection_url:
@@ -19,21 +17,21 @@ async def main() -> None:
     folder_path = os.getenv("FTP_FOLDER_PATH", "/inbound")
     file_name = os.getenv("FTP_FILE_NAME", "sample-from-sdk.txt")
 
-    async with DefaultAzureCredential() as credential:
-        async with FtpClient(connection_url, credential) as client:
-            root_listing = await client.list_root_folder_async()
+    with DefaultAzureCredential() as credential:
+        with FtpClient(connection_url, credential) as client:
+            root_listing = list(client.list_root_folder())
             print("root listing", root_listing)
 
-            created = await client.create_file_async(
+            created = client.create_file(
                 input=b"hello from azure-connectors ftp sample",
                 folder_path=folder_path,
                 name=file_name,
             )
             print("created file", created)
 
-            folder_items = await client.list_folder_async(id=folder_path)
+            folder_items = list(client.list_folder(id=folder_path))
             print("folder items available for polling", folder_items)
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

@@ -6,8 +6,8 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.googletasks import GoogletasksClient
 from azure.connectors.googletasks import (
-    GoogletasksClient,
     TRIGGER_OPERATIONS,
     TaskCreate,
     TaskList,
@@ -20,23 +20,30 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import (
+    generated_pager_response_text,
+    model_instance,
+    resolve_generated_result,
+)
 
 
 async def _invoke_operation(client: GoogletasksClient, operation: str):
     """Invoke a Google Tasks operation by name for shared tests."""
     if operation == "list_task_lists":
-        return await client.list_task_lists_async()
+        return await resolve_generated_result(client.list_task_lists())
     if operation == "create_task_list":
-        return await client.create_task_list_async(input=TaskListCreate(title="Work"))
+        return await client.create_task_list(input=TaskListCreate(title="Work"))
     if operation == "list_tasks":
-        return await client.list_tasks_async(task_list_id="list123")
+        return await resolve_generated_result(
+            client.list_tasks(task_list_id="list123")
+        )
     if operation == "create_task":
-        return await client.create_task_async(
+        return await client.create_task(
             input=TaskCreate(title="Buy milk"),
             task_list_id="list123",
         )
     if operation == "list_task":
-        return await client.list_task_async(task_list_id="list123", task_id="task123")
+        return await client.list_task(task_list_id="list123", task_id="task123")
     raise ValueError(f"Unsupported operation '{operation}'.")
 
 
@@ -73,7 +80,7 @@ class TestGoogletasksClientInitialization:
         client = GoogletasksClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -136,17 +143,20 @@ class TestGoogletasksClientMethods:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        mock_response = MockResponse(status=200, text='{"items":[{"id":"list123"}]}')
+        mock_response = MockResponse(
+            status=200,
+            text=generated_pager_response_text(client.list_task_lists),
+        )
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_task_lists_async()
+            result = await resolve_generated_result(client.list_task_lists())
 
-            assert len(result["items"]) == 1
+            assert result == [{"ok": True}]
             assert "/users/@me/lists" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
@@ -160,11 +170,11 @@ class TestGoogletasksClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_task_list_async(input=TaskListCreate(title="Work"))
+            result = await client.create_task_list(input=TaskListCreate(title="Work"))
 
             assert result["id"] == "list123"
             assert isinstance(mock_send.call_args.kwargs["body"], TaskListCreate)
@@ -180,11 +190,11 @@ class TestGoogletasksClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_task_async(
+            result = await client.create_task(
                 input=TaskCreate(title="Buy milk"),
                 task_list_id="list123",
             )
@@ -204,11 +214,11 @@ class TestGoogletasksClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_task_async(task_list_id="list123", task_id="task123")
+            result = await client.list_task(task_list_id="list123", task_id="task123")
 
             assert result["id"] == "task123"
             assert "/lists/list123/tasks/task123" in mock_send.call_args[0][1]
@@ -242,7 +252,7 @@ class TestGoogletasksClientErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
@@ -279,12 +289,12 @@ class TestGoogletasksTypeSerialization:
         task_list_entry = TaskListEntry()
         task_list = TaskList()
         task_object = TaskObject()
-        task_list_create = TaskListCreate()
-        task_create = TaskCreate()
+        task_list_create = model_instance(TaskListCreate)
+        task_create = model_instance(TaskCreate)
 
         assert task_list_list.items is None
         assert task_list_entry.id is None
         assert task_list.items is None
         assert task_object.id is None
-        assert task_list_create.title is None
-        assert task_create.title is None
+        assert task_list_create.title == "value"
+        assert task_create.title == "value"

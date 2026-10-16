@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.azurevm import AzurevmClient
 from azure.connectors.azurevm import (
-    AzurevmClient,
     VirtualMachine,
     VirtualMachineProperties,
     VirtualMachineInScaleSet,
@@ -70,7 +70,7 @@ class TestAzurevmClientInitialization:
         client = AzurevmClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -151,11 +151,11 @@ class TestVirtualMachineGetAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.virtual_machine_get_async(
+            result = await client.virtual_machine_get(
                 subscription_id="sub1",
                 resource_group_name="rg1",
                 virtual_machine_name="vm1"
@@ -182,11 +182,11 @@ class TestVirtualMachineGetAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.virtual_machine_get_async(
+            result = await client.virtual_machine_get(
                 subscription_id="sub1",
                 resource_group_name="rg1",
                 virtual_machine_name="vm1"
@@ -209,12 +209,12 @@ class TestVirtualMachineGetAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.virtual_machine_get_async(
+                await client.virtual_machine_get(
                     subscription_id="sub1",
                     resource_group_name="rg1",
                     virtual_machine_name="vm1"
@@ -238,11 +238,11 @@ class TestVirtualMachineStartAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.virtual_machine_start_async(
+            await client.virtual_machine_start(
                 subscription_id="sub1",
                 resource_group_name="rg1",
                 virtual_machine_name="vm1"
@@ -269,11 +269,11 @@ class TestVirtualMachineDeallocateAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.virtual_machine_deallocate_async(
+            await client.virtual_machine_deallocate(
                 subscription_id="sub1",
                 resource_group_name="rg1",
                 virtual_machine_name="vm1"
@@ -300,11 +300,11 @@ class TestVirtualMachinePowerOffAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.virtual_machine_poweroff_async(
+            await client.virtual_machine_poweroff(
                 subscription_id="sub1",
                 resource_group_name="rg1",
                 virtual_machine_name="vm1"
@@ -331,11 +331,11 @@ class TestVirtualMachineReapplyAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.virtual_machine_reapply_async(
+            await client.virtual_machine_reapply(
                 subscription_id="sub1",
                 resource_group_name="rg1",
                 virtual_machine_name="vm1"
@@ -362,11 +362,11 @@ class TestVirtualMachineRedeployAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.virtual_machine_redeploy_async(
+            await client.virtual_machine_redeploy(
                 subscription_id="sub1",
                 resource_group_name="rg1",
                 virtual_machine_name="vm1"
@@ -393,11 +393,11 @@ class TestVirtualMachineRestartAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.virtual_machine_restart_async(
+            await client.virtual_machine_restart(
                 subscription_id="sub1",
                 resource_group_name="rg1",
                 virtual_machine_name="vm1"
@@ -430,11 +430,11 @@ class TestVirtualMachineInScaleSetGetAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.virtual_machine_in_scale_set_get_async(
+            result = await client.virtual_machine_in_scale_set_get(
                 subscription_id="sub1",
                 resource_group_name="rg1",
                 virtual_machine_scale_set_name="vmss1",
@@ -463,12 +463,12 @@ class TestVirtualMachineInScaleSetGetAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.virtual_machine_in_scale_set_get_async(
+                await client.virtual_machine_in_scale_set_get(
                     subscription_id="sub1",
                     resource_group_name="rg1",
                     virtual_machine_scale_set_name="vmss1",
@@ -493,11 +493,11 @@ class TestVirtualMachineInScaleSetDeallocateAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.virtual_machine_in_scale_set_deallocate_async(
+            await client.virtual_machine_in_scale_set_deallocate(
                 subscription_id="sub1",
                 resource_group_name="rg1",
                 virtual_machine_scale_set_name="vmss1",
@@ -525,11 +525,11 @@ class TestVirtualMachineInScaleSetPowerOffAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.virtual_machine_in_scale_set_power_off_async(
+            await client.virtual_machine_in_scale_set_power_off(
                 subscription_id="sub1",
                 resource_group_name="rg1",
                 virtual_machine_scale_set_name="vmss1",
@@ -557,11 +557,11 @@ class TestVirtualMachineInScaleSetRedeployAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.virtual_machine_in_scale_set_redeploy_async(
+            await client.virtual_machine_in_scale_set_redeploy(
                 subscription_id="sub1",
                 resource_group_name="rg1",
                 virtual_machine_scale_set_name="vmss1",
@@ -589,11 +589,11 @@ class TestVirtualMachineInScaleSetReimageAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.virtual_machine_in_scale_set_reimage_async(
+            await client.virtual_machine_in_scale_set_reimage(
                 subscription_id="sub1",
                 resource_group_name="rg1",
                 virtual_machine_scale_set_name="vmss1",
@@ -621,11 +621,11 @@ class TestVirtualMachineInScaleSetRestartAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.virtual_machine_in_scale_set_restart_async(
+            await client.virtual_machine_in_scale_set_restart(
                 subscription_id="sub1",
                 resource_group_name="rg1",
                 virtual_machine_scale_set_name="vmss1",
@@ -653,11 +653,11 @@ class TestVirtualMachineInScaleSetStartAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.virtual_machine_in_scale_set_start_async(
+            await client.virtual_machine_in_scale_set_start(
                 subscription_id="sub1",
                 resource_group_name="rg1",
                 virtual_machine_scale_set_name="vmss1",

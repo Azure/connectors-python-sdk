@@ -5,20 +5,43 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "ZendeskClient",
+    "BlobDataSetsMetadata",
+    "DataSet",
+    "DataSetsList",
+    "DataSetsMetadata",
+    "GetCurrentUserInfoResponse",
+    "Item",
+    "ItemsList",
+    "ObjectEntity",
+    "SearchResult",
+    "Table",
+    "TableCapabilitiesMetadata",
+    "TableFilterRestrictionsMetadata",
+    "TableMetadata",
+    "TableSelectRestrictionsMetadata",
+    "TableSortRestrictionsMetadata",
+    "TablesList",
+    "TabularDataSetsMetadata",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -29,7 +52,12 @@ class TablesList:
     Response for Get tables
     """
 
-    value: Optional[List[Table]] = None
+    value: Optional[
+        List[Table | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -38,9 +66,15 @@ class ItemsList:
     Response for Get items
     """
 
-    value: Optional[List[Item]] = None
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[Item | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -52,8 +86,9 @@ class Item:
     Response for Create Item
     """
 
-    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dynamicProperties"},
     )
 
@@ -64,7 +99,7 @@ class SearchResult:
     Response for Search Articles
     """
 
-    results: Optional[List[Dict[str, Any]]] = None
+    results: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -73,19 +108,22 @@ class TableMetadata:
     Response for Get item metadata
     """
 
-    name: Optional[str] = None
-    title: Optional[str] = None
-    x_ms_permission: Optional[str] = field(
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
+    x_ms_permission: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "x-ms-permission"},
     )
-    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = field(
+    x_ms_capabilities: Optional[TableCapabilitiesMetadata | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "x-ms-capabilities"},
     )
-    schema: Optional[ObjectEntity] = None
-    referenced_entities: Optional[ObjectEntity] = field(
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    referenced_entities: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "referencedEntities"},
     )
 
@@ -96,8 +134,18 @@ class DataSetsMetadata:
     Definition: DataSetsMetadata
     """
 
-    tabular: Optional[TabularDataSetsMetadata] = None
-    blob: Optional[BlobDataSetsMetadata] = None
+    tabular: Optional[
+        TabularDataSetsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    blob: Optional[
+        BlobDataSetsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -106,21 +154,25 @@ class TabularDataSetsMetadata:
     Definition: TabularDataSetsMetadata
     """
 
-    source: Optional[str] = None
-    display_name: Optional[str] = field(
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
-    url_encoding: Optional[str] = field(
+    url_encoding: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "urlEncoding"},
     )
-    table_display_name: Optional[str] = field(
+    table_display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tableDisplayName"},
     )
-    table_plural_name: Optional[str] = field(
+    table_plural_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tablePluralName"},
     )
 
@@ -131,13 +183,15 @@ class BlobDataSetsMetadata:
     Definition: BlobDataSetsMetadata
     """
 
-    source: Optional[str] = None
-    display_name: Optional[str] = field(
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
-    url_encoding: Optional[str] = field(
+    url_encoding: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "urlEncoding"},
     )
 
@@ -148,25 +202,36 @@ class TableCapabilitiesMetadata:
     Definition: TableCapabilitiesMetadata
     """
 
-    sort_restrictions: Optional[TableSortRestrictionsMetadata] = field(
+    sort_restrictions: Optional[
+        TableSortRestrictionsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sortRestrictions"},
     )
-    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = field(
+    filter_restrictions: Optional[
+        TableFilterRestrictionsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "filterRestrictions"},
     )
-    select_restrictions: Optional[TableSelectRestrictionsMetadata] = field(
+    select_restrictions: Optional[
+        TableSelectRestrictionsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "selectRestrictions"},
     )
-    is_only_server_pagable: Optional[bool] = field(
+    is_only_server_pagable: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isOnlyServerPagable"},
     )
     """Server paging restrictions"""
-    filter_function_support: Optional[List[str]] = field(
+    filter_function_support: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "filterFunctionSupport"},
     )
 
@@ -177,7 +242,7 @@ class ObjectEntity:
     Definition: Object
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -190,15 +255,17 @@ class TableSortRestrictionsMetadata:
     Definition: TableSortRestrictionsMetadata
     """
 
-    sortable: Optional[bool] = None
+    sortable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether this table has sortable columns"""
-    unsortable_properties: Optional[List[str]] = field(
+    unsortable_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "unsortableProperties"},
     )
     """List of unsortable properties"""
-    ascending_only_properties: Optional[List[str]] = field(
+    ascending_only_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ascendingOnlyProperties"},
     )
     """List of properties which support ascending order only"""
@@ -210,15 +277,17 @@ class TableFilterRestrictionsMetadata:
     Definition: TableFilterRestrictionsMetadata
     """
 
-    filterable: Optional[bool] = None
+    filterable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether this table has filterable columns"""
-    non_filterable_properties: Optional[List[str]] = field(
+    non_filterable_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nonFilterableProperties"},
     )
     """List of non filterable properties"""
-    required_properties: Optional[List[str]] = field(
+    required_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "requiredProperties"},
     )
     """List of required properties"""
@@ -230,7 +299,7 @@ class TableSelectRestrictionsMetadata:
     Definition: TableSelectRestrictionsMetadata
     """
 
-    selectable: Optional[bool] = None
+    selectable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether this table has selectable columns"""
 
 
@@ -240,7 +309,12 @@ class DataSetsList:
     Definition: DataSetsList
     """
 
-    value: Optional[List[DataSet]] = None
+    value: Optional[
+        List[DataSet | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -249,9 +323,14 @@ class DataSet:
     Definition: DataSet
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
 
@@ -262,9 +341,14 @@ class Table:
     Definition: Table
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
 
@@ -275,7 +359,7 @@ class GetCurrentUserInfoResponse:
     Definition: GetCurrentUserInfoResponse
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -290,16 +374,16 @@ class ZendeskClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -310,8 +394,8 @@ class ZendeskClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -319,8 +403,8 @@ class ZendeskClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -332,7 +416,7 @@ class ZendeskClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -348,15 +432,49 @@ class ZendeskClient(ConnectorClientBase):
         return "zendesk"
 
     def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
-        parsed_next_link = urlsplit(next_link)
-        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
             if next_link.startswith("/"):
                 return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
             if next_link.startswith("?"):
-                return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
 
-        parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
         connection_hostname = parsed_connection.hostname
         if next_link_hostname is None or connection_hostname is None:
@@ -373,7 +491,11 @@ class ZendeskClient(ConnectorClientBase):
                 parsed_next_link.scheme == parsed_connection.scheme
                 and next_link_port == connection_port
             ):
-                return next_link
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
 
             raise ValueError(
                 "Pagination URL origin "
@@ -386,63 +508,125 @@ class ZendeskClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def get_tables_async(
+    def list_tables(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get tables
 
         Retrieves Zendesk tables from a site
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetTables`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/datasets/default/tables"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_items_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_items(
         self,
         table: str,
+        *,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
         skip: Optional[int] = None,
         top: Optional[int] = None,
         select: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get items
 
         Retrieves Zendesk items of a certain Zendesk type (example: 'Ticket')
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetItems`.
+
+        Args:
+            table: Zendesk item type (example: 'Ticket').
+            filter: An ODATA filter query to restrict the entries returned
+                (e.g. stringColumn eq 'string' OR numberColumn lt 123).
+            orderby: An ODATA orderBy query for specifying the order of
+                entries.
+            skip: Number of entries to skip (default = 0).
+            top: Maximum number of entries to retrieve (default = 512).
+            select: Specific fields to retrieve from entries (default = all).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -480,11 +664,18 @@ class ZendeskClient(ConnectorClientBase):
             query_params.append(f"$select={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -497,25 +688,34 @@ class ZendeskClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def post_item_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def post_item(
         self,
-        input: Item,
+        input: Item | Mapping[str, Any],
         table: str,
         *,
         timeout: Optional[float] = None,
@@ -527,6 +727,23 @@ class ZendeskClient(ConnectorClientBase):
         Create Item
 
         Creates a Zendesk item
+
+        Swagger operation ID: `PostItem`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            table: Zendesk item type (example: 'Ticket').
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -537,7 +754,7 @@ class ZendeskClient(ConnectorClientBase):
             f"/items"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -551,6 +768,7 @@ class ZendeskClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -558,7 +776,7 @@ class ZendeskClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_item_async(
+    def get_item(
         self,
         table: str,
         id: str,
@@ -572,6 +790,22 @@ class ZendeskClient(ConnectorClientBase):
         Get item
 
         Retrieves a Zendesk item
+
+        Swagger operation ID: `GetItem`.
+
+        Args:
+            table: Zendesk item type (example: 'Ticket').
+            id: Unique identifier of the item to retrieve.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -583,7 +817,7 @@ class ZendeskClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -597,6 +831,7 @@ class ZendeskClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -604,7 +839,7 @@ class ZendeskClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_item_async(
+    def delete_item(
         self,
         table: str,
         id: str,
@@ -618,6 +853,22 @@ class ZendeskClient(ConnectorClientBase):
         Delete item
 
         Deletes a Zendesk item
+
+        Swagger operation ID: `DeleteItem`.
+
+        Args:
+            table: Zendesk item type (example: 'Ticket').
+            id: Unique identifier of the item to delete.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -629,7 +880,7 @@ class ZendeskClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -643,11 +894,12 @@ class ZendeskClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def patch_item_async(
+    def patch_item(
         self,
-        input: Item,
+        input: Item | Mapping[str, Any],
         table: str,
         id: str,
         *,
@@ -660,6 +912,24 @@ class ZendeskClient(ConnectorClientBase):
         Update item
 
         Updates an existing Zendesk item
+
+        Swagger operation ID: `PatchItem`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            table: Zendesk item type (example: 'Ticket').
+            id: Unique identifier of the item to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -671,7 +941,7 @@ class ZendeskClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -685,6 +955,7 @@ class ZendeskClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -692,26 +963,51 @@ class ZendeskClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def search_articles_async(
+    def list_search_articles(
         self,
         query: str,
+        *,
         locale: Optional[str] = None,
         brand_id: Optional[int] = None,
         category: Optional[int] = None,
         section: Optional[int] = None,
         label_names: Optional[str] = None,
         multibrand: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Search Articles
 
         Returns a default number of 25 articles per page, up to a maximum of
         1000 results.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `SearchArticles`.
+
+        Args:
+            query: Article to search for.
+            locale: The locale the item is displayed in.
+            brand_id: Search for articles in the specified brand.
+            category: Limit the search to this category id.
+            section: Limit the search to this section id.
+            label_names: A comma-separated list of label names.
+            multibrand: Enable search across all brands if true.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -754,29 +1050,50 @@ class ZendeskClient(ConnectorClientBase):
             query_params.append(f"multibrand={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_table_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("results", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_table(
         self,
         table: str,
         *,
@@ -789,6 +1106,21 @@ class ZendeskClient(ConnectorClientBase):
         Get item metadata
 
         Retrieves item metadata for Zendesk object type
+
+        Swagger operation ID: `GetTable`.
+
+        Args:
+            table: Zendesk item type (example: 'Ticket').
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -799,7 +1131,7 @@ class ZendeskClient(ConnectorClientBase):
             f"/{quote(quote(str(table), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -813,6 +1145,7 @@ class ZendeskClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

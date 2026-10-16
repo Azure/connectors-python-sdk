@@ -11,6 +11,7 @@ and strongly-typed generated connector clients.
 from .client_base import ConnectorClientBase
 from .exceptions import ConnectorException
 from .http_client import ConnectorHttpClient, ConnectorResponse
+from .polling import ConnectorPollingMethod
 from .response import ConnectorResponseHook, ConnectorResponseSnapshot
 from .trigger_payload import TriggerCallbackPayload, TriggerCallbackBody
 
@@ -20,6 +21,7 @@ __all__ = [
     "ConnectorClientBase",
     "ConnectorException",
     "ConnectorHttpClient",
+    "ConnectorPollingMethod",
     "ConnectorResponse",
     "ConnectorResponseHook",
     "ConnectorResponseSnapshot",

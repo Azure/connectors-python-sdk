@@ -5,20 +5,44 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Dict, List, Literal, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "StarmindClient",
+    "Attachment",
+    "Comment",
+    "ConceptLabelMatch",
+    "ExpertConceptScores",
+    "FindExpertsInput",
+    "FindExpertsResponse",
+    "FindQuestionsResponse",
+    "GraphQLError",
+    "GraphQLUserResponse",
+    "KnowledgeSpace",
+    "Language",
+    "PostQuestionDraftInput",
+    "PublishQuestionDraftResponse",
+    "Question",
+    "QuestionComplete",
+    "Solution",
+    "SolutionAuthorityApproval",
+    "SolutionValidation",
+    "User",
+    "UserId",
+    "UserLegacy",
+]
 
 
 # Type Definitions
@@ -29,8 +53,8 @@ class FindExpertsInput:
     Find experts
     """
 
-    language: Optional[Language] = None
-    text_query: Optional[str] = None
+    language: Optional[Language] = dataclass_field(default=None, kw_only=True)
+    text_query: str
     """
     Primary search text to identify experts. Can be a question, a summary of a
     text, one or multiple topics.
@@ -43,12 +67,17 @@ class FindExpertsResponse:
     Response for Find experts
     """
 
-    experts: Optional[List[Dict[str, Any]]] = None
+    experts: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """
     List of experts matching the search query. May be empty if no experts are
     found.
     """
-    label_matches: Optional[List[ConceptLabelMatch]] = None
+    label_matches: Optional[
+        List[ConceptLabelMatch | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """
     The matched labels for the expert search query. May be empty if no labels
     match.
@@ -61,14 +90,20 @@ class FindQuestionsResponse:
     Response for Find questions
     """
 
-    links: Optional[Dict[str, Any]] = field(
+    links: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
     """_links"""
-    items: Optional[List[Question]] = None
+    items: Optional[
+        List[Question | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Paginated results of the question search."""
-    total: Optional[int] = None
+    total: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Total number of questions matching the request."""
 
 
@@ -78,8 +113,13 @@ class GraphQLUserResponse:
     Response for Get user by id
     """
 
-    data: Optional[Dict[str, Any]] = None
-    errors: Optional[List[GraphQLError]] = None
+    data: Dict[str, Any]
+    errors: Optional[
+        List[GraphQLError | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Optional array of GraphQL errors; only present if errors occurred"""
 
 
@@ -89,22 +129,22 @@ class PostQuestionDraftInput:
     Create a question draft
     """
 
-    category: Optional[int] = None
+    category: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The optional id of the category to assign the question draft to"""
-    title: Optional[str] = None
+    title: str
     """
     Question title, Between 4 and 100 characters by default. Depending on the
     network configuration the title max length may be limited or extended
     further.
     """
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The optional question description providing detailed context and
     information about the question. Depending on the network configuration the
     description might be enforced to be non-empty.
     """
-    language: Optional[Language] = None
-    knowledge_space: Optional[int] = None
+    language: Optional[Language] = dataclass_field(default=None, kw_only=True)
+    knowledge_space: Optional[int] = dataclass_field(default=None, kw_only=True)
     """the id of the knowledge space to assign the question to"""
 
 
@@ -114,63 +154,63 @@ class Question:
     Response for Create a question draft
     """
 
-    knowledge_space_id: Optional[int] = None
+    knowledge_space_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The unique knowledge space id to which the question belongs."""
-    upvote_count: Optional[int] = None
+    upvote_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The total number of upvotes the question has received."""
-    view_count: Optional[int] = None
+    view_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of times the question has been viewed by users."""
-    published: Optional[str] = None
+    published: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Timestamp indicating when the question was published
     (yyyy-MM-ddTHH:mm:ss.fffZ)
     """
-    is_deleted: Optional[bool] = None
+    is_deleted: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Indicates if the question is deleted. Deleted questions are not visible to
     users, but can still be accessed by the administrators.
     """
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The question title"""
-    last_activity: Optional[str] = None
+    last_activity: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Timestamp indicating the last activity with the question
     (yyyy-MM-ddTHH:mm:ss.fffZ)
     """
-    is_published: Optional[bool] = None
+    is_published: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     The question is_published flag indicates whether the question is published
     or not. A published solution is visible to all users, while an unpublished
     solution is in draft state only visible to the author.
     """
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Timestamp indicating when the question was created
     (yyyy-MM-ddTHH:mm:ss.fffZ)
     """
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Question description providing detailed context and information about the
     question
     """
-    solution_count: Optional[int] = None
+    solution_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     This is the number of solutions that have been provided for this question.
     """
-    content_updated: Optional[str] = None
+    content_updated: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Timestamp indicating when the question's content or attachments were last
     updated (yyyy-MM-ddTHH:mm:ss.fffZ)
     """
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The unique question id"""
-    updated: Optional[str] = None
+    updated: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Last time the resource has been updated in the DB. This date does not
     reflect content updates but any update to any fields of the record. Use
     content_updated for information about content updates.
     """
-    language: Optional[str] = None
+    language: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The question language"""
 
 
@@ -180,7 +220,7 @@ class PublishQuestionDraftResponse:
     Response for Publish a question
     """
 
-    number_of_experts: Optional[int] = None
+    number_of_experts: Optional[int] = dataclass_field(default=None, kw_only=True)
     """number_of_experts"""
 
 
@@ -190,75 +230,100 @@ class QuestionComplete:
     Definition: QuestionComplete
     """
 
-    knowledge_space_id: Optional[int] = None
+    knowledge_space_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The unique knowledge space id to which the question belongs."""
-    upvote_count: Optional[int] = None
+    upvote_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The total number of upvotes the question has received."""
-    view_count: Optional[int] = None
+    view_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of times the question has been viewed by users."""
-    published: Optional[str] = None
+    published: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Timestamp indicating when the question was published
     (yyyy-MM-ddTHH:mm:ss.fffZ)
     """
-    is_deleted: Optional[bool] = None
+    is_deleted: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Indicates if the question is deleted. Deleted questions are not visible to
     users, but can still be accessed by the administrators.
     """
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The question title"""
-    last_activity: Optional[str] = None
+    last_activity: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Timestamp indicating the last activity with the question
     (yyyy-MM-ddTHH:mm:ss.fffZ)
     """
-    is_published: Optional[bool] = None
+    is_published: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     The question is_published flag indicates whether the question is published
     or not. A published solution is visible to all users, while an unpublished
     solution is in draft state only visible to the author.
     """
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Timestamp indicating when the question was created
     (yyyy-MM-ddTHH:mm:ss.fffZ)
     """
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Question description providing detailed context and information about the
     question
     """
-    solution_count: Optional[int] = None
+    solution_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     This is the number of solutions that have been provided for this question.
     """
-    content_updated: Optional[str] = None
+    content_updated: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Timestamp indicating when the question's content or attachments were last
     updated (yyyy-MM-ddTHH:mm:ss.fffZ)
     """
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The unique question id"""
-    updated: Optional[str] = None
+    updated: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Last time the resource has been updated in the DB. This date does not
     reflect content updates but any update to any fields of the record. Use
     content_updated for information about content updates.
     """
-    language: Optional[str] = None
+    language: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The question language"""
-    source: Optional[str] = None
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """source"""
-    concepts: Optional[List[ConceptLabelMatch]] = None
+    concepts: Optional[
+        List[ConceptLabelMatch | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The assigned question concepts"""
-    knowledge_space: Optional[KnowledgeSpace] = None
+    knowledge_space: Optional[
+        KnowledgeSpace | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The assigned question knowledge space"""
-    solutions: Optional[List[Solution]] = None
+    solutions: Optional[
+        List[Solution | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The question solutions"""
-    attachments: Optional[List[Attachment]] = None
+    attachments: Optional[
+        List[Attachment | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The question attachments"""
-    comments: Optional[List[Comment]] = None
+    comments: Optional[
+        List[Comment | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The question comments"""
 
 
@@ -268,19 +333,19 @@ class ConceptLabelMatch:
     Definition: ConceptLabelMatch
     """
 
-    concept_id: Optional[str] = None
+    concept_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique concept id"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The concept description"""
-    is_flat: Optional[bool] = None
+    is_flat: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """is_flat"""
-    label_match: Optional[str] = None
+    label_match: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The label that matched the concept"""
-    language: Optional[str] = None
+    language: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Concept language"""
-    ontology_id: Optional[str] = None
+    ontology_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ontology id to which the concept belongs"""
-    primary_label: Optional[str] = None
+    primary_label: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Concept primary label"""
 
 
@@ -290,22 +355,22 @@ class Attachment:
     Definition: Attachment
     """
 
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Timestamp indicating when the attachment was created
     (yyyy-MM-ddTHH:mm:ss.fffZ)
     """
-    hash: Optional[str] = None
+    hash: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The attachment hash"""
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """the unique attachment id"""
-    link: Optional[str] = None
+    link: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The relative url to the attachment resource"""
-    mime_type: Optional[str] = None
+    mime_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The attachment file mime_type"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The attachment file name"""
-    size: Optional[int] = None
+    size: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The attachment file size"""
 
 
@@ -315,34 +380,34 @@ class Comment:
     Definition: Comment
     """
 
-    content_updated: Optional[str] = None
+    content_updated: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Timestamp indicating when the comment's description was last updated
     (yyyy-MM-ddTHH:mm:ss.fffZ)
     """
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Timestamp indicating when the comment was created
     (yyyy-MM-ddTHH:mm:ss.fffZ)
     """
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     This is the main text of the comment that provides additional information
     or context to the question or solution.
     """
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The unique comment id"""
-    language: Optional[str] = None
+    language: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The comment language"""
-    updated: Optional[str] = None
+    updated: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Last time the resource has been updated in the DB. This date does not
     reflect content updates but any update to any fields of the record. Use
     content_updated for information about content updates.
     """
-    upvote_count: Optional[int] = None
+    upvote_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of upvotes the comment has received."""
-    user: Optional[UserLegacy] = None
+    user: Optional[UserLegacy | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -351,64 +416,84 @@ class Solution:
     Definition: Solution
     """
 
-    accepted_by_question_poser: Optional[str] = None
+    accepted_by_question_poser: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Timestamp indicating whether the solution has been accepted by the question
     poser (yyyy-MM-ddTHH:mm:ss.fffZ)
     """
-    attachments: Optional[List[Attachment]] = None
+    attachments: Optional[
+        List[Attachment | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The solution attachments"""
-    comments: Optional[List[Comment]] = None
+    comments: Optional[
+        List[Comment | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The solution comments"""
-    content_updated: Optional[str] = None
+    content_updated: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Timestamp indicating when the solution's content was last updated
     (yyyy-MM-ddTHH:mm:ss.fffZ)
     """
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Timestamp indicating when the solution was created
     (yyyy-MM-ddTHH:mm:ss.fffZ)
     """
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     This is the main text of the solution that provides the answer or guidance
     to the question posed.
     """
-    expires: Optional[str] = None
+    expires: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Timestamp indicating when the solution is about to expiry and requires
     revalidation (yyyy-MM-ddTHH:mm:ss.fffZ)
     """
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """the unique solution id"""
-    is_published: Optional[bool] = None
+    is_published: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     The solution is_published flag indicates whether the solution is published
     or not. A published solution is visible to all users.
     """
-    language: Optional[str] = None
+    language: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The solution language"""
-    published: Optional[str] = None
+    published: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Timestamp indicating when the solution was published
     (yyyy-MM-ddTHH:mm:ss.fffZ)
     """
-    rating_count: Optional[int] = None
+    rating_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Total number of ratings for the solution."""
-    solution_authority_approval: Optional[SolutionAuthorityApproval] = None
-    updated: Optional[str] = None
+    solution_authority_approval: Optional[
+        SolutionAuthorityApproval | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    updated: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Last time the resource has been updated in the DB. This date does not
     reflect content updates but any update to any fields of the record. Use
     content_updated for information about content updates.
     """
-    upvote_count: Optional[int] = None
+    upvote_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The total number of upvotes the solution has received."""
-    user: Optional[UserLegacy] = None
+    user: Optional[UserLegacy | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The user who created the solution"""
-    validated: Optional[SolutionValidation] = None
-    validity_period: Optional[str] = None
+    validated: Optional[
+        SolutionValidation | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    validity_period: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Validity period until the solution is considered expired"""
 
 
@@ -418,17 +503,19 @@ class SolutionValidation:
     Definition: SolutionValidation
     """
 
-    revalidated_at: Optional[str] = field(
+    revalidated_at: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "revalidatedAt"},
     )
     """The date when the solution was revalidated"""
-    validity_period: Optional[str] = field(
+    validity_period: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "validityPeriod"},
     )
     """The validity period until the solution is considered expired"""
-    user: Optional[UserLegacy] = None
+    user: Optional[UserLegacy | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The user who validated the solution"""
 
 
@@ -438,13 +525,13 @@ class SolutionAuthorityApproval:
     Definition: SolutionAuthorityApproval
     """
 
-    approval_date: Optional[str] = None
+    approval_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date of the solution authority approval (yyyy-MM-ddTHH:mm:ss.fffZ)"""
-    solution_authority_id: Optional[int] = None
+    solution_authority_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """ID of the solution authority"""
-    solution_authority_name: Optional[str] = None
+    solution_authority_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the solution authority"""
-    user: Optional[UserLegacy] = None
+    user: Optional[UserLegacy | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -453,18 +540,19 @@ class UserLegacy:
     Definition: UserLegacy
     """
 
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """email"""
-    global_user_id: Optional[str] = field(
+    global_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "globalUserId"},
     )
     """global_user_id"""
-    image: Optional[str] = None
+    image: Optional[str] = dataclass_field(default=None, kw_only=True)
     """image"""
-    firstname: Optional[str] = None
+    firstname: Optional[str] = dataclass_field(default=None, kw_only=True)
     """firstname"""
-    lastname: Optional[str] = None
+    lastname: Optional[str] = dataclass_field(default=None, kw_only=True)
     """lastname"""
 
 
@@ -477,56 +565,56 @@ class User:
     Definition: User
     """
 
-    about: Optional[str] = None
+    about: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Custom text entered by the user to describe themselves in their 'About Me'
     section
     """
-    avatar_url: Optional[str] = None
+    avatar_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """URL to the user's avatar image"""
-    company: Optional[str] = None
+    company: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Company of the user"""
-    country: Optional[str] = None
+    country: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ISO 3166-1 alpha-2 country code (e.g. ch, us, de) of the user"""
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Timestamp indicating when the user was created (yyyy-MM-ddTHH:mm:ss.fffZ)
     """
-    deleted: Optional[str] = None
+    deleted: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Timestamp indicating when the user was deleted (yyyy-MM-ddTHH:mm:ss.fffZ).
     Without admin permissions, only non deleted user will be returned
     """
-    department: Optional[str] = None
+    department: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Department of the user"""
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email of the user"""
-    first_name: Optional[str] = None
+    first_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """First name of the user."""
-    first_seen: Optional[str] = None
+    first_seen: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Timestamp indicating when the user logged in the first time
     (yyyy-MM-ddTHH:mm:ss.fffZ)
     """
-    id: Optional[UserId] = None
-    is_federated: Optional[bool] = None
+    id: Optional[UserId] = dataclass_field(default=None, kw_only=True)
+    is_federated: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Indicates whether the user authenticates using local credentials
     (email/password) rather than an external SSO provider (SAML, OpenID
     Connect)
     """
-    is_technical: Optional[bool] = None
+    is_technical: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Indicates whether the user is a technical API user (non-interactive/machine
     account); when true the user typically authenticates via API key
     """
-    language: Optional[Language] = None
+    language: Optional[Language] = dataclass_field(default=None, kw_only=True)
     """The user's interface language preference"""
-    last_name: Optional[str] = None
+    last_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Last name of the user."""
-    location: Optional[str] = None
+    location: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Location of the user"""
-    position: Optional[str] = None
+    position: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Company of the user"""
 
 
@@ -536,24 +624,24 @@ class KnowledgeSpace:
     Definition: KnowledgeSpace
     """
 
-    automatic_new_user_assignment: Optional[bool] = None
+    automatic_new_user_assignment: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates if new users are automatically assigned"""
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Timestamp indicating when the knowledge space was created
     (yyyy-MM-ddTHH:mm:ss.fffZ)
     """
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of the knowledge space"""
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The unique knowledge space id"""
-    is_closed: Optional[bool] = None
+    is_closed: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates if the knowledge space is non public"""
-    member_count: Optional[int] = None
+    member_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of members"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the knowledge space"""
-    updated: Optional[str] = None
+    updated: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Last time the resource has been updated in the DB."""
 
 
@@ -569,10 +657,10 @@ class GraphQLError:
     Definition: GraphQLError
     """
 
-    extensions: Optional[Dict[str, Any]] = None
-    locations: Optional[List[Dict[str, Any]]] = None
-    message: Optional[str] = None
-    path: Optional[List[str]] = None
+    extensions: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    locations: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
+    path: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
 
 
 # Client Class
@@ -583,16 +671,16 @@ class StarmindClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -603,8 +691,8 @@ class StarmindClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -612,8 +700,8 @@ class StarmindClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -625,7 +713,7 @@ class StarmindClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -640,9 +728,9 @@ class StarmindClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "starmind"
 
-    async def find_experts_async(
+    def find_experts(
         self,
-        input: FindExpertsInput,
+        input: FindExpertsInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -660,10 +748,26 @@ class StarmindClient(ConnectorClientBase):
         we show from returned users by selecting concepts based on the primary
         label in the chosen language. Returned concepts are deduplicated when
         multiple concepts share the same primary label.
+
+        Swagger operation ID: `FindExperts_V3`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/v3/experts"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -677,6 +781,7 @@ class StarmindClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -684,13 +789,13 @@ class StarmindClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def find_questions_async(
+    def find_questions(
         self,
+        *,
         query: Optional[str] = None,
         limit: Optional[int] = None,
         filter: Optional[str] = None,
         sort: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -704,6 +809,24 @@ class StarmindClient(ConnectorClientBase):
         `items`. By default, all published questions are returned, ordered by
         their last activity (descending). A combination of filters, search
         queries and ordering criteria can be applied to the result.
+
+        Swagger operation ID: `FindQuestions_V3`.
+
+        Args:
+            query: The question search query.
+            limit: Limit the number of returned questions. Defaults to 10.
+            filter: Filter the list of questions using a predefined filter.
+            sort: Specify the criteria the result is sorted by.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/v3/questions"
         query_params = []
@@ -730,7 +853,7 @@ class StarmindClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -744,6 +867,7 @@ class StarmindClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -751,7 +875,7 @@ class StarmindClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_user_by_id_async(
+    def get_user_by_id(
         self,
         id: str,
         *,
@@ -764,13 +888,29 @@ class StarmindClient(ConnectorClientBase):
         Get user by id
 
         Retrieves user information based on the provided user id.
+
+        Swagger operation ID: `GetUserById_V3`.
+
+        Args:
+            id: The unique global user identifier (UUID) as path parameter used
+                to reference the user across the Starmind platform.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v3/users/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -784,6 +924,7 @@ class StarmindClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -791,9 +932,9 @@ class StarmindClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def post_question_draft_async(
+    def post_question_draft(
         self,
-        input: PostQuestionDraftInput,
+        input: PostQuestionDraftInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -809,10 +950,26 @@ class StarmindClient(ConnectorClientBase):
         discoverable, and allow other users to answer it. Providing the
         optional description helps experts understand the question better and
         increases the chances of getting high-quality answers.
+
+        Swagger operation ID: `PostQuestionDraft_V3`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/v3/questions"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -826,6 +983,7 @@ class StarmindClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -833,7 +991,7 @@ class StarmindClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def publish_question_draft_async(
+    def publish_question_draft(
         self,
         question_id: int,
         *,
@@ -848,13 +1006,28 @@ class StarmindClient(ConnectorClientBase):
         Publishes a question draft. Publishing the question triggers expert
         search, makes the question discoverable, and allows other users to
         answer it. Questions are always published anonymously.
+
+        Swagger operation ID: `PublishQuestionDraft_V3`.
+
+        Args:
+            question_id: The ID of the question draft to be published.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v3/questions/{quote(str(question_id), safe='')}/publish"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -868,6 +1041,7 @@ class StarmindClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

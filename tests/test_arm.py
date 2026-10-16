@@ -6,8 +6,8 @@ import json
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.arm import ArmClient
 from azure.connectors.arm import (
-    ArmClient,
     LocationListResult,
     Location,
     Subscription,
@@ -97,7 +97,7 @@ class TestArmClientInitialization:
         client = ArmClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -181,11 +181,11 @@ class TestSubscriptionsListAsync:
 
         with patch.object(
             arm_client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(arm_client.subscriptions_list_async())
+            result = await resolve_generated_result(arm_client.list_subscriptions())
 
             mock_send.assert_called_once_with(
                 "GET",
@@ -211,11 +211,11 @@ class TestSubscriptionsListAsync:
 
         with patch.object(
             arm_client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(arm_client.subscriptions_list_async())
+            result = await resolve_generated_result(arm_client.list_subscriptions())
 
             mock_send.assert_called_once_with(
                 "GET",
@@ -237,11 +237,11 @@ class TestSubscriptionsListAsync:
 
         with patch.object(
             arm_client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(arm_client.subscriptions_list_async())
+            result = await resolve_generated_result(arm_client.list_subscriptions())
 
             mock_send.assert_called_once()
             assert result is not None
@@ -254,11 +254,11 @@ class TestSubscriptionsListAsync:
 
         with patch.object(
             arm_client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(arm_client.subscriptions_list_async())
+            result = await resolve_generated_result(arm_client.list_subscriptions())
 
             mock_send.assert_called_once()
             assert result == []
@@ -295,12 +295,12 @@ class TestSubscriptionsListAsync:
 
         with patch.object(
             arm_client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             side_effect=responses,
         ) as mock_send:
             result = await resolve_generated_result(
-                arm_client.subscriptions_list_async()
+                arm_client.list_subscriptions()
             )
 
         assert result == [first_subscription, second_subscription]
@@ -317,12 +317,12 @@ class TestSubscriptionsListAsync:
 
         with patch.object(
             arm_client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await resolve_generated_result(arm_client.subscriptions_list_async())
+                await resolve_generated_result(arm_client.list_subscriptions())
 
             assert exc_info.value.status_code == 401
 
@@ -336,12 +336,12 @@ class TestSubscriptionsListAsync:
 
         with patch.object(
             arm_client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await resolve_generated_result(arm_client.subscriptions_list_async())
+                await resolve_generated_result(arm_client.list_subscriptions())
 
             assert exc_info.value.status_code == 403
 
@@ -355,12 +355,12 @@ class TestSubscriptionsListAsync:
 
         with patch.object(
             arm_client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await resolve_generated_result(arm_client.subscriptions_list_async())
+                await resolve_generated_result(arm_client.list_subscriptions())
 
             assert exc_info.value.status_code == 404
 
@@ -374,12 +374,12 @@ class TestSubscriptionsListAsync:
 
         with patch.object(
             arm_client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await resolve_generated_result(arm_client.subscriptions_list_async())
+                await resolve_generated_result(arm_client.list_subscriptions())
 
             assert exc_info.value.status_code == 500
 
@@ -794,11 +794,11 @@ class TestResourceGroupsListAsync:
 
         with patch.object(
             arm_client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(arm_client.resource_groups_list_async(
+            result = await resolve_generated_result(arm_client.list_resource_groups(
                 subscription_id="sub-1"
             ))
 
@@ -826,12 +826,12 @@ class TestResourceGroupsListAsync:
 
         with patch.object(
             arm_client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await resolve_generated_result(arm_client.resource_groups_list_async(
+                await resolve_generated_result(arm_client.list_resource_groups(
                     subscription_id="sub-1"
                 ))
 
@@ -855,11 +855,11 @@ class TestResourceGroupsGetAsync:
 
         with patch.object(
             arm_client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await arm_client.resource_groups_get_async(
+            result = await arm_client.resource_groups_get(
                 subscription_id="sub-1",
                 resource_group_name="rg-1"
             )
@@ -880,11 +880,11 @@ class TestResourceGroupsDeleteAsync:
 
         with patch.object(
             arm_client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await arm_client.resource_groups_delete_async(
+            result = await arm_client.resource_groups_delete(
                 subscription_id="sub-1",
                 resource_group_name="rg-1"
             )
@@ -908,11 +908,11 @@ class TestResourceGroupsDeleteAsync:
 
         with patch.object(
             arm_client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await arm_client.resource_groups_delete_async(
+            result = await arm_client.resource_groups_delete(
                 subscription_id="sub-1",
                 resource_group_name="rg-1"
             )
@@ -920,26 +920,26 @@ class TestResourceGroupsDeleteAsync:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_error_not_found(self, arm_client):
-        """Test 404 Not Found raises ConnectorException."""
+    async def test_server_error_raises_exception(self, arm_client):
+        """Test a server error raises ConnectorException."""
         mock_response = MockResponse(
-            status=404,
-            text='{"error": {"code": "NotFound", "message": "Resource group not found"}}'
+            status=500,
+            text='{"error": {"code": "ServerError", "message": "Request failed"}}'
         )
 
         with patch.object(
             arm_client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await arm_client.resource_groups_delete_async(
+                await arm_client.resource_groups_delete(
                     subscription_id="sub-1",
                     resource_group_name="rg-1"
                 )
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestDeploymentsGetAsync:
@@ -963,11 +963,11 @@ class TestDeploymentsGetAsync:
 
         with patch.object(
             arm_client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await arm_client.deployments_get_async(
+            result = await arm_client.deployments_get(
                 subscription_id="sub-1",
                 resource_group_name="rg-1",
                 deployment_name="deploy-1"
@@ -988,11 +988,11 @@ class TestDeploymentsDeleteAsync:
 
         with patch.object(
             arm_client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await arm_client.deployments_delete_async(
+            result = await arm_client.deployments_delete(
                 subscription_id="sub-1",
                 resource_group_name="rg-1",
                 deployment_name="deploy-1"
@@ -1011,11 +1011,11 @@ class TestDeploymentsCancelAsync:
 
         with patch.object(
             arm_client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await arm_client.deployments_cancel_async(
+            result = await arm_client.deployments_cancel(
                 subscription_id="sub-1",
                 resource_group_name="rg-1",
                 deployment_name="deploy-1"
@@ -1058,11 +1058,11 @@ class TestProvidersListAsync:
 
         with patch.object(
             arm_client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(arm_client.providers_list_async(
+            result = await resolve_generated_result(arm_client.list_providers(
                 subscription_id="sub-1"
             ))
 
@@ -1085,11 +1085,11 @@ class TestProvidersRegisterAsync:
 
         with patch.object(
             arm_client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await arm_client.providers_register_async(
+            result = await arm_client.providers_register(
                 subscription_id="sub-1",
                 resource_provider_namespace="Microsoft.Compute"
             )
@@ -1123,12 +1123,14 @@ class TestSubscriptionsListLocationsAsync:
 
         with patch.object(
             arm_client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await arm_client.subscriptions_list_locations_async(
-                subscription_id="sub-1"
+            result = await resolve_generated_result(
+                arm_client.list_subscriptions_list_locations(
+                    subscription_id="sub-1"
+                )
             )
 
             mock_send.assert_called_once_with(
@@ -1141,8 +1143,7 @@ class TestSubscriptionsListLocationsAsync:
                 client_request_id=None,
                 response_hook=None,
             )
-            assert result is not None
-            assert len(result["value"]) == 2
+            assert result == mock_response_data["value"]
 
 
 class TestSubscriptionsGetAsync:
@@ -1161,11 +1162,11 @@ class TestSubscriptionsGetAsync:
 
         with patch.object(
             arm_client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await arm_client.subscriptions_get_async(
+            result = await arm_client.subscriptions_get(
                 subscription_id="sub-1"
             )
 
@@ -1193,11 +1194,11 @@ class TestTagsDeleteValueAsync:
 
         with patch.object(
             arm_client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await arm_client.tags_delete_value_async(
+            result = await arm_client.tags_delete_value(
                 subscription_id="sub-1",
                 tag_name="environment",
                 tag_value="deprecated"
@@ -1216,11 +1217,11 @@ class TestTagsDeleteAsync:
 
         with patch.object(
             arm_client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await arm_client.tags_delete_async(
+            result = await arm_client.tags_delete(
                 subscription_id="sub-1",
                 tag_name="obsolete-tag"
             )
@@ -1238,11 +1239,11 @@ class TestResourcesDeleteByIdAsync:
 
         with patch.object(
             arm_client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await arm_client.resources_delete_by_id_async(
+            result = await arm_client.resources_delete_by_id(
                 x_ms_api_version=RESOURCE_API_VERSION,
                 subscription_id="sub-1",
                 resource_group_name="rg-1",
@@ -1253,21 +1254,21 @@ class TestResourcesDeleteByIdAsync:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_error_not_found(self, arm_client):
-        """Test 404 Not Found raises ConnectorException."""
+    async def test_server_error_raises_exception(self, arm_client):
+        """Test a server error raises ConnectorException."""
         mock_response = MockResponse(
-            status=404,
-            text='{"error": {"code": "NotFound", "message": "Resource not found"}}'
+            status=500,
+            text='{"error": {"code": "ServerError", "message": "Request failed"}}'
         )
 
         with patch.object(
             arm_client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await arm_client.resources_delete_by_id_async(
+                await arm_client.resources_delete_by_id(
                     x_ms_api_version=RESOURCE_API_VERSION,
                     subscription_id="sub-1",
                     resource_group_name="rg-1",
@@ -1275,4 +1276,4 @@ class TestResourcesDeleteByIdAsync:
                     short_resource_id="virtualMachines/vm-1"
                 )
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500

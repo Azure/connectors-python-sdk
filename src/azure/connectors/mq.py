@@ -5,19 +5,31 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Dict, List, Any, Mapping
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "MqClient",
+    "Item",
+    "ItemsList",
+    "MultipleGetValidOptions",
+    "ObjectEntity",
+    "ProcedureMetadata",
+    "SendResponse",
+    "SendValidDataOptions",
+    "SendValidDataOptionsArray",
+    "SingleGetValidOptions",
+]
 
 
 # Type Definitions
@@ -28,81 +40,100 @@ class Item:
     Response for Delete message
     """
 
-    item_internal_id: Optional[str] = field(
+    item_internal_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ItemInternalId"},
     )
-    message_data: Optional[str] = field(
+    message_data: str = dataclass_field(metadata={"wire_name": "MessageData"})
+    message_id: Optional[str] = dataclass_field(
         default=None,
-        metadata={"wire_name": "MessageData"},
-    )
-    message_id: Optional[str] = field(
-        default=None,
+        kw_only=True,
         metadata={"wire_name": "MessageId"},
     )
-    correlation_id: Optional[str] = field(
+    correlation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CorrelationId"},
     )
-    put_date_time: Optional[str] = field(
+    put_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PutDateTime"},
     )
-    user_identifier: Optional[str] = field(
+    user_identifier: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "UserIdentifier"},
     )
-    put_application_name: Optional[str] = field(
+    put_application_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PutApplicationName"},
     )
-    put_application_type: Optional[str] = field(
+    put_application_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PutApplicationType"},
     )
-    format: Optional[str] = field(
+    format: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Format"},
     )
-    accounting_token: Optional[str] = field(
+    accounting_token: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountingToken"},
     )
-    ccsid: Optional[int] = field(default=None, metadata={"wire_name": "Ccsid"})
-    group_id: Optional[str] = field(
+    ccsid: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Ccsid"},
+    )
+    group_id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "GroupId"},
     )
-    logical_sequence_number: Optional[int] = field(
+    logical_sequence_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "LogicalSequenceNumber"},
     )
-    message_type: Optional[str] = field(
+    message_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "MessageType"},
     )
-    offset: Optional[int] = field(
+    offset: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Offset"},
     )
-    original_length: Optional[int] = field(
+    original_length: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OriginalLength"},
     )
-    persistence: Optional[str] = field(
+    persistence: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Persistence"},
     )
-    priority: Optional[int] = field(
+    priority: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Priority"},
     )
-    reply_to_queue: Optional[str] = field(
+    reply_to_queue: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReplyToQueue"},
     )
-    reply_to_queue_manager: Optional[str] = field(
+    reply_to_queue_manager: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReplyToQueueManager"},
     )
 
@@ -113,7 +144,12 @@ class ItemsList:
     Response for Delete messages
     """
 
-    value: Optional[List[Item]] = None
+    value: Optional[
+        List[Item | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -122,20 +158,24 @@ class SendResponse:
     Response for Send message
     """
 
-    item_internal_id: Optional[str] = field(
+    item_internal_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ItemInternalId"},
     )
-    message_data: Optional[str] = field(
+    message_data: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "MessageData"},
     )
-    message_id: Optional[str] = field(
+    message_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "MessageId"},
     )
-    correlation_id: Optional[str] = field(
+    correlation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CorrelationId"},
     )
 
@@ -146,9 +186,9 @@ class ProcedureMetadata:
     Definition: ProcedureMetadata
     """
 
-    name: Optional[str] = None
-    title: Optional[str] = None
-    schema: Optional[ObjectEntity] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -157,7 +197,7 @@ class ObjectEntity:
     Definition: Object
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -170,51 +210,63 @@ class SingleGetValidOptions:
     Definition: SingleGetValidOptions
     """
 
-    queue: Optional[str] = field(default=None, metadata={"wire_name": "Queue"})
-    """When specified, overrides the queue defined in the connection."""
-    message_id: Optional[str] = field(
+    queue: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Queue"},
+    )
+    """When specified, overrides the queue defined in the connection."""
+    message_id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "MessageId"},
     )
     """Base64 string that represents a byte array with 24 bytes."""
-    correlation_id: Optional[str] = field(
+    correlation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CorrelationId"},
     )
     """Base64 string that represents a byte array with 24 bytes."""
-    group_id: Optional[str] = field(
+    group_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "GroupId"},
     )
     """Base64 string that represents a byte array with 24 bytes."""
-    message_token: Optional[str] = field(
+    message_token: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "MessageToken"},
     )
     """Base64 string that represents a byte array with 16 bytes."""
-    offset: Optional[float] = field(
+    offset: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Offset"},
     )
     """
     Offset in bytes of the data in the physical message from the start of the
     logical message.
     """
-    logical_sequence_number: Optional[float] = field(
+    logical_sequence_number: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "LogicalSequenceNumber"},
     )
     """Sequence number of a logical message within a group."""
-    include_info: Optional[str] = field(
+    include_info: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IncludeInfo"},
     )
     """
     Indicates if additional message info should be included. Expects true or
     false.
     """
-    timeout: Optional[str] = field(
+    timeout: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Timeout"},
     )
     """
@@ -229,59 +281,72 @@ class MultipleGetValidOptions:
     Definition: MultipleGetValidOptions
     """
 
-    queue: Optional[str] = field(default=None, metadata={"wire_name": "Queue"})
-    """When specified, overrides the queue defined in the connection."""
-    message_id: Optional[str] = field(
+    queue: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Queue"},
+    )
+    """When specified, overrides the queue defined in the connection."""
+    message_id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "MessageId"},
     )
     """Base64 string that represents a byte array with 24 bytes."""
-    correlation_id: Optional[str] = field(
+    correlation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CorrelationId"},
     )
     """Base64 string that represents a byte array with 24 bytes."""
-    group_id: Optional[str] = field(
+    group_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "GroupId"},
     )
     """Base64 string that represents a byte array with 24 bytes."""
-    message_token: Optional[str] = field(
+    message_token: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "MessageToken"},
     )
     """Base64 string that represents a byte array with 16 bytes."""
-    offset: Optional[float] = field(
+    offset: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Offset"},
     )
     """
     Offset in bytes of the data in the physical message from the start of the
     logical message.
     """
-    logical_sequence_number: Optional[float] = field(
+    logical_sequence_number: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "LogicalSequenceNumber"},
     )
     """Sequence number of a logical message within a group."""
-    include_info: Optional[str] = field(
+    include_info: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IncludeInfo"},
     )
     """
     Indicates if additional message info should be included. Expects true or
     false.
     """
-    timeout: Optional[str] = field(
+    timeout: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Timeout"},
     )
     """
     Wait time for a message to appear in the queue, expects an XML duration or
     hh:mm:ss.
     """
-    batch_size: Optional[float] = field(
+    batch_size: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BatchSize"},
     )
     """Maximum number of messages to be retrieved from the queue."""
@@ -293,53 +358,62 @@ class SendValidDataOptions:
     Definition: SendValidDataOptions
     """
 
-    queue: Optional[str] = field(default=None, metadata={"wire_name": "Queue"})
-    """When specified, overrides the queue defined in the connection."""
-    message: Optional[str] = field(
+    queue: Optional[str] = dataclass_field(
         default=None,
-        metadata={"wire_name": "Message"},
+        kw_only=True,
+        metadata={"wire_name": "Queue"},
     )
+    """When specified, overrides the queue defined in the connection."""
+    message: str = dataclass_field(metadata={"wire_name": "Message"})
     """Message data"""
-    message_type: Optional[str] = field(
+    message_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "MessageType"},
     )
     """Message type"""
-    correlation_id: Optional[str] = field(
+    correlation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CorrelationId"},
     )
     """Base64 string that represents a byte array with 24 bytes."""
-    message_id: Optional[str] = field(
+    message_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "MessageId"},
     )
     """Base64 string that represents a byte array with 24 bytes."""
-    reply_to_queue: Optional[str] = field(
+    reply_to_queue: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReplyToQueue"},
     )
     """Reply-to queue"""
-    reply_to_queue_manager: Optional[str] = field(
+    reply_to_queue_manager: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReplyToQueueManager"},
     )
     """Reply-to queue manager"""
-    code_char_set_id: Optional[float] = field(
+    code_char_set_id: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CodeCharSetId"},
     )
     """Character set for the message."""
-    offset: Optional[float] = field(
+    offset: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Offset"},
     )
     """
     Offset in bytes of the data in the physical message from the start of the
     logical message.
     """
-    format: Optional[str] = field(
+    format: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Format"},
     )
     """Format field for the message."""
@@ -351,7 +425,7 @@ class SendValidDataOptionsArray:
     Definition: SendValidDataOptionsArray
     """
 
-    messages: Optional[List[SendValidDataOptions]] = None
+    messages: List[SendValidDataOptions | Mapping[str, Any]]
 
 
 # Client Class
@@ -362,16 +436,16 @@ class MqClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -382,8 +456,8 @@ class MqClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -391,8 +465,8 @@ class MqClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -404,7 +478,7 @@ class MqClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -419,9 +493,9 @@ class MqClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "mq"
 
-    async def delete_async(
+    def delete(
         self,
-        input: SingleGetValidOptions,
+        input: SingleGetValidOptions | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -432,10 +506,26 @@ class MqClient(ConnectorClientBase):
         Delete message
 
         Deletes one message from the queue, by doing a destructive get.
+
+        Swagger operation ID: `DeleteV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/delete"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -449,6 +539,7 @@ class MqClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -456,9 +547,9 @@ class MqClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_all_async(
+    def delete_all(
         self,
-        input: MultipleGetValidOptions,
+        input: MultipleGetValidOptions | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -469,10 +560,26 @@ class MqClient(ConnectorClientBase):
         Delete messages
 
         Deletes messages from the queue, by doing a destructive get.
+
+        Swagger operation ID: `DeleteAllV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/deleteall"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -486,6 +593,7 @@ class MqClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -493,9 +601,9 @@ class MqClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def read_async(
+    def read(
         self,
-        input: SingleGetValidOptions,
+        input: SingleGetValidOptions | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -506,10 +614,26 @@ class MqClient(ConnectorClientBase):
         Browse message
 
         Browse one message from the queue.
+
+        Swagger operation ID: `ReadV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/read"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -523,6 +647,7 @@ class MqClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -530,9 +655,9 @@ class MqClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def read_all_async(
+    def read_all(
         self,
-        input: MultipleGetValidOptions,
+        input: MultipleGetValidOptions | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -543,10 +668,26 @@ class MqClient(ConnectorClientBase):
         Browse messages
 
         Browse messages in a queue.
+
+        Swagger operation ID: `ReadAllV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/readall"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -560,6 +701,7 @@ class MqClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -567,9 +709,9 @@ class MqClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def receive_async(
+    def receive(
         self,
-        input: SingleGetValidOptions,
+        input: SingleGetValidOptions | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -580,10 +722,26 @@ class MqClient(ConnectorClientBase):
         Receive message
 
         Returns one message from the queue, by doing a destructive get.
+
+        Swagger operation ID: `ReceiveV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/receive"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -597,6 +755,7 @@ class MqClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -604,9 +763,9 @@ class MqClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def receive_all_async(
+    def receive_all(
         self,
-        input: MultipleGetValidOptions,
+        input: MultipleGetValidOptions | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -617,10 +776,26 @@ class MqClient(ConnectorClientBase):
         Receive messages
 
         Returns messages from the queue, by doing a destructive get.
+
+        Swagger operation ID: `ReceiveAllV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/receiveall"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -634,6 +809,7 @@ class MqClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -641,9 +817,9 @@ class MqClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def send_async(
+    def send(
         self,
-        input: SendValidDataOptions,
+        input: SendValidDataOptions | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -654,10 +830,26 @@ class MqClient(ConnectorClientBase):
         Send message
 
         Send a message to a queue.
+
+        Swagger operation ID: `SendV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/send"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -671,6 +863,7 @@ class MqClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

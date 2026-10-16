@@ -5,19 +5,29 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Dict, Any, Mapping
 from urllib.parse import quote
+import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "OrderfulClient",
+    "CommunicationChannelCreationResponse",
+    "CommunicationChannelEventResponse",
+    "CommunicationChannelInput",
+    "CommunicationChannelRequestBody",
+    "CreateTransactionInput",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -28,7 +38,7 @@ class CreateTransactionInput:
     Create Transaction
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -41,18 +51,12 @@ class CommunicationChannelInput:
     Listen to Communication Channel
     """
 
-    is_active: Optional[bool] = field(
-        default=None,
-        metadata={"wire_name": "isActive"},
-    )
-    name: Optional[str] = None
+    is_active: bool = dataclass_field(metadata={"wire_name": "isActive"})
+    name: str
     """Communication Channel Name."""
-    config: Optional[Dict[str, Any]] = None
+    config: Dict[str, Any]
     """Configuration of the Trigger"""
-    owner_id: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "ownerId"},
-    )
+    owner_id: int = dataclass_field(metadata={"wire_name": "ownerId"})
     """Owner of the Orderful account."""
 
 
@@ -62,7 +66,7 @@ class CommunicationChannelCreationResponse:
     Response for Listen to Communication Channel
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -71,7 +75,7 @@ class CommunicationChannelEventResponse:
     Definition: CommunicationChannelEventResponse
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -84,19 +88,13 @@ class CommunicationChannelRequestBody:
     Definition: CommunicationChannelRequestBody
     """
 
-    is_active: Optional[bool] = field(
-        default=None,
-        metadata={"wire_name": "isActive"},
-    )
+    is_active: bool = dataclass_field(metadata={"wire_name": "isActive"})
     """If the State of the Trigger is active."""
-    name: Optional[str] = None
+    name: str
     """Communication Channel Name."""
-    config: Optional[Dict[str, Any]] = None
+    config: Dict[str, Any]
     """Configuration of the Trigger."""
-    owner_id: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "ownerId"},
-    )
+    owner_id: int = dataclass_field(metadata={"wire_name": "ownerId"})
     """Owner of the Orderful account."""
 
 
@@ -108,16 +106,16 @@ class OrderfulClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -128,8 +126,8 @@ class OrderfulClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -137,8 +135,8 @@ class OrderfulClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -150,7 +148,7 @@ class OrderfulClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -165,23 +163,37 @@ class OrderfulClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "orderful"
 
-    async def list_transactions_async(
+    def list_transactions(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> None:
+    ) -> dict[str, Any] | None:
         """
         List Transactions
 
         Fetches a list of transactions as specified by the filter/sort
         parameters supplied.
+
+        Swagger operation ID: `ListTransactions`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/transactions"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -195,11 +207,17 @@ class OrderfulClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def create_transaction_async(
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    def create_transaction(
         self,
-        input: CreateTransactionInput,
+        input: CreateTransactionInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -210,10 +228,26 @@ class OrderfulClient(ConnectorClientBase):
         Create Transaction
 
         Create Transaction.
+
+        Swagger operation ID: `CreateTransaction`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/transactions"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -227,9 +261,10 @@ class OrderfulClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_transaction_by_id_async(
+    def get_transaction_by_id(
         self,
         transaction_id: int,
         *,
@@ -242,13 +277,28 @@ class OrderfulClient(ConnectorClientBase):
         Get Transaction by ID
 
         Get transaction by ID.
+
+        Swagger operation ID: `GetTransactionById`.
+
+        Args:
+            transaction_id: The transaction Id used to retrieve transaction..
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v2/transactions/{quote(str(transaction_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -262,6 +312,7 @@ class OrderfulClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
 

@@ -5,20 +5,44 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "PlannerClient",
+    "AppliedCategories",
+    "AssignUsersInput",
+    "CreateBucketInput",
+    "CreateBucketResponse",
+    "CreateTaskRequest",
+    "ErrorResponse",
+    "GetPlanDetailsResponse",
+    "GetTaskDetailsResponse",
+    "GetTaskResponse",
+    "GetTaskResponseV2",
+    "GetTaskResponseV3",
+    "ListBucketsResponse",
+    "ListGroupsResponse",
+    "ListMyPlansResponse",
+    "ListTasksResponse",
+    "UnassignUsersInput",
+    "UpdateTaskDetailsRequest",
+    "UpdateTaskRequest",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -29,7 +53,7 @@ class UnassignUsersInput:
     Remove assignees from a task
     """
 
-    assignments: Optional[str] = None
+    assignments: str
     """
     Semi-colon separated ids or email addresses of users who should be
     unassigned to this task.
@@ -42,65 +66,77 @@ class GetTaskResponseV2:
     Response for Remove assignees from a task
     """
 
-    created_by: Optional[Dict[str, Any]] = field(
+    created_by: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdBy"},
     )
-    plan_id: Optional[str] = field(
+    plan_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "planId"},
     )
     """The id of the plan this task belongs to."""
-    bucket_id: Optional[str] = field(
+    bucket_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "bucketId"},
     )
     """The id of the bucket this task belongs to."""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The title of the task."""
-    percent_complete: Optional[int] = field(
+    percent_complete: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "percentComplete"},
     )
     """The completion percentage of the task."""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """The start datetime of the task."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """The datetime the task was created."""
-    due_date_time: Optional[str] = field(
+    due_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dueDateTime"},
     )
     """The datetime the task is due."""
-    has_description: Optional[bool] = field(
+    has_description: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "hasDescription"},
     )
     """Set to true if the task has a description."""
-    completed_date_time: Optional[str] = field(
+    completed_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "completedDateTime"},
     )
     """The datetime the task was completed."""
-    reference_count: Optional[int] = field(
+    reference_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "referenceCount"},
     )
     """The number of external references that exist on the task."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The id of the task."""
-    applied_categories: Optional[AppliedCategories] = field(
+    applied_categories: Optional[AppliedCategories | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "appliedCategories"},
     )
-    assignments: Optional[List[Dict[str, Any]]] = field(
+    assignments: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_assignments"},
     )
 
@@ -111,7 +147,7 @@ class AssignUsersInput:
     Add assignees to a task
     """
 
-    assignments: Optional[str] = None
+    assignments: str
     """
     Semi-colon separated ids or email addresses of users who should be assigned
     to this task.
@@ -124,7 +160,7 @@ class ListMyPlansResponse:
     Response for List plans for a group
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -133,11 +169,12 @@ class GetPlanDetailsResponse:
     Response for Get plan details
     """
 
-    category_descriptions: Optional[Dict[str, Any]] = field(
+    category_descriptions: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "categoryDescriptions"},
     )
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ID of the plan details"""
 
 
@@ -147,17 +184,11 @@ class CreateBucketInput:
     Create a bucket
     """
 
-    name: Optional[str] = None
+    name: str
     """Name of the bucket"""
-    group_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "groupId"},
-    )
+    group_id: str = dataclass_field(metadata={"wire_name": "groupId"})
     """The group to retrieve the plan."""
-    plan_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "planId"},
-    )
+    plan_id: str = dataclass_field(metadata={"wire_name": "planId"})
     """The plan for the new bucket."""
 
 
@@ -167,19 +198,21 @@ class CreateBucketResponse:
     Response for Create a bucket
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the bucket"""
-    plan_id: Optional[str] = field(
+    plan_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "planId"},
     )
     """Plan ID to which the bucket belongs"""
-    order_hint: Optional[str] = field(
+    order_hint: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "orderHint"},
     )
     """Hint used to order items of this type in a list view"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ID of the bucket"""
 
 
@@ -189,64 +222,75 @@ class GetTaskResponseV3:
     Response for Create a task
     """
 
-    created_by: Optional[Dict[str, Any]] = field(
+    created_by: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdBy"},
     )
-    plan_id: Optional[str] = field(
+    plan_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "planId"},
     )
     """The id of the plan this task belongs to."""
-    bucket_id: Optional[str] = field(
+    bucket_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "bucketId"},
     )
     """The id of the bucket this task belongs to."""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The title of the task."""
-    percent_complete: Optional[int] = field(
+    percent_complete: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "percentComplete"},
     )
     """The completion percentage of the task."""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """The start datetime of the task."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """The datetime the task was created."""
-    due_date_time: Optional[str] = field(
+    due_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dueDateTime"},
     )
     """The datetime the task is due."""
-    has_description: Optional[bool] = field(
+    has_description: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "hasDescription"},
     )
     """Set to true if the task has a description."""
-    completed_date_time: Optional[str] = field(
+    completed_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "completedDateTime"},
     )
     """The datetime the task was completed."""
-    reference_count: Optional[int] = field(
+    reference_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "referenceCount"},
     )
     """The number of external references that exist on the task."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The id of the task."""
-    applied_categories: Optional[AppliedCategories] = field(
+    applied_categories: Optional[AppliedCategories | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "appliedCategories"},
     )
-    priority: Optional[int] = None
+    priority: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Priority of the task. Valid range of values is between 0 and 10
     (inclusive), with increasing value being lower priority (0 has the highest
@@ -256,8 +300,9 @@ class GetTaskResponseV3:
     value 1 for \"urgent\", 3 for \"important\", 5 for \"medium\", and 9 for
     \"low\".
     """
-    assignments: Optional[List[Dict[str, Any]]] = field(
+    assignments: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_assignments"},
     )
 
@@ -268,13 +313,13 @@ class GetTaskDetailsResponse:
     Response for Get task details
     """
 
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The description of the task."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The id of the task."""
-    references: Optional[List[Dict[str, Any]]] = None
+    references: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """The collection of references on the task"""
-    checklist: Optional[List[Dict[str, Any]]] = None
+    checklist: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """The collection of checklist items on the task."""
 
 
@@ -284,7 +329,7 @@ class ListBucketsResponse:
     Response for List buckets
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -293,9 +338,15 @@ class ListTasksResponse:
     Response for List my tasks
     """
 
-    value: Optional[List[GetTaskResponseV2]] = None
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[GetTaskResponseV2 | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """Link to get next page of results"""
@@ -307,7 +358,7 @@ class ListGroupsResponse:
     Response for List groups that I am member of
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """value"""
 
 
@@ -317,11 +368,11 @@ class UpdateTaskDetailsRequest:
     Definition: UpdateTaskDetails_Request
     """
 
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The description of the task."""
-    references: Optional[List[Dict[str, Any]]] = None
+    references: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """The collection of references on the task"""
-    checklist: Optional[List[Dict[str, Any]]] = None
+    checklist: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """The collection of checklist items on the task"""
 
 
@@ -331,30 +382,35 @@ class UpdateTaskRequest:
     Definition: UpdateTask_Request
     """
 
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The title of the plan (maximum of 255 chars)."""
-    due_date_time: Optional[str] = field(
+    due_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dueDateTime"},
     )
     """The datetime the task is due (Ex. '2018-04-13T00:42:19.284Z')."""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """The datetime the task starts (Ex. '2018-04-13T00:42:19.284Z')."""
-    percent_complete: Optional[int] = field(
+    percent_complete: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "percentComplete"},
     )
     """The completion percentage of the task."""
-    bucket_id: Optional[str] = field(
+    bucket_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "bucketId"},
     )
     """The bucket to place this task in."""
-    applied_categories: Optional[AppliedCategories] = field(
+    applied_categories: Optional[AppliedCategories | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "appliedCategories"},
     )
 
@@ -365,43 +421,41 @@ class CreateTaskRequest:
     Definition: CreateTask_Request
     """
 
-    group_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "groupId"},
-    )
+    group_id: str = dataclass_field(metadata={"wire_name": "groupId"})
     """The group to retrieve the plan."""
-    plan_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "planId"},
-    )
+    plan_id: str = dataclass_field(metadata={"wire_name": "planId"})
     """The plan for the new task."""
-    title: Optional[str] = None
+    title: str
     """The title of the new task (maximum of 255 chars)."""
-    bucket_id: Optional[str] = field(
+    bucket_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "bucketId"},
     )
     """The bucket to place this task in."""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """The datetime the task starts (Ex. '2018-04-13T00:42:19.284Z')."""
-    due_date_time: Optional[str] = field(
+    due_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dueDateTime"},
     )
     """The datetime the task is due (Ex. '2018-04-13T00:42:19.284Z')."""
-    assignments: Optional[str] = None
+    assignments: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Semi-colon separated ids or email addresses of users to assign this task
     to.
     """
-    applied_categories: Optional[AppliedCategories] = field(
+    applied_categories: Optional[AppliedCategories | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "appliedCategories"},
     )
-    priority: Optional[int] = None
+    priority: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Priority of the task. Valid range of values is between 0 and 10
     (inclusive), with increasing value being lower priority (0 has the highest
@@ -419,55 +473,55 @@ class AppliedCategories:
     Definition: AppliedCategories
     """
 
-    category1: Optional[bool] = None
+    category1: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Pink category."""
-    category2: Optional[bool] = None
+    category2: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Red category."""
-    category3: Optional[bool] = None
+    category3: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Yellow category."""
-    category4: Optional[bool] = None
+    category4: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Green category."""
-    category5: Optional[bool] = None
+    category5: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Blue category."""
-    category6: Optional[bool] = None
+    category6: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Purple category."""
-    category7: Optional[bool] = None
+    category7: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Bronze category."""
-    category8: Optional[bool] = None
+    category8: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Lime category."""
-    category9: Optional[bool] = None
+    category9: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Aqua category."""
-    category10: Optional[bool] = None
+    category10: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Gray category."""
-    category11: Optional[bool] = None
+    category11: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Silver category."""
-    category12: Optional[bool] = None
+    category12: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Brown category."""
-    category13: Optional[bool] = None
+    category13: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Cranberry category."""
-    category14: Optional[bool] = None
+    category14: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Orange category."""
-    category15: Optional[bool] = None
+    category15: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Peach category."""
-    category16: Optional[bool] = None
+    category16: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Marigold category."""
-    category17: Optional[bool] = None
+    category17: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Light green category."""
-    category18: Optional[bool] = None
+    category18: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Dark green category."""
-    category19: Optional[bool] = None
+    category19: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Teal category."""
-    category20: Optional[bool] = None
+    category20: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Light blue category."""
-    category21: Optional[bool] = None
+    category21: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Dark blue category."""
-    category22: Optional[bool] = None
+    category22: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Lavender category."""
-    category23: Optional[bool] = None
+    category23: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Plum category."""
-    category24: Optional[bool] = None
+    category24: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Light gray category."""
-    category25: Optional[bool] = None
+    category25: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Dark gray category."""
 
 
@@ -477,58 +531,68 @@ class GetTaskResponse:
     Definition: GetTask_Response
     """
 
-    created_by: Optional[Dict[str, Any]] = field(
+    created_by: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdBy"},
     )
-    plan_id: Optional[str] = field(
+    plan_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "planId"},
     )
     """The id of the plan this task belongs to."""
-    bucket_id: Optional[str] = field(
+    bucket_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "bucketId"},
     )
     """The id of the bucket this task belongs to."""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The title of the task."""
-    percent_complete: Optional[int] = field(
+    percent_complete: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "percentComplete"},
     )
     """The completion percentage of the task."""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """The start datetime of the task."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """The datetime the task was created."""
-    due_date_time: Optional[str] = field(
+    due_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dueDateTime"},
     )
     """The datetime the task is due."""
-    has_description: Optional[bool] = field(
+    has_description: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "hasDescription"},
     )
     """Set to true if the task has a description."""
-    completed_date_time: Optional[str] = field(
+    completed_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "completedDateTime"},
     )
     """The datetime the task was completed."""
-    reference_count: Optional[int] = field(
+    reference_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "referenceCount"},
     )
     """The number of external references that exist on the task."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The id of the task."""
 
 
@@ -538,8 +602,8 @@ class ErrorResponse:
     Definition: ErrorResponse
     """
 
-    code: Optional[str] = None
-    message: Optional[str] = None
+    code: Optional[str] = dataclass_field(default=None, kw_only=True)
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 # Client Class
@@ -550,16 +614,16 @@ class PlannerClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -570,8 +634,8 @@ class PlannerClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -579,8 +643,8 @@ class PlannerClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -592,7 +656,7 @@ class PlannerClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -608,15 +672,49 @@ class PlannerClient(ConnectorClientBase):
         return "planner"
 
     def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
-        parsed_next_link = urlsplit(next_link)
-        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
             if next_link.startswith("/"):
                 return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
             if next_link.startswith("?"):
-                return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
 
-        parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
         connection_hostname = parsed_connection.hostname
         if next_link_hostname is None or connection_hostname is None:
@@ -633,7 +731,11 @@ class PlannerClient(ConnectorClientBase):
                 parsed_next_link.scheme == parsed_connection.scheme
                 and next_link_port == connection_port
             ):
-                return next_link
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
 
             raise ValueError(
                 "Pagination URL origin "
@@ -646,7 +748,7 @@ class PlannerClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def delete_task_async(
+    def delete_task(
         self,
         id: str,
         *,
@@ -659,13 +761,28 @@ class PlannerClient(ConnectorClientBase):
         Delete a task
 
         Deletes an existing Planner task.
+
+        Swagger operation ID: `DeleteTask`.
+
+        Args:
+            id: The unique identifier of the task to delete.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/planner/tasks/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -679,11 +796,12 @@ class PlannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def unassign_users_async(
+    def unassign_users(
         self,
-        input: UnassignUsersInput,
+        input: UnassignUsersInput | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -695,13 +813,30 @@ class PlannerClient(ConnectorClientBase):
         Remove assignees from a task
 
         Remove assignees from an existing Planner task.
+
+        Swagger operation ID: `UnassignUsers`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: The unique identifier of the task to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/planner/tasks/{quote(str(id), safe='')}/unassignusers"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -715,6 +850,7 @@ class PlannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -722,9 +858,9 @@ class PlannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def assign_users_async(
+    def assign_users(
         self,
-        input: AssignUsersInput,
+        input: AssignUsersInput | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -736,13 +872,30 @@ class PlannerClient(ConnectorClientBase):
         Add assignees to a task
 
         Add assignees to an existing Planner task.
+
+        Swagger operation ID: `AssignUsers`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: The unique identifier of the task to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/planner/tasks/{quote(str(id), safe='')}/assignusers"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -756,6 +909,7 @@ class PlannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -763,7 +917,7 @@ class PlannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_group_plans_async(
+    def list_group_plans(
         self,
         group_id: str,
         *,
@@ -771,39 +925,79 @@ class PlannerClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List plans for a group
 
         List plans owned by the group specified.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListGroupPlans`.
+
+        Args:
+            group_id: Id of the group.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/groups/{quote(str(group_id), safe='')}/planner/plans"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_plan_details_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_plan_details(
         self,
         id: str,
         *,
@@ -816,13 +1010,28 @@ class PlannerClient(ConnectorClientBase):
         Get plan details
 
         Get plan details where the task belongs to
+
+        Swagger operation ID: `GetPlanDetails`.
+
+        Args:
+            id: The unique plan id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/planner/plans/{quote(str(id), safe='')}/details"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -836,6 +1045,7 @@ class PlannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -843,9 +1053,9 @@ class PlannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_bucket_async(
+    def create_bucket(
         self,
-        input: CreateBucketInput,
+        input: CreateBucketInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -856,10 +1066,26 @@ class PlannerClient(ConnectorClientBase):
         Create a bucket
 
         Create a bucket in Planner for the specified plan and group.
+
+        Swagger operation ID: `CreateBucket_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/v1.0/planner/buckets"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -873,6 +1099,7 @@ class PlannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -880,9 +1107,9 @@ class PlannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_task_async(
+    def create_task(
         self,
-        input: CreateTaskRequest,
+        input: CreateTaskRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -893,10 +1120,26 @@ class PlannerClient(ConnectorClientBase):
         Create a task
 
         Create a new task in Planner.
+
+        Swagger operation ID: `CreateTask_V4`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/beta/planner/tasks"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -910,6 +1153,7 @@ class PlannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -917,7 +1161,7 @@ class PlannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_task_async(
+    def get_task(
         self,
         id: str,
         *,
@@ -930,13 +1174,28 @@ class PlannerClient(ConnectorClientBase):
         Get a task
 
         Get an existing Planner task.
+
+        Swagger operation ID: `GetTask_V2`.
+
+        Args:
+            id: The unique identifier of the task to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/planner/tasks/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -950,6 +1209,7 @@ class PlannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -957,7 +1217,7 @@ class PlannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_task_details_async(
+    def get_task_details(
         self,
         id: str,
         *,
@@ -970,13 +1230,28 @@ class PlannerClient(ConnectorClientBase):
         Get task details
 
         Get the task details for an existing task.
+
+        Swagger operation ID: `GetTaskDetails_V2`.
+
+        Args:
+            id: The unique identifier of the task to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/planner/tasks/{quote(str(id), safe='')}/details"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -990,6 +1265,7 @@ class PlannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -997,7 +1273,7 @@ class PlannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_buckets_async(
+    def list_buckets(
         self,
         id: str,
         group_id: str,
@@ -1006,11 +1282,31 @@ class PlannerClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List buckets
 
         List the buckets in a plan.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListBuckets_V3`.
+
+        Args:
+            id: The unique identifier of the plan.
+            group_id: The group to retrieve the plan.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1023,50 +1319,18 @@ class PlannerClient(ConnectorClientBase):
         query_params.append(f"groupId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def list_my_tasks_async(
-        self,
-        *,
-        timeout: Optional[float] = None,
-        headers: Optional[Mapping[str, str]] = None,
-        client_request_id: Optional[str] = None,
-        response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
-        """
-        List my tasks
-
-        List the tasks assigned to me.
-
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
-        """
-        request_url = f"{self._connection_runtime_url}/v1.0/me/planner/tasks"
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1079,23 +1343,107 @@ class PlannerClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
 
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_my_tasks(
+        self,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> ItemPaged[dict[str, Any]]:
+        """
+        List my tasks
+
+        List the tasks assigned to me.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListMyTasks_V2`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/v1.0/me/planner/tasks"
+        initial_request_url = request_url
+        request_body = None
+
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            )
+
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
+
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def list_tasks_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_tasks(
         self,
         id: str,
         group_id: str,
@@ -1104,14 +1452,31 @@ class PlannerClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List tasks
 
         List the tasks in a plan.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListTasks_V3`.
+
+        Args:
+            id: The unique identifier of the plan.
+            group_id: The group to retrieve the plan.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1124,11 +1489,18 @@ class PlannerClient(ConnectorClientBase):
         query_params.append(f"groupId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1141,25 +1513,34 @@ class PlannerClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def update_task_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def update_task(
         self,
-        input: UpdateTaskRequest,
+        input: UpdateTaskRequest | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -1171,13 +1552,30 @@ class PlannerClient(ConnectorClientBase):
         Update a task
 
         Update an existing Planner task.
+
+        Swagger operation ID: `UpdateTask_V3`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: The unique identifier of the task to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v2/v1.0/planner/tasks/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1191,6 +1589,7 @@ class PlannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1198,9 +1597,9 @@ class PlannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_task_details_async(
+    def update_task_details(
         self,
-        input: UpdateTaskDetailsRequest,
+        input: UpdateTaskDetailsRequest | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -1212,13 +1611,30 @@ class PlannerClient(ConnectorClientBase):
         Update task details
 
         Update the task details for an existing task.
+
+        Swagger operation ID: `UpdateTaskDetails_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: The unique identifier of the task to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/planner/tasks/{quote(str(id), safe='')}/details"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1232,6 +1648,7 @@ class PlannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1239,41 +1656,80 @@ class PlannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_groups_async(
+    def list_groups(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List groups that I am member of
 
         Get groups that the user is a direct member of.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListGroups`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/me/memberOf"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
 
 # Trigger Operations

@@ -5,20 +5,72 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "ArmClient",
+    "AliasPathType",
+    "AliasType",
+    "BasicDependency",
+    "DebugSetting",
+    "Dependency",
+    "Deployment",
+    "DeploymentExportResult",
+    "DeploymentExtended",
+    "DeploymentListResult",
+    "DeploymentOperation",
+    "DeploymentOperationProperties",
+    "DeploymentOperationsListResult",
+    "DeploymentProperties",
+    "DeploymentPropertiesExtended",
+    "DeploymentValidateResult",
+    "ExportTemplateRequest",
+    "GenericResource",
+    "HttpMessage",
+    "Identity",
+    "Location",
+    "LocationListResult",
+    "ObjectWithoutType",
+    "ParametersLink",
+    "Plan",
+    "Provider",
+    "ProviderListResult",
+    "ProviderResourceType",
+    "ProviderResourcesInvokeInput",
+    "ProviderResourcesInvokeResponse",
+    "ResourceGroup",
+    "ResourceGroupExportResult",
+    "ResourceGroupListResult",
+    "ResourceGroupProperties",
+    "ResourceListResult",
+    "ResourceManagementErrorWithDetails",
+    "ResourcesInvokeInput",
+    "ResourcesInvokeResponse",
+    "Sku",
+    "Subscription",
+    "SubscriptionListResult",
+    "SubscriptionPolicies",
+    "TagCount",
+    "TagDetails",
+    "TagValue",
+    "TagsListResult",
+    "TargetResource",
+    "TemplateLink",
+]
 
 
 # Type Definitions
@@ -29,7 +81,12 @@ class LocationListResult:
     Response for Lists the subscription locations
     """
 
-    value: Optional[List[Location]] = None
+    value: Optional[
+        List[Location | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The locations."""
 
 
@@ -39,34 +96,39 @@ class Subscription:
     Response for Read a subscription
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The fully qualified Id. For example,
     /subscriptions/00000000-0000-0000-0000-000000000000.
     """
-    subscription_id: Optional[str] = field(
+    subscription_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "subscriptionId"},
     )
     """The subscription Id."""
-    tenant_id: Optional[str] = field(
+    tenant_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tenantId"},
     )
     """The tenant Id."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The subscription display name."""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The subscription state."""
-    subscription_policies: Optional[SubscriptionPolicies] = field(
+    subscription_policies: Optional[SubscriptionPolicies | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "subscriptionPolicies"},
     )
-    authorization_source: Optional[str] = field(
+    authorization_source: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "authorizationSource"},
     )
     """
@@ -82,10 +144,16 @@ class SubscriptionListResult:
     Response for List subscriptions
     """
 
-    value: Optional[List[Subscription]] = None
-    """The subscriptions."""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[Subscription | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The subscriptions."""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results."""
@@ -97,11 +165,16 @@ class DeploymentExtended:
     Response for Read a template deployment
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ID of the deployment."""
-    name: Optional[str] = None
+    name: str
     """The name of the deployment."""
-    properties: Optional[DeploymentPropertiesExtended] = None
+    properties: Optional[
+        DeploymentPropertiesExtended | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -110,8 +183,18 @@ class DeploymentValidateResult:
     Response for Validate a template deployment
     """
 
-    error: Optional[ResourceManagementErrorWithDetails] = None
-    properties: Optional[DeploymentPropertiesExtended] = None
+    error: Optional[
+        ResourceManagementErrorWithDetails | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    properties: Optional[
+        DeploymentPropertiesExtended | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -120,7 +203,7 @@ class DeploymentExportResult:
     Response for Export deployment template
     """
 
-    template: Optional[Dict[str, Any]] = None
+    template: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The template content."""
 
 
@@ -130,10 +213,16 @@ class DeploymentListResult:
     Response for List template deployments
     """
 
-    value: Optional[List[DeploymentExtended]] = None
-    """The list of deployments."""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[DeploymentExtended | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The list of deployments."""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results."""
@@ -145,14 +234,20 @@ class DeploymentOperation:
     Response for Read a template deployment operation
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Full deployment operation id."""
-    operation_id: Optional[str] = field(
+    operation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "operationId"},
     )
     """Deployment operation id."""
-    properties: Optional[DeploymentOperationProperties] = None
+    properties: Optional[
+        DeploymentOperationProperties | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -161,10 +256,16 @@ class DeploymentOperationsListResult:
     Response for Lists template deployment operations
     """
 
-    value: Optional[List[DeploymentOperation]] = None
-    """The list of deployments."""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[DeploymentOperation | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The list of deployments."""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results."""
@@ -176,17 +277,21 @@ class Provider:
     Response for Unregister resource provider
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The provider id."""
-    namespace: Optional[str] = None
+    namespace: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The namespace of the provider."""
-    registration_state: Optional[str] = field(
+    registration_state: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "registrationState"},
     )
     """The registration state of the provider."""
-    resource_types: Optional[List[ProviderResourceType]] = field(
+    resource_types: Optional[
+        List[ProviderResourceType | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resourceTypes"},
     )
     """The collection of provider resource types."""
@@ -198,10 +303,16 @@ class ProviderListResult:
     Response for List resource providers
     """
 
-    value: Optional[List[Provider]] = None
-    """The list of resource providers."""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[Provider | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The list of resource providers."""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results."""
@@ -213,10 +324,16 @@ class ResourceListResult:
     Response for List resources by resource group
     """
 
-    value: Optional[List[GenericResource]] = None
-    """The list of resources."""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[GenericResource | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The list of resources."""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results."""
@@ -228,26 +345,32 @@ class ResourceGroup:
     Response for Read a resource group
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The ID of the resource group (e.g. /subscriptions/XXX/resourceGroups/YYY).
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Name of the resource group."""
-    location: Optional[str] = None
+    location: str
     """
     The location of the resource group. It cannot be changed after the resource
     group has been created. Has to be one of the supported Azure Locations,
     such as West US, East US, West Europe, East Asia, etc.
     """
-    managed_by: Optional[str] = field(
+    managed_by: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managedBy"},
     )
     """Id of the resource that manages this resource group."""
-    tags: Optional[Dict[str, str]] = None
+    tags: Optional[Dict[str, str]] = dataclass_field(default=None, kw_only=True)
     """The tags attached to the resource group."""
-    properties: Optional[ResourceGroupProperties] = None
+    properties: Optional[
+        ResourceGroupProperties | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -256,9 +379,14 @@ class ResourceGroupExportResult:
     Response for Export a resource group template
     """
 
-    template: Optional[Dict[str, Any]] = None
+    template: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The template content."""
-    error: Optional[ResourceManagementErrorWithDetails] = None
+    error: Optional[
+        ResourceManagementErrorWithDetails | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -267,10 +395,16 @@ class ResourceGroupListResult:
     Response for List resource groups
     """
 
-    value: Optional[List[ResourceGroup]] = None
-    """The list of resource groups."""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[ResourceGroup | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The list of resource groups."""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results."""
@@ -282,27 +416,32 @@ class GenericResource:
     Response for Read a resource
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Resource Id"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Resource name"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    """Resource type"""
-    location: Optional[str] = None
-    """Resource location"""
-    tags: Optional[Dict[str, str]] = None
-    """Resource tags"""
-    plan: Optional[Plan] = None
-    kind: Optional[str] = None
-    """The kind of the resource."""
-    managed_by: Optional[str] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    """Resource type"""
+    location: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """Resource location"""
+    tags: Optional[Dict[str, str]] = dataclass_field(default=None, kw_only=True)
+    """Resource tags"""
+    plan: Optional[Plan | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    kind: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """The kind of the resource."""
+    managed_by: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "managedBy"},
     )
     """Id of the resource that manages this resource."""
-    sku: Optional[Sku] = None
-    identity: Optional[Identity] = None
-    properties: Optional[Dict[str, Any]] = None
+    sku: Optional[Sku | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    identity: Optional[Identity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    properties: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The resource properties."""
 
 
@@ -312,7 +451,7 @@ class ResourcesInvokeInput:
     Invoke resource operation
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -325,7 +464,7 @@ class ResourcesInvokeResponse:
     Response for Invoke resource operation
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -338,7 +477,7 @@ class ProviderResourcesInvokeInput:
     Invoke resource operation in provider
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -351,7 +490,7 @@ class ProviderResourcesInvokeResponse:
     Response for Invoke resource operation in provider
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -364,14 +503,15 @@ class TagValue:
     Response for Create or update a subscription resource tag value
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The tag ID."""
-    tag_value: Optional[str] = field(
+    tag_value: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tagValue"},
     )
     """The tag value."""
-    count: Optional[TagCount] = None
+    count: Optional[TagCount | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -380,15 +520,21 @@ class TagDetails:
     Response for Create or update a subscription resource tag name
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The tag ID."""
-    tag_name: Optional[str] = field(
+    tag_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tagName"},
     )
     """The tag name."""
-    count: Optional[TagCount] = None
-    values: Optional[List[TagValue]] = None
+    count: Optional[TagCount | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    values: Optional[
+        List[TagValue | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of tag values."""
 
 
@@ -398,10 +544,16 @@ class TagsListResult:
     Response for List subscription resource tags
     """
 
-    value: Optional[List[TagDetails]] = None
-    """The list of tags."""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[TagDetails | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The list of tags."""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results."""
@@ -413,26 +565,28 @@ class Location:
     Definition: Location
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The fully qualified Id of the location. For example,
     /subscriptions/00000000-0000-0000-0000-000000000000/locations/westus.
     """
-    subscription_id: Optional[str] = field(
+    subscription_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "subscriptionId"},
     )
     """The subscription Id."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The location name."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The display name of the location."""
-    latitude: Optional[str] = None
+    latitude: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The latitude of the location."""
-    longitude: Optional[str] = None
+    longitude: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The longitude of the location."""
 
 
@@ -442,8 +596,9 @@ class SubscriptionPolicies:
     Definition: SubscriptionPolicies
     """
 
-    location_placement_id: Optional[str] = field(
+    location_placement_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "locationPlacementId"},
     )
     """
@@ -451,13 +606,15 @@ class SubscriptionPolicies:
     visible for a subscription. For example, a subscription with a location
     placement Id of Public_2014-09-01 has access to Azure public regions.
     """
-    quota_id: Optional[str] = field(
+    quota_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "quotaId"},
     )
     """The subscription quota Id."""
-    spending_limit: Optional[str] = field(
+    spending_limit: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "spendingLimit"},
     )
     """The subscription spending limit."""
@@ -469,10 +626,11 @@ class TemplateLink:
     Definition: TemplateLink
     """
 
-    uri: Optional[str] = None
+    uri: str
     """URI referencing the template."""
-    content_version: Optional[str] = field(
+    content_version: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentVersion"},
     )
     """If included it must match the ContentVersion in the template."""
@@ -484,10 +642,11 @@ class ParametersLink:
     Definition: ParametersLink
     """
 
-    uri: Optional[str] = None
+    uri: str
     """URI referencing the template."""
-    content_version: Optional[str] = field(
+    content_version: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentVersion"},
     )
     """If included it must match the ContentVersion in the template."""
@@ -499,28 +658,31 @@ class DeploymentProperties:
     Definition: DeploymentProperties
     """
 
-    template: Optional[Dict[str, Any]] = None
+    template: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """
     The template content. It can be a JObject or a well formed JSON string. Use
     only one of Template or TemplateLink.
     """
-    template_link: Optional[TemplateLink] = field(
+    template_link: Optional[TemplateLink | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "templateLink"},
     )
-    parameters: Optional[Dict[str, Any]] = None
+    parameters: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """
     Deployment parameters. It can be a JObject or a well formed JSON string.
     Use only one of Parameters or ParametersLink.
     """
-    parameters_link: Optional[ParametersLink] = field(
+    parameters_link: Optional[ParametersLink | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parametersLink"},
     )
-    mode: Optional[str] = None
+    mode: str
     """The deployment mode."""
-    debug_setting: Optional[DebugSetting] = field(
+    debug_setting: Optional[DebugSetting | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "debugSetting"},
     )
 
@@ -531,8 +693,9 @@ class DebugSetting:
     Definition: DebugSetting
     """
 
-    detail_level: Optional[str] = field(
+    detail_level: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "detailLevel"},
     )
     """The debug detail level."""
@@ -544,7 +707,12 @@ class Deployment:
     Definition: Deployment
     """
 
-    properties: Optional[DeploymentProperties] = None
+    properties: Optional[
+        DeploymentProperties | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -553,13 +721,13 @@ class ResourceManagementErrorWithDetails:
     Definition: ResourceManagementErrorWithDetails
     """
 
-    code: Optional[str] = None
+    code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The error code returned from the server."""
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The error message returned from the server."""
-    target: Optional[str] = None
+    target: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The target of the error."""
-    details: Optional[List[Dict[str, Any]]] = None
+    details: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Validation error."""
 
 
@@ -569,10 +737,11 @@ class AliasPathType:
     Definition: AliasPathType
     """
 
-    path: Optional[str] = None
+    path: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The path of an alias."""
-    api_versions: Optional[List[str]] = field(
+    api_versions: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "apiVersions"},
     )
     """The api versions."""
@@ -584,9 +753,14 @@ class AliasType:
     Definition: AliasType
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The alias name."""
-    paths: Optional[List[AliasPathType]] = None
+    paths: Optional[
+        List[AliasPathType | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The paths for an alias."""
 
 
@@ -596,23 +770,35 @@ class ProviderResourceType:
     Definition: ProviderResourceType
     """
 
-    resource_type: Optional[str] = field(
+    resource_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resourceType"},
     )
     """The resource type."""
-    locations: Optional[List[ObjectWithoutType]] = None
+    locations: Optional[
+        List[ObjectWithoutType | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """
     The collection of locations where this resource type can be created in.
     """
-    aliases: Optional[List[AliasType]] = None
-    """The aliases that are supported by this resource type."""
-    api_versions: Optional[List[str]] = field(
+    aliases: Optional[
+        List[AliasType | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The aliases that are supported by this resource type."""
+    api_versions: Optional[List[str]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "apiVersions"},
     )
     """The api version."""
-    properties: Optional[Dict[str, str]] = None
+    properties: Optional[Dict[str, str]] = dataclass_field(default=None, kw_only=True)
     """The properties."""
 
 
@@ -622,15 +808,17 @@ class BasicDependency:
     Definition: BasicDependency
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ID of the dependency."""
-    resource_type: Optional[str] = field(
+    resource_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resourceType"},
     )
     """The dependency resource type."""
-    resource_name: Optional[str] = field(
+    resource_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resourceName"},
     )
     """The dependency resource name."""
@@ -642,20 +830,23 @@ class Dependency:
     Definition: Dependency
     """
 
-    depends_on: Optional[List[BasicDependency]] = field(
+    depends_on: Optional[List[BasicDependency | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dependsOn"},
     )
     """The list of dependencies."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ID of the dependency."""
-    resource_type: Optional[str] = field(
+    resource_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resourceType"},
     )
     """The dependency resource type."""
-    resource_name: Optional[str] = field(
+    resource_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resourceName"},
     )
     """The dependency resource name."""
@@ -667,40 +858,55 @@ class DeploymentPropertiesExtended:
     Definition: DeploymentPropertiesExtended
     """
 
-    provisioning_state: Optional[str] = field(
+    provisioning_state: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "provisioningState"},
     )
     """The state of the provisioning."""
-    correlation_id: Optional[str] = field(
+    correlation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "correlationId"},
     )
     """The correlation ID of the deployment."""
-    timestamp: Optional[str] = None
+    timestamp: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The timestamp of the template deployment."""
-    outputs: Optional[Dict[str, Any]] = None
+    outputs: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Key/value pairs that represent deploymentoutput."""
-    providers: Optional[List[Provider]] = None
-    """The list of resource providers needed for the deployment."""
-    dependencies: Optional[List[Dependency]] = None
-    """The list of deployment dependencies."""
-    template: Optional[Dict[str, Any]] = None
-    """The template content. Use only one of Template or TemplateLink."""
-    template_link: Optional[TemplateLink] = field(
+    providers: Optional[
+        List[Provider | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The list of resource providers needed for the deployment."""
+    dependencies: Optional[
+        List[Dependency | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    """The list of deployment dependencies."""
+    template: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    """The template content. Use only one of Template or TemplateLink."""
+    template_link: Optional[TemplateLink | Mapping[str, Any]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "templateLink"},
     )
-    parameters: Optional[Dict[str, Any]] = None
+    parameters: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Deployment parameters. Use only one of Parameters or ParametersLink."""
-    parameters_link: Optional[ParametersLink] = field(
+    parameters_link: Optional[ParametersLink | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parametersLink"},
     )
-    mode: Optional[str] = None
+    mode: str
     """The deployment mode."""
-    debug_setting: Optional[DebugSetting] = field(
+    debug_setting: Optional[DebugSetting | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "debugSetting"},
     )
 
@@ -711,14 +917,15 @@ class Plan:
     Definition: Plan
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The plan ID."""
-    publisher: Optional[str] = None
+    publisher: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The publisher ID."""
-    product: Optional[str] = None
+    product: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The offer ID."""
-    promotion_code: Optional[str] = field(
+    promotion_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "promotionCode"},
     )
     """The promotion code."""
@@ -730,17 +937,17 @@ class Sku:
     Definition: Sku
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The sku name."""
-    tier: Optional[str] = None
+    tier: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The sku tier."""
-    size: Optional[str] = None
+    size: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The sku size."""
-    family: Optional[str] = None
+    family: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The sku family."""
-    model: Optional[str] = None
+    model: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The sku model."""
-    capacity: Optional[int] = None
+    capacity: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The sku capacity."""
 
 
@@ -750,17 +957,23 @@ class Identity:
     Definition: Identity
     """
 
-    principal_id: Optional[str] = field(
+    principal_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "principalId"},
     )
     """The principal id of resource identity."""
-    tenant_id: Optional[str] = field(
+    tenant_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tenantId"},
     )
     """The tenant id of resource."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """The identity type."""
 
 
@@ -770,8 +983,9 @@ class ResourceGroupProperties:
     Definition: ResourceGroupProperties
     """
 
-    provisioning_state: Optional[str] = field(
+    provisioning_state: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "provisioningState"},
     )
     """The provisioning state."""
@@ -783,12 +997,12 @@ class ExportTemplateRequest:
     Definition: ExportTemplateRequest
     """
 
-    resources: Optional[List[str]] = None
+    resources: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     The ids of the resources. The only supported string currently is '*' (all
     resources). Future api updates will support exporting specific resources.
     """
-    options: Optional[str] = None
+    options: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The export template options. Supported values include
     'IncludeParameterDefaultValue', 'IncludeComments' or
@@ -802,9 +1016,13 @@ class TagCount:
     Definition: TagCount
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """Type of count."""
-    value: Optional[int] = None
+    value: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Value of count."""
 
 
@@ -814,15 +1032,17 @@ class TargetResource:
     Definition: TargetResource
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ID of the resource."""
-    resource_name: Optional[str] = field(
+    resource_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resourceName"},
     )
     """The name of the resource."""
-    resource_type: Optional[str] = field(
+    resource_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resourceType"},
     )
     """The type of the resource."""
@@ -834,7 +1054,7 @@ class HttpMessage:
     Definition: HttpMessage
     """
 
-    content: Optional[Dict[str, Any]] = None
+    content: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """HTTP message content."""
 
 
@@ -844,34 +1064,44 @@ class DeploymentOperationProperties:
     Definition: DeploymentOperationProperties
     """
 
-    provisioning_state: Optional[str] = field(
+    provisioning_state: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "provisioningState"},
     )
     """The state of the provisioning."""
-    timestamp: Optional[str] = None
+    timestamp: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date and time of the operation."""
-    service_request_id: Optional[str] = field(
+    service_request_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "serviceRequestId"},
     )
     """Deployment operation service request id."""
-    status_code: Optional[str] = field(
+    status_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "statusCode"},
     )
     """Operation status code."""
-    status_message: Optional[Dict[str, Any]] = field(
+    status_message: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "statusMessage"},
     )
     """Operation status message."""
-    target_resource: Optional[TargetResource] = field(
+    target_resource: Optional[TargetResource | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "targetResource"},
     )
-    request: Optional[HttpMessage] = None
-    response: Optional[HttpMessage] = None
+    request: Optional[HttpMessage | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    response: Optional[
+        HttpMessage | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -880,7 +1110,7 @@ class ObjectWithoutType:
     Definition: ObjectWithoutType
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -895,16 +1125,16 @@ class ArmClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -915,8 +1145,8 @@ class ArmClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -924,8 +1154,8 @@ class ArmClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -937,7 +1167,7 @@ class ArmClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -953,15 +1183,49 @@ class ArmClient(ConnectorClientBase):
         return "arm"
 
     def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
-        parsed_next_link = urlsplit(next_link)
-        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
             if next_link.startswith("/"):
                 return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
             if next_link.startswith("?"):
-                return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
 
-        parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
         connection_hostname = parsed_connection.hostname
         if next_link_hostname is None or connection_hostname is None:
@@ -978,7 +1242,11 @@ class ArmClient(ConnectorClientBase):
                 parsed_next_link.scheme == parsed_connection.scheme
                 and next_link_port == connection_port
             ):
-                return next_link
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
 
             raise ValueError(
                 "Pagination URL origin "
@@ -991,7 +1259,7 @@ class ArmClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def subscriptions_list_locations_async(
+    def list_subscriptions_list_locations(
         self,
         subscription_id: str,
         *,
@@ -999,11 +1267,32 @@ class ArmClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Lists the subscription locations
 
         Lists the locations available for the subscription.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `Subscriptions_ListLocations`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1013,98 +1302,18 @@ class ArmClient(ConnectorClientBase):
         query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def subscriptions_get_async(
-        self,
-        subscription_id: str,
-        *,
-        timeout: Optional[float] = None,
-        headers: Optional[Mapping[str, str]] = None,
-        client_request_id: Optional[str] = None,
-        response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
-        """
-        Read a subscription
-
-        Reads the details for a particular subscription.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/subscriptions/{quote(str(subscription_id), safe='')}"
-        )
-        query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
-        if query_params:
-            request_url += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def subscriptions_list_async(
-        self,
-        *,
-        timeout: Optional[float] = None,
-        headers: Optional[Mapping[str, str]] = None,
-        client_request_id: Optional[str] = None,
-        response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
-        """
-        List subscriptions
-
-        Gets a list of all the subscriptions to which the principal has access.
-
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
-        """
-        request_url = f"{self._connection_runtime_url}/subscriptions"
-        query_params = []
-        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
-        if query_params:
-            request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1117,28 +1326,28 @@ class ArmClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
 
-            next_link = page.get("nextLink")
-            if not next_link:
-                return
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            return None, items()
 
-    async def deployments_get_async(
+        return ItemPaged(get_next, extract_data)
+
+    def subscriptions_get(
         self,
         subscription_id: str,
-        resource_group_name: str,
-        deployment_name: str,
-        wait: Optional[bool] = None,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1146,32 +1355,37 @@ class ArmClient(ConnectorClientBase):
         response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
-        Read a template deployment
+        Read a subscription
 
-        Reads a template deployment within a resource group.
+        Reads the details for a particular subscription.
+
+        Swagger operation ID: `Subscriptions_Get`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/subscriptions"
-            f"/{quote(str(subscription_id), safe='')}"
-            f"/resourcegroups"
-            f"/{quote(str(resource_group_name), safe='')}"
-            f"/providers"
-            f"/Microsoft.Resources"
-            f"/deployments"
-            f"/{quote(str(deployment_name), safe='')}"
+            f"/subscriptions/{quote(str(subscription_id), safe='')}"
         )
         query_params = []
         query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
-        if wait is not None:
-            value = str(wait)
-            if isinstance(wait, bool):
-                value = value.lower()
-            query_params.append(f"wait={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1185,6 +1399,7 @@ class ArmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1192,24 +1407,128 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def deployments_create_or_update_async(
+    def list_subscriptions(
         self,
-        input: Deployment,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> ItemPaged[dict[str, Any]]:
+        """
+        List subscriptions
+
+        Gets a list of all the subscriptions to which the principal has access.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `Subscriptions_List`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/subscriptions"
+        query_params = []
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
+
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            )
+
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
+
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+            next_link = page.get("nextLink")
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def deployments_get(
+        self,
         subscription_id: str,
         resource_group_name: str,
         deployment_name: str,
-        wait: Optional[bool] = None,
         *,
+        wait: Optional[bool] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
     ) -> dict[str, Any] | None:
         """
-        Create or update a template deployment
+        Read a template deployment
 
-        Create or update a named resource group template deployment. A template
-        and parameters are expected for the request to succeed.
+        Reads a template deployment within a resource group.
+
+        Swagger operation ID: `Deployments_Get`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            deployment_name: The name of the resource group template
+                deployment.
+            wait: If the action should wait until deployment is completed.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1232,7 +1551,91 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    def deployments_create_or_update(
+        self,
+        input: Deployment | Mapping[str, Any],
+        subscription_id: str,
+        resource_group_name: str,
+        deployment_name: str,
+        *,
+        wait: Optional[bool] = None,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Create or update a template deployment
+
+        Create or update a named resource group template deployment. A template
+        and parameters are expected for the request to succeed.
+
+        Swagger operation ID: `Deployments_CreateOrUpdate`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            deployment_name: The name of the deployment.
+            wait: If the action should wait until deployment is completed.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/subscriptions"
+            f"/{quote(str(subscription_id), safe='')}"
+            f"/resourcegroups"
+            f"/{quote(str(resource_group_name), safe='')}"
+            f"/providers"
+            f"/Microsoft.Resources"
+            f"/deployments"
+            f"/{quote(str(deployment_name), safe='')}"
+        )
+        query_params = []
+        query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
+        if wait is not None:
+            value = str(wait)
+            if isinstance(wait, bool):
+                value = value.lower()
+            query_params.append(f"wait={quote(value, safe='')}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1246,6 +1649,7 @@ class ArmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1253,7 +1657,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def deployments_delete_async(
+    def deployments_delete(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -1269,6 +1673,26 @@ class ArmClient(ConnectorClientBase):
 
         Deletes a resource group template deployment. The resources will not be
         deleted; only the metadata about the template deployment.
+
+        Swagger operation ID: `Deployments_Delete`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            deployment_name: The name of the resource group template
+                deployment.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1286,7 +1710,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1294,15 +1718,19 @@ class ArmClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def deployments_cancel_async(
+    def deployments_cancel(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -1318,6 +1746,26 @@ class ArmClient(ConnectorClientBase):
 
         Cancel a currently running template deployment. All pending template
         operations will be suspended.
+
+        Swagger operation ID: `Deployments_Cancel`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            deployment_name: The name of the resource group template
+                deployment.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1336,7 +1784,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1350,11 +1798,12 @@ class ArmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def deployments_validate_async(
+    def deployments_validate(
         self,
-        input: Deployment,
+        input: Deployment | Mapping[str, Any],
         subscription_id: str,
         resource_group_name: str,
         deployment_name: str,
@@ -1370,6 +1819,28 @@ class ArmClient(ConnectorClientBase):
         Validates a deployment template. This operation does not have side
         effects and can be used to test a template deployment for syntax or
         logical errors.
+
+        Swagger operation ID: `Deployments_Validate`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            deployment_name: The name of the resource group template
+                deployment.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1388,7 +1859,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1402,6 +1873,7 @@ class ArmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1409,7 +1881,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def deployments_export_template_async(
+    def deployments_export_template(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -1424,6 +1896,26 @@ class ArmClient(ConnectorClientBase):
         Export deployment template
 
         Exports a template from a past resource group deployment.
+
+        Swagger operation ID: `Deployments_ExportTemplate`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            deployment_name: The name of the resource group template
+                deployment.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1442,7 +1934,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1456,6 +1948,7 @@ class ArmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1463,26 +1956,47 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def deployments_list_async(
+    def list_deployments(
         self,
         subscription_id: str,
         resource_group_name: str,
+        *,
         filter: Optional[str] = None,
         top: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List template deployments
 
         Lists all the resource group template deployments. This operation is
         useful to know what has been provisioned thus far.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `Deployments_List`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            filter: The filter to apply on the operation.
+            top: Query parameters. If nothing is passed returns all values.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1508,11 +2022,18 @@ class ArmClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1525,23 +2046,32 @@ class ArmClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def deployment_operations_get_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def deployment_operations_get(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -1558,6 +2088,27 @@ class ArmClient(ConnectorClientBase):
 
         Reads a particular resource group template deployment operation. This
         is useful for troubleshooting failed template deployments.
+
+        Swagger operation ID: `DeploymentOperations_Get`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            deployment_name: The name of the resource group template
+                deployment.
+            operation_id: Operation Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1575,7 +2126,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1589,6 +2140,7 @@ class ArmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1596,26 +2148,48 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def deployment_operations_list_async(
+    def list_deployment_operations(
         self,
         subscription_id: str,
         resource_group_name: str,
         deployment_name: str,
-        top: Optional[int] = None,
         *,
+        top: Optional[int] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Lists template deployment operations
 
         Lists all the template deployment operations. This is useful for
         troubleshooting failed template deployments.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `DeploymentOperations_List`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            deployment_name: The name of the resource group template
+                deployment.
+            top: Query parameters. If nothing is passed returns all values.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1636,11 +2210,18 @@ class ArmClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1653,23 +2234,32 @@ class ArmClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def providers_unregister_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def providers_unregister(
         self,
         subscription_id: str,
         resource_provider_namespace: str,
@@ -1685,6 +2275,24 @@ class ArmClient(ConnectorClientBase):
         Unregisters provider from a subscription. This operation will fail if
         there are any resources from that resource provider in the
         subscription.
+
+        Swagger operation ID: `Providers_Unregister`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_provider_namespace: Namespace of the resource provider.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1699,7 +2307,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1713,6 +2321,7 @@ class ArmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1720,7 +2329,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def providers_register_async(
+    def providers_register(
         self,
         subscription_id: str,
         resource_provider_namespace: str,
@@ -1735,6 +2344,24 @@ class ArmClient(ConnectorClientBase):
 
         Registers a resource provider to be used with a subscription. This will
         provision permissions for the service into your subscription.
+
+        Swagger operation ID: `Providers_Register`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_provider_namespace: Namespace of the resource provider.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1749,7 +2376,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1763,6 +2390,7 @@ class ArmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1770,24 +2398,44 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def providers_list_async(
+    def list_providers(
         self,
         subscription_id: str,
+        *,
         top: Optional[int] = None,
         expand: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List resource providers
 
         Lists the resource providers available for the subscription.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `Providers_List`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            top: Query parameters. If nothing is passed returns all values.
+            expand: The $expand query parameter.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1807,11 +2455,18 @@ class ArmClient(ConnectorClientBase):
             query_params.append(f"$expand={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1824,28 +2479,37 @@ class ArmClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def providers_get_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def providers_get(
         self,
         subscription_id: str,
         resource_provider_namespace: str,
-        expand: Optional[str] = None,
         *,
+        expand: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1855,6 +2519,25 @@ class ArmClient(ConnectorClientBase):
         Read resource provider
 
         Reads a particular resource provider within the subscription.
+
+        Swagger operation ID: `Providers_Get`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_provider_namespace: Namespace of the resource provider.
+            expand: The $expand query parameter.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1873,7 +2556,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1887,6 +2570,7 @@ class ArmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1894,26 +2578,48 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def resource_groups_list_resources_async(
+    def list_resource_groups_list_resources(
         self,
         subscription_id: str,
         resource_group_name: str,
+        *,
         filter: Optional[str] = None,
         expand: Optional[str] = None,
         top: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List resources by resource group
 
         Lists all the resources under a resource group.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ResourceGroups_ListResources`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            filter: The filter to apply on the operation.
+            expand: The $expand query parameter.
+            top: Query parameters. If nothing is passed returns all values.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1942,11 +2648,18 @@ class ArmClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1959,23 +2672,32 @@ class ArmClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def resource_groups_get_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def resource_groups_get(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -1989,6 +2711,24 @@ class ArmClient(ConnectorClientBase):
         Read a resource group
 
         Reads a particular resource group within the subscription.
+
+        Swagger operation ID: `ResourceGroups_Get`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2002,7 +2742,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2016,6 +2756,7 @@ class ArmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2023,9 +2764,9 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def resource_groups_create_or_update_async(
+    def resource_groups_create_or_update(
         self,
-        input: ResourceGroup,
+        input: ResourceGroup | Mapping[str, Any],
         subscription_id: str,
         resource_group_name: str,
         *,
@@ -2039,6 +2780,27 @@ class ArmClient(ConnectorClientBase):
 
         Creates or updates a resource group. The response code can be used to
         distinguish between a create (201) or update (200).
+
+        Swagger operation ID: `ResourceGroups_CreateOrUpdate`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: The name of the resource group to be created
+                or updated.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2052,7 +2814,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2066,6 +2828,7 @@ class ArmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2073,7 +2836,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def resource_groups_delete_async(
+    def resource_groups_delete(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -2087,6 +2850,24 @@ class ArmClient(ConnectorClientBase):
         Delete a resource group
 
         Delete a particular resource group within the subscription.
+
+        Swagger operation ID: `ResourceGroups_Delete`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2100,7 +2881,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2114,11 +2895,12 @@ class ArmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def resource_groups_patch_async(
+    def resource_groups_patch(
         self,
-        input: ResourceGroup,
+        input: ResourceGroup | Mapping[str, Any],
         subscription_id: str,
         resource_group_name: str,
         *,
@@ -2132,6 +2914,26 @@ class ArmClient(ConnectorClientBase):
 
         Updates an existing resource group. If the resource does not exist,
         this request will fail.
+
+        Swagger operation ID: `ResourceGroups_Patch`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2145,7 +2947,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2159,6 +2961,7 @@ class ArmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2166,9 +2969,9 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def resource_groups_export_template_async(
+    def resource_groups_export_template(
         self,
-        input: ExportTemplateRequest,
+        input: ExportTemplateRequest | Mapping[str, Any],
         subscription_id: str,
         resource_group_name: str,
         *,
@@ -2183,6 +2986,26 @@ class ArmClient(ConnectorClientBase):
         Exports a deployment template from an existing resource group. This can
         only be successful if the underlying resources have a schema defined by
         Microsoft.
+
+        Swagger operation ID: `ResourceGroups_ExportTemplate`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2197,7 +3020,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2211,6 +3034,7 @@ class ArmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2218,25 +3042,45 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def resource_groups_list_async(
+    def list_resource_groups(
         self,
         subscription_id: str,
+        *,
         filter: Optional[str] = None,
         top: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List resource groups
 
         Lists all the resource groups within the subscription. The results are
         paginated at 1,000+ records.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ResourceGroups_List`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            filter: The filter to apply on the operation.
+            top: Query parameters. If nothing is passed returns all values.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2258,11 +3102,18 @@ class ArmClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2275,42 +3126,72 @@ class ArmClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def resources_list_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_resources(
         self,
         subscription_id: str,
+        *,
         filter: Optional[str] = None,
         expand: Optional[str] = None,
         top: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List resources by subscription
 
         Reads all of the resources under a particular subscription. The results
         are paginated at 1,000+ records.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `Resources_List`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            filter: The filter to apply on the operation.
+            expand: The $expand query parameter.
+            top: Query parameters. If nothing is passed returns all values.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2335,11 +3216,18 @@ class ArmClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2352,23 +3240,32 @@ class ArmClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def resources_get_by_id_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def resources_get_by_id(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -2385,6 +3282,28 @@ class ArmClient(ConnectorClientBase):
         Read a resource
 
         Reads a resource object.
+
+        Swagger operation ID: `Resources_GetById`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            resource_provider_namespace: Namespace of the resource provider.
+            short_resource_id: The short Id of the resource, including the
+                resource name and resource type. For example, sites/mySite.
+            x_ms_api_version: Api Version to be used.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2404,7 +3323,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2418,6 +3337,7 @@ class ArmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2425,9 +3345,9 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def resources_create_or_update_by_id_async(
+    def resources_create_or_update_by_id(
         self,
-        input: GenericResource,
+        input: GenericResource | Mapping[str, Any],
         subscription_id: str,
         resource_group_name: str,
         resource_provider_namespace: str,
@@ -2444,6 +3364,30 @@ class ArmClient(ConnectorClientBase):
 
         Creates or updates a resource. The response code can be used to
         distinguish between a create (201) or update (200).
+
+        Swagger operation ID: `Resources_CreateOrUpdateById`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            resource_provider_namespace: Namespace of the resource provider.
+            short_resource_id: The short Id of the resource, including the
+                resource name and resource type. For example, sites/mySite.
+            x_ms_api_version: Api Version to be used.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2463,7 +3407,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2477,6 +3421,7 @@ class ArmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2484,7 +3429,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def resources_delete_by_id_async(
+    def resources_delete_by_id(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -2501,6 +3446,28 @@ class ArmClient(ConnectorClientBase):
         Delete a resource
 
         Deletes a resource.
+
+        Swagger operation ID: `Resources_DeleteById`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            resource_provider_namespace: Namespace of the resource provider.
+            short_resource_id: The short Id of the resource, including the
+                resource name and resource type. For example, sites/mySite.
+            x_ms_api_version: Api Version to be used.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2520,7 +3487,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2534,11 +3501,12 @@ class ArmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def resources_invoke_async(
+    def resources_invoke(
         self,
-        input: ResourcesInvokeInput,
+        input: ResourcesInvokeInput | Mapping[str, Any],
         subscription_id: str,
         resource_group_name: str,
         resource_provider_namespace: str,
@@ -2555,6 +3523,31 @@ class ArmClient(ConnectorClientBase):
         Invoke resource operation
 
         Invokes an operation on an Azure resource.
+
+        Swagger operation ID: `Resources_Invoke`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            resource_provider_namespace: Namespace of the resource provider.
+            short_resource_id: The short Id of the resource, including the
+                resource name and resource type. For example, sites/mySite.
+            action_name: Name of the resource action to invoke.
+            x_ms_api_version: Api Version to be used.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2575,7 +3568,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2589,6 +3582,7 @@ class ArmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2596,7 +3590,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def provider_resources_get_by_id_async(
+    def provider_resources_get_by_id(
         self,
         subscription_id: str,
         resource_provider_namespace: str,
@@ -2612,6 +3606,27 @@ class ArmClient(ConnectorClientBase):
         Read a resource in provider
 
         Reads a resource object.
+
+        Swagger operation ID: `Provider_Resources_GetById`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_provider_namespace: Namespace of the resource provider.
+            short_resource_id: The short Id of the resource, including the
+                resource name and resource type. For example, sites/mySite.
+            x_ms_api_version: Api Version to be used.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2629,7 +3644,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2643,6 +3658,7 @@ class ArmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2650,9 +3666,9 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def provider_resources_invoke_async(
+    def provider_resources_invoke(
         self,
-        input: ProviderResourcesInvokeInput,
+        input: ProviderResourcesInvokeInput | Mapping[str, Any],
         subscription_id: str,
         resource_provider_namespace: str,
         short_resource_id: str,
@@ -2667,6 +3683,29 @@ class ArmClient(ConnectorClientBase):
         Invoke resource operation in provider
 
         Invokes an operation on an Azure resource.
+
+        Swagger operation ID: `Provider_Resources_Invoke`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_provider_namespace: Namespace of the resource provider.
+            short_resource_id: The short Id of the resource, including the
+                resource name and resource type. For example, sites/mySite.
+            x_ms_api_version: Api Version to be used.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2684,7 +3723,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2698,6 +3737,7 @@ class ArmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2705,7 +3745,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def tags_create_or_update_value_async(
+    def tags_create_or_update_value(
         self,
         subscription_id: str,
         tag_name: str,
@@ -2720,6 +3760,25 @@ class ArmClient(ConnectorClientBase):
         Create or update a subscription resource tag value
 
         Create or update a subscription resource tag value.
+
+        Swagger operation ID: `Tags_CreateOrUpdateValue`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            tag_name: The name of the tag.
+            tag_value: The value of the tag.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2735,7 +3794,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2749,6 +3808,7 @@ class ArmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2756,7 +3816,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def tags_delete_value_async(
+    def tags_delete_value(
         self,
         subscription_id: str,
         tag_name: str,
@@ -2771,6 +3831,25 @@ class ArmClient(ConnectorClientBase):
         Delete a subscription resource tag value
 
         Delete a subscription resource tag value.
+
+        Swagger operation ID: `Tags_DeleteValue`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            tag_name: The name of the tag.
+            tag_value: The value of the tag.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2786,7 +3865,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2800,9 +3879,10 @@ class ArmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def tags_create_or_update_async(
+    def tags_create_or_update(
         self,
         subscription_id: str,
         tag_name: str,
@@ -2816,6 +3896,24 @@ class ArmClient(ConnectorClientBase):
         Create or update a subscription resource tag name
 
         Create or update a subscription resource tag name.
+
+        Swagger operation ID: `Tags_CreateOrUpdate`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            tag_name: The name of the tag.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2829,7 +3927,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2843,6 +3941,7 @@ class ArmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2850,7 +3949,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def tags_delete_async(
+    def tags_delete(
         self,
         subscription_id: str,
         tag_name: str,
@@ -2864,6 +3963,24 @@ class ArmClient(ConnectorClientBase):
         Delete a subscription resource tag name
 
         Delete a subscription resource tag name.
+
+        Swagger operation ID: `Tags_Delete`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            tag_name: The name of the tag.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2877,7 +3994,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2891,9 +4008,10 @@ class ArmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def tags_list_async(
+    def list_tags(
         self,
         subscription_id: str,
         *,
@@ -2901,14 +4019,32 @@ class ArmClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List subscription resource tags
 
         Lists all the subscription resource tags.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `Tags_List`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2918,11 +4054,18 @@ class ArmClient(ConnectorClientBase):
         query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2935,18 +4078,27 @@ class ArmClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)

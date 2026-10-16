@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure Monitor Logs Connector SDK Sample
+Azure Monitor Logs sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure Monitor Logs connector SDK.
+This sample demonstrates how to use the Azure Monitor Logs client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Azure Monitor Logs access
@@ -22,12 +22,10 @@ Usage:
 
     python sample_connector_usage_azuremonitorlogs.py
 """
-
-import asyncio
 import os
 
 try:
-    from azure.identity.aio import DefaultAzureCredential
+    from azure.identity import DefaultAzureCredential
     from azure.connectors import ConnectorException
     from azure.connectors.azuremonitorlogs import (
         AzuremonitorlogsClient,
@@ -63,19 +61,19 @@ def _print_configuration_help():
     print("  AZUREMONITORLOGS_RESOURCE_NAME")
 
 
-async def example_list_discovery_values():
+def example_list_discovery_values():
     """List subscriptions and resource groups using discovery APIs."""
     print("\n=== Example 1: Discovery Operations ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with AzuremonitorlogsClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with AzuremonitorlogsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                subscriptions = [item async for item in client.list_subscriptions_async()]
+                subscriptions = [item for item in client.list_subscriptions()]
                 count = len(subscriptions) if subscriptions else 0
                 print(f"Found {count} subscriptions.")
 
-                resource_groups = [item async for item in client.list_resource_groups_async(
+                resource_groups = [item for item in client.list_resource_groups(
                     subscriptions=SUBSCRIPTION_ID
                 )]
                 rg_count = len(resource_groups) if resource_groups else 0
@@ -87,20 +85,21 @@ async def example_list_discovery_values():
                 print(f"Error: {ex}")
 
 
-async def example_run_query():
+def example_run_query():
     """Run a KQL query and list tabular rows."""
     print("\n=== Example 2: Run Query Data ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with AzuremonitorlogsClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with AzuremonitorlogsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 request = QueryDataInput(
                     query="Heartbeat | take 5",
                     timerangetype="SetInQuery",
+                    timerange={},
                 )
 
-                result = await client.query_data_async(
+                result = client.query_data(
                     input=request,
                     subscriptions=SUBSCRIPTION_ID,
                     resourcegroups=RESOURCE_GROUP,
@@ -119,13 +118,13 @@ async def example_run_query():
                 print(f"Error: {ex}")
 
 
-async def example_visualize_query():
+def example_visualize_query():
     """Run query visualization."""
     print("\n=== Example 3: Visualize Query ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with AzuremonitorlogsClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with AzuremonitorlogsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 request = VisualizeQueryInput(
                     query=(
@@ -134,9 +133,10 @@ async def example_visualize_query():
                         "| order by TimeGenerated asc"
                     ),
                     timerangetype="SetInQuery",
+                    timerange={},
                 )
 
-                result = await client.visualize_query_async(
+                result = client.visualize_query(
                     input=request,
                     subscriptions=SUBSCRIPTION_ID,
                     resourcegroups=RESOURCE_GROUP,
@@ -157,7 +157,7 @@ async def example_visualize_query():
                 print(f"Error: {ex}")
 
 
-async def main():
+def main():
     """Run Azure Monitor Logs connector samples."""
     if not IMPORTS_AVAILABLE:
         print("Required imports are unavailable:")
@@ -172,10 +172,10 @@ async def main():
         _print_configuration_help()
         return
 
-    await example_list_discovery_values()
-    await example_run_query()
-    await example_visualize_query()
+    example_list_discovery_values()
+    example_run_query()
+    example_visualize_query()
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

@@ -1,0 +1,115 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+
+"""
+Pipedrive sample for the Azure Connectors Python SDK
+
+This sample demonstrates how to use the Pipedrive client from the Azure Connectors Python SDK.
+
+Prerequisites:
+1. Azure subscription with a Pipedrive connection
+2. Pipedrive connection in Connector Namespaces
+3. Connection runtime URL from Azure Portal
+
+Installation:
+    pip install azure-connectors
+
+Usage:
+    Set environment variable:
+    $env:PIPEDRIVE_CONNECTION_URL = "<connection-runtime-url>"
+
+    python sample_connector_usage_pipedrive.py
+"""
+
+import asyncio
+import os
+
+from azure.identity.aio import DefaultAzureCredential
+from azure.connectors import ConnectorException
+from azure.connectors.aio.pipedrive import PipedriveClient
+from azure.connectors.pipedrive import (
+    AddDealRequest,
+    )
+
+# Connection runtime URL format:
+# https://[region].azure-apihub.net/apim/pipedrive/[connection-id]
+CONNECTION_RUNTIME_URL = os.environ.get(
+    "PIPEDRIVE_CONNECTION_URL",
+    "",
+)
+
+
+async def example_1_list_deals():
+    """Example 1: List deals for the authorized account."""
+    print("\n=== Example 1: List Deals ===")
+
+    async with DefaultAzureCredential() as credential:
+
+        async with PipedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                items = [item async for item in client.list_deals()]
+
+                deals = items
+                print(f"Found {len(deals)} deal(s).")
+
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
+
+
+async def example_2_get_deal():
+    """Example 2: Retrieve a single deal by id."""
+    print("\n=== Example 2: Get Deal ===")
+
+    async with DefaultAzureCredential() as credential:
+
+        async with PipedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                result = await client.get_deal(deal_id=1)
+                print(f"Deal: {result}")
+
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
+
+
+async def example_3_add_deal():
+    """Example 3: Create a new deal for the authorized account."""
+    print("\n=== Example 3: Add Deal ===")
+
+    async with DefaultAzureCredential() as credential:
+
+        async with PipedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+            try:
+                new_deal = AddDealRequest(
+                    title="Sample deal",
+                )
+
+                result = await client.add_deal(input=new_deal)
+                print(f"Created deal: {result}")
+
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+            except Exception as ex:
+                print(f"Error: {ex}")
+
+
+async def main():
+    """Run all examples."""
+    if not CONNECTION_RUNTIME_URL:
+        print("Error: PIPEDRIVE_CONNECTION_URL environment variable not set.")
+        print("Set it to your connection runtime URL from Azure Portal.")
+        return
+
+    print(f"Using connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
+
+    await example_1_list_deals()
+    await example_2_get_deal()
+    await example_3_add_deal()
+
+    print("\n=== All examples completed ===")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

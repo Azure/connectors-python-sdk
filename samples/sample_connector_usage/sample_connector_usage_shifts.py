@@ -1,7 +1,7 @@
 """
-Shifts Connector SDK Sample
+Shifts sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Shifts connector SDK.
+This sample demonstrates how to use the Shifts client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Shifts connection
@@ -17,11 +17,9 @@ Usage:
 
     python sample_connector_usage_shifts.py
 """
-
-import asyncio
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
 from azure.connectors.shifts import ShiftsClient
@@ -32,14 +30,13 @@ from azure.connectors.shifts import ShiftsClient
 CONNECTION_RUNTIME_URL = os.environ.get("SHIFTS_CONNECTION_URL", "")
 
 
-async def example_1_list_teams() -> list[dict]:
+def example_1_list_teams() -> list[dict]:
     """Example 1: List joined teams."""
     print("\n=== Example 1: List Teams ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with ShiftsClient(CONNECTION_RUNTIME_URL, credential) as client:
-            teams_response = await client.get_all_teams_async()
-            teams = teams_response.get("value", []) if teams_response else []
+    with DefaultAzureCredential() as credential:
+        with ShiftsClient(CONNECTION_RUNTIME_URL, credential) as client:
+            teams = list(client.list_all_teams())
 
             print(f"Found {len(teams)} teams")
             for team in teams[:10]:
@@ -48,13 +45,13 @@ async def example_1_list_teams() -> list[dict]:
             return teams
 
 
-async def example_2_get_schedule(team_id: str) -> None:
+def example_2_get_schedule(team_id: str) -> None:
     """Example 2: Get a team's schedule."""
     print("\n=== Example 2: Get Schedule ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with ShiftsClient(CONNECTION_RUNTIME_URL, credential) as client:
-            schedule = await client.get_schedule_async(team_id=team_id)
+    with DefaultAzureCredential() as credential:
+        with ShiftsClient(CONNECTION_RUNTIME_URL, credential) as client:
+            schedule = client.get_schedule(team_id=team_id)
 
             if not schedule:
                 print("No schedule returned")
@@ -65,13 +62,13 @@ async def example_2_get_schedule(team_id: str) -> None:
             print(f"Provision Status: {schedule.get('provisionStatus')}")
 
 
-async def example_3_list_shifts(team_id: str) -> None:
+def example_3_list_shifts(team_id: str) -> None:
     """Example 3: List shifts for a team."""
     print("\n=== Example 3: List Shifts ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with ShiftsClient(CONNECTION_RUNTIME_URL, credential) as client:
-            shifts_response = [item async for item in client.list_shifts_async(team_id=team_id, top=10)]
+    with DefaultAzureCredential() as credential:
+        with ShiftsClient(CONNECTION_RUNTIME_URL, credential) as client:
+            shifts_response = [item for item in client.list_shifts(team_id=team_id, top=10)]
             shifts = shifts_response if shifts_response else []
 
             print(f"Found {len(shifts)} shifts")
@@ -79,23 +76,23 @@ async def example_3_list_shifts(team_id: str) -> None:
                 print(f"  - {shift.get('id')} assigned to {shift.get('userId')}")
 
 
-async def main() -> None:
+def main() -> None:
     """Run all examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: SHIFTS_CONNECTION_URL environment variable not set.")
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Shifts Connector SDK - Sample Usage")
+    print("Shifts sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:
-        teams = await example_1_list_teams()
+        teams = example_1_list_teams()
         if teams:
             first_team_id = teams[0].get("id")
             if first_team_id:
-                await example_2_get_schedule(first_team_id)
-                await example_3_list_shifts(first_team_id)
+                example_2_get_schedule(first_team_id)
+                example_3_list_shifts(first_team_id)
             else:
                 print("No team id found in first record; skipping team-specific examples.")
         else:
@@ -108,4 +105,4 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

@@ -1,11 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """Sample usage for the Excelonline connector client."""
-
-import asyncio
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors.excelonline import (
     CreateWorksheetInput,
@@ -14,7 +12,7 @@ from azure.connectors.excelonline import (
 )
 
 
-async def main() -> None:
+def main() -> None:
     """Run a simple Excel Online sample flow."""
     connection_url = os.getenv("EXCELONLINE_CONNECTION_URL")
     if not connection_url:
@@ -24,28 +22,28 @@ async def main() -> None:
     file_id = os.getenv("EXCELONLINE_FILE_ID", "file-id")
     table_name = os.getenv("EXCELONLINE_TABLE_NAME", "Table1")
 
-    async with DefaultAzureCredential() as credential:
-        async with ExcelonlineClient(connection_url, credential) as client:
-            worksheets = await client.get_all_worksheets_async(
+    with DefaultAzureCredential() as credential:
+        with ExcelonlineClient(connection_url, credential) as client:
+            worksheets = list(client.list_all_worksheets(
                 drive=drive_id,
                 file=file_id,
-            )
+            ))
             print("worksheets", worksheets)
 
-            tables = await client.get_tables_async(
+            tables = list(client.list_tables(
                 drive=drive_id,
                 file=file_id,
-            )
+            ))
             print("tables", tables)
 
-            new_sheet = await client.create_worksheet_async(
+            new_sheet = client.create_worksheet(
                 input=CreateWorksheetInput(name="SampleSheet"),
                 drive=drive_id,
                 file=file_id,
             )
             print("created worksheet", new_sheet)
 
-            row = await client.add_row_async(
+            row = client.add_row(
                 input=Item(dynamic_properties={"Name": "Sample Item", "Value": 100}),
                 drive=drive_id,
                 file=file_id,
@@ -55,4 +53,4 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

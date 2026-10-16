@@ -5,20 +5,31 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "PlivoClient",
+    "Call",
+    "GetMessageResponse",
+    "ListMessagesResponse",
+    "MakeCallResponse",
+    "SMS",
+    "SendSMSResponse",
+]
 
 
 # Type Definitions
@@ -29,11 +40,11 @@ class MakeCallResponse:
     Response for Make a call
     """
 
-    api_id: Optional[str] = None
+    api_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the API request."""
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response obtained when the call was made."""
-    request_uuid: Optional[str] = None
+    request_uuid: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the call."""
 
 
@@ -43,11 +54,11 @@ class ListMessagesResponse:
     Response for List all messages
     """
 
-    api_id: Optional[str] = None
+    api_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the API request."""
-    meta: Optional[Dict[str, Any]] = None
+    meta: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Meta information about the response."""
-    objects: Optional[List[Dict[str, Any]]] = None
+    objects: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Details of all messages."""
 
 
@@ -57,11 +68,11 @@ class SendSMSResponse:
     Response for Send SMS
     """
 
-    api_id: Optional[str] = None
+    api_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the API request."""
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response of the sent message."""
-    message_uuid: Optional[List[str]] = None
+    message_uuid: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the message."""
 
 
@@ -71,34 +82,34 @@ class GetMessageResponse:
     Response for Get message
     """
 
-    api_id: Optional[str] = None
+    api_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the API request."""
-    error_code: Optional[str] = None
+    error_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Delivery error code if the message isn't delivered."""
-    from_number: Optional[str] = None
+    from_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Number from which the message was sent."""
-    message_direction: Optional[str] = None
+    message_direction: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Direction of the message (inbound/outbound)."""
-    message_state: Optional[str] = None
+    message_state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Status of the message (queued/sent/delivered/failed)."""
-    message_time: Optional[str] = None
+    message_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Timestamp at which the message was sent or received (yyyy-MM-dd HH:mm:ss
     UTC).
     """
-    message_type: Optional[str] = None
+    message_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Type of the message."""
-    message_uuid: Optional[str] = None
+    message_uuid: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the message."""
-    resource_uri: Optional[str] = None
+    resource_uri: Optional[str] = dataclass_field(default=None, kw_only=True)
     """URI to get details of this single message."""
-    to_number: Optional[str] = None
+    to_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Number to which the message was sent."""
-    total_amount: Optional[str] = None
+    total_amount: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Amount charged for the message."""
-    total_rate: Optional[str] = None
+    total_rate: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Rate per unit of the message."""
-    units: Optional[int] = None
+    units: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of units the message was split into."""
 
 
@@ -108,11 +119,11 @@ class SMS:
     Definition: SMS
     """
 
-    src: Optional[str] = None
+    src: str
     """Plivo number from which the message is to be sent."""
-    dst: Optional[str] = None
+    dst: str
     """Phone number to which the message is to be sent."""
-    text: Optional[str] = None
+    text: str
     """Text of the message to be sent."""
 
 
@@ -122,13 +133,13 @@ class Call:
     Definition: Call
     """
 
-    from_: Optional[str] = field(default=None, metadata={"wire_name": "from"})
+    from_: str = dataclass_field(metadata={"wire_name": "from"})
     """Plivo number to be used to make the call."""
-    to: Optional[str] = None
+    to: str
     """The phone number to call."""
-    answer_url: Optional[str] = None
+    answer_url: str
     """URL to be called when the call is made."""
-    answer_method: Optional[str] = None
+    answer_method: Optional[str] = dataclass_field(default=None, kw_only=True)
     """HTTP Method (GET/POST) that should be used to call the Answer URL."""
 
 
@@ -140,16 +151,16 @@ class PlivoClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -160,8 +171,8 @@ class PlivoClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -169,8 +180,8 @@ class PlivoClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -182,7 +193,7 @@ class PlivoClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -197,9 +208,86 @@ class PlivoClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "plivo"
 
-    async def make_call_async(
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
+            if next_link.startswith("?"):
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
+
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
+    def make_call(
         self,
-        input: Call,
+        input: Call | Mapping[str, Any],
         auth_id: str,
         *,
         timeout: Optional[float] = None,
@@ -211,13 +299,30 @@ class PlivoClient(ConnectorClientBase):
         Make a call
 
         This operation is used to make a call.
+
+        Swagger operation ID: `MakeCall`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            auth_id: Auth ID of your Plivo account.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1/Account/{quote(str(auth_id), safe='')}/Call/"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -231,6 +336,7 @@ class PlivoClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -238,7 +344,7 @@ class PlivoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_messages_async(
+    def list_messages(
         self,
         auth_id: str,
         *,
@@ -246,42 +352,82 @@ class PlivoClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List all messages
 
         This operation returns a list of all messages associated with your
         Plivo account.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListMessages`.
+
+        Args:
+            auth_id: Auth ID of your Plivo account.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1/Account/{quote(str(auth_id), safe='')}/Message/"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def send_sms_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("objects", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def send_sms(
         self,
-        input: SMS,
+        input: SMS | Mapping[str, Any],
         auth_id: str,
         *,
         timeout: Optional[float] = None,
@@ -293,13 +439,30 @@ class PlivoClient(ConnectorClientBase):
         Send SMS
 
         This operation is used to send a text message.
+
+        Swagger operation ID: `SendSMS`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            auth_id: Auth ID of your Plivo account.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1/Account/{quote(str(auth_id), safe='')}/Message/"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -313,6 +476,7 @@ class PlivoClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -320,7 +484,7 @@ class PlivoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_message_async(
+    def get_message(
         self,
         auth_id: str,
         message_uuid: str,
@@ -335,6 +499,23 @@ class PlivoClient(ConnectorClientBase):
 
         This operation is used to fetch the details of a message, given the
         message ID.
+
+        Swagger operation ID: `GetMessage`.
+
+        Args:
+            auth_id: Auth ID of your Plivo account.
+            message_uuid: UUID of the message for which the details need to be
+                fetched.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -345,7 +526,7 @@ class PlivoClient(ConnectorClientBase):
             f"/{quote(str(message_uuid), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -359,6 +540,7 @@ class PlivoClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

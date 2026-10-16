@@ -5,20 +5,183 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, AsyncIterator, Dict, List, Literal, Any, Mapping
-from urllib.parse import quote, urlsplit
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Literal, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core import MatchConditions
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "TeamsClient",
+    "Activities",
+    "AddMemberToChannelInput",
+    "AddMemberToChatInput",
+    "AddMemberToTagInput",
+    "AddMemberToTagResponseSchema",
+    "AddMemberToTeamInput",
+    "AddSectionItemInput",
+    "AiInsightActionItem",
+    "AiInsightCollectionResponse",
+    "AiInsightDetailResponse",
+    "AiInsightMeetingNote",
+    "AiInsightMeetingNoteSubpoint",
+    "AiInsightMentionEvent",
+    "AiInsightResponse",
+    "AiInsightViewpoint",
+    "AiInsightWebhookResponseSchema",
+    "ArchiveChannelInput",
+    "AssociatedTeamInfo",
+    "AsyncOperationResponse",
+    "AtMentionBotResponse",
+    "AtMentionTagResponse",
+    "AtMentionUser",
+    "BotIdForChat",
+    "BotMentionRequest",
+    "CallEventWebhookResponseSchema",
+    "CallRecordingCollectionResponse",
+    "CallRecordingResponse",
+    "CallTranscriptCollectionResponse",
+    "CallTranscriptResponse",
+    "CardResponseTriggerMetadata",
+    "ChannelIdForTeam",
+    "ChannelIds",
+    "ChannelWithOwnerTeamId",
+    "ChatId",
+    "ChatMessage",
+    "ChatMessageList",
+    "ChatMessageWebhookResponseSchema",
+    "ComposeMessageTriggerMetadata",
+    "ConnectorMetadata",
+    "CreateATeamInput",
+    "CreateATeamResponse",
+    "CreateChannelInput",
+    "CreateChannelResponse",
+    "CreateSectionInput",
+    "CreateTagInput",
+    "CreateTagResponseSchema",
+    "DiscoverySettings",
+    "DraftOpenShift",
+    "DraftShift",
+    "DynamicAiInsightTriggerRequest",
+    "DynamicAtMentionWebhookTriggerResponseSchema",
+    "DynamicCallEventTriggerRequest",
+    "DynamicCardResponseTriggerResult",
+    "DynamicChannelAdaptiveCardRequest",
+    "DynamicChannelFlowContinuationSubscriptionResult",
+    "DynamicChannelNotificationRequest",
+    "DynamicComposeMessageTriggerResult",
+    "DynamicGatherInputSubscriptionResult",
+    "DynamicGetMessageDetailsResponseSchema",
+    "DynamicGetMessageDetailsSchema",
+    "DynamicKeywordWebhookTriggerResponseSchema",
+    "DynamicListMembersSchema",
+    "DynamicNewMessageWebhookTriggerResponseSchema",
+    "DynamicPostCardAndWaitRequest",
+    "DynamicPostCardRequest",
+    "DynamicPostConversationNotificationRequest",
+    "DynamicPostFeedNotificationRequest",
+    "DynamicPostGatherInputToConversationResponse",
+    "DynamicPostMessageRequest",
+    "DynamicPostToConversationResponse",
+    "DynamicRecordingTriggerRequest",
+    "DynamicReplyCardRequest",
+    "DynamicReplyMessageRequest",
+    "DynamicResponseSchema",
+    "DynamicSelectedMessageTriggerResult",
+    "DynamicTranscriptTriggerRequest",
+    "DynamicUpdateCardRequest",
+    "DynamicUserAdaptiveCardRequest",
+    "DynamicUserFlowContinuationSubscriptionResult",
+    "DynamicUserMessageWithOptionsSubscriptionRequest",
+    "DynamicUserMessageWithOptionsSubscriptionResult",
+    "DynamicUserNotificationRequest",
+    "DynamicWebhookTriggerRequestSchema",
+    "EditOpenShiftRequest",
+    "FunSettings",
+    "GetAllAssociatedTeamsResponse",
+    "GetAllChannelsForTeamResponse",
+    "GetAllTeamsResponse",
+    "GetChannelResponse",
+    "GetChannelsForGroupResponse",
+    "GetChatsResponse",
+    "GetFlowContinuationSubscriptionWithPosterOutputMetadataInput",
+    "GetMessageDetailsSchema",
+    "GetMessageLocationsResponse",
+    "GetMessagesFromConversationResponse",
+    "GetOnlineMeetingResponse",
+    "GetTagMembersResponseSchema",
+    "GetTagsResponseSchema",
+    "GetTeamResponse",
+    "GetTimeOffReasonsResponse",
+    "GuestSettings",
+    "LastModifiedBy",
+    "ListMembersResponseSchema",
+    "ListMembersSchema",
+    "ListRepliesResponseSchema",
+    "ListSectionItemsResponse",
+    "ListSectionsResponse",
+    "MemberSettings",
+    "MessageId",
+    "MessageReactionWebhookResponseSchema",
+    "MessagingSettings",
+    "MoveSectionItemInput",
+    "NewChat",
+    "NewChatResponse",
+    "NewMeeting",
+    "NewMeetingResponse",
+    "ObjectEntity",
+    "ObjectWithoutType",
+    "OfferShiftRequestResponse",
+    "OnGroupMemberChangeResponse",
+    "OpenShiftChangeRequestResponse",
+    "OpenShiftResponse",
+    "PostCardAndWaitForResponseInput",
+    "PostCardAndWaitSchema",
+    "PostCardSchema",
+    "PostFeedSchema",
+    "PostMessageSchema",
+    "PostMessageToSelfRequest",
+    "PostToConversationResponse",
+    "RecordingWebhookResponseSchema",
+    "ScheduleResponse",
+    "SchedulingGroupResponse",
+    "SectionItemConflictError",
+    "SectionItemResponse",
+    "SectionResponse",
+    "SelectedMessageTriggerMetadata",
+    "SharedOpenShift",
+    "SharedShift",
+    "ShiftResponse",
+    "SingleTagMemberTriggerRequest",
+    "SingleTagTriggerRequest",
+    "SwapShiftsChangeRequestResponse",
+    "TagMemberWebhookResponseSchema",
+    "TagWebhookResponseSchema",
+    "TeamsIdentitySet",
+    "ThemeEditor",
+    "TimeOffRequestResponse",
+    "TranscriptWebhookResponseSchema",
+    "UnifiedActionSchema",
+    "UpdateChannelPropertiesInput",
+    "UpdateSectionInput",
+    "UpdateTagInput",
+    "VirtualAgentBots",
+    "WebhookChatMessageTriggerInput",
+    "WebhookRequest",
+    "WebhookTriggerSchema",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -29,128 +192,149 @@ class NewMeetingResponse:
     Response for Create a Teams meeting
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier for the event"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """Timestamp the event was created"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """Timestamp the event was last modified"""
-    categories: Optional[List[Any]] = None
+    categories: Optional[List[Any]] = dataclass_field(default=None, kw_only=True)
     """The categories associated with the event"""
-    time_zone: Optional[str] = field(
+    time_zone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "timeZone"},
     )
     """Time zone of the event"""
-    reminder_minutes_before_start: Optional[int] = field(
+    reminder_minutes_before_start: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "reminderMinutesBeforeStart"},
     )
     """
     The number of minutes before the event start time that the reminder alert
     occurs
     """
-    is_reminder_on: Optional[bool] = field(
+    is_reminder_on: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isReminderOn"},
     )
     """Set to true if an alert is set to remind the user of the event"""
-    has_attachments: Optional[bool] = field(
+    has_attachments: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "hasAttachments"},
     )
     """Set to true if the event has attachments"""
-    subject: Optional[str] = None
+    subject: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The text of the event's subject line"""
-    body_preview: Optional[str] = field(
+    body_preview: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "bodyPreview"},
     )
     """The preview of the message associated with the event"""
-    importance: Optional[str] = None
+    importance: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The importance of the event. The possible values are: low, normal, high
     """
-    sensitivity: Optional[str] = None
+    sensitivity: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Sensitivity of the event"""
-    is_all_day: Optional[bool] = field(
+    is_all_day: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isAllDay"},
     )
     """Set to true if the event lasts all day"""
-    is_cancelled: Optional[bool] = field(
+    is_cancelled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isCancelled"},
     )
     """Set to true if the event has been canceled"""
-    is_organizer: Optional[bool] = field(
+    is_organizer: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isOrganizer"},
     )
     """Set to true if the calendar owner is the organizer of the event"""
-    response_requested: Optional[bool] = field(
+    response_requested: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseRequested"},
     )
     """The organizer would like an invitee to send a response to the event"""
-    show_as: Optional[str] = field(
+    show_as: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "showAs"},
     )
     """
     The status to show. Possible values are: free, tentative, busy, oof,
     workingElsewhere, unknown.
     """
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """
     The event type. Possible values are: singleInstance, occurrence, exception,
     seriesMaster
     """
-    web_link: Optional[str] = field(
+    web_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "webLink"},
     )
     """The URL to open the event in Outlook on the web."""
-    online_meeting_url: Optional[str] = field(
+    online_meeting_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onlineMeetingUrl"},
     )
     """A URL for an online meeting"""
-    allow_new_time_proposals: Optional[bool] = field(
+    allow_new_time_proposals: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowNewTimeProposals"},
     )
     """
     True if the meeting organizer allows invitees to propose a new time when
     responding
     """
-    recurrence: Optional[Dict[str, Any]] = None
+    recurrence: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The recurrence pattern for the event"""
-    response_status: Optional[Dict[str, Any]] = field(
+    response_status: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseStatus"},
     )
     """Indicates the type of response sent in response to an event message"""
-    body: Optional[Dict[str, Any]] = None
+    body: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The body of the message associated with the event"""
-    start: Optional[Dict[str, Any]] = None
+    start: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The start date, time, and time zone of the event"""
-    end: Optional[Dict[str, Any]] = None
+    end: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The date, time, and time zone that the event ends"""
-    location: Optional[Dict[str, Any]] = None
+    location: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The location of the event"""
-    attendees: Optional[List[Dict[str, Any]]] = None
+    attendees: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """The collection of attendees for the event"""
-    organizer: Optional[Dict[str, Any]] = None
+    organizer: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Organizer"""
-    online_meeting: Optional[Dict[str, Any]] = field(
+    online_meeting: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onlineMeeting"},
     )
     """Details for an attendee to join the meeting online."""
@@ -162,11 +346,12 @@ class GetAllTeamsResponse:
     Response for List joined teams
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of the teams you are a member of"""
 
 
@@ -176,11 +361,17 @@ class GetAllAssociatedTeamsResponse:
     Response for List associated teams
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[AssociatedTeamInfo]] = None
+    value: Optional[
+        List[AssociatedTeamInfo | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of the teams you are associated with"""
 
 
@@ -190,11 +381,17 @@ class GetChannelsForGroupResponse:
     Response for List channels
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[GetChannelResponse]] = None
+    value: Optional[
+        List[GetChannelResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of one or more channels for a specific team"""
 
 
@@ -204,15 +401,13 @@ class CreateChannelInput:
     Create a channel
     """
 
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Optional textual description for the channel"""
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """Channel name as it appears in Microsoft Teams"""
-    membership_type: Optional[str] = field(
+    membership_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "membershipType"},
     )
     """
@@ -228,17 +423,19 @@ class CreateChannelResponse:
     Response for Create a channel
     """
 
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Optional textual description for the channel"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Channel name as it appears in Microsoft Teams"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The channel's unique identifier"""
-    membership_type: Optional[str] = field(
+    membership_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "membershipType"},
     )
     """The type of channel membership"""
@@ -250,39 +447,45 @@ class GetChannelResponse:
     Response for Get details for a specific channel in a team
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique identifier of the channel"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The name of the channel"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The description of the channel, optional"""
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The email address for sending messages to the channel"""
-    tenant_id: Optional[str] = field(
+    tenant_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tenantId"},
     )
     """The ID of the Microsoft Entra tenant."""
-    web_url: Optional[str] = field(
+    web_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "webUrl"},
     )
     """A hyperlink for the channel in Microsoft Teams"""
-    files_folder_web_url: Optional[str] = field(
+    files_folder_web_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "filesFolderWebUrl"},
     )
     """The SharePoint folder URL of the channel"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """Timestamp at which the channel was created. Read only"""
-    membership_type: Optional[str] = field(
+    membership_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "membershipType"},
     )
     """The channel membership type"""
@@ -294,12 +497,13 @@ class UpdateChannelPropertiesInput:
     Update channel
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The new display name for the channel."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The new description for the channel."""
 
 
@@ -309,8 +513,9 @@ class ArchiveChannelInput:
     Archive a channel
     """
 
-    should_set_spo_site_read_only_for_members: Optional[bool] = field(
+    should_set_spo_site_read_only_for_members: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "shouldSetSpoSiteReadOnlyForMembers"},
     )
     """
@@ -325,7 +530,7 @@ class AsyncOperationResponse:
     Response for Archive a channel
     """
 
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The status of the asynchronous operation"""
 
 
@@ -335,11 +540,17 @@ class GetAllChannelsForTeamResponse:
     Response for List all channels
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[ChannelWithOwnerTeamId]] = None
+    value: Optional[
+        List[ChannelWithOwnerTeamId | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of one or more channels for a specific team"""
 
 
@@ -349,11 +560,12 @@ class GetChatsResponse:
     Response for List chats
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of one or more chats you are a part of"""
 
 
@@ -363,8 +575,9 @@ class AtMentionTagResponse:
     Response for Get an @mention token for a team tag
     """
 
-    at_mention: Optional[str] = field(
+    at_mention: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "atMention"},
     )
     """
@@ -379,22 +592,25 @@ class GetMessagesFromConversationResponse:
     Response for Get messages in a channel
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """@odata.context"""
-    count: Optional[int] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.count"},
     )
     """@odata.count"""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """@odata.nextLink"""
-    value: Optional[ChatMessageList] = None
+    value: Optional[ChatMessageList] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -403,7 +619,7 @@ class DynamicGetMessageDetailsResponseSchema:
     Response for Get message details
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -416,7 +632,7 @@ class ListRepliesResponseSchema:
     Response for List replies of a channel message
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List replies response"""
 
 
@@ -426,11 +642,11 @@ class ListMembersResponseSchema:
     Response for List chat or channel members
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List members response"""
 
 
-ChatMessageList = List["ChatMessage"]
+ChatMessageList = List["ChatMessage | Mapping[str, Any]"]
 
 
 @dataclass
@@ -439,8 +655,9 @@ class WebhookChatMessageTriggerInput:
     When a new chat message is added
     """
 
-    notification_url: Optional[str] = field(
+    notification_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "notificationUrl"},
     )
 
@@ -451,48 +668,57 @@ class GetTeamResponse:
     Response for Get a team
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique identifier of the team"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The name of the team"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The description of the team, optional"""
-    internal_id: Optional[str] = field(
+    internal_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "internalId"},
     )
     """The internal ID of the team"""
-    web_url: Optional[str] = field(
+    web_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "webUrl"},
     )
     """A hyperlink that will go to the team in the Microsoft Teams client"""
-    is_archived: Optional[bool] = field(
+    is_archived: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isArchived"},
     )
     """Whether this team is in read-only mode"""
-    member_settings: Optional[MemberSettings] = field(
+    member_settings: Optional[MemberSettings | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "memberSettings"},
     )
-    guest_settings: Optional[GuestSettings] = field(
+    guest_settings: Optional[GuestSettings | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "guestSettings"},
     )
-    messaging_settings: Optional[MessagingSettings] = field(
+    messaging_settings: Optional[MessagingSettings | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "messagingSettings"},
     )
-    fun_settings: Optional[FunSettings] = field(
+    fun_settings: Optional[FunSettings | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "funSettings"},
     )
-    discovery_settings: Optional[DiscoverySettings] = field(
+    discovery_settings: Optional[DiscoverySettings | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "discoverySettings"},
     )
 
@@ -503,8 +729,9 @@ class AtMentionUser:
     Response for Get an @mention token for a user
     """
 
-    at_mention: Optional[str] = field(
+    at_mention: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "atMention"},
     )
     """
@@ -521,7 +748,7 @@ class NewChatResponse:
     Response for Create a chat
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The chat's unique identifier"""
 
 
@@ -531,61 +758,66 @@ class ChatMessage:
     Response for Post a message to myself
     """
 
-    attachments: Optional[List[Dict[str, Any]]] = None
+    attachments: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """attachments"""
-    body: Optional[Dict[str, Any]] = None
+    body: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Plaintext representation of the content of the message"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """Timestamp of when the chat message was created"""
-    deleted: Optional[bool] = None
+    deleted: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """deleted"""
-    etag: Optional[str] = None
+    etag: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Version number of the chat message."""
-    from_: Optional[Dict[str, Any]] = field(
+    from_: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "from"},
     )
     """The message sender"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the message"""
-    importance: Optional[str] = None
+    importance: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The importance of the message. The possible values are: normal, high,
     urgent.
     """
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """
     Timestamp when the chat message is created (initial setting) or modified,
     including when a reaction is added or removed
     """
-    locale: Optional[str] = None
+    locale: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Locale of the chat message set by the client."""
-    mentions: Optional[List[Dict[str, Any]]] = None
+    mentions: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """
     List of entities mentioned in the chat message. Supported entities are:
     user, bot, team, and channel.
     """
-    message_type: Optional[str] = field(
+    message_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "messageType"},
     )
     """The type of chat message"""
-    reactions: Optional[List[Dict[str, Any]]] = None
+    reactions: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Reactions for this chat message (for example, Like)"""
-    reply_to_id: Optional[str] = field(
+    reply_to_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "replyToId"},
     )
     """ID of the parent message of the thread"""
-    subject: Optional[str] = None
+    subject: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The subject of the chat message, optional"""
-    summary: Optional[str] = None
+    summary: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Summary text of the message that could be used for push notifications and
     summary views or fall back views
@@ -598,14 +830,11 @@ class CreateATeamInput:
     Create a team
     """
 
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """The name of the team"""
-    description: Optional[str] = None
+    description: str
     """An optional description for the team"""
-    visibility: Optional[str] = None
+    visibility: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The visibility of the the team"""
 
 
@@ -615,8 +844,9 @@ class CreateATeamResponse:
     Response for Create a team
     """
 
-    new_team_id: Optional[str] = field(
+    new_team_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "newTeamId"},
     )
     """Team ID of the team that was just created"""
@@ -628,12 +858,9 @@ class AddMemberToTeamInput:
     Add a member to a team
     """
 
-    user_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "userId"},
-    )
+    user_id: str = dataclass_field(metadata={"wire_name": "userId"})
     """User principal name or Microsoft Entra ID to add"""
-    owner: Optional[bool] = None
+    owner: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True, if the user should be a team owner"""
 
 
@@ -643,12 +870,9 @@ class AddMemberToChannelInput:
     Add a member to a channel
     """
 
-    user_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "userId"},
-    )
+    user_id: str = dataclass_field(metadata={"wire_name": "userId"})
     """User principal name or Microsoft Entra ID to add"""
-    owner: Optional[bool] = None
+    owner: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True, if the user should be a channel owner"""
 
 
@@ -658,15 +882,17 @@ class PostToConversationResponse:
     Response for Post message in a chat or channel
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique message ID"""
-    message_link: Optional[str] = field(
+    message_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "messageLink"},
     )
     """Link to the message in Microsoft Teams"""
-    conversation_id: Optional[str] = field(
+    conversation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "conversationId"},
     )
     """The chat's unique identifier"""
@@ -678,11 +904,10 @@ class PostCardAndWaitForResponseInput:
     Post adaptive card and wait for a response
     """
 
-    notification_url: Optional[str] = field(
-        default=None,
+    notification_url: str = dataclass_field(
         metadata={"wire_name": "notificationUrl"},
     )
-    body: Optional[Dict[str, Any]] = None
+    body: Dict[str, Any]
 
 
 @dataclass
@@ -691,7 +916,7 @@ class DynamicPostGatherInputToConversationResponse:
     Response for Post adaptive card and wait for a response
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -704,7 +929,7 @@ class ObjectWithoutType:
     Response for Send a Microsoft Graph HTTP request
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -717,15 +942,13 @@ class AddMemberToChatInput:
     Add a user to a chat
     """
 
-    user_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "userId"},
-    )
+    user_id: str = dataclass_field(metadata={"wire_name": "userId"})
     """User principal name or Microsoft Entra ID to add"""
-    owner: Optional[bool] = None
+    owner: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True, if the user should be a chat owner"""
-    visible_history_start_date_time: Optional[str] = field(
+    visible_history_start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "visibleHistoryStartDateTime"},
     )
     """
@@ -740,72 +963,84 @@ class GetOnlineMeetingResponse:
     Response for Get an online meeting
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique identifier of the online meeting"""
-    subject: Optional[str] = None
+    subject: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The subject of the online meeting"""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """The start time of the meeting in UTC"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """The end time of the meeting in UTC"""
-    creation_date_time: Optional[str] = field(
+    creation_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "creationDateTime"},
     )
     """The creation time of the meeting in UTC"""
-    join_web_url: Optional[str] = field(
+    join_web_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "joinWebUrl"},
     )
     """The URL used to join the meeting online"""
-    join_meeting_id_settings: Optional[Dict[str, Any]] = field(
+    join_meeting_id_settings: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "joinMeetingIdSettings"},
     )
     """Settings related to the join meeting ID"""
-    participants: Optional[Dict[str, Any]] = None
+    participants: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The participants of the meeting"""
-    audio_conferencing: Optional[Dict[str, Any]] = field(
+    audio_conferencing: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "audioConferencing"},
     )
     """Phone call-in information for the meeting"""
-    is_entry_exit_announced: Optional[bool] = field(
+    is_entry_exit_announced: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isEntryExitAnnounced"},
     )
     """
     Whether announce notifications are enabled for callers joining or leaving
     the meeting
     """
-    allowed_presenters: Optional[str] = field(
+    allowed_presenters: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowedPresenters"},
     )
     """Specifies who can be a presenter in the meeting"""
-    lobby_bypass_settings: Optional[Dict[str, Any]] = field(
+    lobby_bypass_settings: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lobbyBypassSettings"},
     )
     """Specifies which participants can bypass the meeting lobby"""
-    record_automatically: Optional[bool] = field(
+    record_automatically: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recordAutomatically"},
     )
     """Indicates whether to record the meeting automatically"""
-    allow_meeting_chat: Optional[str] = field(
+    allow_meeting_chat: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowMeetingChat"},
     )
     """Specifies the mode of meeting chat"""
-    meeting_options_web_url: Optional[str] = field(
+    meeting_options_web_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "meetingOptionsWebUrl"},
     )
     """A URL for the organizer to change settings for the meeting"""
@@ -817,11 +1052,17 @@ class CallTranscriptCollectionResponse:
     Response for List meeting transcripts
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[CallTranscriptResponse]] = None
+    value: Optional[
+        List[CallTranscriptResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of transcripts"""
 
 
@@ -831,30 +1072,35 @@ class CallTranscriptResponse:
     Response for Get meeting transcript
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The transcript ID"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """The date and time when the transcript was created"""
-    transcript_content_url: Optional[str] = field(
+    transcript_content_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "transcriptContentUrl"},
     )
     """The URL to access the transcript content"""
-    meeting_id: Optional[str] = field(
+    meeting_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "meetingId"},
     )
     """The meeting ID"""
-    meeting_organizer_id: Optional[str] = field(
+    meeting_organizer_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "meetingOrganizerId"},
     )
     """The meeting organizer's user ID"""
-    call_id: Optional[str] = field(
+    call_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "callId"},
     )
     """The call ID"""
@@ -866,11 +1112,17 @@ class CallRecordingCollectionResponse:
     Response for List meeting recordings
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[CallRecordingResponse]] = None
+    value: Optional[
+        List[CallRecordingResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of recordings"""
 
 
@@ -880,30 +1132,35 @@ class CallRecordingResponse:
     Response for Get meeting recording
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The recording ID"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """The date and time when the recording was created"""
-    recording_content_url: Optional[str] = field(
+    recording_content_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recordingContentUrl"},
     )
     """The URL to access the recording content"""
-    meeting_id: Optional[str] = field(
+    meeting_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "meetingId"},
     )
     """The meeting ID"""
-    meeting_organizer_id: Optional[str] = field(
+    meeting_organizer_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "meetingOrganizerId"},
     )
     """The meeting organizer's user ID"""
-    call_id: Optional[str] = field(
+    call_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "callId"},
     )
     """The call ID"""
@@ -915,19 +1172,26 @@ class ListSectionsResponse:
     Response for List sections
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    microsoft_graph_sections_version: Optional[str] = field(
+    microsoft_graph_sections_version: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@microsoft.graph.sectionsVersion"},
     )
     """
     Version identifier for the sections hierarchy. Pass as If-Match on Create,
     Update, Delete, Add Item, Remove Item, and Move Item operations.
     """
-    value: Optional[List[SectionResponse]] = None
+    value: Optional[
+        List[SectionResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of sections"""
 
 
@@ -937,26 +1201,26 @@ class CreateSectionInput:
     Create a section
     """
 
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """The display name of the section"""
-    display_icon: Optional[Dict[str, Any]] = field(
+    display_icon: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayIcon"},
     )
     """
     The display icon for the section. Only iconType is writable; other fields
     are populated by the service.
     """
-    is_expanded: Optional[bool] = field(
+    is_expanded: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isExpanded"},
     )
     """Whether the section is expanded"""
-    sort_type: Optional[str] = field(
+    sort_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sortType"},
     )
     """The sort type for the section"""
@@ -968,48 +1232,56 @@ class SectionResponse:
     Response for Create a section
     """
 
-    etag: Optional[str] = field(
+    etag: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.etag"},
     )
     """
     ETag for the sections collection. Pass as If-Match on Create, Update, and
     Delete.
     """
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The section ID"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The display name of the section"""
-    display_icon: Optional[Dict[str, Any]] = field(
+    display_icon: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayIcon"},
     )
     """The display icon for the section"""
-    is_expanded: Optional[bool] = field(
+    is_expanded: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isExpanded"},
     )
     """Whether the section is expanded"""
-    sort_type: Optional[str] = field(
+    sort_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sortType"},
     )
     """The sort type for the section"""
-    section_type: Optional[str] = field(
+    section_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sectionType"},
     )
     """The type of section"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """The date and time when the section was created"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """The date and time when the section was last modified"""
@@ -1021,26 +1293,30 @@ class UpdateSectionInput:
     Update a section
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The display name of the section"""
-    display_icon: Optional[Dict[str, Any]] = field(
+    display_icon: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayIcon"},
     )
     """
     The display icon for the section. Only iconType is writable; other fields
     are populated by the service.
     """
-    is_expanded: Optional[bool] = field(
+    is_expanded: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isExpanded"},
     )
     """Whether the section is expanded"""
-    sort_type: Optional[str] = field(
+    sort_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sortType"},
     )
     """The sort type for the section"""
@@ -1052,11 +1328,17 @@ class ListSectionItemsResponse:
     Response for List section items
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[SectionItemResponse]] = None
+    value: Optional[
+        List[SectionItemResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of section items"""
 
 
@@ -1066,7 +1348,7 @@ class AddSectionItemInput:
     Add an item to a section
     """
 
-    id: Optional[str] = None
+    id: str
     """
     The conversation ID of the chat, channel, meeting, or community to add to
     the section. For community items, the service automatically normalizes the
@@ -1080,31 +1362,35 @@ class SectionItemResponse:
     Response for Add an item to a section
     """
 
-    etag: Optional[str] = field(
+    etag: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.etag"},
     )
     """
     ETag for the section items collection. Pass as If-Match on Add, Remove, and
     Move.
     """
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The unique identifier of the item. Corresponds to the conversation ID of
     the underlying chat, channel, meeting, or community.
     """
-    item_type: Optional[str] = field(
+    item_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "itemType"},
     )
     """The type of the item"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """The date and time when the item was added to the section"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """The date and time when the item was last modified"""
@@ -1116,8 +1402,7 @@ class MoveSectionItemInput:
     Move a section item
     """
 
-    target_section_id: Optional[str] = field(
-        default=None,
+    target_section_id: str = dataclass_field(
         metadata={"wire_name": "targetSectionId"},
     )
     """The ID of the section to move the item to"""
@@ -1129,11 +1414,12 @@ class GetTagsResponseSchema:
     Response for List all tags for a team
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1142,12 +1428,9 @@ class CreateTagInput:
     Create a tag for a team
     """
 
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """The name of the tag as it appears to the user in Microsoft Teams."""
-    members: Optional[str] = None
+    members: str
     """
     List of users' IDs separated by semi-colons, identifier must be in a format
     like '550e8400-e29b-41d4-a716-446655440000'.
@@ -1160,24 +1443,28 @@ class CreateTagResponseSchema:
     Response for Create a tag for a team
     """
 
-    type_: Optional[str] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.type"},
     )
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the tag"""
-    team_id: Optional[str] = field(
+    team_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "teamId"},
     )
     """ID of the team in which the tag is defined"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The name of the tag as it appears to the user in Microsoft Teams."""
-    member_count: Optional[int] = field(
+    member_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "memberCount"},
     )
     """The number of users assigned to the tag"""
@@ -1189,10 +1476,7 @@ class UpdateTagInput:
     Update a team tag
     """
 
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """The new name of the tag as it appears to the user in Microsoft Teams."""
 
 
@@ -1202,10 +1486,7 @@ class AddMemberToTagInput:
     Add a member to a team tag
     """
 
-    user_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "userId"},
-    )
+    user_id: str = dataclass_field(metadata={"wire_name": "userId"})
     """
     The user's ID of the member to add to the tag, must be in a format like
     '550e8400-e29b-41d4-a716-446655440000'.
@@ -1218,8 +1499,9 @@ class AddMemberToTagResponseSchema:
     Response for Add a member to a team tag
     """
 
-    user_id: Optional[str] = field(
+    user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userId"},
     )
     """User ID of the member added to the tag"""
@@ -1231,7 +1513,7 @@ class GetTagMembersResponseSchema:
     Response for List the members of a team tag
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1240,11 +1522,17 @@ class AiInsightCollectionResponse:
     Response for List AI insights
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[AiInsightResponse]] = None
+    value: Optional[
+        List[AiInsightResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of AI insights"""
 
 
@@ -1254,34 +1542,40 @@ class AiInsightDetailResponse:
     Response for Get AI insight
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The AI insight ID"""
-    call_id: Optional[str] = field(
+    call_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "callId"},
     )
     """The call ID"""
-    content_correlation_id: Optional[str] = field(
+    content_correlation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentCorrelationId"},
     )
     """The content correlation ID"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """The date and time when the AI insight was created"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """The date and time when the AI insight ended"""
-    recap_url: Optional[str] = field(
+    recap_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recapUrl"},
     )
     """
@@ -1289,20 +1583,27 @@ class AiInsightDetailResponse:
     the underlying callAiInsight resource returned by the fetch. Present when
     the underlying resource provides it; otherwise absent.
     """
-    meeting_notes: Optional[List[AiInsightMeetingNote]] = field(
+    meeting_notes: Optional[List[AiInsightMeetingNote | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "meetingNotes"},
     )
     """
     Detailed notes of the meeting discussion generated by Microsoft Teams
     Copilot.
     """
-    action_items: Optional[List[AiInsightActionItem]] = field(
+    action_items: Optional[List[AiInsightActionItem | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "actionItems"},
     )
     """Action items generated from the meeting conversation."""
-    viewpoint: Optional[AiInsightViewpoint] = None
+    viewpoint: Optional[
+        AiInsightViewpoint | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1311,7 +1612,7 @@ class GetMessageLocationsResponse:
     Response for Conversation location for where to post
     """
 
-    locations: Optional[List[Dict[str, Any]]] = None
+    locations: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """valid locations to post a message or reply, make verbose"""
 
 
@@ -1321,7 +1622,7 @@ class GetMessageDetailsSchema:
     Response for Get message details response schema
     """
 
-    schema: Optional[ObjectEntity] = None
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1330,7 +1631,7 @@ class ListMembersSchema:
     Response for List members input schema
     """
 
-    schema: Optional[ObjectEntity] = None
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1339,7 +1640,7 @@ class PostFeedSchema:
     Response for Get feed notification input metadata
     """
 
-    schema: Optional[ObjectEntity] = None
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1348,7 +1649,7 @@ class UnifiedActionSchema:
     Response for Get unified action input metadata
     """
 
-    schema: Optional[ObjectEntity] = None
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1357,9 +1658,9 @@ class ConnectorMetadata:
     Response for Get message with options subscription input metadata
     """
 
-    metadatatype: Optional[str] = None
-    activitytype: Optional[str] = None
-    schema: Optional[ObjectEntity] = None
+    metadatatype: Optional[str] = dataclass_field(default=None, kw_only=True)
+    activitytype: Optional[str] = dataclass_field(default=None, kw_only=True)
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1368,7 +1669,7 @@ class WebhookTriggerSchema:
     Response for Input schema for webhook trigger
     """
 
-    schema: Optional[ObjectEntity] = None
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1377,7 +1678,7 @@ class DynamicResponseSchema:
     Response for Get response schema
     """
 
-    schema: Optional[ObjectEntity] = None
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 GetFlowContinuationSubscriptionWithPosterOutputMetadataInput = str
@@ -1389,7 +1690,7 @@ class ObjectEntity:
     Response for Get subscription scope input schema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1402,7 +1703,7 @@ class PostMessageSchema:
     Definition: PostMessageSchema
     """
 
-    schema: Optional[ObjectEntity] = None
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1411,7 +1712,7 @@ class PostCardSchema:
     Definition: PostCardSchema
     """
 
-    schema: Optional[ObjectEntity] = None
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1420,7 +1721,7 @@ class PostCardAndWaitSchema:
     Definition: PostCardAndWaitSchema
     """
 
-    schema: Optional[ObjectEntity] = None
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1429,7 +1730,7 @@ class DynamicGetMessageDetailsSchema:
     Definition: DynamicGetMessageDetailsSchema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1442,7 +1743,7 @@ class DynamicListMembersSchema:
     Definition: DynamicListMembersSchema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1455,7 +1756,7 @@ class DynamicUserNotificationRequest:
     Definition: DynamicUserNotificationRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1468,7 +1769,7 @@ class DynamicPostConversationNotificationRequest:
     Definition: DynamicPostConversationNotificationRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1481,7 +1782,7 @@ class DynamicChannelNotificationRequest:
     Definition: DynamicChannelNotificationRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1494,7 +1795,7 @@ class DynamicPostFeedNotificationRequest:
     Definition: DynamicPostFeedNotificationRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1507,7 +1808,7 @@ class DynamicPostMessageRequest:
     Definition: DynamicPostMessageRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1520,7 +1821,7 @@ class DynamicReplyMessageRequest:
     Definition: DynamicReplyMessageRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1533,7 +1834,7 @@ class DynamicPostCardRequest:
     Definition: DynamicPostCardRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1546,7 +1847,7 @@ class DynamicPostCardAndWaitRequest:
     Definition: DynamicPostCardAndWaitRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1559,7 +1860,7 @@ class DynamicReplyCardRequest:
     Definition: DynamicReplyCardRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1572,7 +1873,7 @@ class DynamicUpdateCardRequest:
     Definition: DynamicUpdateCardRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1585,7 +1886,7 @@ class DynamicUserAdaptiveCardRequest:
     Definition: DynamicUserAdaptiveCardRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1598,7 +1899,7 @@ class DynamicChannelAdaptiveCardRequest:
     Definition: DynamicChannelAdaptiveCardRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1611,7 +1912,7 @@ class DynamicUserMessageWithOptionsSubscriptionRequest:
     Definition: DynamicUserMessageWithOptionsSubscriptionRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1624,7 +1925,7 @@ class DynamicUserMessageWithOptionsSubscriptionResult:
     Definition: DynamicUserMessageWithOptionsSubscriptionResult
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1637,7 +1938,7 @@ class DynamicSelectedMessageTriggerResult:
     Definition: DynamicSelectedMessageTriggerResult
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1650,7 +1951,7 @@ class DynamicComposeMessageTriggerResult:
     Definition: DynamicComposeMessageTriggerResult
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1663,7 +1964,7 @@ class DynamicCardResponseTriggerResult:
     Definition: DynamicCardResponseTriggerResult
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1676,47 +1977,56 @@ class MessageReactionWebhookResponseSchema:
     Definition: MessageReactionWebhookResponseSchema
     """
 
-    thread_type: Optional[str] = field(
+    thread_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "threadType"},
     )
-    chat_id: Optional[str] = field(
+    chat_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "chatId"},
     )
     """The chat's unique identifier"""
-    team_id: Optional[str] = field(
+    team_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "teamId"},
     )
     """The team's unique identifier"""
-    channel_id: Optional[str] = field(
+    channel_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "channelId"},
     )
     """The channel's unique identifier"""
-    message_id: Optional[str] = field(
+    message_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "messageId"},
     )
     """Id of the message which was reacted"""
-    reply_to_id: Optional[str] = field(
+    reply_to_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "replyToId"},
     )
     """ID of the parent message of the thread"""
-    message_link: Optional[str] = field(
+    message_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "messageLink"},
     )
     """Link to the message which was reacted"""
-    user_id: Optional[str] = field(
+    user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userId"},
     )
     """Reacting user's Id"""
-    message_reaction: Optional[str] = field(
+    message_reaction: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "messageReaction"},
     )
     """Message reaction used"""
@@ -1728,11 +2038,11 @@ class TeamsIdentitySet:
     Definition: TeamsIdentitySet
     """
 
-    application: Optional[Dict[str, Any]] = None
+    application: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Application identity (bot or service)"""
-    device: Optional[Dict[str, Any]] = None
+    device: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Device identity"""
-    user: Optional[Dict[str, Any]] = None
+    user: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """User identity"""
 
 
@@ -1742,15 +2052,17 @@ class CallEventWebhookResponseSchema:
     Definition: CallEventWebhookResponseSchema
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Event identifier"""
-    id_2: Optional[str] = field(
+    id_2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.id"},
     )
     """OData identifier"""
-    type_: Optional[str] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.type"},
     )
     """
@@ -1758,56 +2070,64 @@ class CallEventWebhookResponseSchema:
     meeting-specific fields are flattened onto the base type by notification
     delivery).
     """
-    call_event_type: Optional[str] = field(
+    call_event_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "callEventType"},
     )
     """Type of call event"""
-    event_date_time: Optional[str] = field(
+    event_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "eventDateTime"},
     )
     """When the event occurred"""
-    call_conversation_id: Optional[str] = field(
+    call_conversation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "callConversationId"},
     )
     """Call conversation identifier"""
-    join_web_url: Optional[str] = field(
+    join_web_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "joinWebUrl"},
     )
     """
     Meeting join URL (populated when the call is associated with an online
     meeting)
     """
-    chat_info: Optional[Dict[str, Any]] = field(
+    chat_info: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "chatInfo"},
     )
     """
     Chat information for the meeting (populated when the call is associated
     with an online meeting)
     """
-    organizer_meeting_info: Optional[Dict[str, Any]] = field(
+    organizer_meeting_info: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "organizerMeetingInfo"},
     )
     """
     Organizer info (populated when the call is associated with an online
     meeting)
     """
-    transcription_state: Optional[Dict[str, Any]] = field(
+    transcription_state: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "transcriptionState"},
     )
     """Transcription state (set on transcriptionStateUpdated events)"""
-    recording_state: Optional[Dict[str, Any]] = field(
+    recording_state: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recordingState"},
     )
     """Recording state (set on recordingStateUpdated events)"""
-    participants: Optional[List[Dict[str, Any]]] = None
+    participants: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Participants (set on rosterUpdated events)"""
 
 
@@ -1817,44 +2137,52 @@ class TranscriptWebhookResponseSchema:
     Definition: TranscriptWebhookResponseSchema
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Transcript identifier"""
-    id_2: Optional[str] = field(
+    id_2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.id"},
     )
     """OData identifier"""
-    meeting_id: Optional[str] = field(
+    meeting_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "meetingId"},
     )
     """Online meeting identifier (empty for ad-hoc call transcripts)"""
-    call_id: Optional[str] = field(
+    call_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "callId"},
     )
     """Call identifier (set for ad-hoc call transcripts)"""
-    content_correlation_id: Optional[str] = field(
+    content_correlation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentCorrelationId"},
     )
     """Content correlation identifier"""
-    meeting_organizer: Optional[TeamsIdentitySet] = field(
+    meeting_organizer: Optional[TeamsIdentitySet | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "meetingOrganizer"},
     )
-    transcript_content_url: Optional[str] = field(
+    transcript_content_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "transcriptContentUrl"},
     )
     """URL to download the transcript content"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """When the transcript was created (UTC)"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """When the transcript ended (UTC)"""
@@ -1866,20 +2194,23 @@ class AiInsightWebhookResponseSchema:
     Definition: AiInsightWebhookResponseSchema
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """AI insight identifier"""
-    id_2: Optional[str] = field(
+    id_2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.id"},
     )
     """OData identifier"""
-    meeting_id: Optional[str] = field(
+    meeting_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "meetingId"},
     )
     """Online meeting identifier (empty for ad-hoc call AI insights)"""
-    call_id: Optional[str] = field(
+    call_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "callId"},
     )
     """Call identifier (set for ad-hoc call AI insights)"""
@@ -1891,44 +2222,52 @@ class RecordingWebhookResponseSchema:
     Definition: RecordingWebhookResponseSchema
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Recording identifier"""
-    id_2: Optional[str] = field(
+    id_2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.id"},
     )
     """OData identifier"""
-    meeting_id: Optional[str] = field(
+    meeting_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "meetingId"},
     )
     """Online meeting identifier (empty for ad-hoc call recordings)"""
-    call_id: Optional[str] = field(
+    call_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "callId"},
     )
     """Call identifier (set for ad-hoc call recordings)"""
-    content_correlation_id: Optional[str] = field(
+    content_correlation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentCorrelationId"},
     )
     """Content correlation identifier"""
-    meeting_organizer: Optional[TeamsIdentitySet] = field(
+    meeting_organizer: Optional[TeamsIdentitySet | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "meetingOrganizer"},
     )
-    recording_content_url: Optional[str] = field(
+    recording_content_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recordingContentUrl"},
     )
     """URL to download the recording content"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """When the recording was created (UTC)"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """When the recording ended (UTC)"""
@@ -1940,7 +2279,7 @@ class ChatMessageWebhookResponseSchema:
     Definition: ChatMessageWebhookResponseSchema
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Message details response"""
 
 
@@ -1950,7 +2289,7 @@ class DynamicWebhookTriggerRequestSchema:
     Definition: DynamicWebhookTriggerRequestSchema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1963,7 +2302,7 @@ class DynamicKeywordWebhookTriggerResponseSchema:
     Definition: DynamicKeywordWebhookTriggerResponseSchema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1976,7 +2315,7 @@ class DynamicAtMentionWebhookTriggerResponseSchema:
     Definition: DynamicAtMentionWebhookTriggerResponseSchema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1989,7 +2328,7 @@ class DynamicNewMessageWebhookTriggerResponseSchema:
     Definition: DynamicNewMessageWebhookTriggerResponseSchema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -2002,7 +2341,7 @@ class DynamicPostToConversationResponse:
     Definition: DynamicPostToConversationResponse
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -2015,7 +2354,7 @@ class MessageId:
     Definition: MessageId
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique message identifier"""
 
 
@@ -2025,7 +2364,7 @@ class DynamicUserFlowContinuationSubscriptionResult:
     Definition: DynamicUserFlowContinuationSubscriptionResult
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -2038,7 +2377,7 @@ class DynamicChannelFlowContinuationSubscriptionResult:
     Definition: DynamicChannelFlowContinuationSubscriptionResult
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -2051,7 +2390,7 @@ class DynamicGatherInputSubscriptionResult:
     Definition: DynamicGatherInputSubscriptionResult
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -2064,15 +2403,17 @@ class AssociatedTeamInfo:
     Definition: AssociatedTeamInfo
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique identifier of the team"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The name of the team"""
-    tenant_id: Optional[str] = field(
+    tenant_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tenantId"},
     )
     """The ID of the Microsoft Entra tenant this team belongs to"""
@@ -2084,44 +2425,51 @@ class ChannelWithOwnerTeamId:
     Definition: ChannelWithOwnerTeamId
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique identifier of the channel"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The name of the channel"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The description of the channel, optional"""
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The email address for sending messages to the channel"""
-    tenant_id: Optional[str] = field(
+    tenant_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tenantId"},
     )
     """The ID of the Microsoft Entra tenant."""
-    web_url: Optional[str] = field(
+    web_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "webUrl"},
     )
     """A hyperlink for the channel in Microsoft Teams"""
-    files_folder_web_url: Optional[str] = field(
+    files_folder_web_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "filesFolderWebUrl"},
     )
     """The SharePoint folder URL of the channel"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """Timestamp at which the channel was created. Read only"""
-    membership_type: Optional[str] = field(
+    membership_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "membershipType"},
     )
     """The channel membership type"""
-    owner_team_id: Optional[str] = field(
+    owner_team_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ownerTeamId"},
     )
     """The ID of the team that owns the channel"""
@@ -2133,8 +2481,7 @@ class WebhookRequest:
     Definition: WebhookRequest
     """
 
-    notification_url: Optional[str] = field(
-        default=None,
+    notification_url: str = dataclass_field(
         metadata={"wire_name": "notificationUrl"},
     )
     """
@@ -2148,11 +2495,12 @@ class GetTimeOffReasonsResponse:
     Definition: GetTimeOffReasonsResponse
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """The list of time off reasons."""
 
 
@@ -2162,67 +2510,79 @@ class TimeOffRequestResponse:
     Definition: TimeOffRequestResponse
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the TimeOff request."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    assigned_to: Optional[str] = field(
+    assigned_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assignedTo"},
     )
     """The person the request is assigned to: 'manager' or 'recipient'"""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """'approved', 'pending' or 'declined'"""
-    sender_date_time: Optional[str] = field(
+    sender_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderDateTime"},
     )
     """Time when the request was sent"""
-    sender_message: Optional[str] = field(
+    sender_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderMessage"},
     )
     """The message from the request sender"""
-    sender_user_id: Optional[str] = field(
+    sender_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderUserId"},
     )
     """The ID of the user that sent the request"""
-    manager_action_date_time: Optional[str] = field(
+    manager_action_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionDateTime"},
     )
     """Time when the manager responded"""
-    manager_action_message: Optional[str] = field(
+    manager_action_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionMessage"},
     )
     """The message from the manager"""
-    manager_user_id: Optional[str] = field(
+    manager_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerUserId"},
     )
     """The ID of the manager that responded"""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """Start of time requested off"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """End of time requested off"""
-    time_off_reason_id: Optional[str] = field(
+    time_off_reason_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "timeOffReasonId"},
     )
     """The ID of the TimeOff Reason"""
@@ -2234,72 +2594,85 @@ class OfferShiftRequestResponse:
     Definition: OfferShiftRequestResponse
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the Offer Shift request."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    assigned_to: Optional[str] = field(
+    assigned_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assignedTo"},
     )
     """The person the request is assigned to: 'manager' or 'recipient'"""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """'approved', 'pending' or 'declined'"""
-    sender_date_time: Optional[str] = field(
+    sender_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderDateTime"},
     )
     """Time when the request was sent"""
-    sender_message: Optional[str] = field(
+    sender_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderMessage"},
     )
     """The message from the request sender"""
-    sender_user_id: Optional[str] = field(
+    sender_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderUserId"},
     )
     """The ID of the user that sent the request"""
-    sender_shift_id: Optional[str] = field(
+    sender_shift_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderShiftId"},
     )
     """The ID of the shift from the sender"""
-    recipient_action_date_time: Optional[str] = field(
+    recipient_action_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientActionDateTime"},
     )
     """Time when the recipient responded"""
-    recipient_action_message: Optional[str] = field(
+    recipient_action_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientActionMessage"},
     )
     """The message from the recipient"""
-    recipient_user_id: Optional[str] = field(
+    recipient_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientUserId"},
     )
     """The ID of the recipient of the request"""
-    manager_action_date_time: Optional[str] = field(
+    manager_action_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionDateTime"},
     )
     """Time when the manager responded"""
-    manager_action_message: Optional[str] = field(
+    manager_action_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionMessage"},
     )
     """The message from the manager"""
-    manager_user_id: Optional[str] = field(
+    manager_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerUserId"},
     )
     """The ID of the manager that responded"""
@@ -2311,77 +2684,91 @@ class SwapShiftsChangeRequestResponse:
     Definition: SwapShiftsChangeRequestResponse
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the Swap Shift request."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    assigned_to: Optional[str] = field(
+    assigned_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assignedTo"},
     )
     """The person the request is assigned to: 'manager' or 'recipient'"""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """'approved', 'pending' or 'declined'"""
-    sender_date_time: Optional[str] = field(
+    sender_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderDateTime"},
     )
     """Time when the request was sent"""
-    sender_message: Optional[str] = field(
+    sender_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderMessage"},
     )
     """The message from the request sender"""
-    sender_user_id: Optional[str] = field(
+    sender_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderUserId"},
     )
     """The ID of the user that sent the request"""
-    sender_shift_id: Optional[str] = field(
+    sender_shift_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderShiftId"},
     )
     """The ID of the shift from the sender"""
-    recipient_action_date_time: Optional[str] = field(
+    recipient_action_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientActionDateTime"},
     )
     """Time when the recipient responded"""
-    recipient_action_message: Optional[str] = field(
+    recipient_action_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientActionMessage"},
     )
     """The message from the recipient"""
-    recipient_user_id: Optional[str] = field(
+    recipient_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientUserId"},
     )
     """The ID of the recipient of the request"""
-    recipient_shift_id: Optional[str] = field(
+    recipient_shift_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientShiftId"},
     )
     """The ID of the shift from the recipient"""
-    manager_action_date_time: Optional[str] = field(
+    manager_action_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionDateTime"},
     )
     """Time when the manager responded"""
-    manager_action_message: Optional[str] = field(
+    manager_action_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionMessage"},
     )
     """The message from the manager"""
-    manager_user_id: Optional[str] = field(
+    manager_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerUserId"},
     )
     """The ID of the manager that responded"""
@@ -2393,57 +2780,67 @@ class OpenShiftChangeRequestResponse:
     Definition: OpenShiftChangeRequestResponse
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the Open Shift Change request."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    assigned_to: Optional[str] = field(
+    assigned_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assignedTo"},
     )
     """The person the request is assigned to: 'manager' or 'recipient'"""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """'approved', 'pending' or 'declined'"""
-    sender_date_time: Optional[str] = field(
+    sender_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderDateTime"},
     )
     """Time when the request was sent"""
-    sender_message: Optional[str] = field(
+    sender_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderMessage"},
     )
     """The message from the request sender"""
-    sender_user_id: Optional[str] = field(
+    sender_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderUserId"},
     )
     """The ID of the user that sent the request"""
-    manager_action_date_time: Optional[str] = field(
+    manager_action_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionDateTime"},
     )
     """Time when the manager responded"""
-    manager_action_message: Optional[str] = field(
+    manager_action_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionMessage"},
     )
     """The message from the manager"""
-    manager_user_id: Optional[str] = field(
+    manager_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerUserId"},
     )
     """The ID of the manager that responded"""
-    open_shift_id: Optional[str] = field(
+    open_shift_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "openShiftId"},
     )
     """The ID of the open shift being requested"""
@@ -2455,13 +2852,15 @@ class EditOpenShiftRequest:
     Definition: EditOpenShiftRequest
     """
 
-    scheduling_group_id: Optional[str] = field(
+    scheduling_group_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "schedulingGroupId"},
     )
     """Scheduling Group ID"""
-    shared_open_shift: Optional[Dict[str, Any]] = field(
+    shared_open_shift: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sharedOpenShift"},
     )
 
@@ -2472,33 +2871,39 @@ class OpenShiftResponse:
     Definition: OpenShiftResponse
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the open shift."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    scheduling_group_id: Optional[str] = field(
+    scheduling_group_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "schedulingGroupId"},
     )
     """Scheduling Group ID"""
-    last_modified_by: Optional[LastModifiedBy] = field(
+    last_modified_by: Optional[LastModifiedBy | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedBy"},
     )
-    shared_open_shift: Optional[SharedOpenShift] = field(
+    shared_open_shift: Optional[SharedOpenShift | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sharedOpenShift"},
     )
-    draft_open_shift: Optional[DraftOpenShift] = field(
+    draft_open_shift: Optional[DraftOpenShift | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "draftOpenShift"},
     )
 
@@ -2509,31 +2914,35 @@ class SharedOpenShift:
     Definition: SharedOpenShift
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display Name"""
-    notes: Optional[str] = None
+    notes: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Notes"""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    theme: Optional[str] = None
+    theme: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Theme"""
-    open_slot_count: Optional[int] = field(
+    open_slot_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "openSlotCount"},
     )
     """Open Slot Count"""
-    activities: Optional[Activities] = None
+    activities: Optional[Activities] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -2542,31 +2951,35 @@ class DraftOpenShift:
     Definition: DraftOpenShift
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display Name"""
-    notes: Optional[str] = None
+    notes: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Notes"""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    theme: Optional[str] = None
+    theme: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Theme"""
-    open_slot_count: Optional[int] = field(
+    open_slot_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "openSlotCount"},
     )
     """Open Slot Count"""
-    activities: Optional[Activities] = None
+    activities: Optional[Activities] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -2575,38 +2988,45 @@ class ShiftResponse:
     Definition: ShiftResponse
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the shift."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    user_id: Optional[str] = field(
+    user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userId"},
     )
     """Assigned To User ID"""
-    scheduling_group_id: Optional[str] = field(
+    scheduling_group_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "schedulingGroupId"},
     )
     """Scheduling Group ID"""
-    last_modified_by: Optional[LastModifiedBy] = field(
+    last_modified_by: Optional[LastModifiedBy | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedBy"},
     )
-    shared_shift: Optional[SharedShift] = field(
+    shared_shift: Optional[SharedShift | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sharedShift"},
     )
-    draft_shift: Optional[DraftShift] = field(
+    draft_shift: Optional[DraftShift | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "draftShift"},
     )
 
@@ -2617,26 +3037,29 @@ class SharedShift:
     Definition: SharedShift
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display Name"""
-    notes: Optional[str] = None
+    notes: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Notes"""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    theme: Optional[str] = None
+    theme: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Theme"""
-    activities: Optional[Activities] = None
+    activities: Optional[Activities] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -2645,26 +3068,29 @@ class DraftShift:
     Definition: DraftShift
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display Name"""
-    notes: Optional[str] = None
+    notes: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Notes"""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    theme: Optional[str] = None
+    theme: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Theme"""
-    activities: Optional[Activities] = None
+    activities: Optional[Activities] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -2673,20 +3099,23 @@ class ScheduleResponse:
     Definition: ScheduleResponse
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the schedule."""
-    time_zone: Optional[str] = field(
+    time_zone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "timeZone"},
     )
     """The Time Zone of the schedule."""
-    provision_status: Optional[str] = field(
+    provision_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "provisionStatus"},
     )
     """The Provision Status of the schedule."""
-    provision_status_code: Optional[str] = field(
+    provision_status_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "provisionStatusCode"},
     )
     """The Provision Status Code of the schedule."""
@@ -2698,7 +3127,7 @@ class PostMessageToSelfRequest:
     Definition: PostMessageToSelfRequest
     """
 
-    body: Optional[Dict[str, Any]] = None
+    body: Dict[str, Any]
 
 
 ThemeEditor = Literal[
@@ -2726,23 +3155,26 @@ class SchedulingGroupResponse:
     Definition: SchedulingGroupResponse
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the scheduling group."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The display name for the scheduling group."""
-    is_active: Optional[bool] = field(
+    is_active: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isActive"},
     )
     """
     Indicates whether the scheduling group can be used when creating new
     entities or updating existing ones.
     """
-    user_ids: Optional[List[str]] = field(
+    user_ids: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userIds"},
     )
     """List of IDs of users in the scheduling group."""
@@ -2754,17 +3186,11 @@ class BotMentionRequest:
     Definition: BotMentionRequest
     """
 
-    bot_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "botId"},
-    )
+    bot_id: str = dataclass_field(metadata={"wire_name": "botId"})
     """The bot's unique identifier (GUID)"""
-    app_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "appId"},
-    )
+    app_id: str = dataclass_field(metadata={"wire_name": "appId"})
     """The bot's app identifier (GUID)"""
-    name: Optional[str] = None
+    name: str
     """The bot's display name"""
 
 
@@ -2774,8 +3200,9 @@ class AtMentionBotResponse:
     Definition: AtMentionBotResponse
     """
 
-    at_mention: Optional[str] = field(
+    at_mention: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "atMention"},
     )
     """
@@ -2793,7 +3220,7 @@ class ChannelIds:
     Definition: ChannelIds
     """
 
-    channel: Optional[ChannelIdForTeam] = None
+    channel: ChannelIdForTeam
 
 
 ChatId = str
@@ -2808,9 +3235,9 @@ class NewChat:
     Definition: NewChat
     """
 
-    topic: Optional[str] = None
+    topic: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title, displayed only in group chats"""
-    members: Optional[str] = None
+    members: str
     """User's IDs, separated by semicolons"""
 
 
@@ -2820,70 +3247,72 @@ class NewMeeting:
     Definition: NewMeeting
     """
 
-    subject: Optional[str] = None
+    subject: str
     """The text of the event's subject line"""
-    body: Optional[Dict[str, Any]] = None
+    body: Dict[str, Any]
     """The body of the message associated with the event"""
-    time_zone: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "timeZone"},
-    )
+    time_zone: str = dataclass_field(metadata={"wire_name": "timeZone"})
     """Time zone of the event"""
-    start: Optional[Dict[str, Any]] = None
-    end: Optional[Dict[str, Any]] = None
-    required_attendees: Optional[str] = field(
+    start: Dict[str, Any]
+    end: Dict[str, Any]
+    required_attendees: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "requiredAttendees"},
     )
     """Required attendees for the event separated by semicolons"""
-    optional_attendees: Optional[str] = field(
+    optional_attendees: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "optionalAttendees"},
     )
     """Optional attendees for the event separated by semicolons"""
-    location: Optional[Dict[str, Any]] = None
+    location: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The location of the event"""
-    importance: Optional[str] = None
+    importance: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The importance of the event: low, normal or high"""
-    recurrence: Optional[Dict[str, Any]] = None
+    recurrence: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The recurrence pattern for the meeting"""
-    is_all_day: Optional[bool] = field(
+    is_all_day: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isAllDay"},
     )
     """Set to true if the event lasts all day"""
-    reminder_minutes_before_start: Optional[int] = field(
+    reminder_minutes_before_start: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "reminderMinutesBeforeStart"},
     )
     """
     The number of minutes before the event start time that the reminder alert
     occurs
     """
-    is_reminder_on: Optional[bool] = field(
+    is_reminder_on: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isReminderOn"},
     )
     """Set to true if an alert is set to remind the user of the event"""
-    show_as: Optional[str] = field(
+    show_as: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "showAs"},
     )
     """Status to show during the event"""
-    response_requested: Optional[bool] = field(
+    response_requested: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseRequested"},
     )
     """
     Set to true if the sender would like a response when the event is accepted
     """
-    is_online_meeting: Optional[bool] = field(
-        default=None,
+    is_online_meeting: bool = dataclass_field(
         metadata={"wire_name": "isOnlineMeeting"},
     )
     """Set to true, if the meeting should have an online meeting provider"""
-    online_meeting_provider: Optional[str] = field(
-        default=None,
+    online_meeting_provider: str = dataclass_field(
         metadata={"wire_name": "onlineMeetingProvider"},
     )
     """Represents the online meeting service provider"""
@@ -2895,13 +3324,13 @@ class LastModifiedBy:
     Definition: LastModifiedBy
     """
 
-    application: Optional[str] = None
+    application: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Application"""
-    device: Optional[str] = None
+    device: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Device"""
-    conversation: Optional[str] = None
+    conversation: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Conversation"""
-    user: Optional[Dict[str, Any]] = None
+    user: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """User"""
 
 
@@ -2911,28 +3340,33 @@ class MemberSettings:
     Definition: MemberSettings
     """
 
-    allow_create_update_channels: Optional[bool] = field(
+    allow_create_update_channels: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowCreateUpdateChannels"},
     )
     """If set to true, members can add and update channels"""
-    allow_delete_channels: Optional[bool] = field(
+    allow_delete_channels: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowDeleteChannels"},
     )
     """If set to true, members can delete channels"""
-    allow_add_remove_apps: Optional[bool] = field(
+    allow_add_remove_apps: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowAddRemoveApps"},
     )
     """If set to true, members can add and remove apps"""
-    allow_create_update_remove_tabs: Optional[bool] = field(
+    allow_create_update_remove_tabs: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowCreateUpdateRemoveTabs"},
     )
     """If set to true, members can add, update, and remove tabs"""
-    allow_create_update_remove_connectors: Optional[bool] = field(
+    allow_create_update_remove_connectors: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowCreateUpdateRemoveConnectors"},
     )
     """If set to true, members can add, update, and remove connectors"""
@@ -2944,13 +3378,15 @@ class GuestSettings:
     Definition: GuestSettings
     """
 
-    allow_create_update_channels: Optional[bool] = field(
+    allow_create_update_channels: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowCreateUpdateChannels"},
     )
     """If set to true, guests can add and update channels"""
-    allow_delete_channels: Optional[bool] = field(
+    allow_delete_channels: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowDeleteChannels"},
     )
     """If set to true, guests can delete channels"""
@@ -2962,28 +3398,33 @@ class MessagingSettings:
     Definition: MessagingSettings
     """
 
-    allow_user_edit_messages: Optional[bool] = field(
+    allow_user_edit_messages: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowUserEditMessages"},
     )
     """If set to true, users can edit their messages"""
-    allow_user_delete_messages: Optional[bool] = field(
+    allow_user_delete_messages: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowUserDeleteMessages"},
     )
     """If set to true, users can delete their messages"""
-    allow_owner_delete_messages: Optional[bool] = field(
+    allow_owner_delete_messages: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowOwnerDeleteMessages"},
     )
     """If set to true, owners can delete any message"""
-    allow_team_mentions: Optional[bool] = field(
+    allow_team_mentions: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowTeamMentions"},
     )
     """If set to true, @team mentions are allowed"""
-    allow_channel_mentions: Optional[bool] = field(
+    allow_channel_mentions: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowChannelMentions"},
     )
     """If set to true, @channel mentions are allowed"""
@@ -2995,23 +3436,27 @@ class FunSettings:
     Definition: FunSettings
     """
 
-    allow_giphy: Optional[bool] = field(
+    allow_giphy: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowGiphy"},
     )
     """If set to true, enables Giphy use"""
-    giphy_content_rating: Optional[str] = field(
+    giphy_content_rating: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "giphyContentRating"},
     )
     """Giphy content rating. Possible values are: moderate, strict"""
-    allow_stickers_and_memes: Optional[bool] = field(
+    allow_stickers_and_memes: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowStickersAndMemes"},
     )
     """If set to true, enables users to include stickers and memes"""
-    allow_custom_memes: Optional[bool] = field(
+    allow_custom_memes: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowCustomMemes"},
     )
     """If set to true, enables users to include custom memes"""
@@ -3023,8 +3468,9 @@ class DiscoverySettings:
     Definition: DiscoverySettings
     """
 
-    show_in_teams_search_and_suggestions: Optional[bool] = field(
+    show_in_teams_search_and_suggestions: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "showInTeamsSearchAndSuggestions"},
     )
     """
@@ -3039,12 +3485,14 @@ class SelectedMessageTriggerMetadata:
     Definition: SelectedMessageTriggerMetadata
     """
 
-    teams_flow_run_context: Optional[ObjectEntity] = field(
+    teams_flow_run_context: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TeamsFlowRunContext"},
     )
-    card_outputs: Optional[ObjectEntity] = field(
+    card_outputs: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CardOutputs"},
     )
 
@@ -3055,12 +3503,14 @@ class ComposeMessageTriggerMetadata:
     Definition: ComposeMessageTriggerMetadata
     """
 
-    teams_flow_run_context: Optional[ObjectEntity] = field(
+    teams_flow_run_context: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TeamsFlowRunContext"},
     )
-    card_outputs: Optional[ObjectEntity] = field(
+    card_outputs: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CardOutputs"},
     )
 
@@ -3071,12 +3521,14 @@ class CardResponseTriggerMetadata:
     Definition: CardResponseTriggerMetadata
     """
 
-    teams_flow_run_context: Optional[ObjectEntity] = field(
+    teams_flow_run_context: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TeamsFlowRunContext"},
     )
-    card_outputs: Optional[ObjectEntity] = field(
+    card_outputs: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CardOutputs"},
     )
 
@@ -3087,11 +3539,12 @@ class VirtualAgentBots:
     Definition: VirtualAgentBots
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of the Microsoft Copilot Studio agents"""
 
 
@@ -3101,7 +3554,7 @@ class SectionItemConflictError:
     Definition: SectionItemConflictError
     """
 
-    error: Optional[Dict[str, Any]] = None
+    error: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -3110,12 +3563,11 @@ class DynamicCallEventTriggerRequest:
     Definition: DynamicCallEventTriggerRequest
     """
 
-    notification_url: Optional[str] = field(
-        default=None,
+    notification_url: str = dataclass_field(
         metadata={"wire_name": "notificationUrl"},
     )
     """Webhook callback URL"""
-    scope: Optional[Dict[str, Any]] = None
+    scope: Dict[str, Any]
 
 
 @dataclass
@@ -3124,12 +3576,11 @@ class DynamicTranscriptTriggerRequest:
     Definition: DynamicTranscriptTriggerRequest
     """
 
-    notification_url: Optional[str] = field(
-        default=None,
+    notification_url: str = dataclass_field(
         metadata={"wire_name": "notificationUrl"},
     )
     """Webhook callback URL"""
-    scope: Optional[Dict[str, Any]] = None
+    scope: Dict[str, Any]
 
 
 @dataclass
@@ -3138,12 +3589,11 @@ class DynamicAiInsightTriggerRequest:
     Definition: DynamicAiInsightTriggerRequest
     """
 
-    notification_url: Optional[str] = field(
-        default=None,
+    notification_url: str = dataclass_field(
         metadata={"wire_name": "notificationUrl"},
     )
     """Webhook callback URL"""
-    scope: Optional[Dict[str, Any]] = None
+    scope: Dict[str, Any]
 
 
 @dataclass
@@ -3152,12 +3602,11 @@ class DynamicRecordingTriggerRequest:
     Definition: DynamicRecordingTriggerRequest
     """
 
-    notification_url: Optional[str] = field(
-        default=None,
+    notification_url: str = dataclass_field(
         metadata={"wire_name": "notificationUrl"},
     )
     """Webhook callback URL"""
-    scope: Optional[Dict[str, Any]] = None
+    scope: Dict[str, Any]
 
 
 @dataclass
@@ -3166,20 +3615,13 @@ class SingleTagTriggerRequest:
     Definition: SingleTagTriggerRequest
     """
 
-    notification_url: Optional[str] = field(
-        default=None,
+    notification_url: str = dataclass_field(
         metadata={"wire_name": "notificationUrl"},
     )
     """Webhook callback URL"""
-    group_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "groupId"},
-    )
+    group_id: str = dataclass_field(metadata={"wire_name": "groupId"})
     """The team that owns the tag to monitor"""
-    tag_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "tagId"},
-    )
+    tag_id: str = dataclass_field(metadata={"wire_name": "tagId"})
     """The specific tag to monitor"""
 
 
@@ -3189,20 +3631,13 @@ class SingleTagMemberTriggerRequest:
     Definition: SingleTagMemberTriggerRequest
     """
 
-    notification_url: Optional[str] = field(
-        default=None,
+    notification_url: str = dataclass_field(
         metadata={"wire_name": "notificationUrl"},
     )
     """Webhook callback URL"""
-    group_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "groupId"},
-    )
+    group_id: str = dataclass_field(metadata={"wire_name": "groupId"})
     """The team that owns the tag whose membership to monitor"""
-    tag_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "tagId"},
-    )
+    tag_id: str = dataclass_field(metadata={"wire_name": "tagId"})
     """The specific tag whose membership to monitor"""
 
 
@@ -3212,42 +3647,49 @@ class TagWebhookResponseSchema:
     Definition: TagWebhookResponseSchema
     """
 
-    change_type: Optional[str] = field(
+    change_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "changeType"},
     )
     """The tag lifecycle change: 'created', 'updated', or 'deleted'."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The tag identifier."""
-    team_id: Optional[str] = field(
+    team_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "teamId"},
     )
     """The team (group) ID that owns the tag."""
-    tag_id: Optional[str] = field(
+    tag_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tagId"},
     )
     """The tag ID."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the tag."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of the tag."""
-    member_count: Optional[int] = field(
+    member_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "memberCount"},
     )
     """Number of members in the tag."""
-    tag_type: Optional[str] = field(
+    tag_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tagType"},
     )
     """Tag type."""
-    event_id: Optional[str] = field(
+    event_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "eventId"},
     )
     """
@@ -3262,38 +3704,44 @@ class TagMemberWebhookResponseSchema:
     Definition: TagMemberWebhookResponseSchema
     """
 
-    change_type: Optional[str] = field(
+    change_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "changeType"},
     )
     """
     The membership change: 'created' (member added) or 'deleted' (member
     removed).
     """
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The tag member identifier."""
-    team_id: Optional[str] = field(
+    team_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "teamId"},
     )
     """The team (group) ID that owns the tag."""
-    tag_id: Optional[str] = field(
+    tag_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tagId"},
     )
     """The tag ID whose membership changed."""
-    tenant_id: Optional[str] = field(
+    tenant_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tenantId"},
     )
     """Tenant ID of the tag member."""
-    user_id: Optional[str] = field(
+    user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userId"},
     )
     """User ID of the tag member."""
-    event_id: Optional[str] = field(
+    event_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "eventId"},
     )
     """
@@ -3308,25 +3756,29 @@ class AiInsightResponse:
     Definition: AiInsightResponse
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The AI insight ID"""
-    call_id: Optional[str] = field(
+    call_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "callId"},
     )
     """The call ID"""
-    content_correlation_id: Optional[str] = field(
+    content_correlation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentCorrelationId"},
     )
     """The content correlation ID"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """The date and time when the AI insight was created"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """The date and time when the AI insight ended"""
@@ -3338,11 +3790,16 @@ class AiInsightMeetingNote:
     Definition: AiInsightMeetingNote
     """
 
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of the meeting note."""
-    text: Optional[str] = None
+    text: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Summary text of the meeting note."""
-    subpoints: Optional[List[AiInsightMeetingNoteSubpoint]] = None
+    subpoints: Optional[
+        List[AiInsightMeetingNoteSubpoint | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Detailed subpoints of the discussion."""
 
 
@@ -3352,9 +3809,9 @@ class AiInsightMeetingNoteSubpoint:
     Definition: AiInsightMeetingNoteSubpoint
     """
 
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of the subpoint."""
-    text: Optional[str] = None
+    text: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Text of the subpoint."""
 
 
@@ -3364,12 +3821,13 @@ class AiInsightActionItem:
     Definition: AiInsightActionItem
     """
 
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of the action item."""
-    text: Optional[str] = None
+    text: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of the action item."""
-    owner_display_name: Optional[str] = field(
+    owner_display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ownerDisplayName"},
     )
     """Display name of the person assigned the action item."""
@@ -3381,8 +3839,11 @@ class AiInsightViewpoint:
     Definition: AiInsightViewpoint
     """
 
-    mention_events: Optional[List[AiInsightMentionEvent]] = field(
+    mention_events: Optional[
+        List[AiInsightMentionEvent | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mentionEvents"},
     )
     """
@@ -3397,17 +3858,19 @@ class AiInsightMentionEvent:
     Definition: AiInsightMentionEvent
     """
 
-    event_date_time: Optional[str] = field(
+    event_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "eventDateTime"},
     )
     """The time during the meeting when the mention occurred (UTC)."""
-    transcript_utterance: Optional[str] = field(
+    transcript_utterance: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "transcriptUtterance"},
     )
     """The transcript utterance containing the mention."""
-    speaker: Optional[Dict[str, Any]] = None
+    speaker: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The speaker who made the utterance."""
 
 
@@ -3419,16 +3882,16 @@ class TeamsClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -3439,8 +3902,8 @@ class TeamsClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -3448,8 +3911,8 @@ class TeamsClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -3461,7 +3924,7 @@ class TeamsClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -3476,16 +3939,87 @@ class TeamsClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "teams"
 
+    @staticmethod
+    def _prepare_match_headers(
+        headers: Optional[Mapping[str, str]],
+        etag: Optional[str],
+        match_condition: Optional[MatchConditions],
+        *,
+        if_match_required: bool,
+    ) -> Optional[Mapping[str, str]]:
+        request_headers = dict(headers) if headers is not None else {}
+        existing_if_match = next(
+            (name for name in request_headers if name.lower() == "if-match"),
+            None,
+        )
+        if etag is None and match_condition is None:
+            if if_match_required and existing_if_match is None:
+                request_headers["If-Match"] = "*"
+            return request_headers or None
+
+        if existing_if_match is not None:
+            del request_headers[existing_if_match]
+        if match_condition is None:
+            assert etag is not None
+            request_headers["If-Match"] = etag
+        elif match_condition == MatchConditions.IfNotModified:
+            if etag is None:
+                raise ValueError(
+                    "etag is required for MatchConditions.IfNotModified."
+                )
+            request_headers["If-Match"] = etag
+        elif match_condition == MatchConditions.Unconditionally:
+            request_headers["If-Match"] = "*"
+        else:
+            raise ValueError(
+                "If-Match operations support only IfNotModified or Unconditionally."
+            )
+        return request_headers or None
+
     def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
-        parsed_next_link = urlsplit(next_link)
-        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
             if next_link.startswith("/"):
                 return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
             if next_link.startswith("?"):
-                return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
 
-        parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
         connection_hostname = parsed_connection.hostname
         if next_link_hostname is None or connection_hostname is None:
@@ -3502,7 +4036,11 @@ class TeamsClient(ConnectorClientBase):
                 parsed_next_link.scheme == parsed_connection.scheme
                 and next_link_port == connection_port
             ):
-                return next_link
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
 
             raise ValueError(
                 "Pagination URL origin "
@@ -3515,9 +4053,9 @@ class TeamsClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def create_teams_meeting_async(
+    def create_teams_meeting(
         self,
-        input: NewMeeting,
+        input: NewMeeting | Mapping[str, Any],
         calendarid: str,
         *,
         timeout: Optional[float] = None,
@@ -3530,13 +4068,30 @@ class TeamsClient(ConnectorClientBase):
 
         Create a meeting with a link at the bottom of the invite to join the
         meeting online on Microsoft Teams.
+
+        Swagger operation ID: `CreateTeamsMeeting`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            calendarid: Select a value.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/me/calendars/{quote(str(calendarid), safe='')}/events"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3550,6 +4105,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3557,96 +4113,197 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_all_teams_async(
+    def list_all_teams(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List joined teams
 
         Lists all the teams in Microsoft Teams that you are a member of
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetAllTeams`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/beta/me/joinedTeams"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_all_associated_teams_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_all_associated_teams(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List associated teams
 
         Lists all the teams you are a direct member of, or are a member of a
         shared channel that is hosted inside the team.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetAllAssociatedTeams`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/v1.0/me/teamwork/associatedTeams"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_channels_for_group_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_channels_for_group(
         self,
         group_id: str,
+        *,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List channels
 
         Lists all the channels for a specific team
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetChannelsForGroup`.
+
+        Args:
+            group_id: Select team.
+            filter: An OData filter query to restrict the entries returned
+                (e.g. membershipType eq 'standard').
+            orderby: An OData orderBy query option for specifying the order of
+                entries (e.g., displayName asc).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3665,31 +4322,52 @@ class TeamsClient(ConnectorClientBase):
             query_params.append(f"$orderby={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def create_channel_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def create_channel(
         self,
-        input: CreateChannelInput,
+        input: CreateChannelInput | Mapping[str, Any],
         group_id: str,
         *,
         timeout: Optional[float] = None,
@@ -3701,13 +4379,30 @@ class TeamsClient(ConnectorClientBase):
         Create a channel
 
         Create a new channel within a specified team
+
+        Swagger operation ID: `CreateChannel`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            group_id: Select team.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/beta/groups/{quote(str(group_id), safe='')}/channels"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3721,6 +4416,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3728,7 +4424,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_channel_async(
+    def get_channel(
         self,
         group_id: str,
         channel_id: str,
@@ -3742,6 +4438,22 @@ class TeamsClient(ConnectorClientBase):
         Get details for a specific channel in a team
 
         Get the channel details
+
+        Swagger operation ID: `GetChannel`.
+
+        Args:
+            group_id: Select team.
+            channel_id: Channel ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3752,7 +4464,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(channel_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3766,6 +4478,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3773,9 +4486,9 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_channel_properties_async(
+    def update_channel_properties(
         self,
-        input: UpdateChannelPropertiesInput,
+        input: UpdateChannelPropertiesInput | Mapping[str, Any],
         group_id: str,
         channel_id: str,
         *,
@@ -3791,6 +4504,24 @@ class TeamsClient(ConnectorClientBase):
         properties you provide are changed; omitted properties are left
         unchanged. For shared channels, the team ID must refer to the host
         team, which is the team that owns the shared channel.
+
+        Swagger operation ID: `UpdateChannelProperties`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            group_id: Select team.
+            channel_id: Channel ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3801,7 +4532,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(channel_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3815,11 +4546,12 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def archive_channel_async(
+    def archive_channel(
         self,
-        input: ArchiveChannelInput,
+        input: ArchiveChannelInput | Mapping[str, Any],
         group_id: str,
         channel_id: str,
         *,
@@ -3835,6 +4567,24 @@ class TeamsClient(ConnectorClientBase):
         send new messages or react to existing messages in the channel, edit
         the channel settings, or make other changes to the channel. Archiving
         is an asynchronous operation.
+
+        Swagger operation ID: `ArchiveChannel`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            group_id: Select team.
+            channel_id: Channel ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3846,7 +4596,7 @@ class TeamsClient(ConnectorClientBase):
             f"/archive"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3860,6 +4610,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3867,22 +4618,45 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_all_channels_for_team_async(
+    def list_all_channels_for_team(
         self,
         group_id: str,
+        *,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List all channels
 
         Lists all the channels for a specific team, including channels that are
         shared with the team
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetAllChannelsForTeam`.
+
+        Args:
+            group_id: Select team.
+            filter: An OData filter query to restrict the entries returned
+                (e.g. membershipType eq 'standard').
+            orderby: An OData orderBy query option for specifying the order of
+                entries (e.g., displayName asc).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3901,29 +4675,50 @@ class TeamsClient(ConnectorClientBase):
             query_params.append(f"$orderby={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_chats_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_chats(
         self,
         chat_type: str,
         topic: str,
@@ -3932,11 +4727,31 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List chats
 
         Lists recent chats you are a part of
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetChats`.
+
+        Args:
+            chat_type: Filter by type.
+            topic: Filter by whether or not the topic name is defined.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3950,31 +4765,52 @@ class TeamsClient(ConnectorClientBase):
             f"/expandmembers"
             f"/false"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def post_feed_notification_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def post_feed_notification(
         self,
-        input: DynamicPostFeedNotificationRequest,
+        input: DynamicPostFeedNotificationRequest | Mapping[str, Any],
         poster: str,
         notification_type: str,
         *,
@@ -3988,6 +4824,24 @@ class TeamsClient(ConnectorClientBase):
 
         Posts a notification to a user's activity feed linking to a chat or
         team.
+
+        Swagger operation ID: `PostFeedNotification`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            poster: Select an option.
+            notification_type: Choose notification type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3999,7 +4853,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(notification_type), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4013,9 +4867,10 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def at_mention_tag_async(
+    def at_mention_tag(
         self,
         group_id: str,
         tag_id: str,
@@ -4030,6 +4885,22 @@ class TeamsClient(ConnectorClientBase):
 
         Creates a token that can be inserted into a message or adaptive card
         sent as a user in a channel to @mention a team tag.
+
+        Swagger operation ID: `AtMentionTag`.
+
+        Args:
+            group_id: Select team.
+            tag_id: Select tag.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4040,7 +4911,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(tag_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4054,6 +4925,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4061,7 +4933,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_messages_from_channel_async(
+    def list_messages_from_channel(
         self,
         group_id: str,
         channel_id: str,
@@ -4070,7 +4942,7 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get messages in a channel
 
@@ -4078,8 +4950,25 @@ class TeamsClient(ConnectorClientBase):
         the team ID must refer to the host team, which is the team that owns
         the shared channel.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetMessagesFromChannel`.
+
+        Args:
+            group_id: Select team.
+            channel_id: Channel ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4090,11 +4979,18 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(channel_id), safe='')}"
             f"/messages"
         )
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -4107,25 +5003,34 @@ class TeamsClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_message_details_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_message_details(
         self,
-        input: DynamicGetMessageDetailsSchema,
+        input: DynamicGetMessageDetailsSchema | Mapping[str, Any],
         message_id: str,
         thread_type: str,
         *,
@@ -4138,6 +5043,24 @@ class TeamsClient(ConnectorClientBase):
         Get message details
 
         Gets the details of a message in a chat or a channel.
+
+        Swagger operation ID: `GetMessageDetails`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            message_id: Message ID.
+            thread_type: Choose message type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4149,7 +5072,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(thread_type), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4163,6 +5086,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4170,24 +5094,47 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_replies_to_message_async(
+    def list_replies_to_message(
         self,
         group_id: str,
         channel_id: str,
         message_id: str,
-        top: Optional[int] = None,
         *,
+        top: Optional[int] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List replies of a channel message
 
         List replies to a message in a channel in a specific team. For shared
         channels, the team ID must refer to the host team, which is the team
         that owns the shared channel.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListRepliesToMessage`.
+
+        Args:
+            group_id: Select team.
+            channel_id: Channel ID.
+            message_id: Message ID.
+            top: The number of latest replies to return. The default value is
+                20. The supported value is between 1 and 50.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4208,43 +5155,87 @@ class TeamsClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_members_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_members(
         self,
-        input: DynamicListMembersSchema,
+        input: DynamicListMembersSchema | Mapping[str, Any],
         thread_type: str,
-        filter: Optional[str] = None,
         *,
+        filter: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List chat or channel members
 
         List direct members of a group chat or a channel
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListMembers`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            thread_type: Choose message type.
+            filter: An OData filter query to restrict the entries returned
+                (e.g. membershipType eq 'standard').
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4262,31 +5253,52 @@ class TeamsClient(ConnectorClientBase):
             query_params.append(f"$filter={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = input
 
-        response = await self.http_client.send_async(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def subscribe_user_message_with_options_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def subscribe_user_message_with_options(
         self,
-        input: DynamicUserMessageWithOptionsSubscriptionRequest,
+        input: DynamicUserMessageWithOptionsSubscriptionRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -4299,6 +5311,22 @@ class TeamsClient(ConnectorClientBase):
         Send a set of options to a Microsoft Teams user, that they must respond
         to before the flow will continue. This action will pause the flow until
         the user response to the options
+
+        Swagger operation ID: `SubscribeUserMessageWithOptions`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4310,7 +5338,7 @@ class TeamsClient(ConnectorClientBase):
             f"/$subscriptions"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4324,9 +5352,10 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_team_async(
+    def get_team(
         self,
         team_id: str,
         *,
@@ -4339,13 +5368,28 @@ class TeamsClient(ConnectorClientBase):
         Get a team
 
         Gets the details for a team in Microsoft Teams.
+
+        Swagger operation ID: `GetTeam`.
+
+        Args:
+            team_id: Select team.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/beta/teams/{quote(str(team_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4359,6 +5403,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4366,7 +5411,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def at_mention_user_async(
+    def at_mention_user(
         self,
         user_id: str,
         *,
@@ -4380,13 +5425,28 @@ class TeamsClient(ConnectorClientBase):
 
         Creates a token that can be inserted into a message or adaptive card to
         @mention a user.
+
+        Swagger operation ID: `AtMentionUser`.
+
+        Args:
+            user_id: Specify a user principal or user ID to @mention.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/users/{quote(str(user_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4400,6 +5460,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4407,9 +5468,9 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_chat_async(
+    def create_chat(
         self,
-        input: NewChat,
+        input: NewChat | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -4420,10 +5481,26 @@ class TeamsClient(ConnectorClientBase):
         Create a chat
 
         Creates a one on one or group chat
+
+        Swagger operation ID: `CreateChat`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/beta/chats"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4437,6 +5514,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4444,25 +5522,47 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_messages_from_chat_async(
+    def list_messages_from_chat(
         self,
         chat_id: str,
+        *,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
         top: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get messages in a chat
 
         Retrieves messages from a one on one or group chat
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetMessagesFromChat`.
+
+        Args:
+            chat_id: The chat's unique identifier.
+            filter: An OData filter query to restrict the entries returned
+                (e.g. membershipType eq 'standard').
+            orderby: An OData orderBy query option for specifying the order of
+                entries (e.g., displayName asc).
+            top: An OData top query option for specifying the maximum number of
+                entries returned.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4486,11 +5586,18 @@ class TeamsClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -4503,25 +5610,34 @@ class TeamsClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def post_message_to_self_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def post_message_to_self(
         self,
-        input: PostMessageToSelfRequest,
+        input: PostMessageToSelfRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -4533,12 +5649,28 @@ class TeamsClient(ConnectorClientBase):
 
         Sends a message to the signed-in user's own Notes chat in Microsoft
         Teams.
+
+        Swagger operation ID: `PostMessageToSelf`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/v1.0/chats/48:notes/messages"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4552,6 +5684,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4559,9 +5692,9 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_a_team_async(
+    def create_a_team(
         self,
-        input: CreateATeamInput,
+        input: CreateATeamInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -4572,10 +5705,26 @@ class TeamsClient(ConnectorClientBase):
         Create a team
 
         Creates a new team in Microsoft Teams
+
+        Swagger operation ID: `CreateATeam`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/beta/teams"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4589,6 +5738,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4596,21 +5746,44 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_team_members_async(
+    def list_team_members(
         self,
         team_id: str,
+        *,
         filter: Optional[str] = None,
         top: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List team members
 
         Lists the members of a team in Microsoft Teams
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListTeamMembers`.
+
+        Args:
+            team_id: Select team.
+            filter: An OData filter query to restrict the entries returned
+                (e.g. membershipType eq 'standard').
+            top: An OData top query option for specifying the maximum number of
+                entries returned.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4629,31 +5802,52 @@ class TeamsClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def add_member_to_team_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def add_member_to_team(
         self,
-        input: AddMemberToTeamInput,
+        input: AddMemberToTeamInput | Mapping[str, Any],
         team_id: str,
         *,
         timeout: Optional[float] = None,
@@ -4665,13 +5859,30 @@ class TeamsClient(ConnectorClientBase):
         Add a member to a team
 
         Adds a member to a team in Microsoft Teams
+
+        Swagger operation ID: `AddMemberToTeam`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            team_id: Select team.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/teams/{quote(str(team_id), safe='')}/members"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4685,9 +5896,10 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def remove_member_from_team_async(
+    def remove_member_from_team(
         self,
         team_id: str,
         membership_id: str,
@@ -4701,6 +5913,24 @@ class TeamsClient(ConnectorClientBase):
         Remove a member from a team
 
         Removes a member from a team in Microsoft Teams
+
+        Swagger operation ID: `RemoveMemberFromTeam`.
+
+        Args:
+            team_id: Select team.
+            membership_id: The membership ID of the member to remove from the
+                team. Use the 'List team members' action to look up the
+                membership ID for a user.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4711,7 +5941,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(membership_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4725,11 +5955,12 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def add_member_to_channel_async(
+    def add_member_to_channel(
         self,
-        input: AddMemberToChannelInput,
+        input: AddMemberToChannelInput | Mapping[str, Any],
         group_id: str,
         channel_id: str,
         *,
@@ -4743,6 +5974,24 @@ class TeamsClient(ConnectorClientBase):
 
         Adds a member to a channel in Microsoft Teams. The channel must be a
         private or shared channel.
+
+        Swagger operation ID: `AddMemberToChannel`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            group_id: Select team.
+            channel_id: Channel ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4754,7 +6003,7 @@ class TeamsClient(ConnectorClientBase):
             f"/members"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4768,9 +6017,10 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def remove_member_from_channel_async(
+    def remove_member_from_channel(
         self,
         group_id: str,
         channel_id: str,
@@ -4786,6 +6036,26 @@ class TeamsClient(ConnectorClientBase):
 
         Removes a direct member from a channel in Microsoft Teams. The channel
         must be a private or shared channel.
+
+        Swagger operation ID: `RemoveMemberFromChannel`.
+
+        Args:
+            group_id: Select team.
+            channel_id: Channel ID.
+            membership_id: The membership ID of the direct member to remove
+                from the channel. Use the 'List chat or channel members' action
+                with thread type 'Channel' to look up the membership ID for a
+                user.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4798,7 +6068,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(membership_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4812,11 +6082,12 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def post_message_to_conversation_async(
+    def post_message_to_conversation(
         self,
-        input: DynamicPostMessageRequest,
+        input: DynamicPostMessageRequest | Mapping[str, Any],
         poster: str,
         location: str,
         *,
@@ -4829,6 +6100,24 @@ class TeamsClient(ConnectorClientBase):
         Post message in a chat or channel
 
         Posts a message to a chat or a channel
+
+        Swagger operation ID: `PostMessageToConversation`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            poster: Select an option.
+            location: Select an option.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4842,7 +6131,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(location), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4856,6 +6145,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4863,9 +6153,9 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def reply_with_message_to_conversation_async(
+    def reply_with_message_to_conversation(
         self,
-        input: DynamicReplyMessageRequest,
+        input: DynamicReplyMessageRequest | Mapping[str, Any],
         poster: str,
         location: str,
         *,
@@ -4878,6 +6168,24 @@ class TeamsClient(ConnectorClientBase):
         Reply with a message in a channel
 
         Replies with a message to a channel's message
+
+        Swagger operation ID: `ReplyWithMessageToConversation`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            poster: Select an option.
+            location: Select an option.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4891,7 +6199,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(location), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4905,6 +6213,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4912,9 +6221,9 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def post_card_to_conversation_async(
+    def post_card_to_conversation(
         self,
-        input: DynamicPostCardRequest,
+        input: DynamicPostCardRequest | Mapping[str, Any],
         poster: str,
         location: str,
         *,
@@ -4927,6 +6236,24 @@ class TeamsClient(ConnectorClientBase):
         Post card in a chat or channel
 
         Posts a card to a chat or a channel
+
+        Swagger operation ID: `PostCardToConversation`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            poster: Select an option.
+            location: Select an option.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4940,7 +6267,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(location), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4954,6 +6281,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4961,9 +6289,9 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def post_card_and_wait_for_response_async(
+    def post_card_and_wait_for_response(
         self,
-        input: PostCardAndWaitForResponseInput,
+        input: PostCardAndWaitForResponseInput | Mapping[str, Any],
         poster: str,
         location: str,
         *,
@@ -4977,6 +6305,24 @@ class TeamsClient(ConnectorClientBase):
 
         Posts an adaptive card to a chat or a channel and waits for a response
         from any user. This will pause the flow until any user responds.
+
+        Swagger operation ID: `PostCardAndWaitForResponse`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            poster: Select an option.
+            location: Select an option.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4991,7 +6337,7 @@ class TeamsClient(ConnectorClientBase):
             f"/$subscriptions"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5005,6 +6351,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5012,9 +6359,9 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def reply_with_card_to_conversation_async(
+    def reply_with_card_to_conversation(
         self,
-        input: DynamicReplyCardRequest,
+        input: DynamicReplyCardRequest | Mapping[str, Any],
         poster: str,
         location: str,
         *,
@@ -5027,6 +6374,24 @@ class TeamsClient(ConnectorClientBase):
         Reply with an adaptive card in a channel
 
         Replies with an adaptive card to a channel's message
+
+        Swagger operation ID: `ReplyWithCardToConversation`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            poster: Select an option.
+            location: Select an option.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5040,7 +6405,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(location), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5054,6 +6419,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5061,9 +6427,9 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_card_in_conversation_async(
+    def update_card_in_conversation(
         self,
-        input: DynamicUpdateCardRequest,
+        input: DynamicUpdateCardRequest | Mapping[str, Any],
         poster: str,
         location: str,
         *,
@@ -5076,6 +6442,24 @@ class TeamsClient(ConnectorClientBase):
         Update an adaptive card in a chat or channel
 
         Updates an existing adaptive card
+
+        Swagger operation ID: `UpdateCardInConversation`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            poster: Select an option.
+            location: Select an option.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5089,7 +6473,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(location), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5103,6 +6487,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5110,7 +6495,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def http_request_async(
+    def http_request(
         self,
         input: bytes,
         *,
@@ -5127,10 +6512,25 @@ class TeamsClient(ConnectorClientBase):
         /teams, /me, /users 2nd segment: channels, chats, installedApps,
         messages, pinnedMessages, onlineMeetings. Learn more:
         https://docs.microsoft.com/en-us/graph/use-the-api
+
+        Swagger operation ID: `HttpRequest`.
+
+        Args:
+            input: The binary request body.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/httprequest"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST",
             request_url,
             body=input,
@@ -5147,6 +6547,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5154,9 +6555,9 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_member_to_chat_async(
+    def add_member_to_chat(
         self,
-        input: AddMemberToChatInput,
+        input: AddMemberToChatInput | Mapping[str, Any],
         chat_id: str,
         *,
         timeout: Optional[float] = None,
@@ -5168,13 +6569,30 @@ class TeamsClient(ConnectorClientBase):
         Add a user to a chat
 
         Adds a user to a chat in Microsoft Teams.
+
+        Swagger operation ID: `AddMemberToChat`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            chat_id: The chat's unique identifier.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/chats/{quote(str(chat_id), safe='')}/members"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5188,9 +6606,10 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def remove_member_from_chat_async(
+    def remove_member_from_chat(
         self,
         chat_id: str,
         membership_id: str,
@@ -5205,6 +6624,24 @@ class TeamsClient(ConnectorClientBase):
 
         Removes a member from a chat in Microsoft Teams. Only group chats
         support member removal.
+
+        Swagger operation ID: `RemoveMemberFromChat`.
+
+        Args:
+            chat_id: The chat's unique identifier.
+            membership_id: The membership ID of the member to remove from the
+                chat. Use the 'List chat or channel members' action with thread
+                type 'Group chat' to look up the membership ID for a user.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5215,7 +6652,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(membership_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5229,9 +6666,10 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_online_meeting_async(
+    def get_online_meeting(
         self,
         lookup_type: str,
         lookup_value: str,
@@ -5246,6 +6684,23 @@ class TeamsClient(ConnectorClientBase):
 
         Retrieves the properties and relationships of an online meeting. You
         can look up a meeting by meeting ID, join web URL, or join meeting ID.
+
+        Swagger operation ID: `GetOnlineMeeting`.
+
+        Args:
+            lookup_type: Select how to identify the meeting.
+            lookup_value: The value corresponding to the selected lookup type
+                (meeting ID, join web URL, or join meeting ID).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/v1.0/me/onlineMeetings/lookup"
@@ -5262,7 +6717,7 @@ class TeamsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5276,6 +6731,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5283,7 +6739,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_meeting_transcripts_async(
+    def list_meeting_transcripts(
         self,
         meeting_id: str,
         *,
@@ -5291,11 +6747,30 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List meeting transcripts
 
         Lists all transcripts for an online meeting
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListMeetingTranscripts`.
+
+        Args:
+            meeting_id: The online meeting ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5305,29 +6780,50 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(meeting_id), safe='')}"
             f"/transcripts"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_meeting_transcript_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_meeting_transcript(
         self,
         meeting_id: str,
         transcript_id: str,
@@ -5341,6 +6837,22 @@ class TeamsClient(ConnectorClientBase):
         Get meeting transcript
 
         Gets a specific transcript for an online meeting
+
+        Swagger operation ID: `GetMeetingTranscript`.
+
+        Args:
+            meeting_id: The online meeting ID.
+            transcript_id: The transcript ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5352,7 +6864,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(transcript_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5366,6 +6878,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5373,7 +6886,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_meeting_transcript_content_async(
+    def get_meeting_transcript_content(
         self,
         meeting_id: str,
         transcript_id: str,
@@ -5387,6 +6900,22 @@ class TeamsClient(ConnectorClientBase):
         Get meeting transcript content
 
         Gets the content of a meeting transcript
+
+        Swagger operation ID: `GetMeetingTranscriptContent`.
+
+        Args:
+            meeting_id: The online meeting ID.
+            transcript_id: The transcript ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5399,7 +6928,7 @@ class TeamsClient(ConnectorClientBase):
             f"/content"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5413,6 +6942,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5420,7 +6950,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_meeting_recordings_async(
+    def list_meeting_recordings(
         self,
         meeting_id: str,
         *,
@@ -5428,11 +6958,30 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List meeting recordings
 
         Lists all recordings for an online meeting
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListMeetingRecordings`.
+
+        Args:
+            meeting_id: The online meeting ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5442,29 +6991,50 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(meeting_id), safe='')}"
             f"/recordings"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_meeting_recording_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_meeting_recording(
         self,
         meeting_id: str,
         recording_id: str,
@@ -5478,6 +7048,22 @@ class TeamsClient(ConnectorClientBase):
         Get meeting recording
 
         Gets a specific recording for an online meeting
+
+        Swagger operation ID: `GetMeetingRecording`.
+
+        Args:
+            meeting_id: The online meeting ID.
+            recording_id: The recording ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5489,7 +7075,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(recording_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5503,6 +7089,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5510,7 +7097,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_meeting_recording_content_async(
+    def get_meeting_recording_content(
         self,
         meeting_id: str,
         recording_id: str,
@@ -5524,6 +7111,22 @@ class TeamsClient(ConnectorClientBase):
         Get meeting recording content
 
         Gets the content stream of a meeting recording
+
+        Swagger operation ID: `GetMeetingRecordingContent`.
+
+        Args:
+            meeting_id: The online meeting ID.
+            recording_id: The recording ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5536,7 +7139,7 @@ class TeamsClient(ConnectorClientBase):
             f"/content"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5550,52 +7153,94 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
 
-    async def list_sections_async(
+    def list_sections(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List sections
 
         Lists the current user's teamwork sections
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListSections`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/beta/me/teamwork/sections"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def create_section_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def create_section(
         self,
-        input: CreateSectionInput,
+        input: CreateSectionInput | Mapping[str, Any],
         *,
+        etag: Optional[str] = None,
+        match_condition: Optional[MatchConditions] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5605,12 +7250,37 @@ class TeamsClient(ConnectorClientBase):
         Create a section
 
         Creates a new teamwork section for the current user
+
+        Swagger operation ID: `CreateSection`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            etag: The entity tag for the conditional request.
+            match_condition: The Azure Core match condition.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
+        headers = self._prepare_match_headers(
+            headers,
+            etag,
+            match_condition,
+            if_match_required=True,
+        )
+
         request_url = (
             f"{self._connection_runtime_url}/beta/me/teamwork/sections"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5624,6 +7294,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5631,7 +7302,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_section_async(
+    def get_section(
         self,
         section_id: str,
         *,
@@ -5644,13 +7315,28 @@ class TeamsClient(ConnectorClientBase):
         Get a section
 
         Gets a specific teamwork section by ID
+
+        Swagger operation ID: `GetSection`.
+
+        Args:
+            section_id: The section ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/beta/me/teamwork/sections/{quote(str(section_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5664,6 +7350,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5671,11 +7358,13 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_section_async(
+    def update_section(
         self,
-        input: UpdateSectionInput,
+        input: UpdateSectionInput | Mapping[str, Any],
         section_id: str,
         *,
+        etag: Optional[str] = None,
+        match_condition: Optional[MatchConditions] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5685,13 +7374,39 @@ class TeamsClient(ConnectorClientBase):
         Update a section
 
         Updates a teamwork section for the current user
+
+        Swagger operation ID: `UpdateSection`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            section_id: The section ID.
+            etag: The entity tag for the conditional request.
+            match_condition: The Azure Core match condition.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
+        headers = self._prepare_match_headers(
+            headers,
+            etag,
+            match_condition,
+            if_match_required=True,
+        )
+
         request_url = (
             f"{self._connection_runtime_url}"
             f"/beta/me/teamwork/sections/{quote(str(section_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5705,6 +7420,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5712,10 +7428,12 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_section_async(
+    def delete_section(
         self,
         section_id: str,
         *,
+        etag: Optional[str] = None,
+        match_condition: Optional[MatchConditions] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5725,13 +7443,37 @@ class TeamsClient(ConnectorClientBase):
         Delete a section
 
         Deletes a teamwork section for the current user
+
+        Swagger operation ID: `DeleteSection`.
+
+        Args:
+            section_id: The section ID.
+            etag: The entity tag for the conditional request.
+            match_condition: The Azure Core match condition.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
+        headers = self._prepare_match_headers(
+            headers,
+            etag,
+            match_condition,
+            if_match_required=True,
+        )
+
         request_url = (
             f"{self._connection_runtime_url}"
             f"/beta/me/teamwork/sections/{quote(str(section_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5745,9 +7487,10 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def list_section_items_async(
+    def list_section_items(
         self,
         section_id: str,
         *,
@@ -5755,12 +7498,31 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List section items
 
         Lists the items (chats, channels, meetings, communities) in a teamwork
         section. Each item belongs to exactly one section at a time.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListSectionItems`.
+
+        Args:
+            section_id: The section ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5771,33 +7533,56 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(section_id), safe='')}"
             f"/items"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def add_section_item_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def add_section_item(
         self,
-        input: AddSectionItemInput,
+        input: AddSectionItemInput | Mapping[str, Any],
         section_id: str,
         *,
+        etag: Optional[str] = None,
+        match_condition: Optional[MatchConditions] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5809,7 +7594,33 @@ class TeamsClient(ConnectorClientBase):
         Adds an item (chat, channel, meeting, or community) currently in a
         system-defined section to a user-defined teamwork section. Use Move
         Section Item to relocate items already in another user-defined section.
+
+        Swagger operation ID: `AddSectionItem`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            section_id: The section ID.
+            etag: The entity tag for the conditional request.
+            match_condition: The Azure Core match condition.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
+        headers = self._prepare_match_headers(
+            headers,
+            etag,
+            match_condition,
+            if_match_required=True,
+        )
+
         request_url = (
             f"{self._connection_runtime_url}"
             f"/beta"
@@ -5820,7 +7631,7 @@ class TeamsClient(ConnectorClientBase):
             f"/items"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5834,6 +7645,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5841,11 +7653,13 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def remove_section_item_async(
+    def remove_section_item(
         self,
         section_id: str,
         section_item_id: str,
         *,
+        etag: Optional[str] = None,
+        match_condition: Optional[MatchConditions] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5857,7 +7671,33 @@ class TeamsClient(ConnectorClientBase):
         Removes an item from a user-defined teamwork section. The underlying
         chat, channel, meeting, or community is not deleted; the item returns
         to its default system-defined section.
+
+        Swagger operation ID: `RemoveSectionItem`.
+
+        Args:
+            section_id: The section ID.
+            section_item_id: The section item ID (the conversation ID of the
+                underlying chat, channel, meeting, or community).
+            etag: The entity tag for the conditional request.
+            match_condition: The Azure Core match condition.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
+        headers = self._prepare_match_headers(
+            headers,
+            etag,
+            match_condition,
+            if_match_required=True,
+        )
+
         request_url = (
             f"{self._connection_runtime_url}"
             f"/beta"
@@ -5869,7 +7709,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(section_item_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5883,14 +7723,17 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def move_section_item_async(
+    def move_section_item(
         self,
-        input: MoveSectionItemInput,
+        input: MoveSectionItemInput | Mapping[str, Any],
         section_id: str,
         section_item_id: str,
         *,
+        etag: Optional[str] = None,
+        match_condition: Optional[MatchConditions] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5903,7 +7746,35 @@ class TeamsClient(ConnectorClientBase):
         another user-defined section. Each item can belong to only one section
         at a time. This action removes the item from its current section and
         adds it to the target section.
+
+        Swagger operation ID: `MoveSectionItem`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            section_id: The section ID.
+            section_item_id: The section item ID (the conversation ID of the
+                underlying chat, channel, meeting, or community).
+            etag: The entity tag for the conditional request.
+            match_condition: The Azure Core match condition.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
+        headers = self._prepare_match_headers(
+            headers,
+            etag,
+            match_condition,
+            if_match_required=True,
+        )
+
         request_url = (
             f"{self._connection_runtime_url}"
             f"/beta"
@@ -5916,7 +7787,7 @@ class TeamsClient(ConnectorClientBase):
             f"/move"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5930,6 +7801,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5937,7 +7809,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_tags_async(
+    def list_tags(
         self,
         group_id: str,
         *,
@@ -5945,41 +7817,81 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List all tags for a team
 
         Lists the team's tags
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetTags`.
+
+        Args:
+            group_id: Select team.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/teams/{quote(str(group_id), safe='')}/tags"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def create_tag_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def create_tag(
         self,
-        input: CreateTagInput,
+        input: CreateTagInput | Mapping[str, Any],
         group_id: str,
         *,
         timeout: Optional[float] = None,
@@ -5991,13 +7903,30 @@ class TeamsClient(ConnectorClientBase):
         Create a tag for a team
 
         Creates a tag in a team
+
+        Swagger operation ID: `CreateTag`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            group_id: Select team.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/teams/{quote(str(group_id), safe='')}/tags"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6011,6 +7940,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6018,7 +7948,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_tag_async(
+    def get_tag(
         self,
         group_id: str,
         tag_id: str,
@@ -6032,6 +7962,22 @@ class TeamsClient(ConnectorClientBase):
         Get a team tag
 
         Gets a specific tag by ID from a team
+
+        Swagger operation ID: `GetTag`.
+
+        Args:
+            group_id: Select team.
+            tag_id: Select tag.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6042,7 +7988,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(tag_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6056,6 +8002,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6063,9 +8010,9 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_tag_async(
+    def update_tag(
         self,
-        input: UpdateTagInput,
+        input: UpdateTagInput | Mapping[str, Any],
         group_id: str,
         tag_id: str,
         *,
@@ -6078,6 +8025,24 @@ class TeamsClient(ConnectorClientBase):
         Update a team tag
 
         Updates the display name of a tag in a team
+
+        Swagger operation ID: `UpdateTag`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            group_id: Select team.
+            tag_id: Select tag.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6088,7 +8053,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(tag_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6102,6 +8067,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6109,7 +8075,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_tag_async(
+    def delete_tag(
         self,
         group_id: str,
         tag_id: str,
@@ -6123,6 +8089,22 @@ class TeamsClient(ConnectorClientBase):
         Delete a team tag
 
         Deletes a tag from a team
+
+        Swagger operation ID: `DeleteTag`.
+
+        Args:
+            group_id: Select team.
+            tag_id: Select tag.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6133,7 +8115,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(tag_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6147,11 +8129,12 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def add_member_to_tag_async(
+    def add_member_to_tag(
         self,
-        input: AddMemberToTagInput,
+        input: AddMemberToTagInput | Mapping[str, Any],
         group_id: str,
         tag_id: str,
         *,
@@ -6164,6 +8147,24 @@ class TeamsClient(ConnectorClientBase):
         Add a member to a team tag
 
         Adds a user to a team tag
+
+        Swagger operation ID: `AddMemberToTag`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            group_id: Select team.
+            tag_id: Select tag.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6175,7 +8176,7 @@ class TeamsClient(ConnectorClientBase):
             f"/members"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6189,6 +8190,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6196,7 +8198,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_tag_members_async(
+    def list_tag_members(
         self,
         group_id: str,
         tag_id: str,
@@ -6205,11 +8207,31 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List the members of a team tag
 
         Lists the members of a team tag
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetTagMembers`.
+
+        Args:
+            group_id: Select team.
+            tag_id: Select tag.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6220,29 +8242,50 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(tag_id), safe='')}"
             f"/members"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def delete_tag_member_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def delete_tag_member(
         self,
         group_id: str,
         tag_id: str,
@@ -6257,6 +8300,23 @@ class TeamsClient(ConnectorClientBase):
         Delete a member from a team tag
 
         Deletes a member from a team tag
+
+        Swagger operation ID: `DeleteTagMember`.
+
+        Args:
+            group_id: Select team.
+            tag_id: Select tag.
+            tag_member_id: ID of the member to remove from the tag.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6269,7 +8329,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(tag_member_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6283,9 +8343,10 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def list_call_recordings_async(
+    def list_call_recordings(
         self,
         call_id: str,
         *,
@@ -6293,39 +8354,79 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List call recordings
 
         Lists all recordings for an ad-hoc call
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListCallRecordings`.
+
+        Args:
+            call_id: The call ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/me/adhocCalls/{quote(str(call_id), safe='')}/recordings"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_call_recording_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_call_recording(
         self,
         call_id: str,
         recording_id: str,
@@ -6339,6 +8440,22 @@ class TeamsClient(ConnectorClientBase):
         Get call recording
 
         Gets a specific recording for an ad-hoc call
+
+        Swagger operation ID: `GetCallRecording`.
+
+        Args:
+            call_id: The call ID.
+            recording_id: The recording ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6350,7 +8467,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(recording_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6364,6 +8481,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6371,7 +8489,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_call_recording_content_async(
+    def get_call_recording_content(
         self,
         call_id: str,
         recording_id: str,
@@ -6385,6 +8503,22 @@ class TeamsClient(ConnectorClientBase):
         Get call recording content
 
         Gets the content of a call recording
+
+        Swagger operation ID: `GetCallRecordingContent`.
+
+        Args:
+            call_id: The call ID.
+            recording_id: The recording ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6397,7 +8531,7 @@ class TeamsClient(ConnectorClientBase):
             f"/content"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6411,11 +8545,12 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
 
-    async def list_call_transcripts_async(
+    def list_call_transcripts(
         self,
         call_id: str,
         *,
@@ -6423,39 +8558,79 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List call transcripts
 
         Lists all transcripts for an ad-hoc call
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListCallTranscripts`.
+
+        Args:
+            call_id: The call ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/me/adhocCalls/{quote(str(call_id), safe='')}/transcripts"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_call_transcript_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_call_transcript(
         self,
         call_id: str,
         transcript_id: str,
@@ -6469,6 +8644,22 @@ class TeamsClient(ConnectorClientBase):
         Get call transcript
 
         Gets a specific transcript for an ad-hoc call
+
+        Swagger operation ID: `GetCallTranscript`.
+
+        Args:
+            call_id: The call ID.
+            transcript_id: The transcript ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6480,7 +8671,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(transcript_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6494,6 +8685,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6501,7 +8693,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_call_transcript_content_async(
+    def get_call_transcript_content(
         self,
         call_id: str,
         transcript_id: str,
@@ -6515,6 +8707,22 @@ class TeamsClient(ConnectorClientBase):
         Get call transcript content
 
         Gets the content of a call transcript
+
+        Swagger operation ID: `GetCallTranscriptContent`.
+
+        Args:
+            call_id: The call ID.
+            transcript_id: The transcript ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6527,7 +8735,7 @@ class TeamsClient(ConnectorClientBase):
             f"/content"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6541,6 +8749,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6548,23 +8757,46 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_all_adhoc_call_recordings_async(
+    def list_all_adhoc_call_recordings(
         self,
+        *,
         start_date_time: Optional[str] = None,
         end_date_time: Optional[str] = None,
         top: Optional[int] = None,
         skiptoken: Optional[str] = None,
         deltatoken: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get all ad-hoc call recordings
 
         Gets all recordings from ad-hoc calls for the signed-in user
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetAllAdhocCallRecordings`.
+
+        Args:
+            start_date_time: The start date and time to filter recordings.
+            end_date_time: The end date and time to filter recordings.
+            top: The number of recordings to return.
+            skiptoken: The skip token for pagination.
+            deltatoken: The delta token for tracking changes.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6598,45 +8830,89 @@ class TeamsClient(ConnectorClientBase):
             query_params.append(f"$deltatoken={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_all_adhoc_call_transcripts_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_all_adhoc_call_transcripts(
         self,
+        *,
         start_date_time: Optional[str] = None,
         end_date_time: Optional[str] = None,
         top: Optional[int] = None,
         skiptoken: Optional[str] = None,
         deltatoken: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get all ad-hoc call transcripts
 
         Gets all transcripts from ad-hoc calls for the signed-in user
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetAllAdhocCallTranscripts`.
+
+        Args:
+            start_date_time: The start date and time to filter transcripts.
+            end_date_time: The end date and time to filter transcripts.
+            top: The number of transcripts to return.
+            skiptoken: The skip token for pagination.
+            deltatoken: The delta token for tracking changes.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6670,29 +8946,50 @@ class TeamsClient(ConnectorClientBase):
             query_params.append(f"$deltatoken={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_ai_insights_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_ai_insights(
         self,
         meeting_id: str,
         *,
@@ -6700,12 +8997,31 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List AI insights
 
         Lists AI-generated insights for an online meeting. Requires Microsoft
         365 Copilot license.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListAiInsights`.
+
+        Args:
+            meeting_id: The online meeting ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6716,29 +9032,50 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(meeting_id), safe='')}"
             f"/aiInsights"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_ai_insight_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_ai_insight(
         self,
         meeting_id: str,
         ai_insight_id: str,
@@ -6753,6 +9090,22 @@ class TeamsClient(ConnectorClientBase):
 
         Gets a specific AI-generated insight for an online meeting. Requires
         Microsoft 365 Copilot license.
+
+        Swagger operation ID: `GetAiInsight`.
+
+        Args:
+            meeting_id: The online meeting ID.
+            ai_insight_id: The AI insight ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6765,7 +9118,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(ai_insight_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6779,6 +9132,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6786,7 +9140,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_message_locations_async(
+    def list_message_locations(
         self,
         message_type: str,
         poster: str,
@@ -6795,12 +9149,32 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Conversation location for where to post
 
         Returns a list of locations to post a message or reply based on who the
         user is posting as
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetMessageLocations`.
+
+        Args:
+            message_type: Message Type.
+            poster: Select an option.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6810,29 +9184,50 @@ class TeamsClient(ConnectorClientBase):
             f"/poster"
             f"/{quote(str(poster), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_message_details_input_schema_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("locations", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_message_details_input_schema(
         self,
         thread_type: str,
         *,
@@ -6845,6 +9240,21 @@ class TeamsClient(ConnectorClientBase):
         Get message details response schema
 
         Get the schema information for get message details response
+
+        Swagger operation ID: `GetMessageDetailsInputSchema`.
+
+        Args:
+            thread_type: Choose message type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6854,7 +9264,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(thread_type), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6868,6 +9278,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6875,7 +9286,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_message_details_response_schema_async(
+    def get_message_details_response_schema(
         self,
         thread_type: str,
         *,
@@ -6888,6 +9299,21 @@ class TeamsClient(ConnectorClientBase):
         Get message details input metadata
 
         Get the schema information for message inputs
+
+        Swagger operation ID: `GetMessageDetailsResponseSchema`.
+
+        Args:
+            thread_type: Choose message type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6897,7 +9323,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(thread_type), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6911,6 +9337,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6918,7 +9345,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_members_input_schema_async(
+    def list_members_input_schema(
         self,
         thread_type: str,
         *,
@@ -6931,6 +9358,21 @@ class TeamsClient(ConnectorClientBase):
         List members input schema
 
         Get the schema information for list members input based on thread type
+
+        Swagger operation ID: `ListMembersInputSchema`.
+
+        Args:
+            thread_type: Choose message type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6940,7 +9382,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(thread_type), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6954,6 +9396,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6961,7 +9404,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_feed_notification_input_schema_async(
+    def get_feed_notification_input_schema(
         self,
         poster: str,
         notification_type: str,
@@ -6975,6 +9418,22 @@ class TeamsClient(ConnectorClientBase):
         Get feed notification input metadata
 
         Get the schema information for feed notification
+
+        Swagger operation ID: `GetFeedNotificationInputSchema`.
+
+        Args:
+            poster: Select an option.
+            notification_type: Choose notification type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6986,7 +9445,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(notification_type), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7000,6 +9459,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7007,7 +9467,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_unified_action_schema_async(
+    def get_unified_action_schema(
         self,
         action_type: str,
         poster: str,
@@ -7022,6 +9482,23 @@ class TeamsClient(ConnectorClientBase):
         Get unified action input metadata
 
         Get the schema information for unified actions
+
+        Swagger operation ID: `GetUnifiedActionSchema`.
+
+        Args:
+            action_type: Unified Action.
+            poster: Select an option.
+            recipient_type: Type of the recipient of the action.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7035,7 +9512,7 @@ class TeamsClient(ConnectorClientBase):
             f"/schema"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7049,6 +9526,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7056,7 +9534,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_message_with_options_subscription_input_metadata_async(
+    def get_message_with_options_subscription_input_metadata(
         self,
         recipient_type: str,
         *,
@@ -7070,6 +9548,21 @@ class TeamsClient(ConnectorClientBase):
 
         Get the schema information for the message with options subscription
         inputs
+
+        Swagger operation ID: `GetMessageWithOptionsSubscriptionInputMetadata`.
+
+        Args:
+            recipient_type: Type of the recipient of the action.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7082,7 +9575,7 @@ class TeamsClient(ConnectorClientBase):
             f"/subscriptioninputs"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7096,6 +9589,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7103,7 +9597,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_message_with_options_subscription_output_metadata_async(
+    def get_message_with_options_subscription_output_metadata(
         self,
         recipient_type: str,
         *,
@@ -7117,6 +9611,22 @@ class TeamsClient(ConnectorClientBase):
 
         Get the schema information for the message with options subscription
         outputs
+
+        Swagger operation ID:
+        `GetMessageWithOptionsSubscriptionOutputMetadata`.
+
+        Args:
+            recipient_type: Type of the recipient of the action.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7129,7 +9639,7 @@ class TeamsClient(ConnectorClientBase):
             f"/subscriptionoutputs"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7143,6 +9653,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7150,7 +9661,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_webhook_trigger_request_schema_async(
+    def get_webhook_trigger_request_schema(
         self,
         thread_type: str,
         *,
@@ -7163,6 +9674,21 @@ class TeamsClient(ConnectorClientBase):
         Input schema for webhook trigger
 
         Gets the input schema for webhook trigger
+
+        Swagger operation ID: `GetWebhookTriggerRequestSchema`.
+
+        Args:
+            thread_type: Choose message type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7173,7 +9699,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(thread_type), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7187,6 +9713,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7194,7 +9721,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_webhook_trigger_response_schema_async(
+    def get_webhook_trigger_response_schema(
         self,
         trigger_type: str,
         thread_type: str,
@@ -7208,6 +9735,22 @@ class TeamsClient(ConnectorClientBase):
         Response schema for webhook trigger
 
         Gets the response schema for webhook trigger
+
+        Swagger operation ID: `GetWebhookTriggerResponseSchema`.
+
+        Args:
+            trigger_type: Trigger type.
+            thread_type: Choose message type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7220,7 +9763,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(thread_type), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7234,6 +9777,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7241,7 +9785,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_post_to_conversation_response_schema_async(
+    def get_post_to_conversation_response_schema(
         self,
         action_type: str,
         poster: str,
@@ -7256,6 +9800,23 @@ class TeamsClient(ConnectorClientBase):
         Get response schema
 
         Get the schema information for unified action responses
+
+        Swagger operation ID: `GetPostToConversationResponseSchema`.
+
+        Args:
+            action_type: Unified Action.
+            poster: Select an option.
+            recipient_type: Type of the recipient of the action.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7270,7 +9831,7 @@ class TeamsClient(ConnectorClientBase):
             f"/schema"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7284,6 +9845,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7291,7 +9853,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_flow_continuation_subscription_with_poster_output_metadata_async(
+    def get_flow_continuation_subscription_with_poster_output_metadata(
         self,
         input: GetFlowContinuationSubscriptionWithPosterOutputMetadataInput,
         poster: str,
@@ -7307,6 +9869,24 @@ class TeamsClient(ConnectorClientBase):
 
         Get the schema information for the flow continuation subscription
         outputs
+
+        Swagger operation ID:
+        `GetFlowContinuationSubscriptionWithPosterOutputMetadata`.
+
+        Args:
+            input: The request body.
+            poster: Select an option.
+            recipient_type: Type of the recipient of the action.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7321,7 +9901,7 @@ class TeamsClient(ConnectorClientBase):
             f"/subscriptionoutputs"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7335,6 +9915,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7342,7 +9923,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_subscription_scope_schema_async(
+    def get_subscription_scope_schema(
         self,
         scope_type: str,
         *,
@@ -7356,6 +9937,21 @@ class TeamsClient(ConnectorClientBase):
 
         Returns the input schema for a subscription trigger based on the
         selected scope type.
+
+        Swagger operation ID: `GetSubscriptionScopeSchema`.
+
+        Args:
+            scope_type: The selected scope type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7366,7 +9962,7 @@ class TeamsClient(ConnectorClientBase):
             f"/schema"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7380,6 +9976,7 @@ class TeamsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

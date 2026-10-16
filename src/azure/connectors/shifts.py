@@ -5,20 +5,83 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, AsyncIterator, Dict, List, Literal, Any, Mapping
-from urllib.parse import quote, urlsplit
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Literal, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "ShiftsClient",
+    "Activities",
+    "CreateShiftRequest",
+    "CreateTimeOffRequest",
+    "DraftOpenShift",
+    "DraftShift",
+    "DraftTimeOff",
+    "EditOpenShiftRequest",
+    "GetAllTeamsResponse",
+    "GetTimeOffReasonsResponse",
+    "ListOfferShiftRequestsResponse",
+    "ListOpenShiftChangeRequestsResponse",
+    "ListOpenShiftsCrossTeamResponse",
+    "ListOpenShiftsResponse",
+    "ListSchedulingGroupsResponse",
+    "ListShiftsCrossTeamResponse",
+    "ListShiftsResponse",
+    "ListSwapShiftsChangeRequestsResponse",
+    "ListTimeOffRequestsResponse",
+    "ListTimesOffCrossTeamResponse",
+    "ListTimesOffResponse",
+    "OfferShiftRequestApproveInput",
+    "OfferShiftRequestApproveResponse",
+    "OfferShiftRequestDeclineInput",
+    "OfferShiftRequestDeclineResponse",
+    "OfferShiftRequestResponse",
+    "OpenShiftChangeRequestApproveInput",
+    "OpenShiftChangeRequestApproveResponse",
+    "OpenShiftChangeRequestDeclineInput",
+    "OpenShiftChangeRequestDeclineResponse",
+    "OpenShiftChangeRequestResponse",
+    "OpenShiftResponse",
+    "ScheduleResponse",
+    "SchedulingGroupInfo",
+    "SchedulingGroupResponse",
+    "SharedOpenShift",
+    "SharedShift",
+    "SharedTimeOff",
+    "ShiftResponse",
+    "Subscription",
+    "SwapShiftsChangeRequestApproveInput",
+    "SwapShiftsChangeRequestApproveResponse",
+    "SwapShiftsChangeRequestDeclineInput",
+    "SwapShiftsChangeRequestDeclineResponse",
+    "SwapShiftsChangeRequestResponse",
+    "TeamInfo",
+    "Theme",
+    "TimeOffRequestApproveInput",
+    "TimeOffRequestApproveResponse",
+    "TimeOffRequestDeclineInput",
+    "TimeOffRequestDeclineResponse",
+    "TimeOffRequestResponse",
+    "TimeOffResponse",
+    "UserInfo",
+    "WebHookRequest",
+    "WebhookNotificationEntity",
+    "WebhookPushResponse",
+    "WebhookPushResponseResourceEntity",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -29,20 +92,23 @@ class ScheduleResponse:
     Response for Get a Schedule's details
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the Schedule."""
-    time_zone: Optional[str] = field(
+    time_zone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "timeZone"},
     )
     """The Time Zone of the Schedule."""
-    provision_status: Optional[str] = field(
+    provision_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "provisionStatus"},
     )
     """The Provision Status of the Schedule."""
-    provision_status_code: Optional[str] = field(
+    provision_status_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "provisionStatusCode"},
     )
     """The Provision Status Code of the Schedule."""
@@ -54,14 +120,21 @@ class ListTimesOffResponse:
     Response for List all Time Off instances in a team
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[TimeOffResponse]] = None
-    """List of Time Off instances"""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[TimeOffResponse | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of Time Off instances"""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -73,37 +146,44 @@ class TimeOffResponse:
     Response for Create a new Time Off instance
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the Time Off."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    user_id: Optional[str] = field(
+    user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userId"},
     )
     """Assigned To User ID."""
-    user_info: Optional[UserInfo] = field(
+    user_info: Optional[UserInfo | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userInfo"},
     )
-    team_info: Optional[TeamInfo] = field(
+    team_info: Optional[TeamInfo | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "teamInfo"},
     )
-    shared_time_off: Optional[SharedTimeOff] = field(
+    shared_time_off: Optional[SharedTimeOff | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sharedTimeOff"},
     )
-    draft_time_off: Optional[DraftTimeOff] = field(
+    draft_time_off: Optional[DraftTimeOff | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "draftTimeOff"},
     )
 
@@ -114,14 +194,21 @@ class ListShiftsResponse:
     Response for List all Shifts in a team
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[ShiftResponse]] = None
-    """List of Shifts"""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[ShiftResponse | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of Shifts"""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -133,46 +220,55 @@ class ShiftResponse:
     Response for Create a new Shift
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the Shift."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    user_id: Optional[str] = field(
+    user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userId"},
     )
     """Assigned To User ID."""
-    scheduling_group_id: Optional[str] = field(
+    scheduling_group_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "schedulingGroupId"},
     )
     """Scheduling Group ID."""
-    scheduling_group_info: Optional[SchedulingGroupInfo] = field(
+    scheduling_group_info: Optional[SchedulingGroupInfo | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "schedulingGroupInfo"},
     )
-    user_info: Optional[UserInfo] = field(
+    user_info: Optional[UserInfo | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userInfo"},
     )
-    team_info: Optional[TeamInfo] = field(
+    team_info: Optional[TeamInfo | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "teamInfo"},
     )
-    shared_shift: Optional[SharedShift] = field(
+    shared_shift: Optional[SharedShift | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sharedShift"},
     )
-    draft_shift: Optional[DraftShift] = field(
+    draft_shift: Optional[DraftShift | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "draftShift"},
     )
 
@@ -183,14 +279,21 @@ class ListOpenShiftsResponse:
     Response for List all Open Shifts in a team
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[OpenShiftResponse]] = None
-    """List of Open Shifts"""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[OpenShiftResponse | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of Open Shifts"""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -202,37 +305,44 @@ class OpenShiftResponse:
     Response for Create a new Open Shift
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the Open Shift."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    scheduling_group_id: Optional[str] = field(
+    scheduling_group_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "schedulingGroupId"},
     )
     """Scheduling Group ID"""
-    scheduling_group_info: Optional[SchedulingGroupInfo] = field(
+    scheduling_group_info: Optional[SchedulingGroupInfo | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "schedulingGroupInfo"},
     )
-    team_info: Optional[TeamInfo] = field(
+    team_info: Optional[TeamInfo | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "teamInfo"},
     )
-    shared_open_shift: Optional[SharedOpenShift] = field(
+    shared_open_shift: Optional[SharedOpenShift | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sharedOpenShift"},
     )
-    draft_open_shift: Optional[DraftOpenShift] = field(
+    draft_open_shift: Optional[DraftOpenShift | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "draftOpenShift"},
     )
 
@@ -243,14 +353,16 @@ class GetTimeOffReasonsResponse:
     Response for List all Time Off Reasons in a team
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """The list of Time Off Reasons."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -262,14 +374,21 @@ class ListSchedulingGroupsResponse:
     Response for List all Scheduling Groups in a team
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[SchedulingGroupResponse]] = None
-    """List of Scheduling Groups."""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[SchedulingGroupResponse | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of Scheduling Groups."""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -281,23 +400,26 @@ class SchedulingGroupResponse:
     Response for Get a Scheduling Group
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the Scheduling Group."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The display name for the Scheduling Group."""
-    is_active: Optional[bool] = field(
+    is_active: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isActive"},
     )
     """
     Indicates whether the Scheduling Group can be used when creating new
     entities or updating existing ones.
     """
-    user_ids: Optional[List[str]] = field(
+    user_ids: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userIds"},
     )
     """List of IDs of users in the Scheduling Group."""
@@ -309,14 +431,21 @@ class ListTimeOffRequestsResponse:
     Response for List all Time Off requests in a team
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[TimeOffRequestResponse]] = None
-    """List of Time Off requests."""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[TimeOffRequestResponse | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of Time Off requests."""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -328,67 +457,79 @@ class TimeOffRequestResponse:
     Response for Get a Time Off request
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the Time Off request."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    assigned_to: Optional[str] = field(
+    assigned_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assignedTo"},
     )
     """The person the request is assigned to: 'manager' or 'recipient'"""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """'approved', 'pending' or 'declined'"""
-    sender_date_time: Optional[str] = field(
+    sender_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderDateTime"},
     )
     """Time when the request was sent"""
-    sender_message: Optional[str] = field(
+    sender_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderMessage"},
     )
     """The message from the request sender"""
-    sender_user_id: Optional[str] = field(
+    sender_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderUserId"},
     )
     """The ID of the user that sent the request"""
-    manager_action_date_time: Optional[str] = field(
+    manager_action_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionDateTime"},
     )
     """Time when the manager responded"""
-    manager_action_message: Optional[str] = field(
+    manager_action_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionMessage"},
     )
     """The message from the manager"""
-    manager_user_id: Optional[str] = field(
+    manager_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerUserId"},
     )
     """The ID of the manager that responded"""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """Start of time requested off"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """End of time requested off"""
-    time_off_reason_id: Optional[str] = field(
+    time_off_reason_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "timeOffReasonId"},
     )
     """The ID of the Time Off Reason"""
@@ -400,7 +541,7 @@ class TimeOffRequestApproveInput:
     Approve a Time Off request
     """
 
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A message from the manager to the sender/recipient when a request is
     accepted.
@@ -413,7 +554,7 @@ class TimeOffRequestApproveResponse:
     Response for Approve a Time Off request
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -426,7 +567,7 @@ class TimeOffRequestDeclineInput:
     Decline a Time Off request
     """
 
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A message from the manager to the sender/recipient when a request is
     declined.
@@ -439,7 +580,7 @@ class TimeOffRequestDeclineResponse:
     Response for Decline a Time Off request
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -452,14 +593,21 @@ class ListOfferShiftRequestsResponse:
     Response for List all Offer Shift requests in a team
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[OfferShiftRequestResponse]] = None
-    """List of Offer Shift requests."""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[OfferShiftRequestResponse | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of Offer Shift requests."""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -471,72 +619,85 @@ class OfferShiftRequestResponse:
     Response for Get an Offer Shift request
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the Offer Shift request."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    assigned_to: Optional[str] = field(
+    assigned_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assignedTo"},
     )
     """The person the request is assigned to: 'manager' or 'recipient'"""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """'approved', 'pending' or 'declined'"""
-    sender_date_time: Optional[str] = field(
+    sender_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderDateTime"},
     )
     """Time when the request was sent"""
-    sender_message: Optional[str] = field(
+    sender_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderMessage"},
     )
     """The message from the request sender"""
-    sender_user_id: Optional[str] = field(
+    sender_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderUserId"},
     )
     """The ID of the user that sent the request"""
-    sender_shift_id: Optional[str] = field(
+    sender_shift_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderShiftId"},
     )
     """The ID of the Shift from the sender"""
-    recipient_action_date_time: Optional[str] = field(
+    recipient_action_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientActionDateTime"},
     )
     """Time when the recipient responded"""
-    recipient_action_message: Optional[str] = field(
+    recipient_action_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientActionMessage"},
     )
     """The message from the recipient"""
-    recipient_user_id: Optional[str] = field(
+    recipient_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientUserId"},
     )
     """The ID of the recipient of the request"""
-    manager_action_date_time: Optional[str] = field(
+    manager_action_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionDateTime"},
     )
     """Time when the manager responded"""
-    manager_action_message: Optional[str] = field(
+    manager_action_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionMessage"},
     )
     """The message from the manager"""
-    manager_user_id: Optional[str] = field(
+    manager_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerUserId"},
     )
     """The ID of the manager that responded"""
@@ -548,7 +709,7 @@ class OfferShiftRequestApproveInput:
     Approve an Offer Shift request
     """
 
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A message when a request is accepted."""
 
 
@@ -558,7 +719,7 @@ class OfferShiftRequestApproveResponse:
     Response for Approve an Offer Shift request
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -571,7 +732,7 @@ class OfferShiftRequestDeclineInput:
     Decline an Offer Shift request
     """
 
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A message when a request is declined."""
 
 
@@ -581,7 +742,7 @@ class OfferShiftRequestDeclineResponse:
     Response for Decline an Offer Shift request
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -594,14 +755,21 @@ class ListSwapShiftsChangeRequestsResponse:
     Response for List all Swap Shifts requests in a team
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[SwapShiftsChangeRequestResponse]] = None
-    """List of Swap Shifts Change Requests."""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[SwapShiftsChangeRequestResponse | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of Swap Shifts Change Requests."""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -613,77 +781,91 @@ class SwapShiftsChangeRequestResponse:
     Response for Get a Swap Shifts request
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the Swap Shift request."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    assigned_to: Optional[str] = field(
+    assigned_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assignedTo"},
     )
     """The person the request is assigned to: 'manager' or 'recipient'"""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """'approved', 'pending' or 'declined'"""
-    sender_date_time: Optional[str] = field(
+    sender_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderDateTime"},
     )
     """Time when the request was sent"""
-    sender_message: Optional[str] = field(
+    sender_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderMessage"},
     )
     """The message from the request sender"""
-    sender_user_id: Optional[str] = field(
+    sender_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderUserId"},
     )
     """The ID of the user that sent the request"""
-    sender_shift_id: Optional[str] = field(
+    sender_shift_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderShiftId"},
     )
     """The ID of the Shift from the sender"""
-    recipient_action_date_time: Optional[str] = field(
+    recipient_action_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientActionDateTime"},
     )
     """Time when the recipient responded"""
-    recipient_action_message: Optional[str] = field(
+    recipient_action_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientActionMessage"},
     )
     """The message from the recipient"""
-    recipient_user_id: Optional[str] = field(
+    recipient_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientUserId"},
     )
     """The ID of the recipient of the request"""
-    recipient_shift_id: Optional[str] = field(
+    recipient_shift_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientShiftId"},
     )
     """The ID of the Shift from the recipient"""
-    manager_action_date_time: Optional[str] = field(
+    manager_action_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionDateTime"},
     )
     """Time when the manager responded"""
-    manager_action_message: Optional[str] = field(
+    manager_action_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionMessage"},
     )
     """The message from the manager"""
-    manager_user_id: Optional[str] = field(
+    manager_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerUserId"},
     )
     """The ID of the manager that responded"""
@@ -695,7 +877,7 @@ class SwapShiftsChangeRequestApproveInput:
     Approve a Swap Shifts request
     """
 
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A message when a request is accepted."""
 
 
@@ -705,7 +887,7 @@ class SwapShiftsChangeRequestApproveResponse:
     Response for Approve a Swap Shifts request
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -718,7 +900,7 @@ class SwapShiftsChangeRequestDeclineInput:
     Decline a Swap Shifts request
     """
 
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A message when a request is declined."""
 
 
@@ -728,7 +910,7 @@ class SwapShiftsChangeRequestDeclineResponse:
     Response for Decline a Swap Shifts request
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -741,14 +923,21 @@ class ListOpenShiftChangeRequestsResponse:
     Response for List all Open Shift requests in a team
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[OpenShiftChangeRequestResponse]] = None
-    """List of Open Shift Change Requests."""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[OpenShiftChangeRequestResponse | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of Open Shift Change Requests."""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -760,57 +949,67 @@ class OpenShiftChangeRequestResponse:
     Response for Get an Open Shift request
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the Open Shift Change request."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    assigned_to: Optional[str] = field(
+    assigned_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assignedTo"},
     )
     """The person the request is assigned to: 'manager' or 'recipient'"""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """'approved', 'pending' or 'declined'"""
-    sender_date_time: Optional[str] = field(
+    sender_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderDateTime"},
     )
     """Time when the request was sent"""
-    sender_message: Optional[str] = field(
+    sender_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderMessage"},
     )
     """The message from the request sender"""
-    sender_user_id: Optional[str] = field(
+    sender_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderUserId"},
     )
     """The ID of the user that sent the request"""
-    manager_action_date_time: Optional[str] = field(
+    manager_action_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionDateTime"},
     )
     """Time when the manager responded"""
-    manager_action_message: Optional[str] = field(
+    manager_action_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionMessage"},
     )
     """The message from the manager"""
-    manager_user_id: Optional[str] = field(
+    manager_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerUserId"},
     )
     """The ID of the manager that responded"""
-    open_shift_id: Optional[str] = field(
+    open_shift_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "openShiftId"},
     )
     """The ID of the Open Shift being requested"""
@@ -822,7 +1021,7 @@ class OpenShiftChangeRequestApproveInput:
     Approve an Open Shift request
     """
 
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A message from the manager to the sender/recipient when a request is
     accepted.
@@ -835,7 +1034,7 @@ class OpenShiftChangeRequestApproveResponse:
     Response for Approve an Open Shift request
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -848,7 +1047,7 @@ class OpenShiftChangeRequestDeclineInput:
     Decline an Open Shift request
     """
 
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A message from the manager to the sender/recipient when a request is
     declined.
@@ -861,7 +1060,7 @@ class OpenShiftChangeRequestDeclineResponse:
     Response for Decline an Open Shift request
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -874,14 +1073,21 @@ class ListOpenShiftsCrossTeamResponse:
     Response for List all Open Shifts from my teams
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[OpenShiftResponse]] = None
-    """List of Open Shifts"""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[OpenShiftResponse | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of Open Shifts"""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -893,14 +1099,21 @@ class ListShiftsCrossTeamResponse:
     Response for List all Shifts from my teams
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[ShiftResponse]] = None
-    """List of Shifts"""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[ShiftResponse | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of Shifts"""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -912,14 +1125,21 @@ class ListTimesOffCrossTeamResponse:
     Response for List all Times Off from my teams
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[TimeOffResponse]] = None
-    """List of Times off"""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[TimeOffResponse | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of Times off"""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -931,11 +1151,12 @@ class GetAllTeamsResponse:
     Response for List teams
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of one or more Teams you are a part of."""
 
 
@@ -945,8 +1166,7 @@ class WebHookRequest:
     Definition: WebHookRequest
     """
 
-    notification_url: Optional[str] = field(
-        default=None,
+    notification_url: str = dataclass_field(
         metadata={"wire_name": "notificationUrl"},
     )
     """
@@ -960,7 +1180,12 @@ class WebhookPushResponse:
     Definition: WebhookPushResponse
     """
 
-    value: Optional[List[WebhookNotificationEntity]] = None
+    value: Optional[
+        List[WebhookNotificationEntity | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of values"""
 
 
@@ -970,23 +1195,29 @@ class WebhookNotificationEntity:
     Definition: WebhookNotificationEntity
     """
 
-    subscription_id: Optional[str] = field(
+    subscription_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "subscriptionId"},
     )
     """WebHook Subscription Id"""
-    expiration_date_time: Optional[str] = field(
+    expiration_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "expirationDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    change_type: Optional[str] = field(
+    change_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "changeType"},
     )
     """Resource change type (created/updated/deleted)."""
-    resource_data: Optional[WebhookPushResponseResourceEntity] = field(
+    resource_data: Optional[
+        WebhookPushResponseResourceEntity | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resourceData"},
     )
 
@@ -997,20 +1228,23 @@ class WebhookPushResponseResourceEntity:
     Definition: WebhookPushResponseResourceEntity
     """
 
-    id_2: Optional[str] = field(
+    id_2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.id"},
     )
     """Full resource path."""
-    type_: Optional[str] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.type"},
     )
     """Resoure Type."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ID of the resource that is updated."""
-    team_id: Optional[str] = field(
+    team_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "teamId"},
     )
     """ID of team where the update happened."""
@@ -1022,25 +1256,28 @@ class Subscription:
     Definition: Subscription
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier for the subscription."""
-    resource: Optional[str] = None
+    resource: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Specifies the resource that will be monitored for changes."""
-    application_id: Optional[str] = field(
+    application_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "applicationId"},
     )
     """Identifier of the application used to create the subscription."""
-    change_type: Optional[str] = field(
+    change_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "changeType"},
     )
     """
     Indicates the type of change in the subscribed resource that will raise a
     notification.
     """
-    client_state: Optional[str] = field(
+    client_state: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "clientState"},
     )
     """
@@ -1050,23 +1287,26 @@ class Subscription:
     clientState property sent with the subscription with the value of the
     clientState property received with each notification.
     """
-    notification_url: Optional[str] = field(
+    notification_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "notificationUrl"},
     )
     """
     The URL of the endpoint that will receive the notifications. This URL must
     make use of the HTTPS protocol.
     """
-    expiration_date_time: Optional[str] = field(
+    expiration_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "expirationDateTime"},
     )
     """
     Specifies the date and time when the webhook subscription expires (UTC).
     """
-    creator_id: Optional[str] = field(
+    creator_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "creatorId"},
     )
     """
@@ -1084,22 +1324,25 @@ class SharedTimeOff:
     Definition: SharedTimeOff
     """
 
-    time_off_reason_id: Optional[str] = field(
+    time_off_reason_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "timeOffReasonId"},
     )
     """Time Off Reason ID."""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    theme: Optional[Theme] = None
+    theme: Optional[Theme] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1108,22 +1351,25 @@ class DraftTimeOff:
     Definition: DraftTimeOff
     """
 
-    time_off_reason_id: Optional[str] = field(
+    time_off_reason_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "timeOffReasonId"},
     )
     """Time Off Reason ID."""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    theme: Optional[Theme] = None
+    theme: Optional[Theme] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1132,25 +1378,28 @@ class SharedShift:
     Definition: SharedShift
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display Name"""
-    notes: Optional[str] = None
+    notes: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Shift Notes"""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    theme: Optional[Theme] = None
-    activities: Optional[Activities] = None
+    theme: Optional[Theme] = dataclass_field(default=None, kw_only=True)
+    activities: Optional[Activities] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1159,25 +1408,28 @@ class DraftShift:
     Definition: DraftShift
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display Name"""
-    notes: Optional[str] = None
+    notes: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Notes"""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    theme: Optional[Theme] = None
-    activities: Optional[Activities] = None
+    theme: Optional[Theme] = dataclass_field(default=None, kw_only=True)
+    activities: Optional[Activities] = dataclass_field(default=None, kw_only=True)
 
 
 Theme = Literal[
@@ -1205,17 +1457,19 @@ class SchedulingGroupInfo:
     Definition: SchedulingGroupInfo
     """
 
-    scheduling_group_id: Optional[str] = field(
+    scheduling_group_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "schedulingGroupId"},
     )
     """The unique ID of the Scheduling Group."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The display name for the Scheduling Group."""
-    code: Optional[str] = None
+    code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The scheduling group code."""
 
 
@@ -1225,13 +1479,15 @@ class UserInfo:
     Definition: UserInfo
     """
 
-    user_id: Optional[str] = field(
+    user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userId"},
     )
     """The ID of the user."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The display name of the user."""
@@ -1243,13 +1499,15 @@ class TeamInfo:
     Definition: TeamInfo
     """
 
-    team_id: Optional[str] = field(
+    team_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "teamId"},
     )
     """The ID of the team."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The display name for the team."""
@@ -1261,13 +1519,15 @@ class EditOpenShiftRequest:
     Definition: EditOpenShiftRequest
     """
 
-    scheduling_group_id: Optional[str] = field(
+    scheduling_group_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "schedulingGroupId"},
     )
     """Scheduling Group ID"""
-    shared_open_shift: Optional[Dict[str, Any]] = field(
+    shared_open_shift: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sharedOpenShift"},
     )
 
@@ -1278,30 +1538,34 @@ class SharedOpenShift:
     Definition: SharedOpenShift
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display Name"""
-    notes: Optional[str] = None
+    notes: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Notes"""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    theme: Optional[Theme] = None
-    open_slot_count: Optional[int] = field(
+    theme: Optional[Theme] = dataclass_field(default=None, kw_only=True)
+    open_slot_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "openSlotCount"},
     )
     """Open Slot Count"""
-    activities: Optional[Activities] = None
+    activities: Optional[Activities] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1310,30 +1574,34 @@ class DraftOpenShift:
     Definition: DraftOpenShift
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display Name"""
-    notes: Optional[str] = None
+    notes: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Notes"""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    theme: Optional[Theme] = None
-    open_slot_count: Optional[int] = field(
+    theme: Optional[Theme] = dataclass_field(default=None, kw_only=True)
+    open_slot_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "openSlotCount"},
     )
     """Open Slot Count"""
-    activities: Optional[Activities] = None
+    activities: Optional[Activities] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1342,20 +1610,17 @@ class CreateShiftRequest:
     Definition: CreateShiftRequest
     """
 
-    scheduling_group_id: Optional[str] = field(
+    scheduling_group_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "schedulingGroupId"},
     )
     """Scheduling Group ID"""
-    shared_shift: Optional[Dict[str, Any]] = field(
-        default=None,
+    shared_shift: Dict[str, Any] = dataclass_field(
         metadata={"wire_name": "sharedShift"},
     )
     """Shared version of the Shift."""
-    user_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "userId"},
-    )
+    user_id: str = dataclass_field(metadata={"wire_name": "userId"})
     """Assigned to User ID"""
 
 
@@ -1365,15 +1630,11 @@ class CreateTimeOffRequest:
     Definition: CreateTimeOffRequest
     """
 
-    shared_time_off: Optional[Dict[str, Any]] = field(
-        default=None,
+    shared_time_off: Dict[str, Any] = dataclass_field(
         metadata={"wire_name": "sharedTimeOff"},
     )
     """Shared version of a TimeOff."""
-    user_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "userId"},
-    )
+    user_id: str = dataclass_field(metadata={"wire_name": "userId"})
     """Assigned to User ID"""
 
 
@@ -1385,16 +1646,16 @@ class ShiftsClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -1405,8 +1666,8 @@ class ShiftsClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -1414,8 +1675,8 @@ class ShiftsClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -1427,7 +1688,7 @@ class ShiftsClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -1443,15 +1704,49 @@ class ShiftsClient(ConnectorClientBase):
         return "shifts"
 
     def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
-        parsed_next_link = urlsplit(next_link)
-        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
             if next_link.startswith("/"):
                 return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
             if next_link.startswith("?"):
-                return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
 
-        parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
         connection_hostname = parsed_connection.hostname
         if next_link_hostname is None or connection_hostname is None:
@@ -1468,7 +1763,11 @@ class ShiftsClient(ConnectorClientBase):
                 parsed_next_link.scheme == parsed_connection.scheme
                 and next_link_port == connection_port
             ):
-                return next_link
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
 
             raise ValueError(
                 "Pagination URL origin "
@@ -1481,7 +1780,7 @@ class ShiftsClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def get_schedule_async(
+    def get_schedule(
         self,
         team_id: str,
         *,
@@ -1495,13 +1794,28 @@ class ShiftsClient(ConnectorClientBase):
 
         This operation returns details of a Schedule using the Schedule's
         unique ID.
+
+        Swagger operation ID: `GetSchedule`.
+
+        Args:
+            team_id: Add Team ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/teams/{quote(str(team_id), safe='')}/schedule"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1515,6 +1829,7 @@ class ShiftsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1522,25 +1837,44 @@ class ShiftsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_times_off_async(
+    def list_times_off(
         self,
         team_id: str,
+        *,
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
         top: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List all Time Off instances in a team
 
         This operation returns all Time Off instances in a Schedule
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListTimesOff`.
+
+        Args:
+            team_id: Add Team ID.
+            start_time: yyyy-MM-ddTHH:mm:ss.fffZ (UTC format).
+            end_time: yyyy-MM-ddTHH:mm:ss.fffZ (UTC format).
+            top: Items per page (enable Pagination under .../Settings).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1564,11 +1898,18 @@ class ShiftsClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1581,25 +1922,34 @@ class ShiftsClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def create_time_off_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def create_time_off(
         self,
-        input: CreateTimeOffRequest,
+        input: CreateTimeOffRequest | Mapping[str, Any],
         team_id: str,
         *,
         timeout: Optional[float] = None,
@@ -1612,13 +1962,30 @@ class ShiftsClient(ConnectorClientBase):
 
         This operation creates a new Time Off instance and assigns it to a
         member of the team
+
+        Swagger operation ID: `CreateTimeOff`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            team_id: Add Team ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/teams/{quote(str(team_id), safe='')}/schedule/timesoff"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1632,6 +1999,7 @@ class ShiftsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1639,7 +2007,7 @@ class ShiftsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_time_off_async(
+    def get_time_off(
         self,
         team_id: str,
         time_off_id: str,
@@ -1653,6 +2021,22 @@ class ShiftsClient(ConnectorClientBase):
         Get a Time Off instance
 
         This operation returns details for a Time Off using its unique ID.
+
+        Swagger operation ID: `GetTimeOff`.
+
+        Args:
+            team_id: Add Team ID.
+            time_off_id: The unique ID of the Time Off.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1664,7 +2048,7 @@ class ShiftsClient(ConnectorClientBase):
             f"/{quote(str(time_off_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1678,6 +2062,7 @@ class ShiftsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1685,7 +2070,7 @@ class ShiftsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_time_off_async(
+    def delete_time_off(
         self,
         team_id: str,
         time_off_id: str,
@@ -1699,6 +2084,22 @@ class ShiftsClient(ConnectorClientBase):
         Delete a Time Off instance
 
         This operation deletes a Time Off using its unique ID.
+
+        Swagger operation ID: `DeleteTimeOff`.
+
+        Args:
+            team_id: Add Team ID.
+            time_off_id: The unique ID of the Time Off.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1710,7 +2111,7 @@ class ShiftsClient(ConnectorClientBase):
             f"/{quote(str(time_off_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1724,27 +2125,47 @@ class ShiftsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def list_shifts_async(
+    def list_shifts(
         self,
         team_id: str,
+        *,
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
         top: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List all Shifts in a team
 
         This operation returns all Shifts assigned to members of a team
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListShifts`.
+
+        Args:
+            team_id: Add Team ID.
+            start_time: yyyy-MM-ddTHH:mm:ss.fffZ (UTC format).
+            end_time: yyyy-MM-ddTHH:mm:ss.fffZ (UTC format).
+            top: Items per page (enable Pagination under .../Settings).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1768,11 +2189,18 @@ class ShiftsClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1785,25 +2213,34 @@ class ShiftsClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def create_shift_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def create_shift(
         self,
-        input: CreateShiftRequest,
+        input: CreateShiftRequest | Mapping[str, Any],
         team_id: str,
         *,
         timeout: Optional[float] = None,
@@ -1816,13 +2253,30 @@ class ShiftsClient(ConnectorClientBase):
 
         This operation creates a new Shift and assigns it to a member of the
         team
+
+        Swagger operation ID: `CreateShift`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            team_id: Add Team ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/teams/{quote(str(team_id), safe='')}/schedule/shifts"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1836,6 +2290,7 @@ class ShiftsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1843,7 +2298,7 @@ class ShiftsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_shift_async(
+    def get_shift(
         self,
         team_id: str,
         shift_id: str,
@@ -1857,6 +2312,22 @@ class ShiftsClient(ConnectorClientBase):
         Get a Shift
 
         This operation returns details for a Shift using the Shift's unique ID.
+
+        Swagger operation ID: `GetShift`.
+
+        Args:
+            team_id: Add Team ID.
+            shift_id: The unique ID of the Shift.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1868,7 +2339,7 @@ class ShiftsClient(ConnectorClientBase):
             f"/{quote(str(shift_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1882,6 +2353,7 @@ class ShiftsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1889,7 +2361,7 @@ class ShiftsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_shift_async(
+    def delete_shift(
         self,
         team_id: str,
         shift_id: str,
@@ -1903,6 +2375,22 @@ class ShiftsClient(ConnectorClientBase):
         Delete a Shift
 
         This operation deletes a Shift using the Shift's unique ID.
+
+        Swagger operation ID: `DeleteShift`.
+
+        Args:
+            team_id: Add Team ID.
+            shift_id: The unique ID of the Shift.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1914,7 +2402,7 @@ class ShiftsClient(ConnectorClientBase):
             f"/{quote(str(shift_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1928,27 +2416,47 @@ class ShiftsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def list_open_shifts_async(
+    def list_open_shifts(
         self,
         team_id: str,
+        *,
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
         top: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List all Open Shifts in a team
 
         This operation returns all Open Shifts in a team.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListOpenShifts`.
+
+        Args:
+            team_id: Add Team ID.
+            start_time: yyyy-MM-ddTHH:mm:ss.fffZ (UTC format).
+            end_time: yyyy-MM-ddTHH:mm:ss.fffZ (UTC format).
+            top: Items per page (enable Pagination under .../Settings).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1972,11 +2480,18 @@ class ShiftsClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1989,25 +2504,34 @@ class ShiftsClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def create_open_shift_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def create_open_shift(
         self,
-        input: EditOpenShiftRequest,
+        input: EditOpenShiftRequest | Mapping[str, Any],
         team_id: str,
         *,
         timeout: Optional[float] = None,
@@ -2019,13 +2543,30 @@ class ShiftsClient(ConnectorClientBase):
         Create a new Open Shift
 
         Create a new Open Shift in a Schedule.
+
+        Swagger operation ID: `CreateOpenShift`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            team_id: Add Team ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/teams/{quote(str(team_id), safe='')}/schedule/openShifts"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2039,6 +2580,7 @@ class ShiftsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2046,7 +2588,7 @@ class ShiftsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_open_shift_async(
+    def get_open_shift(
         self,
         team_id: str,
         open_shift_id: str,
@@ -2060,6 +2602,22 @@ class ShiftsClient(ConnectorClientBase):
         Get an Open Shift
 
         This operation returns details for an Open Shift.
+
+        Swagger operation ID: `GetOpenShift`.
+
+        Args:
+            team_id: Add Team ID.
+            open_shift_id: The unique ID of the Open Shift.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2071,7 +2629,7 @@ class ShiftsClient(ConnectorClientBase):
             f"/{quote(str(open_shift_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2085,6 +2643,7 @@ class ShiftsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2092,9 +2651,9 @@ class ShiftsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_open_shift_async(
+    def update_open_shift(
         self,
-        input: EditOpenShiftRequest,
+        input: EditOpenShiftRequest | Mapping[str, Any],
         team_id: str,
         open_shift_id: str,
         *,
@@ -2107,6 +2666,24 @@ class ShiftsClient(ConnectorClientBase):
         Update an Open Shift
 
         Update an Open Shift in a Schedule.
+
+        Swagger operation ID: `UpdateOpenShift`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            team_id: Add Team ID.
+            open_shift_id: The unique ID of the Open Shift.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2118,7 +2695,7 @@ class ShiftsClient(ConnectorClientBase):
             f"/{quote(str(open_shift_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2132,6 +2709,7 @@ class ShiftsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2139,7 +2717,7 @@ class ShiftsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_open_shift_async(
+    def delete_open_shift(
         self,
         team_id: str,
         open_shift_id: str,
@@ -2153,6 +2731,22 @@ class ShiftsClient(ConnectorClientBase):
         Delete an Open Shift
 
         This operation deletes an Open Shift.
+
+        Swagger operation ID: `DeleteOpenShift`.
+
+        Args:
+            team_id: Add Team ID.
+            open_shift_id: The unique ID of the Open Shift.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2164,7 +2758,7 @@ class ShiftsClient(ConnectorClientBase):
             f"/{quote(str(open_shift_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2178,26 +2772,44 @@ class ShiftsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def list_time_off_reasons_async(
+    def list_time_off_reasons(
         self,
         team_id: str,
-        top: Optional[int] = None,
         *,
+        top: Optional[int] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List all Time Off Reasons in a team
 
         This operation returns the list of Time Off Reasons associated with a
         team.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListTimeOffReasons`.
+
+        Args:
+            team_id: Add Team ID.
+            top: Items per page (enable Pagination under .../Settings).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2215,11 +2827,18 @@ class ShiftsClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2232,39 +2851,65 @@ class ShiftsClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def list_scheduling_groups_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_scheduling_groups(
         self,
         team_id: str,
-        top: Optional[int] = None,
         *,
+        top: Optional[int] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List all Scheduling Groups in a team
 
         This operation returns all Scheduling Groups in a Schedule.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListSchedulingGroups`.
+
+        Args:
+            team_id: Add Team ID.
+            top: Items per page (enable Pagination under .../Settings).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2282,11 +2927,18 @@ class ShiftsClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2299,23 +2951,32 @@ class ShiftsClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_scheduling_group_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_scheduling_group(
         self,
         team_id: str,
         scheduling_group_id: str,
@@ -2330,6 +2991,22 @@ class ShiftsClient(ConnectorClientBase):
 
         This operation returns details for a Scheduling Group using its unique
         ID.
+
+        Swagger operation ID: `GetSchedulingGroup`.
+
+        Args:
+            team_id: Add Team ID.
+            scheduling_group_id: The unique ID of the Scheduling Group.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2341,7 +3018,7 @@ class ShiftsClient(ConnectorClientBase):
             f"/{quote(str(scheduling_group_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2355,6 +3032,7 @@ class ShiftsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2362,24 +3040,42 @@ class ShiftsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_time_off_requests_async(
+    def list_time_off_requests(
         self,
         team_id: str,
+        *,
         top: Optional[int] = None,
         state: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List all Time Off requests in a team
 
         This operation returns all Time Off requests in a Schedule.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListTimeOffRequests`.
+
+        Args:
+            team_id: Add Team ID.
+            top: Items per page (enable Pagination under .../Settings).
+            state: Request state filter.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2402,11 +3098,18 @@ class ShiftsClient(ConnectorClientBase):
             query_params.append(f"state={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2419,23 +3122,32 @@ class ShiftsClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_time_off_shift_request_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_time_off_shift_request(
         self,
         team_id: str,
         time_off_request_id: str,
@@ -2449,6 +3161,22 @@ class ShiftsClient(ConnectorClientBase):
         Get a Time Off request
 
         This operation returns a Time Off request by ID.
+
+        Swagger operation ID: `GetTimeOffShiftRequest`.
+
+        Args:
+            team_id: Add Team ID.
+            time_off_request_id: The unique ID of the Time Off request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2460,7 +3188,7 @@ class ShiftsClient(ConnectorClientBase):
             f"/{quote(str(time_off_request_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2474,6 +3202,7 @@ class ShiftsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2481,9 +3210,9 @@ class ShiftsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def time_off_request_approve_async(
+    def time_off_request_approve(
         self,
-        input: TimeOffRequestApproveInput,
+        input: TimeOffRequestApproveInput | Mapping[str, Any],
         team_id: str,
         time_off_request_id: str,
         *,
@@ -2496,6 +3225,24 @@ class ShiftsClient(ConnectorClientBase):
         Approve a Time Off request
 
         This operation allows managers to approve a Time Off request.
+
+        Swagger operation ID: `TimeOffRequestApprove`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            team_id: Add Team ID.
+            time_off_request_id: The unique ID of the Time Off request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2508,7 +3255,7 @@ class ShiftsClient(ConnectorClientBase):
             f"/approve"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2522,6 +3269,7 @@ class ShiftsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2529,9 +3277,9 @@ class ShiftsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def time_off_request_decline_async(
+    def time_off_request_decline(
         self,
-        input: TimeOffRequestDeclineInput,
+        input: TimeOffRequestDeclineInput | Mapping[str, Any],
         team_id: str,
         time_off_request_id: str,
         *,
@@ -2544,6 +3292,24 @@ class ShiftsClient(ConnectorClientBase):
         Decline a Time Off request
 
         This operation allows managers to decline a Time Off request.
+
+        Swagger operation ID: `TimeOffRequestDecline`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            team_id: Add Team ID.
+            time_off_request_id: The unique ID of the Time Off request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2556,7 +3322,7 @@ class ShiftsClient(ConnectorClientBase):
             f"/decline"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2570,6 +3336,7 @@ class ShiftsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2577,24 +3344,42 @@ class ShiftsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_offer_shift_requests_async(
+    def list_offer_shift_requests(
         self,
         team_id: str,
+        *,
         top: Optional[int] = None,
         state: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List all Offer Shift requests in a team
 
         This operation returns all Offer Shift requests in a Schedule.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListOfferShiftRequests`.
+
+        Args:
+            team_id: Add Team ID.
+            top: Items per page (enable Pagination under .../Settings).
+            state: Request state filter.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2617,11 +3402,18 @@ class ShiftsClient(ConnectorClientBase):
             query_params.append(f"state={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2634,23 +3426,32 @@ class ShiftsClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_offer_shift_request_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_offer_shift_request(
         self,
         team_id: str,
         offer_shift_request_id: str,
@@ -2664,6 +3465,22 @@ class ShiftsClient(ConnectorClientBase):
         Get an Offer Shift request
 
         This operation returns an Offer Shift request by ID.
+
+        Swagger operation ID: `GetOfferShiftRequest`.
+
+        Args:
+            team_id: Add Team ID.
+            offer_shift_request_id: The unique ID of the Offer Shift request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2675,7 +3492,7 @@ class ShiftsClient(ConnectorClientBase):
             f"/{quote(str(offer_shift_request_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2689,6 +3506,7 @@ class ShiftsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2696,9 +3514,9 @@ class ShiftsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def offer_shift_request_approve_async(
+    def offer_shift_request_approve(
         self,
-        input: OfferShiftRequestApproveInput,
+        input: OfferShiftRequestApproveInput | Mapping[str, Any],
         team_id: str,
         offer_shift_request_id: str,
         *,
@@ -2712,6 +3530,24 @@ class ShiftsClient(ConnectorClientBase):
 
         This operation allows recipients/managers to approve an Offer Shift
         request.
+
+        Swagger operation ID: `OfferShiftRequestApprove`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            team_id: Add Team ID.
+            offer_shift_request_id: The unique ID of the Offer Shift request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2724,7 +3560,7 @@ class ShiftsClient(ConnectorClientBase):
             f"/approve"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2738,6 +3574,7 @@ class ShiftsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2745,9 +3582,9 @@ class ShiftsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def offer_shift_request_decline_async(
+    def offer_shift_request_decline(
         self,
-        input: OfferShiftRequestDeclineInput,
+        input: OfferShiftRequestDeclineInput | Mapping[str, Any],
         team_id: str,
         offer_shift_request_id: str,
         *,
@@ -2760,6 +3597,24 @@ class ShiftsClient(ConnectorClientBase):
         Decline an Offer Shift request
 
         This operation allows users to decline an Offer Shift request.
+
+        Swagger operation ID: `OfferShiftRequestDecline`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            team_id: Add Team ID.
+            offer_shift_request_id: The unique ID of the Offer Shift request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2772,7 +3627,7 @@ class ShiftsClient(ConnectorClientBase):
             f"/decline"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2786,6 +3641,7 @@ class ShiftsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2793,24 +3649,42 @@ class ShiftsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_swap_shifts_change_requests_async(
+    def list_swap_shifts_change_requests(
         self,
         team_id: str,
+        *,
         top: Optional[int] = None,
         state: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List all Swap Shifts requests in a team
 
         This operation returns all Swap Shifts requests in a Schedule.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListSwapShiftsChangeRequests`.
+
+        Args:
+            team_id: Add Team ID.
+            top: Items per page (enable Pagination under .../Settings).
+            state: Request state filter.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2833,11 +3707,18 @@ class ShiftsClient(ConnectorClientBase):
             query_params.append(f"state={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2850,23 +3731,32 @@ class ShiftsClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_swap_shifts_change_request_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_swap_shifts_change_request(
         self,
         team_id: str,
         swap_shifts_change_request_id: str,
@@ -2880,6 +3770,22 @@ class ShiftsClient(ConnectorClientBase):
         Get a Swap Shifts request
 
         This operation returns a Swap Shifts request by ID.
+
+        Swagger operation ID: `GetSwapShiftsChangeRequest`.
+
+        Args:
+            team_id: Add Team ID.
+            swap_shifts_change_request_id: The unique ID of the request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2891,7 +3797,7 @@ class ShiftsClient(ConnectorClientBase):
             f"/{quote(str(swap_shifts_change_request_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2905,6 +3811,7 @@ class ShiftsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2912,9 +3819,9 @@ class ShiftsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def swap_shifts_change_request_approve_async(
+    def swap_shifts_change_request_approve(
         self,
-        input: SwapShiftsChangeRequestApproveInput,
+        input: SwapShiftsChangeRequestApproveInput | Mapping[str, Any],
         team_id: str,
         swap_shifts_change_request_id: str,
         *,
@@ -2927,6 +3834,24 @@ class ShiftsClient(ConnectorClientBase):
         Approve a Swap Shifts request
 
         This operation allows a user to approve a Swap Shifts request.
+
+        Swagger operation ID: `SwapShiftsChangeRequestApprove`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            team_id: Add Team ID.
+            swap_shifts_change_request_id: The unique ID of the request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2939,7 +3864,7 @@ class ShiftsClient(ConnectorClientBase):
             f"/approve"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2953,6 +3878,7 @@ class ShiftsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2960,9 +3886,9 @@ class ShiftsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def swap_shifts_change_request_decline_async(
+    def swap_shifts_change_request_decline(
         self,
-        input: SwapShiftsChangeRequestDeclineInput,
+        input: SwapShiftsChangeRequestDeclineInput | Mapping[str, Any],
         team_id: str,
         swap_shifts_change_request_id: str,
         *,
@@ -2975,6 +3901,24 @@ class ShiftsClient(ConnectorClientBase):
         Decline a Swap Shifts request
 
         This operation allows users to decline a Swap Shifts request.
+
+        Swagger operation ID: `SwapShiftsChangeRequestDecline`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            team_id: Add Team ID.
+            swap_shifts_change_request_id: The unique ID of the request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2987,7 +3931,7 @@ class ShiftsClient(ConnectorClientBase):
             f"/decline"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3001,6 +3945,7 @@ class ShiftsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3008,24 +3953,42 @@ class ShiftsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_open_shift_change_requests_async(
+    def list_open_shift_change_requests(
         self,
         team_id: str,
+        *,
         top: Optional[int] = None,
         state: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List all Open Shift requests in a team
 
         This operation returns all Open Shift change requests in a Schedule.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListOpenShiftChangeRequests`.
+
+        Args:
+            team_id: Add Team ID.
+            top: Items per page (enable Pagination under .../Settings).
+            state: Request state filter.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3048,11 +4011,18 @@ class ShiftsClient(ConnectorClientBase):
             query_params.append(f"state={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -3065,23 +4035,32 @@ class ShiftsClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_open_shift_change_request_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_open_shift_change_request(
         self,
         team_id: str,
         open_shift_change_request_id: str,
@@ -3095,6 +4074,22 @@ class ShiftsClient(ConnectorClientBase):
         Get an Open Shift request
 
         This operation returns an Open Shift change request by ID.
+
+        Swagger operation ID: `GetOpenShiftChangeRequest`.
+
+        Args:
+            team_id: Add Team ID.
+            open_shift_change_request_id: The unique ID of the request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3106,7 +4101,7 @@ class ShiftsClient(ConnectorClientBase):
             f"/{quote(str(open_shift_change_request_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3120,6 +4115,7 @@ class ShiftsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3127,9 +4123,9 @@ class ShiftsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def open_shift_change_request_approve_async(
+    def open_shift_change_request_approve(
         self,
-        input: OpenShiftChangeRequestApproveInput,
+        input: OpenShiftChangeRequestApproveInput | Mapping[str, Any],
         team_id: str,
         open_shift_change_request_id: str,
         *,
@@ -3142,6 +4138,24 @@ class ShiftsClient(ConnectorClientBase):
         Approve an Open Shift request
 
         This operation allows managers to approve an Open Shift request.
+
+        Swagger operation ID: `OpenShiftChangeRequestApprove`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            team_id: Add Team ID.
+            open_shift_change_request_id: The unique ID of the request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3154,7 +4168,7 @@ class ShiftsClient(ConnectorClientBase):
             f"/approve"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3168,6 +4182,7 @@ class ShiftsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3175,9 +4190,9 @@ class ShiftsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def open_shift_change_request_decline_async(
+    def open_shift_change_request_decline(
         self,
-        input: OpenShiftChangeRequestDeclineInput,
+        input: OpenShiftChangeRequestDeclineInput | Mapping[str, Any],
         team_id: str,
         open_shift_change_request_id: str,
         *,
@@ -3190,6 +4205,24 @@ class ShiftsClient(ConnectorClientBase):
         Decline an Open Shift request
 
         This operation allows managers to decline an Open Shift request.
+
+        Swagger operation ID: `OpenShiftChangeRequestDecline`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            team_id: Add Team ID.
+            open_shift_change_request_id: The unique ID of the request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3202,7 +4235,7 @@ class ShiftsClient(ConnectorClientBase):
             f"/decline"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3216,6 +4249,7 @@ class ShiftsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3223,25 +4257,43 @@ class ShiftsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_open_shifts_cross_team_async(
+    def list_open_shifts_cross_team(
         self,
+        *,
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
         top: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List all Open Shifts from my teams
 
         This operation returns Open Shifts that need to be filled from all your
         teams.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListOpenShiftsCrossTeam`.
+
+        Args:
+            start_time: yyyy-MM-ddTHH:mm:ss.fffZ (UTC format).
+            end_time: yyyy-MM-ddTHH:mm:ss.fffZ (UTC format).
+            top: Items per page (enable Pagination under .../Settings).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/beta/me/joinedTeams/getOpenShifts"
@@ -3264,11 +4316,18 @@ class ShiftsClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -3281,41 +4340,69 @@ class ShiftsClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def list_shifts_cross_team_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_shifts_cross_team(
         self,
+        *,
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
         assigned_to_user_name: Optional[str] = None,
         top: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List all Shifts from my teams
 
         This operation returns assigned Shifts from all your teams.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListShiftsCrossTeam`.
+
+        Args:
+            start_time: yyyy-MM-ddTHH:mm:ss.fffZ (UTC format).
+            end_time: yyyy-MM-ddTHH:mm:ss.fffZ (UTC format).
+            assigned_to_user_name: Assigned to user with name.
+            top: Items per page (enable Pagination under .../Settings).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/beta/me/joinedTeams/getShifts"
@@ -3343,11 +4430,18 @@ class ShiftsClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -3360,41 +4454,69 @@ class ShiftsClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def list_times_off_cross_team_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_times_off_cross_team(
         self,
+        *,
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
         assigned_to_user_name: Optional[str] = None,
         top: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List all Times Off from my teams
 
         This operation returns times when people are off from all your teams.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListTimesOffCrossTeam`.
+
+        Args:
+            start_time: yyyy-MM-ddTHH:mm:ss.fffZ (UTC format).
+            end_time: yyyy-MM-ddTHH:mm:ss.fffZ (UTC format).
+            assigned_to_user_name: Assigned to user with name.
+            top: How many times off to fetch.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/beta/me/joinedTeams/getTimesOff"
@@ -3422,11 +4544,18 @@ class ShiftsClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -3439,58 +4568,106 @@ class ShiftsClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_all_teams_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_all_teams(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List teams
 
         This operation retrieves a list of all the Teams (Office 365 Groups)
         you are a member of.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetAllTeams`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/me/joinedTeams"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
 
 # Trigger Operations

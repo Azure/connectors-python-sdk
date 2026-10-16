@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure Event Hubs Connector SDK Sample
+Azure Event Hubs sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure Event Hubs connector SDK
+This sample demonstrates how to use the Azure Event Hubs client from the Azure Connectors Python SDK
 to send and receive events from Azure Event Hubs.
 
 Prerequisites:
@@ -22,11 +22,9 @@ Usage:
 
     python sample_connector_usage_eventhubs.py
 """
-
-import asyncio
 import json
 import os
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.eventhubs import (
     EventhubsClient,
@@ -45,7 +43,7 @@ CONNECTION_RUNTIME_URL = os.environ.get(
 EVENT_HUB_NAME = os.environ.get("EVENTHUBS_HUB_NAME", "")
 
 
-async def example_1_send_event():
+def example_1_send_event():
     """Example 1: Send a single event to Event Hub."""
     print("\n=== Example 1: Send Single Event ===")
 
@@ -54,9 +52,9 @@ async def example_1_send_event():
         print("Example: $env:EVENTHUBS_HUB_NAME = 'my-event-hub'")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Create a single event
                 event = SendEvent(
@@ -71,7 +69,7 @@ async def example_1_send_event():
                     }
                 )
 
-                await client.send_event_async(
+                client.send_event(
                     input=event,
                     event_hub_name=EVENT_HUB_NAME
                 )
@@ -86,7 +84,7 @@ async def example_1_send_event():
                 print(f"Error: {ex}")
 
 
-async def example_2_send_event_with_partition_key():
+def example_2_send_event_with_partition_key():
     """Example 2: Send an event with a specific partition key."""
     print("\n=== Example 2: Send Event with Partition Key ===")
 
@@ -95,9 +93,9 @@ async def example_2_send_event_with_partition_key():
         return
 
     partition_key = os.environ.get("EVENTHUBS_PARTITION_KEY", "partition-1")
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 event = SendEvent(
                     content_data=json.dumps({
@@ -110,7 +108,7 @@ async def example_2_send_event_with_partition_key():
                     }
                 )
 
-                await client.send_event_async(
+                client.send_event(
                     input=event,
                     event_hub_name=EVENT_HUB_NAME,
                     partition_key=partition_key
@@ -125,7 +123,7 @@ async def example_2_send_event_with_partition_key():
                 print(f"Error: {ex}")
 
 
-async def example_3_send_batch_events():
+def example_3_send_batch_events():
     """Example 3: Send multiple events in a batch."""
     print("\n=== Example 3: Send Batch Events ===")
 
@@ -133,9 +131,9 @@ async def example_3_send_batch_events():
         print("Set EVENTHUBS_HUB_NAME environment variable.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Create batch with multiple events
                 batch_input = SendEventsInput(
@@ -157,7 +155,7 @@ async def example_3_send_batch_events():
                     }
                 )
 
-                await client.send_events_async(
+                client.send_events(
                     input=batch_input,
                     event_hub_name=EVENT_HUB_NAME,
                     partition_key=os.environ.get("EVENTHUBS_PARTITION_KEY", "partition-1")
@@ -174,16 +172,16 @@ async def example_3_send_batch_events():
                 print(f"Error: {ex}")
 
 
-async def example_4_list_event_hubs():
+def example_4_list_event_hubs():
     """Example 4: List Event Hubs in the namespace."""
     print("\n=== Example 4: List Event Hubs ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_event_hubs_async()
-                print(f"Event Hubs: {result}")
+                event_hubs = list(client.list_event_hubs())
+                print(f"Event Hubs: {event_hubs}")
 
             except ConnectorException as ex:
                 print(f"Connector error (status {ex.status_code}): {ex}")
@@ -191,7 +189,7 @@ async def example_4_list_event_hubs():
                 print(f"Error: {ex}")
 
 
-async def example_5_list_consumer_groups():
+def example_5_list_consumer_groups():
     """Example 5: List consumer groups for an Event Hub."""
     print("\n=== Example 5: List Consumer Groups ===")
 
@@ -199,14 +197,14 @@ async def example_5_list_consumer_groups():
         print("Set EVENTHUBS_HUB_NAME environment variable.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_consumer_groups_async(
+                consumer_groups = list(client.list_consumer_groups(
                     event_hub_name=EVENT_HUB_NAME
-                )
-                print(f"Consumer groups for '{EVENT_HUB_NAME}': {result}")
+                ))
+                print(f"Consumer groups for '{EVENT_HUB_NAME}': {consumer_groups}")
 
             except ConnectorException as ex:
                 print(f"Connector error (status {ex.status_code}): {ex}")
@@ -214,9 +212,9 @@ async def example_5_list_consumer_groups():
                 print(f"Error: {ex}")
 
 
-async def main():
+def main():
     """Run all examples."""
-    print("Azure Event Hubs Connector SDK - Sample Usage")
+    print("Azure Event Hubs sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
 
     if not CONNECTION_RUNTIME_URL:
@@ -225,15 +223,15 @@ async def main():
         print("Format: https://[region].azure-apihub.net/apim/eventhubs/[id]")
         return
 
-    await example_1_send_event()
-    await example_2_send_event_with_partition_key()
-    await example_3_send_batch_events()
-    await example_4_list_event_hubs()
-    await example_5_list_consumer_groups()
+    example_1_send_event()
+    example_2_send_event_with_partition_key()
+    example_3_send_batch_events()
+    example_4_list_event_hubs()
+    example_5_list_consumer_groups()
 
     print("\n" + "=" * 60)
     print("Sample completed!")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

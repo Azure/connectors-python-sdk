@@ -5,20 +5,33 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "ZeptomailClient",
+    "EmailAddress",
+    "EmailAddressItems",
+    "FromAddress",
+    "GetMailAgentResponse",
+    "GetProcessedEmailsResponse",
+    "ProcessedMailStatsResponse",
+    "ReplyToAddress",
+    "SendMailInput",
+    "SendTemplateMailInput",
+    "SuccessMessage",
+]
 
 
 # Type Definitions
@@ -29,9 +42,9 @@ class GetMailAgentResponse:
     Response for Get all Mail Agent
     """
 
-    data: Optional[List[Dict[str, Any]]] = None
+    data: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """data"""
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """message"""
 
 
@@ -41,9 +54,9 @@ class GetProcessedEmailsResponse:
     Response for Get processed email details
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """message"""
 
 
@@ -53,32 +66,46 @@ class SendMailInput:
     Send mail
     """
 
-    mailagent_key: Optional[str] = None
+    mailagent_key: str
     """Choose Mail Agent or enter the Mail Agent key."""
-    bounce_address: Optional[str] = None
+    bounce_address: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The email address to which bounced emails will be sent."""
-    from_: Optional[FromAddress] = field(
-        default=None,
+    from_: FromAddress | Mapping[str, Any] = dataclass_field(
         metadata={"wire_name": "from"},
     )
-    to: Optional[List[EmailAddressItems]] = None
+    to: List[EmailAddressItems | Mapping[str, Any]]
     """Recipient email address."""
-    cc: Optional[List[EmailAddressItems]] = None
+    cc: Optional[
+        List[EmailAddressItems | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Email addresses of cc'd recipients."""
-    bcc: Optional[List[EmailAddressItems]] = None
+    bcc: Optional[
+        List[EmailAddressItems | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Email addresses of bcc'd recipients."""
-    mailtype: Optional[str] = None
+    mailtype: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Format of the mail to be sent"""
-    subject: Optional[str] = None
+    subject: str
     """Subject line of your email"""
-    htmlbody: Optional[str] = None
+    htmlbody: Optional[str] = dataclass_field(default=None, kw_only=True)
     """This is the body content for your email."""
-    reply_to: Optional[List[ReplyToAddress]] = None
+    reply_to: Optional[
+        List[ReplyToAddress | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """
     The email address to which the recipient's email responses will be
     addressed.
     """
-    attachments: Optional[List[Dict[str, Any]]] = None
+    attachments: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Attachments"""
 
 
@@ -88,11 +115,11 @@ class SuccessMessage:
     Response for Send mail
     """
 
-    data: Optional[List[Dict[str, Any]]] = None
+    data: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """data"""
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The status of the request made."""
-    request_id: Optional[str] = None
+    request_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique reference ID of the request."""
 
 
@@ -102,28 +129,52 @@ class SendTemplateMailInput:
     Send template mail
     """
 
-    mailagent_key: Optional[str] = None
+    mailagent_key: str
     """Choose Mail Agent or enter the Mail Agent key."""
-    bounce_address: Optional[str] = None
+    bounce_address: Optional[str] = dataclass_field(default=None, kw_only=True)
     """the email address to which bounced emails will be sent."""
-    mail_template_key: Optional[str] = None
+    mail_template_key: str
     """Choose the Mail template"""
-    from_: Optional[FromAddress] = field(
-        default=None,
+    from_: FromAddress | Mapping[str, Any] = dataclass_field(
         metadata={"wire_name": "from"},
     )
-    to: Optional[List[EmailAddressItems]] = None
+    to: Optional[
+        List[EmailAddressItems | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Recipient email address."""
-    cc: Optional[List[EmailAddressItems]] = None
+    cc: Optional[
+        List[EmailAddressItems | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Email addresses of cc'd recipients."""
-    bcc: Optional[List[EmailAddressItems]] = None
+    bcc: Optional[
+        List[EmailAddressItems | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Email addresses of bcc'd recipients."""
-    merge_key_detail: Optional[List[Dict[str, Any]]] = None
+    merge_key_detail: Optional[
+        List[Dict[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """
     You can use merge tags to replace the placeholders with multiple values for
     different recipients.
     """
-    reply_to: Optional[List[ReplyToAddress]] = None
+    reply_to: Optional[
+        List[ReplyToAddress | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Reply To"""
 
 
@@ -133,11 +184,11 @@ class ProcessedMailStatsResponse:
     Response for Processed emails analytics
     """
 
-    hb: Optional[Dict[str, Any]] = None
+    hb: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Emails that have hard bounced"""
-    sb: Optional[Dict[str, Any]] = None
+    sb: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """sb"""
-    sent: Optional[Dict[str, Any]] = None
+    sent: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Emails that have been sent"""
 
 
@@ -147,11 +198,10 @@ class FromAddress:
     Definition: FromAddress
     """
 
-    from_detail: Optional[Dict[str, Any]] = field(
-        default=None,
+    from_detail: Dict[str, Any] = dataclass_field(
         metadata={"wire_name": "from-detail"},
     )
-    name: Optional[str] = None
+    name: str
     """Sender's user name"""
 
 
@@ -161,9 +211,9 @@ class EmailAddress:
     Definition: EmailAddress
     """
 
-    address: Optional[str] = None
+    address: str
     """Recipient's email address."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Recipient's name."""
 
 
@@ -173,12 +223,12 @@ class ReplyToAddress:
     Definition: ReplyToAddress
     """
 
-    address: Optional[str] = None
+    address: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A valid email address containing a domain that is verified in your Mail
     Agent.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name for the reply-to."""
 
 
@@ -188,7 +238,12 @@ class EmailAddressItems:
     Definition: EmailAddressItems
     """
 
-    email_address: Optional[EmailAddress] = None
+    email_address: Optional[
+        EmailAddress | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 # Client Class
@@ -199,16 +254,16 @@ class ZeptomailClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -219,8 +274,8 @@ class ZeptomailClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -228,8 +283,8 @@ class ZeptomailClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -241,7 +296,7 @@ class ZeptomailClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -256,7 +311,7 @@ class ZeptomailClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "zeptomail"
 
-    async def get_mail_agent_async(
+    def get_mail_agent(
         self,
         *,
         timeout: Optional[float] = None,
@@ -275,10 +330,24 @@ class ZeptomailClient(ConnectorClientBase):
         created.\\n- status: Status of the Mail Agent.\\n\\nExample 1: To
         retrieve details of all Mail Agents in the ZeptoMail account. Sample
         prompt 1: Get me details of all the Mail Agents in the account.
+
+        Swagger operation ID: `GetMailAgent`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/portal/v1.0/mailagents"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -292,6 +361,7 @@ class ZeptomailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -299,9 +369,10 @@ class ZeptomailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_processed_emails_async(
+    def get_processed_emails(
         self,
         mailagent_key: str,
+        *,
         subject: Optional[str] = None,
         from_: Optional[str] = None,
         to: Optional[str] = None,
@@ -310,7 +381,6 @@ class ZeptomailClient(ConnectorClientBase):
         request_id: Optional[str] = None,
         is_hb: Optional[bool] = None,
         is_sb: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -324,6 +394,31 @@ class ZeptomailClient(ConnectorClientBase):
         Subject, From Address, Sent time and Request ID for emails sent for the
         time range. The mailagent_key parameter should match the Mail Agent key
         of the Mail Agent as listed in our system.
+
+        Swagger operation ID: `Get_Processed_Emails`.
+
+        Args:
+            mailagent_key: Choose Mail Agent or enter the Mail Agent key.
+            subject: Enter subject of the email.
+            from_: Enter sender address of the email.
+            to: Enter recipient address of the email.
+            date_from: Enter from date for search in the format
+                yyyy-MM-ddTHH:mm:sszzz.
+            date_to: Enter to date for search in the format
+                yyyy-MM-ddTHH:mm:sszzz.
+            request_id: Enter Request ID of the email.
+            is_hb: Include hardbounces in results.
+            is_sb: Include softbounces in results.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/email"
         query_params = []
@@ -374,7 +469,7 @@ class ZeptomailClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -388,6 +483,7 @@ class ZeptomailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -395,9 +491,9 @@ class ZeptomailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def send_mail_async(
+    def send_mail(
         self,
-        input: SendMailInput,
+        input: SendMailInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -408,10 +504,26 @@ class ZeptomailClient(ConnectorClientBase):
         Send mail
 
         To send an email to the desired recipient.
+
+        Swagger operation ID: `SendMail`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/email"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -425,6 +537,7 @@ class ZeptomailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -432,9 +545,9 @@ class ZeptomailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def send_template_mail_async(
+    def send_template_mail(
         self,
-        input: SendTemplateMailInput,
+        input: SendTemplateMailInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -445,10 +558,26 @@ class ZeptomailClient(ConnectorClientBase):
         Send template mail
 
         Sending a single email using Templates.
+
+        Swagger operation ID: `SendTemplateMail`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/email/template"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -462,6 +591,7 @@ class ZeptomailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -469,12 +599,12 @@ class ZeptomailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def processed_mail_stats_async(
+    def processed_mail_stats(
         self,
         mailagent: str,
+        *,
         from_time: Optional[str] = None,
         to_time: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -488,6 +618,25 @@ class ZeptomailClient(ConnectorClientBase):
         count of Hardbounce, Softbounce and Sent statistics over a period of
         time and each day . The mailagent parameter should match the Mail Agent
         name as listed in our system.
+
+        Swagger operation ID: `Processed_Mail_Stats`.
+
+        Args:
+            mailagent: Choose or enter Mail agent name.
+            from_time: Enter statics from date in the format
+                yyyy-MM-ddTHH:mm:sszzz.
+            to_time: Enter statics to date in the format
+                yyyy-MM-ddTHH:mm:sszzz.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/stats/email"
         query_params = []
@@ -508,7 +657,7 @@ class ZeptomailClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -522,6 +671,7 @@ class ZeptomailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

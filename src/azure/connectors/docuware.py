@@ -5,20 +5,42 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "DocuwareClient",
+    "GetDialogFieldsResponse",
+    "GetDialogsResponse",
+    "GetDocumentInformationResponse",
+    "GetFileCabinetFieldsResponse",
+    "GetFileCabinetsResponse",
+    "GetOrganizationResponse",
+    "GetStampFieldsResponse",
+    "GetStampsResponse",
+    "ListDocumentsInDocumentTrayResponse",
+    "PlaceAStampInput",
+    "PlaceAStampResponse",
+    "SearchForDocumentsInFileCabinetInput",
+    "SearchForDocumentsInFileCabinetResponse",
+    "TransferDocumentInput",
+    "TransferDocumentResponse",
+    "UpdateIndexFieldsInput",
+    "UpdateIndexFieldsResponse",
+]
 
 
 # Type Definitions
@@ -29,7 +51,7 @@ class SearchForDocumentsInFileCabinetInput:
     Search in file cabinet
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -42,10 +64,15 @@ class SearchForDocumentsInFileCabinetResponse:
     Response for Search in file cabinet
     """
 
-    count: Optional[int] = field(default=None, metadata={"wire_name": "Count"})
-    """Count"""
-    documents: Optional[List[Dict[str, Any]]] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Count"},
+    )
+    """Count"""
+    documents: Optional[List[Dict[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Documents"},
     )
     """Documents"""
@@ -57,7 +84,11 @@ class GetOrganizationResponse:
     Response for Get organization
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
     """Name"""
 
 
@@ -67,8 +98,9 @@ class GetFileCabinetsResponse:
     Response for Get file cabinets and document trays
     """
 
-    file_cabinets: Optional[List[Dict[str, Any]]] = field(
+    file_cabinets: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FileCabinets"},
     )
     """FileCabinets"""
@@ -80,53 +112,63 @@ class GetDocumentInformationResponse:
     Response for Get document information
     """
 
-    sections: Optional[List[Dict[str, Any]]] = field(
+    sections: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Sections"},
     )
     """Sections"""
-    document_id: Optional[int] = field(
+    document_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DocumentId"},
     )
     """DocumentId"""
-    index_fields: Optional[Dict[str, Any]] = field(
+    index_fields: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IndexFields"},
     )
     """IndexFields"""
-    document_title: Optional[str] = field(
+    document_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DocumentTitle"},
     )
     """DocumentTitle"""
-    file_cabinet_id: Optional[str] = field(
+    file_cabinet_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FileCabinetId"},
     )
     """FileCabinetId"""
-    total_pages: Optional[int] = field(
+    total_pages: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TotalPages"},
     )
     """TotalPages"""
-    file_size: Optional[int] = field(
+    file_size: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FileSize"},
     )
     """FileSize"""
-    content_type: Optional[str] = field(
+    content_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContentType"},
     )
     """ContentType"""
-    version_status: Optional[str] = field(
+    version_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "VersionStatus"},
     )
     """VersionStatus"""
-    document_flags: Optional[Dict[str, Any]] = field(
+    document_flags: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DocumentFlags"},
     )
     """DocumentFlags"""
@@ -141,53 +183,63 @@ class UpdateIndexFieldsResponse:
     Response for Update index fields
     """
 
-    sections: Optional[List[Dict[str, Any]]] = field(
+    sections: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Sections"},
     )
     """Sections"""
-    document_id: Optional[int] = field(
+    document_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DocumentId"},
     )
     """DocumentId"""
-    index_fields: Optional[Dict[str, Any]] = field(
+    index_fields: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IndexFields"},
     )
     """IndexFields"""
-    document_title: Optional[str] = field(
+    document_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DocumentTitle"},
     )
     """DocumentTitle"""
-    file_cabinet_id: Optional[str] = field(
+    file_cabinet_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FileCabinetId"},
     )
     """FileCabinetId"""
-    total_pages: Optional[int] = field(
+    total_pages: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TotalPages"},
     )
     """TotalPages"""
-    file_size: Optional[int] = field(
+    file_size: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FileSize"},
     )
     """FileSize"""
-    content_type: Optional[str] = field(
+    content_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContentType"},
     )
     """ContentType"""
-    version_status: Optional[str] = field(
+    version_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "VersionStatus"},
     )
     """VersionStatus"""
-    document_flags: Optional[Dict[str, Any]] = field(
+    document_flags: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DocumentFlags"},
     )
     """DocumentFlags"""
@@ -199,22 +251,24 @@ class TransferDocumentInput:
     Transfer documents
     """
 
-    source_file_cabinet_id: Optional[str] = field(
-        default=None,
+    source_file_cabinet_id: str = dataclass_field(
         metadata={"wire_name": "SourceFileCabinetId"},
     )
     """Select the source File Cabinet or Document Tray."""
-    documents: Optional[List[Dict[str, Any]]] = field(
+    documents: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Documents"},
     )
-    keep_source: Optional[bool] = field(
+    keep_source: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "KeepSource"},
     )
     """Choose whether the source documents should be deleted or not."""
-    fill_intellix: Optional[bool] = field(
+    fill_intellix: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FillIntellix"},
     )
     """Choose whether intelligent indexing should be used when storing."""
@@ -226,10 +280,15 @@ class TransferDocumentResponse:
     Response for Transfer documents
     """
 
-    count: Optional[int] = field(default=None, metadata={"wire_name": "Count"})
-    """Count"""
-    documents: Optional[List[Dict[str, Any]]] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Count"},
+    )
+    """Count"""
+    documents: Optional[List[Dict[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Documents"},
     )
     """Documents"""
@@ -241,40 +300,35 @@ class PlaceAStampInput:
     Place a stamp
     """
 
-    file_number: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "FileNumber"},
-    )
+    file_number: int = dataclass_field(metadata={"wire_name": "FileNumber"})
     """Specify the file/section containing the page to be stamped."""
-    page_number: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "PageNumber"},
-    )
+    page_number: int = dataclass_field(metadata={"wire_name": "PageNumber"})
     """Specify the page number to place the stamp on."""
-    layer: Optional[int] = field(default=None, metadata={"wire_name": "Layer"})
+    layer: int = dataclass_field(metadata={"wire_name": "Layer"})
     """Specify the document layer to place the stamp on [1-5]"""
-    position_x: Optional[float] = field(
+    position_x: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PositionX"},
     )
     """[Optional] Position from the left edge of the page in mm."""
-    position_y: Optional[float] = field(
+    position_y: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PositionY"},
     )
     """[Optional] Position from the upper edge of the page in mm."""
-    stamp_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "StampId"},
-    )
+    stamp_id: str = dataclass_field(metadata={"wire_name": "StampId"})
     """Select or specify the stamp to be used."""
-    password: Optional[str] = field(
+    password: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Password"},
     )
     """Specify the password for the stamp (if required)."""
-    fields: Optional[List[Dict[str, Any]]] = field(
+    fields: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Fields"},
     )
 
@@ -285,31 +339,47 @@ class PlaceAStampResponse:
     Response for Place a stamp
     """
 
-    created: Optional[Dict[str, Any]] = field(
+    created: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Created"},
     )
     """Created"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "Type"})
-    """Type"""
-    color: Optional[str] = field(default=None, metadata={"wire_name": "Color"})
-    """Color"""
-    rotation: Optional[int] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Type"},
+    )
+    """Type"""
+    color: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Color"},
+    )
+    """Color"""
+    rotation: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Rotation"},
     )
     """Rotation"""
-    transparent: Optional[bool] = field(
+    transparent: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Transparent"},
     )
     """Transparent"""
-    stroke_width: Optional[int] = field(
+    stroke_width: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StrokeWidth"},
     )
     """StrokeWidth"""
-    guid: Optional[str] = field(default=None, metadata={"wire_name": "Guid"})
+    guid: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Guid"},
+    )
     """Guid"""
 
 
@@ -319,8 +389,9 @@ class GetDialogsResponse:
     Response for Get dialogs
     """
 
-    dialogs: Optional[List[Dict[str, Any]]] = field(
+    dialogs: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Dialogs"},
     )
     """Dialogs"""
@@ -332,8 +403,9 @@ class GetStampsResponse:
     Response for Get stamps
     """
 
-    stamps: Optional[List[Dict[str, Any]]] = field(
+    stamps: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Stamps"},
     )
     """Stamps"""
@@ -345,8 +417,9 @@ class GetStampFieldsResponse:
     Response for Get stamp fields
     """
 
-    fields: Optional[List[Dict[str, Any]]] = field(
+    fields: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Fields"},
     )
     """Fields"""
@@ -358,8 +431,9 @@ class GetFileCabinetFieldsResponse:
     Response for Get file cabinet fields
     """
 
-    fields: Optional[List[Dict[str, Any]]] = field(
+    fields: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Fields"},
     )
     """Fields"""
@@ -371,8 +445,9 @@ class GetDialogFieldsResponse:
     Response for Get dialog fields
     """
 
-    fields: Optional[List[Dict[str, Any]]] = field(
+    fields: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Fields"},
     )
     """Fields"""
@@ -384,10 +459,15 @@ class ListDocumentsInDocumentTrayResponse:
     Response for List documents in document tray
     """
 
-    count: Optional[int] = field(default=None, metadata={"wire_name": "Count"})
-    """Count"""
-    documents: Optional[List[Dict[str, Any]]] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Count"},
+    )
+    """Count"""
+    documents: Optional[List[Dict[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Documents"},
     )
 
@@ -400,16 +480,16 @@ class DocuwareClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -420,8 +500,8 @@ class DocuwareClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -429,8 +509,8 @@ class DocuwareClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -442,7 +522,7 @@ class DocuwareClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -457,9 +537,86 @@ class DocuwareClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "docuware"
 
-    async def search_for_documents_in_file_cabinet_async(
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
+            if next_link.startswith("?"):
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
+
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
+    def search_for_documents_in_file_cabinet(
         self,
-        input: SearchForDocumentsInFileCabinetInput,
+        input: SearchForDocumentsInFileCabinetInput | Mapping[str, Any],
         file_cabinet: str,
         search_dialog_id: str,
         *,
@@ -472,6 +629,24 @@ class DocuwareClient(ConnectorClientBase):
         Search in file cabinet
 
         Search a file cabinet for documents matching the specified criteria.
+
+        Swagger operation ID: `SearchForDocumentsInFileCabinet`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            file_cabinet: Select the File Cabinet to search.
+            search_dialog_id: Select the search dialog to use for searching.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -485,7 +660,7 @@ class DocuwareClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -499,6 +674,7 @@ class DocuwareClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -506,7 +682,7 @@ class DocuwareClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_organization_async(
+    def get_organization(
         self,
         *,
         timeout: Optional[float] = None,
@@ -518,10 +694,24 @@ class DocuwareClient(ConnectorClientBase):
         Get organization
 
         Get the organization name.
+
+        Swagger operation ID: `GetOrganization`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/Organization"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -535,6 +725,7 @@ class DocuwareClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -542,7 +733,7 @@ class DocuwareClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_file_cabinets_async(
+    def list_file_cabinets(
         self,
         file_cabinet_type: str,
         *,
@@ -550,11 +741,30 @@ class DocuwareClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get file cabinets and document trays
 
         Gets a list of file cabinets and/or document trays.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetFileCabinets`.
+
+        Args:
+            file_cabinet_type: Select which types you want returned.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/FileCabinets"
         query_params = []
@@ -564,29 +774,50 @@ class DocuwareClient(ConnectorClientBase):
         query_params.append(f"FileCabinetType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_document_information_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("FileCabinets", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_document_information(
         self,
         file_cabinet_id: str,
         document_id: int,
@@ -600,6 +831,24 @@ class DocuwareClient(ConnectorClientBase):
         Get document information
 
         Gets information about a document.
+
+        Swagger operation ID: `GetDocumentInformation`.
+
+        Args:
+            file_cabinet_id: Select the File Cabinet or Document Tray with your
+                document.
+            document_id: Specify the ID of the document you want information
+                on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -609,7 +858,7 @@ class DocuwareClient(ConnectorClientBase):
             f"/{quote(str(document_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -623,6 +872,7 @@ class DocuwareClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -630,7 +880,7 @@ class DocuwareClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_document_async(
+    def delete_document(
         self,
         file_cabinet_id: str,
         document_id: int,
@@ -644,6 +894,23 @@ class DocuwareClient(ConnectorClientBase):
         Delete a document
 
         Deletes a document from a file cabinet or document tray.
+
+        Swagger operation ID: `DeleteDocument`.
+
+        Args:
+            file_cabinet_id: Select the File Cabinet or Document Tray with your
+                document.
+            document_id: Specify the ID of the document you want to delete.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -653,7 +920,7 @@ class DocuwareClient(ConnectorClientBase):
             f"/{quote(str(document_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -667,9 +934,10 @@ class DocuwareClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def download_file_async(
+    def download_file(
         self,
         file_cabinet_id: str,
         document_id: int,
@@ -686,6 +954,27 @@ class DocuwareClient(ConnectorClientBase):
 
         Downloads a file/section of a document stored in a file cabinet or
         document tray.
+
+        Swagger operation ID: `DownloadFile`.
+
+        Args:
+            file_cabinet_id: Select the File Cabinet or Document Tray with your
+                document.
+            document_id: Specify the ID of the document with the file you want
+                to download.
+            file_number: Specify the file number of the file you want to
+                download.
+            document_format: Select the format for the downloaded document.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -705,7 +994,7 @@ class DocuwareClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -719,11 +1008,12 @@ class DocuwareClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
 
-    async def download_document_async(
+    def download_document(
         self,
         file_cabinet_id: str,
         document_id: int,
@@ -738,6 +1028,24 @@ class DocuwareClient(ConnectorClientBase):
         Download a document
 
         Downloads a document from a file cabinet or document tray.
+
+        Swagger operation ID: `DownloadDocument`.
+
+        Args:
+            file_cabinet_id: Select the File Cabinet or Document Tray with your
+                document.
+            document_id: Specify the ID of the document you want to download.
+            document_format: Select the format for the downloaded document.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -755,7 +1063,7 @@ class DocuwareClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -769,11 +1077,12 @@ class DocuwareClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
 
-    async def update_index_fields_async(
+    def update_index_fields(
         self,
         input: UpdateIndexFieldsInput,
         file_cabinet_id: str,
@@ -788,6 +1097,24 @@ class DocuwareClient(ConnectorClientBase):
         Update index fields
 
         Updates the index fields of a document.
+
+        Swagger operation ID: `UpdateIndexFields`.
+
+        Args:
+            input: The request body.
+            file_cabinet_id: Select the File Cabinet with the document to
+                update.
+            document_id: Specify the ID of the document to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -798,7 +1125,7 @@ class DocuwareClient(ConnectorClientBase):
             f"/Fields"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -812,6 +1139,7 @@ class DocuwareClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -819,12 +1147,12 @@ class DocuwareClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def transfer_document_async(
+    def transfer_document(
         self,
-        input: TransferDocumentInput,
+        input: TransferDocumentInput | Mapping[str, Any],
         destination_file_cabinet_id: str,
-        store_dialog_id: Optional[str] = None,
         *,
+        store_dialog_id: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -835,6 +1163,26 @@ class DocuwareClient(ConnectorClientBase):
 
         Moves one or more documents from one file cabinet/document tray to
         another.
+
+        Swagger operation ID: `TransferDocument`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            destination_file_cabinet_id: Select the destination File Cabinet or
+                Document Tray.
+            store_dialog_id: Select the store dialog for indexing the documents
+                being moved.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -852,7 +1200,7 @@ class DocuwareClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -866,6 +1214,7 @@ class DocuwareClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -873,9 +1222,9 @@ class DocuwareClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def place_a_stamp_async(
+    def place_a_stamp(
         self,
-        input: PlaceAStampInput,
+        input: PlaceAStampInput | Mapping[str, Any],
         file_cabinet_id: str,
         document_id: int,
         *,
@@ -888,6 +1237,25 @@ class DocuwareClient(ConnectorClientBase):
         Place a stamp
 
         Places a stamp on a document.
+
+        Swagger operation ID: `PlaceAStamp`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            file_cabinet_id: Select the File Cabinet or Document Tray with your
+                document.
+            document_id: Specify the ID of the document you want to stamp.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -898,7 +1266,7 @@ class DocuwareClient(ConnectorClientBase):
             f"/Annotation"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -912,6 +1280,7 @@ class DocuwareClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -919,20 +1288,41 @@ class DocuwareClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_dialogs_async(
+    def list_dialogs(
         self,
         file_cabinet: str,
-        dialog_type: Optional[str] = None,
         *,
+        dialog_type: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get dialogs
 
         Gets a list of dialogs for a file cabinet or document tray.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetDialogs`.
+
+        Args:
+            file_cabinet: Select the File Cabinet or Document Tray to get
+                dialogs from.
+            dialog_type: Select the type of dialogs to return.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -946,29 +1336,50 @@ class DocuwareClient(ConnectorClientBase):
             query_params.append(f"DialogType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_stamps_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("Dialogs", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_stamps(
         self,
         file_cabinet: str,
         *,
@@ -976,39 +1387,80 @@ class DocuwareClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get stamps
 
         Gets a list of stamps for a file cabinet or document tray.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetStamps`.
+
+        Args:
+            file_cabinet: Select the File Cabinet or Document Tray to get
+                stamps from.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/FileCabinets/{quote(str(file_cabinet), safe='')}/Stamps"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_stamp_fields_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("Stamps", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_stamp_fields(
         self,
         file_cabinet: str,
         stamp: str,
@@ -1017,11 +1469,32 @@ class DocuwareClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get stamp fields
 
         Gets a list of fields for a stamp.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetStampFields`.
+
+        Args:
+            file_cabinet: Select the File Cabinet or Document Tray with the
+                desired stamp.
+            stamp: Select the stamp to get its fields.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1031,42 +1504,83 @@ class DocuwareClient(ConnectorClientBase):
             f"/{quote(str(stamp), safe='')}"
             f"/Fields"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_file_cabinet_fields_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("Fields", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_file_cabinet_fields(
         self,
         file_cabinet: str,
-        field_type: Optional[str] = None,
         *,
+        field_type: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get file cabinet fields
 
         Gets a list of fields for a file cabinet.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetFileCabinetFields`.
+
+        Args:
+            file_cabinet: Select the File Cabinet to get fields for.
+            field_type: Select the type of fields to return.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1080,29 +1594,50 @@ class DocuwareClient(ConnectorClientBase):
             query_params.append(f"FieldType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_dialog_fields_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("Fields", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_dialog_fields(
         self,
         file_cabinet: str,
         dialog_id: str,
@@ -1111,11 +1646,31 @@ class DocuwareClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get dialog fields
 
         Gets the fields for a dialog
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetDialogFields`.
+
+        Args:
+            file_cabinet: Select the File Cabinet.
+            dialog_id: Select the dialog to get the fields for.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1125,29 +1680,50 @@ class DocuwareClient(ConnectorClientBase):
             f"/{quote(str(dialog_id), safe='')}"
             f"/Fields"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_documents_in_document_tray_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("Fields", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_documents_in_document_tray(
         self,
         document_tray: str,
         *,
@@ -1155,34 +1731,74 @@ class DocuwareClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List documents in document tray
 
         List documents from the specified document tray.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListDocumentsInDocumentTray`.
+
+        Args:
+            document_tray: Select the Document Tray to search.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/DocumentTrays/{quote(str(document_tray), safe='')}/Search"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("Documents", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)

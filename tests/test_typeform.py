@@ -3,7 +3,8 @@
 """Contract tests for TypeformClient."""
 
 import azure.connectors.typeform as typeform_module
-from azure.connectors.typeform import TRIGGER_OPERATIONS, TypeformClient
+from azure.connectors.aio.typeform import TypeformClient
+from azure.connectors.typeform import TRIGGER_OPERATIONS
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 
 

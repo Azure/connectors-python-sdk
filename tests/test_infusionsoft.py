@@ -8,9 +8,9 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.infusionsoft import InfusionsoftClient
 from azure.connectors.infusionsoft import (
     CreateTaskRequest,
-    InfusionsoftClient,
     ListOrdersResponse,
     ListTasksResponse,
     OnNewTaskResponse,
@@ -21,16 +21,24 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import (
+    generated_pager_response_text,
+    model_instance,
+    resolve_generated_result,
+)
 
 
 async def _invoke_operation(client: InfusionsoftClient, operation: str):
     """Invoke an Infusionsoft operation by name for shared tests."""
     if operation == "create_task":
-        return await client.create_task_async(input=CreateTaskRequest())
+        return await client.create_task(input=model_instance(CreateTaskRequest))
     if operation == "update_task":
-        return await client.update_task_async(input=CreateTaskRequest(), id="1")
+        return await client.update_task(
+            input=model_instance(CreateTaskRequest),
+            id="1",
+        )
     if operation == "list_tasks":
-        return await client.list_tasks_async()
+        return await resolve_generated_result(client.list_tasks())
 
     raise ValueError(f"Unsupported operation '{operation}'.")
 
@@ -75,7 +83,7 @@ class TestInfusionsoftClientInitialization:
         client = InfusionsoftClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -142,11 +150,13 @@ class TestInfusionsoftClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_task_async(input=CreateTaskRequest())
+            result = await client.create_task(
+                input=model_instance(CreateTaskRequest)
+            )
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "POST"
@@ -165,11 +175,14 @@ class TestInfusionsoftClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.update_task_async(input=CreateTaskRequest(), id="5")
+            result = await client.update_task(
+                input=model_instance(CreateTaskRequest),
+                id="5",
+            )
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "PUT"
@@ -184,25 +197,28 @@ class TestInfusionsoftClientOperations:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        mock_response = MockResponse(status=200, text='{"tasks": [{"id": 1}]}')
+        mock_response = MockResponse(
+            status=200,
+            text=generated_pager_response_text(client.list_tasks),
+        )
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_tasks_async()
+            result = await resolve_generated_result(client.list_tasks())
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
             assert "/crm/rest/v1/tasks/search?" in path
             assert "order=" in path
-            assert result == {"tasks": [{"id": 1}]}
+            assert result == [{"ok": True}]
 
     @pytest.mark.asyncio
-    async def test_empty_response_body_returns_none(self, mock_credential):
-        """Test a 2xx response with no body returns None."""
+    async def test_empty_response_body_returns_empty_page(self, mock_credential):
+        """Test a pageable 2xx response with no body returns no items."""
         client = InfusionsoftClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
@@ -211,13 +227,13 @@ class TestInfusionsoftClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.list_tasks_async()
+            result = await resolve_generated_result(client.list_tasks())
 
-            assert result is None
+            assert result == []
 
 
 class TestInfusionsoftClientErrorHandling:
@@ -239,7 +255,7 @@ class TestInfusionsoftClientErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
@@ -288,6 +304,8 @@ class TestInfusionsoftTypeSerialization:
         assert get_origin(ListOrdersResponse) is list
 
     def test_request_dataclasses_instantiate(self):
-        """Test generated request dataclasses instantiate without arguments."""
-        assert CreateTaskRequest() is not None
-        assert CreateTaskRequest().type_ is None
+        """Test generated request dataclasses initialize optional defaults."""
+        request = model_instance(CreateTaskRequest)
+
+        assert request is not None
+        assert request.type_ is None

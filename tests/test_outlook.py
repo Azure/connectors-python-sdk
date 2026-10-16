@@ -7,8 +7,8 @@ import inspect
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.outlook import OutlookClient
 from azure.connectors.outlook import (
-    OutlookClient,
     ClientReceiveMessage,
     ContactResponse,
     ClientSendAttachment,
@@ -25,6 +25,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestOutlookClientInitialization:
@@ -60,7 +61,7 @@ class TestOutlookClientInitialization:
         client = OutlookClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -131,11 +132,11 @@ class TestGetEmail:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_email_async(message_id="msg123")
+            result = await client.get_email(message_id="msg123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -155,19 +156,19 @@ class TestGetEmail:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_email_async(message_id="msg123", include_attachments="true")
+            await client.get_email(message_id="msg123", include_attachments="true")
 
             call_args = mock_send.call_args
             url = call_args[0][1]
             assert "includeAttachments=true" in url
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_credential):
-        """Test that error response raises ConnectorException."""
+    async def test_not_found_succeeds(self, mock_credential):
+        """Test deleting an absent email succeeds."""
         client = OutlookClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
@@ -177,12 +178,12 @@ class TestGetEmail:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_email_async(message_id="nonexistent")
+                await client.get_email(message_id="nonexistent")
 
             assert exc_info.value.status_code == 404
 
@@ -202,11 +203,11 @@ class TestDeleteEmail:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.delete_email_async(message_id="msg123")
+            await client.delete_email(message_id="msg123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -225,14 +226,35 @@ class TestDeleteEmail:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.delete_email_async(message_id="nonexistent")
+                await client.delete_email(message_id="nonexistent")
 
-            assert exc_info.value.status_code == 404
+        assert exc_info.value.status_code == 404
+
+    @pytest.mark.asyncio
+    async def test_other_error_response_raises_exception(self, mock_credential):
+        """Test that non-404 error responses still raise ConnectorException."""
+        client = OutlookClient(
+            "https://example.azure.com/connections/test",
+            credential=mock_credential
+        )
+
+        mock_response = MockResponse(status=500, text='{"error": "Failed"}')
+
+        with patch.object(
+            client._http_client,
+            'send',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.delete_email(message_id="nonexistent")
+
+            assert exc_info.value.status_code == 500
 
 
 class TestMoveEmail:
@@ -253,11 +275,11 @@ class TestMoveEmail:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            _ = await client.move_async(message_id="msg123", folder_path="Archive")
+            _ = await client.move(message_id="msg123", folder_path="Archive")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -277,12 +299,12 @@ class TestMoveEmail:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.move_async(message_id="nonexistent", folder_path="Archive")
+                await client.move(message_id="nonexistent", folder_path="Archive")
 
             assert exc_info.value.status_code == 404
 
@@ -302,11 +324,11 @@ class TestFlagEmail:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.flag_async(message_id="msg123")
+            await client.flag(message_id="msg123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -325,12 +347,12 @@ class TestFlagEmail:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.flag_async(message_id="nonexistent")
+                await client.flag(message_id="nonexistent")
 
             assert exc_info.value.status_code == 404
 
@@ -350,11 +372,11 @@ class TestMarkAsRead:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.mark_as_read_async(message_id="msg123")
+            await client.mark_as_read(message_id="msg123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -373,12 +395,12 @@ class TestMarkAsRead:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.mark_as_read_async(message_id="nonexistent")
+                await client.mark_as_read(message_id="nonexistent")
 
             assert exc_info.value.status_code == 404
 
@@ -398,11 +420,11 @@ class TestGetAttachment:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_attachment_async(
+            result = await client.get_attachment(
                 message_id="msg123",
                 attachment_id="att456"
             )
@@ -425,12 +447,12 @@ class TestGetAttachment:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_attachment_async(
+                await client.get_attachment(
                     message_id="msg123",
                     attachment_id="nonexistent"
                 )
@@ -458,11 +480,11 @@ class TestSendEmail:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.send_email_async(input=email_input)
+            await client.send_email(input=email_input)
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -486,12 +508,12 @@ class TestSendEmail:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.send_email_async(input=email_input)
+                await client.send_email(input=email_input)
 
             assert exc_info.value.status_code == 400
 
@@ -515,11 +537,11 @@ class TestReplyTo:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.reply_to_async(input=reply_input, message_id="msg123")
+            await client.reply_to(input=reply_input, message_id="msg123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -542,12 +564,12 @@ class TestReplyTo:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.reply_to_async(input=reply_input, message_id="nonexistent")
+                await client.reply_to(input=reply_input, message_id="nonexistent")
 
             assert exc_info.value.status_code == 404
 
@@ -570,17 +592,17 @@ class TestGetEmails:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_emails_async()
+            result = await resolve_generated_result(client.list_emails())
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/v2/Mail" in call_args[0][1]
-            assert len(result["value"]) == 2
+            assert len(result) == 2
 
     @pytest.mark.asyncio
     async def test_with_query_parameters(self, mock_credential):
@@ -594,15 +616,17 @@ class TestGetEmails:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_emails_async(
-                folder_path="Inbox",
-                fetch_only_unread="true",
-                importance="High",
-                top="10"
+            await resolve_generated_result(
+                client.list_emails(
+                    folder_path="Inbox",
+                    fetch_only_unread=True,
+                    importance="High",
+                    top=10
+                )
             )
 
             call_args = mock_send.call_args
@@ -631,17 +655,19 @@ class TestCalendarGetTables:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.calendar_get_tables_async()
+            result = await resolve_generated_result(
+                client.list_calendar_get_tables()
+            )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/datasets/calendars/tables" in call_args[0][1]
-            assert len(result["value"]) == 1
+            assert len(result) == 1
 
 
 class TestCalendarGetItem:
@@ -662,11 +688,11 @@ class TestCalendarGetItem:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.calendar_get_item_async(
+            result = await client.calendar_get_item(
                 table="Calendar",
                 id="event123"
             )
@@ -701,11 +727,11 @@ class TestCalendarPostItem:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.calendar_post_item_async(
+            result = await client.calendar_post_item(
                 input=event_input,
                 table="Calendar"
             )
@@ -732,11 +758,11 @@ class TestCalendarDeleteItem:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.calendar_delete_item_async(table="Calendar", id="event123")
+            await client.calendar_delete_item(table="Calendar", id="event123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -762,11 +788,13 @@ class TestContactGetTables:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            _ = await client.contact_get_tables_async()
+            _ = await resolve_generated_result(
+                client.list_contact_get_tables()
+            )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -792,11 +820,13 @@ class TestContactGetItems:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            _ = await client.contact_get_items_async(table="Contacts")
+            _ = await resolve_generated_result(
+                client.list_contact_get_items(table="Contacts")
+            )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -810,45 +840,45 @@ class TestOutlookApiSurface:
     def test_callable_method_signatures(self):
         """Test the client exposes exactly the generated callable methods."""
         expected_signatures = {
-            "calendar_delete_item_async": ("self", "table", "id"),
-            "calendar_get_item_async": ("self", "table", "id"),
-            "calendar_get_items_async": (
+            "calendar_delete_item": ("self", "table", "id"),
+            "calendar_get_item": ("self", "table", "id"),
+            "list_calendar_get_items": (
                 "self", "table", "filter", "orderby", "top", "skip"
             ),
-            "calendar_get_tables_async": ("self",),
-            "calendar_patch_item_async": ("self", "input", "table", "id"),
-            "calendar_post_item_async": ("self", "input", "table"),
-            "contact_delete_item_async": ("self", "table", "id"),
-            "contact_get_item_async": ("self", "table", "id"),
-            "contact_get_items_async": (
+            "list_calendar_get_tables": ("self",),
+            "calendar_patch_item": ("self", "input", "table", "id"),
+            "calendar_post_item": ("self", "input", "table"),
+            "contact_delete_item": ("self", "table", "id"),
+            "contact_get_item": ("self", "table", "id"),
+            "list_contact_get_items": (
                 "self", "table", "filter", "orderby", "top", "skip"
             ),
-            "contact_get_tables_async": ("self",),
-            "contact_patch_item_async": ("self", "input", "table", "id"),
-            "contact_post_item_async": ("self", "input", "table"),
-            "delete_email_async": ("self", "message_id"),
-            "flag_async": ("self", "message_id"),
-            "forward_email_async": ("self", "input", "message_id"),
-            "get_attachment_async": ("self", "message_id", "attachment_id"),
-            "get_email_async": (
+            "list_contact_get_tables": ("self",),
+            "contact_patch_item": ("self", "input", "table", "id"),
+            "contact_post_item": ("self", "input", "table"),
+            "delete_email": ("self", "message_id"),
+            "flag": ("self", "message_id"),
+            "forward_email": ("self", "input", "message_id"),
+            "get_attachment": ("self", "message_id", "attachment_id"),
+            "get_email": (
                 "self", "message_id", "include_attachments", "internet_message_id"
             ),
-            "get_emails_async": (
+            "list_emails": (
                 "self", "folder_path", "to", "cc", "to_or_cc", "from_",
                 "importance", "fetch_only_with_attachment", "subject_filter",
                 "fetch_only_unread", "include_attachments", "search_query", "top"
             ),
-            "get_events_calendar_view_async": (
+            "list_events_calendar_view": (
                 "self", "calendar_id", "start_date_time_offset",
                 "end_date_time_offset", "filter", "orderby", "top", "skip", "search"
             ),
-            "mark_as_read_async": ("self", "message_id"),
-            "move_async": ("self", "message_id", "folder_path"),
-            "reply_to_async": ("self", "input", "message_id"),
-            "respond_to_event_async": ("self", "input", "event_id", "response"),
-            "send_approval_mail_async": ("self", "input"),
-            "send_email_async": ("self", "input"),
-            "send_mail_with_options_async": ("self", "input"),
+            "mark_as_read": ("self", "message_id"),
+            "move": ("self", "message_id", "folder_path"),
+            "reply_to": ("self", "input", "message_id"),
+            "respond_to_event": ("self", "input", "event_id", "response"),
+            "send_approval_mail": ("self", "input"),
+            "send_email": ("self", "input"),
+            "send_mail_with_options": ("self", "input"),
         }
         request_control_parameters = (
             "timeout",
@@ -863,10 +893,7 @@ class TestOutlookApiSurface:
         actual_signatures = {
             name: tuple(inspect.signature(method).parameters)
             for name, method in vars(OutlookClient).items()
-            if (
-                inspect.iscoroutinefunction(method)
-                or inspect.isasyncgenfunction(method)
-            )
+            if callable(method) and not name.startswith("_")
         }
 
         assert actual_signatures == expected_signatures
@@ -1064,12 +1091,12 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_emails_async()
-            await client.calendar_get_tables_async()
+            await resolve_generated_result(client.list_emails())
+            await resolve_generated_result(client.list_calendar_get_tables())
 
             assert mock_send.call_count == 2
 
@@ -1085,12 +1112,12 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_emails_async()
-            assert result is None
+            result = await resolve_generated_result(client.list_emails())
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_unauthorized_raises_exception(self, mock_credential):
@@ -1104,11 +1131,11 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_email_async(message_id="msg123")
+                await client.get_email(message_id="msg123")
 
             assert exc_info.value.status_code == 401

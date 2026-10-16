@@ -1,7 +1,7 @@
 """
-DocuSign Connector SDK Sample
+DocuSign sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the DocuSign connector SDK.
+This sample demonstrates how to use the DocuSign client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with DocuSign connection
@@ -17,11 +17,9 @@ Usage:
 
     python sample_connector_usage_docusign.py
 """
-
-import asyncio
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
 from azure.connectors.docusign import DocusignClient
@@ -32,14 +30,13 @@ from azure.connectors.docusign import DocusignClient
 CONNECTION_RUNTIME_URL = os.environ.get("DOCUSIGN_CONNECTION_URL", "")
 
 
-async def example_1_get_login_accounts() -> list[dict]:
+def example_1_get_login_accounts() -> list[dict]:
     """Example 1: Get available DocuSign accounts."""
     print("\n=== Example 1: Get Login Accounts ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with DocusignClient(CONNECTION_RUNTIME_URL, credential) as client:
-            accounts_response = await client.get_login_accounts_async()
-            accounts = accounts_response.get("accounts", []) if accounts_response else []
+    with DefaultAzureCredential() as credential:
+        with DocusignClient(CONNECTION_RUNTIME_URL, credential) as client:
+            accounts = list(client.list_login_accounts())
 
             print(f"Found {len(accounts)} accounts")
             for account in accounts[:10]:
@@ -48,13 +45,13 @@ async def example_1_get_login_accounts() -> list[dict]:
             return accounts
 
 
-async def example_2_search_envelopes(account_id: str) -> None:
+def example_2_search_envelopes(account_id: str) -> None:
     """Example 2: Search envelopes for an account."""
     print("\n=== Example 2: Search Envelopes ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with DocusignClient(CONNECTION_RUNTIME_URL, credential) as client:
-            envelopes_response = await client.search_list_envelopes_async(
+    with DefaultAzureCredential() as credential:
+        with DocusignClient(CONNECTION_RUNTIME_URL, credential) as client:
+            envelopes_response = client.search_list_envelopes(
                 account_id=account_id,
                 top=5,
             )
@@ -65,22 +62,22 @@ async def example_2_search_envelopes(account_id: str) -> None:
                 print(f"  - {envelope.get('envelopeId')} ({envelope.get('status')})")
 
 
-async def main() -> None:
+def main() -> None:
     """Run all examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: DOCUSIGN_CONNECTION_URL environment variable not set.")
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("DocuSign Connector SDK - Sample Usage")
+    print("DocuSign sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:
-        accounts = await example_1_get_login_accounts()
+        accounts = example_1_get_login_accounts()
         if accounts:
             first_account_id = accounts[0].get("accountId")
             if first_account_id:
-                await example_2_search_envelopes(first_account_id)
+                example_2_search_envelopes(first_account_id)
             else:
                 print("No account id found in first record; skipping envelope search.")
         else:
@@ -93,4 +90,4 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

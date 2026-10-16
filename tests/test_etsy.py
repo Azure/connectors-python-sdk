@@ -3,7 +3,7 @@
 """Contract tests for EtsyClient."""
 
 import azure.connectors.etsy as etsy_module
-from azure.connectors.etsy import EtsyClient
+from azure.connectors.aio.etsy import EtsyClient
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 
 

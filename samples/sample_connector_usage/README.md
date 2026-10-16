@@ -10,10 +10,16 @@ This directory contains samples demonstrating how to use the Azure Connectors SD
 
 ## Samples
 
-Each sample file (`sample_connector_usage_*.py`) demonstrates a specific connector's operations. Run any sample with:
+Each connector has a synchronous sample in this directory and an asynchronous
+counterpart under `aio/`. Both catalogs contain 99 files and use identical
+unsuffixed operation names. Run either mode with:
 
 ```bash
+# Synchronous
 python sample_connector_usage_<connector>.py
+
+# Asynchronous
+python aio/sample_connector_usage_<connector>.py
 ```
 
 | Sample | Connector | Environment Variable |
@@ -128,40 +134,74 @@ $env:OFFICE365_CONNECTION_URL = "https://[region].azure-apihub.net/apim/office36
 export OFFICE365_CONNECTION_URL="https://[region].azure-apihub.net/apim/office365/[connection-id]"
 ```
 
-## Usage Pattern
+## Usage Patterns
 
-All connector clients follow the same async context manager pattern:
+Root connector modules provide synchronous clients and shared models:
 
 ```python
-import asyncio
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
+
 from azure.connectors import ConnectorException
 from azure.connectors.<connector> import <Connector>Client
 
 CONNECTION_URL = "https://[region].azure-apihub.net/apim/<connector>/[connection-id]"
 
+def main():
+    with DefaultAzureCredential() as credential:
+        with <Connector>Client(CONNECTION_URL, credential) as client:
+            try:
+                result = client.<operation>()
+                print(result)
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+```
+
+Asynchronous clients live in the matching `aio` connector module. Import
+request and response models from the root module:
+
+```python
+import asyncio
+
+from azure.identity.aio import DefaultAzureCredential
+
+from azure.connectors import ConnectorException
+from azure.connectors.aio.<connector> import <Connector>Client
+from azure.connectors.<connector> import <RequestModel>
+
+CONNECTION_URL = "https://[region].azure-apihub.net/apim/<connector>/[connection-id]"
+
+
 async def main():
-    credential = DefaultAzureCredential()
-    
-    async with <Connector>Client(CONNECTION_URL, credential) as client:
-        try:
-            result = await client.<operation>_async()
-            print(result)
-        except ConnectorException as ex:
-            print(f"Connector error: {ex}")
+    async with DefaultAzureCredential() as credential:
+        async with <Connector>Client(CONNECTION_URL, credential) as client:
+            try:
+                result = await client.<operation>(<RequestModel>())
+                print(result)
+            except ConnectorException as ex:
+                print(f"Connector error: {ex}")
+
 
 asyncio.run(main())
 ```
 
+Pageable operations return `ItemPaged` from root clients and `AsyncItemPaged`
+from aio clients. Iterate the pager directly; do not await pager construction.
+
 ## Error Handling
 
-The SDK provides structured error handling via `ConnectorException`:
+The SDK provides structured error handling via `ConnectorException` in both
+modes:
 
 ```python
-from azure.connectors import ConnectorException
-
 try:
-    result = await client.some_operation_async()
+    result = client.some_operation()
+except ConnectorException as ex:
+    print(f"Status: {ex.status_code}, Message: {ex}")
+```
+
+```python
+try:
+    result = await client.some_operation()
 except ConnectorException as ex:
     print(f"Status: {ex.status_code}, Message: {ex}")
 ```
@@ -170,12 +210,12 @@ except ConnectorException as ex:
 
 1. Set up a connection in Azure Portal (see [connection-setup.md](../../docs/connection-setup.md))
 2. Set the connection runtime URL environment variable
-3. Run the sample for your connector
+3. Run the sync or aio sample for your connector
 4. Use typed clients in your application
 5. Deploy to Azure Functions or run locally
 
 ## Reference
 
-- Python SDK: [PythonSDK/src/azure_workflows_connectors_sdk](../../src/azure_workflows_connectors_sdk)
+- API Reference: [Azure Connectors Python SDK](https://azure.github.io/connectors-python-sdk/)
 - Generation Guide: [GENERATION.md](../../GENERATION.md)
-- .NET Sample: [DotnetSDK/samples/SampleConnectorUsage](../../../DotnetSDK/samples/SampleConnectorUsage)
+- Migration Guide: [Sync/aio migration](../../docs/migration-sync-aio.md)

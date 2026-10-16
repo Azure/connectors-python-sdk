@@ -1,7 +1,7 @@
 """
-Freshservice Connector SDK Sample
+Freshservice sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Freshservice connector SDK.
+This sample demonstrates how to use the Freshservice client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Freshservice connection
@@ -17,11 +17,9 @@ Usage:
 
     python sample_connector_usage_freshservice.py
 """
-
-import asyncio
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
 from azure.connectors.freshservice import (
@@ -37,12 +35,12 @@ from azure.connectors.freshservice import (
 CONNECTION_RUNTIME_URL = os.environ.get("FRESHSERVICE_CONNECTION_URL", "")
 
 
-async def example_1_create_ticket() -> None:
+def example_1_create_ticket() -> None:
     """Example 1: Create a ticket."""
     print("\n=== Example 1: Create Ticket ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with FreshserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
+    with DefaultAzureCredential() as credential:
+        with FreshserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
             request = CreateTicketRequest(
                 subject="SDK sample ticket",
                 description="Created from the freshservice SDK sample.",
@@ -51,48 +49,48 @@ async def example_1_create_ticket() -> None:
                 status="2",
             )
 
-            created = await client.create_ticket_async(input=request)
+            created = client.create_ticket(input=request)
             ticket = created.get("ticket", {}) if created else {}
             print(f"Created ticket: {ticket.get('id')}")
 
 
-async def example_2_update_ticket() -> None:
+def example_2_update_ticket() -> None:
     """Example 2: Update an existing ticket."""
     print("\n=== Example 2: Update Ticket ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with FreshserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
+    with DefaultAzureCredential() as credential:
+        with FreshserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
             request = UpdateTicketRequest(priority="3", status="3")
 
-            updated = await client.update_ticket_async(input=request, ticket_id=1)
+            updated = client.update_ticket(input=request, ticket_id=1)
             ticket = updated.get("ticket", {}) if updated else {}
             print(f"Updated ticket: {ticket.get('id')}")
 
 
-async def example_3_add_note() -> None:
+def example_3_add_note() -> None:
     """Example 3: Add a note to a ticket."""
     print("\n=== Example 3: Add Note ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with FreshserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
+    with DefaultAzureCredential() as credential:
+        with FreshserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
             request = AddNoteRequest(
                 body="Note added from the freshservice SDK sample.",
                 private=True,
             )
 
-            note = await client.add_note_async(input=request, ticket_id=1)
+            note = client.add_note(input=request, ticket_id=1)
             conversation = note.get("conversation", {}) if note else {}
             print(f"Added note: {conversation.get('id')}")
 
 
-async def main() -> None:
+def main() -> None:
     """Run Freshservice connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: FRESHSERVICE_CONNECTION_URL environment variable not set.")
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Freshservice Connector SDK - Sample Usage")
+    print("Freshservice sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:
@@ -109,4 +107,4 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

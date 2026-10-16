@@ -1,7 +1,7 @@
 """
-ClickSend SMS Connector SDK Sample
+ClickSend SMS sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the ClickSend SMS connector SDK.
+This sample demonstrates how to use the ClickSend SMS client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a ClickSend SMS connection
@@ -17,11 +17,9 @@ Usage:
 
     python sample_connector_usage_clicksendsms.py
 """
-
-import asyncio
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
 from azure.connectors.clicksendsms import (
@@ -36,18 +34,18 @@ from azure.connectors.clicksendsms import (
 CONNECTION_RUNTIME_URL = os.environ.get("CLICKSENDSMS_CONNECTION_URL", "")
 
 
-async def example_1_send_sms() -> None:
+def example_1_send_sms() -> None:
     """Example 1: Send an SMS message."""
     print("\n=== Example 1: Send SMS ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with ClicksendsmsClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.sms_send_async(
+    with DefaultAzureCredential() as credential:
+        with ClicksendsmsClient(CONNECTION_RUNTIME_URL, credential) as client:
+            result = client.sms_send(
                 input=SmsSendInput(
                     messages=[
                         {
                             "to": "+61411111111",
-                            "body": "Hello from the ClickSend SMS connector SDK.",
+                            "body": "Hello from the ClickSend SMS client in the Azure Connectors Python SDK.",
                         }
                     ],
                 ),
@@ -55,46 +53,46 @@ async def example_1_send_sms() -> None:
             print(f"Send result: {result}")
 
 
-async def example_2_get_contact_lists() -> None:
+def example_2_get_contact_lists() -> None:
     """Example 2: Get contact lists."""
     print("\n=== Example 2: Get Contact Lists ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with ClicksendsmsClient(CONNECTION_RUNTIME_URL, credential) as client:
-            lists = await client.get_contact_lists_async(page=1, limit=10)
+    with DefaultAzureCredential() as credential:
+        with ClicksendsmsClient(CONNECTION_RUNTIME_URL, credential) as client:
+            lists = client.get_contact_lists(page=1, limit=10)
             print(f"Contact lists: {lists}")
 
 
-async def example_3_create_list() -> None:
+def example_3_create_list() -> None:
     """Example 3: Create a new contact list."""
     print("\n=== Example 3: Create Contact List ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with ClicksendsmsClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.create_list_async(
+    with DefaultAzureCredential() as credential:
+        with ClicksendsmsClient(CONNECTION_RUNTIME_URL, credential) as client:
+            result = client.create_list(
                 input=CreateListInput(list_name="My New List"),
             )
             print(f"Created list: {result}")
 
 
-async def example_4_search_contact_lists() -> None:
+def example_4_search_contact_lists() -> None:
     """Example 4: Search contact lists."""
     print("\n=== Example 4: Search Contact Lists ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with ClicksendsmsClient(CONNECTION_RUNTIME_URL, credential) as client:
-            results = await client.search_contact_list_async(q="friends")
+    with DefaultAzureCredential() as credential:
+        with ClicksendsmsClient(CONNECTION_RUNTIME_URL, credential) as client:
+            results = client.search_contact_list(q="friends")
             print(f"Search results: {results}")
 
 
-async def main() -> None:
+def main() -> None:
     """Run ClickSend SMS connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: CLICKSENDSMS_CONNECTION_URL environment variable not set.")
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("ClickSend SMS Connector SDK - Sample Usage")
+    print("ClickSend SMS sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:
@@ -112,4 +110,4 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

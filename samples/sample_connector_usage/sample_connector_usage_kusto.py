@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Kusto (Azure Data Explorer) Connector SDK Sample
+Kusto (Azure Data Explorer) sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Kusto connector SDK.
+This sample demonstrates how to use the Kusto client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Kusto (Azure Data Explorer) cluster
@@ -22,12 +22,10 @@ Usage:
 
     python sample_connector_usage_kusto.py
 """
-
-import asyncio
 import os
 
 try:
-    from azure.identity.aio import DefaultAzureCredential
+    from azure.identity import DefaultAzureCredential
     from azure.connectors import ConnectorException
     from azure.connectors.kusto import (
         KustoClient,
@@ -66,13 +64,13 @@ KUSTO_TABLE = os.environ.get(
 )
 
 
-async def example_1_simple_kql_query():
+def example_1_simple_kql_query():
     """Example 1: Run a simple KQL query."""
     print("\n=== Example 1: Simple KQL Query ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with KustoClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with KustoClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 query = f"{KUSTO_TABLE} | take 5"
 
@@ -82,7 +80,8 @@ async def example_1_simple_kql_query():
                     csl=query,
                 )
 
-                results = await client.list_kusto_results_async(input=query_request)
+                poller = client.begin_list_kusto_results(input=query_request)
+                results = poller.result()
 
                 if results and 'value' in results:
                     print(f"Query executed successfully. Found {len(results['value'])} rows:")
@@ -97,13 +96,13 @@ async def example_1_simple_kql_query():
                 print(f"Error: {ex}")
 
 
-async def example_2_aggregation_query():
+def example_2_aggregation_query():
     """Example 2: Run a KQL query with aggregation."""
     print("\n=== Example 2: Aggregation Query ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with KustoClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with KustoClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 query = f"""
                     {KUSTO_TABLE}
@@ -117,7 +116,8 @@ async def example_2_aggregation_query():
                     csl=query,
                 )
 
-                results = await client.list_kusto_results_async(input=query_request)
+                poller = client.begin_list_kusto_results(input=query_request)
+                results = poller.result()
 
                 if results and 'value' in results:
                     print("Top 5 states by event count:")
@@ -134,13 +134,13 @@ async def example_2_aggregation_query():
                 print(f"Error: {ex}")
 
 
-async def example_3_time_based_filtering():
+def example_3_time_based_filtering():
     """Example 3: Query with time-based filtering."""
     print("\n=== Example 3: Time-Based Filtering ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with KustoClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with KustoClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 query = f"""
                     {KUSTO_TABLE}
@@ -156,7 +156,8 @@ async def example_3_time_based_filtering():
                     csl=query,
                 )
 
-                results = await client.list_kusto_results_async(input=query_request)
+                poller = client.begin_list_kusto_results(input=query_request)
+                results = poller.result()
 
                 if results and 'value' in results:
                     print("Top 5 event types in the last year:")
@@ -173,13 +174,13 @@ async def example_3_time_based_filtering():
                 print(f"Error: {ex}")
 
 
-async def example_4_visualize_results():
+def example_4_visualize_results():
     """Example 4: Query and visualize results as a chart."""
     print("\n=== Example 4: Visualize Query Results ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with KustoClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with KustoClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 query = f"""
                     {KUSTO_TABLE}
@@ -194,9 +195,10 @@ async def example_4_visualize_results():
                     chart_type="Time Chart",
                 )
 
-                chart = await client.run_kusto_query_and_visualize_results_async(
+                poller = client.begin_run_kusto_query_and_visualize_results(
                     input=visualize_request
                 )
+                chart = poller.result()
 
                 if chart:
                     print("Chart data generated successfully")
@@ -215,13 +217,13 @@ async def example_4_visualize_results():
                 print(f"Error: {ex}")
 
 
-async def example_5_control_command():
+def example_5_control_command():
     """Example 5: Run a control command to show database schema."""
     print("\n=== Example 5: Control Command (Show Tables) ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with KustoClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with KustoClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 command = ".show tables"
 
@@ -231,9 +233,10 @@ async def example_5_control_command():
                     csl=command,
                 )
 
-                results = await client.list_kusto_show_command_results_async(
+                poller = client.begin_list_kusto_show_command_results(
                     input=command_request
                 )
+                results = poller.result()
 
                 if results and 'value' in results:
                     print(f"Found {len(results['value'])} tables in database '{KUSTO_DATABASE}':")
@@ -250,13 +253,13 @@ async def example_5_control_command():
                 print(f"Error: {ex}")
 
 
-async def example_6_table_schema():
+def example_6_table_schema():
     """Example 6: Get schema information for a specific table."""
     print("\n=== Example 6: Show Table Schema ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with KustoClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with KustoClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 command = f".show table {KUSTO_TABLE} schema as json"
 
@@ -266,9 +269,10 @@ async def example_6_table_schema():
                     csl=command,
                 )
 
-                results = await client.list_kusto_show_command_results_async(
+                poller = client.begin_list_kusto_show_command_results(
                     input=command_request
                 )
+                results = poller.result()
 
                 if results and 'value' in results and len(results['value']) > 0:
                     print(f"Schema for table '{KUSTO_TABLE}':")
@@ -292,13 +296,13 @@ async def example_6_table_schema():
                 print(f"Error: {ex}")
 
 
-async def example_7_statistical_analysis():
+def example_7_statistical_analysis():
     """Example 7: Statistical analysis with percentiles."""
     print("\n=== Example 7: Statistical Analysis ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with KustoClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with KustoClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 query = f"""
                     {KUSTO_TABLE}
@@ -316,7 +320,8 @@ async def example_7_statistical_analysis():
                     csl=query,
                 )
 
-                results = await client.list_kusto_results_async(input=query_request)
+                poller = client.begin_list_kusto_results(input=query_request)
+                results = poller.result()
 
                 if results and 'value' in results and len(results['value']) > 0:
                     stats = results['value'][0]
@@ -334,13 +339,13 @@ async def example_7_statistical_analysis():
                 print(f"Error: {ex}")
 
 
-async def example_8_error_handling():
+def example_8_error_handling():
     """Example 8: Demonstrate error handling with invalid query."""
     print("\n=== Example 8: Error Handling ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with KustoClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with KustoClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Intentionally use an invalid table name
                 query = "NonExistentTable | take 10"
@@ -351,7 +356,8 @@ async def example_8_error_handling():
                     csl=query,
                 )
 
-                results = await client.list_kusto_results_async(input=query_request)
+                poller = client.begin_list_kusto_results(input=query_request)
+                results = poller.result()
                 print(f"Unexpected success: {results}")
 
             except ConnectorException as ex:
@@ -362,24 +368,24 @@ async def example_8_error_handling():
                 print(f"  Message: {ex}")
 
 
-async def main():
+def main():
     """Run all examples."""
-    print("Kusto (Azure Data Explorer) Connector SDK - Sample Usage")
+    print("Kusto (Azure Data Explorer) sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
     print()
 
-    await example_1_simple_kql_query()
-    await example_2_aggregation_query()
-    await example_3_time_based_filtering()
-    await example_4_visualize_results()
-    await example_5_control_command()
-    await example_6_table_schema()
-    await example_7_statistical_analysis()
-    await example_8_error_handling()
+    example_1_simple_kql_query()
+    example_2_aggregation_query()
+    example_3_time_based_filtering()
+    example_4_visualize_results()
+    example_5_control_command()
+    example_6_table_schema()
+    example_7_statistical_analysis()
+    example_8_error_handling()
 
     print("\n" + "=" * 60)
     print("Sample completed!")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

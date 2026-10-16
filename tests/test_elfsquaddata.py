@@ -8,7 +8,8 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 import azure.connectors.elfsquaddata as elfsquaddata_module
-from azure.connectors.elfsquaddata import ElfsquaddataClient, TRIGGER_OPERATIONS
+from azure.connectors.aio.elfsquaddata import ElfsquaddataClient
+from azure.connectors.elfsquaddata import TRIGGER_OPERATIONS
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import (
     GeneratedConnectorContractTests,
@@ -20,7 +21,7 @@ OPERATION_CONTRACTS = {
     "delete_entity_by_id": ("DELETE", False),
     **dict.fromkeys(
         [
-            "get_entities",
+            "list_entities",
             "get_entity_by_id",
             "get_function_definition",
             "get_functions",
@@ -68,11 +69,11 @@ async def test_get_entities_serializes_query_and_response(
 
     with patch.object(
         client._http_client,
-        "send_async",
+        "send",
         new_callable=AsyncMock,
         return_value=MockResponse(status=200, text='{"value": []}'),
     ) as mock_send:
-        result = await resolve_generated_result(client.get_entities_async(
+        result = await resolve_generated_result(client.list_entities(
             entity_name="products",
             top=10,
             select="id,name",
@@ -109,7 +110,7 @@ async def test_get_entities_follows_odata_pages_and_terminates(
     ) as client:
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             side_effect=[
                 MockResponse(status=200, text=json.dumps({
@@ -123,7 +124,7 @@ async def test_get_entities_follows_odata_pages_and_terminates(
             ],
         ) as transport:
             entities = [
-                entity async for entity in client.get_entities_async(
+                entity async for entity in client.list_entities(
                     entity_name="products",
                     top=10,
                 )
@@ -155,12 +156,12 @@ async def test_get_entities_empty_response_is_a_single_request(
     ) as client:
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=status, text=body),
         ) as transport:
             entities = [
-                entity async for entity in client.get_entities_async(
+                entity async for entity in client.list_entities(
                     entity_name="products"
                 )
             ]

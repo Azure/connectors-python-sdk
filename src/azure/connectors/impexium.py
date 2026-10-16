@@ -5,20 +5,179 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "ImpexiumClient",
+    "AbandonedCheckoutData",
+    "ActivityData",
+    "AddActivityInput",
+    "AddCategoriesForAnIndividualInput",
+    "AddCategoriesForAnOrganizationInput",
+    "AddEmailToIndividualInput",
+    "AddExamScoresInput",
+    "AddIndividualInput",
+    "AddOrUpdateAListOfCustomFieldsPerIndividualInput",
+    "AddOrUpdateAListOfCustomFieldsPerOrganizationInput",
+    "AddOrganizationInput",
+    "AddRelationshipToIndividualInput",
+    "AddToCommitteeResponse",
+    "AddWebLinkForIndividualInput",
+    "AddWebLinkForOrganizationInput",
+    "AddressSaveData",
+    "AwardData",
+    "AwardNominationData",
+    "AwardRecipientIndividualData",
+    "AwardRecipientOrganizationData",
+    "AwardsGetIndividualAwardRecipientsResponse",
+    "AwardsGetOrganizationAwardRecipientsResponse",
+    "BaseNoteData",
+    "CertificationData",
+    "CommitteeData",
+    "CommitteeMemberCreateData",
+    "CommitteeMemberData",
+    "CommitteeMemberPayload",
+    "CommitteeMemberUpdateData",
+    "CommitteeNomineeData",
+    "CommitteeNomineeSaveData",
+    "CommitteePositionData",
+    "ContactData",
+    "CountryData",
+    "CourseAttendeeData",
+    "CustomFieldData",
+    "CustomFieldResultData",
+    "CustomFieldValueData",
+    "CustomerAddressUpdatedPayload",
+    "CustomerCustomFieldValuePayload",
+    "CustomerMergedPayload",
+    "CustomerPhoneUpdatedPayload",
+    "CustomerRelationshipUpdatedPayload",
+    "CustomerRequestPayload",
+    "DeleteAnIndividualWebLinkInput",
+    "DeleteAnOrganizationWebLinkInput",
+    "EducationCreditData",
+    "EmailData",
+    "EmailPayload",
+    "EventData",
+    "EventRegistrationSubstitutedPayload",
+    "ExamData",
+    "ExamScoreData",
+    "ExamScoreResultData",
+    "ExhibitData",
+    "ExhibitorData",
+    "FindCustomerPhoneResponse",
+    "FindIndividualIdOrEmailResponse",
+    "FindMembersByNameResponse",
+    "FindMembersOrIndividualsByFirstAndLastNameResponse",
+    "FindMembersOrIndividualsByNameResponse",
+    "GetAListOfAllServicesOfAnOrganizationResponse",
+    "GetAListOfLicensesResponse",
+    "GetAbandonedCheckoutsResponse",
+    "GetAllCommitteesResponse",
+    "GetAllEventRegistrationsInformationForAnIndividualResponse",
+    "GetAllEventsResponse",
+    "GetAllOpenOrdersForAnIndividualResponse",
+    "GetAllStatesByCountryResponse",
+    "GetCommitteeInformationForAnIndividualResponse",
+    "GetCourseAttendeesResponse",
+    "GetIndividualsActiveSubscriptionsResponse",
+    "GetIndividualsRelationshipsResponse",
+    "GetListOfActiveCertificationsForAnIndividualResponse",
+    "GetListOfActiveCertificationsForAnOrganizationResponse",
+    "GetNomineesByCommitteeResponse",
+    "GetOrganizationsActiveSubscriptionsResponse",
+    "GetOrganizationsRelationshipsResponse",
+    "GetPositionsByCommitteeResponse",
+    "GetPurchasesForAnIndividualResponse",
+    "GetSubCommitteesResponse",
+    "GetUpcomingEventsResponse",
+    "IndividualData",
+    "IndividualLookupBasicData",
+    "IndividualPayload",
+    "IndividualRequestToBeForgottenPayload",
+    "IndividualsLookupByNameResponse",
+    "LicenseData",
+    "ListAllAwardsResponse",
+    "ListAllCountriesResponse",
+    "ListAllEventCancellationsByEventResponse",
+    "ListAllExhibitorsResponse",
+    "ListAllExhibitsResponse",
+    "ListAllIndividualsResponse",
+    "ListAllOpenCustomerRequestResponse",
+    "ListCompletedUserTasksByUserIdOrEmailResponse",
+    "ListOfAllIndividualMembersResponse",
+    "ListOfAllOrganizationMembersResponse",
+    "ListOfCustomerRelationshipsResponse",
+    "ListOfExamsResponse",
+    "ListPendingUserTasksByUserIdOrEmailResponse",
+    "ListRegistrantsResponse",
+    "MarkRegistrantAttendedInput",
+    "MembershipData",
+    "MembershipTypeTerminatedPayload",
+    "NoteData",
+    "NotificationData",
+    "OrganizationData",
+    "OrganizationLookupBasicData",
+    "OrganizationLookupByNameResponse",
+    "PayableOrderData",
+    "PhoneDataSet",
+    "PhoneSaveData",
+    "ProductPurchasePayload",
+    "PurchaseCancelledPayload",
+    "PurchasedItemData",
+    "RegisterAnIndividualForAFreeSessionInput",
+    "RegistrantCancellationData",
+    "RegistrantData",
+    "RegistrationData",
+    "RelationshipData",
+    "RelationshipTypeData",
+    "RequestData",
+    "RequestSaveData",
+    "RequestUpdateData",
+    "SaveCategoryBasicData",
+    "SaveRelationshipForOrganizationInput",
+    "ServiceData",
+    "SessionRegistrationData",
+    "StateProvinceData",
+    "SubscriptionData",
+    "TaskData",
+    "TaskSaveData",
+    "UpdateAnIndividualEmailInput",
+    "UpdateAwardNominationData",
+    "UpdateOrganizationInput",
+    "UserTaskData",
+    "WhenCommitteeMemberUpdatedInput",
+    "WhenCustomerAddressUpdatedInput",
+    "WhenCustomerCustomFieldValueUpdatedInput",
+    "WhenCustomerIsMergedInput",
+    "WhenCustomerPhoneUpdatedInput",
+    "WhenCustomerRelationshipUpdatedInput",
+    "WhenEmailUpdatedInput",
+    "WhenEventRegistrationSubstitutedInput",
+    "WhenIndividualCreatedInput",
+    "WhenIndividualDeletedInput",
+    "WhenIndividualRequestForgottenInput",
+    "WhenMembershipTerminatedInput",
+    "WhenProductPurchasedInput",
+    "WhenPurchaseCancelledInput",
+    "WhenPurchasePaidInput",
+    "WhenRequestUpdatedInput",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -29,13 +188,15 @@ class GetAbandonedCheckoutsResponse:
     Response for Get Abandoned Checkouts
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number"""
-    data_list: Optional[List[AbandonedCheckoutData]] = field(
+    data_list: Optional[List[AbandonedCheckoutData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
@@ -47,13 +208,15 @@ class ListAllExhibitorsResponse:
     Response for List All Exhibitors
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number"""
-    data_list: Optional[List[ExhibitorData]] = field(
+    data_list: Optional[List[ExhibitorData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
@@ -65,13 +228,15 @@ class ListOfExamsResponse:
     Response for List of Exams
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number"""
-    data_list: Optional[List[ExamData]] = field(
+    data_list: Optional[List[ExamData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
@@ -83,13 +248,15 @@ class ListRegistrantsResponse:
     Response for List Registrants
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[RegistrantData]] = field(
+    data_list: Optional[List[RegistrantData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
@@ -101,19 +268,21 @@ class GetCourseAttendeesResponse:
     Response for Get Course Attendees
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[CourseAttendeeData]] = field(
+    data_list: Optional[List[CourseAttendeeData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
 
 
-AddExamScoresInput = List["ExamScoreData"]
+AddExamScoresInput = List["ExamScoreData | Mapping[str, Any]"]
 
 
 @dataclass
@@ -122,14 +291,15 @@ class ExamScoreResultData:
     Response for Add Exam Scores
     """
 
-    individual_record_number: Optional[str] = field(
+    individual_record_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "individualRecordNumber"},
     )
     """Individual Record Number."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Status."""
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Message."""
 
 
@@ -139,13 +309,15 @@ class FindMembersByNameResponse:
     Response for Find Members by Name
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[ContactData]] = field(
+    data_list: Optional[List[ContactData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
@@ -157,19 +329,23 @@ class GetPurchasesForAnIndividualResponse:
     Response for Get Purchases for an Individual
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[PurchasedItemData]] = field(
+    data_list: Optional[List[PurchasedItemData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
 
 
-AddOrUpdateAListOfCustomFieldsPerOrganizationInput = List["CustomFieldValueData"]
+AddOrUpdateAListOfCustomFieldsPerOrganizationInput = List[
+    "CustomFieldValueData | Mapping[str, Any]"
+]
 
 
 @dataclass
@@ -178,12 +354,13 @@ class CustomFieldResultData:
     Response for Add or Update a List of Custom Fields Per Organization
     """
 
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Status."""
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Message."""
-    custom_field_name: Optional[str] = field(
+    custom_field_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customFieldName"},
     )
     """Custom Field Name."""
@@ -195,11 +372,11 @@ class CustomFieldData:
     Response for Get Individual Custom Field Values
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name."""
-    caption: Optional[str] = None
+    caption: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Caption."""
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Custom Field Value. For multi-selects, use \"|\" as delimiter."""
 
 
@@ -209,13 +386,17 @@ class ListAllEventCancellationsByEventResponse:
     Response for List All Event Cancellations by Event
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[RegistrantCancellationData]] = field(
+    data_list: Optional[
+        List[RegistrantCancellationData | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
@@ -227,13 +408,15 @@ class GetAllOpenOrdersForAnIndividualResponse:
     Response for Get All Open Orders for an Individual
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number"""
-    data_list: Optional[List[PayableOrderData]] = field(
+    data_list: Optional[List[PayableOrderData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
@@ -245,13 +428,15 @@ class ListCompletedUserTasksByUserIdOrEmailResponse:
     Response for List Completed User Tasks by User ID or Email
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[UserTaskData]] = field(
+    data_list: Optional[List[UserTaskData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
@@ -263,13 +448,15 @@ class ListPendingUserTasksByUserIdOrEmailResponse:
     Response for List Pending User Tasks by User ID or Email
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[UserTaskData]] = field(
+    data_list: Optional[List[UserTaskData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
@@ -281,24 +468,27 @@ class TaskData:
     Response for Update Task by Task Number
     """
 
-    task_number: Optional[str] = field(
+    task_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "taskNumber"},
     )
     """Task Number."""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title."""
-    category: Optional[str] = None
+    category: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Category."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description."""
-    start_date: Optional[str] = field(
+    start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDate"},
     )
     """Start Date."""
-    due_date: Optional[str] = field(
+    due_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dueDate"},
     )
     """Due Date."""
@@ -310,13 +500,15 @@ class ListAllCountriesResponse:
     Response for List All Countries
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number"""
-    data_list: Optional[List[CountryData]] = field(
+    data_list: Optional[List[CountryData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
@@ -328,13 +520,15 @@ class GetAllStatesByCountryResponse:
     Response for Get All States by Country
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number"""
-    data_list: Optional[List[StateProvinceData]] = field(
+    data_list: Optional[List[StateProvinceData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
@@ -346,13 +540,15 @@ class ListAllExhibitsResponse:
     Response for List All Exhibits
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number"""
-    data_list: Optional[List[ExhibitData]] = field(
+    data_list: Optional[List[ExhibitData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
@@ -364,19 +560,21 @@ class RequestUpdateData:
     Response for Update Customer Request
     """
 
-    request_number: Optional[str] = field(
+    request_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "requestNumber"},
     )
     """Request Number."""
-    closed_date: Optional[str] = field(
+    closed_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "closedDate"},
     )
     """Closed Date."""
 
 
-AddCategoriesForAnOrganizationInput = List["SaveCategoryBasicData"]
+AddCategoriesForAnOrganizationInput = List["SaveCategoryBasicData | Mapping[str, Any]"]
 
 
 @dataclass
@@ -385,13 +583,15 @@ class ListOfCustomerRelationshipsResponse:
     Response for List of Customer Relationships
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[RelationshipTypeData]] = field(
+    data_list: Optional[List[RelationshipTypeData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
@@ -403,13 +603,15 @@ class ListAllOpenCustomerRequestResponse:
     Response for List All Open Customer Request
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[RequestData]] = field(
+    data_list: Optional[List[RequestData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
@@ -421,60 +623,71 @@ class MembershipData:
     Response for Get Organization Inactive Memberships
     """
 
-    membership_type: Optional[str] = field(
+    membership_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "membershipType"},
     )
     """Membership Type."""
-    membership_type_id: Optional[str] = field(
+    membership_type_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "membershipTypeId"},
     )
     """Membership Type ID."""
-    code: Optional[str] = None
+    code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Code."""
-    expire_date: Optional[str] = field(
+    expire_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "expireDate"},
     )
     """Expire Date."""
-    grace_expire_date: Optional[str] = field(
+    grace_expire_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "graceExpireDate"},
     )
     """Grace Expire Date."""
-    inherited_membership_benefits: Optional[bool] = field(
+    inherited_membership_benefits: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "inheritedMembershipBenefits"},
     )
     """Inherited Membership Benefits."""
-    renewal_url: Optional[str] = field(
+    renewal_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "renewalUrl"},
     )
     """Renewal URL."""
-    join_date: Optional[str] = field(
+    join_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "joinDate"},
     )
     """Join Date."""
-    terminate_date: Optional[str] = field(
+    terminate_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "terminateDate"},
     )
     """Terminate Date."""
-    effective_date: Optional[str] = field(
+    effective_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "effectiveDate"},
     )
     """Effective Date."""
-    membership_unique_id: Optional[str] = field(
+    membership_unique_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "membershipUniqueId"},
     )
     """Membership Unique ID."""
-    terms_list: Optional[List[Dict[str, Any]]] = field(
+    terms_list: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "termsList"},
     )
     """Terms List"""
@@ -486,36 +699,41 @@ class UserTaskData:
     Response for Update User Task Progress or Mark as Completed
     """
 
-    task_number: Optional[str] = field(
+    task_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "taskNumber"},
     )
     """Task Number."""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title."""
-    category: Optional[str] = None
+    category: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Category."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description."""
-    assigned_by: Optional[str] = field(
+    assigned_by: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assignedBy"},
     )
     """Assigned By."""
-    start_date: Optional[str] = field(
+    start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDate"},
     )
     """Start Date."""
-    due_date: Optional[str] = field(
+    due_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dueDate"},
     )
     """Due Date."""
-    progress: Optional[str] = None
+    progress: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Progress."""
-    completed_date: Optional[str] = field(
+    completed_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "completedDate"},
     )
     """Completed Date."""
@@ -527,135 +745,158 @@ class IndividualData:
     Response for Find Members (Individuals) by First Name
     """
 
-    first_name: Optional[str] = field(
+    first_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "firstName"},
     )
     """First Name."""
-    last_name: Optional[str] = field(
+    last_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastName"},
     )
     """Last Name."""
-    middle_name: Optional[str] = field(
+    middle_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "middleName"},
     )
     """Middle Name."""
-    preferred_first_name: Optional[str] = field(
+    preferred_first_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "preferredFirstName"},
     )
     """Preferred First Name."""
-    second_last_name: Optional[str] = field(
+    second_last_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "secondLastName"},
     )
     """Second Last Name."""
-    prefix: Optional[str] = None
+    prefix: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Prefix."""
-    suffix: Optional[str] = None
+    suffix: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Suffix."""
-    gender: Optional[str] = None
+    gender: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Gender."""
-    primary_organization: Optional[Dict[str, Any]] = field(
+    primary_organization: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "primaryOrganization"},
     )
-    committees: Optional[List[Dict[str, Any]]] = None
+    committees: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Committees."""
-    security_roles: Optional[List[Dict[str, Any]]] = field(
+    security_roles: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "securityRoles"},
     )
     """Security Roles."""
-    user: Optional[Dict[str, Any]] = None
-    designation_data: Optional[List[Dict[str, Any]]] = field(
+    user: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    designation_data: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "designationData"},
     )
     """Designations."""
-    relationships: Optional[List[Dict[str, Any]]] = None
-    """Relationships."""
-    job_roles: Optional[List[Dict[str, Any]]] = field(
+    relationships: Optional[
+        List[Dict[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """Relationships."""
+    job_roles: Optional[List[Dict[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "jobRoles"},
     )
     """Job Roles."""
-    tags: Optional[List[str]] = None
+    tags: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Tags."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Individual Id."""
-    customer_type: Optional[str] = field(
+    customer_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customerType"},
     )
     """Customer Type."""
-    record_number: Optional[str] = field(
+    record_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recordNumber"},
     )
     """Record Number."""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name."""
-    addresses: Optional[List[Dict[str, Any]]] = None
+    addresses: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Addresses."""
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email."""
-    image_uri: Optional[str] = field(
+    image_uri: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "imageUri"},
     )
     """Image URI."""
-    twitter: Optional[str] = None
+    twitter: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Twitter."""
-    linked_in: Optional[str] = field(
+    linked_in: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "linkedIn"},
     )
     """LinkedIn."""
-    emails: Optional[List[Dict[str, Any]]] = None
+    emails: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Emails."""
-    phones: Optional[List[Dict[str, Any]]] = None
+    phones: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Phones."""
-    web_site: Optional[str] = field(
+    web_site: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "webSite"},
     )
     """Website."""
-    memberships: Optional[List[Dict[str, Any]]] = None
+    memberships: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Memberships."""
-    category: Optional[str] = None
+    category: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Category."""
-    categories: Optional[List[Dict[str, Any]]] = None
+    categories: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Categories."""
-    custom_fields: Optional[List[Dict[str, Any]]] = field(
+    custom_fields: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customFields"},
     )
     """Custom Fields."""
-    show_in_directory: Optional[bool] = field(
+    show_in_directory: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "showInDirectory"},
     )
     """Show In Directory."""
-    links: Optional[List[Dict[str, Any]]] = None
+    links: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Links."""
-    old_id: Optional[str] = field(
+    old_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "oldId"},
     )
     """Old Id."""
-    is_deceased: Optional[bool] = field(
+    is_deceased: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isDeceased"},
     )
     """Is Deceased."""
 
 
-AddCategoriesForAnIndividualInput = List["SaveCategoryBasicData"]
+AddCategoriesForAnIndividualInput = List["SaveCategoryBasicData | Mapping[str, Any]"]
 
 
 @dataclass
@@ -664,13 +905,15 @@ class ListOfAllOrganizationMembersResponse:
     Response for List of All Organization Members
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[OrganizationData]] = field(
+    data_list: Optional[List[OrganizationData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
@@ -682,13 +925,15 @@ class ListOfAllIndividualMembersResponse:
     Response for List of All Individual Members
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[IndividualData]] = field(
+    data_list: Optional[List[IndividualData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
@@ -700,13 +945,15 @@ class GetListOfActiveCertificationsForAnOrganizationResponse:
     Response for Get List of Active Certifications for an Organization
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[CertificationData]] = field(
+    data_list: Optional[List[CertificationData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
@@ -718,19 +965,21 @@ class GetListOfActiveCertificationsForAnIndividualResponse:
     Response for Get List of Active Certifications for an Individual
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[CertificationData]] = field(
+    data_list: Optional[List[CertificationData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
 
 
-RegisterAnIndividualForAFreeSessionInput = List["SessionRegistrationData"]
+RegisterAnIndividualForAFreeSessionInput = List["SessionRegistrationData | Mapping[str, Any]"]
 
 
 @dataclass
@@ -739,13 +988,15 @@ class GetAListOfLicensesResponse:
     Response for Get a List of Licenses
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[LicenseData]] = field(
+    data_list: Optional[List[LicenseData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
@@ -757,13 +1008,15 @@ class ListAllAwardsResponse:
     Response for List All Awards
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[AwardData]] = field(
+    data_list: Optional[List[AwardData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
@@ -775,13 +1028,15 @@ class FindMembersOrIndividualsByNameResponse:
     Response for Find Members (Individuals) by Name
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[IndividualData]] = field(
+    data_list: Optional[List[IndividualData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
@@ -793,13 +1048,15 @@ class GetAListOfAllServicesOfAnOrganizationResponse:
     Response for Get a List of All Services of an Organization
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[ServiceData]] = field(
+    data_list: Optional[List[ServiceData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
@@ -811,9 +1068,9 @@ class ServiceData:
     Response for Add a Service to an Organization
     """
 
-    code: Optional[str] = None
+    code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Code."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name."""
 
 
@@ -823,24 +1080,30 @@ class PhoneDataSet:
     Response for Update Phone for an Individual
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ID."""
-    primary: Optional[bool] = None
+    primary: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Is Primary."""
-    type_: Optional[int] = field(default=None, metadata={"wire_name": "type"})
-    """Type."""
-    country: Optional[Dict[str, Any]] = None
-    show_in_directory: Optional[bool] = field(
+    type_: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    """Type."""
+    country: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    show_in_directory: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "showInDirectory"},
     )
     """Show In Directory."""
-    number: Optional[str] = None
+    number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Number."""
-    extension: Optional[str] = None
+    extension: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Extension."""
-    type_name: Optional[str] = field(
+    type_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "typeName"},
     )
     """Type Name."""
@@ -852,9 +1115,13 @@ class DeleteAnIndividualWebLinkInput:
     Delete an Individual Web Link
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """Type."""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Url."""
 
 
@@ -864,9 +1131,13 @@ class AddWebLinkForIndividualInput:
     Add Web Link for Individual
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """Type."""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Url."""
 
 
@@ -876,13 +1147,15 @@ class GetNomineesByCommitteeResponse:
     Response for Get Nominees by Committee
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[CommitteeNomineeData]] = field(
+    data_list: Optional[List[CommitteeNomineeData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """Data List"""
@@ -894,13 +1167,15 @@ class GetOrganizationsActiveSubscriptionsResponse:
     Response for Get Organization's Active Subscriptions
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[SubscriptionData]] = field(
+    data_list: Optional[List[SubscriptionData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
@@ -912,9 +1187,9 @@ class DeleteAnOrganizationWebLinkInput:
     Delete an Organization Web Link
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """Type."""
-    url: Optional[str] = None
+    url: str
     """Url."""
 
 
@@ -924,9 +1199,9 @@ class AddWebLinkForOrganizationInput:
     Add Web Link for Organization
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """Type."""
-    url: Optional[str] = None
+    url: str
     """Url."""
 
 
@@ -936,13 +1211,15 @@ class GetOrganizationsRelationshipsResponse:
     Response for Get Organization's Relationships
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[RelationshipData]] = field(
+    data_list: Optional[List[RelationshipData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """DataList"""
@@ -954,43 +1231,51 @@ class AddressSaveData:
     Response for Add or Update Address to Organization
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ID."""
-    primary: Optional[bool] = None
+    primary: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Primary."""
-    line1: Optional[str] = None
+    line1: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Line 1."""
-    line2: Optional[str] = None
+    line2: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Line 2."""
-    line3: Optional[str] = None
+    line3: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Line 3."""
-    city: Optional[str] = None
+    city: Optional[str] = dataclass_field(default=None, kw_only=True)
     """City."""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """State."""
-    zipcode: Optional[str] = None
+    zipcode: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Zipcode."""
-    country: Optional[str] = None
+    country: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Country."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    """Type."""
-    show_in_directory: Optional[bool] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    """Type."""
+    show_in_directory: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "showInDirectory"},
     )
     """Show In Directory."""
-    is_preferred_shipping: Optional[bool] = field(
+    is_preferred_shipping: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isPreferredShipping"},
     )
     """Is Preferred Shipping."""
-    is_preferred_billing: Optional[bool] = field(
+    is_preferred_billing: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isPreferredBilling"},
     )
     """Is Preferred Billing."""
-    is_bad_address: Optional[bool] = field(
+    is_bad_address: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isBadAddress"},
     )
     """Is Bad Address."""
@@ -1005,13 +1290,15 @@ class GetUpcomingEventsResponse:
     Response for Get Upcoming Events
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[EventData]] = field(
+    data_list: Optional[List[EventData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """DataList"""
@@ -1023,13 +1310,15 @@ class GetCommitteeInformationForAnIndividualResponse:
     Response for Get Committee Information for an Individual
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number"""
-    data_list: Optional[List[CommitteeMemberData]] = field(
+    data_list: Optional[List[CommitteeMemberData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """Data List."""
@@ -1041,13 +1330,15 @@ class GetAllEventsResponse:
     Response for Get All Events
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[EventData]] = field(
+    data_list: Optional[List[EventData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """DataList"""
@@ -1059,13 +1350,15 @@ class GetAllEventRegistrationsInformationForAnIndividualResponse:
     Response for Get All Event Registrations Information for an Individual
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[RegistrationData]] = field(
+    data_list: Optional[List[RegistrationData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
@@ -1077,13 +1370,15 @@ class GetIndividualsRelationshipsResponse:
     Response for Get Individual's Relationships
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[RelationshipData]] = field(
+    data_list: Optional[List[RelationshipData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """Data List."""
@@ -1095,14 +1390,19 @@ class UpdateAnIndividualEmailInput:
     Update an Individual Email
     """
 
-    primary: Optional[bool] = None
+    primary: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Primary."""
-    address: Optional[str] = None
+    address: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Address."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    """Type."""
-    show_in_directory: Optional[bool] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    """Type."""
+    show_in_directory: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "showInDirectory"},
     )
     """Show In Directory"""
@@ -1114,42 +1414,43 @@ class SaveRelationshipForOrganizationInput:
     Save Relationship for Organization
     """
 
-    relationship_name: Optional[str] = field(
-        default=None,
+    relationship_name: str = dataclass_field(
         metadata={"wire_name": "relationshipName"},
     )
     """Relationship Name."""
-    related_to_customer_record_number: Optional[str] = field(
-        default=None,
+    related_to_customer_record_number: str = dataclass_field(
         metadata={"wire_name": "relatedToCustomerRecordNumber"},
     )
     """Related To Customer Record Number."""
-    reciprocal_relationship_name: Optional[str] = field(
-        default=None,
+    reciprocal_relationship_name: str = dataclass_field(
         metadata={"wire_name": "reciprocalRelationshipName"},
     )
     """Reciprocal Relationship Name."""
-    is_primary: Optional[bool] = field(
+    is_primary: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isPrimary"},
     )
     """Is Primary."""
-    start_date: Optional[str] = field(
+    start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDate"},
     )
     """Start Date."""
-    end_date: Optional[str] = field(
+    end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDate"},
     )
     """End Date."""
-    is_reciprocal_primary: Optional[bool] = field(
+    is_reciprocal_primary: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isReciprocalPrimary"},
     )
     """Is Reciprocal Primary."""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title."""
 
 
@@ -1159,20 +1460,15 @@ class AddIndividualInput:
     Add Individual
     """
 
-    first_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "firstName"},
-    )
+    first_name: str = dataclass_field(metadata={"wire_name": "firstName"})
     """First Name."""
-    last_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "lastName"},
-    )
+    last_name: str = dataclass_field(metadata={"wire_name": "lastName"})
     """Last Name."""
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email Address."""
-    record_number: Optional[str] = field(
+    record_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recordNumber"},
     )
     """Record Number."""
@@ -1184,14 +1480,19 @@ class AddEmailToIndividualInput:
     Add Email to Individual
     """
 
-    primary: Optional[bool] = None
+    primary: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Primary"""
-    address: Optional[str] = None
+    address: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Address."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    """Type."""
-    show_in_directory: Optional[bool] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    """Type."""
+    show_in_directory: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "showInDirectory"},
     )
     """Show In Directory"""
@@ -1203,14 +1504,19 @@ class EmailData:
     Response for Add Email to Individual
     """
 
-    primary: Optional[bool] = None
+    primary: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Is Primary Email."""
-    address: Optional[str] = None
+    address: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Address."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    """Type."""
-    show_in_directory: Optional[bool] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    """Type."""
+    show_in_directory: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "showInDirectory"},
     )
     """Show In Directory."""
@@ -1222,13 +1528,15 @@ class FindMembersOrIndividualsByFirstAndLastNameResponse:
     Response for Find Members (Individuals) by First Name and Last Name
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[IndividualData]] = field(
+    data_list: Optional[List[IndividualData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
@@ -1240,14 +1548,15 @@ class AddActivityInput:
     Add Activity
     """
 
-    category: Optional[str] = None
+    category: str
     """Category."""
-    text: Optional[str] = None
+    text: str
     """Text."""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """URL."""
-    activity_date: Optional[str] = field(
+    activity_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "activityDate"},
     )
     """Activity Date."""
@@ -1259,13 +1568,15 @@ class FindIndividualIdOrEmailResponse:
     Response for Find Individual by Id or Email or Record Number
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[IndividualData]] = field(
+    data_list: Optional[List[IndividualData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """Data List."""
@@ -1277,38 +1588,39 @@ class AddRelationshipToIndividualInput:
     Add Relationship to Individual
     """
 
-    relationship_name: Optional[str] = field(
-        default=None,
+    relationship_name: str = dataclass_field(
         metadata={"wire_name": "relationshipName"},
     )
     """Relationship Name."""
-    related_to_customer_record_number: Optional[str] = field(
-        default=None,
+    related_to_customer_record_number: str = dataclass_field(
         metadata={"wire_name": "relatedToCustomerRecordNumber"},
     )
     """Related To Customer Record Number."""
-    reciprocal_relationship_name: Optional[str] = field(
-        default=None,
+    reciprocal_relationship_name: str = dataclass_field(
         metadata={"wire_name": "reciprocalRelationshipName"},
     )
     """Reciprocal Relationship Name."""
-    is_primary: Optional[bool] = field(
+    is_primary: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isPrimary"},
     )
     """Is Primary."""
-    is_reciprocal_primary: Optional[bool] = field(
+    is_reciprocal_primary: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isReciprocalPrimary"},
     )
     """Is Reciprocal Primary."""
-    start_date: Optional[str] = field(
+    start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDate"},
     )
     """Start Date."""
-    end_date: Optional[str] = field(
+    end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDate"},
     )
     """End Date."""
@@ -1320,13 +1632,17 @@ class IndividualsLookupByNameResponse:
     Response for Lookup Individuals
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[IndividualLookupBasicData]] = field(
+    data_list: Optional[
+        List[IndividualLookupBasicData | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """Data List."""
@@ -1338,58 +1654,67 @@ class AddToCommitteeResponse:
     Response for Add Individual to Committee
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Member Id."""
-    first_name: Optional[str] = field(
+    first_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "firstName"},
     )
     """First Name."""
-    last_name: Optional[str] = field(
+    last_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastName"},
     )
     """Last Name."""
-    code: Optional[str] = None
+    code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Code."""
-    record_number: Optional[str] = field(
+    record_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recordNumber"},
     )
     """Record Number."""
-    position: Optional[str] = None
+    position: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Position."""
-    position_code: Optional[str] = field(
+    position_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "positionCode"},
     )
     """Position Code."""
-    start_date: Optional[str] = field(
+    start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDate"},
     )
     """Start Date."""
-    end_date: Optional[str] = field(
+    end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDate"},
     )
     """End Date."""
-    primary_organization: Optional[Dict[str, Any]] = field(
+    primary_organization: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "primaryOrganization"},
     )
-    organization_representing: Optional[Dict[str, Any]] = field(
+    organization_representing: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "organizationRepresenting"},
     )
-    nominated_by_customer: Optional[Dict[str, Any]] = field(
+    nominated_by_customer: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nominatedByCustomer"},
     )
-    addresses: Optional[List[Dict[str, Any]]] = None
-    phones: Optional[List[Dict[str, Any]]] = None
-    emails: Optional[List[Dict[str, Any]]] = None
-    rank: Optional[int] = None
+    addresses: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    phones: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    emails: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    rank: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Rank."""
 
 
@@ -1399,21 +1724,21 @@ class AddOrganizationInput:
     Add Organization
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Id."""
-    name: Optional[str] = None
+    name: str
     """Name."""
-    show_in_directory: Optional[bool] = field(
-        default=None,
+    show_in_directory: bool = dataclass_field(
         metadata={"wire_name": "showInDirectory"},
     )
     """Show In Directory."""
-    branch_name: Optional[str] = field(
+    branch_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "branchName"},
     )
     """Branch Name."""
-    website: Optional[str] = None
+    website: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Website."""
 
 
@@ -1423,86 +1748,97 @@ class OrganizationData:
     Response for Add Organization
     """
 
-    contact_ids: Optional[List[str]] = field(
+    contact_ids: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contactIds"},
     )
     """Contact Ids."""
-    parent_company_id: Optional[str] = field(
+    parent_company_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parentCompanyId"},
     )
     """Parent Company Id."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description."""
-    branch_name: Optional[str] = field(
+    branch_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "branchName"},
     )
     """Branch Name."""
-    tags: Optional[List[str]] = None
+    tags: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Tags."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Organization Id."""
-    customer_type: Optional[str] = field(
+    customer_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customerType"},
     )
     """Customer Type."""
-    record_number: Optional[str] = field(
+    record_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recordNumber"},
     )
     """Record Number."""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Organization Name."""
-    addresses: Optional[List[Dict[str, Any]]] = None
+    addresses: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Addresses."""
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email."""
-    image_uri: Optional[str] = field(
+    image_uri: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "imageUri"},
     )
     """Image URI."""
-    twitter: Optional[str] = None
+    twitter: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Twitter."""
-    linked_in: Optional[str] = field(
+    linked_in: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "linkedIn"},
     )
     """LinkedIn."""
-    emails: Optional[List[Dict[str, Any]]] = None
+    emails: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Emails."""
-    phones: Optional[List[Dict[str, Any]]] = None
+    phones: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Phones."""
-    web_site: Optional[str] = field(
+    web_site: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "webSite"},
     )
     """Website."""
-    memberships: Optional[List[Dict[str, Any]]] = None
+    memberships: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Memberships."""
-    category: Optional[str] = None
+    category: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Category."""
-    categories: Optional[List[Dict[str, Any]]] = None
+    categories: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Categories."""
-    custom_fields: Optional[List[Dict[str, Any]]] = field(
+    custom_fields: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customFields"},
     )
     """Custom Fields."""
-    show_in_directory: Optional[bool] = field(
+    show_in_directory: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "showInDirectory"},
     )
     """Show In Directory."""
-    links: Optional[List[Dict[str, Any]]] = None
+    links: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Links."""
-    old_id: Optional[str] = field(
+    old_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "oldId"},
     )
     """Old Id."""
@@ -1514,21 +1850,23 @@ class UpdateOrganizationInput:
     Update Organization
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description."""
-    show_in_directory: Optional[bool] = field(
+    show_in_directory: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "showInDirectory"},
     )
     """Show In Directory."""
-    branch_name: Optional[str] = field(
+    branch_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "branchName"},
     )
     """Branch Name."""
-    website: Optional[str] = None
+    website: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Website."""
 
 
@@ -1538,13 +1876,17 @@ class OrganizationLookupByNameResponse:
     Response for Lookup Organizations
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[OrganizationLookupBasicData]] = field(
+    data_list: Optional[
+        List[OrganizationLookupBasicData | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """Data List."""
@@ -1556,13 +1898,15 @@ class GetAllCommitteesResponse:
     Response for Get All Committees
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[CommitteeData]] = field(
+    data_list: Optional[List[CommitteeData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
@@ -1574,13 +1918,15 @@ class GetPositionsByCommitteeResponse:
     Response for Get Positions by Committee
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[CommitteePositionData]] = field(
+    data_list: Optional[List[CommitteePositionData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
@@ -1592,13 +1938,15 @@ class GetSubCommitteesResponse:
     Response for Get Sub-Committees
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """pageNumber"""
-    data_list: Optional[List[CommitteeData]] = field(
+    data_list: Optional[List[CommitteeData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
@@ -1610,13 +1958,15 @@ class GetIndividualsActiveSubscriptionsResponse:
     Response for Get Individual's Active Subscriptions
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[SubscriptionData]] = field(
+    data_list: Optional[List[SubscriptionData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """dataList"""
@@ -1628,13 +1978,15 @@ class ListAllIndividualsResponse:
     Response for List all Individuals
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[IndividualData]] = field(
+    data_list: Optional[List[IndividualData | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
 
@@ -1645,13 +1997,15 @@ class FindCustomerPhoneResponse:
     Response for Find Customer by Phone Number
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[Dict[str, Any]]] = field(
+    data_list: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
 
@@ -1665,13 +2019,17 @@ class AwardsGetIndividualAwardRecipientsResponse:
     Response for List Award Individual Recipients
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[AwardRecipientIndividualData]] = field(
+    data_list: Optional[
+        List[AwardRecipientIndividualData | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """Data List."""
@@ -1683,13 +2041,17 @@ class AwardsGetOrganizationAwardRecipientsResponse:
     Response for List Award Organization Recipients
     """
 
-    page_number: Optional[int] = field(
+    page_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[AwardRecipientOrganizationData]] = field(
+    data_list: Optional[
+        List[AwardRecipientOrganizationData | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dataList"},
     )
     """Data List."""
@@ -1701,19 +2063,13 @@ class WhenIndividualCreatedInput:
     When an individual is created
     """
 
-    type_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "typeName"},
-    )
+    type_name: str = dataclass_field(metadata={"wire_name": "typeName"})
     """Type Name."""
-    secret: Optional[str] = None
+    secret: str
     """Secret."""
-    call_back_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callBackUrl"},
-    )
+    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
-    description: Optional[str] = None
+    description: str
     """Description."""
 
 
@@ -1723,19 +2079,13 @@ class WhenIndividualDeletedInput:
     When an individual is deleted
     """
 
-    type_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "typeName"},
-    )
+    type_name: str = dataclass_field(metadata={"wire_name": "typeName"})
     """Type Name."""
-    secret: Optional[str] = None
+    secret: str
     """Secret."""
-    call_back_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callBackUrl"},
-    )
+    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
-    description: Optional[str] = None
+    description: str
     """Description."""
 
 
@@ -1745,19 +2095,13 @@ class WhenIndividualRequestForgottenInput:
     When an individual requests to be forgotten
     """
 
-    type_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "typeName"},
-    )
+    type_name: str = dataclass_field(metadata={"wire_name": "typeName"})
     """Type Name."""
-    secret: Optional[str] = None
+    secret: str
     """Secret."""
-    call_back_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callBackUrl"},
-    )
+    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
-    description: Optional[str] = None
+    description: str
     """Description."""
 
 
@@ -1767,23 +2111,17 @@ class WhenProductPurchasedInput:
     When a product is purchased
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Id."""
-    type_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "typeName"},
-    )
+    type_name: str = dataclass_field(metadata={"wire_name": "typeName"})
     """Type Name."""
-    filters: Optional[List[str]] = None
+    filters: List[str]
     """Filters."""
-    secret: Optional[str] = None
+    secret: str
     """Secret."""
-    call_back_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callBackUrl"},
-    )
+    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
-    description: Optional[str] = None
+    description: str
     """Description."""
 
 
@@ -1793,19 +2131,13 @@ class WhenCommitteeMemberUpdatedInput:
     When a committee member is updated
     """
 
-    type_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "typeName"},
-    )
+    type_name: str = dataclass_field(metadata={"wire_name": "typeName"})
     """Type Name."""
-    secret: Optional[str] = None
+    secret: str
     """Secret."""
-    call_back_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callBackUrl"},
-    )
+    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
-    description: Optional[str] = None
+    description: str
     """Description."""
 
 
@@ -1815,23 +2147,17 @@ class WhenPurchaseCancelledInput:
     When a purchase is canceled
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Id."""
-    type_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "typeName"},
-    )
+    type_name: str = dataclass_field(metadata={"wire_name": "typeName"})
     """Type Name."""
-    filters: Optional[List[str]] = None
+    filters: List[str]
     """Filters."""
-    secret: Optional[str] = None
+    secret: str
     """Secret."""
-    call_back_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callBackUrl"},
-    )
+    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
-    description: Optional[str] = None
+    description: str
     """Description."""
 
 
@@ -1841,19 +2167,13 @@ class WhenRequestUpdatedInput:
     When a customer request is updated
     """
 
-    type_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "typeName"},
-    )
+    type_name: str = dataclass_field(metadata={"wire_name": "typeName"})
     """Type Name."""
-    secret: Optional[str] = None
+    secret: str
     """Secret."""
-    call_back_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callBackUrl"},
-    )
+    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
-    description: Optional[str] = None
+    description: str
     """Description."""
 
 
@@ -1863,19 +2183,13 @@ class WhenEmailUpdatedInput:
     When a customer email is updated
     """
 
-    type_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "typeName"},
-    )
+    type_name: str = dataclass_field(metadata={"wire_name": "typeName"})
     """Type Name."""
-    secret: Optional[str] = None
+    secret: str
     """Secret."""
-    call_back_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callBackUrl"},
-    )
+    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
-    description: Optional[str] = None
+    description: str
     """Description."""
 
 
@@ -1885,21 +2199,15 @@ class WhenCustomerCustomFieldValueUpdatedInput:
     When a customer custom field value is updated
     """
 
-    type_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "typeName"},
-    )
+    type_name: str = dataclass_field(metadata={"wire_name": "typeName"})
     """Type Name."""
-    filters: Optional[List[str]] = None
+    filters: List[str]
     """Filters."""
-    secret: Optional[str] = None
+    secret: str
     """Secret."""
-    call_back_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callBackUrl"},
-    )
+    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
-    description: Optional[str] = None
+    description: str
     """Description."""
 
 
@@ -1909,19 +2217,13 @@ class WhenCustomerIsMergedInput:
     When a customer is merged
     """
 
-    type_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "typeName"},
-    )
+    type_name: str = dataclass_field(metadata={"wire_name": "typeName"})
     """Type Name."""
-    secret: Optional[str] = None
+    secret: str
     """Secret."""
-    call_back_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callBackUrl"},
-    )
+    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
-    description: Optional[str] = None
+    description: str
     """Description."""
 
 
@@ -1931,19 +2233,13 @@ class WhenCustomerRelationshipUpdatedInput:
     When a customer relationship is updated
     """
 
-    type_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "typeName"},
-    )
+    type_name: str = dataclass_field(metadata={"wire_name": "typeName"})
     """Type Name."""
-    secret: Optional[str] = None
+    secret: str
     """Secret."""
-    call_back_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callBackUrl"},
-    )
+    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
-    description: Optional[str] = None
+    description: str
     """Description."""
 
 
@@ -1953,19 +2249,13 @@ class WhenCustomerPhoneUpdatedInput:
     When a customer phone is updated
     """
 
-    type_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "typeName"},
-    )
+    type_name: str = dataclass_field(metadata={"wire_name": "typeName"})
     """Type Name."""
-    secret: Optional[str] = None
+    secret: str
     """Secret."""
-    call_back_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callBackUrl"},
-    )
+    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
-    description: Optional[str] = None
+    description: str
     """Description."""
 
 
@@ -1975,19 +2265,13 @@ class WhenCustomerAddressUpdatedInput:
     When a customer address is updated
     """
 
-    type_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "typeName"},
-    )
+    type_name: str = dataclass_field(metadata={"wire_name": "typeName"})
     """Type Name."""
-    secret: Optional[str] = None
+    secret: str
     """Secret."""
-    call_back_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callBackUrl"},
-    )
+    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
-    description: Optional[str] = None
+    description: str
     """Description."""
 
 
@@ -1997,21 +2281,15 @@ class WhenEventRegistrationSubstitutedInput:
     When an event registration is substituted
     """
 
-    type_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "typeName"},
-    )
+    type_name: str = dataclass_field(metadata={"wire_name": "typeName"})
     """Type Name."""
-    filters: Optional[List[str]] = None
+    filters: List[str]
     """Filters."""
-    secret: Optional[str] = None
+    secret: str
     """Secret."""
-    call_back_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callBackUrl"},
-    )
+    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
-    description: Optional[str] = None
+    description: str
     """Description."""
 
 
@@ -2021,21 +2299,15 @@ class WhenPurchasePaidInput:
     When a purchase is paid
     """
 
-    type_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "typeName"},
-    )
+    type_name: str = dataclass_field(metadata={"wire_name": "typeName"})
     """Type Name."""
-    filters: Optional[List[str]] = None
+    filters: List[str]
     """Filters."""
-    secret: Optional[str] = None
+    secret: str
     """Secret."""
-    call_back_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callBackUrl"},
-    )
+    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
-    description: Optional[str] = None
+    description: str
     """Description."""
 
 
@@ -2045,21 +2317,15 @@ class WhenMembershipTerminatedInput:
     When a membership is terminated
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Id."""
-    type_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "typeName"},
-    )
+    type_name: str = dataclass_field(metadata={"wire_name": "typeName"})
     """Type Name."""
-    secret: Optional[str] = None
+    secret: str
     """Secret."""
-    call_back_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callBackUrl"},
-    )
+    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
-    description: Optional[str] = None
+    description: str
     """Description."""
 
 
@@ -2069,21 +2335,24 @@ class AbandonedCheckoutData:
     Definition: AbandonedCheckoutData
     """
 
-    created_on: Optional[str] = field(
+    created_on: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdOn"},
     )
     """Created On"""
-    created_by_email_address: Optional[str] = field(
+    created_by_email_address: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdByEmailAddress"},
     )
     """Created By Email Address"""
-    currency: Optional[str] = None
+    currency: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Currency"""
-    customer: Optional[Dict[str, Any]] = None
-    line_items: Optional[List[Dict[str, Any]]] = field(
+    customer: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    line_items: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lineItems"},
     )
     """Line Items"""
@@ -2095,9 +2364,9 @@ class ExhibitorData:
     Definition: ExhibitorData
     """
 
-    organization: Optional[Dict[str, Any]] = None
+    organization: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Organization"""
-    booths: Optional[List[Dict[str, Any]]] = None
+    booths: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Booths"""
 
 
@@ -2107,77 +2376,93 @@ class ExamData:
     Definition: ExamData
     """
 
-    exam_start_date: Optional[str] = field(
+    exam_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "examStartDate"},
     )
     """Exam Start Date"""
-    exam_end_date: Optional[str] = field(
+    exam_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "examEndDate"},
     )
     """Exam End Date"""
-    exam_number: Optional[str] = field(
+    exam_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "examNumber"},
     )
     """Exam Number"""
-    education_credits: Optional[List[Dict[str, Any]]] = field(
+    education_credits: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "educationCredits"},
     )
     """Education Credits"""
-    categories: Optional[List[Dict[str, Any]]] = None
+    categories: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """categories"""
-    active_prices: Optional[List[Dict[str, Any]]] = field(
+    active_prices: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "activePrices"},
     )
     """Active Prices"""
-    related_products: Optional[List[Dict[str, Any]]] = field(
+    related_products: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "relatedProducts"},
     )
     """Related Products"""
-    tags: Optional[List[str]] = None
+    tags: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Tags."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ID."""
-    code: Optional[str] = None
+    code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Code."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name."""
-    short_description: Optional[str] = field(
+    short_description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "shortDescription"},
     )
     """Short Description."""
-    long_description: Optional[str] = field(
+    long_description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "longDescription"},
     )
     """Long Description."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    """Type."""
-    url: Optional[str] = None
-    """Url."""
-    image_url: Optional[List[str]] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    """Type."""
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """Url."""
+    image_url: Optional[List[str]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "imageUrl"},
     )
     """Image Url."""
-    is_public: Optional[bool] = field(
+    is_public: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isPublic"},
     )
     """Is Public."""
-    available_from: Optional[str] = field(
+    available_from: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "availableFrom"},
     )
     """Available From."""
-    available_until: Optional[str] = field(
+    available_until: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "availableUntil"},
     )
     """Available Until."""
@@ -2189,118 +2474,138 @@ class RegistrantData:
     Definition: RegistrantData
     """
 
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title."""
-    badge_name: Optional[str] = field(
+    badge_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "badgeName"},
     )
     """Badge Name"""
-    badge_organization: Optional[str] = field(
+    badge_organization: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "badgeOrganization"},
     )
     """Badge Organization."""
-    badge_city: Optional[str] = field(
+    badge_city: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "badgeCity"},
     )
     """Badge City."""
-    badge_state: Optional[str] = field(
+    badge_state: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "badgeState"},
     )
     """Badge State."""
-    attended_date: Optional[str] = field(
+    attended_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "attendedDate"},
     )
     """Attended Date."""
-    sessions: Optional[List[Dict[str, Any]]] = None
-    itemized_custom_fields: Optional[List[Dict[str, Any]]] = field(
+    sessions: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    itemized_custom_fields: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "itemizedCustomFields"},
     )
     """Itemized Custom Fields"""
-    guest_of_record_number: Optional[str] = field(
+    guest_of_record_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "guestOfRecordNumber"},
     )
     """Guest Of Record Number."""
-    registrant_type_code: Optional[str] = field(
+    registrant_type_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "registrantTypeCode"},
     )
     """Registrant Type Code."""
-    registrant_type_name: Optional[str] = field(
+    registrant_type_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "registrantTypeName"},
     )
     """Registrant Type Name."""
-    registration_number: Optional[str] = field(
+    registration_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "registrationNumber"},
     )
     """Registration Number."""
-    bought_together_with: Optional[List[Dict[str, Any]]] = field(
+    bought_together_with: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "boughtTogetherWith"},
     )
-    first_name: Optional[str] = field(
+    first_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "firstName"},
     )
     """First Name."""
-    last_name: Optional[str] = field(
+    last_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastName"},
     )
     """Last Name."""
-    middle_name: Optional[str] = field(
+    middle_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "middleName"},
     )
     """Middle Name."""
-    preferred_first_name: Optional[str] = field(
+    preferred_first_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "preferredFirstName"},
     )
     """Preferred First Name."""
-    second_last_name: Optional[str] = field(
+    second_last_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "secondLastName"},
     )
     """Second Last Name."""
-    prefix: Optional[str] = None
+    prefix: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Prefix."""
-    suffix: Optional[str] = None
+    suffix: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Suffix."""
-    gender: Optional[str] = None
+    gender: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Gender."""
-    primary_organization: Optional[Dict[str, Any]] = field(
+    primary_organization: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "primaryOrganization"},
     )
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ID."""
-    customer_type: Optional[str] = field(
+    customer_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customerType"},
     )
     """Customer Type"""
-    record_number: Optional[str] = field(
+    record_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recordNumber"},
     )
     """Record Number."""
-    show_in_directory: Optional[bool] = field(
+    show_in_directory: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "showInDirectory"},
     )
     """Show In Directory."""
-    addresses: Optional[List[Dict[str, Any]]] = None
-    phones: Optional[List[Dict[str, Any]]] = None
-    emails: Optional[List[Dict[str, Any]]] = None
+    addresses: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    phones: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    emails: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -2309,80 +2614,92 @@ class CourseAttendeeData:
     Definition: CourseAttendeeData
     """
 
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title."""
-    registered_date: Optional[str] = field(
+    registered_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "registeredDate"},
     )
     """Registered Date."""
-    attended_date: Optional[str] = field(
+    attended_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "attendedDate"},
     )
     """Attended Date."""
-    itemized_custom_fields: Optional[List[Dict[str, Any]]] = field(
+    itemized_custom_fields: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "itemizedCustomFields"},
     )
     """Itemized Custom Fields"""
-    first_name: Optional[str] = field(
+    first_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "firstName"},
     )
     """First Name."""
-    last_name: Optional[str] = field(
+    last_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastName"},
     )
     """Last Name."""
-    middle_name: Optional[str] = field(
+    middle_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "middleName"},
     )
     """Middle Name."""
-    preferred_first_name: Optional[str] = field(
+    preferred_first_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "preferredFirstName"},
     )
     """Preferred First Name."""
-    second_last_name: Optional[str] = field(
+    second_last_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "secondLastName"},
     )
     """Second Last Name."""
-    prefix: Optional[str] = None
+    prefix: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Prefix."""
-    suffix: Optional[str] = None
+    suffix: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Suffix"""
-    gender: Optional[str] = None
+    gender: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Gender."""
-    primary_organization: Optional[Dict[str, Any]] = field(
+    primary_organization: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "primaryOrganization"},
     )
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ID."""
-    customer_type: Optional[str] = field(
+    customer_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customerType"},
     )
     """Customer Type."""
-    record_number: Optional[str] = field(
+    record_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recordNumber"},
     )
     """Record Number."""
-    show_in_directory: Optional[bool] = field(
+    show_in_directory: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "showInDirectory"},
     )
     """Show In Directory."""
-    addresses: Optional[List[Dict[str, Any]]] = None
+    addresses: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Addresses."""
-    emails: Optional[List[Dict[str, Any]]] = None
+    emails: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Emails."""
-    phones: Optional[List[Dict[str, Any]]] = None
+    phones: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Phones."""
 
 
@@ -2392,12 +2709,13 @@ class ExamScoreData:
     Definition: ExamScoreData
     """
 
-    individual_record_number: Optional[str] = field(
+    individual_record_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "individualRecordNumber"},
     )
     """Individual Record Number."""
-    score: Optional[str] = None
+    score: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Score."""
 
 
@@ -2407,63 +2725,71 @@ class ContactData:
     Definition: ContactData
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ID."""
-    customer_type: Optional[str] = field(
+    customer_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customerType"},
     )
     """Customer Type."""
-    record_number: Optional[str] = field(
+    record_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recordNumber"},
     )
     """Record Number."""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name."""
-    addresses: Optional[List[Dict[str, Any]]] = None
-    image_uri: Optional[str] = field(
+    addresses: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    image_uri: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "imageUri"},
     )
     """Image Uri."""
-    twitter: Optional[str] = None
+    twitter: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Twitter."""
-    linked_in: Optional[str] = field(
+    linked_in: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "linkedIn"},
     )
     """LinkedIn."""
-    emails: Optional[List[Dict[str, Any]]] = None
+    emails: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """emails"""
-    phones: Optional[List[Dict[str, Any]]] = None
-    web_site: Optional[str] = field(
+    phones: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    web_site: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "webSite"},
     )
     """Website."""
-    memberships: Optional[List[Dict[str, Any]]] = None
+    memberships: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Memberships."""
-    category: Optional[str] = None
+    category: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Category."""
-    categories: Optional[List[Dict[str, Any]]] = None
+    categories: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Categories"""
-    custom_fields: Optional[List[Dict[str, Any]]] = field(
+    custom_fields: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customFields"},
     )
     """Custom Fields"""
-    show_in_directory: Optional[bool] = field(
+    show_in_directory: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "showInDirectory"},
     )
     """Show In Directory."""
-    links: Optional[List[Dict[str, Any]]] = None
+    links: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Links"""
-    old_id: Optional[str] = field(
+    old_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "oldId"},
     )
     """Old ID."""
@@ -2475,45 +2801,53 @@ class PurchasedItemData:
     Definition: PurchasedItemData
     """
 
-    order_number: Optional[str] = field(
+    order_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "orderNumber"},
     )
     """Order Number."""
-    product_code: Optional[str] = field(
+    product_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "productCode"},
     )
     """Product Code."""
-    product_name: Optional[str] = field(
+    product_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "productName"},
     )
     """Product Name."""
-    product_type: Optional[str] = field(
+    product_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "productType"},
     )
     """Product Type."""
-    purchase_date: Optional[str] = field(
+    purchase_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "purchaseDate"},
     )
     """Purchase Date."""
-    additional_info: Optional[str] = field(
+    additional_info: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "additionalInfo"},
     )
     """Additional Info."""
-    quantity: Optional[int] = None
+    quantity: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Quantity."""
-    itemized_custom_fields: Optional[List[Dict[str, Any]]] = field(
+    itemized_custom_fields: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "itemizedCustomFields"},
     )
     """Itemized Custom Fields"""
-    product_categories: Optional[List[Dict[str, Any]]] = field(
+    product_categories: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "productCategories"},
     )
     """Product Categories"""
@@ -2525,9 +2859,9 @@ class CustomFieldValueData:
     Definition: CustomFieldValueData
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name."""
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Value."""
 
 
@@ -2537,41 +2871,47 @@ class CommitteeNomineeSaveData:
     Definition: CommitteeNomineeSaveData
     """
 
-    nominee_record_number: Optional[str] = field(
+    nominee_record_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nomineeRecordNumber"},
     )
     """Nominee Record Number."""
-    code: Optional[str] = None
+    code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Code."""
-    position_code: Optional[str] = field(
+    position_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "positionCode"},
     )
     """Position Code."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Status."""
-    representing_organization_record_number: Optional[str] = field(
+    representing_organization_record_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "representingOrganizationRecordNumber"},
     )
     """Representing Organization Record Number."""
-    representing_organization_relationship_name: Optional[str] = field(
+    representing_organization_relationship_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "representingOrganizationRelationshipName"},
     )
     """Representing Organization Relationship Name."""
-    nominated_by_customer_record_number: Optional[str] = field(
+    nominated_by_customer_record_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nominatedByCustomerRecordNumber"},
     )
     """Nominated By Customer Record Number."""
-    committee_term: Optional[int] = field(
+    committee_term: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "committeeTerm"},
     )
     """Committee Term."""
-    rank: Optional[int] = None
+    rank: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Rank."""
 
 
@@ -2581,86 +2921,99 @@ class RegistrantCancellationData:
     Definition: RegistrantCancellationData
     """
 
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title."""
-    registration_number: Optional[str] = field(
+    registration_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "registrationNumber"},
     )
     """Registration Number."""
-    event_cancellation_date: Optional[str] = field(
+    event_cancellation_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "eventCancellationDate"},
     )
     """Event Cancellation Date."""
-    guest_of_record_number: Optional[str] = field(
+    guest_of_record_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "guestOfRecordNumber"},
     )
     """Guest Of Record Number."""
-    cancelled_sessions: Optional[List[Dict[str, Any]]] = field(
+    cancelled_sessions: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "cancelledSessions"},
     )
     """Cancelled Sessions."""
-    first_name: Optional[str] = field(
+    first_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "firstName"},
     )
     """First Name."""
-    last_name: Optional[str] = field(
+    last_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastName"},
     )
     """Last Name."""
-    middle_name: Optional[str] = field(
+    middle_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "middleName"},
     )
     """Middle Name."""
-    preferred_first_name: Optional[str] = field(
+    preferred_first_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "preferredFirstName"},
     )
     """Preferred First Name."""
-    second_last_name: Optional[str] = field(
+    second_last_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "secondLastName"},
     )
     """Second Last Name."""
-    prefix: Optional[str] = None
+    prefix: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Prefix."""
-    suffix: Optional[str] = None
+    suffix: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Suffix."""
-    gender: Optional[str] = None
+    gender: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Gender."""
-    primary_organization: Optional[Dict[str, Any]] = field(
+    primary_organization: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "primaryOrganization"},
     )
     """primaryOrganization"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ID."""
-    customer_type: Optional[str] = field(
+    customer_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customerType"},
     )
     """Customer Type."""
-    record_number: Optional[str] = field(
+    record_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recordNumber"},
     )
     """Record Number."""
-    show_in_directory: Optional[bool] = field(
+    show_in_directory: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "showInDirectory"},
     )
     """Show In Directory."""
-    addresses: Optional[List[Dict[str, Any]]] = None
+    addresses: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Addresses."""
-    emails: Optional[List[Dict[str, Any]]] = None
+    emails: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Emails"""
-    phones: Optional[List[Dict[str, Any]]] = None
+    phones: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Phones."""
 
 
@@ -2670,32 +3023,39 @@ class PayableOrderData:
     Definition: PayableOrderData
     """
 
-    number: Optional[str] = None
+    number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Number."""
-    date: Optional[str] = None
+    date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date."""
-    balance: Optional[float] = None
+    balance: Optional[float] = dataclass_field(default=None, kw_only=True)
     """Balance."""
-    line_items: Optional[List[Dict[str, Any]]] = field(
+    line_items: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lineItems"},
     )
     """lineItems"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    """Type."""
-    id: Optional[str] = None
-    """ID."""
-    customer_id: Optional[str] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    """Type."""
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """ID."""
+    customer_id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "customerId"},
     )
     """Customer Id."""
-    total_amount: Optional[float] = field(
+    total_amount: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "totalAmount"},
     )
     """Total Amount."""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title."""
 
 
@@ -2705,18 +3065,21 @@ class BaseNoteData:
     Definition: BaseNoteData
     """
 
-    content: Optional[str] = field(
+    content: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Content"},
     )
     """Content."""
-    category: Optional[str] = field(
+    category: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Category"},
     )
     """Category."""
-    is_internal: Optional[bool] = field(
+    is_internal: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isInternal"},
     )
     """Is Internal."""
@@ -2728,19 +3091,21 @@ class TaskSaveData:
     Definition: TaskSaveData
     """
 
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title."""
-    category: Optional[str] = None
+    category: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Category."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description."""
-    start_date: Optional[str] = field(
+    start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDate"},
     )
     """Start Date."""
-    due_date: Optional[str] = field(
+    due_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dueDate"},
     )
     """Due Date."""
@@ -2752,21 +3117,23 @@ class CountryData:
     Definition: CountryData
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ID."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name."""
-    two_letter_iso_code: Optional[str] = field(
+    two_letter_iso_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "twoLetterIsoCode"},
     )
     """Two Letter Iso Code."""
-    three_letter_iso_code: Optional[str] = field(
+    three_letter_iso_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "threeLetterIsoCode"},
     )
     """Three Letter Iso Code."""
-    code: Optional[int] = None
+    code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Code."""
 
 
@@ -2776,14 +3143,15 @@ class StateProvinceData:
     Definition: StateProvinceData
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ID."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name."""
-    abbreviation: Optional[str] = None
+    abbreviation: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Abbreviation."""
-    iso_code: Optional[str] = field(
+    iso_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isoCode"},
     )
     """Iso Code."""
@@ -2795,44 +3163,51 @@ class ExhibitData:
     Definition: ExhibitData
     """
 
-    code: Optional[str] = None
+    code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Code."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name."""
-    start_date: Optional[str] = field(
+    start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDate"},
     )
     """Start Date."""
-    start_time: Optional[str] = field(
+    start_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startTime"},
     )
     """Start Time."""
-    end_date: Optional[str] = field(
+    end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDate"},
     )
     """End Date."""
-    end_time: Optional[str] = field(
+    end_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endTime"},
     )
     """End Time."""
-    categories: Optional[List[Dict[str, Any]]] = None
+    categories: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Categories"""
-    short_description: Optional[str] = field(
+    short_description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "shortDescription"},
     )
     """Short Description."""
-    long_description: Optional[str] = field(
+    long_description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "longDescription"},
     )
     """Long Description."""
-    featured_listing: Optional[Dict[str, Any]] = field(
+    featured_listing: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "featuredListing"},
     )
 
@@ -2843,19 +3218,21 @@ class RequestSaveData:
     Definition: RequestSaveData
     """
 
-    requested_by_customer_record_number: Optional[str] = field(
+    requested_by_customer_record_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "requestedByCustomerRecordNumber"},
     )
     """Requested By Customer Record Number."""
-    request_type: Optional[str] = field(
+    request_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "requestType"},
     )
     """Request Type."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description."""
-    source: Optional[str] = None
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Source."""
 
 
@@ -2865,35 +3242,41 @@ class RelationshipTypeData:
     Definition: RelationshipTypeData
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name."""
-    reciprocal_relationship_name: Optional[str] = field(
+    reciprocal_relationship_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "reciprocalRelationshipName"},
     )
     """Reciprocal Relationship Name."""
-    relationship_type: Optional[str] = field(
+    relationship_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "relationshipType"},
     )
     """Relationship Type."""
-    allow_primary: Optional[bool] = field(
+    allow_primary: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowPrimary"},
     )
     """Allow Primary."""
-    can_purchase_for_organization: Optional[bool] = field(
+    can_purchase_for_organization: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "canPurchaseForOrganization"},
     )
     """Can Purchase For Organization."""
-    can_manage_p_a_c: Optional[bool] = field(
+    can_manage_p_a_c: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "canManagePAC"},
     )
     """Can Manage PAC."""
-    can_manage_organization: Optional[bool] = field(
+    can_manage_organization: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "canManageOrganization"},
     )
     """Can Manage Organization."""
@@ -2905,32 +3288,37 @@ class RequestData:
     Definition: RequestData
     """
 
-    request_number: Optional[str] = field(
+    request_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "requestNumber"},
     )
     """Request Number."""
-    request_date: Optional[str] = field(
+    request_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "requestDate"},
     )
     """Request Date."""
-    requested_by_customer_record_number: Optional[str] = field(
+    requested_by_customer_record_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "requestedByCustomerRecordNumber"},
     )
     """Requested By Customer Record Number."""
-    request_type: Optional[str] = field(
+    request_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "requestType"},
     )
     """Request Type."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description."""
-    source: Optional[str] = None
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Source."""
-    closed_date: Optional[str] = field(
+    closed_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "closedDate"},
     )
     """Closed Date."""
@@ -2942,16 +3330,17 @@ class NotificationData:
     Definition: NotificationData
     """
 
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title."""
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Message."""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Url."""
-    date: Optional[str] = None
+    date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date."""
-    is_read: Optional[bool] = field(
+    is_read: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isRead"},
     )
     """Is Read."""
@@ -2963,10 +3352,11 @@ class SaveCategoryBasicData:
     Definition: SaveCategoryBasicData
     """
 
-    code: Optional[str] = None
+    code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Code."""
-    is_primary: Optional[bool] = field(
+    is_primary: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isPrimary"},
     )
     """Is Primary."""
@@ -2978,12 +3368,13 @@ class CertificationData:
     Definition: CertificationData
     """
 
-    code: Optional[str] = None
+    code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Code."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name."""
-    expire_date: Optional[str] = field(
+    expire_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "expireDate"},
     )
     """Expire Date."""
@@ -2995,14 +3386,15 @@ class ActivityData:
     Definition: ActivityData
     """
 
-    category: Optional[str] = None
+    category: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Category."""
-    text: Optional[str] = None
+    text: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Text."""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Url."""
-    activity_date: Optional[str] = field(
+    activity_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "activityDate"},
     )
     """Activity Date."""
@@ -3014,8 +3406,9 @@ class SessionRegistrationData:
     Definition: SessionRegistrationData
     """
 
-    session_code: Optional[str] = field(
+    session_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sessionCode"},
     )
     """Session Code."""
@@ -3027,31 +3420,35 @@ class AwardData:
     Definition: AwardData
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ID."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description."""
-    year: Optional[int] = None
+    year: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Year."""
-    customer_type: Optional[str] = field(
+    customer_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customerType"},
     )
     """Customer Type."""
-    allow_public_nomination: Optional[bool] = field(
+    allow_public_nomination: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowPublicNomination"},
     )
     """Allow Public Nomination."""
-    nomination_start_date: Optional[str] = field(
+    nomination_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nominationStartDate"},
     )
     """Nomination Start Date."""
-    nomination_end_date: Optional[str] = field(
+    nomination_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nominationEndDate"},
     )
     """Nomination End Date."""
@@ -3063,26 +3460,29 @@ class LicenseData:
     Definition: LicenseData
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ID."""
-    license_type: Optional[str] = field(
+    license_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "licenseType"},
     )
     """License Type."""
-    number: Optional[str] = None
+    number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Number."""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """State."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Status."""
-    start_date: Optional[str] = field(
+    start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDate"},
     )
     """Start Date."""
-    expiration_date: Optional[str] = field(
+    expiration_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "expirationDate"},
     )
     """Experation Date."""
@@ -3094,53 +3494,61 @@ class CommitteeNomineeData:
     Definition: CommitteeNomineeData
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ID."""
-    first_name: Optional[str] = field(
+    first_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "firstName"},
     )
     """First Name."""
-    last_name: Optional[str] = field(
+    last_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastName"},
     )
     """Last Name."""
-    code: Optional[str] = None
+    code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Code."""
-    position: Optional[str] = None
+    position: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Position."""
-    position_code: Optional[str] = field(
+    position_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "positionCode"},
     )
     """Position Code."""
-    start_date: Optional[str] = field(
+    start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDate"},
     )
     """Start Date."""
-    end_date: Optional[str] = field(
+    end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDate"},
     )
     """End Date."""
-    primary_organization: Optional[Dict[str, Any]] = field(
+    primary_organization: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "primaryOrganization"},
     )
-    organization_representing: Optional[Dict[str, Any]] = field(
+    organization_representing: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "organizationRepresenting"},
     )
-    nominated_by_customer: Optional[Dict[str, Any]] = field(
+    nominated_by_customer: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nominatedByCustomer"},
     )
-    addresses: Optional[List[Dict[str, Any]]] = None
-    phones: Optional[List[Dict[str, Any]]] = None
-    emails: Optional[List[Dict[str, Any]]] = None
-    rank: Optional[int] = None
+    addresses: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    phones: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    emails: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    rank: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Rank."""
 
 
@@ -3150,33 +3558,39 @@ class RelationshipData:
     Definition: RelationshipData
     """
 
-    relationship_name: Optional[str] = field(
+    relationship_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "relationshipName"},
     )
     """Relationship Name."""
-    related_to_customer: Optional[Dict[str, Any]] = field(
+    related_to_customer: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "relatedToCustomer"},
     )
     """Related To Customer."""
-    reciprocal_relationship_name: Optional[str] = field(
+    reciprocal_relationship_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "reciprocalRelationshipName"},
     )
     """Reciprocal Relationship Name."""
-    is_primary: Optional[bool] = field(
+    is_primary: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isPrimary"},
     )
     """Is Primary."""
-    start_date: Optional[str] = field(
+    start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDate"},
     )
     """Start Date."""
-    end_date: Optional[str] = field(
+    end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDate"},
     )
     """End Date."""
@@ -3188,51 +3602,60 @@ class RegistrationData:
     Definition: RegistrationData
     """
 
-    individual_id: Optional[str] = field(
+    individual_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "individualId"},
     )
     """Individual ID."""
-    event: Optional[Dict[str, Any]] = None
+    event: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Event."""
-    sessions: Optional[List[Dict[str, Any]]] = None
+    sessions: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Sessions."""
-    badge_name: Optional[str] = field(
+    badge_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "badgeName"},
     )
     """Badge Name."""
-    badge_organization: Optional[str] = field(
+    badge_organization: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "badgeOrganization"},
     )
     """Badge Organization."""
-    badge_city: Optional[str] = field(
+    badge_city: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "badgeCity"},
     )
     """Badge City."""
-    badge_state: Optional[str] = field(
+    badge_state: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "badgeState"},
     )
     """Badge State."""
-    bought_together_with: Optional[List[Dict[str, Any]]] = field(
+    bought_together_with: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "boughtTogetherWith"},
     )
-    registrant_type_code: Optional[str] = field(
+    registrant_type_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "registrantTypeCode"},
     )
     """Registrant Type Code."""
-    registrant_type_name: Optional[str] = field(
+    registrant_type_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "registrantTypeName"},
     )
     """Registrant Type Name."""
-    registration_number: Optional[str] = field(
+    registration_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "registrationNumber"},
     )
     """Registration Number."""
@@ -3244,23 +3667,26 @@ class CommitteeMemberData:
     Definition: CommitteeMemberData
     """
 
-    committee: Optional[Dict[str, Any]] = None
-    position: Optional[str] = None
+    committee: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    position: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Position."""
-    position_code: Optional[str] = field(
+    position_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "positionCode"},
     )
     """Position Code."""
-    code: Optional[str] = None
+    code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Code."""
-    start_date: Optional[str] = field(
+    start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDate"},
     )
     """Start Date."""
-    end_date: Optional[str] = field(
+    end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDate"},
     )
     """End Date."""
@@ -3272,99 +3698,117 @@ class EventData:
     Definition: EventData
     """
 
-    event_id: Optional[str] = field(
+    event_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "eventId"},
     )
     """Event ID."""
-    event_code: Optional[str] = field(
+    event_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "eventCode"},
     )
     """Event Code."""
-    event_name: Optional[str] = field(
+    event_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "eventName"},
     )
     """Event Name."""
-    event_start_date: Optional[str] = field(
+    event_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "eventStartDate"},
     )
     """Event Start Date."""
-    event_start_time: Optional[str] = field(
+    event_start_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "eventStartTime"},
     )
     """Event Start Time."""
-    event_end_date: Optional[str] = field(
+    event_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "eventEndDate"},
     )
     """Event End Date."""
-    event_end_time: Optional[str] = field(
+    event_end_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "eventEndTime"},
     )
     """Event End Time."""
-    event_timezone: Optional[str] = field(
+    event_timezone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "eventTimezone"},
     )
     """Event Time Zone."""
-    event_description: Optional[str] = field(
+    event_description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "eventDescription"},
     )
     """Event Description."""
-    short_description: Optional[str] = field(
+    short_description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "shortDescription"},
     )
     """Short Description."""
-    public_event: Optional[bool] = field(
+    public_event: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "publicEvent"},
     )
     """Public Event."""
-    image_url: Optional[List[str]] = field(
+    image_url: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "imageUrl"},
     )
     """Image Url."""
-    external_url: Optional[str] = field(
+    external_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "externalUrl"},
     )
     """External Url."""
-    external_code: Optional[str] = field(
+    external_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "externalCode"},
     )
     """External Code."""
-    event_locations: Optional[List[Dict[str, Any]]] = field(
+    event_locations: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "eventLocations"},
     )
     """Event Locations."""
-    categories: Optional[List[Dict[str, Any]]] = None
+    categories: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Event Locations - Categories."""
-    education_credits: Optional[List[Dict[str, Any]]] = field(
+    education_credits: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "educationCredits"},
     )
     """Event Locations - Education Credits."""
-    uploads_data: Optional[List[Dict[str, Any]]] = field(
+    uploads_data: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "uploadsData"},
     )
     """Event Locations - Uploads Data"""
-    related_products: Optional[List[Dict[str, Any]]] = field(
+    related_products: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "relatedProducts"},
     )
     """Event Locations - Related Products."""
-    tags: Optional[List[str]] = None
+    tags: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Event Locations - Tags"""
 
 
@@ -3374,26 +3818,21 @@ class PhoneSaveData:
     Definition: PhoneSaveData
     """
 
-    country_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "countryName"},
-    )
+    country_name: str = dataclass_field(metadata={"wire_name": "countryName"})
     """Country Name."""
-    primary: Optional[bool] = None
+    primary: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Primary."""
-    show_in_directory: Optional[bool] = field(
+    show_in_directory: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "showInDirectory"},
     )
     """Show in Directory."""
-    number: Optional[str] = None
+    number: str
     """Number."""
-    extension: Optional[str] = None
+    extension: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Extension."""
-    type_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "typeName"},
-    )
+    type_name: str = dataclass_field(metadata={"wire_name": "typeName"})
     """Type Name."""
 
 
@@ -3403,18 +3842,21 @@ class IndividualPayload:
     Definition: IndividualPayload
     """
 
-    webhook_id: Optional[str] = field(
+    webhook_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebhookId"},
     )
     """Webhook Id."""
-    properties: Optional[Dict[str, Any]] = field(
+    properties: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Properties"},
     )
     """Properties."""
-    notifications: Optional[List[Dict[str, Any]]] = field(
+    notifications: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Notifications"},
     )
     """Notifications."""
@@ -3426,18 +3868,21 @@ class CommitteeMemberPayload:
     Definition: CommitteeMemberPayload
     """
 
-    webhook_id: Optional[str] = field(
+    webhook_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebhookId"},
     )
     """Webhook Id."""
-    properties: Optional[Dict[str, Any]] = field(
+    properties: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Properties"},
     )
     """Properties."""
-    notifications: Optional[List[Dict[str, Any]]] = field(
+    notifications: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Notifications"},
     )
     """Notifications."""
@@ -3449,18 +3894,21 @@ class PurchaseCancelledPayload:
     Definition: PurchaseCancelledPayload
     """
 
-    webhook_id: Optional[str] = field(
+    webhook_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebhookId"},
     )
     """Webhook Id."""
-    properties: Optional[Dict[str, Any]] = field(
+    properties: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Properties"},
     )
     """Properties."""
-    notifications: Optional[List[Dict[str, Any]]] = field(
+    notifications: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Notifications"},
     )
     """Notifications."""
@@ -3472,18 +3920,21 @@ class CustomerRequestPayload:
     Definition: CustomerRequestPayload
     """
 
-    webhook_id: Optional[str] = field(
+    webhook_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebhookId"},
     )
     """Webhook Id,."""
-    properties: Optional[Dict[str, Any]] = field(
+    properties: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Properties"},
     )
     """Properties."""
-    notifications: Optional[List[Dict[str, Any]]] = field(
+    notifications: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Notifications"},
     )
     """Notifications."""
@@ -3495,18 +3946,21 @@ class EmailPayload:
     Definition: EmailPayload
     """
 
-    webhook_id: Optional[str] = field(
+    webhook_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebhookId"},
     )
     """Webhook Id."""
-    properties: Optional[Dict[str, Any]] = field(
+    properties: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Properties"},
     )
     """Properties."""
-    notifications: Optional[List[Dict[str, Any]]] = field(
+    notifications: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Notifications"},
     )
     """Notifications."""
@@ -3518,49 +3972,49 @@ class CommitteeMemberCreateData:
     Definition: CommitteeMemberCreateData
     """
 
-    record_number: Optional[str] = field(
-        default=None,
+    record_number: str = dataclass_field(
         metadata={"wire_name": "recordNumber"},
     )
     """Record Number."""
-    code: Optional[str] = None
+    code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Member Code."""
-    position_code: Optional[str] = field(
-        default=None,
+    position_code: str = dataclass_field(
         metadata={"wire_name": "positionCode"},
     )
     """Position Code."""
-    start_date: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "startDate"},
-    )
+    start_date: str = dataclass_field(metadata={"wire_name": "startDate"})
     """Start Date."""
-    end_date: Optional[str] = field(
+    end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDate"},
     )
     """End Date."""
-    representing_organization_record_number: Optional[str] = field(
+    representing_organization_record_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "representingOrganizationRecordNumber"},
     )
     """Representing Organization - Record Number."""
-    representing_organization_relationship_name: Optional[str] = field(
+    representing_organization_relationship_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "representingOrganizationRelationshipName"},
     )
     """Representing Organization - Relationship Name."""
-    nominated_by_customer_record_number: Optional[str] = field(
+    nominated_by_customer_record_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nominatedByCustomerRecordNumber"},
     )
     """Nominated By - Record Number"""
-    committee_term: Optional[int] = field(
+    committee_term: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "committeeTerm"},
     )
     """Committee Term."""
-    rank: Optional[int] = None
+    rank: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Rank."""
 
 
@@ -3570,16 +4024,17 @@ class SubscriptionData:
     Definition: SubscriptionData
     """
 
-    code: Optional[str] = None
+    code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Code."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name."""
-    expire_date: Optional[str] = field(
+    expire_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "expireDate"},
     )
     """Expire Date."""
-    quantity: Optional[int] = None
+    quantity: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Quantity."""
 
 
@@ -3589,16 +4044,17 @@ class CommitteePositionData:
     Definition: CommitteePositionData
     """
 
-    code: Optional[str] = None
+    code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Code."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name."""
-    term: Optional[int] = None
+    term: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Term."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description."""
-    is_admin: Optional[bool] = field(
+    is_admin: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isAdmin"},
     )
     """Is Admin."""
@@ -3610,49 +4066,55 @@ class CommitteeData:
     Definition: CommitteeData
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name."""
-    code: Optional[str] = None
+    code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Code."""
-    website: Optional[str] = None
+    website: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Website."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Id."""
-    parent_committee_id: Optional[str] = field(
+    parent_committee_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parentCommitteeId"},
     )
     """Parent Committee Id."""
-    category_name: Optional[str] = field(
+    category_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "categoryName"},
     )
     """Category Name."""
-    category_code: Optional[str] = field(
+    category_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "categoryCode"},
     )
     """Category Code."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description."""
-    start_date: Optional[str] = field(
+    start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDate"},
     )
     """Start Date."""
-    end_date: Optional[str] = field(
+    end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDate"},
     )
     """End Date."""
-    show_in_directory: Optional[bool] = field(
+    show_in_directory: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "showInDirectory"},
     )
     """Show In Directory."""
-    term: Optional[Dict[str, Any]] = None
+    term: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Term."""
-    tags: Optional[List[str]] = None
+    tags: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Tags."""
 
 
@@ -3662,49 +4124,57 @@ class CommitteeMemberUpdateData:
     Definition: CommitteeMemberUpdateData
     """
 
-    record_number: Optional[str] = field(
+    record_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recordNumber"},
     )
     """Record Number."""
-    code: Optional[str] = None
+    code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Member Code."""
-    position_code: Optional[str] = field(
+    position_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "positionCode"},
     )
     """New Position Code."""
-    start_date: Optional[str] = field(
+    start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDate"},
     )
     """Start Date."""
-    end_date: Optional[str] = field(
+    end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDate"},
     )
     """End Date."""
-    representing_organization_record_number: Optional[str] = field(
+    representing_organization_record_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "representingOrganizationRecordNumber"},
     )
     """Representing Organization - Record Number."""
-    representing_organization_relationship_name: Optional[str] = field(
+    representing_organization_relationship_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "representingOrganizationRelationshipName"},
     )
     """Representing Organization - Relationship Name."""
-    nominated_by_customer_record_number: Optional[str] = field(
+    nominated_by_customer_record_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nominatedByCustomerRecordNumber"},
     )
     """Nominated By - Record Number"""
-    committee_term: Optional[int] = field(
+    committee_term: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "committeeTerm"},
     )
     """Committee Term."""
-    rank: Optional[int] = None
+    rank: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Rank."""
 
 
@@ -3714,34 +4184,33 @@ class EducationCreditData:
     Definition: EducationCreditData
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """Education Credit Type."""
-    description: Optional[str] = None
+    description: str
     """Description."""
-    number_of_credits: Optional[float] = field(
-        default=None,
+    number_of_credits: float = dataclass_field(
         metadata={"wire_name": "numberOfCredits"},
     )
     """Number of Credits Earned."""
-    date_earned: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "dateEarned"},
-    )
+    date_earned: str = dataclass_field(metadata={"wire_name": "dateEarned"})
     """Earned Date."""
-    provider_name: Optional[str] = field(
+    provider_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "providerName"},
     )
     """Provider Name."""
-    state_name: Optional[str] = field(
+    state_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "stateName"},
     )
     """State or Province Name."""
-    reference: Optional[str] = None
+    reference: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Reference."""
-    is_self_reported: Optional[bool] = field(
+    is_self_reported: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isSelfReported"},
     )
     """Is Self Reported."""
@@ -3753,24 +4222,27 @@ class NoteData:
     Definition: NoteData
     """
 
-    is_alert: Optional[bool] = field(
+    is_alert: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isAlert"},
     )
     """Is Alert."""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title."""
-    follow_up_date: Optional[str] = field(
+    follow_up_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "followUpDate"},
     )
     """Follow Up Date."""
-    content: Optional[str] = None
+    content: str
     """Content."""
-    category: Optional[str] = None
+    category: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Category."""
-    is_internal: Optional[bool] = field(
+    is_internal: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isInternal"},
     )
     """Is Internal."""
@@ -3782,29 +4254,27 @@ class AwardNominationData:
     Definition: AwardNominationData
     """
 
-    nominee_record_number: Optional[str] = field(
-        default=None,
+    nominee_record_number: str = dataclass_field(
         metadata={"wire_name": "nomineeRecordNumber"},
     )
     """Nominee Record Number."""
-    nominated_by_customer_record_number: Optional[str] = field(
-        default=None,
+    nominated_by_customer_record_number: str = dataclass_field(
         metadata={"wire_name": "nominatedByCustomerRecordNumber"},
     )
     """Nominated By Record Number."""
-    nomination_date: Optional[str] = field(
-        default=None,
+    nomination_date: str = dataclass_field(
         metadata={"wire_name": "nominationDate"},
     )
     """Nomination Date."""
-    awarded_date: Optional[str] = field(
+    awarded_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "awardedDate"},
     )
     """Awarded Date."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Status."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """An explanation why the nominee should be considered for the award."""
 
 
@@ -3814,29 +4284,29 @@ class UpdateAwardNominationData:
     Definition: UpdateAwardNominationData
     """
 
-    nominee_record_number: Optional[str] = field(
+    nominee_record_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nomineeRecordNumber"},
     )
     """Nominee Record Number."""
-    nominated_by_customer_record_number: Optional[str] = field(
-        default=None,
+    nominated_by_customer_record_number: str = dataclass_field(
         metadata={"wire_name": "nominatedByCustomerRecordNumber"},
     )
     """Nominated By Record Number."""
-    nomination_date: Optional[str] = field(
-        default=None,
+    nomination_date: str = dataclass_field(
         metadata={"wire_name": "nominationDate"},
     )
     """Nomination Date."""
-    awarded_date: Optional[str] = field(
+    awarded_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "awardedDate"},
     )
     """Awarded Date."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Status."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """An explanation why the nominee should be considered for the award."""
 
 
@@ -3846,68 +4316,78 @@ class AwardRecipientIndividualData:
     Definition: AwardRecipientIndividualData
     """
 
-    awarded_date: Optional[str] = field(
+    awarded_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "awardedDate"},
     )
     """Awarded Date."""
-    first_name: Optional[str] = field(
+    first_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "firstName"},
     )
     """First Name."""
-    last_name: Optional[str] = field(
+    last_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastName"},
     )
     """Last Name."""
-    middle_name: Optional[str] = field(
+    middle_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "middleName"},
     )
     """Middle Name."""
-    preferred_first_name: Optional[str] = field(
+    preferred_first_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "preferredFirstName"},
     )
     """Preferred First Name."""
-    second_last_name: Optional[str] = field(
+    second_last_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "secondLastName"},
     )
     """Second Last Name."""
-    prefix: Optional[str] = None
+    prefix: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Prefix."""
-    suffix: Optional[str] = None
+    suffix: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Suffix."""
-    gender: Optional[str] = None
+    gender: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Gender."""
-    primary_organization: Optional[Dict[str, Any]] = field(
+    primary_organization: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "primaryOrganization"},
     )
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Individual Id."""
-    customer_type: Optional[str] = field(
+    customer_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customerType"},
     )
     """Customer Type."""
-    record_number: Optional[str] = field(
+    record_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recordNumber"},
     )
     """Record Number."""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title."""
-    addresses: Optional[List[Dict[str, Any]]] = None
+    addresses: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Addresses."""
-    emails: Optional[List[Dict[str, Any]]] = None
+    emails: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Emails."""
-    phones: Optional[List[Dict[str, Any]]] = None
+    phones: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Phones."""
-    show_in_directory: Optional[bool] = field(
+    show_in_directory: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "showInDirectory"},
     )
     """Show In Directory."""
@@ -3919,52 +4399,59 @@ class AwardRecipientOrganizationData:
     Definition: AwardRecipientOrganizationData
     """
 
-    awarded_date: Optional[str] = field(
+    awarded_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "awardedDate"},
     )
     """Awarded Date."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Organization Name."""
-    acronym: Optional[str] = None
+    acronym: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Acronym."""
-    branch_name: Optional[str] = field(
+    branch_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "branchName"},
     )
     """Branch Name."""
-    annual_sales: Optional[float] = field(
+    annual_sales: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "annualSales"},
     )
     """Annual Sales."""
-    employee_range_id: Optional[str] = field(
+    employee_range_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "employeeRangeId"},
     )
     """Employee Range Id."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Organization Id."""
-    customer_type: Optional[str] = field(
+    customer_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customerType"},
     )
     """Customer Type."""
-    record_number: Optional[str] = field(
+    record_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recordNumber"},
     )
     """Record Number."""
-    show_in_directory: Optional[bool] = field(
+    show_in_directory: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "showInDirectory"},
     )
     """Show In Directory."""
-    addresses: Optional[List[Dict[str, Any]]] = None
+    addresses: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Addresses."""
-    emails: Optional[List[Dict[str, Any]]] = None
+    emails: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Emails."""
-    phones: Optional[List[Dict[str, Any]]] = None
+    phones: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Phones."""
 
 
@@ -3974,28 +4461,31 @@ class OrganizationLookupBasicData:
     Definition: OrganizationLookupBasicData
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Organization Name."""
-    acronym: Optional[str] = None
+    acronym: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Acronym."""
-    branch_name: Optional[str] = field(
+    branch_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "branchName"},
     )
     """Branch Name."""
-    employee_range_id: Optional[str] = field(
+    employee_range_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "employeeRangeId"},
     )
     """Employee Range Id."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Organization Id."""
-    record_number: Optional[str] = field(
+    record_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recordNumber"},
     )
     """Record Number."""
-    addresses: Optional[List[Dict[str, Any]]] = None
+    addresses: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Addresses."""
 
 
@@ -4005,47 +4495,54 @@ class IndividualLookupBasicData:
     Definition: IndividualLookupBasicData
     """
 
-    first_name: Optional[str] = field(
+    first_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "firstName"},
     )
     """First Name."""
-    last_name: Optional[str] = field(
+    last_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastName"},
     )
     """Last Name."""
-    middle_name: Optional[str] = field(
+    middle_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "middleName"},
     )
     """Middle Name."""
-    preferred_first_name: Optional[str] = field(
+    preferred_first_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "preferredFirstName"},
     )
     """Preferred First Name."""
-    second_last_name: Optional[str] = field(
+    second_last_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "secondLastName"},
     )
     """Second Last Name."""
-    prefix: Optional[str] = None
+    prefix: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Prefix."""
-    suffix: Optional[str] = None
+    suffix: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Suffix."""
-    gender: Optional[str] = None
+    gender: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Gender."""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title."""
-    primary_organization: Optional[Dict[str, Any]] = field(
+    primary_organization: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "primaryOrganization"},
     )
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Individual Id."""
-    record_number: Optional[str] = field(
+    record_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recordNumber"},
     )
     """Record Number."""
@@ -4057,18 +4554,21 @@ class CustomerCustomFieldValuePayload:
     Definition: CustomerCustomFieldValuePayload
     """
 
-    webhook_id: Optional[str] = field(
+    webhook_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebhookId"},
     )
     """Webhook Id."""
-    properties: Optional[Dict[str, Any]] = field(
+    properties: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Properties"},
     )
     """Properties."""
-    notifications: Optional[List[Dict[str, Any]]] = field(
+    notifications: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Notifications"},
     )
 
@@ -4079,18 +4579,21 @@ class CustomerMergedPayload:
     Definition: CustomerMergedPayload
     """
 
-    webhook_id: Optional[str] = field(
+    webhook_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebhookId"},
     )
     """Webhook Id."""
-    properties: Optional[Dict[str, Any]] = field(
+    properties: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Properties"},
     )
     """Properties."""
-    notifications: Optional[List[Dict[str, Any]]] = field(
+    notifications: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Notifications"},
     )
 
@@ -4101,18 +4604,21 @@ class CustomerRelationshipUpdatedPayload:
     Definition: CustomerRelationshipUpdatedPayload
     """
 
-    webhook_id: Optional[str] = field(
+    webhook_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebhookId"},
     )
     """Webhook Id."""
-    properties: Optional[Dict[str, Any]] = field(
+    properties: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Properties"},
     )
     """Properties."""
-    notifications: Optional[List[Dict[str, Any]]] = field(
+    notifications: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Notifications"},
     )
 
@@ -4123,18 +4629,21 @@ class CustomerPhoneUpdatedPayload:
     Definition: CustomerPhoneUpdatedPayload
     """
 
-    webhook_id: Optional[str] = field(
+    webhook_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebhookId"},
     )
     """Webhook Id."""
-    properties: Optional[Dict[str, Any]] = field(
+    properties: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Properties"},
     )
     """Properties."""
-    notifications: Optional[List[Dict[str, Any]]] = field(
+    notifications: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Notifications"},
     )
 
@@ -4145,18 +4654,21 @@ class CustomerAddressUpdatedPayload:
     Definition: CustomerAddressUpdatedPayload
     """
 
-    webhook_id: Optional[str] = field(
+    webhook_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebhookId"},
     )
     """Webhook Id."""
-    properties: Optional[Dict[str, Any]] = field(
+    properties: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Properties"},
     )
     """Properties."""
-    notifications: Optional[List[Dict[str, Any]]] = field(
+    notifications: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Notifications"},
     )
 
@@ -4167,18 +4679,21 @@ class EventRegistrationSubstitutedPayload:
     Definition: EventRegistrationSubstitutedPayload
     """
 
-    webhook_id: Optional[str] = field(
+    webhook_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebhookId"},
     )
     """Webhook Id."""
-    properties: Optional[Dict[str, Any]] = field(
+    properties: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Properties"},
     )
     """Properties."""
-    notifications: Optional[List[Dict[str, Any]]] = field(
+    notifications: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Notifications"},
     )
 
@@ -4189,18 +4704,21 @@ class IndividualRequestToBeForgottenPayload:
     Definition: IndividualRequestToBeForgottenPayload
     """
 
-    webhook_id: Optional[str] = field(
+    webhook_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebhookId"},
     )
     """Webhook Id."""
-    properties: Optional[Dict[str, Any]] = field(
+    properties: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Properties"},
     )
     """Properties."""
-    notifications: Optional[List[Dict[str, Any]]] = field(
+    notifications: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Notifications"},
     )
 
@@ -4211,18 +4729,21 @@ class ProductPurchasePayload:
     Definition: ProductPurchasePayload
     """
 
-    webhook_id: Optional[str] = field(
+    webhook_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebhookId"},
     )
     """Webhook Id."""
-    properties: Optional[Dict[str, Any]] = field(
+    properties: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Properties"},
     )
     """Properties."""
-    notifications: Optional[List[Dict[str, Any]]] = field(
+    notifications: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Notifications"},
     )
 
@@ -4233,18 +4754,21 @@ class MembershipTypeTerminatedPayload:
     Definition: MembershipTypeTerminatedPayload
     """
 
-    webhook_id: Optional[str] = field(
+    webhook_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebhookId"},
     )
     """Webhook Id."""
-    properties: Optional[Dict[str, Any]] = field(
+    properties: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Properties"},
     )
     """Properties."""
-    notifications: Optional[List[Dict[str, Any]]] = field(
+    notifications: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Notifications"},
     )
 
@@ -4257,16 +4781,16 @@ class ImpexiumClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -4277,8 +4801,8 @@ class ImpexiumClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -4286,8 +4810,8 @@ class ImpexiumClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -4299,7 +4823,7 @@ class ImpexiumClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -4314,13 +4838,90 @@ class ImpexiumClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "impexium"
 
-    async def get_abandoned_checkouts_async(
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
+            if next_link.startswith("?"):
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
+
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
+    def get_abandoned_checkouts(
         self,
         page_number: int,
         abandoned_from: str,
+        *,
         product_code: Optional[str] = None,
         customer_record_number: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4330,6 +4931,24 @@ class ImpexiumClient(ConnectorClientBase):
         Get Abandoned Checkouts
 
         Get Abandoned Checkouts
+
+        Swagger operation ID: `GetAbandonedCheckouts`.
+
+        Args:
+            page_number: Page Number.
+            abandoned_from: Abandoned From.
+            product_code: Product Code.
+            customer_record_number: Customer Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4357,7 +4976,7 @@ class ImpexiumClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4371,6 +4990,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4378,7 +4998,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_all_exhibitors_async(
+    def list_all_exhibitors(
         self,
         exhibit_code: str,
         page_number: int,
@@ -4387,11 +5007,31 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List All Exhibitors
 
         List All Exhibitors
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `List-All-Exhibitors`.
+
+        Args:
+            exhibit_code: Exhibit Code.
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4402,47 +5042,97 @@ class ImpexiumClient(ConnectorClientBase):
             f"/Exhibitors"
             f"/{quote(str(page_number), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_of_exams_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_of_exams(
         self,
         page_number: int,
+        *,
         code: Optional[str] = None,
         category_name: Optional[str] = None,
         is_public: Optional[bool] = None,
         changed_since: Optional[str] = None,
         tag: Optional[str] = None,
         include_prices: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List of Exams
 
         List of Exams
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `List-of-Exams`.
+
+        Args:
+            page_number: The page number of the result set.
+            code: A specific Exam code.
+            category_name: A specific Exam Category name.
+            is_public: When set to true, only public Exams will be displayed;
+                If it's not specified will display all.
+            changed_since: When a date (yyyy-MM-ddTHH:mm:ss (UTC)) is
+                specified, only Exams modified after this date will be
+                displayed.
+            tag: Tag.
+            include_prices: When set to true, add the active price list for
+                every product.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4481,45 +5171,89 @@ class ImpexiumClient(ConnectorClientBase):
             query_params.append(f"includePrices={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_registrants_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_registrants(
         self,
         event_code: str,
         page_number: int,
+        *,
         session_code: Optional[str] = None,
         include_details: Optional[bool] = None,
         registered_since: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List Registrants
 
         List Registrants
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `List-Registrants`.
+
+        Args:
+            event_code: Event Code.
+            page_number: Page Number.
+            session_code: Session Code.
+            include_details: Include Details.
+            registered_since: Registered Since.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4548,29 +5282,50 @@ class ImpexiumClient(ConnectorClientBase):
             query_params.append(f"registeredSince={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_course_attendees_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_course_attendees(
         self,
         code: str,
         page_number: int,
@@ -4584,6 +5339,22 @@ class ImpexiumClient(ConnectorClientBase):
         Get Course Attendees
 
         Get Course Attendees
+
+        Swagger operation ID: `Get-Course-Attendees`.
+
+        Args:
+            code: Course Code.
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4595,7 +5366,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/{quote(str(page_number), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4609,6 +5380,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4616,7 +5388,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_exam_scores_async(
+    def add_exam_scores(
         self,
         input: AddExamScoresInput,
         exam_code: str,
@@ -4630,13 +5402,29 @@ class ImpexiumClient(ConnectorClientBase):
         Add Exam Scores
 
         Add Exam Scores
+
+        Swagger operation ID: `Add-Exam-Scores`.
+
+        Args:
+            input: The request body.
+            exam_code: Exam Code.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Exams/{quote(str(exam_code), safe='')}/Scores"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4650,6 +5438,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4657,7 +5446,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def find_members_by_name_async(
+    def find_members_by_name(
         self,
         name: str,
         page_number: int,
@@ -4671,6 +5460,22 @@ class ImpexiumClient(ConnectorClientBase):
         Find Members by Name
 
         Find Members by Name
+
+        Swagger operation ID: `Find-Members-by-Name`.
+
+        Args:
+            name: Individual or Organization name.
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4683,7 +5488,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/{quote(str(page_number), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4697,6 +5502,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4704,14 +5510,14 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_purchases_for_an_individual_async(
+    def get_purchases_for_an_individual(
         self,
         id_or_record_number: str,
         page_number: int,
+        *,
         product_code: Optional[str] = None,
         purchased_since: Optional[str] = None,
         product_category_code: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4721,6 +5527,25 @@ class ImpexiumClient(ConnectorClientBase):
         Get Purchases for an Individual
 
         Get Purchases for an Individual
+
+        Swagger operation ID: `Get-Purchases-for-an-Individual`.
+
+        Args:
+            id_or_record_number: Individual ID or Record Number.
+            page_number: Page Number.
+            product_code: Product Code.
+            purchased_since: yyyy-MM-ddTHH:mm:ss.
+            product_category_code: Product Category Code.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4750,7 +5575,7 @@ class ImpexiumClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4764,6 +5589,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4771,7 +5597,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_or_update_a_list_of_custom_fields_per_organization_async(
+    def add_or_update_a_list_of_custom_fields_per_organization(
         self,
         input: AddOrUpdateAListOfCustomFieldsPerOrganizationInput,
         id_or_record_number: str,
@@ -4785,6 +5611,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add or Update a List of Custom Fields Per Organization
 
         Add or Update a List of Custom Fields Per Organization
+
+        Swagger operation ID:
+        `Add-or-Update-a-List-of-Custom-Fields-Per-Organization`.
+
+        Args:
+            input: The request body.
+            id_or_record_number: Organization ID or Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4795,7 +5638,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/CustomFieldsList"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4809,6 +5652,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4816,9 +5660,9 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_nominee_async(
+    def add_nominee(
         self,
-        input: CommitteeNomineeSaveData,
+        input: CommitteeNomineeSaveData | Mapping[str, Any],
         code: str,
         *,
         timeout: Optional[float] = None,
@@ -4830,13 +5674,30 @@ class ImpexiumClient(ConnectorClientBase):
         Add Nominee
 
         Add Nominee
+
+        Swagger operation ID: `Add-Nominee`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            code: Committee Code.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Committees/{quote(str(code), safe='')}/Nominations"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4850,9 +5711,10 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_individual_custom_field_values_async(
+    def list_individual_custom_field_values(
         self,
         id: str,
         *,
@@ -4860,41 +5722,81 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Individual Custom Field Values
 
         Get Individual Custom Field Values
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `Get-Individual-Custom-Field-Values`.
+
+        Args:
+            id: Individual ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Individuals/{quote(str(id), safe='')}/CustomFields"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def update_custom_field_value_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def update_custom_field_value(
         self,
-        input: CustomFieldData,
+        input: CustomFieldData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -4906,13 +5808,30 @@ class ImpexiumClient(ConnectorClientBase):
         Update Individual Custom Field Values
 
         Update Individual Custom Field Values.
+
+        Swagger operation ID: `Update-custom-field-value`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Customer ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Individuals/{quote(str(id), safe='')}/CustomFields"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4926,24 +5845,49 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def list_all_event_cancellations_by_event_async(
+    def list_all_event_cancellations_by_event(
         self,
         event_code: str,
         page_number: int,
+        *,
         include_details: Optional[bool] = None,
         cancelled_since: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List All Event Cancellations by Event
 
         List All Event Cancellations by Event
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `List-All-Event-Cancellations-by-Event`.
+
+        Args:
+            event_code: A valid Event Code.
+            page_number: Page Number.
+            include_details: Indicates if additional information should be
+                returned.
+            cancelled_since: The initial date to search cancellations
+                (yyyy-MM-ddTHH:mm:ss).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4967,36 +5911,57 @@ class ImpexiumClient(ConnectorClientBase):
             query_params.append(f"cancelledSince={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_all_open_orders_for_an_individual_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_all_open_orders_for_an_individual(
         self,
         id_or_record_number: str,
         page_number: int,
+        *,
         include_line_items: Optional[bool] = None,
         from_date: Optional[str] = None,
         to_date: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5006,6 +5971,25 @@ class ImpexiumClient(ConnectorClientBase):
         Get All Open Orders for an Individual
 
         Get All Open Orders for an Individual
+
+        Swagger operation ID: `Get-All-Open-Orders-for-an-Individual`.
+
+        Args:
+            id_or_record_number: Individual ID or Record Number.
+            page_number: Page Number.
+            include_line_items: Include Line Items.
+            from_date: From Date.
+            to_date: To Date.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5036,7 +6020,7 @@ class ImpexiumClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5050,6 +6034,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5057,7 +6042,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_completed_user_tasks_by_user_id_or_email_async(
+    def list_completed_user_tasks_by_user_id_or_email(
         self,
         user_id_or_email: str,
         page_number: int,
@@ -5066,11 +6051,31 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List Completed User Tasks by User ID or Email
 
         List Completed User Tasks by User ID or Email
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `List-Completed-User-Tasks-by-User-ID-or-Email`.
+
+        Args:
+            user_id_or_email: A valid User ID or Email.
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5082,29 +6087,50 @@ class ImpexiumClient(ConnectorClientBase):
             f"/Completed"
             f"/{quote(str(page_number), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_pending_user_tasks_by_user_id_or_email_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_pending_user_tasks_by_user_id_or_email(
         self,
         user_id_or_email: str,
         page_number: int,
@@ -5113,11 +6139,31 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List Pending User Tasks by User ID or Email
 
         List Pending User Tasks by User ID or Email
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `List-Pending-User-Tasks-by-User-ID-or-Email`.
+
+        Args:
+            user_id_or_email: A valid User ID or Email.
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5129,31 +6175,52 @@ class ImpexiumClient(ConnectorClientBase):
             f"/Pending"
             f"/{quote(str(page_number), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def add_note_to_sales_opportunity_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def add_note_to_sales_opportunity(
         self,
-        input: BaseNoteData,
+        input: BaseNoteData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -5165,13 +6232,30 @@ class ImpexiumClient(ConnectorClientBase):
         Add Note to Sales Opportunity
 
         Add Note to Sales Opportunity
+
+        Swagger operation ID: `Add-Note-to-Sales-Opportunity`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Sales opportunity ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Sales/Opportunities/{quote(str(id), safe='')}/Notes"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5185,11 +6269,12 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def add_activity_to_sales_opportunity_async(
+    def add_activity_to_sales_opportunity(
         self,
-        input: ActivityData,
+        input: ActivityData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -5201,13 +6286,30 @@ class ImpexiumClient(ConnectorClientBase):
         Add Activity to Sales Opportunity
 
         Add Activity to Sales Opportunity
+
+        Swagger operation ID: `Add-Activity-to-Sales-Opportunity`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Opportunity ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Sales/Opportunities/{quote(str(id), safe='')}/Activities"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5221,11 +6323,12 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def update_task_by_task_number_async(
+    def update_task_by_task_number(
         self,
-        input: TaskSaveData,
+        input: TaskSaveData | Mapping[str, Any],
         task_number: str,
         *,
         timeout: Optional[float] = None,
@@ -5237,13 +6340,30 @@ class ImpexiumClient(ConnectorClientBase):
         Update Task by Task Number
 
         Update Task by Task Number
+
+        Swagger operation ID: `Update-Task-by-Task-Number`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            task_number: A valid Task Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/tasks/{quote(str(task_number), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5257,6 +6377,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5264,7 +6385,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_all_countries_async(
+    def list_all_countries(
         self,
         page_number: int,
         *,
@@ -5272,39 +6393,79 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List All Countries
 
         List All Countries
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `List-All-Countries`.
+
+        Args:
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Countries/All/{quote(str(page_number), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_all_states_by_country_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_all_states_by_country(
         self,
         country_id: str,
         page_number: int,
@@ -5318,6 +6479,22 @@ class ImpexiumClient(ConnectorClientBase):
         Get All States by Country
 
         Get All States by Country
+
+        Swagger operation ID: `Get-All-States-by-Country`.
+
+        Args:
+            country_id: Country ID.
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5330,7 +6507,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/{quote(str(page_number), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5344,6 +6521,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5351,7 +6529,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_all_exhibits_async(
+    def list_all_exhibits(
         self,
         page_number: int,
         *,
@@ -5359,39 +6537,79 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List All Exhibits
 
         List All Exhibits
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `List-All-Exhibits`.
+
+        Args:
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Exhibits/{quote(str(page_number), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def delete_a_category_for_an_organization_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def delete_a_category_for_an_organization(
         self,
         record_number: str,
         category_code: str,
@@ -5405,6 +6623,22 @@ class ImpexiumClient(ConnectorClientBase):
         Delete a Category for an Organization
 
         Delete a Category for an Organization
+
+        Swagger operation ID: `Delete-a-Category-for-an-Organization`.
+
+        Args:
+            record_number: Record Number.
+            category_code: Category Code.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5416,7 +6650,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/{quote(str(category_code), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5430,11 +6664,12 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def add_customer_request_async(
+    def add_customer_request(
         self,
-        input: RequestSaveData,
+        input: RequestSaveData | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5445,10 +6680,26 @@ class ImpexiumClient(ConnectorClientBase):
         Add Customer Request
 
         Add Customer Request
+
+        Swagger operation ID: `Add-Customer-Request`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/v1/Requests"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5462,11 +6713,12 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def update_customer_request_async(
+    def update_customer_request(
         self,
-        input: RequestUpdateData,
+        input: RequestUpdateData | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5477,10 +6729,26 @@ class ImpexiumClient(ConnectorClientBase):
         Update Customer Request
 
         Update Customer Request
+
+        Swagger operation ID: `Update-Customer-Request`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/v1/Requests"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5494,6 +6762,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5501,7 +6770,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_categories_for_an_organization_async(
+    def add_categories_for_an_organization(
         self,
         input: AddCategoriesForAnOrganizationInput,
         record_number: str,
@@ -5515,6 +6784,22 @@ class ImpexiumClient(ConnectorClientBase):
         Add Categories for an Organization
 
         Add Categories for an Organization
+
+        Swagger operation ID: `Add-Categories-for-an-Organization`.
+
+        Args:
+            input: The request body.
+            record_number: Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5525,7 +6810,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/Categories"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5539,9 +6824,10 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def list_of_customer_relationships_async(
+    def list_of_customer_relationships(
         self,
         page_number: int,
         *,
@@ -5549,11 +6835,30 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List of Customer Relationships
 
         List of Customer Relationships
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `List-of-Customer-Relationships`.
+
+        Args:
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5563,29 +6868,50 @@ class ImpexiumClient(ConnectorClientBase):
             f"/RelationshipTypes"
             f"/{quote(str(page_number), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_all_open_customer_request_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_all_open_customer_request(
         self,
         page_number: int,
         *,
@@ -5593,39 +6919,79 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List All Open Customer Request
 
         List All Open Customer Request
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `List-All-Open-Customer-Request`.
+
+        Args:
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Requests/Open/{quote(str(page_number), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_organization_inactive_memberships_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_organization_inactive_memberships(
         self,
         id: str,
         *,
@@ -5638,6 +7004,21 @@ class ImpexiumClient(ConnectorClientBase):
         Get Organization Inactive Memberships
 
         Get Organization Inactive Memberships
+
+        Swagger operation ID: `Get-Organization-Inactive-Memberships`.
+
+        Args:
+            id: Organization ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5649,7 +7030,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/Inactive"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5663,6 +7044,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5670,7 +7052,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_record_from_custom_data_table_async(
+    def delete_record_from_custom_data_table(
         self,
         table_name: str,
         id: str,
@@ -5684,6 +7066,22 @@ class ImpexiumClient(ConnectorClientBase):
         Delete Record From Custom Data Table
 
         Delete Record From Custom Data Table
+
+        Swagger operation ID: `Delete-Record-From-Custom-Data-Table`.
+
+        Args:
+            table_name: Custom table name.
+            id: ID of the record to be deleted.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5694,7 +7092,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5708,11 +7106,12 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def update_user_task_progress_or_mark_as_completed_async(
+    def update_user_task_progress_or_mark_as_completed(
         self,
-        input: UserTaskData,
+        input: UserTaskData | Mapping[str, Any],
         user_id_or_email: str,
         *,
         timeout: Optional[float] = None,
@@ -5724,13 +7123,30 @@ class ImpexiumClient(ConnectorClientBase):
         Update User Task Progress or Mark as Completed
 
         Update User Task Progress or Mark as Completed
+
+        Swagger operation ID: `Update-User-Task-Progress-or-Mark-as-Completed`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            user_id_or_email: A valid User Id or Email.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/tasks/Users/{quote(str(user_id_or_email), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5744,6 +7160,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5751,12 +7168,12 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def find_members_or_individuals_by_first_name_async(
+    def find_members_or_individuals_by_first_name(
         self,
         first_name: str,
         page_number: int,
-        include_email: Optional[bool] = None,
         *,
+        include_email: Optional[bool] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5766,6 +7183,23 @@ class ImpexiumClient(ConnectorClientBase):
         Find Members (Individuals) by First Name
 
         Find Members (Individuals) by First Name
+
+        Swagger operation ID: `Find-Members-or-Individuals-by-First-Name`.
+
+        Args:
+            first_name: First Name.
+            page_number: Page Number.
+            include_email: Include Email Data.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5786,7 +7220,7 @@ class ImpexiumClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5800,6 +7234,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5807,12 +7242,12 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def find_members_or_individuals_by_last_name_async(
+    def find_members_or_individuals_by_last_name(
         self,
         last_name: str,
         page_number: int,
-        include_email: Optional[bool] = None,
         *,
+        include_email: Optional[bool] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5822,6 +7257,23 @@ class ImpexiumClient(ConnectorClientBase):
         Find Members (Individuals) by Last Name
 
         Find Members (Individuals) by Last Name
+
+        Swagger operation ID: `Find-Members-or-Individuals-by-Last-Name`.
+
+        Args:
+            last_name: Last Name.
+            page_number: Page Number.
+            include_email: Include Email Data.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5842,7 +7294,7 @@ class ImpexiumClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5856,6 +7308,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5863,9 +7316,9 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def assign_task_to_a_user_async(
+    def assign_task_to_a_user(
         self,
-        input: UserTaskData,
+        input: UserTaskData | Mapping[str, Any],
         user_id_or_email: str,
         *,
         timeout: Optional[float] = None,
@@ -5877,13 +7330,30 @@ class ImpexiumClient(ConnectorClientBase):
         Create a new task or Assign Task to a User
 
         Create a new task or Assign Task to a User
+
+        Swagger operation ID: `Assign-Task-to-a-User`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            user_id_or_email: A valid User Id or Email.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/tasks/Users/{quote(str(user_id_or_email), safe='')}/Task"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5897,9 +7367,10 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def delete_a_category_for_an_individual_async(
+    def delete_a_category_for_an_individual(
         self,
         record_number: str,
         category_code: str,
@@ -5913,6 +7384,22 @@ class ImpexiumClient(ConnectorClientBase):
         Delete a Category for an Individual
 
         Delete a Category for an Individual
+
+        Swagger operation ID: `Delete-a-Category-for-an-Individual`.
+
+        Args:
+            record_number: Record Number.
+            category_code: Category Code.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5924,7 +7411,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/{quote(str(category_code), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5938,11 +7425,12 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def add_notification_to_individual_async(
+    def add_notification_to_individual(
         self,
-        input: NotificationData,
+        input: NotificationData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -5954,13 +7442,30 @@ class ImpexiumClient(ConnectorClientBase):
         Add Notification to Individual
 
         Add Notification to Individual
+
+        Swagger operation ID: `Add-Notification-to-Individual`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Individual ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Individuals/{quote(str(id), safe='')}/Notifications"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5974,9 +7479,10 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def add_categories_for_an_individual_async(
+    def add_categories_for_an_individual(
         self,
         input: AddCategoriesForAnIndividualInput,
         record_number: str,
@@ -5990,6 +7496,22 @@ class ImpexiumClient(ConnectorClientBase):
         Add Categories for an Individual
 
         Add Categories for an Individual
+
+        Swagger operation ID: `Add-Categories-for-an-Individual`.
+
+        Args:
+            input: The request body.
+            record_number: Individual Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6000,7 +7522,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/Categories"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6014,11 +7536,12 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def add_a_new_task_async(
+    def add_a_new_task(
         self,
-        input: TaskSaveData,
+        input: TaskSaveData | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6029,10 +7552,26 @@ class ImpexiumClient(ConnectorClientBase):
         Add a New Task
 
         Add a New Task
+
+        Swagger operation ID: `Add-a-New-Task`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/v1/tasks"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6046,6 +7585,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6053,9 +7593,10 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_of_all_organization_members_async(
+    def list_of_all_organization_members(
         self,
         page_number: int,
+        *,
         zip_code: Optional[str] = None,
         radius: Optional[float] = None,
         state_abbreviation: Optional[str] = None,
@@ -6075,16 +7616,53 @@ class ImpexiumClient(ConnectorClientBase):
         include_custom_fields: Optional[bool] = None,
         expiring_from: Optional[str] = None,
         expiring_to: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List of All Organization Members
 
         List of All Organization Members
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `List-of-All-Organization-Members`.
+
+        Args:
+            page_number: Page Number.
+            zip_code: Zip Code.
+            radius: Radius in Miles.
+            state_abbreviation: State Abbreviation.
+            congressional_district: Congressional District.
+            membership_type_code: A valid code for a Membership Type.
+            membership_type_category: A valid Membership Type Category name.
+            city: City.
+            name: Name.
+            tag: Tag.
+            latitude: Latitude.
+            longitude: Longitude.
+            domain: Domain.
+            include_membership: Include Membership Data.
+            include_address: Include Address Data.
+            include_phone: Include Phone Data.
+            include_email: Include Email Data.
+            include_custom_fields: Include Custom Field Data.
+            expiring_from: Expire Date - From.
+            expiring_to: Expire Date - To.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6193,31 +7771,53 @@ class ImpexiumClient(ConnectorClientBase):
             query_params.append(f"expiringTo={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_of_all_individual_members_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_of_all_individual_members(
         self,
         page_number: int,
+        *,
         zip_code: Optional[str] = None,
         radius: Optional[float] = None,
         membership_type_code: Optional[str] = None,
@@ -6233,16 +7833,49 @@ class ImpexiumClient(ConnectorClientBase):
         include_membership_renewal_url: Optional[bool] = None,
         expiring_from: Optional[str] = None,
         expiring_to: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List of All Individual Members
 
         List of All Individual Members
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `List-of-All-Individual-Members`.
+
+        Args:
+            page_number: Page Number.
+            zip_code: Zip Code.
+            radius: Radius in Miles.
+            membership_type_code: A valid code for a Membership Type.
+            membership_type_category: A valid Membership Type Category name.
+            tag: Tag.
+            include_membership: Include Membership Data.
+            include_address: Include Address Data.
+            include_phone: Include Phone Data.
+            include_email: Include Email Data.
+            include_link: Include Link Data.
+            include_custom_fields: Include Custom Field Data.
+            include_categories: Include Categories Data.
+            include_membership_renewal_url: Include Membership Renewal URLs.
+            expiring_from: Expire Date - From.
+            expiring_to: Expire Date - To.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6331,29 +7964,50 @@ class ImpexiumClient(ConnectorClientBase):
             query_params.append(f"expiringTo={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_list_of_active_certifications_for_an_organization_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_list_of_active_certifications_for_an_organization(
         self,
         id_or_record_number: str,
         page_number: int,
@@ -6367,6 +8021,23 @@ class ImpexiumClient(ConnectorClientBase):
         Get List of Active Certifications for an Organization
 
         Get List of Active Certifications for an Organization
+
+        Swagger operation ID:
+        `Get-List-of-Active-Certifications-for-an-Organization`.
+
+        Args:
+            id_or_record_number: Organization ID or Record Number.
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6378,7 +8049,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/{quote(str(page_number), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6392,6 +8063,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6399,7 +8071,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_list_of_active_certifications_for_an_individual_async(
+    def get_list_of_active_certifications_for_an_individual(
         self,
         id_or_record_number: str,
         page_number: int,
@@ -6413,6 +8085,23 @@ class ImpexiumClient(ConnectorClientBase):
         Get List of Active Certifications for an Individual
 
         Get List of Active Certifications for an Individual
+
+        Swagger operation ID:
+        `Get-List-of-Active-Certifications-for-an-Individual`.
+
+        Args:
+            id_or_record_number: Individual ID or Record Number.
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6424,7 +8113,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/{quote(str(page_number), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6438,6 +8127,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6445,7 +8135,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_individual_inactive_memberships_async(
+    def get_individual_inactive_memberships(
         self,
         id: str,
         *,
@@ -6458,6 +8148,21 @@ class ImpexiumClient(ConnectorClientBase):
         Get Individual Inactive Memberships
 
         Get Individual Inactive Memberships
+
+        Swagger operation ID: `Get-Individual-Inactive-Memberships`.
+
+        Args:
+            id: Individual ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6469,7 +8174,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/Inactive"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6483,6 +8188,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6490,9 +8196,9 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_activity_to_organization_async(
+    def add_activity_to_organization(
         self,
-        input: ActivityData,
+        input: ActivityData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -6504,13 +8210,30 @@ class ImpexiumClient(ConnectorClientBase):
         Add Activity to Organization
 
         Add Activity to Organization
+
+        Swagger operation ID: `Add-Activity-to-Organization`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Organization ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Organizations/{quote(str(id), safe='')}/Activities"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6524,15 +8247,16 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def register_an_individual_for_a_free_session_async(
+    def register_an_individual_for_a_free_session(
         self,
         input: RegisterAnIndividualForAFreeSessionInput,
         event_code: str,
         customer_id_or_record_number: str,
-        registration_number: Optional[str] = None,
         *,
+        registration_number: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -6542,6 +8266,25 @@ class ImpexiumClient(ConnectorClientBase):
         Register an Individual for a Free Session
 
         Register an Individual for a Free Session
+
+        Swagger operation ID: `Register-an-Individual-for-a-Free-Session`.
+
+        Args:
+            input: The request body.
+            event_code: A Valid Event Code.
+            customer_id_or_record_number: A Valid Individual ID or Record
+                Number.
+            registration_number: A Valid Registration Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6562,7 +8305,7 @@ class ImpexiumClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6576,9 +8319,10 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_a_list_of_licenses_async(
+    def get_a_list_of_licenses(
         self,
         id: str,
         page_number: int,
@@ -6592,6 +8336,22 @@ class ImpexiumClient(ConnectorClientBase):
         Get a List of Licenses
 
         Get a List of Licenses
+
+        Swagger operation ID: `Get-a-List-of-Licenses`.
+
+        Args:
+            id: Individual ID.
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6603,7 +8363,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/{quote(str(page_number), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6617,6 +8377,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6624,20 +8385,40 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_all_awards_async(
+    def list_all_awards(
         self,
         page_number: int,
-        year: Optional[int] = None,
         *,
+        year: Optional[int] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List All Awards
 
         List All Awards
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `List-All-Awards`.
+
+        Args:
+            page_number: Page Number.
+            year: Year.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6651,34 +8432,55 @@ class ImpexiumClient(ConnectorClientBase):
             query_params.append(f"Year={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def find_members_or_individuals_by_name_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def find_members_or_individuals_by_name(
         self,
         name: str,
         page_number: int,
-        include_email: Optional[bool] = None,
         *,
+        include_email: Optional[bool] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -6688,6 +8490,23 @@ class ImpexiumClient(ConnectorClientBase):
         Find Members (Individuals) by Name
 
         Find Members (Individuals) by Name
+
+        Swagger operation ID: `Find-Members-or-Individuals-by-Name`.
+
+        Args:
+            name: Individual Name.
+            page_number: Page Number.
+            include_email: Include Email Data.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6708,7 +8527,7 @@ class ImpexiumClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6722,6 +8541,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6729,7 +8549,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_a_list_of_all_services_of_an_organization_async(
+    def get_a_list_of_all_services_of_an_organization(
         self,
         id: str,
         *,
@@ -6742,13 +8562,28 @@ class ImpexiumClient(ConnectorClientBase):
         Get a List of All Services of an Organization
 
         Get a List of All Services of an Organization
+
+        Swagger operation ID: `Get-a-List-of-All-Services-of-an-Organization`.
+
+        Args:
+            id: Organization ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Organizations/{quote(str(id), safe='')}/Services"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6762,6 +8597,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6769,9 +8605,9 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_a_service_to_an_organization_async(
+    def add_a_service_to_an_organization(
         self,
-        input: ServiceData,
+        input: ServiceData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -6783,13 +8619,30 @@ class ImpexiumClient(ConnectorClientBase):
         Add a Service to an Organization
 
         Add a Service to an Organization
+
+        Swagger operation ID: `Add-a-Service-to-an-Organization`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Organization ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Organizations/{quote(str(id), safe='')}/Services"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6803,6 +8656,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6810,9 +8664,9 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_phone_for_an_individual_async(
+    def update_phone_for_an_individual(
         self,
-        input: PhoneSaveData,
+        input: PhoneSaveData | Mapping[str, Any],
         id_or_record_number: str,
         id: str,
         *,
@@ -6825,6 +8679,24 @@ class ImpexiumClient(ConnectorClientBase):
         Update Phone for an Individual
 
         Update Phone for an Individual
+
+        Swagger operation ID: `Update-Phone-for-an-Individual`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id_or_record_number: Individual ID or Record Number.
+            id: Phone ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6836,7 +8708,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6850,6 +8722,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6857,9 +8730,9 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_phone_for_an_organization_async(
+    def update_phone_for_an_organization(
         self,
-        input: PhoneSaveData,
+        input: PhoneSaveData | Mapping[str, Any],
         id_or_record_number: str,
         id: str,
         *,
@@ -6872,6 +8745,24 @@ class ImpexiumClient(ConnectorClientBase):
         Update Phone for an Organization
 
         Update Phone for an Organization
+
+        Swagger operation ID: `Update-Phone-for-an-Organization`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id_or_record_number: Organization ID or Record Number.
+            id: Phone ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6883,7 +8774,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6897,6 +8788,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6904,9 +8796,9 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_an_individual_web_link_async(
+    def delete_an_individual_web_link(
         self,
-        input: DeleteAnIndividualWebLinkInput,
+        input: DeleteAnIndividualWebLinkInput | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -6918,6 +8810,23 @@ class ImpexiumClient(ConnectorClientBase):
         Delete an Individual Web Link
 
         Delete an Individual Web Link
+
+        Swagger operation ID: `Delete-an-Individual-Web-Link`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id_or_record_number: A valid Individual ID or Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6928,7 +8837,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/Links"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6942,11 +8851,12 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def add_web_link_for_individual_async(
+    def add_web_link_for_individual(
         self,
-        input: AddWebLinkForIndividualInput,
+        input: AddWebLinkForIndividualInput | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -6958,6 +8868,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add Web Link for Individual
 
         Add Web Link for Individual
+
+        Swagger operation ID: `Add-Web-Link-for-Individual`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id_or_record_number: A valid Individual Id or Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6968,7 +8895,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/Links"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6982,11 +8909,12 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def add_phone_to_organization_async(
+    def add_phone_to_organization(
         self,
-        input: PhoneSaveData,
+        input: PhoneSaveData | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -6998,6 +8926,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add Phone to Organization
 
         Add Phone to Organization
+
+        Swagger operation ID: `Add-Phone-to-Organization`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id_or_record_number: Organization ID or Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7008,7 +8953,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/Phones"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7022,6 +8967,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7029,12 +8975,12 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_nominees_by_committee_async(
+    def get_nominees_by_committee(
         self,
         code: str,
         page_number: int,
-        term: Optional[str] = None,
         *,
+        term: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -7044,6 +8990,23 @@ class ImpexiumClient(ConnectorClientBase):
         Get Nominees by Committee
 
         Get Nominees by Committee
+
+        Swagger operation ID: `Get-Nominees-by-Committee`.
+
+        Args:
+            code: Committee Code.
+            page_number: Page Number.
+            term: Term.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7063,7 +9026,7 @@ class ImpexiumClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7077,6 +9040,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7084,7 +9048,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_organizations_active_subscriptions_async(
+    def get_organizations_active_subscriptions(
         self,
         id: str,
         page_number: int,
@@ -7098,6 +9062,22 @@ class ImpexiumClient(ConnectorClientBase):
         Get Organization's Active Subscriptions
 
         Get Organization's Active Subscriptions
+
+        Swagger operation ID: `Get-Organizations-Active-Subscriptions`.
+
+        Args:
+            id: Organization ID.
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7109,7 +9089,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/{quote(str(page_number), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7123,6 +9103,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7130,9 +9111,9 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_an_organization_web_link_async(
+    def delete_an_organization_web_link(
         self,
-        input: DeleteAnOrganizationWebLinkInput,
+        input: DeleteAnOrganizationWebLinkInput | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -7144,6 +9125,23 @@ class ImpexiumClient(ConnectorClientBase):
         Delete an Organization Web Link
 
         Delete an Organization Web Link
+
+        Swagger operation ID: `Delete-an-Organization-Web-Link`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id_or_record_number: Organization ID or Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7154,7 +9152,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/Links"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7168,11 +9166,12 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def add_web_link_for_organization_async(
+    def add_web_link_for_organization(
         self,
-        input: AddWebLinkForOrganizationInput,
+        input: AddWebLinkForOrganizationInput | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -7184,6 +9183,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add Web Link for Organization
 
         Add Web Link for Organization
+
+        Swagger operation ID: `Add-Web-Link-for-Organization`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id_or_record_number: Organization ID or Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7194,7 +9210,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/Links"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7208,11 +9224,12 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def add_email_to_organization_async(
+    def add_email_to_organization(
         self,
-        input: EmailData,
+        input: EmailData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -7224,13 +9241,30 @@ class ImpexiumClient(ConnectorClientBase):
         Add Email to Organization
 
         Add Email to Organization
+
+        Swagger operation ID: `Add-Email-to-Organization`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Organization ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Organizations/{quote(str(id), safe='')}/Emails"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7244,15 +9278,16 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_organizations_relationships_async(
+    def get_organizations_relationships(
         self,
         id: str,
         page_number: int,
+        *,
         relationship_name: Optional[str] = None,
         includes_details: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -7262,6 +9297,24 @@ class ImpexiumClient(ConnectorClientBase):
         Get Organization's Relationships
 
         Get Organization's Relationships
+
+        Swagger operation ID: `Get-Organizations-Relationships`.
+
+        Args:
+            id: Organization ID.
+            page_number: Page Number.
+            relationship_name: Name of the Relationship.
+            includes_details: Includes Details.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7286,7 +9339,7 @@ class ImpexiumClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7300,6 +9353,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7307,9 +9361,9 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_or_update_address_to_organization_async(
+    def add_or_update_address_to_organization(
         self,
-        input: AddressSaveData,
+        input: AddressSaveData | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -7321,6 +9375,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add or Update Address to Organization
 
         Add or Update Address to Organization
+
+        Swagger operation ID: `Add-or-Update-Address-to-Organization`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id_or_record_number: Organization ID or Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7331,7 +9402,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/Addresses"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7345,6 +9416,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7352,7 +9424,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_or_update_a_list_of_custom_fields_per_individual_async(
+    def add_or_update_a_list_of_custom_fields_per_individual(
         self,
         input: AddOrUpdateAListOfCustomFieldsPerIndividualInput,
         id_or_record_number: str,
@@ -7366,6 +9438,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add or Update a List of Custom Fields Per Individual
 
         Add or Update a List of Custom Fields Per Individual
+
+        Swagger operation ID:
+        `Add-or-Update-a-List-of-Custom-Fields-Per-Individual`.
+
+        Args:
+            input: The request body.
+            id_or_record_number: Individual ID or Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7376,7 +9465,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/CustomFieldsList"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7390,6 +9479,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7397,7 +9487,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_upcoming_events_async(
+    def get_upcoming_events(
         self,
         page_number: int,
         *,
@@ -7410,13 +9500,28 @@ class ImpexiumClient(ConnectorClientBase):
         Get Upcoming Events
 
         Get Upcoming Events
+
+        Swagger operation ID: `Get-Upcoming-Events`.
+
+        Args:
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Events/Upcoming/{quote(str(page_number), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7430,6 +9535,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7437,9 +9543,9 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_phone_to_individual_async(
+    def add_phone_to_individual(
         self,
-        input: PhoneSaveData,
+        input: PhoneSaveData | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -7451,6 +9557,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add Phone to Individual
 
         Add Phone to Individual
+
+        Swagger operation ID: `Add-Phone-to-Individual`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id_or_record_number: Individual ID or Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7461,7 +9584,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/Phones"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7475,6 +9598,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7482,12 +9606,12 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_committee_information_for_an_individual_async(
+    def get_committee_information_for_an_individual(
         self,
         id: str,
         page_number: int,
-        include_inactive: Optional[bool] = None,
         *,
+        include_inactive: Optional[bool] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -7497,6 +9621,23 @@ class ImpexiumClient(ConnectorClientBase):
         Get Committee Information for an Individual
 
         Get Committee Information for an Individual
+
+        Swagger operation ID: `Get-Committee-Information-for-an-Individual`.
+
+        Args:
+            id: Individual ID.
+            page_number: Page Number.
+            include_inactive: Include Inactive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7516,7 +9657,7 @@ class ImpexiumClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7530,6 +9671,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7537,7 +9679,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_organization_custom_field_values_async(
+    def list_organization_custom_field_values(
         self,
         id: str,
         *,
@@ -7545,39 +9687,79 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Organization Custom Field Values
 
         Get Organization Custom Field Values
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `Get-Organization-Custom-Field-Values`.
+
+        Args:
+            id: Organization ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Organizations/{quote(str(id), safe='')}/CustomFields"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_organization_active_memberships_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_organization_active_memberships(
         self,
         id: str,
         *,
@@ -7585,11 +9767,30 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Organization Active Memberships
 
         Get Organization Active Memberships
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `Get-Organization-Active-Memberships`.
+
+        Args:
+            id: Organization ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7600,35 +9801,56 @@ class ImpexiumClient(ConnectorClientBase):
             f"/Memberships"
             f"/Active"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_all_events_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_all_events(
         self,
         page_number: int,
+        *,
         code: Optional[str] = None,
         name: Optional[str] = None,
         tag: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -7638,6 +9860,24 @@ class ImpexiumClient(ConnectorClientBase):
         Get All Events
 
         Get All Events
+
+        Swagger operation ID: `Get-All-Events`.
+
+        Args:
+            page_number: Page Number.
+            code: Code.
+            name: Name.
+            tag: Tag.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7662,7 +9902,7 @@ class ImpexiumClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7676,6 +9916,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7683,7 +9924,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_individual_active_memberships_async(
+    def list_individual_active_memberships(
         self,
         id: str,
         *,
@@ -7691,44 +9932,84 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Individual Active Memberships
 
         Get Individual Active Memberships
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `Get-Individual-Active-Memberships`.
+
+        Args:
+            id: Individual ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Individuals/{quote(str(id), safe='')}/Memberships/Active"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_all_event_registrations_information_for_an_individual_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_all_event_registrations_information_for_an_individual(
         self,
         id_or_record_number: str,
         page_number: int,
-        event_code: Optional[str] = None,
         *,
+        event_code: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -7738,6 +10019,24 @@ class ImpexiumClient(ConnectorClientBase):
         Get All Event Registrations Information for an Individual
 
         Get All Event Registrations Information for an Individual
+
+        Swagger operation ID:
+        `Get-All-Event-Registrations-Information-for-an-Individual`.
+
+        Args:
+            id_or_record_number: Individual ID or Record Number.
+            page_number: Page Number.
+            event_code: Event Code.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7757,7 +10056,7 @@ class ImpexiumClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7771,6 +10070,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7778,13 +10078,13 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_individuals_relationships_async(
+    def get_individuals_relationships(
         self,
         id: str,
         page_number: int,
+        *,
         relationship_name: Optional[str] = None,
         include_details: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -7794,6 +10094,24 @@ class ImpexiumClient(ConnectorClientBase):
         Get Individual's Relationships
 
         Get Individual's Relationships
+
+        Swagger operation ID: `Get-Individuals-Relationships`.
+
+        Args:
+            id: Individual ID.
+            page_number: Page Number.
+            relationship_name: Name of the Relationship.
+            include_details: Include Details.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7818,7 +10136,7 @@ class ImpexiumClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7832,6 +10150,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7839,9 +10158,9 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_an_individual_email_async(
+    def update_an_individual_email(
         self,
-        input: UpdateAnIndividualEmailInput,
+        input: UpdateAnIndividualEmailInput | Mapping[str, Any],
         id_or_record_number: str,
         current_email_address: str,
         *,
@@ -7854,6 +10173,24 @@ class ImpexiumClient(ConnectorClientBase):
         Update an Individual Email
 
         Update an Individual Email
+
+        Swagger operation ID: `Update-an-Individual-Email`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id_or_record_number: Individual ID or Record Number.
+            current_email_address: Email Address to Update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7865,7 +10202,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/{quote(str(current_email_address), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7879,11 +10216,12 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def save_relationship_for_organization_async(
+    def save_relationship_for_organization(
         self,
-        input: SaveRelationshipForOrganizationInput,
+        input: SaveRelationshipForOrganizationInput | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -7895,13 +10233,30 @@ class ImpexiumClient(ConnectorClientBase):
         Save Relationship for Organization
 
         Save Relationship for Organization
+
+        Swagger operation ID: `Save-Relationship-for-Organization`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Organization ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Organizations/{quote(str(id), safe='')}/Relationships"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7915,13 +10270,14 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def add_individual_async(
+    def add_individual(
         self,
-        input: AddIndividualInput,
-        create_user: Optional[bool] = None,
+        input: AddIndividualInput | Mapping[str, Any],
         *,
+        create_user: Optional[bool] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -7931,6 +10287,24 @@ class ImpexiumClient(ConnectorClientBase):
         Add Individual
 
         Adds an Individual.
+
+        Swagger operation ID: `Add-Individual`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            create_user: Choose True if a user account should be created when
+                the individual is created.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/v1/Individuals"
         query_params = []
@@ -7942,7 +10316,7 @@ class ImpexiumClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7956,6 +10330,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7963,9 +10338,9 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_email_to_individual_async(
+    def add_email_to_individual(
         self,
-        input: AddEmailToIndividualInput,
+        input: AddEmailToIndividualInput | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -7977,6 +10352,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add Email to Individual
 
         Add Email to Individual
+
+        Swagger operation ID: `Add-Email-to-Individual`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id_or_record_number: Individual ID Or Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7987,7 +10379,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/Emails"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8001,6 +10393,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8008,9 +10401,9 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_or_update_address_to_individual_async(
+    def add_or_update_address_to_individual(
         self,
-        input: AddressSaveData,
+        input: AddressSaveData | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -8022,6 +10415,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add or Update Address to Individual
 
         Add or Update Address to Individual
+
+        Swagger operation ID: `Add-or-Update-Address-to-Individual`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id_or_record_number: Individual ID or Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8032,7 +10442,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/Addresses"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8046,6 +10456,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8053,13 +10464,13 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def find_members_or_individuals_by_first_and_last_name_async(
+    def find_members_or_individuals_by_first_and_last_name(
         self,
         first_name: str,
         last_name: str,
         page_number: int,
-        include_email: Optional[bool] = None,
         *,
+        include_email: Optional[bool] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -8069,6 +10480,25 @@ class ImpexiumClient(ConnectorClientBase):
         Find Members (Individuals) by First Name and Last Name
 
         Find Members (Individuals) by First Name and Last Name
+
+        Swagger operation ID:
+        `Find-members-or-individuals-by-first-and-last-name`.
+
+        Args:
+            first_name: First Name.
+            last_name: Last Name.
+            page_number: Page Number.
+            include_email: Include Email Data.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8090,7 +10520,7 @@ class ImpexiumClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8104,6 +10534,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8111,13 +10542,13 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_committee_members_by_committee_id_or_code_async(
+    def get_committee_members_by_committee_id_or_code(
         self,
         id_or_code: str,
         page_number: int,
+        *,
         term: Optional[int] = None,
         position_codes: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -8127,6 +10558,24 @@ class ImpexiumClient(ConnectorClientBase):
         Get Committee Members by committee ID or code
 
         Get Committee Members by Committee ID or Code
+
+        Swagger operation ID: `Get-Committee-Members-by-committee-ID-or-code`.
+
+        Args:
+            id_or_code: Committee ID or Code.
+            page_number: Page Number.
+            term: Term.
+            position_codes: Position Codes.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8151,7 +10600,7 @@ class ImpexiumClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8165,11 +10614,12 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def add_activity_async(
+    def add_activity(
         self,
-        input: AddActivityInput,
+        input: AddActivityInput | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -8181,13 +10631,30 @@ class ImpexiumClient(ConnectorClientBase):
         Add Activity
 
         Add Activity.
+
+        Swagger operation ID: `Add-Activity`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Individual Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Individuals/{quote(str(id), safe='')}/Activities"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8201,9 +10668,10 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def find_individual_id_or_email_async(
+    def find_individual_id_or_email(
         self,
         id_or_record_number_or_email: str,
         page_number: int,
@@ -8217,6 +10685,22 @@ class ImpexiumClient(ConnectorClientBase):
         Find Individual by Id or Email or Record Number
 
         Find Individual by Id or Email.
+
+        Swagger operation ID: `Find-Individual-IDOrEmail`.
+
+        Args:
+            id_or_record_number_or_email: Id or Record Number or Email.
+            page_number: pageNumber.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8232,7 +10716,7 @@ class ImpexiumClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8246,6 +10730,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8253,9 +10738,9 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_relationship_to_individual_async(
+    def add_relationship_to_individual(
         self,
-        input: AddRelationshipToIndividualInput,
+        input: AddRelationshipToIndividualInput | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -8267,13 +10752,30 @@ class ImpexiumClient(ConnectorClientBase):
         Add Relationship to Individual
 
         Add Relationship to Individual.
+
+        Swagger operation ID: `Add-relationship-to-individual`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Individual Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Individuals/{quote(str(id), safe='')}/Relationships"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8287,11 +10789,12 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def individual_add_education_credit_async(
+    def individual_add_education_credit(
         self,
-        input: EducationCreditData,
+        input: EducationCreditData | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -8303,6 +10806,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add Education Credits to Individual
 
         Add a new Education Credit to an Individual.
+
+        Swagger operation ID: `Individual-Add-Education-Credit`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id_or_record_number: Individual Id or Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8313,7 +10833,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/EducationCredits"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8327,11 +10847,12 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def individual_add_note_async(
+    def individual_add_note(
         self,
-        input: NoteData,
+        input: NoteData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -8343,13 +10864,30 @@ class ImpexiumClient(ConnectorClientBase):
         Add Note to Individual
 
         Add a Note to an Individual.
+
+        Swagger operation ID: `Individual-AddNote`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Individual Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Individuals/{quote(str(id), safe='')}/Notes"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8363,9 +10901,10 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def individuals_lookup_by_name_async(
+    def individuals_lookup_by_name(
         self,
         page_number: int,
         name: str,
@@ -8379,6 +10918,22 @@ class ImpexiumClient(ConnectorClientBase):
         Lookup Individuals
 
         Lookup Individuals by Name
+
+        Swagger operation ID: `Individuals-LookupByName`.
+
+        Args:
+            page_number: pageNumber.
+            name: Individual Name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8393,7 +10948,7 @@ class ImpexiumClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8407,6 +10962,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8414,9 +10970,9 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_to_committee_async(
+    def add_to_committee(
         self,
-        input: CommitteeMemberCreateData,
+        input: CommitteeMemberCreateData | Mapping[str, Any],
         code: str,
         *,
         timeout: Optional[float] = None,
@@ -8428,13 +10984,30 @@ class ImpexiumClient(ConnectorClientBase):
         Add Individual to Committee
 
         Add Individual to Committee.
+
+        Swagger operation ID: `Add-To-Committee`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            code: Committee Code.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Committees/{quote(str(code), safe='')}/Members"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8448,6 +11021,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8455,9 +11029,9 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_committee_member_async(
+    def update_committee_member(
         self,
-        input: CommitteeMemberUpdateData,
+        input: CommitteeMemberUpdateData | Mapping[str, Any],
         code: str,
         member_record_number: str,
         current_position_code: str,
@@ -8471,6 +11045,25 @@ class ImpexiumClient(ConnectorClientBase):
         Update Committee Member
 
         Update Committee Member.
+
+        Swagger operation ID: `Update-Committee-Member`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            code: Committee Code.
+            member_record_number: Member Record Number.
+            current_position_code: Current Position Code.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8483,7 +11076,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/{quote(str(current_position_code), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8497,11 +11090,12 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def add_organization_async(
+    def add_organization(
         self,
-        input: AddOrganizationInput,
+        input: AddOrganizationInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -8512,10 +11106,26 @@ class ImpexiumClient(ConnectorClientBase):
         Add Organization
 
         Add Organization.
+
+        Swagger operation ID: `Add-Organization`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/v1/Organizations"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8529,6 +11139,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8536,9 +11147,9 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_organization_async(
+    def update_organization(
         self,
-        input: UpdateOrganizationInput,
+        input: UpdateOrganizationInput | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -8550,13 +11161,30 @@ class ImpexiumClient(ConnectorClientBase):
         Update Organization
 
         Update Organization.
+
+        Swagger operation ID: `Update-Organization`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Organization Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Organizations/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8570,6 +11198,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8577,7 +11206,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def organization_get_profile_async(
+    def organization_get_profile(
         self,
         id_or_recordnumber: str,
         page_number: int,
@@ -8591,6 +11220,22 @@ class ImpexiumClient(ConnectorClientBase):
         Find Organization by Id or Record Number
 
         Get organization's profile information by ID or Record Number
+
+        Swagger operation ID: `Organization-Get-Profile`.
+
+        Args:
+            id_or_recordnumber: Organization Id or Record Number.
+            page_number: pageNumber.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8606,7 +11251,7 @@ class ImpexiumClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8620,6 +11265,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8627,9 +11273,9 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def organization_add_note_async(
+    def organization_add_note(
         self,
-        input: NoteData,
+        input: NoteData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -8641,13 +11287,30 @@ class ImpexiumClient(ConnectorClientBase):
         Add Note to Organization
 
         Add a Note to an Organization.
+
+        Swagger operation ID: `Organization-AddNote`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Organization Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Organizations/{quote(str(id), safe='')}/Notes"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8661,9 +11324,10 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def organization_lookup_by_name_async(
+    def organization_lookup_by_name(
         self,
         page_number: int,
         name: str,
@@ -8677,6 +11341,22 @@ class ImpexiumClient(ConnectorClientBase):
         Lookup Organizations
 
         Lookup Organizations by Name or Acronym
+
+        Swagger operation ID: `Organization-LookupByName`.
+
+        Args:
+            page_number: pageNumber.
+            name: Name or Acronym.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8691,7 +11371,7 @@ class ImpexiumClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8705,6 +11385,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8712,14 +11393,14 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_all_committees_async(
+    def get_all_committees(
         self,
         page_number: int,
+        *,
         code: Optional[str] = None,
         name: Optional[str] = None,
         term: Optional[int] = None,
         active_only: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -8729,6 +11410,25 @@ class ImpexiumClient(ConnectorClientBase):
         Get All Committees
 
         Get All Committees
+
+        Swagger operation ID: `Get-All-Committees`.
+
+        Args:
+            page_number: Page Number.
+            code: Committee Code.
+            name: Committee Name.
+            term: Term.
+            active_only: Active Only.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8758,7 +11458,7 @@ class ImpexiumClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8772,6 +11472,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8779,7 +11480,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_positions_by_committee_async(
+    def get_positions_by_committee(
         self,
         code: str,
         *,
@@ -8792,13 +11493,28 @@ class ImpexiumClient(ConnectorClientBase):
         Get Positions by Committee
 
         Get Positions by Committee
+
+        Swagger operation ID: `Get-Positions-by-Committee`.
+
+        Args:
+            code: Committee Code.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Committees/{quote(str(code), safe='')}/Positions"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8812,6 +11528,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8819,7 +11536,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_sub_committees_async(
+    def get_sub_committees(
         self,
         code: str,
         page_number: int,
@@ -8833,6 +11550,22 @@ class ImpexiumClient(ConnectorClientBase):
         Get Sub-Committees
 
         Get Sub-Committees
+
+        Swagger operation ID: `Get-Sub-Committees`.
+
+        Args:
+            code: Code.
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8844,7 +11577,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/{quote(str(page_number), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8858,6 +11591,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8865,7 +11599,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_individuals_active_subscriptions_async(
+    def get_individuals_active_subscriptions(
         self,
         id: str,
         page_number: int,
@@ -8879,6 +11613,22 @@ class ImpexiumClient(ConnectorClientBase):
         Get Individual's Active Subscriptions
 
         Get Individual's Active Subscriptions
+
+        Swagger operation ID: `Get-Individuals-Active-Subscriptions`.
+
+        Args:
+            id: Individual.
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8891,7 +11641,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/{quote(str(page_number), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8905,6 +11655,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8912,22 +11663,44 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_all_individuals_async(
+    def list_all_individuals(
         self,
         page_number: int,
+        *,
         name: Optional[str] = None,
         include_details: Optional[bool] = None,
         old_id: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List all Individuals
 
         List all Individuals
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `List-all-Individuals`.
+
+        Args:
+            page_number: Page Number.
+            name: Individual Name.
+            include_details: Include Details.
+            old_id: Individual Old ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8951,29 +11724,50 @@ class ImpexiumClient(ConnectorClientBase):
             query_params.append(f"oldID={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def find_customer_phone_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def find_customer_phone(
         self,
         page_number: str,
         phone_number: str,
@@ -8987,6 +11781,22 @@ class ImpexiumClient(ConnectorClientBase):
         Find Customer by Phone Number
 
         Find Customer by Phone Number.
+
+        Swagger operation ID: `Find-Customer-Phone`.
+
+        Args:
+            page_number: pageNumber.
+            phone_number: Phone Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9003,7 +11813,7 @@ class ImpexiumClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -9017,6 +11827,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -9024,7 +11835,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def mark_registrant_attended_async(
+    def mark_registrant_attended(
         self,
         input: MarkRegistrantAttendedInput,
         record_number: str,
@@ -9038,6 +11849,22 @@ class ImpexiumClient(ConnectorClientBase):
         Mark Registrant as Attended
 
         Mark the Registrant as Attended for the specified Events.
+
+        Swagger operation ID: `Mark-Registrant-Attended`.
+
+        Args:
+            input: The request body.
+            record_number: Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9049,7 +11876,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/Attended"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -9063,11 +11890,12 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def awards_add_award_nomination_async(
+    def awards_add_award_nomination(
         self,
-        input: AwardNominationData,
+        input: AwardNominationData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -9079,13 +11907,30 @@ class ImpexiumClient(ConnectorClientBase):
         Add Award Nomination
 
         Add a new Award Nomination.
+
+        Swagger operation ID: `Awards-AddAwardNomination`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Award Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Awards/{quote(str(id), safe='')}/Nominations"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -9099,11 +11944,12 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def awards_update_award_nomination_async(
+    def awards_update_award_nomination(
         self,
-        input: UpdateAwardNominationData,
+        input: UpdateAwardNominationData | Mapping[str, Any],
         id: str,
         nominee_record_number: str,
         *,
@@ -9116,6 +11962,24 @@ class ImpexiumClient(ConnectorClientBase):
         Update Award Nomination
 
         Update an existing Award Nomination.
+
+        Swagger operation ID: `Awards-UpdateAwardNomination`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Award Id.
+            nominee_record_number: Nominee Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9127,7 +11991,7 @@ class ImpexiumClient(ConnectorClientBase):
             f"/{quote(str(nominee_record_number), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -9141,9 +12005,10 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def awards_get_individual_award_recipients_async(
+    def awards_get_individual_award_recipients(
         self,
         page_number: int,
         id: str,
@@ -9157,6 +12022,22 @@ class ImpexiumClient(ConnectorClientBase):
         List Award Individual Recipients
 
         List all Individuals that are Award Recipients.
+
+        Swagger operation ID: `Awards-GetIndividualAwardRecipients`.
+
+        Args:
+            page_number: pageNumber.
+            id: Award Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9173,7 +12054,7 @@ class ImpexiumClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -9187,6 +12068,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -9194,7 +12076,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def awards_get_organization_award_recipients_async(
+    def awards_get_organization_award_recipients(
         self,
         page_number: int,
         id: str,
@@ -9208,6 +12090,22 @@ class ImpexiumClient(ConnectorClientBase):
         List Award Organization Recipients
 
         List all Organizations that are Award Recipients.
+
+        Swagger operation ID: `Awards-GetOrganizationAwardRecipients`.
+
+        Args:
+            page_number: pageNumber.
+            id: Award Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9224,7 +12122,7 @@ class ImpexiumClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -9238,6 +12136,7 @@ class ImpexiumClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

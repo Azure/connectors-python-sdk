@@ -6,6 +6,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.dynamicsax import DynamicsaxClient
 from azure.connectors.dynamicsax import (
     AxOnlineProcedureResult,
     BusinessEventSubscription,
@@ -13,7 +14,6 @@ from azure.connectors.dynamicsax import (
     BusinessEventsList,
     DataSet,
     DataSetsList,
-    DynamicsaxClient,
     ExecuteProcedureInput,
     GetItemResponse,
     Item,
@@ -31,7 +31,10 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
-from tests.generated_connector_test_utils import resolve_generated_result
+from tests.generated_connector_test_utils import (
+    generated_pager_response_text,
+    resolve_generated_result,
+)
 
 BASE_URL = "https://example.azure.com/connections/test"
 
@@ -42,7 +45,7 @@ OPERATION_ARGS = {
         "dataset": "ds",
         "procedure": "proc",
     },
-    "get_items": {"dataset": "ds", "table": "tbl"},
+    "list_items": {"dataset": "ds", "table": "tbl"},
     "post_item": {
         "input": PostItemInput(),
         "dataset": "ds",
@@ -56,16 +59,16 @@ OPERATION_ARGS = {
         "table": "tbl",
         "id": "1",
     },
-    "get_tables": {"dataset": "ds"},
-    "get_data_sets": {},
-    "get_business_event_categories": {"dataset": "ds"},
-    "get_business_events": {"dataset": "ds", "businesseventcategory": "cat"},
-    "get_legal_entities": {
+    "list_tables": {"dataset": "ds"},
+    "list_data_sets": {},
+    "list_business_event_categories": {"dataset": "ds"},
+    "list_business_events": {"dataset": "ds", "businesseventcategory": "cat"},
+    "list_legal_entities": {
         "dataset": "ds",
         "businesseventcategory": "cat",
         "businessevent": "evt",
     },
-    "get_procedures": {"dataset": "ds"},
+    "list_procedures": {"dataset": "ds"},
     "get_procedure": {"dataset": "ds", "procedure": "proc"},
     "get_table": {"dataset": "ds", "table": "tbl"},
 }
@@ -79,7 +82,7 @@ ALL_OPERATIONS = sorted(OPERATION_ARGS.keys())
 async def _invoke_operation(client: DynamicsaxClient, operation: str):
     """Invoke a Dynamics AX operation by name for shared parametrized tests."""
     return await resolve_generated_result(
-        getattr(client, f"{operation}_async")(**OPERATION_ARGS[operation])
+        getattr(client, f"{operation}")(**OPERATION_ARGS[operation])
     )
 
 
@@ -116,7 +119,7 @@ class TestDynamicsaxClientInitialization:
         client = DynamicsaxClient(
             BASE_URL,
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -171,13 +174,13 @@ class TestDynamicsaxClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_data_sets_async()
+            result = await resolve_generated_result(client.list_data_sets())
 
-            assert result["value"][0]["name"] == "instance-1"
+            assert result == [{"name": "instance-1"}]
             assert mock_send.call_args[0][0] == "GET"
             assert mock_send.call_args[0][1].endswith("/datasets")
 
@@ -189,11 +192,11 @@ class TestDynamicsaxClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await resolve_generated_result(client.get_items_async(dataset="ds", table="tbl"))
+            await resolve_generated_result(client.list_items(dataset="ds", table="tbl"))
 
             request_url = mock_send.call_args[0][1]
             assert "/datasets/ds/tables/tbl/items" in request_url
@@ -206,11 +209,11 @@ class TestDynamicsaxClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await resolve_generated_result(client.get_items_async(
+            await resolve_generated_result(client.list_items(
                 dataset="ds",
                 table="tbl",
                 filter="Name eq 'x'",
@@ -230,11 +233,11 @@ class TestDynamicsaxClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.post_item_async(input=item_input, dataset="ds", table="tbl")
+            result = await client.post_item(input=item_input, dataset="ds", table="tbl")
 
             assert result["id"] == "1"
             assert mock_send.call_args[0][0] == "POST"
@@ -249,11 +252,11 @@ class TestDynamicsaxClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.patch_item_async(
+            result = await client.patch_item(
                 input=item_input,
                 dataset="ds",
                 table="tbl",
@@ -272,11 +275,11 @@ class TestDynamicsaxClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.delete_item_async(dataset="ds", table="tbl", id="1")
+            result = await client.delete_item(dataset="ds", table="tbl", id="1")
 
             assert result is None
             assert mock_send.call_args[0][0] == "DELETE"
@@ -289,11 +292,11 @@ class TestDynamicsaxClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.get_table_async(dataset="ds", table="tbl")
+            await client.get_table(dataset="ds", table="tbl")
 
             request_url = mock_send.call_args[0][1]
             assert "/$metadata.json/datasets/ds/tables/tbl" in request_url
@@ -303,16 +306,17 @@ class TestDynamicsaxClientMethods:
     async def test_all_operations_success(self, mock_credential, operation):
         """Test every operation returns the expected success result."""
         client = _make_client(credential=mock_credential)
+        method = getattr(client, operation)
         response_text = (
-            '{"value":[{"value":"ok"}]}'
-            if operation == "get_items"
+            generated_pager_response_text(method)
+            if operation.startswith("list_")
             else '{"value":"ok"}'
         )
         mock_response = MockResponse(status=200, text=response_text)
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
@@ -320,8 +324,8 @@ class TestDynamicsaxClientMethods:
 
             if operation in NO_JSON_OPERATIONS:
                 assert result is None
-            elif operation == "get_items":
-                assert result == [{"value": "ok"}]
+            elif operation.startswith("list_"):
+                assert result == [{"ok": True}]
             else:
                 assert result == {"value": "ok"}
 
@@ -334,7 +338,7 @@ class TestDynamicsaxClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
@@ -359,7 +363,7 @@ class TestDynamicsaxClientErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
@@ -374,7 +378,9 @@ class TestDynamicsaxTypeSerialization:
 
     def test_dataclass_instances_initialize_expected_defaults(self):
         """Test generated dataclasses initialize with expected default values."""
-        assert BusinessEventSubscription().notification_url is None
+        assert BusinessEventSubscription(
+            notification_url="https://example.com/callback"
+        ).notification_url == "https://example.com/callback"
         assert BusinessEventSubscriptionResponse().id is None
         assert ExecuteProcedureInput().additional_properties == {}
         assert AxOnlineProcedureResult().value is None

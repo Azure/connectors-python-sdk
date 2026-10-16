@@ -8,12 +8,12 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.freshservice import FreshserviceClient
 from azure.connectors.freshservice import (
     AddNoteRequest,
     AddNoteResponse,
     CreateTicketRequest,
     CreateUpdateTicketResponse,
-    FreshserviceClient,
     ListTicketResponse,
     ListUsersResponse,
     TicketResponse,
@@ -25,16 +25,20 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import model_instance
 
 
 async def _invoke_operation(client: FreshserviceClient, operation: str):
     """Invoke a Freshservice operation by name for shared tests."""
     if operation == "add_note":
-        return await client.add_note_async(input=AddNoteRequest(), ticket_id="1")
+        return await client.add_note(
+            input=model_instance(AddNoteRequest),
+            ticket_id="1",
+        )
     if operation == "create_ticket":
-        return await client.create_ticket_async(input=CreateTicketRequest())
+        return await client.create_ticket(input=model_instance(CreateTicketRequest))
     if operation == "update_ticket":
-        return await client.update_ticket_async(input=UpdateTicketRequest(), ticket_id="1")
+        return await client.update_ticket(input=UpdateTicketRequest(), ticket_id="1")
 
     raise ValueError(f"Unsupported operation '{operation}'.")
 
@@ -79,7 +83,7 @@ class TestFreshserviceClientInitialization:
         client = FreshserviceClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -146,11 +150,13 @@ class TestFreshserviceClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_ticket_async(input=CreateTicketRequest())
+            result = await client.create_ticket(
+                input=model_instance(CreateTicketRequest)
+            )
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "POST"
@@ -169,11 +175,11 @@ class TestFreshserviceClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.update_ticket_async(input=UpdateTicketRequest(), ticket_id="5")
+            result = await client.update_ticket(input=UpdateTicketRequest(), ticket_id="5")
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "PUT"
@@ -192,11 +198,14 @@ class TestFreshserviceClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.add_note_async(input=AddNoteRequest(), ticket_id="7")
+            result = await client.add_note(
+                input=model_instance(AddNoteRequest),
+                ticket_id="7",
+            )
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "POST"
@@ -215,11 +224,13 @@ class TestFreshserviceClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.create_ticket_async(input=CreateTicketRequest())
+            result = await client.create_ticket(
+                input=model_instance(CreateTicketRequest)
+            )
 
             assert result is None
 
@@ -243,7 +254,7 @@ class TestFreshserviceClientErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
@@ -292,7 +303,12 @@ class TestFreshserviceTypeSerialization:
         assert get_origin(ListUsersResponse) is list
 
     def test_request_dataclasses_instantiate(self):
-        """Test generated request dataclasses instantiate without arguments."""
-        assert CreateTicketRequest().email is None
+        """Test generated request dataclasses honor required and optional fields."""
+        create_ticket = model_instance(CreateTicketRequest)
+        add_note = model_instance(AddNoteRequest)
+
+        assert create_ticket.subject == "value"
+        assert create_ticket.email is None
         assert UpdateTicketRequest().priority is None
-        assert AddNoteRequest().body is None
+        assert add_note.body == "value"
+        assert add_note.private is None

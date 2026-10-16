@@ -1,7 +1,7 @@
 """
-Monday.com Connector SDK Sample
+Monday.com sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Monday.com connector SDK.
+This sample demonstrates how to use the Monday.com client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a Monday.com connection
@@ -17,11 +17,9 @@ Usage:
 
     python sample_connector_usage_monday.py
 """
-
-import asyncio
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
 from azure.connectors.monday import (
@@ -38,13 +36,13 @@ from azure.connectors.monday import (
 CONNECTION_RUNTIME_URL = os.environ.get("MONDAY_CONNECTION_URL", "")
 
 
-async def example_1_create_board() -> None:
+def example_1_create_board() -> None:
     """Example 1: Create a board."""
     print("\n=== Example 1: Create Board ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with MondayClient(CONNECTION_RUNTIME_URL, credential) as client:
-            board = await client.create_board_async(
+    with DefaultAzureCredential() as credential:
+        with MondayClient(CONNECTION_RUNTIME_URL, credential) as client:
+            board = client.create_board(
                 input=CreateBoardInput(
                     workspace_id="123456",
                     board_name="SDK sample board",
@@ -54,13 +52,13 @@ async def example_1_create_board() -> None:
             print(f"Created board: {data}")
 
 
-async def example_2_create_item() -> None:
+def example_2_create_item() -> None:
     """Example 2: Create an item in a board and group."""
     print("\n=== Example 2: Create Item ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with MondayClient(CONNECTION_RUNTIME_URL, credential) as client:
-            item = await client.create_item_async(
+    with DefaultAzureCredential() as credential:
+        with MondayClient(CONNECTION_RUNTIME_URL, credential) as client:
+            item = client.create_item(
                 input=CreateItemInput(
                     workspace_id="123456",
                     board_id="789012",
@@ -72,13 +70,13 @@ async def example_2_create_item() -> None:
             print(f"Created item: {data}")
 
 
-async def example_3_update_item_column() -> None:
+def example_3_update_item_column() -> None:
     """Example 3: Update a column value on an item."""
     print("\n=== Example 3: Update Item Column ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with MondayClient(CONNECTION_RUNTIME_URL, credential) as client:
-            updated = await client.update_item_column_async(
+    with DefaultAzureCredential() as credential:
+        with MondayClient(CONNECTION_RUNTIME_URL, credential) as client:
+            updated = client.update_item_column(
                 input=UpdateItemColumnInput(
                     workspace_id="123456",
                     board_id="789012",
@@ -93,24 +91,24 @@ async def example_3_update_item_column() -> None:
             print(f"Updated item column: {data}")
 
 
-async def example_4_list_workspaces() -> None:
+def example_4_list_workspaces() -> None:
     """Example 4: List the available workspaces."""
     print("\n=== Example 4: List Workspaces ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with MondayClient(CONNECTION_RUNTIME_URL, credential) as client:
-            workspaces = await client.get_workspaces_async()
+    with DefaultAzureCredential() as credential:
+        with MondayClient(CONNECTION_RUNTIME_URL, credential) as client:
+            workspaces = client.get_workspaces()
             print(f"Workspaces: {workspaces}")
 
 
-async def main() -> None:
+def main() -> None:
     """Run Monday.com connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: MONDAY_CONNECTION_URL environment variable not set.")
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Monday.com Connector SDK - Sample Usage")
+    print("Monday.com sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:
@@ -128,4 +126,4 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

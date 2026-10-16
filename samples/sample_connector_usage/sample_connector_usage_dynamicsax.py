@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Dynamics 365 for Finance and Operations (Dynamics AX) Connector SDK Sample
+Dynamics 365 for Finance and Operations (Dynamics AX) sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Dynamics AX connector SDK.
+This sample demonstrates how to use the Dynamics AX client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a Dynamics AX connection
@@ -22,11 +22,9 @@ Usage:
 
     python sample_connector_usage_dynamicsax.py
 """
-
-import asyncio
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.dynamicsax import (
     DynamicsaxClient,
@@ -44,22 +42,21 @@ CONNECTION_RUNTIME_URL = os.environ.get(
 DATASET = os.environ.get("DYNAMICSAX_DATASET", "")
 
 
-async def example_1_list_instances():
+def example_1_list_instances():
     """Example 1: List accessible Dynamics 365 Fin & Ops instances."""
     print("\n=== Example 1: List Instances ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with DynamicsaxClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.get_data_sets_async()
-            datasets = result.get("value", []) if result else []
+        with DynamicsaxClient(CONNECTION_RUNTIME_URL, credential) as client:
+            datasets = list(client.list_data_sets())
 
             print(f"Found {len(datasets)} instance(s).")
             for dataset in datasets[:10]:
                 print(f"  - {dataset.get('name', 'N/A')}")
 
 
-async def example_2_list_tables():
+def example_2_list_tables():
     """Example 2: List entities (tables) for an instance."""
     print("\n=== Example 2: List Tables ===")
 
@@ -67,18 +64,17 @@ async def example_2_list_tables():
         print("Set DYNAMICSAX_DATASET to run this example.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with DynamicsaxClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.get_tables_async(dataset=DATASET)
-            tables = result.get("value", []) if result else []
+        with DynamicsaxClient(CONNECTION_RUNTIME_URL, credential) as client:
+            tables = list(client.list_tables(dataset=DATASET))
 
             print(f"Found {len(tables)} table(s).")
             for table in tables[:10]:
                 print(f"  - {table.get('name', 'N/A')}")
 
 
-async def example_3_create_record():
+def example_3_create_record():
     """Example 3: Create a new record in an entity."""
     print("\n=== Example 3: Create Record ===")
 
@@ -88,13 +84,13 @@ async def example_3_create_record():
         print("Set DYNAMICSAX_DATASET and DYNAMICSAX_TABLE to run this example.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with DynamicsaxClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with DynamicsaxClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 record = PostItemInput()
                 record.additional_properties = {"Name": "SDK Sample"}
-                result = await client.post_item_async(
+                result = client.post_item(
                     input=record,
                     dataset=DATASET,
                     table=table,
@@ -104,7 +100,7 @@ async def example_3_create_record():
                 print(f"Connector error: {ex}")
 
 
-async def main():
+def main():
     """Run all Dynamics AX connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: DYNAMICSAX_CONNECTION_URL environment variable is not set.")
@@ -113,12 +109,12 @@ async def main():
 
     print(f"Using connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
 
-    await example_1_list_instances()
-    await example_2_list_tables()
-    await example_3_create_record()
+    example_1_list_instances()
+    example_2_list_tables()
+    example_3_create_record()
 
     print("\n=== Dynamics AX sample completed ===")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

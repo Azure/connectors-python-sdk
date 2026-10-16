@@ -5,20 +5,36 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "Office365groupsClient",
+    "CreateCalendarEventResponse",
+    "ListGroupMembersResponse",
+    "ListGroupsResponse",
+    "ListOwnedGroupsResponse",
+    "ObjectWithoutType",
+    "OnGroupMemberAddedOrRemovedResponse",
+    "OnNewEventResponse",
+    "SensitivityLabelMetadata",
+    "UpdateCalendarEventHTMLRequest",
+    "UpdateCalendarEventRequest",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -29,20 +45,22 @@ class ListGroupMembersResponse:
     Response for List group members
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The OData context."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """
     Only used in Power Apps Canvas to genereate the `$skipToken` for
     pagination. Power Automate and Logic Apps must use the pagination setting.
     """
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """value"""
 
 
@@ -55,20 +73,22 @@ class ListGroupsResponse:
     Response for List groups
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The OData context."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """
     Only used in Power Apps Canvas to genereate the `$skipToken` for
     pagination. Power Automate and Logic Apps must use the pagination setting.
     """
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """value"""
 
 
@@ -78,44 +98,49 @@ class CreateCalendarEventResponse:
     Response for Update a group event
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique id of the event."""
-    reminder_minutes_before_start: Optional[int] = field(
+    reminder_minutes_before_start: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "reminderMinutesBeforeStart"},
     )
     """Time in minutes before event starts to remind."""
-    is_reminder_on: Optional[bool] = field(
+    is_reminder_on: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isReminderOn"},
     )
     """Set to true if the event has a reminder."""
-    subject: Optional[str] = None
+    subject: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of the event."""
-    importance: Optional[str] = None
+    importance: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The importance of the event: Low, Normal, or High."""
-    is_all_day: Optional[bool] = field(
+    is_all_day: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isAllDay"},
     )
     """True if the event is an all day event."""
-    response_requested: Optional[bool] = field(
+    response_requested: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseRequested"},
     )
     """True if a response was requested for the event."""
-    show_as: Optional[str] = field(
+    show_as: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "showAs"},
     )
     """Status to show during the event."""
-    body: Optional[Dict[str, Any]] = None
+    body: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """body"""
-    start: Optional[Dict[str, Any]] = None
+    start: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """start"""
-    end: Optional[Dict[str, Any]] = None
+    end: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """end"""
-    location: Optional[Dict[str, Any]] = None
+    location: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """location"""
 
 
@@ -128,7 +153,7 @@ class ObjectWithoutType:
     Response for Send an HTTP request
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -141,12 +166,13 @@ class ListOwnedGroupsResponse:
     Response for List groups that I own and belong to
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The OData context."""
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """value"""
 
 
@@ -156,41 +182,47 @@ class SensitivityLabelMetadata:
     Definition: SensitivityLabelMetadata
     """
 
-    sensitivity_label_id: Optional[str] = field(
+    sensitivity_label_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sensitivityLabelId"},
     )
     """SensitivityLabel Id."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel name."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """SensitivityLabel displayName info"""
-    tooltip: Optional[str] = None
+    tooltip: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel details on tooltip."""
-    priority: Optional[int] = None
+    priority: Optional[int] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel priority."""
-    color: Optional[str] = None
+    color: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel color."""
-    is_encrypted: Optional[bool] = field(
+    is_encrypted: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isEncrypted"},
     )
     """ is  SensitivityLabel Encrypted."""
-    is_enabled: Optional[bool] = field(
+    is_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isEnabled"},
     )
     """Whether  SensitivityLabel is Enabled."""
-    is_parent: Optional[bool] = field(
+    is_parent: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isParent"},
     )
     """Whether  SensitivityLabel is Parent."""
-    parent_sensitivity_label_id: Optional[str] = field(
+    parent_sensitivity_label_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parentSensitivityLabelId"},
     )
     """Parent  SensitivityLabel Id."""
@@ -202,36 +234,41 @@ class UpdateCalendarEventRequest:
     Definition: UpdateCalendarEvent_Request
     """
 
-    subject: Optional[str] = None
+    subject: str
     """Title of the event."""
-    start: Optional[Dict[str, Any]] = None
-    end: Optional[Dict[str, Any]] = None
-    body: Optional[Dict[str, Any]] = None
-    location: Optional[Dict[str, Any]] = None
-    importance: Optional[str] = None
+    start: Dict[str, Any]
+    end: Dict[str, Any]
+    body: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    location: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    importance: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The importance of the event: Low, Normal, or High."""
-    is_all_day: Optional[bool] = field(
+    is_all_day: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isAllDay"},
     )
     """Set to true if the event lasts all day."""
-    is_reminder_on: Optional[bool] = field(
+    is_reminder_on: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isReminderOn"},
     )
     """Set to true if the event has a reminder."""
-    reminder_minutes_before_start: Optional[int] = field(
+    reminder_minutes_before_start: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "reminderMinutesBeforeStart"},
     )
     """Time in minutes before event start to remind."""
-    show_as: Optional[str] = field(
+    show_as: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "showAs"},
     )
     """Status to show during the event."""
-    response_requested: Optional[bool] = field(
+    response_requested: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseRequested"},
     )
     """
@@ -246,36 +283,41 @@ class UpdateCalendarEventHTMLRequest:
     Definition: UpdateCalendarEvent_HTMLRequest
     """
 
-    subject: Optional[str] = None
+    subject: str
     """Title of the event."""
-    start: Optional[Dict[str, Any]] = None
-    end: Optional[Dict[str, Any]] = None
-    body: Optional[Dict[str, Any]] = None
-    location: Optional[Dict[str, Any]] = None
-    importance: Optional[str] = None
+    start: Dict[str, Any]
+    end: Dict[str, Any]
+    body: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    location: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    importance: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The importance of the event: Low, Normal, or High."""
-    is_all_day: Optional[bool] = field(
+    is_all_day: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isAllDay"},
     )
     """Set to true if the event lasts all day."""
-    is_reminder_on: Optional[bool] = field(
+    is_reminder_on: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isReminderOn"},
     )
     """Set to true if the event has a reminder."""
-    reminder_minutes_before_start: Optional[int] = field(
+    reminder_minutes_before_start: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "reminderMinutesBeforeStart"},
     )
     """Time in minutes before event start to remind."""
-    show_as: Optional[str] = field(
+    show_as: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "showAs"},
     )
     """Status to show during the event."""
-    response_requested: Optional[bool] = field(
+    response_requested: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseRequested"},
     )
     """
@@ -292,16 +334,16 @@ class Office365groupsClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -312,8 +354,8 @@ class Office365groupsClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -321,8 +363,8 @@ class Office365groupsClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -334,7 +376,7 @@ class Office365groupsClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -350,15 +392,49 @@ class Office365groupsClient(ConnectorClientBase):
         return "office365groups"
 
     def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
-        parsed_next_link = urlsplit(next_link)
-        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
             if next_link.startswith("/"):
                 return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
             if next_link.startswith("?"):
-                return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
 
-        parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
         connection_hostname = parsed_connection.hostname
         if next_link_hostname is None or connection_hostname is None:
@@ -375,7 +451,11 @@ class Office365groupsClient(ConnectorClientBase):
                 parsed_next_link.scheme == parsed_connection.scheme
                 and next_link_port == connection_port
             ):
-                return next_link
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
 
             raise ValueError(
                 "Pagination URL origin "
@@ -388,16 +468,16 @@ class Office365groupsClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def list_group_members_async(
+    def list_group_members(
         self,
         group_id: str,
-        top: Optional[int] = None,
         *,
+        top: Optional[int] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List group members
 
@@ -407,8 +487,26 @@ class Office365groupsClient(ConnectorClientBase):
         values please turn on Settings->Pagination feature and provide
         Threshold limit.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListGroupMembers`.
+
+        Args:
+            group_id: Pick a group from the drop down or enter group id.
+            top: Number of group members to retrieve (from 1 to 999, default is
+                100).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -422,11 +520,18 @@ class Office365groupsClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -439,23 +544,32 @@ class Office365groupsClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def add_member_to_group_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def add_member_to_group(
         self,
         group_id: str,
         user_upn: str,
@@ -469,6 +583,22 @@ class Office365groupsClient(ConnectorClientBase):
         Add member to group
 
         This operation is used to add a member to an O365 group, using a UPN.
+
+        Swagger operation ID: `AddMemberToGroup`.
+
+        Args:
+            group_id: Pick a group from the drop down or enter group id.
+            user_upn: The user principal name (UPN) of the user.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -482,7 +612,7 @@ class Office365groupsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -496,28 +626,53 @@ class Office365groupsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def list_groups_async(
+    def list_groups(
         self,
+        *,
         extract_sensitivity_label: Optional[bool] = None,
         fetch_sensitivity_label_metadata: Optional[bool] = None,
         filter: Optional[str] = None,
         top: Optional[int] = None,
         skiptoken: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List groups
 
         This operation returns a list of all groups in the organization.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListGroups`.
+
+        Args:
+            extract_sensitivity_label: A boolean whether to extract sensitivity
+                label Id for associated artefact.
+            fetch_sensitivity_label_metadata: A boolean whether to fetch
+                sensitivity label Metadata for associated LabelId.
+            filter: Enter an OData style filter expression to limit which rows
+                are listed.
+            top: Sets the page size of results.
+            skiptoken: Token that references the next page of results and is
+                returned in the @odata.nextLink property in the response.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/groups"
         query_params = []
@@ -548,11 +703,18 @@ class Office365groupsClient(ConnectorClientBase):
             query_params.append(f"$skiptoken={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -565,25 +727,34 @@ class Office365groupsClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def update_calendar_event_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def update_calendar_event(
         self,
-        input: UpdateCalendarEventHTMLRequest,
+        input: UpdateCalendarEventHTMLRequest | Mapping[str, Any],
         group_id: str,
         event: str,
         *,
@@ -596,6 +767,24 @@ class Office365groupsClient(ConnectorClientBase):
         Update a group event
 
         This operation is used to update a new event in a group calendar.
+
+        Swagger operation ID: `UpdateCalendarEvent`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            group_id: Pick a group from the drop down or enter group id.
+            event: Select an event.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -606,7 +795,7 @@ class Office365groupsClient(ConnectorClientBase):
             f"/{quote(quote(str(event), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -620,6 +809,7 @@ class Office365groupsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -627,7 +817,7 @@ class Office365groupsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def remove_member_from_group_async(
+    def remove_member_from_group(
         self,
         group_id: str,
         user_upn: str,
@@ -642,6 +832,22 @@ class Office365groupsClient(ConnectorClientBase):
 
         This operation is used to remove a member from an O365 group, using a
         UPN.
+
+        Swagger operation ID: `RemoveMemberFromGroup`.
+
+        Args:
+            group_id: Pick a group from the drop down or enter group id.
+            user_upn: The user principal name (UPN) of the user.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -660,7 +866,7 @@ class Office365groupsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -674,33 +880,56 @@ class Office365groupsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def list_deleted_groups_async(
+    def list_deleted_groups(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List deleted groups
 
         Lists deleted groups that can be restored.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListDeletedGroups`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/directory/deletedItems/microsoft.graph.group"
         )
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -713,23 +942,32 @@ class Office365groupsClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def restore_deleted_group_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def restore_deleted_group(
         self,
         group_id: str,
         *,
@@ -742,6 +980,21 @@ class Office365groupsClient(ConnectorClientBase):
         Restore a deleted group
 
         Restore a recently deleted group
+
+        Swagger operation ID: `RestoreDeletedGroup`.
+
+        Args:
+            group_id: Pick a group from the drop down or enter group id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -752,7 +1005,7 @@ class Office365groupsClient(ConnectorClientBase):
             f"/restore"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -766,33 +1019,56 @@ class Office365groupsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def list_deleted_groups_by_owner_async(
+    def list_deleted_groups_by_owner(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List deleted groups by owner
 
         List deleted groups that can be restored by owner
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListDeletedGroupsByOwner`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/directory/deletedItems/getUserOwnedObjects"
         )
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "POST", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "POST", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -805,23 +1081,32 @@ class Office365groupsClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def calendar_delete_item_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def calendar_delete_item(
         self,
         group_id: str,
         event: str,
@@ -835,6 +1120,22 @@ class Office365groupsClient(ConnectorClientBase):
         Delete event
 
         This operation deletes an event in a calendar.
+
+        Swagger operation ID: `CalendarDeleteItem_V2`.
+
+        Args:
+            group_id: Pick a group from the drop down or enter group id.
+            event: Select an event.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -845,7 +1146,7 @@ class Office365groupsClient(ConnectorClientBase):
             f"/{quote(quote(str(event), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -859,11 +1160,12 @@ class Office365groupsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def create_calendar_event_async(
+    def create_calendar_event(
         self,
-        input: UpdateCalendarEventHTMLRequest,
+        input: UpdateCalendarEventHTMLRequest | Mapping[str, Any],
         group_id: str,
         *,
         timeout: Optional[float] = None,
@@ -875,13 +1177,30 @@ class Office365groupsClient(ConnectorClientBase):
         Create a group event
 
         This operation is used to create a new event in a group calendar.
+
+        Swagger operation ID: `CreateCalendarEventV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            group_id: Pick a group from the drop down or enter group id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v2/v1.0/groups/{quote(str(group_id), safe='')}/events"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -895,6 +1214,7 @@ class Office365groupsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -902,7 +1222,7 @@ class Office365groupsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def http_request_async(
+    def http_request(
         self,
         input: bytes,
         *,
@@ -917,10 +1237,25 @@ class Office365groupsClient(ConnectorClientBase):
         Construct a Microsoft Graph REST API request to invoke. There is one
         segment that is supported: /groups. Learn more:
         https://docs.microsoft.com/en-us/graph/use-the-api.
+
+        Swagger operation ID: `HttpRequestV2`.
+
+        Args:
+            input: The binary request body.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/httprequest"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST",
             request_url,
             body=input,
@@ -937,6 +1272,7 @@ class Office365groupsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -944,20 +1280,42 @@ class Office365groupsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_owned_groups_async(
+    def list_owned_groups(
         self,
+        *,
         extract_sensitivity_label: Optional[bool] = None,
         fetch_sensitivity_label_metadata: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List groups that I own and belong to
 
         This operation returns a list of all groups that you own and belong to.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListOwnedGroups_V3`.
+
+        Args:
+            extract_sensitivity_label: A boolean whether to extract sensitivity
+                label Id for associated artefact.
+            fetch_sensitivity_label_metadata: A boolean whether to fetch
+                sensitivity label Metadata for associated LabelId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -976,27 +1334,48 @@ class Office365groupsClient(ConnectorClientBase):
             query_params.append(f"fetchSensitivityLabelMetadata={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
 
 # Trigger Operations

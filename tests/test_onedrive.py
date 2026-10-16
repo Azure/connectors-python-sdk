@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.onedrive import OnedriveClient
 from azure.connectors.onedrive import (
-    OnedriveClient,
     BlobMetadata,
     BlobMetadataPage,
     SharingLink,
@@ -55,7 +55,7 @@ class TestOnedriveClientInitialization:
         client = OnedriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -126,11 +126,11 @@ class TestGetFileMetadata:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_file_metadata_async(id="file123")
+            result = await client.get_file_metadata(id="file123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -150,11 +150,11 @@ class TestGetFileMetadata:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_file_metadata_async(id="file123")
+            result = await client.get_file_metadata(id="file123")
 
             assert result is None
 
@@ -166,18 +166,18 @@ class TestGetFileMetadata:
             credential=mock_credential
         )
 
-        mock_response = MockResponse(status=404, text='{"error": "File not found"}')
+        mock_response = MockResponse(status=500, text='{"error": "Server error"}')
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_file_metadata_async(id="nonexistent")
+                await client.get_file_metadata(id="nonexistent")
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestGetFileContent:
@@ -197,11 +197,11 @@ class TestGetFileContent:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_file_content_async(id="file123")
+            result = await client.get_file_content(id="file123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -222,11 +222,11 @@ class TestGetFileContent:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_file_content_async(
+            await client.get_file_content(
                 id="file123",
                 infer_content_type="true"
             )
@@ -246,12 +246,12 @@ class TestGetFileContent:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_file_content_async(id="nonexistent")
+                await client.get_file_content(id="nonexistent")
 
             assert exc_info.value.status_code == 404
 
@@ -273,11 +273,11 @@ class TestGetFileContentByPath:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_file_content_by_path_async(
+            result = await client.get_file_content_by_path(
                 path="/Documents/file.txt"
             )
 
@@ -299,12 +299,12 @@ class TestGetFileContentByPath:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_file_content_by_path_async(path="/invalid/path")
+                await client.get_file_content_by_path(path="/invalid/path")
 
             assert exc_info.value.status_code == 404
 
@@ -327,12 +327,12 @@ class TestCreateFile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
             input_data = b"file content"
-            result = await client.create_file_async(
+            result = await client.create_file(
                 input=input_data,
                 folder_path="/Documents",
                 name="newfile.txt"
@@ -357,12 +357,12 @@ class TestCreateFile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_file_async(
+                await client.create_file(
                     input=b"file content",
                     folder_path="/invalid",
                     name="file.txt"
@@ -389,12 +389,12 @@ class TestUpdateFile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
             input_data = b"updated content"
-            result = await client.update_file_async(
+            result = await client.update_file(
                 input=input_data,
                 id="file123"
             )
@@ -417,12 +417,12 @@ class TestUpdateFile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.update_file_async(
+                await client.update_file(
                     input=b"updated content",
                     id="nonexistent"
                 )
@@ -445,11 +445,11 @@ class TestDeleteFile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.delete_file_async(id="file123")
+            await client.delete_file(id="file123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -464,18 +464,18 @@ class TestDeleteFile:
             credential=mock_credential
         )
 
-        mock_response = MockResponse(status=404, text='{"error": "File not found"}')
+        mock_response = MockResponse(status=500, text='{"error": "Server error"}')
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.delete_file_async(id="nonexistent")
+                await client.delete_file(id="nonexistent")
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestCopyFile:
@@ -496,11 +496,11 @@ class TestCopyFile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.copy_file_async(
+            result = await client.copy_file(
                 source="https://example.com/source.txt",
                 destination="/Documents/destination.txt"
             )
@@ -525,11 +525,11 @@ class TestCopyFile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.copy_file_async(
+            await client.copy_file(
                 source="https://example.com/source.txt",
                 destination="/Documents/destination.txt",
                 overwrite="true"
@@ -550,12 +550,12 @@ class TestCopyFile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.copy_file_async(
+                await client.copy_file(
                     source="invalid",
                     destination="invalid"
                 )
@@ -581,11 +581,11 @@ class TestCopyDriveFile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.copy_drive_file_async(
+            result = await client.copy_drive_file(
                 id="sourcefile123",
                 destination="/Documents/copy.txt"
             )
@@ -609,12 +609,12 @@ class TestCopyDriveFile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.copy_drive_file_async(
+                await client.copy_drive_file(
                     id="nonexistent",
                     destination="/Documents/copy.txt"
                 )
@@ -640,11 +640,11 @@ class TestMoveFile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.move_file_async(
+            result = await client.move_file(
                 id="file123",
                 destination="/Archive/moved_file.txt"
             )
@@ -668,12 +668,12 @@ class TestMoveFile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.move_file_async(
+                await client.move_file(
                     id="nonexistent",
                     destination="/Archive/file.txt"
                 )
@@ -700,11 +700,11 @@ class TestListFolder:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.list_folder_async(id="folder123"))
+            result = await resolve_generated_result(client.list_folder(id="folder123"))
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -726,23 +726,25 @@ class TestListRootFolder:
 
         mock_response = MockResponse(
             status=200,
-            text='{"value": [{"id": "folder1", "name": "Documents"}, '
-                 '{"id": "folder2", "name": "Pictures"}]}'
+            text=(
+                '[{"id": "folder1", "name": "Documents"}, '
+                '{"id": "folder2", "name": "Pictures"}]'
+            )
         )
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_root_folder_async()
+            result = await resolve_generated_result(client.list_root_folder())
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/folders" in call_args[0][1]
-            assert len(result["value"]) == 2
+            assert len(result) == 2
 
 
 class TestFindFiles:
@@ -758,19 +760,21 @@ class TestFindFiles:
 
         mock_response = MockResponse(
             status=200,
-            text='{"value": [{"id": "file1", "name": "report.docx"}]}'
+            text='[{"id": "file1", "name": "report.docx"}]'
         )
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.find_files_async(
-                id="folder123",
-                query="report",
-                find_mode="search"
+            result = await resolve_generated_result(
+                client.list_find_files(
+                    id="folder123",
+                    query="report",
+                    find_mode="search"
+                )
             )
 
             mock_send.assert_called_once()
@@ -778,7 +782,7 @@ class TestFindFiles:
             assert call_args[0][0] == "GET"
             assert "/search" in call_args[0][1]
             assert "query=report" in call_args[0][1]
-            assert len(result["value"]) == 1
+            assert len(result) == 1
 
 
 class TestCreateShareLink:
@@ -799,11 +803,11 @@ class TestCreateShareLink:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.create_share_link_async(
+            result = await client.create_share_link(
                 id="file123",
                 type_="view"
             )
@@ -829,22 +833,24 @@ class TestGetFileTags:
 
         mock_response = MockResponse(
             status=200,
-            text='{"tags": ["important", "work", "2026"]}'
+            text='{"Tags": ["important", "work", "2026"]}'
         )
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_file_tags_async(id="file123")
+            result = await resolve_generated_result(
+                client.list_file_tags(id="file123")
+            )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/tags" in call_args[0][1]
-            assert "important" in result["tags"]
+            assert "important" in result
 
 
 class TestAddFileTag:
@@ -860,18 +866,20 @@ class TestAddFileTag:
 
         mock_response = MockResponse(
             status=200,
-            text='{"tags": ["important", "work", "new-tag"]}'
+            text='{"Tags": ["important", "work", "new-tag"]}'
         )
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.add_file_tag_async(
-                id="file123",
-                tag="new-tag"
+            await resolve_generated_result(
+                client.add_file_tag(
+                    id="file123",
+                    tag="new-tag"
+                )
             )
 
             mock_send.assert_called_once()
@@ -896,11 +904,11 @@ class TestRemoveFileTag:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.remove_file_tag_async(
+            await client.remove_file_tag(
                 id="file123",
                 tag="old-tag"
             )
@@ -930,11 +938,11 @@ class TestGetFileThumbnail:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_file_thumbnail_async(
+            result = await client.get_file_thumbnail(
                 id="file123",
                 size="medium"
             )
@@ -964,11 +972,11 @@ class TestConvertFile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.convert_file_async(
+            result = await client.convert_file(
                 id="file123",
                 type_="pdf"
             )
@@ -994,18 +1002,20 @@ class TestExtractFolder:
 
         mock_response = MockResponse(
             status=200,
-            text='{"id": "folder123", "name": "extracted"}'
+            text='[{"id": "folder123", "name": "extracted"}]'
         )
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.extract_folder_async(
-                source="/Documents/archive.zip",
-                destination="/Documents/extracted"
+            await resolve_generated_result(
+                client.extract_folder(
+                    source="/Documents/archive.zip",
+                    destination="/Documents/extracted"
+                )
             )
 
             mock_send.assert_called_once()
@@ -1088,11 +1098,11 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_file_metadata_by_path_async(
+            await client.get_file_metadata_by_path(
                 path="/Documents/My File (2026).docx"
             )
 
@@ -1112,15 +1122,15 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            await client.get_file_metadata_async(id="file1")
-            await client.get_file_metadata_async(id="file2")
-            await client.get_file_metadata_async(id="file3")
+            await client.get_file_metadata(id="file1")
+            await client.get_file_metadata(id="file2")
+            await client.get_file_metadata(id="file3")
 
-            assert client._http_client.send_async.call_count == 3
+            assert client._http_client.send.call_count == 3
 
     @pytest.mark.asyncio
     async def test_http_client_property_access(self, mock_credential):

@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from azure.core.credentials import AzureKeyCredential
 
-from azure.connectors.sdk.client_base import ConnectorClientBase
+from azure.connectors.sdk.aio.client_base import ConnectorClientBase
 
 
 class TestClient(ConnectorClientBase):
@@ -48,12 +48,12 @@ class TestConnectorClientBase:
     def test_init_forwards_pipeline_settings(self, mock_credential) -> None:
         """Test that direct settings are forwarded to the HTTP client."""
         with patch(
-            "azure.connectors.sdk.client_base.ConnectorHttpClient"
+            "azure.connectors.sdk.aio.client_base.ConnectorHttpClient"
         ) as mock_http_client:
             TestClient(
                 mock_credential,
                 max_retry_attempts=5,
-                timeout_seconds=60.0,
+                timeout=60.0,
                 retry_unsafe_http_methods=True,
                 retry_status=2,
             )

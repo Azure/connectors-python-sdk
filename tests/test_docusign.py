@@ -7,10 +7,10 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.docusign import DocusignClient
 from azure.connectors.docusign import (
     AdditionalURLForSenderView,
     CombinedEmailBodyAndCustomFields,
-    DocusignClient,
     DynamicSigningUrlFields,
     DynamicSigners,
     UpdateDocgenFormFieldsInput,
@@ -19,6 +19,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestDocusignClientInitialization:
@@ -54,7 +55,7 @@ class TestDocusignClientInitialization:
         client = DocusignClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -146,11 +147,11 @@ class TestEmbeddedUrlOperationNames:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.generate_embedded_sender_url_async(
+            result = await client.generate_embedded_sender_url(
                 input=payload,
                 account_id="acct-1",
                 envelope_id="env-1",
@@ -182,11 +183,11 @@ class TestEmbeddedUrlOperationNames:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.generate_embedded_signing_url_async(
+            result = await client.generate_embedded_signing_url(
                 input=payload,
                 account_id="acct-1",
                 envelope_id="env-1",
@@ -219,22 +220,24 @@ class TestGetLoginAccountsAsync:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        mock_response = MockResponse(status=200, text='{"accounts": [{"accountId": "123"}]}')
+        mock_response = MockResponse(
+            status=200,
+            text='{"loginAccounts": [{"accountId": "123"}]}',
+        )
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_login_accounts_async()
+            result = await resolve_generated_result(client.list_login_accounts())
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
             assert path.endswith("/oauth/userinfo")
-            assert result is not None
-            assert "accounts" in result
+            assert result == [{"accountId": "123"}]
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -247,12 +250,12 @@ class TestGetLoginAccountsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.get_login_accounts_async()
+                await resolve_generated_result(client.list_login_accounts())
 
 
 class TestSearchListEnvelopesAsync:
@@ -269,11 +272,11 @@ class TestSearchListEnvelopesAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.search_list_envelopes_async(
+            result = await client.search_list_envelopes(
                 account_id="acct-1",
                 envelope_title="Quarterly Contract",
                 top="5",
@@ -300,12 +303,12 @@ class TestSearchListEnvelopesAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.search_list_envelopes_async(account_id="acct-1")
+                await client.search_list_envelopes(account_id="acct-1")
 
 
 class TestCreateBlankEnvelopeAsync:
@@ -323,11 +326,11 @@ class TestCreateBlankEnvelopeAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_blank_envelope_async(
+            result = await client.create_blank_envelope(
                 input=payload,
                 account_id="acct-1",
                 email_subject="Please sign",
@@ -354,12 +357,12 @@ class TestCreateBlankEnvelopeAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.create_blank_envelope_async(
+                await client.create_blank_envelope(
                     input=payload,
                     account_id="acct-1",
                     email_subject="Please sign",
@@ -381,11 +384,11 @@ class TestSendEnvelopeAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.send_envelope_async(
+            result = await client.send_envelope(
                 input=payload,
                 account_id="acct-1",
                 status="sent",
@@ -415,12 +418,12 @@ class TestSendEnvelopeAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.send_envelope_async(
+                await client.send_envelope(
                     input=payload,
                     account_id="acct-1",
                     status="sent",
@@ -444,11 +447,11 @@ class TestUpdateDocgenFormFieldsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.update_docgen_form_fields_async(
+            await client.update_docgen_form_fields(
                 input=payload,
                 account_id="acct-1",
                 envelope_id="env-1",
@@ -474,12 +477,12 @@ class TestUpdateDocgenFormFieldsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.update_docgen_form_fields_async(
+                await client.update_docgen_form_fields(
                     input=payload,
                     account_id="acct-1",
                     envelope_id="env-1",
@@ -491,8 +494,8 @@ class TestRemoveRecipientFromEnvelopeAsync:
     """Tests for remove_recipient_from_envelope_async method (DELETE)."""
 
     @pytest.mark.asyncio
-    async def test_success_returns_result(self, mock_credential):
-        """Test successful DELETE returns response."""
+    async def test_success_returns_declared_response(self, mock_credential):
+        """Test successful DELETE returns its declared response body."""
         client = DocusignClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
@@ -501,11 +504,11 @@ class TestRemoveRecipientFromEnvelopeAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.remove_recipient_from_envelope_async(
+            result = await client.remove_recipient_from_envelope(
                 account_id="acct-1",
                 envelope_id="env-1",
                 folder_id=None,
@@ -515,7 +518,7 @@ class TestRemoveRecipientFromEnvelopeAsync:
             mock_send.assert_called_once()
             method = mock_send.call_args[0][0]
             assert method == "DELETE"
-            assert result is not None
+            assert result == {"recipientsRemoved": True}
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -524,16 +527,16 @@ class TestRemoveRecipientFromEnvelopeAsync:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        mock_response = MockResponse(status=404, text='{"error": "Envelope not found"}')
+        mock_response = MockResponse(status=500, text='{"error": "Server error"}')
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.remove_recipient_from_envelope_async(
+                await client.remove_recipient_from_envelope(
                     account_id="acct-1",
                     envelope_id="missing-env",
                     folder_id=None,

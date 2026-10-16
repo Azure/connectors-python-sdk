@@ -99,14 +99,14 @@ This project follows Python best practices documented in [.github/copilot-instru
 
 - **PEP 8** — Standard Python style guide (79 character line limit)
 - **Type hints** — All public API signatures must have type hints (PEP 484)
-- **Async/await** — Use async patterns for all I/O operations
+- **Sync/aio parity** — Keep root synchronous and `.aio` asynchronous behavior aligned
 - **Naming conventions:**
   - `snake_case` for functions, methods, variables
   - `PascalCase` for classes
   - `UPPER_SNAKE_CASE` for constants
   - `_snake_case` for private methods/attributes
 - **Docstrings** — Google-style docstrings for all public APIs
-- **Context managers** — Use `async with` for client lifecycle management
+- **Context managers** — Use `with` for root clients and `async with` for aio clients
 
 ### Automated Enforcement
 
@@ -121,7 +121,7 @@ Run `flake8 src/ tests/` locally before pushing to catch style issues early.
 
 ## Generated Code
 
-Connector client files in `src/azure/connectors/*.py` (except `sdk/` subpackage) are produced by an internal Microsoft code generator that is not publicly accessible at this time. **Do not submit pull requests that directly modify generated files** — changes will be overwritten the next time the code is regenerated.
+Connector client files in `src/azure/connectors/*.py` and `src/azure/connectors/aio/*.py` are produced by an internal Microsoft code generator. **Do not submit pull requests that directly modify generated files** — changes will be overwritten the next time the code is regenerated.
 
 If you find a bug or want to suggest an improvement in the generated code:
 
@@ -133,6 +133,7 @@ If you find a bug or want to suggest an improvement in the generated code:
 **Files safe to modify:**
 
 - `src/azure/connectors/sdk/*.py` — Core SDK infrastructure (not generated)
+- `src/azure/connectors/sdk/aio/*.py` — Async core SDK infrastructure (not generated)
 - `tests/*.py` — All test files
 - `samples/*.py` — Sample code
 - Documentation files (`.md` files)

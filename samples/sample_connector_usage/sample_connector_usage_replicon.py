@@ -1,9 +1,7 @@
-"""Replicon connector SDK sample."""
-
-import asyncio
+"""Replicon sample for the Azure Connectors Python SDK."""
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
 from azure.connectors.replicon import RepliconClient
@@ -12,20 +10,20 @@ from azure.connectors.replicon import RepliconClient
 CONNECTION_RUNTIME_URL = os.environ.get("REPLICON_CONNECTION_URL", "")
 
 
-async def main() -> None:
+def main() -> None:
     """Get Replicon tenant endpoint details."""
     if not CONNECTION_RUNTIME_URL:
         print("Set REPLICON_CONNECTION_URL to run this sample.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
         try:
-            async with RepliconClient(CONNECTION_RUNTIME_URL, credential) as client:
-                endpoint = await client.get_my_tenant_endpoint_details_async()
+            with RepliconClient(CONNECTION_RUNTIME_URL, credential) as client:
+                endpoint = client.get_my_tenant_endpoint_details()
                 print(f"Tenant endpoint: {endpoint}")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

@@ -5,20 +5,34 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "KeyvaultClient",
+    "KeyDecryptInput",
+    "KeyDecryptOutput",
+    "KeyEncryptInput",
+    "KeyEncryptOutput",
+    "KeyMetadata",
+    "KeyMetadataCollection",
+    "Secret",
+    "SecretMetadata",
+    "SecretMetadataCollection",
+]
 
 
 # Type Definitions
@@ -29,10 +43,16 @@ class KeyMetadataCollection:
     Response for List keys
     """
 
-    value: Optional[List[KeyMetadata]] = None
-    """The keys"""
-    continuation_token: Optional[str] = field(
+    value: Optional[
+        List[KeyMetadata | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The keys"""
+    continuation_token: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "continuationToken"},
     )
     """Continuation token"""
@@ -44,42 +64,49 @@ class KeyMetadata:
     Response for Get key metadata
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the key"""
-    version: Optional[str] = None
+    version: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Version of the key"""
-    is_enabled: Optional[bool] = field(
+    is_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isEnabled"},
     )
     """A flag indicating whether the key is enabled"""
-    created_time: Optional[str] = field(
+    created_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdTime"},
     )
     """Time when the key was created"""
-    last_updated_time: Optional[str] = field(
+    last_updated_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastUpdatedTime"},
     )
     """Time when the key was last updated"""
-    validity_start_time: Optional[str] = field(
+    validity_start_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "validityStartTime"},
     )
     """Time when the key validity starts."""
-    validity_end_time: Optional[str] = field(
+    validity_end_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "validityEndTime"},
     )
     """Time when the key validity ends."""
-    allowed_operations: Optional[List[str]] = field(
+    allowed_operations: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowedOperations"},
     )
     """Operations allowed using the key"""
-    key_type: Optional[str] = field(
+    key_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "keyType"},
     )
     """Type of the key"""
@@ -91,8 +118,9 @@ class KeyEncryptOutput:
     Response for Encrypt data with key
     """
 
-    encrypted_data: Optional[str] = field(
+    encrypted_data: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "encryptedData"},
     )
     """Encrypted data"""
@@ -104,8 +132,9 @@ class KeyDecryptOutput:
     Response for Decrypt data with key
     """
 
-    raw_data: Optional[str] = field(
+    raw_data: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "rawData"},
     )
     """Raw data"""
@@ -117,10 +146,16 @@ class SecretMetadataCollection:
     Response for List secrets
     """
 
-    value: Optional[List[SecretMetadata]] = None
-    """The secrets"""
-    continuation_token: Optional[str] = field(
+    value: Optional[
+        List[SecretMetadata | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The secrets"""
+    continuation_token: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "continuationToken"},
     )
     """Continuation token"""
@@ -132,37 +167,43 @@ class SecretMetadata:
     Response for Get secret metadata
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the secret"""
-    version: Optional[str] = None
+    version: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Version of the secret"""
-    content_type: Optional[str] = field(
+    content_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentType"},
     )
     """Content type of the secret"""
-    is_enabled: Optional[bool] = field(
+    is_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isEnabled"},
     )
     """A flag indicating whether the secret is enabled"""
-    created_time: Optional[str] = field(
+    created_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdTime"},
     )
     """Time when the secret was created"""
-    last_updated_time: Optional[str] = field(
+    last_updated_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastUpdatedTime"},
     )
     """Time when the secret was last updated"""
-    validity_start_time: Optional[str] = field(
+    validity_start_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "validityStartTime"},
     )
     """Time when the secret validity starts."""
-    validity_end_time: Optional[str] = field(
+    validity_end_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "validityEndTime"},
     )
     """Time when the secret validity ends."""
@@ -174,39 +215,45 @@ class Secret:
     Response for Get secret
     """
 
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Value of the secret"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the secret"""
-    version: Optional[str] = None
+    version: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Version of the secret"""
-    content_type: Optional[str] = field(
+    content_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentType"},
     )
     """Content type of the secret"""
-    is_enabled: Optional[bool] = field(
+    is_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isEnabled"},
     )
     """A flag indicating whether the secret is enabled"""
-    created_time: Optional[str] = field(
+    created_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdTime"},
     )
     """Time when the secret was created"""
-    last_updated_time: Optional[str] = field(
+    last_updated_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastUpdatedTime"},
     )
     """Time when the secret was last updated"""
-    validity_start_time: Optional[str] = field(
+    validity_start_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "validityStartTime"},
     )
     """Time when the secret validity starts."""
-    validity_end_time: Optional[str] = field(
+    validity_end_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "validityEndTime"},
     )
     """Time when the secret validity ends."""
@@ -218,12 +265,9 @@ class KeyEncryptInput:
     Definition: KeyEncryptInput
     """
 
-    algorithm: Optional[str] = None
+    algorithm: str
     """Algorithm to use for encrypting the data"""
-    raw_data: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "rawData"},
-    )
+    raw_data: str = dataclass_field(metadata={"wire_name": "rawData"})
     """Data to encrypt"""
 
 
@@ -233,10 +277,9 @@ class KeyDecryptInput:
     Definition: KeyDecryptInput
     """
 
-    algorithm: Optional[str] = None
+    algorithm: str
     """Algorithm to use for decrypting the data"""
-    encrypted_data: Optional[str] = field(
-        default=None,
+    encrypted_data: str = dataclass_field(
         metadata={"wire_name": "encryptedData"},
     )
     """Data to decrypt"""
@@ -250,16 +293,16 @@ class KeyvaultClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -270,8 +313,8 @@ class KeyvaultClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -279,8 +322,8 @@ class KeyvaultClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -292,7 +335,7 @@ class KeyvaultClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -307,43 +350,159 @@ class KeyvaultClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "keyvault"
 
-    async def list_keys_async(
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
+            if next_link.startswith("?"):
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
+
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
+    def list_keys(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List keys
 
         List keys.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListKeys`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/keys"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_key_versions_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_key_versions(
         self,
         key_name: str,
         *,
@@ -351,39 +510,79 @@ class KeyvaultClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List key versions
 
         List versions of a key.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListKeyVersions`.
+
+        Args:
+            key_name: Name of the key.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/keys/{quote(str(key_name), safe='')}/versions"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_key_metadata_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_key_metadata(
         self,
         key_name: str,
         *,
@@ -396,13 +595,28 @@ class KeyvaultClient(ConnectorClientBase):
         Get key metadata
 
         Gets metadata of a key.
+
+        Swagger operation ID: `GetKeyMetadata`.
+
+        Args:
+            key_name: Name of the key.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/keys/{quote(str(key_name), safe='')}/metadata"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -416,6 +630,7 @@ class KeyvaultClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -423,7 +638,7 @@ class KeyvaultClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_key_version_metadata_async(
+    def get_key_version_metadata(
         self,
         key_name: str,
         key_version: str,
@@ -437,6 +652,22 @@ class KeyvaultClient(ConnectorClientBase):
         Get key version metadata
 
         Gets metadata of a version of a key.
+
+        Swagger operation ID: `GetKeyVersionMetadata`.
+
+        Args:
+            key_name: Name of the key.
+            key_version: Version of the key.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -447,7 +678,7 @@ class KeyvaultClient(ConnectorClientBase):
             f"/metadata"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -461,6 +692,7 @@ class KeyvaultClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -468,9 +700,9 @@ class KeyvaultClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def encrypt_data_async(
+    def encrypt_data(
         self,
-        input: KeyEncryptInput,
+        input: KeyEncryptInput | Mapping[str, Any],
         key_name: str,
         *,
         timeout: Optional[float] = None,
@@ -482,13 +714,30 @@ class KeyvaultClient(ConnectorClientBase):
         Encrypt data with key
 
         Encrypt data using the latest version of a key.
+
+        Swagger operation ID: `EncryptData`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            key_name: Name of the key.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/keys/{quote(str(key_name), safe='')}/encrypt"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -502,6 +751,7 @@ class KeyvaultClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -509,9 +759,9 @@ class KeyvaultClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def encrypt_data_with_version_async(
+    def encrypt_data_with_version(
         self,
-        input: KeyEncryptInput,
+        input: KeyEncryptInput | Mapping[str, Any],
         key_name: str,
         key_version: str,
         *,
@@ -524,6 +774,24 @@ class KeyvaultClient(ConnectorClientBase):
         Encrypt data with key version
 
         Encrypt data using a specific version of a key.
+
+        Swagger operation ID: `EncryptDataWithVersion`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            key_name: Name of the key.
+            key_version: Version of the key.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -534,7 +802,7 @@ class KeyvaultClient(ConnectorClientBase):
             f"/encrypt"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -548,6 +816,7 @@ class KeyvaultClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -555,9 +824,9 @@ class KeyvaultClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def decrypt_data_async(
+    def decrypt_data(
         self,
-        input: KeyDecryptInput,
+        input: KeyDecryptInput | Mapping[str, Any],
         key_name: str,
         *,
         timeout: Optional[float] = None,
@@ -571,13 +840,30 @@ class KeyvaultClient(ConnectorClientBase):
         Decrypt data using the latest version of a key. Output of this
         operation is typically classified as secret and can be visible in the
         run history.
+
+        Swagger operation ID: `DecryptData`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            key_name: Name of the key.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/keys/{quote(str(key_name), safe='')}/decrypt"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -591,6 +877,7 @@ class KeyvaultClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -598,9 +885,9 @@ class KeyvaultClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def decrypt_data_with_version_async(
+    def decrypt_data_with_version(
         self,
-        input: KeyDecryptInput,
+        input: KeyDecryptInput | Mapping[str, Any],
         key_name: str,
         key_version: str,
         *,
@@ -615,6 +902,24 @@ class KeyvaultClient(ConnectorClientBase):
         Decrypt data using a specific version of a key. Output of this
         operation is typically classified as secret and can be visible in the
         run history.
+
+        Swagger operation ID: `DecryptDataWithVersion`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            key_name: Name of the key.
+            key_version: Version of the key.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -625,7 +930,7 @@ class KeyvaultClient(ConnectorClientBase):
             f"/decrypt"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -639,6 +944,7 @@ class KeyvaultClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -646,43 +952,82 @@ class KeyvaultClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_secrets_async(
+    def list_secrets(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List secrets
 
         List secrets.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListSecrets`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/secrets"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_secret_versions_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_secret_versions(
         self,
         secret_name: str,
         *,
@@ -690,39 +1035,79 @@ class KeyvaultClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List secret versions
 
         List versions of a secret.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListSecretVersions`.
+
+        Args:
+            secret_name: Name of the secret.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/secrets/{quote(str(secret_name), safe='')}/versions"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_secret_metadata_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_secret_metadata(
         self,
         secret_name: str,
         *,
@@ -735,13 +1120,28 @@ class KeyvaultClient(ConnectorClientBase):
         Get secret metadata
 
         Gets metadata of a secret.
+
+        Swagger operation ID: `GetSecretMetadata`.
+
+        Args:
+            secret_name: Name of the secret.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/secrets/{quote(str(secret_name), safe='')}/metadata"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -755,6 +1155,7 @@ class KeyvaultClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -762,7 +1163,7 @@ class KeyvaultClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_secret_version_metadata_async(
+    def get_secret_version_metadata(
         self,
         secret_name: str,
         secret_version: str,
@@ -776,6 +1177,22 @@ class KeyvaultClient(ConnectorClientBase):
         Get secret version metadata
 
         Gets metadata of a version of a secret.
+
+        Swagger operation ID: `GetSecretVersionMetadata`.
+
+        Args:
+            secret_name: Name of the secret.
+            secret_version: Version of the secret.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -786,7 +1203,7 @@ class KeyvaultClient(ConnectorClientBase):
             f"/metadata"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -800,6 +1217,7 @@ class KeyvaultClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -807,7 +1225,7 @@ class KeyvaultClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_secret_async(
+    def get_secret(
         self,
         secret_name: str,
         *,
@@ -821,13 +1239,28 @@ class KeyvaultClient(ConnectorClientBase):
 
         Gets a secret. Output of this operation is typically classified as
         secret and can be visible in the run history.
+
+        Swagger operation ID: `GetSecret`.
+
+        Args:
+            secret_name: Name of the secret.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/secrets/{quote(str(secret_name), safe='')}/value"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -841,6 +1274,7 @@ class KeyvaultClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -848,7 +1282,7 @@ class KeyvaultClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_secret_version_async(
+    def get_secret_version(
         self,
         secret_name: str,
         secret_version: str,
@@ -863,6 +1297,22 @@ class KeyvaultClient(ConnectorClientBase):
 
         Gets a version of a secret. Output of this operation is typically
         classified as secret and can be visible in the run history.
+
+        Swagger operation ID: `GetSecretVersion`.
+
+        Args:
+            secret_name: Name of the secret.
+            secret_version: Version of the secret.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -873,7 +1323,7 @@ class KeyvaultClient(ConnectorClientBase):
             f"/value"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -887,6 +1337,7 @@ class KeyvaultClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

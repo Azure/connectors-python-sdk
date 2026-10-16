@@ -5,20 +5,48 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "ClicksendsmsClient",
+    "CreateListContactInput",
+    "CreateListContactResponse",
+    "CreateListInput",
+    "CreateListResponse",
+    "DeleteListContactResponse",
+    "DeleteListResponse",
+    "GetContactListsResponse",
+    "SearchContactListResponse",
+    "SendFaxInput",
+    "SendFaxResponse",
+    "SendLetterInput",
+    "SendLetterResponse",
+    "SendMmsInput",
+    "SendMmsResponse",
+    "SendPostcardInput",
+    "SendPostcardResponse",
+    "SendVoiceInput",
+    "SendVoiceResponse",
+    "SmsInboundAutomationInput",
+    "SmsSendInput",
+    "SmsSendResponse",
+    "UploadMediaInput",
+    "UploadMediaResponse",
+    "ViewListContactsResponse",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -29,7 +57,7 @@ class SmsSendInput:
     Send SMS
     """
 
-    messages: Optional[List[Dict[str, Any]]] = None
+    messages: List[Dict[str, Any]]
     """Message"""
 
 
@@ -39,13 +67,13 @@ class SmsSendResponse:
     Response for Send SMS
     """
 
-    http_code: Optional[int] = None
+    http_code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Http Code"""
-    response_code: Optional[str] = None
+    response_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Code"""
-    response_msg: Optional[str] = None
+    response_msg: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Msg"""
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -55,7 +83,7 @@ class CreateListInput:
     Create New Contact List
     """
 
-    list_name: Optional[str] = None
+    list_name: str
     """Your contact list name"""
 
 
@@ -65,13 +93,13 @@ class CreateListResponse:
     Response for Create New Contact List
     """
 
-    http_code: Optional[int] = None
+    http_code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Http Code"""
-    response_code: Optional[str] = None
+    response_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Code"""
-    response_msg: Optional[str] = None
+    response_msg: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Message"""
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -81,13 +109,13 @@ class GetContactListsResponse:
     Response for Get Contact Lists
     """
 
-    http_code: Optional[int] = None
+    http_code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Http Code"""
-    response_code: Optional[str] = None
+    response_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Code"""
-    response_msg: Optional[str] = None
+    response_msg: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Message"""
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -97,7 +125,7 @@ class SendVoiceInput:
     Send Voice Message
     """
 
-    messages: Optional[List[Dict[str, Any]]] = None
+    messages: List[Dict[str, Any]]
     """Message"""
 
 
@@ -107,13 +135,13 @@ class SendVoiceResponse:
     Response for Send Voice Message
     """
 
-    http_code: Optional[int] = None
+    http_code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Http Code"""
-    response_code: Optional[str] = None
+    response_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Code"""
-    response_msg: Optional[str] = None
+    response_msg: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Message"""
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -123,11 +151,11 @@ class DeleteListResponse:
     Response for Delete List
     """
 
-    http_code: Optional[int] = None
+    http_code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Http Code"""
-    response_code: Optional[str] = None
+    response_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Code"""
-    response_msg: Optional[str] = None
+    response_msg: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Message"""
 
 
@@ -137,52 +165,58 @@ class CreateListContactInput:
     Create New Contact
     """
 
-    first_name: Optional[str] = None
+    first_name: str
     """Contact's first name."""
-    last_name: Optional[str] = None
+    last_name: str
     """Contact's last name."""
-    phone_number: Optional[str] = None
+    phone_number: str
     """The contact phone in local or international format e.g. +61411111111."""
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Contact's email address."""
-    fax_number: Optional[str] = None
+    fax_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Contact's fax number."""
-    organization_name: Optional[str] = None
+    organization_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Contact's organization name."""
-    address_country: Optional[str] = None
+    address_country: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The contact's country."""
-    address_state: Optional[str] = None
+    address_state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """State"""
-    address_city: Optional[str] = None
+    address_city: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Address City"""
-    custom1: Optional[str] = field(
+    custom1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "custom_1"},
     )
     """Custom 1"""
-    custom3: Optional[str] = field(
+    custom3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "custom_3"},
     )
     """Custom 3"""
-    address_postal_code: Optional[str] = None
-    custom2: Optional[str] = field(
+    address_postal_code: Optional[str] = dataclass_field(default=None, kw_only=True)
+    custom2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "custom_2"},
     )
     """Custom 2"""
-    custom4: Optional[str] = field(
+    custom4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "custom_4"},
     )
     """Custom 4"""
-    address_line1: Optional[str] = field(
+    address_line1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "address_line_1"},
     )
     """Address Line 1"""
-    address_line2: Optional[str] = field(
+    address_line2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "address_line_2"},
     )
     """Address Line 2"""
@@ -194,13 +228,13 @@ class CreateListContactResponse:
     Response for Create New Contact
     """
 
-    http_code: Optional[int] = None
+    http_code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Http Code"""
-    response_code: Optional[str] = None
+    response_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Code"""
-    response_msg: Optional[str] = None
+    response_msg: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Message"""
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -210,13 +244,13 @@ class ViewListContactsResponse:
     Response for Get Contacts in a List
     """
 
-    http_code: Optional[int] = None
+    http_code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Http Code"""
-    response_code: Optional[str] = None
+    response_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Code"""
-    response_msg: Optional[str] = None
+    response_msg: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Message"""
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -226,11 +260,11 @@ class DeleteListContactResponse:
     Response for Delete a Contact
     """
 
-    http_code: Optional[int] = None
+    http_code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Http Code"""
-    response_code: Optional[str] = None
+    response_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Code"""
-    response_msg: Optional[str] = None
+    response_msg: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Message"""
 
 
@@ -240,9 +274,9 @@ class SendMmsInput:
     Send MMS
     """
 
-    messages: Optional[List[Dict[str, Any]]] = None
+    messages: List[Dict[str, Any]]
     """Message"""
-    media_file: Optional[str] = None
+    media_file: str
     """
     Supports maximum file size of 250kB, Gif can only be supported if it below
     100 kB file size
@@ -255,13 +289,13 @@ class SendMmsResponse:
     Response for Send MMS
     """
 
-    http_code: Optional[int] = None
+    http_code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Http Code"""
-    response_code: Optional[str] = None
+    response_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Code"""
-    response_msg: Optional[str] = None
+    response_msg: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Message"""
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -271,9 +305,9 @@ class SendFaxInput:
     Send Fax
     """
 
-    messages: Optional[List[Dict[str, Any]]] = None
+    messages: List[Dict[str, Any]]
     """Message"""
-    file_url: Optional[str] = None
+    file_url: str
     """
     Maximum file size is 4 MB. All pages should be in portrait. Chat with
     ClickSend Support for complete specifications
@@ -286,13 +320,13 @@ class SendFaxResponse:
     Response for Send Fax
     """
 
-    http_code: Optional[int] = None
+    http_code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Http Code"""
-    response_code: Optional[str] = None
+    response_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Code"""
-    response_msg: Optional[str] = None
+    response_msg: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Message"""
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -302,7 +336,7 @@ class UploadMediaInput:
     Convert Media File Format
     """
 
-    content: Optional[str] = None
+    content: str
     """File Content (base64)"""
 
 
@@ -312,13 +346,13 @@ class UploadMediaResponse:
     Response for Convert Media File Format
     """
 
-    http_code: Optional[int] = None
+    http_code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Http Code"""
-    response_code: Optional[str] = None
+    response_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Code"""
-    response_msg: Optional[str] = None
+    response_msg: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Message"""
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -328,13 +362,13 @@ class SearchContactListResponse:
     Response for Search Contact Lists
     """
 
-    http_code: Optional[int] = None
+    http_code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Http Code"""
-    response_code: Optional[str] = None
+    response_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Code"""
-    response_msg: Optional[str] = None
+    response_msg: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Message"""
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -344,27 +378,27 @@ class SendLetterInput:
     Send Letter
     """
 
-    file_url: Optional[str] = None
+    file_url: str
     """
     Maximum file size is 10 MB. All pages should be in portrait. Chat with
     ClickSend Support for complete specifications.
     """
-    template_used: Optional[int] = None
+    template_used: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Whether using letter template. Flag value must be 1 for yes or 0 for no.
     """
-    colour: Optional[int] = None
+    colour: int
     """Choose to use colour or B&W printing. (Black & White = 0, Colour = 1)"""
-    duplex: Optional[int] = None
+    duplex: int
     """
     Choose to use Duplex = 1 (double-sided) or Simplex = 0(single sided)
     printing.
     """
-    priority_post: Optional[int] = None
+    priority_post: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Whether letter is priority, Flag value must be 1 for yes or 0 for no."""
-    recipients: Optional[List[Dict[str, Any]]] = None
+    recipients: List[Dict[str, Any]]
     """Recipient"""
-    source: Optional[str] = None
+    source: str
     """Source"""
 
 
@@ -374,13 +408,13 @@ class SendLetterResponse:
     Response for Send Letter
     """
 
-    http_code: Optional[int] = None
+    http_code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Http Code"""
-    response_code: Optional[str] = None
+    response_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Code"""
-    response_msg: Optional[str] = None
+    response_msg: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Message"""
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -390,9 +424,9 @@ class SendPostcardInput:
     Send Postcard
     """
 
-    recipients: Optional[List[Dict[str, Any]]] = None
+    recipients: List[Dict[str, Any]]
     """item"""
-    file_urls: Optional[List[str]] = None
+    file_urls: List[str]
     """PDF File URL"""
 
 
@@ -402,13 +436,13 @@ class SendPostcardResponse:
     Response for Send Postcard
     """
 
-    http_code: Optional[int] = None
+    http_code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Http Code"""
-    response_code: Optional[str] = None
+    response_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Code"""
-    response_msg: Optional[str] = None
+    response_msg: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Message"""
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -418,28 +452,28 @@ class SmsInboundAutomationInput:
     SMS Inbound Automation
     """
 
-    message_search_type: Optional[int] = None
+    message_search_type: int
     """
     Message Search Type: 0=Any message, 1=starts with, 2=contains, 3=does not
     contain.
     """
-    message_search_term: Optional[str] = None
+    message_search_term: str
     """word or phrase in the SMS"""
-    action_address: Optional[str] = None
+    action_address: str
     """Action address"""
-    dedicated_number: Optional[str] = None
+    dedicated_number: str
     """Decicated Number. Can be '*' to apply to all numbers."""
-    rule_name: Optional[str] = None
+    rule_name: str
     """Rule Name"""
-    webhook_type: Optional[str] = None
+    webhook_type: str
     """Webhook Type"""
-    action: Optional[str] = None
+    action: str
     """
     Action to be taken (AUTO_REPLY, EMAIL_USER, EMAIL_FIXED, URL, SMS, POLL,
     GROUP_SMS, MOVE_CONTACT, CREATE_CONTACT, CREATE_CONTACT_PLUS_EMAIL,
     CREATE_CONTACT_PLUS_NAME_EMAIL CREATE_CONTACT_PLUS_NAME, SMPP, NONE).
     """
-    enabled: Optional[int] = None
+    enabled: int
     """enabled"""
 
 
@@ -451,16 +485,16 @@ class ClicksendsmsClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -471,8 +505,8 @@ class ClicksendsmsClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -480,8 +514,8 @@ class ClicksendsmsClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -493,7 +527,7 @@ class ClicksendsmsClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -508,9 +542,9 @@ class ClicksendsmsClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "clicksendsms"
 
-    async def sms_send_async(
+    def sms_send(
         self,
-        input: SmsSendInput,
+        input: SmsSendInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -521,10 +555,26 @@ class ClicksendsmsClient(ConnectorClientBase):
         Send SMS
 
         Each 160 characters = 1 SMS. Can send up to 1,224 standard characters.
+
+        Swagger operation ID: `sms_send`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/sms/send"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -538,6 +588,7 @@ class ClicksendsmsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -545,9 +596,9 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_list_async(
+    def create_list(
         self,
-        input: CreateListInput,
+        input: CreateListInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -558,10 +609,26 @@ class ClicksendsmsClient(ConnectorClientBase):
         Create New Contact List
 
         Create New Contact List
+
+        Swagger operation ID: `create_list`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/lists"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -575,6 +642,7 @@ class ClicksendsmsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -582,11 +650,11 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_contact_lists_async(
+    def get_contact_lists(
         self,
+        *,
         page: Optional[int] = None,
         limit: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -596,6 +664,22 @@ class ClicksendsmsClient(ConnectorClientBase):
         Get Contact Lists
 
         Get all contact lists unless specified in the advance options
+
+        Swagger operation ID: `get_contact_lists`.
+
+        Args:
+            page: Page number.
+            limit: Number of records per page.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/lists"
         query_params = []
@@ -612,7 +696,7 @@ class ClicksendsmsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -626,6 +710,7 @@ class ClicksendsmsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -633,9 +718,9 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def send_voice_async(
+    def send_voice(
         self,
-        input: SendVoiceInput,
+        input: SendVoiceInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -647,10 +732,26 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         Each 300 characters = 1 voice message. Can send up to 1,200 standard
         characters
+
+        Swagger operation ID: `send_voice`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/voice/send"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -664,6 +765,7 @@ class ClicksendsmsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -671,7 +773,7 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_list_async(
+    def delete_list(
         self,
         list_id: int,
         *,
@@ -684,13 +786,29 @@ class ClicksendsmsClient(ConnectorClientBase):
         Delete List
 
         Delete a specific contact list
+
+        Swagger operation ID: `delete_list`.
+
+        Args:
+            list_id: You may use the Search Contact List action OR Get Contact
+                List action to get the List ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/lists/{quote(str(list_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -704,6 +822,7 @@ class ClicksendsmsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -711,9 +830,9 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_list_contact_async(
+    def create_list_contact(
         self,
-        input: CreateListContactInput,
+        input: CreateListContactInput | Mapping[str, Any],
         list_id: int,
         *,
         timeout: Optional[float] = None,
@@ -725,13 +844,31 @@ class ClicksendsmsClient(ConnectorClientBase):
         Create New Contact
 
         Create New Contact
+
+        Swagger operation ID: `create_list_contact`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            list_id: You may use the Search Contact List action OR Get Contact
+                List action to get the List ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/lists/{quote(str(list_id), safe='')}/contacts"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -745,6 +882,7 @@ class ClicksendsmsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -752,7 +890,7 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def view_list_contacts_async(
+    def view_list_contacts(
         self,
         list_id: int,
         *,
@@ -765,13 +903,29 @@ class ClicksendsmsClient(ConnectorClientBase):
         Get Contacts in a List
 
         Get all Contacts in a List
+
+        Swagger operation ID: `view_list_contacts`.
+
+        Args:
+            list_id: You may use the Search Contact List action OR Get Contact
+                List action to get the List ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/lists/{quote(str(list_id), safe='')}/contacts"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -785,6 +939,7 @@ class ClicksendsmsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -792,7 +947,7 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_list_contact_async(
+    def delete_list_contact(
         self,
         list_id: int,
         contact_id: int,
@@ -806,6 +961,23 @@ class ClicksendsmsClient(ConnectorClientBase):
         Delete a Contact
 
         Delete a Contact
+
+        Swagger operation ID: `delete_list_contact`.
+
+        Args:
+            list_id: You may use the Search Contact List action OR Get Contact
+                List action to get the List ID.
+            contact_id: Contact ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -815,7 +987,7 @@ class ClicksendsmsClient(ConnectorClientBase):
             f"/{quote(str(contact_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -829,6 +1001,7 @@ class ClicksendsmsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -836,9 +1009,9 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def send_mms_async(
+    def send_mms(
         self,
-        input: SendMmsInput,
+        input: SendMmsInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -849,10 +1022,26 @@ class ClicksendsmsClient(ConnectorClientBase):
         Send MMS
 
         Send MMS
+
+        Swagger operation ID: `send_mms`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/mms/send"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -866,6 +1055,7 @@ class ClicksendsmsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -873,9 +1063,9 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def send_fax_async(
+    def send_fax(
         self,
-        input: SendFaxInput,
+        input: SendFaxInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -886,10 +1076,26 @@ class ClicksendsmsClient(ConnectorClientBase):
         Send Fax
 
         Send Fax
+
+        Swagger operation ID: `send_fax`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/fax/send"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -903,6 +1109,7 @@ class ClicksendsmsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -910,9 +1117,9 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def upload_media_async(
+    def upload_media(
         self,
-        input: UploadMediaInput,
+        input: UploadMediaInput | Mapping[str, Any],
         convert: str,
         *,
         timeout: Optional[float] = None,
@@ -924,6 +1131,23 @@ class ClicksendsmsClient(ConnectorClientBase):
         Convert Media File Format
 
         Convert Media File Format
+
+        Swagger operation ID: `upload_media`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            convert: Select action the file is needed for.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/uploads"
         query_params = []
@@ -934,7 +1158,7 @@ class ClicksendsmsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -948,6 +1172,7 @@ class ClicksendsmsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -955,7 +1180,7 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def search_contact_list_async(
+    def search_contact_list(
         self,
         q: str,
         *,
@@ -968,6 +1193,21 @@ class ClicksendsmsClient(ConnectorClientBase):
         Search Contact Lists
 
         Get list of searched contact list
+
+        Swagger operation ID: `search_contact_list`.
+
+        Args:
+            q: Search for.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/search/contacts-lists"
         query_params = []
@@ -978,7 +1218,7 @@ class ClicksendsmsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -992,6 +1232,7 @@ class ClicksendsmsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -999,9 +1240,9 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def send_letter_async(
+    def send_letter(
         self,
-        input: SendLetterInput,
+        input: SendLetterInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1012,10 +1253,26 @@ class ClicksendsmsClient(ConnectorClientBase):
         Send Letter
 
         Send Letter
+
+        Swagger operation ID: `send_letter`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/post/letters/send"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1029,6 +1286,7 @@ class ClicksendsmsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1036,9 +1294,9 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def send_postcard_async(
+    def send_postcard(
         self,
-        input: SendPostcardInput,
+        input: SendPostcardInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1049,10 +1307,26 @@ class ClicksendsmsClient(ConnectorClientBase):
         Send Postcard
 
         Send one or more postcards
+
+        Swagger operation ID: `send_postcard`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/post/postcards/send"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1066,6 +1340,7 @@ class ClicksendsmsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

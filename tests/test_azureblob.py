@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.azureblob import AzureblobClient
 from azure.connectors.azureblob import (
-    AzureblobClient,
     SharedAccessSignatureBlobPolicy,
 )
 from azure.connectors.sdk import (
@@ -49,7 +49,7 @@ class TestAzureblobClientInitialization:
         client = AzureblobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -120,11 +120,11 @@ class TestCopyFile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.copy_file_async(
+            result = await client.copy_file(
                 dataset="mycontainer",
                 source="/source/file.txt",
                 destination="/dest/file.txt"
@@ -150,11 +150,11 @@ class TestCopyFile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.copy_file_async(
+            await client.copy_file(
                 dataset="mycontainer",
                 source="/source/file.txt",
                 destination="/dest/file.txt",
@@ -176,11 +176,11 @@ class TestCopyFile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.copy_file_async(
+            result = await client.copy_file(
                 dataset="mycontainer",
                 source="/source/file.txt",
                 destination="/dest/file.txt"
@@ -199,12 +199,12 @@ class TestCopyFile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.copy_file_async(
+                await client.copy_file(
                     dataset="mycontainer",
                     source="/source/file.txt",
                     destination="/dest/file.txt"
@@ -229,11 +229,11 @@ class TestCreateBlockBlob:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.create_block_blob_async(
+            await client.create_block_blob(
                 input=blob_input,
                 storage_account_name="mystorageaccount",
                 folder_path="/uploads",
@@ -267,11 +267,11 @@ class TestCreateFile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.create_file_async(
+            result = await client.create_file(
                 input=file_input,
                 dataset="mycontainer",
                 folder_path="/uploads",
@@ -296,12 +296,12 @@ class TestCreateFile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_file_async(
+                await client.create_file(
                     input=b"file content",
                     dataset="mycontainer",
                     folder_path="/uploads",
@@ -330,11 +330,11 @@ class TestCreateShareLinkByPath:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.create_share_link_by_path_async(
+            result = await client.create_share_link_by_path(
                 input=policy_input,
                 storage_account_name="mystorageaccount",
                 path="/container/file.txt"
@@ -358,12 +358,12 @@ class TestCreateShareLinkByPath:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_share_link_by_path_async(
+                await client.create_share_link_by_path(
                     input=SharedAccessSignatureBlobPolicy(),
                     storage_account_name="mystorageaccount",
                     path="/container/file.txt"
@@ -387,11 +387,11 @@ class TestDeleteFile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.delete_file_async(
+            await client.delete_file(
                 dataset="mycontainer",
                 id="blob123"
             )
@@ -415,26 +415,28 @@ class TestExtractFolder:
 
         mock_response = MockResponse(
             status=200,
-            text='{"extractedFiles": ["file1.txt", "file2.txt"]}'
+            text='["file1.txt", "file2.txt"]'
         )
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.extract_folder_async(
-                dataset="mycontainer",
-                source="/archive.zip",
-                destination="/extracted"
+            result = await resolve_generated_result(
+                client.extract_folder(
+                    dataset="mycontainer",
+                    source="/archive.zip",
+                    destination="/extracted"
+                )
             )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
             assert "extractFolderV2" in call_args[0][1]
-            assert "extractedFiles" in result
+            assert result == ["file1.txt", "file2.txt"]
 
     @pytest.mark.asyncio
     async def test_with_overwrite_parameter(self, mock_credential):
@@ -448,15 +450,17 @@ class TestExtractFolder:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.extract_folder_async(
-                dataset="mycontainer",
-                source="/archive.zip",
-                destination="/extracted",
-                overwrite="true"
+            await resolve_generated_result(
+                client.extract_folder(
+                    dataset="mycontainer",
+                    source="/archive.zip",
+                    destination="/extracted",
+                    overwrite="true"
+                )
             )
 
             call_args = mock_send.call_args
@@ -474,15 +478,17 @@ class TestExtractFolder:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.extract_folder_async(
-                    dataset="mycontainer",
-                    source="/archive.zip",
-                    destination="/extracted"
+                await resolve_generated_result(
+                    client.extract_folder(
+                        dataset="mycontainer",
+                        source="/archive.zip",
+                        destination="/extracted"
+                    )
                 )
 
             assert exc_info.value.status_code == 400
@@ -501,29 +507,31 @@ class TestGetAccessPolicies:
 
         mock_response = MockResponse(
             status=200,
-            text='{"policies": [{"id": "policy1", "permissions": "rwd"}]}'
+            text='[{"id": "policy1", "permissions": "rwd"}]'
         )
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_access_policies_async(
-                storage_account_name="mystorageaccount",
-                path="/container/file.txt"
+            result = await resolve_generated_result(
+                client.list_access_policies(
+                    storage_account_name="mystorageaccount",
+                    path="/container/file.txt"
+                )
             )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/policies" in call_args[0][1]
-            assert "policies" in result
+            assert result == [{"id": "policy1", "permissions": "rwd"}]
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_credential):
-        """Test that empty response returns None."""
+    async def test_empty_response_returns_empty_page(self, mock_credential):
+        """Test that an empty response returns an empty page."""
         client = AzureblobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
@@ -533,15 +541,17 @@ class TestGetAccessPolicies:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_access_policies_async(
-                storage_account_name="mystorageaccount",
-                path="/container/file.txt"
+            result = await resolve_generated_result(
+                client.list_access_policies(
+                    storage_account_name="mystorageaccount",
+                    path="/container/file.txt"
+                )
             )
-            assert result is None
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -555,14 +565,16 @@ class TestGetAccessPolicies:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_access_policies_async(
-                    storage_account_name="mystorageaccount",
-                    path="/container/file.txt"
+                await resolve_generated_result(
+                    client.list_access_policies(
+                        storage_account_name="mystorageaccount",
+                        path="/container/file.txt"
+                    )
                 )
 
             assert exc_info.value.status_code == 404
@@ -585,11 +597,11 @@ class TestGetFileContent:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_file_content_async(
+            result = await client.get_file_content(
                 dataset="mycontainer",
                 id="blob123"
             )
@@ -613,11 +625,11 @@ class TestGetFileContent:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_file_content_async(
+            await client.get_file_content(
                 dataset="mycontainer",
                 id="blob123",
                 infer_content_type="true"
@@ -638,12 +650,12 @@ class TestGetFileContent:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_file_content_async(
+                await client.get_file_content(
                     dataset="mycontainer",
                     id="nonexistent"
                 )
@@ -668,11 +680,11 @@ class TestGetFileContentByPath:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_file_content_by_path_async(
+            result = await client.get_file_content_by_path(
                 dataset="mycontainer",
                 path="/folder/file.txt"
             )
@@ -695,12 +707,12 @@ class TestGetFileContentByPath:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_file_content_by_path_async(
+                await client.get_file_content_by_path(
                     dataset="mycontainer",
                     path="/nonexistent/path.txt"
                 )
@@ -726,11 +738,11 @@ class TestGetFileMetadata:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_file_metadata_async(
+            result = await client.get_file_metadata(
                 dataset="mycontainer",
                 id="blob123"
             )
@@ -754,11 +766,11 @@ class TestGetFileMetadata:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_file_metadata_async(
+            result = await client.get_file_metadata(
                 dataset="mycontainer",
                 id="blob123"
             )
@@ -776,12 +788,12 @@ class TestGetFileMetadata:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_file_metadata_async(
+                await client.get_file_metadata(
                     dataset="mycontainer",
                     id="nonexistent"
                 )
@@ -807,11 +819,11 @@ class TestGetFileMetadataByPath:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_file_metadata_by_path_async(
+            result = await client.get_file_metadata_by_path(
                 dataset="mycontainer",
                 path="/folder/file.txt"
             )
@@ -834,11 +846,11 @@ class TestGetFileMetadataByPath:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_file_metadata_by_path_async(
+            result = await client.get_file_metadata_by_path(
                 dataset="mycontainer",
                 path="/folder/file.txt"
             )
@@ -856,12 +868,12 @@ class TestGetFileMetadataByPath:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_file_metadata_by_path_async(
+                await client.get_file_metadata_by_path(
                     dataset="mycontainer",
                     path="/nonexistent/path.txt"
                 )
@@ -887,11 +899,11 @@ class TestListFolder:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.list_folder_async(
+            result = await resolve_generated_result(client.list_folder(
                 dataset="mycontainer",
                 id="folder123"
             ))
@@ -903,8 +915,8 @@ class TestListFolder:
             assert len(result) == 2
 
     @pytest.mark.asyncio
-    async def test_with_pagination_parameters(self, mock_credential):
-        """Test GET request with pagination parameters."""
+    async def test_with_optional_parameters(self, mock_credential):
+        """Test GET request with public optional parameters."""
         client = AzureblobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
@@ -914,19 +926,18 @@ class TestListFolder:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await resolve_generated_result(client.list_folder_async(
+            await resolve_generated_result(client.list_folder(
                 dataset="mycontainer",
                 id="folder123",
-                next_page_marker="marker123",
                 use_flat_listing="true"
             ))
 
             call_args = mock_send.call_args
-            assert "nextPageMarker=" in call_args[0][1]
+            assert "nextPageMarker=" not in call_args[0][1]
             assert "useFlatListing=true" in call_args[0][1]
 
     @pytest.mark.asyncio
@@ -941,11 +952,11 @@ class TestListFolder:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await resolve_generated_result(client.list_folder_async(
+            result = await resolve_generated_result(client.list_folder(
                 dataset="mycontainer",
                 id="folder123"
             ))
@@ -963,12 +974,12 @@ class TestListFolder:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await resolve_generated_result(client.list_folder_async(
+                await resolve_generated_result(client.list_folder(
                     dataset="mycontainer",
                     id="nonexistent"
                 ))
@@ -994,12 +1005,12 @@ class TestListRootFolder:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
             result = await resolve_generated_result(
-                client.list_root_folder_async(dataset="mycontainer")
+                client.list_root_folder(dataset="mycontainer")
             )
 
             mock_send.assert_called_once()
@@ -1009,8 +1020,8 @@ class TestListRootFolder:
             assert len(result) == 2
 
     @pytest.mark.asyncio
-    async def test_with_pagination_parameters(self, mock_credential):
-        """Test GET request with pagination parameters."""
+    async def test_hides_continuation_parameter(self, mock_credential):
+        """Test that paging continuation is managed internally."""
         client = AzureblobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
@@ -1020,17 +1031,16 @@ class TestListRootFolder:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await resolve_generated_result(client.list_root_folder_async(
-                dataset="mycontainer",
-                next_page_marker="marker456"
+            await resolve_generated_result(client.list_root_folder(
+                dataset="mycontainer"
             ))
 
             call_args = mock_send.call_args
-            assert "nextPageMarker=marker456" in call_args[0][1]
+            assert "nextPageMarker=" not in call_args[0][1]
 
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
@@ -1044,12 +1054,12 @@ class TestListRootFolder:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             result = await resolve_generated_result(
-                client.list_root_folder_async(dataset="mycontainer")
+                client.list_root_folder(dataset="mycontainer")
             )
             assert result == []
 
@@ -1065,12 +1075,12 @@ class TestListRootFolder:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await resolve_generated_result(client.list_root_folder_async(dataset="mycontainer"))
+                await resolve_generated_result(client.list_root_folder(dataset="mycontainer"))
 
             assert exc_info.value.status_code == 403
 
@@ -1090,11 +1100,11 @@ class TestSetBlobTierByPath:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.set_blob_tier_by_path_async(
+            await client.set_blob_tier_by_path(
                 storage_account_name="mystorageaccount",
                 path="/container/file.txt",
                 new_tier="Cool"
@@ -1126,11 +1136,11 @@ class TestUpdateFile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.update_file_async(
+            result = await client.update_file(
                 input=update_input,
                 dataset="mycontainer",
                 id="blob123"
@@ -1154,11 +1164,11 @@ class TestUpdateFile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.update_file_async(
+            result = await client.update_file(
                 input=b"updated content",
                 dataset="mycontainer",
                 id="blob123"
@@ -1177,12 +1187,12 @@ class TestUpdateFile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.update_file_async(
+                await client.update_file(
                     input=b"updated content",
                     dataset="mycontainer",
                     id="nonexistent"

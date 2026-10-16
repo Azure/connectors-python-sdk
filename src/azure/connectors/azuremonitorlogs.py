@@ -5,20 +5,42 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "AzuremonitorlogsClient",
+    "ObjectEntity",
+    "PartialQueryError",
+    "QueryDataInput",
+    "QuerySchemaInput",
+    "ResourceGroup",
+    "ResourceGroupListResult",
+    "ResourceItem",
+    "ResourceItemListResult",
+    "Row",
+    "Subscription",
+    "SubscriptionListResult",
+    "Table",
+    "TimeRangeItem",
+    "TimeRangeListResult",
+    "TimeRangeTypesListResult",
+    "VisualizeQueryInput",
+    "VisualizeResults",
+]
 
 
 # Type Definitions
@@ -29,11 +51,11 @@ class QueryDataInput:
     Run query and list results
     """
 
-    query: Optional[str] = None
+    query: str
     """Specify the query you would like to run. """
-    timerangetype: Optional[str] = None
+    timerangetype: str
     """Select Time Range type. """
-    timerange: Optional[Dict[str, Any]] = None
+    timerange: Dict[str, Any]
     """Time Range"""
 
 
@@ -43,8 +65,18 @@ class Table:
     Response for Run query and list results
     """
 
-    value: Optional[List[Row]] = None
-    error: Optional[PartialQueryError] = None
+    value: Optional[
+        List[Row | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    error: Optional[
+        PartialQueryError | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -53,11 +85,11 @@ class VisualizeQueryInput:
     Run query and visualize results
     """
 
-    query: Optional[str] = None
+    query: str
     """Specify the query you would like to run. """
-    timerangetype: Optional[str] = None
+    timerangetype: str
     """Select Time Range type. """
-    timerange: Optional[Dict[str, Any]] = None
+    timerange: Dict[str, Any]
     """Time Range"""
 
 
@@ -67,16 +99,23 @@ class VisualizeResults:
     Response for Run query and visualize results
     """
 
-    body: Optional[str] = None
-    attachment_content: Optional[str] = field(
+    body: Optional[str] = dataclass_field(default=None, kw_only=True)
+    attachment_content: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "attachmentContent"},
     )
-    attachment_name: Optional[str] = field(
+    attachment_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "attachmentName"},
     )
-    error: Optional[PartialQueryError] = None
+    error: Optional[
+        PartialQueryError | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -85,10 +124,16 @@ class SubscriptionListResult:
     Response for List subscriptions
     """
 
-    value: Optional[List[Subscription]] = None
-    """The subscriptions ."""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[Subscription | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The subscriptions ."""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results. """
@@ -100,10 +145,16 @@ class ResourceGroupListResult:
     Response for List resource groups
     """
 
-    value: Optional[List[ResourceGroup]] = None
-    """The list of resource groups. """
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[ResourceGroup | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The list of resource groups. """
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results. """
@@ -115,10 +166,16 @@ class ResourceItemListResult:
     Response for List resources
     """
 
-    value: Optional[List[ResourceItem]] = None
-    """The list of resource items. """
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[ResourceItem | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The list of resource items. """
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results. """
@@ -133,7 +190,7 @@ class ObjectEntity:
     Response for Get query schema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -146,7 +203,7 @@ class Row:
     Definition: Row
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -159,7 +216,7 @@ class PartialQueryError:
     Definition: PartialQueryError
     """
 
-    code: Optional[str] = None
+    code: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -168,18 +225,20 @@ class Subscription:
     Definition: Subscription
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The fully qualified Id. For example,
     /subscriptions/00000000-0000-0000-0000-000000000000.
     """
-    subscription_id: Optional[str] = field(
+    subscription_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "subscriptionId"},
     )
     """The subscription Id. """
-    authorization_source: Optional[str] = field(
+    authorization_source: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "authorizationSource"},
     )
     """
@@ -195,11 +254,11 @@ class ResourceGroup:
     Definition: ResourceGroup
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The ID of the resource group (e.g. /subscriptions/XXX/resourceGroups/YYY).
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Name of the resource group. """
 
 
@@ -209,9 +268,9 @@ class ResourceItem:
     Definition: ResourceItem
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ID of the resource. """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Name of the resource ."""
 
 
@@ -221,10 +280,16 @@ class TimeRangeTypesListResult:
     Definition: TimeRangeTypesListResult
     """
 
-    value: Optional[List[TimeRangeItem]] = None
-    """The list of time range types (Relative\\Absolute\\SetInQuery). """
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[TimeRangeItem | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The list of time range types (Relative\\Absolute\\SetInQuery). """
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results. """
@@ -236,10 +301,16 @@ class TimeRangeListResult:
     Definition: TimeRangeListResult
     """
 
-    value: Optional[List[TimeRangeItem]] = None
-    """The list of time range. """
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[TimeRangeItem | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The list of time range. """
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results. """
@@ -251,9 +322,9 @@ class TimeRangeItem:
     Definition: TimeRangeItem
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The ID of the item. """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Name of the item. """
 
 
@@ -265,16 +336,16 @@ class AzuremonitorlogsClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -285,8 +356,8 @@ class AzuremonitorlogsClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -294,8 +365,8 @@ class AzuremonitorlogsClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -307,7 +378,7 @@ class AzuremonitorlogsClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -323,15 +394,49 @@ class AzuremonitorlogsClient(ConnectorClientBase):
         return "azuremonitorlogs"
 
     def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
-        parsed_next_link = urlsplit(next_link)
-        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
             if next_link.startswith("/"):
                 return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
             if next_link.startswith("?"):
-                return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
 
-        parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
         connection_hostname = parsed_connection.hostname
         if next_link_hostname is None or connection_hostname is None:
@@ -348,7 +453,11 @@ class AzuremonitorlogsClient(ConnectorClientBase):
                 parsed_next_link.scheme == parsed_connection.scheme
                 and next_link_port == connection_port
             ):
-                return next_link
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
 
             raise ValueError(
                 "Pagination URL origin "
@@ -361,9 +470,9 @@ class AzuremonitorlogsClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def query_data_async(
+    def query_data(
         self,
-        input: QueryDataInput,
+        input: QueryDataInput | Mapping[str, Any],
         subscriptions: str,
         resourcegroups: str,
         resourcetype: str,
@@ -379,6 +488,26 @@ class AzuremonitorlogsClient(ConnectorClientBase):
 
         Returns each row as its own object. Use this action when you want to
         work with each row separately in the rest of the workflow.
+
+        Swagger operation ID: `QueryDataV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            subscriptions: Select subscription.
+            resourcegroups: Select resource group.
+            resourcetype: Select Resource Type.
+            resourcename: Select Resource.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/queryDataV2"
         query_params = []
@@ -401,7 +530,7 @@ class AzuremonitorlogsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -415,6 +544,7 @@ class AzuremonitorlogsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -422,9 +552,9 @@ class AzuremonitorlogsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def visualize_query_async(
+    def visualize_query(
         self,
-        input: VisualizeQueryInput,
+        input: VisualizeQueryInput | Mapping[str, Any],
         subscriptions: str,
         resourcegroups: str,
         resourcetype: str,
@@ -442,6 +572,27 @@ class AzuremonitorlogsClient(ConnectorClientBase):
         Returns all rows in the result set as a single formatted object. Use
         this action when you want to use the result set together in the rest of
         the workflow.
+
+        Swagger operation ID: `VisualizeQueryV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            subscriptions: Select subscription.
+            resourcegroups: Select resource group.
+            resourcetype: Select Resource Type.
+            resourcename: Select Resource.
+            vis_type: Specify the resulting chart type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/visualizeQueryV2"
         query_params = []
@@ -468,7 +619,7 @@ class AzuremonitorlogsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -482,6 +633,7 @@ class AzuremonitorlogsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -489,28 +641,50 @@ class AzuremonitorlogsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_subscriptions_async(
+    def list_subscriptions(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List subscriptions
 
         Gets a list of all the subscriptions to which the principal has access.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListSubscriptions`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/listSubscriptions"
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -523,23 +697,32 @@ class AzuremonitorlogsClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def list_resource_groups_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_resource_groups(
         self,
         subscriptions: str,
         *,
@@ -547,14 +730,30 @@ class AzuremonitorlogsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List resource groups
 
         Lists all the resource groups within the subscription.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListResourceGroups`.
+
+        Args:
+            subscriptions: Select subscription.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/listResourceGroups"
         query_params = []
@@ -564,11 +763,18 @@ class AzuremonitorlogsClient(ConnectorClientBase):
         query_params.append(f"subscriptions={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -581,23 +787,32 @@ class AzuremonitorlogsClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def list_resources_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_resources(
         self,
         subscriptions: str,
         resourcegroups: str,
@@ -607,14 +822,32 @@ class AzuremonitorlogsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List resources
 
         Lists all the resource groups within the resource group.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListResources`.
+
+        Args:
+            subscriptions: Select subscription.
+            resourcegroups: Select resource group.
+            resourcetype: Select Resource Type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/listResources"
         query_params = []
@@ -632,11 +865,18 @@ class AzuremonitorlogsClient(ConnectorClientBase):
         query_params.append(f"resourcetype={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -649,23 +889,32 @@ class AzuremonitorlogsClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def query_schema_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def query_schema(
         self,
         input: QuerySchemaInput,
         subscriptions: str,
@@ -682,6 +931,25 @@ class AzuremonitorlogsClient(ConnectorClientBase):
         Get query schema
 
         Gets the schema for a specific query.
+
+        Swagger operation ID: `QuerySchemaV2`.
+
+        Args:
+            input: The request body.
+            subscriptions: Select subscription.
+            resourcegroups: Select resource group.
+            resourcetype: Select Resource Type.
+            resourcename: Select Resource.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/querySchemaV2"
         query_params = []
@@ -704,7 +972,7 @@ class AzuremonitorlogsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -718,6 +986,7 @@ class AzuremonitorlogsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -725,7 +994,7 @@ class AzuremonitorlogsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_time_range_selection_control_async(
+    def get_time_range_selection_control(
         self,
         timerangetype: str,
         *,
@@ -738,6 +1007,21 @@ class AzuremonitorlogsClient(ConnectorClientBase):
         Returns the control schema according to to the given time range type
 
         Returns the Relative\\Absolute\\Set in query time range control.
+
+        Swagger operation ID: `getTimeRangeSelectionControl`.
+
+        Args:
+            timerangetype: The Time Range type that the control represents.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/getTimeRangeSelectionControl"
@@ -750,7 +1034,7 @@ class AzuremonitorlogsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -764,6 +1048,7 @@ class AzuremonitorlogsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

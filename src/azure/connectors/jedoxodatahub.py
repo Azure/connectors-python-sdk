@@ -5,20 +5,70 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "JedoxodatahubClient",
+    "Cell",
+    "CellArray",
+    "Cube",
+    "CubeArray",
+    "CubeCellsResponse",
+    "CubesResponse",
+    "Database",
+    "DatabaseArray",
+    "DatabasesResponse",
+    "Dimension",
+    "DimensionArray",
+    "DimensionsResponse",
+    "Element",
+    "ElementArray",
+    "ElementsResponse",
+    "Error",
+    "ExtractRowsResponse",
+    "ExtractsResponse",
+    "GetCubeCellResultSchemaResponse",
+    "GetExtractRowsResultSchemaResponse",
+    "GetTransformRowsResultSchemaResponse",
+    "GetViewCellResultSchemaResponse",
+    "IntegratorComponent",
+    "IntegratorComponentArray",
+    "IntegratorExtractComponentRow",
+    "IntegratorExtractComponentRowArray",
+    "IntegratorProject",
+    "IntegratorProjectArray",
+    "IntegratorProjectGroup",
+    "IntegratorProjectGroupArray",
+    "IntegratorProjectGroupsResponse",
+    "IntegratorProjectsResponse",
+    "IntegratorRunResult",
+    "IntegratorTransformComponentRow",
+    "IntegratorTransformComponentRowArray",
+    "JobsResponse",
+    "LoadsResponse",
+    "TransformRowsResponse",
+    "TransformsResponse",
+    "View",
+    "ViewArray",
+    "ViewCell",
+    "ViewCellArray",
+    "ViewCellsResponse",
+    "ViewsResponse",
+]
 
 
 # Type Definitions
@@ -29,7 +79,7 @@ class DatabasesResponse:
     Response for Get databases
     """
 
-    value: Optional[DatabaseArray] = None
+    value: Optional[DatabaseArray] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -38,17 +88,31 @@ class Database:
     Response for Get database by id
     """
 
-    cube_count: Optional[int] = field(
+    cube_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CubeCount"},
     )
-    dimension_count: Optional[int] = field(
+    dimension_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DimensionCount"},
     )
-    id: Optional[int] = field(default=None, metadata={"wire_name": "Id"})
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "Type"})
+    id: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Type"},
+    )
 
 
 @dataclass
@@ -57,7 +121,7 @@ class CubesResponse:
     Response for Get cubes
     """
 
-    value: Optional[CubeArray] = None
+    value: Optional[CubeArray] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -66,13 +130,26 @@ class Cube:
     Response for Get cube by ID
     """
 
-    filled_cell_count: Optional[int] = field(
+    filled_cell_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FilledCellCount"},
     )
-    id: Optional[int] = field(default=None, metadata={"wire_name": "Id"})
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "Type"})
+    id: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Type"},
+    )
 
 
 @dataclass
@@ -81,7 +158,7 @@ class CubeCellsResponse:
     Response for Get cube cells
     """
 
-    value: Optional[CellArray] = None
+    value: Optional[CellArray] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -90,7 +167,7 @@ class DimensionsResponse:
     Response for Get dimensions
     """
 
-    value: Optional[DimensionArray] = None
+    value: Optional[DimensionArray] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -99,13 +176,26 @@ class Dimension:
     Response for Get dimension by ID
     """
 
-    element_count: Optional[int] = field(
+    element_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ElementCount"},
     )
-    id: Optional[int] = field(default=None, metadata={"wire_name": "Id"})
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "Type"})
+    id: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Type"},
+    )
 
 
 @dataclass
@@ -114,7 +204,7 @@ class ElementsResponse:
     Response for Get elements
     """
 
-    value: Optional[ElementArray] = None
+    value: Optional[ElementArray] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -123,15 +213,29 @@ class Element:
     Response for Get element by ID
     """
 
-    id: Optional[int] = field(default=None, metadata={"wire_name": "Id"})
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    position: Optional[int] = field(
+    id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    position: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Position"},
     )
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "Type"})
-    weight: Optional[float] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Type"},
+    )
+    weight: Optional[float] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Weight"},
     )
 
@@ -142,7 +246,7 @@ class ViewsResponse:
     Response for Get stored views
     """
 
-    value: Optional[ViewArray] = None
+    value: Optional[ViewArray] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -151,33 +255,44 @@ class View:
     Response for Get stored view by ID
     """
 
-    creation_date: Optional[str] = field(
+    creation_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CreationDate"},
     )
-    cube_id: Optional[int] = field(
+    cube_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CubeId"},
     )
-    cube_name: Optional[str] = field(
+    cube_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CubeName"},
     )
-    description: Optional[str] = field(
+    description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Description"},
     )
-    friendly_name: Optional[str] = field(
+    friendly_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FriendlyName"},
     )
-    global_: Optional[bool] = field(
+    global_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Global"},
     )
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    user_name: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    user_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "UserName"},
     )
 
@@ -188,7 +303,7 @@ class ViewCellsResponse:
     Response for Get stored view cells
     """
 
-    value: Optional[ViewCellArray] = None
+    value: Optional[ViewCellArray] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -197,7 +312,7 @@ class IntegratorProjectGroupsResponse:
     Response for Get Integrator project groups
     """
 
-    value: Optional[IntegratorProjectGroupArray] = None
+    value: Optional[IntegratorProjectGroupArray] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -206,26 +321,39 @@ class IntegratorProjectGroup:
     Response for Get Integrator project group by identifier
     """
 
-    description: Optional[str] = field(
+    description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Description"},
     )
-    developer: Optional[str] = field(
+    developer: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Developer"},
     )
-    friendly_name: Optional[str] = field(
+    friendly_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FriendlyName"},
     )
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    namespace: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    namespace: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Namespace"},
     )
-    version: Optional[str] = field(
+    version: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Version"},
     )
 
@@ -236,7 +364,7 @@ class IntegratorProjectsResponse:
     Response for Get Integrator projects
     """
 
-    value: Optional[IntegratorProjectArray] = None
+    value: Optional[IntegratorProjectArray] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -245,17 +373,24 @@ class IntegratorProject:
     Response for Get Integrator project by name
     """
 
-    description: Optional[str] = field(
+    description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Description"},
     )
-    modification_date: Optional[str] = field(
+    modification_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ModificationDate"},
     )
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    version: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    version: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Version"},
     )
 
@@ -266,7 +401,7 @@ class ExtractsResponse:
     Response for Get extracts
     """
 
-    value: Optional[IntegratorComponentArray] = None
+    value: Optional[IntegratorComponentArray] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -275,16 +410,26 @@ class IntegratorComponent:
     Response for Get extract by Name
     """
 
-    description: Optional[str] = field(
+    description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Description"},
     )
-    modification_date: Optional[str] = field(
+    modification_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ModificationDate"},
     )
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "Type"})
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Type"},
+    )
 
 
 @dataclass
@@ -293,7 +438,12 @@ class ExtractRowsResponse:
     Response for Get extract rows
     """
 
-    value: Optional[IntegratorExtractComponentRowArray] = None
+    value: Optional[
+        IntegratorExtractComponentRowArray
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -302,7 +452,7 @@ class JobsResponse:
     Response for Get jobs
     """
 
-    value: Optional[IntegratorComponentArray] = None
+    value: Optional[IntegratorComponentArray] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -311,22 +461,25 @@ class IntegratorRunResult:
     Response for Run job
     """
 
-    errors: Optional[int] = None
-    execution_type: Optional[str] = field(
+    errors: Optional[int] = dataclass_field(default=None, kw_only=True)
+    execution_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "executionType"},
     )
-    id: Optional[int] = None
-    start_date: Optional[str] = field(
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDate"},
     )
-    status: Optional[str] = None
-    trace_available: Optional[bool] = field(
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
+    trace_available: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "traceAvailable"},
     )
-    warnings: Optional[int] = None
+    warnings: Optional[int] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -335,7 +488,7 @@ class LoadsResponse:
     Response for Get loads
     """
 
-    value: Optional[IntegratorComponentArray] = None
+    value: Optional[IntegratorComponentArray] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -344,7 +497,7 @@ class TransformsResponse:
     Response for Get transforms
     """
 
-    value: Optional[IntegratorComponentArray] = None
+    value: Optional[IntegratorComponentArray] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -353,7 +506,12 @@ class TransformRowsResponse:
     Response for Get transform Rows
     """
 
-    value: Optional[IntegratorTransformComponentRowArray] = None
+    value: Optional[
+        IntegratorTransformComponentRowArray
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -362,7 +520,7 @@ class GetCubeCellResultSchemaResponse:
     Response for Get Cube Cell Result Schema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -375,7 +533,7 @@ class GetExtractRowsResultSchemaResponse:
     Response for Get Extract Rows Result Schema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -388,7 +546,7 @@ class GetTransformRowsResultSchemaResponse:
     Response for Get Transform Rows Result Schema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -401,7 +559,7 @@ class GetViewCellResultSchemaResponse:
     Response for Get View Cell Result Schema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -414,26 +572,26 @@ class Cell:
     Definition: Cell
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
     """
 
 
-CellArray = List["Cell"]
+CellArray = List["Cell | Mapping[str, Any]"]
 
 
-CubeArray = List["Cube"]
+CubeArray = List["Cube | Mapping[str, Any]"]
 
 
-DatabaseArray = List["Database"]
+DatabaseArray = List["Database | Mapping[str, Any]"]
 
 
-DimensionArray = List["Dimension"]
+DimensionArray = List["Dimension | Mapping[str, Any]"]
 
 
-ElementArray = List["Element"]
+ElementArray = List["Element | Mapping[str, Any]"]
 
 
 @dataclass
@@ -442,10 +600,10 @@ class Error:
     Definition: Error
     """
 
-    error: Optional[str] = None
+    error: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
-IntegratorComponentArray = List["IntegratorComponent"]
+IntegratorComponentArray = List["IntegratorComponent | Mapping[str, Any]"]
 
 
 @dataclass
@@ -454,20 +612,20 @@ class IntegratorExtractComponentRow:
     Definition: IntegratorExtractComponentRow
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
     """
 
 
-IntegratorExtractComponentRowArray = List["IntegratorExtractComponentRow"]
+IntegratorExtractComponentRowArray = List["IntegratorExtractComponentRow | Mapping[str, Any]"]
 
 
-IntegratorProjectArray = List["IntegratorProject"]
+IntegratorProjectArray = List["IntegratorProject | Mapping[str, Any]"]
 
 
-IntegratorProjectGroupArray = List["IntegratorProjectGroup"]
+IntegratorProjectGroupArray = List["IntegratorProjectGroup | Mapping[str, Any]"]
 
 
 @dataclass
@@ -476,17 +634,19 @@ class IntegratorTransformComponentRow:
     Definition: IntegratorTransformComponentRow
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
     """
 
 
-IntegratorTransformComponentRowArray = List["IntegratorTransformComponentRow"]
+IntegratorTransformComponentRowArray = List[
+    "IntegratorTransformComponentRow | Mapping[str, Any]"
+]
 
 
-ViewArray = List["View"]
+ViewArray = List["View | Mapping[str, Any]"]
 
 
 @dataclass
@@ -495,14 +655,14 @@ class ViewCell:
     Definition: ViewCell
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
     """
 
 
-ViewCellArray = List["ViewCell"]
+ViewCellArray = List["ViewCell | Mapping[str, Any]"]
 
 
 # Client Class
@@ -513,16 +673,16 @@ class JedoxodatahubClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -533,8 +693,8 @@ class JedoxodatahubClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -542,8 +702,8 @@ class JedoxodatahubClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -555,7 +715,7 @@ class JedoxodatahubClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -570,23 +730,127 @@ class JedoxodatahubClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "jedoxodatahub"
 
-    async def databases_async(
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
+            if next_link.startswith("?"):
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
+
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
+    def list_databases(
         self,
+        *,
         top: Optional[int] = None,
         skip: Optional[int] = None,
         filter: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get databases
 
         Get a list of databases found in the server. System and config
         databases are excluded from the list, but can be requested by providing
         the ID.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `Databases`.
+
+        Args:
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/Databases"
         query_params = []
@@ -607,29 +871,50 @@ class JedoxodatahubClient(ConnectorClientBase):
             query_params.append(f"$filter={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def database_by_id_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def database_by_id(
         self,
         database_id: int,
         *,
@@ -642,13 +927,28 @@ class JedoxodatahubClient(ConnectorClientBase):
         Get database by id
 
         Get the database with the given ID.
+
+        Swagger operation ID: `DatabaseById`.
+
+        Args:
+            database_id: Numeric ID of the database.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/Databases({quote(str(database_id), safe='')})"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -662,6 +962,7 @@ class JedoxodatahubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -669,24 +970,52 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def cubes_async(
+    def list_cubes(
         self,
         database_id: int,
+        *,
         top: Optional[int] = None,
         skip: Optional[int] = None,
         filter: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get cubes
 
         Get a list of cubes in the given database. To prevent issues with the
         URL encodings, Attribute cubes will be renamed, e.g. \\#_Years to
         ATT_Years.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `Cubes`.
+
+        Args:
+            database_id: Numeric ID of the database.
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -710,29 +1039,50 @@ class JedoxodatahubClient(ConnectorClientBase):
             query_params.append(f"$filter={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def cube_by_id_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def cube_by_id(
         self,
         database_id: int,
         cube_id: int,
@@ -748,6 +1098,22 @@ class JedoxodatahubClient(ConnectorClientBase):
         Get the cube with the given ID in the given database. To prevent issues
         with the URL encodings, Attribute cubes will be renamed, e.g. \\#_Years
         to ATT_Years.
+
+        Swagger operation ID: `CubeById`.
+
+        Args:
+            database_id: Numeric ID of the database.
+            cube_id: Numeric ID of the cube.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -755,7 +1121,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Cubes({quote(str(cube_id), safe='')})"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -769,6 +1135,7 @@ class JedoxodatahubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -776,10 +1143,11 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def cube_cells_async(
+    def list_cube_cells(
         self,
         database_id: int,
         cube_id: int,
+        *,
         top: Optional[int] = None,
         skip: Optional[int] = None,
         filter: Optional[str] = None,
@@ -787,18 +1155,60 @@ class JedoxodatahubClient(ConnectorClientBase):
         userules: Optional[bool] = None,
         zerosupression: Optional[bool] = None,
         disablepaging: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get cube cells
 
         Get the cells from a cube. This returns the cells' values and element
         names. If the cell has a string value, the value is instead stored in
         the stringValue field. Element names are stored in dynamic properties.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `CubeCells`.
+
+        Args:
+            database_id: Numeric ID of the database.
+            cube_id: Numeric ID of the cube.
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+                > Currently the /Cells functions only support basic operations.
+                Complex formulas might return an invalid result. For complex
+                filtering, please use Views.
+            baseonly: If set to true, the result will only contain base
+                elements. If set to false, it will also contain consolidated
+                elements.
+            userules: If set to true, rules will be applied to the resulting
+                cells.
+            zerosupression: If set to true, numeric cells with a value of 0 and
+                empty string cells will be removed from the result.
+            disablepaging: If set to true, the service will return the entire
+                result instead of a single page. With this option set to true,
+                the response might take multiple minutes depending on the
+                cube's size.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -844,44 +1254,93 @@ class JedoxodatahubClient(ConnectorClientBase):
             query_params.append(f"disablepaging={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def dimensions_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_dimensions(
         self,
         database_id: int,
+        *,
         top: Optional[int] = None,
         skip: Optional[int] = None,
         filter: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get dimensions
 
         Get a list of dimensions in the given database.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `Dimensions`.
+
+        Args:
+            database_id: Numeric ID of the database.
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -905,29 +1364,50 @@ class JedoxodatahubClient(ConnectorClientBase):
             query_params.append(f"$filter={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def dimension_by_id_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def dimension_by_id(
         self,
         database_id: int,
         dimension_id: int,
@@ -941,6 +1421,22 @@ class JedoxodatahubClient(ConnectorClientBase):
         Get dimension by ID
 
         Get the dimension with the given ID in the given database.
+
+        Swagger operation ID: `DimensionById`.
+
+        Args:
+            database_id: Numeric ID of the database.
+            dimension_id: Numeric ID of the dimension.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -948,7 +1444,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Dimensions({quote(str(dimension_id), safe='')})"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -962,6 +1458,7 @@ class JedoxodatahubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -969,23 +1466,52 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def elements_async(
+    def list_elements(
         self,
         database_id: int,
         dimension_id: int,
+        *,
         top: Optional[int] = None,
         skip: Optional[int] = None,
         filter: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get elements
 
         Get a list of elements in the given dimension.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `Elements`.
+
+        Args:
+            database_id: Numeric ID of the database.
+            dimension_id: Numeric ID of the dimension.
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1011,29 +1537,50 @@ class JedoxodatahubClient(ConnectorClientBase):
             query_params.append(f"$filter={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def element_by_id_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def element_by_id(
         self,
         database_id: int,
         dimension_id: int,
@@ -1048,6 +1595,23 @@ class JedoxodatahubClient(ConnectorClientBase):
         Get element by ID
 
         Returns the element with the given ID in the given dimension.
+
+        Swagger operation ID: `ElementById`.
+
+        Args:
+            database_id: Numeric ID of the database.
+            dimension_id: Numeric ID of the dimension.
+            element_id: Numeric ID of the element.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1056,7 +1620,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Elements({quote(str(element_id), safe='')})"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1070,6 +1634,7 @@ class JedoxodatahubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1077,22 +1642,50 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def views_async(
+    def list_views(
         self,
         database_id: int,
+        *,
         top: Optional[int] = None,
         skip: Optional[int] = None,
         filter: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get stored views
 
         Get a list of stored views in the given database.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `Views`.
+
+        Args:
+            database_id: Numeric ID of the database.
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1116,29 +1709,50 @@ class JedoxodatahubClient(ConnectorClientBase):
             query_params.append(f"$filter={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def view_by_id_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def view_by_id(
         self,
         database_id: int,
         view_id: str,
@@ -1152,6 +1766,22 @@ class JedoxodatahubClient(ConnectorClientBase):
         Get stored view by ID
 
         Get the view with the given ID in the given database.
+
+        Swagger operation ID: `ViewById`.
+
+        Args:
+            database_id: Numeric ID of the database.
+            view_id: UUID of the view.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1159,7 +1789,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Views({quote(str(view_id), safe='')})"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1173,6 +1803,7 @@ class JedoxodatahubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1180,10 +1811,11 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def view_cells_async(
+    def list_view_cells(
         self,
         database_id: int,
         view_id: str,
+        *,
         top: Optional[int] = None,
         skip: Optional[int] = None,
         filter: Optional[str] = None,
@@ -1191,18 +1823,59 @@ class JedoxodatahubClient(ConnectorClientBase):
         userules: Optional[bool] = None,
         zerosupression: Optional[bool] = None,
         disablepaging: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get stored view cells
 
         Get all cells from a view. This returns the cells' values and element
         names. If the cell has a string value, the value is instead stored in
         the stringValue field. Element names are stored in dynamic properties.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ViewCells`.
+
+        Args:
+            database_id: Numeric ID of the database.
+            view_id: UUID of the view.
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+                > Currently the /Cells functions only support basic operations.
+                Complex formulas might return an invalid result.
+            baseonly: If set to true, the result will only contain base
+                elements. If set to false, it will also contain consolidated
+                elements.
+            userules: If set to true, rules will be applied to the resulting
+                cells.
+            zerosupression: If set to true, numeric cells with a value of 0 and
+                empty string cells will be removed from the result.
+            disablepaging: If set to true, the service will return the entire
+                result instead of a single page. With this option set to true,
+                the response might take multiple minutes depending on the
+                view's size.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1248,43 +1921,91 @@ class JedoxodatahubClient(ConnectorClientBase):
             query_params.append(f"disablepaging={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def integrator_project_groups_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_integrator_project_groups(
         self,
+        *,
         top: Optional[int] = None,
         skip: Optional[int] = None,
         filter: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Integrator project groups
 
         Get a list of integrator project groups found in the server.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `IntegratorProjectGroups`.
+
+        Args:
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/Integrator"
         query_params = []
@@ -1305,29 +2026,50 @@ class JedoxodatahubClient(ConnectorClientBase):
             query_params.append(f"$filter={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def integrator_projects_by_id_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def integrator_projects_by_id(
         self,
         group_identifier: str,
         *,
@@ -1340,13 +2082,28 @@ class JedoxodatahubClient(ConnectorClientBase):
         Get Integrator project group by identifier
 
         Get the project group with the given ID.
+
+        Swagger operation ID: `IntegratorProjectsById`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/Integrator('{quote(str(group_identifier), safe='')}')"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1360,6 +2117,7 @@ class JedoxodatahubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1367,22 +2125,50 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def integrator_projects_async(
+    def list_integrator_projects(
         self,
         group_identifier: str,
+        *,
         top: Optional[int] = None,
         skip: Optional[int] = None,
         filter: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Integrator projects
 
         Get a list of integrator projects found in the server.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `IntegratorProjects`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1406,29 +2192,50 @@ class JedoxodatahubClient(ConnectorClientBase):
             query_params.append(f"$filter={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def integrator_projects_by_name_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def integrator_projects_by_name(
         self,
         group_identifier: str,
         project_name: str,
@@ -1442,6 +2249,22 @@ class JedoxodatahubClient(ConnectorClientBase):
         Get Integrator project by name
 
         Get the integrator project with the given name.
+
+        Swagger operation ID: `IntegratorProjectsByName`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1449,7 +2272,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Projects('{quote(str(project_name), safe='')}')"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1463,6 +2286,7 @@ class JedoxodatahubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1470,23 +2294,52 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def extracts_async(
+    def list_extracts(
         self,
         group_identifier: str,
         project_name: str,
+        *,
         top: Optional[int] = None,
         skip: Optional[int] = None,
         filter: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get extracts
 
         Get a list of extracts in the given integrator project.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `Extracts`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1512,29 +2365,50 @@ class JedoxodatahubClient(ConnectorClientBase):
             query_params.append(f"$filter={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def extract_by_name_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def extract_by_name(
         self,
         group_identifier: str,
         project_name: str,
@@ -1549,6 +2423,23 @@ class JedoxodatahubClient(ConnectorClientBase):
         Get extract by Name
 
         Get the extract with the given name in the given integrator project.
+
+        Swagger operation ID: `ExtractByName`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            extract_name: The name of the extract.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1557,7 +2448,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Extracts('{quote(str(extract_name), safe='')}')"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1571,6 +2462,7 @@ class JedoxodatahubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1578,25 +2470,55 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def extract_rows_async(
+    def list_extract_rows(
         self,
         group_identifier: str,
         project_name: str,
         extract_name: str,
+        *,
         top: Optional[int] = None,
         skip: Optional[int] = None,
         filter: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get extract rows
 
         Stream the rows of the extract with the given name in the given
         integrator project.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ExtractRows`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            extract_name: The name of the extract.
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1623,45 +2545,95 @@ class JedoxodatahubClient(ConnectorClientBase):
             query_params.append(f"$filter={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def jobs_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_jobs(
         self,
         group_identifier: str,
         project_name: str,
+        *,
         top: Optional[int] = None,
         skip: Optional[int] = None,
         filter: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get jobs
 
         Get a list of jobs in the given integrator project.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `Jobs`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1687,29 +2659,50 @@ class JedoxodatahubClient(ConnectorClientBase):
             query_params.append(f"$filter={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def job_by_name_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def job_by_name(
         self,
         group_identifier: str,
         project_name: str,
@@ -1724,6 +2717,23 @@ class JedoxodatahubClient(ConnectorClientBase):
         Get job by name
 
         Get the jobs with the given name in the given integrator project.
+
+        Swagger operation ID: `JobByName`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            job_name: The name of the job.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1732,7 +2742,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Jobs('{quote(str(job_name), safe='')}')"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1746,6 +2756,7 @@ class JedoxodatahubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1753,7 +2764,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def run_job_async(
+    def run_job(
         self,
         group_identifier: str,
         project_name: str,
@@ -1769,6 +2780,23 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Run the job with the given name in the given integrator project. The
         execution will be added to the queue.
+
+        Swagger operation ID: `RunJob`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            job_name: The name of the job.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1778,7 +2806,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Run"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1792,6 +2820,7 @@ class JedoxodatahubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1799,7 +2828,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def run_job_with_variables_async(
+    def run_job_with_variables(
         self,
         group_identifier: str,
         project_name: str,
@@ -1816,6 +2845,27 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Run the job with the given name in the given integrator project. The
         execution will be added to the queue.
+
+        Swagger operation ID: `RunJobWithVariables`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            job_name: The name of the job.
+            variables: Variable names and values separated by an equal sign. If
+                a variable is omitted, the default value will be used. Multiple
+                variables must be separated by commas. Example:
+                Variables='SourceDB=Demo,TargetDB=Biker'.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1827,7 +2877,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"')"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1841,6 +2891,7 @@ class JedoxodatahubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1848,23 +2899,52 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def loads_async(
+    def list_loads(
         self,
         group_identifier: str,
         project_name: str,
+        *,
         top: Optional[int] = None,
         skip: Optional[int] = None,
         filter: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get loads
 
         Get a list of loads in the given integrator project.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `Loads`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1890,29 +2970,50 @@ class JedoxodatahubClient(ConnectorClientBase):
             query_params.append(f"$filter={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def load_by_name_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def load_by_name(
         self,
         group_identifier: str,
         project_name: str,
@@ -1927,6 +3028,23 @@ class JedoxodatahubClient(ConnectorClientBase):
         Get load by name
 
         Get the transform with the given name in the given integrator project.
+
+        Swagger operation ID: `LoadByName`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            load_name: The name of the load.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1935,7 +3053,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Loads('{quote(str(load_name), safe='')}')"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1949,6 +3067,7 @@ class JedoxodatahubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1956,7 +3075,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def run_load_async(
+    def run_load(
         self,
         group_identifier: str,
         project_name: str,
@@ -1972,6 +3091,23 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Run the load with the given name in the given integrator project. The
         execution will be added to the queue.
+
+        Swagger operation ID: `RunLoad`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            load_name: The name of the load.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1981,7 +3117,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Run()"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1995,6 +3131,7 @@ class JedoxodatahubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2002,7 +3139,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def run_load_with_variables_async(
+    def run_load_with_variables(
         self,
         group_identifier: str,
         project_name: str,
@@ -2019,6 +3156,27 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Run the load with the given name in the given integrator project. The
         execution will be added to the queue.
+
+        Swagger operation ID: `RunLoadWithVariables`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            load_name: The name of the load.
+            variables: Variable names and values separated by an equal sign. If
+                a variable is omitted, the default value will be used. Multiple
+                variables must be separated by commas. Example:
+                Variables='SourceDB=Demo,TargetDB=Biker'.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2030,7 +3188,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"')"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2044,6 +3202,7 @@ class JedoxodatahubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2051,23 +3210,52 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def transforms_async(
+    def list_transforms(
         self,
         group_identifier: str,
         project_name: str,
+        *,
         top: Optional[int] = None,
         skip: Optional[int] = None,
         filter: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get transforms
 
         Get a list of transforms in the given integrator project.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `Transforms`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2093,29 +3281,50 @@ class JedoxodatahubClient(ConnectorClientBase):
             query_params.append(f"$filter={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def transform_by_name_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def transform_by_name(
         self,
         group_identifier: str,
         project_name: str,
@@ -2130,6 +3339,23 @@ class JedoxodatahubClient(ConnectorClientBase):
         Get transform by name
 
         Get the transform with the given name in the given integrator project.
+
+        Swagger operation ID: `TransformByName`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            transform_name: The name of the transform.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2138,7 +3364,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Transforms('{quote(str(transform_name), safe='')}')"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2152,6 +3378,7 @@ class JedoxodatahubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2159,25 +3386,55 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def transform_rows_async(
+    def list_transform_rows(
         self,
         group_identifier: str,
         project_name: str,
         transform_name: str,
+        *,
         top: Optional[int] = None,
         skip: Optional[int] = None,
         filter: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get transform Rows
 
         Stream the rows of the transform with the given name in the given
         integrator project.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `TransformRows`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            transform_name: The name of the transform.
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2204,29 +3461,50 @@ class JedoxodatahubClient(ConnectorClientBase):
             query_params.append(f"$filter={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_cube_cell_result_schema_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_cube_cell_result_schema(
         self,
         database_id: int,
         cube_id: int,
@@ -2241,6 +3519,22 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Service request for getting the schema used for the result of cube
         cells.
+
+        Swagger operation ID: `GetCubeCellResultSchema`.
+
+        Args:
+            database_id: The identifier of the Olap database.
+            cube_id: The identifier of the Olap cube.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2254,7 +3548,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/cells"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2268,6 +3562,7 @@ class JedoxodatahubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2275,7 +3570,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_extract_rows_result_schema_async(
+    def get_extract_rows_result_schema(
         self,
         group_identifier: str,
         project_name: str,
@@ -2291,6 +3586,23 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Service request for getting the schema used for the result of extract
         rows.
+
+        Swagger operation ID: `GetExtractRowsResultSchema`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the project.
+            extract_name: The name of the extract.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2305,7 +3617,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/rows"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2319,6 +3631,7 @@ class JedoxodatahubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2326,7 +3639,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_transform_rows_result_schema_async(
+    def get_transform_rows_result_schema(
         self,
         group_identifier: str,
         project_name: str,
@@ -2342,6 +3655,23 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Service request for getting the schema used for the result of transform
         rows.
+
+        Swagger operation ID: `GetTransformRowsResultSchema`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the project.
+            transform_name: The name of the transform.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2356,7 +3686,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/rows"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2370,6 +3700,7 @@ class JedoxodatahubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2377,7 +3708,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_view_cell_result_schema_async(
+    def get_view_cell_result_schema(
         self,
         database_id: int,
         view_id: str,
@@ -2392,6 +3723,22 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Service request for getting the schema used for the result of view
         cells.
+
+        Swagger operation ID: `GetViewCellResultSchema`.
+
+        Args:
+            database_id: The identifier of the Olap database.
+            view_id: The identifier of the stored view.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2405,7 +3752,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/cells"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2419,6 +3766,7 @@ class JedoxodatahubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

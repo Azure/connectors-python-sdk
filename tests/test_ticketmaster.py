@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 import azure.connectors.ticketmaster as ticketmaster_module
-from azure.connectors.ticketmaster import TicketmasterClient
+from azure.connectors.aio.ticketmaster import TicketmasterClient
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 
@@ -50,11 +50,11 @@ async def test_attractions_get_serializes_query_and_response(
 
     with patch.object(
         client._http_client,
-        "send_async",
+        "send",
         new_callable=AsyncMock,
         return_value=MockResponse(status=200, text='{"items": []}'),
     ) as mock_send:
-        result = await client.attractions_get_async(
+        result = await client.attractions_get(
             keyword="rock & roll",
             classification_name=["music", "comedy"],
         )

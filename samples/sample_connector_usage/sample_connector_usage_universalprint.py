@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Universal Print Connector SDK Sample
+Universal Print sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Universal Print connector SDK.
+This sample demonstrates how to use the Universal Print client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a Universal Print connection
@@ -19,12 +19,10 @@ Usage:
 
     python sample_connector_usage_universalprint.py
 """
-
-import asyncio
 import os
 from pathlib import Path
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.universalprint import UniversalprintClient
 
@@ -36,17 +34,15 @@ CONNECTION_RUNTIME_URL = os.environ.get(
 )
 
 
-async def example_1_list_recent_shares():
+def example_1_list_recent_shares():
     """Example 1: List recently used printer shares."""
     print("\n=== Example 1: List Recent Printer Shares ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with UniversalprintClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with UniversalprintClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.list_recent_shares_async()
-
-                shares = (result or {}).get("value", []) if isinstance(result, dict) else []
+                shares = list(client.list_recent_shares())
                 print(f"Found {len(shares)} recent printer share(s).")
                 for share in shares:
                     print(f"  - {share}")
@@ -57,18 +53,18 @@ async def example_1_list_recent_shares():
                 print(f"Error: {ex}")
 
 
-async def example_2_print_file():
+def example_2_print_file():
     """Example 2: Print a PDF to a printer share."""
     print("\n=== Example 2: Print File ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
         pdf_file_path = Path(
             os.environ.get("UNIVERSALPRINT_PDF_PATH", "document.pdf")
         )
 
-        async with UniversalprintClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with UniversalprintClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                await client.print_file_async(
+                client.print_file(
                     input=pdf_file_path.read_bytes(),
                     printer="your-printer-share-id",
                     file_name=pdf_file_path.name,
@@ -85,7 +81,7 @@ async def example_2_print_file():
                 print(f"Error: {ex}")
 
 
-async def main():
+def main():
     """Run all examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: UNIVERSALPRINT_CONNECTION_URL environment variable not set.")
@@ -94,11 +90,11 @@ async def main():
 
     print(f"Using connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
 
-    await example_1_list_recent_shares()
-    await example_2_print_file()
+    example_1_list_recent_shares()
+    example_2_print_file()
 
     print("\n=== All examples completed ===")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

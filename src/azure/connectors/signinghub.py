@@ -5,20 +5,265 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Literal, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Literal, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "SigninghubClient",
+    "AccessAuthentication",
+    "AccessDurationByDate",
+    "AccessDurationByDateResponse",
+    "AccessDurationByDays",
+    "AccessDurationByDaysResponse",
+    "AccessResponse",
+    "AccessSecurityPasswordResponse",
+    "AccessSecuritySmsOtpResponse",
+    "AccessSecurityTOTPResponse",
+    "AccessUpdateRequest",
+    "AddAttachmentResponse",
+    "AddDocumentPackageRequest",
+    "AddFieldResponse",
+    "AddPackageResponse",
+    "AddQrCodeResponse",
+    "ApiBulkSignAction",
+    "ApplyTemplateRequest",
+    "ApproveRequest",
+    "AssignFieldRequest",
+    "AttachmentDownloadAttachmentResponse",
+    "AttachmentFieldResponse",
+    "AttachmentPermissionRequest",
+    "AttachmentPermissionResponse",
+    "Authentication",
+    "AuthenticationPassword",
+    "AuthenticationRequest",
+    "AuthenticationResponse",
+    "AuthenticationSigningResponse",
+    "AuthenticationSigningSmsOtp",
+    "AuthenticationSigningSmsOtpResponse",
+    "AuthenticationSmsOtp",
+    "AutoPlaceFieldRequest",
+    "AutoPlaceFieldsResponse",
+    "BulkSignActionDocumentModel",
+    "BulkSignActionFieldModel",
+    "BulkSignAuthentication",
+    "BulkSignPackagesStatus",
+    "BulkSignRequest",
+    "BulkSignResponse",
+    "BulkSignStatusRequest",
+    "BulkSignStatusResponse",
+    "CertifyPermission",
+    "CertifyPermissionResponse",
+    "CertifyPolicyRequest",
+    "CertifyPolicyResponse",
+    "CertifyResponse",
+    "ChangeServicePlanRequest",
+    "CheckBoxFieldRequest",
+    "CheckBoxFormFillingRequest",
+    "CheckboxFieldResponse",
+    "CollaboratorGroupResponse",
+    "CollaboratorPlaceholderResponse",
+    "CollaboratorResponse",
+    "CollaboratorRole",
+    "CommentFieldRecipientResponse",
+    "CommentFieldResponse",
+    "ContactResponse",
+    "ContactSortBy",
+    "DeclineByDetails",
+    "DeclineRequest",
+    "DeleteDocumentFieldRequest",
+    "DeliveryMethod",
+    "DetailedResponse",
+    "DigitalSignatureFieldRequest",
+    "DigitalSignatureFieldResponse",
+    "DocumentCertifyResponse",
+    "DocumentDetails",
+    "DocumentDetailsResponse",
+    "DocumentLogsActions",
+    "DocumentLogsActionsInformation",
+    "DocumentOwnedBy",
+    "DocumentOwner",
+    "DocumentPackageStatus",
+    "DocumentResponse",
+    "DocumentTemplateResponse",
+    "DocumentType",
+    "DocumentsDownloadDocumentBytesResponse",
+    "DocumentsTemplateResponse",
+    "DropDownFormFillingRequest",
+    "DropdownFieldResponse",
+    "DurationByDate",
+    "DurationByDateResponse",
+    "DurationByDays",
+    "DurationByDaysResponse",
+    "ECCLevelAPI",
+    "EciModeAPI",
+    "ElectronicSealRecipient",
+    "ElectronicSignatureFieldResponse",
+    "EmailDeletedDocument",
+    "EmptyResponse",
+    "EnterpriseAccessResponse",
+    "EnterpriseAccessSecuritySmsOtpResponse",
+    "EnterpriseAuthenticationResponse",
+    "EnterpriseAuthenticationSigningResponse",
+    "EnterpriseAuthenticationSigningSmsOtpResponse",
+    "EnterpriseTemplateResponse",
+    "EnterpriseTemplateRole",
+    "ErrorWithDescriptionResponse",
+    "FieldAuthentication",
+    "FieldDimension",
+    "FieldDimenssionResponse",
+    "FieldResponse",
+    "FieldType",
+    "FieldValidationValue",
+    "FieldValidationValueRule",
+    "FieldsAutoAssignFieldInput",
+    "FieldsResponse",
+    "FolderItemSortBy",
+    "Font",
+    "FontResponse",
+    "FormFillingRequest",
+    "GetAttachmentResponse",
+    "GetPackageDetailsResponse",
+    "GetPackagesResponse",
+    "GroupMemberResponse",
+    "HandSignature",
+    "HandSignatureFieldResponse",
+    "InPersonFieldRequest",
+    "InPersonFieldResponse",
+    "InitialFieldRequest",
+    "InitialFieldResponse",
+    "InitialFillingRequest",
+    "LegalNoticeResponse",
+    "ListBoxFieldResponse",
+    "ListBoxFormFillingRequest",
+    "MoveToRequest",
+    "NextSignerEmail",
+    "NotifyInactiveDeleteUser",
+    "NotifyUnUsedDeleteDocument",
+    "PackageDownloadPackageBytesResponse",
+    "PageResponse",
+    "PermissionAccessDuration",
+    "PermissionAccessDurationResponse",
+    "PermissionLegalNotice",
+    "PermissionLegalNoticeResponse",
+    "PlaceholderRequest",
+    "PostProcessRecipientRequest",
+    "PostProcessRecipientResponse",
+    "PostProcessResponse",
+    "PostProcessUpdateRequest",
+    "QrCodeColor",
+    "QrCodeLogo",
+    "QrCodeOptions",
+    "QrCodeRequest",
+    "QrCodeResponse",
+    "RadioBoxFieldRequest",
+    "RadioFieldResponse",
+    "RadioFormFillingRequest",
+    "RecipientAccessDurationDetails",
+    "RecipientDeclineDetails",
+    "ReminderRepeat",
+    "ReminderResponse",
+    "RenameDocumentPackageRequest",
+    "RenameDocumentRequest",
+    "RepeatRequest",
+    "Response",
+    "ServicePlanAuthenticationProfile",
+    "ServicePlanAutoDeleteDocument",
+    "ServicePlanAutoDeleteUser",
+    "ServicePlanCapacity",
+    "ServicePlanCapacityRequest",
+    "ServicePlanCertifyOption",
+    "ServicePlanElectronicSealServer",
+    "ServicePlanEmailOtp",
+    "ServicePlanEvidenceReport",
+    "ServicePlanLevelOfAssurance",
+    "ServicePlanOneTimePassword",
+    "ServicePlanProfile",
+    "ServicePlanSigningServer",
+    "ServicePlanSmsNotification",
+    "ServicePlanSmsOtp",
+    "ServicePlanSmtpServer",
+    "SignDocumentRequest",
+    "SignDocumentResponse",
+    "SignatureFieldAuthentication",
+    "SignatureFieldAuthenticationOtp",
+    "SignatureFieldAuthenticationTotp",
+    "SignatureFieldResponse",
+    "SigningAuthentication",
+    "SigningServerCapacity",
+    "SigningServerCsp",
+    "SigningServerSignatureAppearance",
+    "StartWorkflowResponse",
+    "TemplateDocumentResponse",
+    "TemplateResponse",
+    "TemplateSmartFormResponse",
+    "TemplateSortBy",
+    "TextBoxFieldRequest",
+    "TextFieldResponse",
+    "TextFormFillingRequest",
+    "TextboxType",
+    "TotpPermissionResponse",
+    "UniqueIdentifierFieldResponse",
+    "UpdateCertifyPolicyRequest",
+    "UpdateCheckBoxFieldRequest",
+    "UpdateCollaboratorResponse",
+    "UpdateDigitalSignatureFieldRequest",
+    "UpdateInPersonFieldRequest",
+    "UpdateInitialFieldRequest",
+    "UpdateQrCodeRequest",
+    "UpdateQrCodeResponse",
+    "UpdateRadioBoxFieldRequest",
+    "UpdateReminderRequest",
+    "UpdateTextBoxFieldRequest",
+    "UpdateWorkSpaceRequest",
+    "UploadDocument",
+    "UploadDocumentLibraryCertifyResponse",
+    "UploadDocumentLibraryResponse",
+    "UploadDocumentLibraryTemplateResponse",
+    "UploadDocumentMetaInfoDetail",
+    "ValidationRule",
+    "VerificationResponse",
+    "WorflowGroupRequest",
+    "WorflowUserRequest",
+    "WorkSpaceMembers",
+    "WorkSpaceOwner",
+    "WorkSpaceResponse",
+    "WorkflowCollaboratorRole",
+    "WorkflowDetailUpdateRequest",
+    "WorkflowDetailsResponse",
+    "WorkflowDocumentsResponse",
+    "WorkflowEvidenceReportDownloadBytesResponse",
+    "WorkflowGatekeeperResponse",
+    "WorkflowGatekeeperUserResponse",
+    "WorkflowHistoryResponse",
+    "WorkflowMode",
+    "WorkflowModes",
+    "WorkflowPermission",
+    "WorkflowPermissionResponse",
+    "WorkflowPermissionsUpdateRequest",
+    "WorkflowPlaceholderUpdateRequest",
+    "WorkflowRecipient",
+    "WorkflowResponse",
+    "WorkflowType",
+    "WorkflowUserReorderRequest",
+    "WorkflowUserResponse",
+    "WorkflowUserUpdateRequest",
+    "WorkflowWorkflowAddGroupInput",
+    "WorkflowWorkflowAddPlaceholderInput",
+    "WorkflowWorkflowAddUserInput",
+]
 
 
 # Type Definitions
@@ -29,7 +274,7 @@ class EmptyResponse:
     Response for Delete Attachment
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -42,7 +287,7 @@ class AttachmentDownloadAttachmentResponse:
     Response for Download Attachment
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -55,9 +300,9 @@ class GetAttachmentResponse:
     Response for Get Attachments
     """
 
-    attachment_id: Optional[int] = None
+    attachment_id: int
     """Attachment id"""
-    attachment_name: Optional[str] = None
+    attachment_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Attachment name"""
 
 
@@ -67,7 +312,7 @@ class AddAttachmentResponse:
     Response for Upload Attachment
     """
 
-    attachment_id: Optional[int] = None
+    attachment_id: int
     """Attachment id"""
 
 
@@ -77,9 +322,9 @@ class AddFieldResponse:
     Response for Add CheckBox Field
     """
 
-    field_name: Optional[str] = None
+    field_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the field created in the document."""
-    created_on: Optional[str] = None
+    created_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date and time of field creation."""
 
 
@@ -89,19 +334,19 @@ class ContactResponse:
     Response for Get Contacts
     """
 
-    id: Optional[int] = None
+    id: int
     """id of the contact."""
-    user_name: Optional[str] = None
+    user_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User name of the contact."""
-    user_email: Optional[str] = None
+    user_email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address of the contact."""
-    mobile_number: Optional[str] = None
+    mobile_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Mobile number of the contact."""
-    enterprise: Optional[bool] = None
+    enterprise: bool
     """True, if contact is enterprise."""
-    user_national_id: Optional[str] = None
+    user_national_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """National identity number of the contact"""
-    created_on: Optional[str] = None
+    created_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """DateTime when contact is added."""
 
 
@@ -111,7 +356,7 @@ class DocumentResponse:
     Response for Delete Document
     """
 
-    package_name: Optional[str] = None
+    package_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Document Package name"""
 
 
@@ -121,7 +366,7 @@ class DocumentsDownloadDocumentBytesResponse:
     Response for Download Document
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -134,8 +379,13 @@ class CertifyPolicyResponse:
     Response for Get Certify Policy for a document
     """
 
-    certify: Optional[CertifyPermissionResponse] = None
-    lock_form_fields: Optional[bool] = None
+    certify: Optional[
+        CertifyPermissionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    lock_form_fields: bool
     """
     True if forms fields are to be locked in the PDF after the last digital
     signature on the current document.
@@ -148,31 +398,41 @@ class DocumentDetailsResponse:
     Response for Get Document Details
     """
 
-    document_id: Optional[int] = None
+    document_id: int
     """ID of the newly created document."""
-    document_name: Optional[str] = None
+    document_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the document."""
-    document_order: Optional[int] = None
-    document_type: Optional[str] = None
+    document_order: int
+    document_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Type of the document e.g. \"PDF\"."""
-    document_width: Optional[int] = None
+    document_width: int
     """Width of the document in PDF format."""
-    document_height: Optional[int] = None
+    document_height: int
     """Height of the document in PDF format."""
-    document_source: Optional[str] = None
+    document_source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Identifies where the document was uploaded e.g. \"My App\"."""
-    document_pages: Optional[int] = None
+    document_pages: int
     """Total pages of the document."""
-    form_fields: Optional[bool] = None
+    form_fields: bool
     """True if document has form fields."""
-    lock_form_fields: Optional[bool] = None
+    lock_form_fields: bool
     """True if locking of form fields with the last signature is enabled."""
-    uploaded_on: Optional[str] = None
+    uploaded_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date and time when the document was uploaded."""
-    modified_on: Optional[str] = None
+    modified_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date and time when the document was last modified."""
-    certify: Optional[DocumentCertifyResponse] = None
-    template: Optional[DocumentTemplateResponse] = None
+    certify: Optional[
+        DocumentCertifyResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    template: Optional[
+        DocumentTemplateResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -181,37 +441,52 @@ class UploadDocumentLibraryResponse:
     Response for Add or Update Document from Library
     """
 
-    document_id: Optional[int] = None
+    document_id: int
     """ID of the newly created document."""
-    document_name: Optional[str] = None
+    document_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the document."""
-    document_size: Optional[int] = None
+    document_size: int
     """Uploaded document size in bytes"""
-    document_order: Optional[int] = None
+    document_order: int
     """Order of the document"""
-    document_type: Optional[str] = None
+    document_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Type of the document e.g. \"PDF\"."""
-    document_source: Optional[str] = None
+    document_source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Identifies where the document was uploaded e.g. \"My App\"."""
-    document_width: Optional[int] = None
+    document_width: int
     """Width of the document in PDF format."""
-    document_height: Optional[int] = None
+    document_height: int
     """Height of the document in PDF format."""
-    document_pages: Optional[int] = None
+    document_pages: int
     """Total pages of the document."""
-    uploaded_on: Optional[str] = None
+    uploaded_on: str
     """The date and time when the document was uploaded."""
-    modified_on: Optional[str] = None
+    modified_on: str
     """The date and time when the document was last modified."""
-    form_fields: Optional[bool] = None
+    form_fields: bool
     """True if document has form fields."""
-    lock_form_fields: Optional[bool] = None
+    lock_form_fields: bool
     """True if locking of form fields with the last signature is enabled."""
-    certify: Optional[UploadDocumentLibraryCertifyResponse] = None
-    template: Optional[UploadDocumentLibraryTemplateResponse] = None
-    package_name: Optional[str] = None
+    certify: Optional[
+        UploadDocumentLibraryCertifyResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    template: Optional[
+        UploadDocumentLibraryTemplateResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    package_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Package name"""
-    metadata: Optional[UploadDocumentMetaInfoDetail] = None
+    metadata: Optional[
+        UploadDocumentMetaInfoDetail | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -220,49 +495,56 @@ class UploadDocument:
     Response for Upload Document
     """
 
-    document_id_2: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "documentId"},
-    )
+    document_id_2: int = dataclass_field(metadata={"wire_name": "documentId"})
     """
     This property is retained for backward compatibility and will be removed in
     later versions. Use document_id instead.
     """
-    documentid: Optional[int] = None
+    documentid: int
     """
     The document ID to be used later to share, download and get status of the
     document. will be removed later document_id will be used
     """
-    document_id: Optional[int] = None
+    document_id: int
     """
     The document ID to be used later to share, download and get status of the
     document.
     """
-    document_name: Optional[str] = None
+    document_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the document."""
-    document_order: Optional[int] = None
+    document_order: int
     """Document order in package"""
-    document_type: Optional[str] = None
+    document_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Type of the document e.g. \"PDF\"."""
-    document_source: Optional[str] = None
+    document_source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Identifies where the document was uploaded e.g. \"My App\"."""
-    document_width: Optional[int] = None
+    document_width: int
     """Width of the document in PDF format."""
-    document_height: Optional[int] = None
+    document_height: int
     """Height of the document in PDF format."""
-    document_pages: Optional[int] = None
+    document_pages: int
     """Total pages of the document."""
-    uploaded_on: Optional[str] = None
+    uploaded_on: str
     """The date and time when the document was uploaded."""
-    modified_on: Optional[str] = None
+    modified_on: str
     """The date and time when the document was last modified."""
-    lock_form_fields: Optional[bool] = None
+    lock_form_fields: bool
     """True if locking of form fields with the last signature is enabled."""
-    certify: Optional[CertifyPermissionResponse] = None
-    document_size: Optional[int] = None
+    certify: Optional[
+        CertifyPermissionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    document_size: int
     """Uploaded document size in bytes"""
-    metadata: Optional[UploadDocumentMetaInfoDetail] = None
-    package_name: Optional[str] = None
+    metadata: Optional[
+        UploadDocumentMetaInfoDetail | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    package_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The document package name"""
 
 
@@ -272,12 +554,27 @@ class EnterpriseAccessResponse:
     Response for Get Workflow User Authentication (Document Opening)  of Enterprise Package
     """
 
-    authentication: Optional[EnterpriseAuthenticationResponse] = None
-    authentication_signing: Optional[EnterpriseAuthenticationSigningResponse] = None
-    access_duration: Optional[PermissionAccessDurationResponse] = None
+    authentication: Optional[
+        EnterpriseAuthenticationResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    authentication_signing: Optional[
+        EnterpriseAuthenticationSigningResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    access_duration: Optional[
+        PermissionAccessDurationResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
-FieldsAutoAssignFieldInput = List["AssignFieldRequest"]
+FieldsAutoAssignFieldInput = List["AssignFieldRequest | Mapping[str, Any]"]
 
 
 @dataclass
@@ -286,7 +583,7 @@ class AutoPlaceFieldsResponse:
     Response for AutoPlace Fields
     """
 
-    field_name: Optional[str] = None
+    field_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the field that was auto generated by the API."""
 
 
@@ -296,21 +593,91 @@ class FieldsResponse:
     Response for Get Document Fields
     """
 
-    signature: Optional[List[DigitalSignatureFieldResponse]] = None
+    signature: Optional[
+        List[DigitalSignatureFieldResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """A list of all digital signatures in the document."""
-    hand_signature: Optional[List[HandSignatureFieldResponse]] = None
-    electronic_signature: Optional[List[ElectronicSignatureFieldResponse]] = None
-    initials: Optional[List[InitialFieldResponse]] = None
-    in_person_signature: Optional[List[Dict[str, Any]]] = None
-    text: Optional[List[TextFieldResponse]] = None
-    radio: Optional[List[RadioFieldResponse]] = None
-    checkbox: Optional[List[CheckboxFieldResponse]] = None
-    dropdown: Optional[List[DropdownFieldResponse]] = None
-    listbox: Optional[List[ListBoxFieldResponse]] = None
-    qrcode: Optional[List[QrCodeResponse]] = None
-    attachment: Optional[List[AttachmentFieldResponse]] = None
-    comment: Optional[List[CommentFieldResponse]] = None
-    unique_identifier: Optional[List[UniqueIdentifierFieldResponse]] = None
+    hand_signature: Optional[
+        List[HandSignatureFieldResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    electronic_signature: Optional[
+        List[ElectronicSignatureFieldResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    initials: Optional[
+        List[InitialFieldResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    in_person_signature: Optional[
+        List[Dict[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    text: Optional[
+        List[TextFieldResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    radio: Optional[
+        List[RadioFieldResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    checkbox: Optional[
+        List[CheckboxFieldResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    dropdown: Optional[
+        List[DropdownFieldResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    listbox: Optional[
+        List[ListBoxFieldResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    qrcode: Optional[
+        List[QrCodeResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    attachment: Optional[
+        List[AttachmentFieldResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    comment: Optional[
+        List[CommentFieldResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    unique_identifier: Optional[
+        List[UniqueIdentifierFieldResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -319,14 +686,14 @@ class AddPackageResponse:
     Response for Add Package
     """
 
-    package_id: Optional[int] = None
+    package_id: int
     """
     The package ID to be used later to share, download and get status of the
     document.
     """
-    workflow_mode: Optional[str] = None
+    workflow_mode: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The workflow mode that is set while adding package."""
-    workflow_type: Optional[str] = None
+    workflow_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Type of the workflow. Possible values are \"SERIAL\", \"PARALLEL\",
     \"INDIVIDUAL\" and \"CUSTOM\".
@@ -339,7 +706,7 @@ class PackageDownloadPackageBytesResponse:
     Response for Download Package
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -352,48 +719,63 @@ class GetPackagesResponse:
     Response for Get Packages
     """
 
-    package_id: Optional[int] = None
+    package_id: int
     """Package ID of the document package."""
-    package_name: Optional[str] = None
+    package_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the document package."""
-    package_owner: Optional[str] = None
+    package_owner: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address of the document package owner."""
-    owner_name: Optional[str] = None
+    owner_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the document package owner."""
-    shared_package: Optional[bool] = None
+    shared_package: bool
     """Shared Package"""
-    gatekeeper_package: Optional[bool] = None
+    gatekeeper_package: bool
     """Gatekeeper Package"""
-    package_status: Optional[str] = None
+    package_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Document status for the current logged in user. Possible values are
     \"DRAFT\", \"INPROGRESS\", \"PENDING\", \"DECLINED\", or \"COMPLETED\".
     """
-    extension: Optional[str] = None
+    extension: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Document Package extension"""
-    workflow_mode: Optional[str] = None
+    workflow_mode: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Workflow Mode"""
-    folder: Optional[str] = None
+    folder: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the folder which contains the document package."""
-    folder_id: Optional[int] = None
+    folder_id: int
     """Id of the folder which contains the document package."""
-    unread: Optional[bool] = None
+    unread: bool
     """True, if the document is not read by the recipient yet."""
-    next_signer: Optional[str] = None
+    next_signer: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the next signer if the document is in shared state."""
-    next_signer_email: Optional[List[NextSignerEmail]] = None
+    next_signer_email: Optional[
+        List[NextSignerEmail | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """
     An object containing next signers username and email address. In case of
     group signer it will have a list of email addresses of all the group
     members.
     """
-    uploaded_on: Optional[str] = None
+    uploaded_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date and time when the document was uploaded."""
-    modified_on: Optional[str] = None
+    modified_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date and time when the document was last modified."""
-    access_duration: Optional[RecipientAccessDurationDetails] = None
-    decline: Optional[RecipientDeclineDetails] = None
-    size: Optional[int] = None
+    access_duration: Optional[
+        RecipientAccessDurationDetails | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    decline: Optional[
+        RecipientDeclineDetails | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    size: int
     """Size of the document in bytes."""
 
 
@@ -403,20 +785,25 @@ class GetPackageDetailsResponse:
     Response for Get Package Details
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the document package."""
-    owner: Optional[DocumentOwner] = None
-    read_only: Optional[bool] = None
+    owner: Optional[DocumentOwner | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    read_only: bool
     """
     True if the applied template is read only. User will not be able to make
     any changes if a read only template is applied.
     """
-    document_status: Optional[str] = None
+    document_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Document status for the current logged in user. Possible values are
     \"DRAFT\", \"INPROGRESS\", \"PENDING\", \"DECLINED\", or \"COMPLETED\".
     """
-    documents: Optional[List[DocumentDetails]] = None
+    documents: Optional[
+        List[DocumentDetails | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -425,11 +812,11 @@ class AddQrCodeResponse:
     Response for Add QR Code
     """
 
-    data: Optional[str] = None
+    data: str
     """QR Code generated data"""
-    field_name: Optional[str] = None
+    field_name: str
     """Name of the field created in the document."""
-    value: Optional[str] = None
+    value: str
     """Value will be the base64 of QrCode image"""
 
 
@@ -439,7 +826,7 @@ class UpdateQrCodeResponse:
     Response for Update QR Code
     """
 
-    value: Optional[str] = None
+    value: str
     """Value will be the base64 of QrCode image"""
 
 
@@ -449,28 +836,38 @@ class TemplateResponse:
     Response for Get Templates
     """
 
-    template_id: Optional[int] = None
+    template_id: int
     """Id of the template is returned here             """
-    template_name: Optional[str] = None
+    template_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the template."""
-    template_public: Optional[bool] = None
+    template_public: bool
     """
     Response is \"true\" if enterprise template is marked as public. Otherwise
     \"false\" would be returned
     """
-    read_only: Optional[bool] = None
+    read_only: bool
     """
     Response of \"true\" if the template is read only, and user cannot make any
     changes to the workflow after applying this template. Otherwise \"false\".
     """
-    created_on: Optional[str] = None
+    created_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date and time when the template was created"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of the template"""
-    enterprise: Optional[bool] = None
+    enterprise: bool
     """True, if user belong to an enterprise."""
-    documents: Optional[List[TemplateDocumentResponse]] = None
-    smart_form: Optional[TemplateSmartFormResponse] = None
+    documents: Optional[
+        List[TemplateDocumentResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    smart_form: Optional[
+        TemplateSmartFormResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -479,9 +876,9 @@ class SignatureFieldResponse:
     Response for Add Digital Signature Field
     """
 
-    field_name: Optional[str] = None
+    field_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the field created in the document."""
-    created_on: Optional[str] = None
+    created_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date and time of field creation."""
 
 
@@ -491,8 +888,8 @@ class BulkSignResponse:
     Response for Bulk Sign Packages
     """
 
-    status: Optional[str] = None
-    transaction_id: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
+    transaction_id: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -501,8 +898,13 @@ class BulkSignStatusResponse:
     Response for Bulk Signing Status
     """
 
-    status: Optional[str] = None
-    packages: Optional[List[BulkSignPackagesStatus]] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
+    packages: Optional[
+        List[BulkSignPackagesStatus | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -511,18 +913,23 @@ class SignDocumentResponse:
     Response for Sign Document
     """
 
-    field_name: Optional[str] = None
+    field_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the field for which the verification was requested."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Returns the status of signature field. Values are SIGNED, PENDING. Status
     helps in eIDAS enabled remote authorized signing. If sign request is sent
     to mobile the status is pending.
     """
-    transaction_id: Optional[str] = None
+    transaction_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """This parameter is used while RAS signing"""
-    verification: Optional[VerificationResponse] = None
-    authentication_access_token: Optional[str] = None
+    verification: Optional[
+        VerificationResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    authentication_access_token: Optional[str] = dataclass_field(default=None, kw_only=True)
     """It will contain the OIDC id_token when user is authenticated via OIDC"""
 
 
@@ -532,26 +939,36 @@ class EnterpriseTemplateResponse:
     Response for Get Enterprise Templates
     """
 
-    id: Optional[int] = None
+    id: int
     """Id of the template             """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the template."""
-    public: Optional[bool] = None
+    public: bool
     """
     Response is \"true\" if enterprise template is marked as public. Otherwise
     \"false\" would be returned
     """
-    read_only: Optional[bool] = None
+    read_only: bool
     """
     Response of \"true\" if the template is read only, and user cannot make any
     changes to the workflow after applying this template. Otherwise \"false\".
     """
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of the template"""
-    created_on: Optional[str] = None
+    created_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date and time when the template was created"""
-    roles: Optional[List[EnterpriseTemplateRole]] = None
-    documents: Optional[List[TemplateDocumentResponse]] = None
+    roles: Optional[
+        List[EnterpriseTemplateRole | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    documents: Optional[
+        List[TemplateDocumentResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -560,7 +977,7 @@ class WorkflowEvidenceReportDownloadBytesResponse:
     Response for Get Process Evidence Report
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -573,43 +990,63 @@ class WorkflowDetailsResponse:
     Response for Get Workflow Details
     """
 
-    package_id: Optional[int] = None
+    package_id: int
     """Package ID of the document package."""
-    package_name: Optional[str] = None
+    package_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the document package."""
-    shared_package: Optional[bool] = None
+    shared_package: bool
     """shared package"""
-    package_owner: Optional[str] = None
+    package_owner: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address of the document package owner."""
-    owner_name: Optional[str] = None
+    owner_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the document package owner."""
-    package_status: Optional[str] = None
+    package_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Document status for the current logged in user. Possible values are
     \"DRAFT\", \"INPROGRESS\", \"PENDING\", \"DECLINED\", \"APPROVED\",
     \"UPDATED\" or \"COMPLETED\".
     """
-    folder: Optional[str] = None
+    folder: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the folder which contains the document package."""
-    folder_id: Optional[int] = None
+    folder_id: int
     """ID of the folder which contains the document package."""
-    gatekeeper: Optional[bool] = None
-    next_signer: Optional[str] = None
+    gatekeeper: bool
+    next_signer: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the next signer if the document is in shared state."""
-    next_signer_email: Optional[List[NextSignerEmail]] = None
+    next_signer_email: Optional[
+        List[NextSignerEmail | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """
     An object containing next signers username and email address. In case of
     group signer it will have a list of email addresses of all the group
     members.
     """
-    uploaded_on: Optional[str] = None
+    uploaded_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date and time when the document was uploaded."""
-    modified_on: Optional[str] = None
+    modified_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date and time when the document was last modified."""
-    workflow: Optional[WorkflowResponse] = None
-    documents: Optional[List[WorkflowDocumentsResponse]] = None
+    workflow: Optional[
+        WorkflowResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    documents: Optional[
+        List[WorkflowDocumentsResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of documents that are uploaded in the package."""
-    users: Optional[List[WorkflowUserResponse]] = None
+    users: Optional[
+        List[WorkflowUserResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Recipients list for the workflow."""
 
 
@@ -619,25 +1056,40 @@ class WorkflowHistoryResponse:
     Response for Get Workflow History
     """
 
-    package_id: Optional[int] = None
+    package_id: int
     """ID of the package for which the workflow history is requested."""
-    package_name: Optional[str] = None
-    package_owner: Optional[str] = None
+    package_name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    package_owner: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address of the package owner."""
-    owner_name: Optional[str] = None
+    owner_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the package owner."""
-    package_status: Optional[str] = None
+    package_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Status of the package/document with the current logged in user. Possible
     values are \"DRAFT\", \"INPROGRESS\", \"PENDING\", \"DECLINED\",
     \"APPROVED\", \"UPDATED\" or \"COMPLETED\".
     """
-    next_signer: Optional[str] = None
+    next_signer: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the next recipient."""
-    next_signer_email: Optional[List[NextSignerEmail]] = None
+    next_signer_email: Optional[
+        List[NextSignerEmail | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Object having name and email address of the next recipient."""
-    documents: Optional[List[WorkflowDocumentsResponse]] = None
-    actions: Optional[List[DocumentLogsActions]] = None
+    documents: Optional[
+        List[WorkflowDocumentsResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    actions: Optional[
+        List[DocumentLogsActions | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -646,16 +1098,21 @@ class ReminderResponse:
     Response for Get Workflow Reminder
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if reminders are enabled for the recipient"""
-    frequency: Optional[str] = None
+    frequency: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Reminder Frequency. Possible Values are DAYS | HOURS. """
-    remind_after: Optional[int] = None
+    remind_after: int
     """
     The number of days after which the first reminder would be sent to workflow
     user.
     """
-    repeat: Optional[ReminderRepeat] = None
+    repeat: Optional[
+        ReminderRepeat | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -664,79 +1121,94 @@ class WorkflowRecipient:
     Response for Get Workflow Users
     """
 
-    order: Optional[int] = None
+    order: int
     """Order of the recipient in the workflow."""
-    user_email: Optional[str] = None
+    user_email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address of the recipient if user is not a group."""
-    user_name: Optional[str] = None
+    user_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the recipient if user is not a group."""
-    mobile_number: Optional[str] = None
+    mobile_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Mobile number"""
-    delivery_method: Optional[str] = None
+    delivery_method: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Delivery method of recipient Possible values: EMAIL, SMS, or EMAIL_AND_SMS
     """
-    user_photo_url: Optional[str] = None
+    user_photo_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     API endpoint to access the resource, This will be provided only for main
     signers. e.g it will be null for group/delegator/gatekeeper etc. This URL
     does not make sure that signer image is exist. If image exist it will be
     provided by hitting the defined url otherwise it will be an empty string.
     """
-    group_name: Optional[str] = None
+    group_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Group name of the recipient if recipient is a group."""
-    group_members: Optional[List[GroupMemberResponse]] = None
+    group_members: Optional[
+        List[GroupMemberResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """
     A list of email addresses of the group members if recipient is a group.
     """
-    delegatee: Optional[str] = None
+    delegatee: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Delegatee email address, if recipient is not a group."""
-    delegatee_name: Optional[str] = None
+    delegatee_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the delegatee user, if recipient is not a group."""
-    role: Optional[str] = None
+    role: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Workflow role in which the recipient was added. This role is not the
     enterprise role. Possible values are \"SIGNER\",
     \"REVIEWER\",\"CARBON_COPY\" and \"EDITOR\".
     """
-    reason: Optional[str] = None
+    reason: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Reason provided by the user when declining, approving or submitting a
     document.
     """
-    process_status: Optional[str] = None
+    process_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Document processing status for the recipient. Possible values are
     \"UN_PROCESSED\", \"IN_PROGRESS\", \"SIGNED\", \"REVIEWED\", \"DECLINED\",
     \"EDITED\" or \"INVALID\".
     """
-    processed_on: Optional[str] = None
+    processed_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date and time on which the document was processed."""
-    processed_as: Optional[str] = None
+    processed_as: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     User may processed the field as COLLABORATOR , DELEGATOR, GROUP_MEMBER or
     OWNER.
     """
-    processed_by: Optional[str] = None
+    processed_by: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address of the user who processed the document."""
-    placeholder: Optional[str] = None
+    placeholder: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Placeholder text if the recipient is a placeholder"""
-    signing_order: Optional[int] = None
+    signing_order: int
     """
     Order in which the workflow will be signed by the recipients. This signing
     order is important when workflow type is set to \"CUSTOM\".
     """
-    user_national_id: Optional[str] = None
+    user_national_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     National identity number of the user. This helps to identify user in the
     workflow
     """
-    guest_user: Optional[bool] = None
+    guest_user: bool
     """Gest user"""
-    email_language_code: Optional[str] = None
+    email_language_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """email language code"""
-    electronic_seal: Optional[ElectronicSealRecipient] = None
-    gatekeepers: Optional[WorkflowGatekeeperResponse] = None
+    electronic_seal: Optional[
+        ElectronicSealRecipient | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    gatekeepers: Optional[
+        WorkflowGatekeeperResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -745,21 +1217,31 @@ class WorkflowPermissionResponse:
     Response for Get Workflow User Permissions
     """
 
-    print: Optional[bool] = None
+    print: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True, if printing is allowed for this recipient."""
-    download: Optional[bool] = None
+    download: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True, if download is allowed."""
-    add_text: Optional[bool] = None
+    add_text: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True, if add text annotation on the document is allowed."""
-    change_recipients: Optional[bool] = None
+    change_recipients: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     True, if the recipient on the current order can change other recipients in
     the workflow after workflow is shared.
     """
-    add_attachment: Optional[bool] = None
+    add_attachment: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True, if attachments and merging of PDF documents is allowed."""
-    legal_notice: Optional[PermissionLegalNoticeResponse] = None
-    attachment: Optional[AttachmentPermissionResponse] = None
+    legal_notice: Optional[
+        PermissionLegalNoticeResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    attachment: Optional[
+        AttachmentPermissionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -768,17 +1250,17 @@ class StartWorkflowResponse:
     Response for Share Document Package
     """
 
-    package_id: Optional[int] = None
+    package_id: int
     """
     Package ID of the package just shared. Incase of individual sharing, more
     then one packages are created and shared with the recipients. API returns
     an array of packages along with IDs of newly created documents.
     """
-    documents: Optional[List[int]] = None
+    documents: Optional[List[int]] = dataclass_field(default=None, kw_only=True)
     """Array of document IDs which were part of the package before sharing."""
 
 
-WorkflowWorkflowAddGroupInput = List["WorflowGroupRequest"]
+WorkflowWorkflowAddGroupInput = List["WorflowGroupRequest | Mapping[str, Any]"]
 
 
 @dataclass
@@ -787,13 +1269,23 @@ class CollaboratorGroupResponse:
     Response for Add Groups to Workflow
     """
 
-    permission: Optional[WorkflowPermissionResponse] = None
-    reminder: Optional[ReminderResponse] = None
-    signing_order: Optional[int] = None
+    permission: Optional[
+        WorkflowPermissionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    reminder: Optional[
+        ReminderResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    signing_order: int
     """Signing order"""
 
 
-WorkflowWorkflowAddPlaceholderInput = List["PlaceholderRequest"]
+WorkflowWorkflowAddPlaceholderInput = List["PlaceholderRequest | Mapping[str, Any]"]
 
 
 @dataclass
@@ -802,13 +1294,23 @@ class CollaboratorPlaceholderResponse:
     Response for Add Placeholder to Workflow
     """
 
-    permission: Optional[WorkflowPermissionResponse] = None
-    reminder: Optional[ReminderResponse] = None
-    signing_order: Optional[int] = None
+    permission: Optional[
+        WorkflowPermissionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    reminder: Optional[
+        ReminderResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    signing_order: int
     """Signing order"""
 
 
-WorkflowWorkflowAddUserInput = List["WorflowUserRequest"]
+WorkflowWorkflowAddUserInput = List["WorflowUserRequest | Mapping[str, Any]"]
 
 
 @dataclass
@@ -817,16 +1319,26 @@ class CollaboratorResponse:
     Response for Add Users to Workflow
     """
 
-    user_email: Optional[str] = None
+    user_email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User email"""
-    signing_order: Optional[int] = None
+    signing_order: int
     """Signing order"""
-    guest_user: Optional[bool] = None
+    guest_user: bool
     """Is guest user"""
-    email_language_code: Optional[str] = None
+    email_language_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email language code"""
-    permission: Optional[WorkflowPermissionResponse] = None
-    reminder: Optional[ReminderResponse] = None
+    permission: Optional[
+        WorkflowPermissionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    reminder: Optional[
+        ReminderResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -835,13 +1347,13 @@ class UpdateCollaboratorResponse:
     Response for Update Workflow User
     """
 
-    user_email: Optional[str] = None
+    user_email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User email"""
-    signing_order: Optional[int] = None
+    signing_order: int
     """Signing order"""
-    guest_user: Optional[bool] = None
+    guest_user: bool
     """Is guest user"""
-    email_language_code: Optional[str] = None
+    email_language_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email language code"""
 
 
@@ -851,12 +1363,12 @@ class WorkSpaceResponse:
     Response for Get Shared Space
     """
 
-    id: Optional[int] = None
+    id: int
     """Id of shared space"""
-    name: Optional[str] = None
+    name: str
     """Name of shared space"""
-    owner: Optional[WorkSpaceOwner] = None
-    members: Optional[List[WorkSpaceMembers]] = None
+    owner: WorkSpaceOwner | Mapping[str, Any]
+    members: List[WorkSpaceMembers | Mapping[str, Any]]
     """Members of shared space"""
 
 
@@ -866,12 +1378,12 @@ class ErrorWithDescriptionResponse:
     Definition: ErrorWithDescriptionResponse
     """
 
-    error: Optional[str] = None
+    error: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Error key to identify the error in programming and applications can respond
     based on the different error keys.
     """
-    error_description: Optional[str] = None
+    error_description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Error message against the error key returned. Client applications can
     present this error as it is or send their own error message.
@@ -884,8 +1396,9 @@ class Response:
     Definition: Response
     """
 
-    message: Optional[str] = field(
+    message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Message"},
     )
     """
@@ -901,10 +1414,15 @@ class DetailedResponse:
     Definition: DetailedResponse
     """
 
-    error: Optional[str] = field(default=None, metadata={"wire_name": "Error"})
-    """Custom error code"""
-    message: Optional[str] = field(
+    error: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Error"},
+    )
+    """Custom error code"""
+    message: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Message"},
     )
     """
@@ -920,17 +1438,17 @@ class AuthenticationRequest:
     Definition: AuthenticationRequest
     """
 
-    client_id: Optional[str] = None
+    client_id: str
     """
     Application Name that you have configured in your Enterprise Account when
     configuring the integration options.
     """
-    client_secret: Optional[str] = None
+    client_secret: str
     """
     API Key that you generated in your Enterprise Account when configuring the
     integration options.
     """
-    profile_name: Optional[str] = None
+    profile_name: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -939,8 +1457,8 @@ class ElectronicSealRecipient:
     Definition: ElectronicSealRecipient
     """
 
-    name: Optional[str] = None
-    level_of_assurance: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    level_of_assurance: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -949,14 +1467,24 @@ class PermissionLegalNoticeResponse:
     Definition: PermissionLegalNoticeResponse
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if legal notice is enabled and configured for the recipient."""
-    allowed_notices: Optional[List[LegalNoticeResponse]] = None
+    allowed_notices: Optional[
+        List[LegalNoticeResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """
     List of legal notices allowed to the document owner from which he can
     select one for the recipient.
     """
-    default_notice: Optional[List[LegalNoticeResponse]] = None
+    default_notice: Optional[
+        List[LegalNoticeResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Default or selected legal notice for the recipient."""
 
 
@@ -966,10 +1494,10 @@ class LegalNoticeResponse:
     Definition: LegalNoticeResponse
     """
 
-    legal_notice_id: Optional[int] = None
-    legal_notice_name: Optional[str] = None
+    legal_notice_id: int
+    legal_notice_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """LegalNoticeResponse"""
-    legal_notice_html: Optional[str] = None
+    legal_notice_html: Optional[str] = dataclass_field(default=None, kw_only=True)
     """HTML content of the legal notice."""
 
 
@@ -979,9 +1507,24 @@ class AccessResponse:
     Definition: AccessResponse
     """
 
-    authentication: Optional[AuthenticationResponse] = None
-    authentication_signing: Optional[AuthenticationSigningResponse] = None
-    access_duration: Optional[PermissionAccessDurationResponse] = None
+    authentication: Optional[
+        AuthenticationResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    authentication_signing: Optional[
+        AuthenticationSigningResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    access_duration: Optional[
+        PermissionAccessDurationResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -990,11 +1533,26 @@ class AuthenticationResponse:
     Definition: AuthenticationResponse
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if authentication is enabled for the package."""
-    password: Optional[AccessSecurityPasswordResponse] = None
-    sms_otp: Optional[AccessSecuritySmsOtpResponse] = None
-    totp: Optional[TotpPermissionResponse] = None
+    password: Optional[
+        AccessSecurityPasswordResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    sms_otp: Optional[
+        AccessSecuritySmsOtpResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    totp: Optional[
+        TotpPermissionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1003,9 +1561,9 @@ class AccessSecurityPasswordResponse:
     Definition: AccessSecurityPasswordResponse
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if password authentication is enabled for the package."""
-    user_password: Optional[str] = None
+    user_password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Authentication password for document access."""
 
 
@@ -1015,16 +1573,16 @@ class AccessSecuritySmsOtpResponse:
     Definition: AccessSecuritySmsOtpResponse
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if SMS OTP authentication is enabled for the package."""
-    otp_length: Optional[int] = None
-    retry_duration: Optional[int] = None
-    mobile_number: Optional[str] = None
+    otp_length: int
+    retry_duration: int
+    mobile_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Mobile number of the recipient. Mobile number is needed to send the SMS to
     the recipient for the authentication.
     """
-    methods: Optional[List[str]] = None
+    methods: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Allowed OTP Methods"""
 
 
@@ -1034,7 +1592,7 @@ class TotpPermissionResponse:
     Definition: TotpPermissionResponse
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """Enabled"""
 
 
@@ -1044,10 +1602,20 @@ class AuthenticationSigningResponse:
     Definition: AuthenticationSigningResponse
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if authentication is enabled for the package."""
-    sms_otp: Optional[AuthenticationSigningSmsOtpResponse] = None
-    totp: Optional[TotpPermissionResponse] = None
+    sms_otp: Optional[
+        AuthenticationSigningSmsOtpResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    totp: Optional[
+        TotpPermissionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1056,14 +1624,14 @@ class AuthenticationSigningSmsOtpResponse:
     Definition: AuthenticationSigningSmsOtpResponse
     """
 
-    otp_length: Optional[int] = None
-    retry_duration: Optional[int] = None
-    mobile_number: Optional[str] = None
+    otp_length: int
+    retry_duration: int
+    mobile_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Mobile number of the recipient. Mobile number is needed to send the SMS to
     the recipient for the authentication.
     """
-    methods: Optional[List[str]] = None
+    methods: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Allowed OTP Methods"""
 
 
@@ -1073,10 +1641,20 @@ class PermissionAccessDurationResponse:
     Definition: PermissionAccessDurationResponse
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if access duration security is enabled for the package."""
-    duration_by_date: Optional[AccessDurationByDateResponse] = None
-    duration_by_days: Optional[AccessDurationByDaysResponse] = None
+    duration_by_date: Optional[
+        AccessDurationByDateResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    duration_by_days: Optional[
+        AccessDurationByDaysResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1085,10 +1663,15 @@ class AccessDurationByDateResponse:
     Definition: AccessDurationByDateResponse
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True if access security is enabled for a duration by date and time."""
-    accessible: Optional[bool] = None
-    duration: Optional[DurationByDateResponse] = None
+    accessible: bool
+    duration: Optional[
+        DurationByDateResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1097,11 +1680,11 @@ class DurationByDateResponse:
     Definition: DurationByDateResponse
     """
 
-    start_date_time: Optional[str] = None
+    start_date_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Date and time from where the package will be accessible to the recipient.
     """
-    end_date_time: Optional[str] = None
+    end_date_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Date and time after which the package will not be accessible to the
     recipient.
@@ -1114,10 +1697,15 @@ class AccessDurationByDaysResponse:
     Definition: AccessDurationByDaysResponse
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if access security is enabled for a duration by number of days."""
-    accessible: Optional[bool] = None
-    duration: Optional[DurationByDaysResponse] = None
+    accessible: bool
+    duration: Optional[
+        DurationByDaysResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1126,7 +1714,7 @@ class DurationByDaysResponse:
     Definition: DurationByDaysResponse
     """
 
-    total_days: Optional[int] = None
+    total_days: int
     """
     Total number of days for which the package will be accessible to the
     recipient after receiving the package.
@@ -1139,16 +1727,16 @@ class ReminderRepeat:
     Definition: ReminderRepeat
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if subsequent reminders are enabled."""
-    frequency: Optional[str] = None
+    frequency: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Repeat Reminder Frequency. Possible Values are DAYS | HOURS. """
-    keep_reminding_after: Optional[int] = None
+    keep_reminding_after: int
     """
     The number of days after which the subsequent reminders would be sent to
     workflow recipient.
     """
-    total_reminders: Optional[int] = None
+    total_reminders: int
     """The number of subsequent reminders to be sent to workflow user."""
 
 
@@ -1158,14 +1746,19 @@ class AccessUpdateRequest:
     Definition: AccessUpdateRequest
     """
 
-    apply_to_all: Optional[bool] = None
+    apply_to_all: bool
     """
     True, if the access security or authentications are to be applied on all
     the recipients in the workflow.
     """
-    authentication: Optional[AccessAuthentication] = None
-    authentication_signing: Optional[SigningAuthentication] = None
-    access_duration: Optional[PermissionAccessDuration] = None
+    authentication: AccessAuthentication | Mapping[str, Any]
+    authentication_signing: Optional[
+        SigningAuthentication | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    access_duration: PermissionAccessDuration | Mapping[str, Any]
 
 
 @dataclass
@@ -1174,11 +1767,26 @@ class AccessAuthentication:
     Definition: AccessAuthentication
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if authentication is enabled for the package."""
-    password: Optional[AuthenticationPassword] = None
-    sms_otp: Optional[AuthenticationSmsOtp] = None
-    totp: Optional[TotpPermissionResponse] = None
+    password: Optional[
+        AuthenticationPassword | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    sms_otp: Optional[
+        AuthenticationSmsOtp | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    totp: Optional[
+        TotpPermissionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1187,9 +1795,9 @@ class AuthenticationPassword:
     Definition: AuthenticationPassword
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if password authentication is enabled for the package."""
-    user_password: Optional[str] = None
+    user_password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Password string if password field is enabled. If a password is already set
     and owner do not wish to change it, remove the field from the response, or
@@ -1203,9 +1811,9 @@ class AuthenticationSmsOtp:
     Definition: AuthenticationSmsOtp
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if SMS OTP authentication is enabled for the package."""
-    mobile_number: Optional[str] = None
+    mobile_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Mobile number of the recipient. Mobile number is needed to send the SMS to
     the recipient for the authentication.
@@ -1218,10 +1826,20 @@ class SigningAuthentication:
     Definition: SigningAuthentication
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if authentication is enabled for the package."""
-    sms_otp: Optional[AuthenticationSigningSmsOtp] = None
-    totp: Optional[TotpPermissionResponse] = None
+    sms_otp: Optional[
+        AuthenticationSigningSmsOtp | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    totp: Optional[
+        TotpPermissionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1230,7 +1848,7 @@ class AuthenticationSigningSmsOtp:
     Definition: AuthenticationSigningSmsOtp
     """
 
-    mobile_number: Optional[str] = None
+    mobile_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Mobile number of the recipient. Mobile number is needed to send the SMS to
     the recipient for the authentication.
@@ -1243,10 +1861,20 @@ class PermissionAccessDuration:
     Definition: PermissionAccessDuration
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if access duration security is enabled for the package."""
-    duration_by_date: Optional[AccessDurationByDate] = None
-    duration_by_days: Optional[AccessDurationByDays] = None
+    duration_by_date: Optional[
+        AccessDurationByDate | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    duration_by_days: Optional[
+        AccessDurationByDays | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1255,9 +1883,14 @@ class AccessDurationByDate:
     Definition: AccessDurationByDate
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True if access security is enabled for a duration by date and time."""
-    duration: Optional[DurationByDate] = None
+    duration: Optional[
+        DurationByDate | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1266,11 +1899,11 @@ class DurationByDate:
     Definition: DurationByDate
     """
 
-    start_date_time: Optional[str] = None
+    start_date_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Date and time from where the package will be accessible to the recipient.
     """
-    end_date_time: Optional[str] = None
+    end_date_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Date and time after which the package will not be accessible to the
     recipient.
@@ -1283,9 +1916,14 @@ class AccessDurationByDays:
     Definition: AccessDurationByDays
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if access security is enabled for a duration by number of days."""
-    duration: Optional[DurationByDays] = None
+    duration: Optional[
+        DurationByDays | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1294,7 +1932,7 @@ class DurationByDays:
     Definition: DurationByDays
     """
 
-    total_days: Optional[int] = None
+    total_days: int
     """
     Total number of days for which the package will be accessible to the
     recipient after receiving the package.
@@ -1307,23 +1945,28 @@ class QrCodeRequest:
     Definition: QrCodeRequest
     """
 
-    page_no: Optional[int] = None
+    page_no: int
     """Page number on which the field is to be created."""
-    field_name: Optional[str] = None
+    field_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Name of the provided field that is to be added. If not provided, system
     will assign an unique auto generated name to the field.
     """
-    dimensions: Optional[FieldDimension] = None
-    data: Optional[str] = None
+    dimensions: FieldDimension | Mapping[str, Any]
+    data: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The plain text data to be encoded in the QR code. Default is URL generated
     to access the related document. e.g.
     {base_url}/document/{document_unique_id}
     """
-    options: Optional[QrCodeOptions] = None
-    color: Optional[QrCodeColor] = None
-    logo: Optional[QrCodeLogo] = None
+    options: Optional[
+        QrCodeOptions | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    color: Optional[QrCodeColor | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    logo: Optional[QrCodeLogo | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1332,13 +1975,13 @@ class FieldDimension:
     Definition: FieldDimension
     """
 
-    x: Optional[float] = None
+    x: float
     """Left location of the field in pixel."""
-    y: Optional[float] = None
+    y: float
     """Top location of the field in pixel."""
-    width: Optional[float] = None
+    width: float
     """Width of the field in pixel."""
-    height: Optional[float] = None
+    height: float
     """Height of the field in pixel."""
 
 
@@ -1348,15 +1991,15 @@ class QrCodeOptions:
     Definition: QrCodeOptions
     """
 
-    error_correction_level: Optional[ECCLevelAPI] = None
-    encoding: Optional[EciModeAPI] = None
-    pixels_per_module: Optional[int] = None
+    error_correction_level: ECCLevelAPI
+    encoding: EciModeAPI
+    pixels_per_module: int
     """
     Specifies the number of pixels per module in the QR code. A higher number
     results in a larger and more detailed QR code. Default is \"20\" Possible
     Values are : 20 | 30 | 40 | 50
     """
-    add_margins: Optional[bool] = None
+    add_margins: bool
     """
     Indicates whether quiet zones (margins) should be drawn around the QR code.
     Quiet zones help scanners to detect and decode the QR code more accurately.
@@ -1376,12 +2019,12 @@ class QrCodeColor:
     Definition: QrCodeColor
     """
 
-    dots: Optional[str] = None
+    dots: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Represents the dark color used for the dots in the QR code. Default is
     \"black\". e.g. \"#000000\"
     """
-    background: Optional[str] = None
+    background: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Represents the light color used for the background of the QR code. Default
     is \"white\". e.g. \"#ffffff\"
@@ -1394,14 +2037,14 @@ class QrCodeLogo:
     Definition: QrCodeLogo
     """
 
-    base64: Optional[str] = None
+    base64: Optional[str] = dataclass_field(default=None, kw_only=True)
     """An optional icon (base64) to place in the center of the QR code."""
-    hide_background_dots: Optional[bool] = None
+    hide_background_dots: bool
     """
     The background color behind the icon, if an icon is provided. If color is
     not provided transparent background is implemented.
     """
-    size: Optional[int] = None
+    size: int
     """
     The size of the icon as a percentage of the QR code's size, if an icon is
     provided. Default is \"15\". Possible Values are : 10 | 15 | 20 | 25 | 30 |
@@ -1424,10 +2067,20 @@ class SignatureFieldAuthentication:
     Definition: SignatureFieldAuthentication
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if authentication is enabled for the field.  False otherwise."""
-    otp: Optional[SignatureFieldAuthenticationOtp] = None
-    totp: Optional[SignatureFieldAuthenticationTotp] = None
+    otp: Optional[
+        SignatureFieldAuthenticationOtp | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    totp: Optional[
+        SignatureFieldAuthenticationTotp | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1436,12 +2089,12 @@ class SignatureFieldAuthenticationOtp:
     Definition: SignatureFieldAuthenticationOtp
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """
     True, if SMS/Email OTP authentication is enabled for the field. False
     otherwise.
     """
-    mobile_number: Optional[str] = None
+    mobile_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Mobile number of the recipient to which the field is assigned."""
 
 
@@ -1451,7 +2104,7 @@ class SignatureFieldAuthenticationTotp:
     Definition: SignatureFieldAuthenticationTotp
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """
     True, if TOTP authentication is enabled for the field. False otherwise.
     """
@@ -1463,22 +2116,27 @@ class UpdateQrCodeRequest:
     Definition: UpdateQrCodeRequest
     """
 
-    field_name: Optional[str] = None
+    field_name: str
     """Current name of the field, that is to be updated."""
-    renamed_as: Optional[str] = None
+    renamed_as: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Updated name of the field if renaming is intended."""
-    page_no: Optional[int] = None
+    page_no: int
     """Page number for which field is need to be updated"""
-    dimensions: Optional[FieldDimension] = None
-    data: Optional[str] = None
+    dimensions: FieldDimension | Mapping[str, Any]
+    data: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The plain text data to be encoded in the QR code. Default is URL generated
     to access the related document. e.g.
     {base_url}/document/{document_unique_id}
     """
-    options: Optional[QrCodeOptions] = None
-    color: Optional[QrCodeColor] = None
-    logo: Optional[QrCodeLogo] = None
+    options: Optional[
+        QrCodeOptions | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    color: Optional[QrCodeColor | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    logo: Optional[QrCodeLogo | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1487,8 +2145,13 @@ class FieldValidationValue:
     Definition: FieldValidationValue
     """
 
-    required: Optional[bool] = None
-    rules: Optional[List[FieldValidationValueRule]] = None
+    required: bool
+    rules: Optional[
+        List[FieldValidationValueRule | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1497,12 +2160,16 @@ class FieldValidationValueRule:
     Definition: FieldValidationValueRule
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """
     Specifies the type of validation rule, which is currently always set to
     EQUALS for text field.
     """
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Represents the value used for validation."""
 
 
@@ -1512,44 +2179,49 @@ class PostProcessResponse:
     Definition: PostProcessResponse
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if post processing is enabled for the package."""
-    contacts: Optional[List[str]] = None
+    contacts: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     List of email addresses to which the email will be sent when the workflow
     is completed.
     """
-    recipients: Optional[List[PostProcessRecipientResponse]] = None
+    recipients: Optional[
+        List[PostProcessRecipientResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """
     List of the name and email addresses to whom the emails are sent when the
     post processing is executed after the workflow completion.
     """
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Any custom string message that is to be sent to the contacts when the
     workflow is completed.
     """
-    google_drive: Optional[bool] = None
+    google_drive: bool
     """
     True, if google drive uploading is turned on for the package. Documents
     will be uploaded to google drive when the workflow is completed.
     """
-    one_drive: Optional[bool] = None
+    one_drive: bool
     """
     True, if one drive uploading is turned on for the package. Documents will
     be uploaded to one drive when the workflow is completed.
     """
-    dropbox: Optional[bool] = None
+    dropbox: bool
     """
     True, if dropbox uploading is turned on for the package. Documents will be
     uploaded to google drive when the workflow is completed.
     """
-    workflow_recipients: Optional[bool] = None
+    workflow_recipients: bool
     """
     True, if workflow completion report is to be sent to all recipients of the
     workflow when post processing is executed. Default value is false.
     """
-    document_processing_report: Optional[bool] = None
+    document_processing_report: bool
     """
     True, if Send the document processing report (XML) is to be enabled to for
     the workflow
@@ -1562,8 +2234,8 @@ class PostProcessRecipientResponse:
     Definition: PostProcessRecipientResponse
     """
 
-    name: Optional[str] = None
-    email: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1572,14 +2244,14 @@ class CertifyResponse:
     Definition: CertifyResponse
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if certify signature settings are enabled for the document."""
-    allowed_permissions: Optional[List[str]] = None
+    allowed_permissions: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     Certify permission level set for the document with certify signature
     settings.
     """
-    default_permission: Optional[str] = None
+    default_permission: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1588,9 +2260,9 @@ class GroupMemberResponse:
     Definition: GroupMemberResponse
     """
 
-    user_email: Optional[str] = None
+    user_email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address of the group member"""
-    user_name: Optional[str] = None
+    user_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User name of the group member"""
 
 
@@ -1600,7 +2272,7 @@ class AttachmentPermissionResponse:
     Definition: AttachmentPermissionResponse
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """Enabled"""
 
 
@@ -1616,8 +2288,8 @@ class PostProcessRecipientRequest:
     Definition: PostProcessRecipientRequest
     """
 
-    name: Optional[str] = None
-    email: Optional[str] = None
+    name: str
+    email: str
 
 
 @dataclass
@@ -1626,8 +2298,13 @@ class UpdateCertifyPolicyRequest:
     Definition: UpdateCertifyPolicyRequest
     """
 
-    certify: Optional[CertifyPolicyRequest] = None
-    lock_form_fields: Optional[bool] = None
+    certify: Optional[
+        CertifyPolicyRequest | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    lock_form_fields: bool
     """
     True if form fields are to be locked after the last signature on the
     current document.
@@ -1640,9 +2317,9 @@ class CertifyPolicyRequest:
     Definition: CertifyPolicyRequest
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True if certify settings are to be enabled for the document."""
-    permission: Optional[CertifyPermission] = None
+    permission: CertifyPermission
 
 
 CertifyPermission = Literal[
@@ -1658,7 +2335,7 @@ class DeleteDocumentFieldRequest:
     Definition: DeleteDocumentFieldRequest
     """
 
-    field_name: Optional[str] = None
+    field_name: str
     """Name of the field to be deleted."""
 
 
@@ -1688,9 +2365,9 @@ class EnterpriseTemplateRole:
     Definition: EnterpriseTemplateRole
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the enterprise role assigned to the user."""
-    id: Optional[int] = None
+    id: int
     """Id of the enterprise role assigned to the user."""
 
 
@@ -1700,9 +2377,9 @@ class TemplateDocumentResponse:
     Definition: TemplateDocumentResponse
     """
 
-    id: Optional[int] = None
+    id: int
     """Id of the template document             """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the template document."""
 
 
@@ -1721,9 +2398,9 @@ class NextSignerEmail:
     Definition: Next_signer_email
     """
 
-    user_email: Optional[str] = None
+    user_email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address of the next signer."""
-    user_name: Optional[str] = None
+    user_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the next signer."""
 
 
@@ -1733,7 +2410,12 @@ class WorkflowGatekeeperResponse:
     Definition: WorkflowGatekeeperResponse
     """
 
-    emails: Optional[List[WorkflowGatekeeperUserResponse]] = None
+    emails: Optional[
+        List[WorkflowGatekeeperUserResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Getekeepers"""
 
 
@@ -1743,7 +2425,7 @@ class WorkflowGatekeeperUserResponse:
     Definition: WorkflowGatekeeperUserResponse
     """
 
-    user_email: Optional[str] = None
+    user_email: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1752,11 +2434,26 @@ class EnterpriseAuthenticationResponse:
     Definition: EnterpriseAuthenticationResponse
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if authentication is enabled for the package."""
-    password: Optional[AccessSecurityPasswordResponse] = None
-    sms_otp: Optional[EnterpriseAccessSecuritySmsOtpResponse] = None
-    totp: Optional[TotpPermissionResponse] = None
+    password: Optional[
+        AccessSecurityPasswordResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    sms_otp: Optional[
+        EnterpriseAccessSecuritySmsOtpResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    totp: Optional[
+        TotpPermissionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1765,11 +2462,11 @@ class EnterpriseAccessSecuritySmsOtpResponse:
     Definition: EnterpriseAccessSecuritySmsOtpResponse
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if SMS OTP authentication is enabled for the package."""
-    otp_length: Optional[int] = None
-    retry_duration: Optional[int] = None
-    mobile_number: Optional[str] = None
+    otp_length: int
+    retry_duration: int
+    mobile_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Mobile number of the recipient. Mobile number is needed to send the SMS to
     the recipient for the authentication.
@@ -1782,10 +2479,20 @@ class EnterpriseAuthenticationSigningResponse:
     Definition: EnterpriseAuthenticationSigningResponse
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if authentication is enabled for the package."""
-    sms_otp: Optional[EnterpriseAuthenticationSigningSmsOtpResponse] = None
-    totp: Optional[TotpPermissionResponse] = None
+    sms_otp: Optional[
+        EnterpriseAuthenticationSigningSmsOtpResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    totp: Optional[
+        TotpPermissionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1794,9 +2501,9 @@ class EnterpriseAuthenticationSigningSmsOtpResponse:
     Definition: EnterpriseAuthenticationSigningSmsOtpResponse
     """
 
-    otp_length: Optional[int] = None
-    retry_duration: Optional[int] = None
-    mobile_number: Optional[str] = None
+    otp_length: int
+    retry_duration: int
+    mobile_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Mobile number of the recipient. Mobile number is needed to send the SMS to
     the recipient for the authentication.
@@ -1809,9 +2516,9 @@ class DocumentOwner:
     Definition: DocumentOwner
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the document package owner."""
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email of the document package owner."""
 
 
@@ -1821,19 +2528,23 @@ class DocumentDetails:
     Definition: DocumentDetails
     """
 
-    id: Optional[int] = None
+    id: int
     """ID of the newly created document."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the document."""
-    uploaded_on: Optional[str] = None
+    uploaded_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date and time when the document was uploaded."""
-    modified_on: Optional[str] = None
+    modified_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date and time when the document was last modified."""
-    size: Optional[int] = None
+    size: int
     """Size of the document in bytes."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """Type of the document e.g. \"PDF\"."""
-    source: Optional[str] = None
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Identifies where the document was uploaded e.g. \"My App\"."""
 
 
@@ -1843,9 +2554,9 @@ class ChangeServicePlanRequest:
     Definition: ChangeServicePlanRequest
     """
 
-    user_email: Optional[str] = None
+    user_email: str
     """Email address of the account owner."""
-    service_plan: Optional[str] = None
+    service_plan: str
     """New Service Plan name, which is to be assigned to the user."""
 
 
@@ -1855,9 +2566,9 @@ class TemplateSmartFormResponse:
     Definition: TemplateSmartFormResponse
     """
 
-    active_count: Optional[int] = None
+    active_count: int
     """Active count             """
-    total_count: Optional[int] = None
+    total_count: int
     """Total"""
 
 
@@ -1867,14 +2578,14 @@ class ServicePlanLevelOfAssurance:
     Definition: ServicePlanLevelOfAssurance
     """
 
-    allowed: Optional[List[str]] = None
+    allowed: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     Allowed level of assurances, Possible values are:
     ADVANCED_ELECTRONIC_SIGNATURE, HIGH_TRUST_ADVANCED,
     QUALIFIED_ELECTRONIC_SIGNATURE, ELECTRONIC_SEAL, ADVANCED_ELECTRONIC_SEAL,
     QUALIFIED_ELECTRONIC_SEAL, ELECTRONIC_SIGNATURE
     """
-    default: Optional[List[str]] = None
+    default: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     Default level of assurances, Possible values are:
     ADVANCED_ELECTRONIC_SIGNATURE, HIGH_TRUST_ADVANCED,
@@ -1889,12 +2600,12 @@ class ServicePlanCertifyOption:
     Definition: ServicePlanCertifyOption
     """
 
-    allowed: Optional[List[str]] = None
+    allowed: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     Allowed document certify options, Possible values are: NO_CHANGES_ALLOWED,
     FORM_FILLING_ALLOWED, FORM_FILLING_WITH_ANNOTATIONS_ALLOWED
     """
-    default: Optional[str] = None
+    default: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Default document certify options, Possible values are: NO_CHANGES_ALLOWED,
     FORM_FILLING_ALLOWED, FORM_FILLING_WITH_ANNOTATIONS_ALLOWED
@@ -1907,12 +2618,22 @@ class ServicePlanAutoDeleteDocument:
     Definition: ServicePlanAutoDeleteDocument
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, If auto deletion of the unused documents is enabled."""
-    duration: Optional[int] = None
+    duration: int
     """Total number of unused days.             """
-    notify: Optional[NotifyUnUsedDeleteDocument] = None
-    email_document: Optional[EmailDeletedDocument] = None
+    notify: Optional[
+        NotifyUnUsedDeleteDocument | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    email_document: Optional[
+        EmailDeletedDocument | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1921,9 +2642,9 @@ class NotifyUnUsedDeleteDocument:
     Definition: NotifyUnUsedDeleteDocument
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, If notify the user before days to deleting unused documents."""
-    duration: Optional[int] = None
+    duration: int
     """Total number of days before notifying the user.             """
 
 
@@ -1933,9 +2654,9 @@ class EmailDeletedDocument:
     Definition: EmailDeletedDocument
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, If deleted document as attachment is enabled"""
-    workflow_evidence_report: Optional[bool] = None
+    workflow_evidence_report: bool
     """
     True, Email the workflow evidence report as an attachment of the completed
     document is enabled
@@ -1948,19 +2669,64 @@ class ServicePlanSigningServer:
     Definition: ServicePlanSigningServer
     """
 
-    key_location: Optional[str] = None
+    key_location: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Key location of the signing server, possible values are SERVER, LOCAL"""
-    order: Optional[int] = None
+    order: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Signing server order"""
-    signing_profile: Optional[ServicePlanProfile] = None
-    electronic_seal: Optional[SigningServerCapacity] = None
-    advanced_electronic_seal: Optional[SigningServerCapacity] = None
-    qualified_electronic_seal: Optional[SigningServerCapacity] = None
-    advanced_electronic_signature: Optional[SigningServerCapacity] = None
-    high_trust_advanced_signature: Optional[SigningServerCapacity] = None
-    qualified_electronic_signature: Optional[SigningServerCapacity] = None
-    signature_appearances: Optional[SigningServerSignatureAppearance] = None
-    csp: Optional[SigningServerCsp] = None
+    signing_profile: Optional[
+        ServicePlanProfile | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    electronic_seal: Optional[
+        SigningServerCapacity | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    advanced_electronic_seal: Optional[
+        SigningServerCapacity | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    qualified_electronic_seal: Optional[
+        SigningServerCapacity | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    advanced_electronic_signature: Optional[
+        SigningServerCapacity | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    high_trust_advanced_signature: Optional[
+        SigningServerCapacity | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    qualified_electronic_signature: Optional[
+        SigningServerCapacity | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    signature_appearances: Optional[
+        SigningServerSignatureAppearance | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    csp: Optional[
+        SigningServerCsp | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1969,9 +2735,9 @@ class ServicePlanProfile:
     Definition: ServicePlanProfile
     """
 
-    id: Optional[int] = None
+    id: int
     """ID of the profile"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the profile"""
 
 
@@ -1981,9 +2747,14 @@ class SigningServerCapacity:
     Definition: SigningServerCapacity
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, If to add the Signing Capacities."""
-    capacities: Optional[List[ServicePlanCapacity]] = None
+    capacities: Optional[
+        List[ServicePlanCapacity | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Total number of Signing Capacities added are signing server."""
 
 
@@ -1993,18 +2764,18 @@ class ServicePlanCapacity:
     Definition: ServicePlanCapacity
     """
 
-    id: Optional[int] = None
+    id: int
     """Id of the Capacity"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the Capacity"""
-    level_of_assurance: Optional[str] = None
+    level_of_assurance: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Level of assurance of the capacity, possible values are
     ADVANCED_ELECTRONIC_SIGNATURE, HIGH_TRUST_ADVANCED,
     QUALIFIED_ELECTRONIC_SIGNATURE, ELECTRONIC_SEAL, ADVANCED_ELECTRONIC_SEAL,
     QUALIFIED_ELECTRONIC_SEAL.
     """
-    key_protection: Optional[str] = None
+    key_protection: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Key protection option of the capacity, possible values are NO_PASSWORD,
     USER_PASSWORD, SYSTEM_PASSWORD, REMOTE_AUTHORISATION.
@@ -2017,12 +2788,12 @@ class SigningServerSignatureAppearance:
     Definition: SigningServerSignatureAppearance
     """
 
-    signature_appearance: Optional[str] = None
+    signature_appearance: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Appearances of the signature, possible values are COMPANY_LOGO,
     HAND_SIGNATURE, DETAILED_SIGNATURE
     """
-    signature_appearance_logo: Optional[str] = None
+    signature_appearance_logo: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Logo of the signature appearance"""
 
 
@@ -2032,10 +2803,15 @@ class SigningServerCsp:
     Definition: SigningServerCsp
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, If to add Push Certificates to CSP."""
-    virtual_profile: Optional[ServicePlanProfile] = None
-    auto_delete_certificates: Optional[bool] = None
+    virtual_profile: Optional[
+        ServicePlanProfile | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    auto_delete_certificates: bool
     """
     True, If Automatically delete certificates and users from CSP when user is
     removed.
@@ -2048,10 +2824,30 @@ class ServicePlanElectronicSealServer:
     Definition: ServicePlanElectronicSealServer
     """
 
-    electronic_seal_profile: Optional[ServicePlanProfile] = None
-    electronic_seal: Optional[SigningServerCapacity] = None
-    advanced_electronic_seal: Optional[SigningServerCapacity] = None
-    qualified_electronic_seal: Optional[SigningServerCapacity] = None
+    electronic_seal_profile: Optional[
+        ServicePlanProfile | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    electronic_seal: Optional[
+        SigningServerCapacity | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    advanced_electronic_seal: Optional[
+        SigningServerCapacity | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    qualified_electronic_seal: Optional[
+        SigningServerCapacity | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -2060,9 +2856,19 @@ class ServicePlanAuthenticationProfile:
     Definition: ServicePlanAuthenticationProfile
     """
 
-    allowed: Optional[List[ServicePlanProfile]] = None
+    allowed: Optional[
+        List[ServicePlanProfile | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Allowed authentication profile in service plan"""
-    default: Optional[ServicePlanProfile] = None
+    default: Optional[
+        ServicePlanProfile | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -2071,12 +2877,16 @@ class ServicePlanEvidenceReport:
     Definition: ServicePlanEvidenceReport
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """
     Type of workflow evidence recording, Possible values are \"BASIC\",
     \"DETAILED\"
     """
-    delete_document_logs: Optional[bool] = None
+    delete_document_logs: bool
     """
     True, If enable to delete document logs on generation of Workflow Evidence
     Report.
@@ -2089,13 +2899,23 @@ class ServicePlanOneTimePassword:
     Definition: ServicePlanOneTimePassword
     """
 
-    email_otp: Optional[ServicePlanEmailOtp] = None
-    sms_otp: Optional[ServicePlanSmsOtp] = None
-    otp_length: Optional[int] = None
+    email_otp: Optional[
+        ServicePlanEmailOtp | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    sms_otp: Optional[
+        ServicePlanSmsOtp | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    otp_length: int
     """Character count of OTP to be generated for authentication."""
-    otp_expiry: Optional[int] = None
+    otp_expiry: int
     """OTP expiry duration in seconds"""
-    otp_retry_interval: Optional[int] = None
+    otp_retry_interval: int
     """OTP retry interval duration in seconds"""
 
 
@@ -2105,7 +2925,7 @@ class ServicePlanEmailOtp:
     Definition: ServicePlanEmailOtp
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if Email OTP are enabled for the service plan."""
 
 
@@ -2115,9 +2935,9 @@ class ServicePlanSmsOtp:
     Definition: ServicePlanSmsOtp
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if SMS OTP are enabled for the service plan."""
-    server: Optional[str] = None
+    server: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SMS OTP server"""
 
 
@@ -2127,10 +2947,11 @@ class ServicePlanSmtpServer:
     Definition: ServicePlanSmtpServer
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if SMTP Server is enabled for the service plan."""
-    server: Optional[str] = field(
+    server: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Server"},
     )
     """SMTP Server"""
@@ -2142,10 +2963,11 @@ class ServicePlanSmsNotification:
     Definition: ServicePlanSmsNotification
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if SMS notification gateway is enabled for the service plan."""
-    server: Optional[str] = field(
+    server: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Server"},
     )
     """SMS Gateway"""
@@ -2157,11 +2979,16 @@ class ServicePlanAutoDeleteUser:
     Definition: ServicePlanAutoDeleteUser
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, If auto deletion of the inactive users is enabled."""
-    inactive_days: Optional[int] = None
+    inactive_days: int
     """Total number of inactive days.             """
-    notify: Optional[NotifyInactiveDeleteUser] = None
+    notify: Optional[
+        NotifyInactiveDeleteUser | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -2170,9 +2997,9 @@ class NotifyInactiveDeleteUser:
     Definition: NotifyInactiveDeleteUser
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, If notify the user before days to deleting inactive users."""
-    duration: Optional[int] = None
+    duration: int
     """Total number of days before notifying the user.             """
 
 
@@ -2182,7 +3009,7 @@ class ServicePlanCapacityRequest:
     Definition: ServicePlanCapacityRequest
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the Capacity"""
 
 
@@ -2192,20 +3019,20 @@ class WorkflowDetailUpdateRequest:
     Definition: WorkflowDetailUpdateRequest
     """
 
-    workflow_type: Optional[WorkflowType] = None
-    workflow_mode: Optional[WorkflowModes] = None
-    continue_on_decline: Optional[bool] = None
+    workflow_type: Optional[WorkflowType] = dataclass_field(default=None, kw_only=True)
+    workflow_mode: Optional[WorkflowModes] = dataclass_field(default=None, kw_only=True)
+    continue_on_decline: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     True, if workflow needs to continue even if any recipient declines the
     document. If no value is provided, old value will be retained.
     """
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A custom string message from the document owner to every recipient, this
     message appears in the sharing email as well as on the screen. If no value
     is provided, old value will be retained.
     """
-    comments: Optional[bool] = None
+    comments: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Allow comments"""
 
 
@@ -2218,40 +3045,45 @@ class PostProcessUpdateRequest:
     Definition: PostProcessUpdateRequest
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if post processing is turned on for the package."""
-    contacts: Optional[List[str]] = None
-    recipients: Optional[List[PostProcessRecipientRequest]] = None
+    contacts: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
+    recipients: Optional[
+        List[PostProcessRecipientRequest | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """
     List of the name and email addresses to whom the emails are sent when the
     post processing is executed after the workflow completion.
     """
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A custom string message for all the contacts. Message becomes part of the
     email sent to the contacts.
     """
-    google_drive: Optional[bool] = None
+    google_drive: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     True, if document is to be uploaded to the provided google account after
     the workflow completion.
     """
-    dropbox: Optional[bool] = None
+    dropbox: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     True, if document is to be uploaded to the provided dropbox account after
     the workflow completion.
     """
-    onedrive: Optional[bool] = None
+    onedrive: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     True, if document is to be uploaded to the provided oneDrive account after
     the workflow completion.
     """
-    workflow_recipients: Optional[bool] = None
+    workflow_recipients: bool
     """
     True, if workflow completion report is to be sent to all recipients of the
     workflow when post processing is executed. Default value is false.
     """
-    document_processing_report: Optional[bool] = None
+    document_processing_report: bool
     """
     True, if Send the document processing report (XML) is to be enabled to for
     the workflow
@@ -2264,26 +3096,26 @@ class WorflowUserRequest:
     Definition: WorflowUserRequest
     """
 
-    user_email: Optional[str] = None
+    user_email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address of the user to be added in the workflow."""
-    user_name: Optional[str] = None
+    user_name: str
     """Name of the recipient to be added in the workflow."""
-    user_national_id: Optional[str] = None
+    user_national_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User national id of the recipient"""
-    email_notification: Optional[bool] = None
+    email_notification: bool
     """
     If set as true, SigningHub will send notifications to the user via email as
     per the document owner and user notification settings. A value of false
     means no notifications will be sent to user throughout the workflow.
     """
-    role: Optional[CollaboratorRole] = None
-    signing_order: Optional[int] = None
+    role: CollaboratorRole
+    signing_order: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Order of the recipient in the workflow. This signing order is mandatory
     when workflow type is \"CUSTOM\".
     """
-    delivery_method: Optional[DeliveryMethod] = None
-    mobile_number: Optional[str] = None
+    delivery_method: DeliveryMethod
+    mobile_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Mobile Number"""
 
 
@@ -2303,42 +3135,47 @@ class WorkflowResponse:
     Definition: WorkflowResponse
     """
 
-    workflow_type: Optional[str] = None
+    workflow_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Type of the workflow, there are four types of workflows supported in the
     application. Possible values are \"SERIAL\", \"PARALLEL\", \"INDIVIDUAL\"
     and \"CUSTOM\".
     """
-    continue_on_decline: Optional[bool] = None
+    continue_on_decline: bool
     """
     True, if workflow needs to be continued even after a recipient declines at
     his turn.
     """
-    workflow_status: Optional[str] = None
+    workflow_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Processing status of the workflow, possible values are \"DRAFT\",
     \"IN_PRGORESS\" and \"COMPLETED\".
     """
-    workflow_mode: Optional[str] = None
+    workflow_mode: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Mode of the workflow, there are three types of workflow modes supported in
     application. Possible values are \"ONLY_ME\", \"ME_AND_OTHERS\" and
     \"ONLY_OTHERS\"
     """
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Any custom string message that is to be sent to all the recipient of the
     workflow by the document owner.
     """
-    read_only: Optional[bool] = None
+    read_only: bool
     """
     If any template applied on the documents in this workflow is read only or
     locked template then the workflow is read only. SigningHub will not allow
     the end users to make any changes to this workflow in draft state and this
     workflow is to be shared as it is.
     """
-    post_process: Optional[PostProcessResponse] = None
-    comments: Optional[bool] = None
+    post_process: Optional[
+        PostProcessResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    comments: bool
     """Comments"""
 
 
@@ -2348,52 +3185,62 @@ class WorkflowDocumentsResponse:
     Definition: WorkflowDocumentsResponse
     """
 
-    document_id: Optional[int] = None
+    document_id: int
     """ID of the document."""
-    document_name: Optional[str] = None
+    document_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the document."""
-    document_type: Optional[str] = None
+    document_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Original document extension when the document was uploaded before
     conversion to the PDF.
     """
-    document_order: Optional[int] = None
+    document_order: int
     """Order of the document in the document package."""
-    document_source: Optional[str] = None
+    document_source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Source of the document from where the document was uploaded."""
-    update_required: Optional[bool] = None
+    update_required: bool
     """True if document is required to update """
-    document_height: Optional[int] = None
+    document_height: int
     """Height of the PDF document."""
-    document_width: Optional[int] = None
+    document_width: int
     """Width of the PDF document."""
-    document_pages: Optional[int] = None
+    document_pages: int
     """Total number of pages in the document."""
-    created_on: Optional[str] = None
+    created_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date and time on which the document was uploaded."""
-    modified_on: Optional[str] = None
+    modified_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date and time on which the document was last modified."""
-    form_fields: Optional[bool] = None
+    form_fields: bool
     """True, if document has form fields."""
-    template: Optional[DocumentsTemplateResponse] = None
-    certify: Optional[CertifyResponse] = None
-    lock_form_fields: Optional[bool] = None
+    template: Optional[
+        DocumentsTemplateResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    certify: Optional[
+        CertifyResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    lock_form_fields: bool
     """
     True, if document is set to lock the form fields with the last digital
     signature on the document.
     """
-    locked: Optional[bool] = None
-    has_signed_signature_fields: Optional[bool] = None
+    locked: bool
+    has_signed_signature_fields: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Pdf document meta info: true if pdf document have signed signature fields
     """
-    attachments: Optional[bool] = None
+    attachments: bool
     """True, if document has attachments."""
-    conformance_level: Optional[str] = None
+    conformance_level: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Document conformance level"""
-    document_size: Optional[int] = None
+    document_size: int
     """Size of document."""
-    formatted: Optional[bool] = None
+    formatted: bool
     """This property is for XML document, that either its formatted or not"""
 
 
@@ -2403,11 +3250,11 @@ class DocumentsTemplateResponse:
     Definition: DocumentsTemplateResponse
     """
 
-    template_id: Optional[int] = None
+    template_id: int
     """ID of the template applied to the document."""
-    template_name: Optional[str] = None
+    template_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the template applied to the document."""
-    read_only: Optional[bool] = None
+    read_only: bool
     """
     True, if template is configured as read only. No changes to the workflow
     should be made after a read only template is applied.
@@ -2420,84 +3267,109 @@ class WorkflowUserResponse:
     Definition: WorkflowUserResponse
     """
 
-    order: Optional[int] = None
+    order: int
     """Order of the recipient in the workflow."""
-    user_name: Optional[str] = None
+    user_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Name of the recipient if recipient is not a group. If recipient is a
     placeholder it will contain the name of the placeholder.
     """
-    user_email: Optional[str] = None
+    user_email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Email address of the recipient if recipient is not a group or placeholder.
     """
-    mobile_number: Optional[str] = None
+    mobile_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Mobile number"""
-    delivery_method: Optional[str] = None
+    delivery_method: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Delivery method of recipient Possible values: EMAIL, SMS, or EMAIL_AND_SMS
     """
-    user_photo_url: Optional[str] = None
+    user_photo_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     API endpoint to access the resource, This will be provided only for main
     signers. e.g it will be null for group/delegator/gatekeeper etc. This URL
     does not make sure that signer image is exist. If image exist it will be
     provided by hitting the defined url otherwise it will be an empty string.
     """
-    group_name: Optional[str] = None
+    group_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the group if recipient is a group."""
-    group_members: Optional[List[str]] = None
+    group_members: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """List of all the email addresses and names of the users."""
-    delegator: Optional[str] = None
+    delegator: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address of the user who is delegator to this recipient."""
-    gatekeeper: Optional[str] = None
+    gatekeeper: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address of the user who is gatekeeper to this recipient."""
-    gatekeepers: Optional[WorkflowGatekeeperResponse] = None
-    role: Optional[str] = None
+    gatekeepers: Optional[
+        WorkflowGatekeeperResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    role: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Role of the recipient i.e., \"SIGNER\", \"REVIEWER\",
     \"EDITOR\",\"CARBON_COPY\" or \"INPERSON_HOST\".
     """
-    process_status: Optional[str] = None
+    process_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Document processing status for the recipient. Possible values are
     \"UN_PROCESSED\", \"IN_PROGRESS\", \"SIGNED\", \"REVIEWED\", \"DECLINED\",
     \"EDITED\" or \"INVALID\".
     """
-    processed_on: Optional[str] = None
+    processed_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date and time on which the document was processed."""
-    processed_as: Optional[str] = None
+    processed_as: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     User may processed the field as COLLABORATOR, DELEGATOR, GROUP_MEMBER or
     OWNER.
     """
-    processed_by: Optional[str] = None
+    processed_by: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address of the user who processed the document."""
-    reason: Optional[str] = None
+    reason: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Reason provided by the user when declining, approving or submitting a
     document.
     """
-    placeholder: Optional[str] = None
+    placeholder: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Placeholder text if the recipient is a placeholder."""
-    permission: Optional[WorkflowPermissionResponse] = None
-    authentications: Optional[AccessResponse] = None
-    reminder: Optional[ReminderResponse] = None
-    signing_order: Optional[int] = None
+    permission: Optional[
+        WorkflowPermissionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    authentications: Optional[
+        AccessResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    reminder: Optional[
+        ReminderResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    signing_order: int
     """
     Order in which the workflow will be signed by the recipients. This signing
     order is important when workflow type is set to \"CUSTOM\".
     """
-    user_national_id: Optional[str] = None
+    user_national_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     National identity number of the user. This helps to identify user in the
     workflow
     """
-    guest_user: Optional[bool] = None
+    guest_user: bool
     """Gest user"""
-    email_language_code: Optional[str] = None
+    email_language_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email language code"""
-    electronic_seal: Optional[ElectronicSealRecipient] = None
+    electronic_seal: Optional[
+        ElectronicSealRecipient | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -2506,9 +3378,9 @@ class DocumentCertifyResponse:
     Definition: DocumentCertifyResponse
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True if certify signature is enabled for the document."""
-    permission: Optional[str] = None
+    permission: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     It is the certify permissions to be applied on the PDF document when the
     first signature is created. The possible values are \"NO_CHANGES_ALLOWED\",
@@ -2522,9 +3394,9 @@ class DocumentTemplateResponse:
     Definition: DocumentTemplateResponse
     """
 
-    template_name: Optional[str] = None
+    template_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the template applied on the document."""
-    read_only: Optional[bool] = None
+    read_only: bool
     """
     True if the applied template is read only. User will not be able to make
     any changes if a read only template is applied.
@@ -2537,9 +3409,9 @@ class ApplyTemplateRequest:
     Definition: ApplyTemplateRequest
     """
 
-    template_name: Optional[str] = None
+    template_name: str
     """Name of template to be applied on the document."""
-    apply_to_all: Optional[bool] = None
+    apply_to_all: bool
     """
     True, if template is to be applied on all the documents in the package.
     """
@@ -2551,13 +3423,13 @@ class AddDocumentPackageRequest:
     Definition: AddDocumentPackageRequest
     """
 
-    package_name: Optional[str] = None
+    package_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The name of the package. Default package name is always \"Untitled\" if the
     package_name is not provided.
     """
-    workflow_mode: Optional[WorkflowMode] = None
-    folder_name: Optional[str] = None
+    workflow_mode: WorkflowMode
+    folder_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The name of the folder. It will be used to upload package in any folder of
     the user, either it is a custom folder or a shared folder.
@@ -2573,7 +3445,7 @@ class ApproveRequest:
     Definition: ApproveRequest
     """
 
-    reason: Optional[str] = None
+    reason: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The reason for approving a package."""
 
 
@@ -2583,7 +3455,7 @@ class DeclineRequest:
     Definition: DeclineRequest
     """
 
-    reason: Optional[str] = None
+    reason: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Reason provided by the user for declining."""
 
 
@@ -2593,7 +3465,7 @@ class RenameDocumentPackageRequest:
     Definition: RenameDocumentPackageRequest
     """
 
-    package_name: Optional[str] = None
+    package_name: str
     """New name of the document package.             """
 
 
@@ -2603,9 +3475,9 @@ class RecipientAccessDurationDetails:
     Definition: RecipientAccessDurationDetails
     """
 
-    date_from: Optional[str] = None
+    date_from: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Start date/time for a recipient to access the document             """
-    date_to: Optional[str] = None
+    date_to: Optional[str] = dataclass_field(default=None, kw_only=True)
     """End date/time for a recipient to access the document             """
 
 
@@ -2615,11 +3487,16 @@ class RecipientDeclineDetails:
     Definition: RecipientDeclineDetails
     """
 
-    reason: Optional[str] = None
+    reason: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Define reason of document decline"""
-    auto_decline: Optional[bool] = None
+    auto_decline: bool
     """Indication of document is manually/auto declined """
-    declined_by: Optional[DeclineByDetails] = None
+    declined_by: Optional[
+        DeclineByDetails | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -2628,9 +3505,9 @@ class DeclineByDetails:
     Definition: DeclineByDetails
     """
 
-    user_name: Optional[str] = None
+    user_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of user who have declined the workflow """
-    user_email: Optional[str] = None
+    user_email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email of user who have declined the workflow              """
 
 
@@ -2651,11 +3528,11 @@ class CertifyPermissionResponse:
     Definition: CertifyPermissionResponse
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True if certify signature is enabled for the document."""
-    allowed_permissions: Optional[List[str]] = None
+    allowed_permissions: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Set of allowed certify permission levels for the document."""
-    default_permission: Optional[str] = None
+    default_permission: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Selected permission level for the certify signature settings."""
 
 
@@ -2665,27 +3542,27 @@ class UploadDocumentMetaInfoDetail:
     Definition: UploadDocumentMetaInfoDetail
     """
 
-    attachments: Optional[bool] = None
+    attachments: bool
     """true if pdf document has any attachment"""
-    form_fields: Optional[bool] = None
+    form_fields: bool
     """true if pdf document has any form field"""
-    blank_signatures: Optional[bool] = None
+    blank_signatures: bool
     """true if pdf document has any blank signature field"""
-    signed_signatures: Optional[bool] = None
+    signed_signatures: bool
     """true if pdf document has any signed signature field"""
-    conformance: Optional[str] = None
+    conformance: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     null/empty if document does not contains any conformance level otherwise
     contains formation like 1A, 1B etc
     """
-    locked: Optional[bool] = None
+    locked: bool
     """true if pdf document is locked"""
-    certify: Optional[str] = None
+    certify: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     CertifyLevel of pdf document. Possible values NotCertified,
     NoChangesAllowed, FormFilling, FormFillingAndAnnotations
     """
-    qr_code: Optional[bool] = None
+    qr_code: bool
     """true if pdf document has any Qr Code, otherwise its false"""
 
 
@@ -2695,7 +3572,7 @@ class RenameDocumentRequest:
     Definition: RenameDocumentRequest
     """
 
-    document_name: Optional[str] = None
+    document_name: str
     """New name of the document."""
 
 
@@ -2708,74 +3585,74 @@ class VerificationResponse:
     Definition: VerificationResponse
     """
 
-    field_name: Optional[str] = None
+    field_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the field for which the verification was requested."""
-    signer_name: Optional[str] = None
+    signer_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the signer."""
-    signature_status: Optional[str] = None
+    signature_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     If the overall status of the signature is valid or not. Possible values are
     \"VALID\" or \"INVALID\".
     """
-    signing_reason: Optional[str] = None
+    signing_reason: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Reason provided by the user while signing the field. In case of witness
     signing, custom signing reason would be set
     """
-    signing_location: Optional[str] = None
+    signing_location: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Location entered by the user while signing the field."""
-    contact_information: Optional[str] = None
+    contact_information: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Contact information entered by the user while signing the field."""
-    signing_time: Optional[str] = None
+    signing_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Date and time of signing in 8601 format. Default timezone from SH Admin is
     followed the the time.
     """
-    ltv: Optional[bool] = None
+    ltv: bool
     """True, if signature is LTV."""
-    qualified: Optional[bool] = None
+    qualified: bool
     """True, if signatures are qualified."""
-    certified: Optional[bool] = None
+    certified: bool
     """True, if signatures are certified."""
-    certify_permission: Optional[str] = None
+    certify_permission: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Permission level for certified digital signature."""
-    timestamp_at: Optional[str] = None
+    timestamp_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date and time when signature was time-stamped."""
-    timestamp_authority: Optional[str] = None
+    timestamp_authority: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Authority by which the signature was time-stamped."""
-    subject_dn: Optional[str] = None
+    subject_dn: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Subject DN from the certificate used while signing the field."""
-    issuer_dn: Optional[str] = None
+    issuer_dn: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Issuers DN from the certificate used while signing the field."""
-    cert_valid_from: Optional[str] = None
+    cert_valid_from: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date and time from which the certificate is valid."""
-    cert_valid_to: Optional[str] = None
+    cert_valid_to: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date and time to which the certificate is valid."""
-    signature_type: Optional[str] = None
+    signature_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Type of signatures, possible values are \"PADES_PART2\" or \"PADES_PART4\".
     """
-    signature_algorithm: Optional[str] = None
+    signature_algorithm: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Signature algorithm used while signing the field."""
-    signature_application: Optional[str] = None
+    signature_application: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Application name from where the field was signed."""
-    signature_policy_id: Optional[int] = None
+    signature_policy_id: int
     """Signature policy ID."""
-    signature_policy_uri: Optional[str] = None
+    signature_policy_uri: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Signature policy URI."""
-    signer_photo: Optional[str] = None
+    signer_photo: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Base64 image of the signer's avatar."""
-    signer_photo_url: Optional[str] = None
-    signed_hash: Optional[str] = None
+    signer_photo_url: Optional[str] = dataclass_field(default=None, kw_only=True)
+    signed_hash: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Hash of the document that was signed in respective signature."""
-    display: Optional[str] = None
-    page_number: Optional[int] = None
+    display: Optional[str] = dataclass_field(default=None, kw_only=True)
+    page_number: int
     """Page number of the signature field"""
-    lei_number: Optional[str] = None
+    lei_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """LEI number if availbale in certificate"""
-    lei_role: Optional[str] = None
+    lei_role: Optional[str] = dataclass_field(default=None, kw_only=True)
     """LEI role if available in certificate"""
-    error_message: Optional[str] = None
+    error_message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     An error message returns in case the application unable to get verification
     results.
@@ -2788,38 +3665,48 @@ class BulkSignRequest:
     Definition: BulkSignRequest
     """
 
-    ids: Optional[List[int]] = None
+    ids: Optional[List[int]] = dataclass_field(default=None, kw_only=True)
     """
     An array of the document package ids that are selected for bulk signing.
     """
-    hand_signature_initials_image: Optional[str] = None
+    hand_signature_initials_image: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Base64 image used for the filling of the initials"""
-    hand_signature_initials_method: Optional[HandSignature] = None
-    hand_signature_image: Optional[str] = None
+    hand_signature_initials_method: Optional[
+        HandSignature
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    hand_signature_image: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Base64 encoded string image of the visible signature appearance"""
-    hand_signature_method: Optional[HandSignature] = None
-    signing_reason: Optional[str] = None
+    hand_signature_method: Optional[HandSignature] = dataclass_field(default=None, kw_only=True)
+    signing_reason: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Reason of signing provided by the recipient."""
-    signing_location: Optional[str] = None
+    signing_location: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Locale of the signer provided by the recipient"""
-    contact_information: Optional[str] = None
+    contact_information: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Contact information of the signer provided by the recipient"""
-    appearance_design: Optional[str] = None
+    appearance_design: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Name of the signature appearance provided by user for signing. In case no
     appearance name is provided then default selected appearance would be used.
     Possible values are \"COMPANY_LOGO\", \"DETAILED_SIGNATURE\",
     \"HAND_SIGNATURE\"
     """
-    signing_server: Optional[str] = None
+    signing_server: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of signing server using which the document is to be signed"""
-    signing_capacity: Optional[str] = None
+    signing_capacity: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Name of certification profile/signing capacity using which the document is
     to be signed
     """
-    authentication: Optional[BulkSignAuthentication] = None
-    transaction_id: Optional[str] = None
+    authentication: Optional[
+        BulkSignAuthentication | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    transaction_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """re-initiated signing process transaction id"""
 
 
@@ -2829,19 +3716,19 @@ class BulkSignAuthentication:
     Definition: BulkSignAuthentication
     """
 
-    mechanism: Optional[str] = None
+    mechanism: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Mechanism of the authentication. Possible values for mechanism are:
     AUTHENTICATION_PASSWORD, AUTHENTICATION_ACTIVE_DIRECTORY,
     AUTHENTICATION_AZURE_ACTIVE_DIRECTORY, AUTHENTICATION_OFFICE_365,
     AUTHENTICATION_OAUTH2, AUTHENTICATION_OIDC
     """
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     It is an optional parameter, but it's only required when using
     'AUTHENTICATION_PASSWORD' as a parameter value under 'mechanism'
     """
-    token: Optional[str] = None
+    token: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     It is an optional parameter that will be received from third party server,
     but it's only required when using either
@@ -2850,21 +3737,21 @@ class BulkSignAuthentication:
     'AUTHENTICATION_LINKED_IN' 'AUTHENTICATION_SALES_FORCE' as a parameter
     value under 'mechanism'
     """
-    user_identifier: Optional[str] = None
+    user_identifier: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     It is an optional parameter, but it's only required when using
     'AUTHENTICATION_ACTIVE_DIRECTORY' or 'AUTHENTICATION_SAML' as a parameter
     value under 'mechanism'
     """
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     It is an optional parameter, but it's only required when using
     'AUTHENTICATION_SALES_FORCE' or 'AUTHENTICATION_IDFY' as a parameter value
     under 'mechanism'. For 'AUTHENTICATION_IDFY' it's requestId
     """
-    code_verifier: Optional[str] = None
+    code_verifier: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Code Verifier if PKCE is enabled for the client."""
-    nonce: Optional[str] = None
+    nonce: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Nonce value if it is enabled for the client."""
 
 
@@ -2877,14 +3764,19 @@ class BulkSignPackagesStatus:
     Definition: BulkSignPackagesStatus
     """
 
-    id: Optional[int] = None
-    name: Optional[str] = None
-    status: Optional[str] = None
-    action: Optional[str] = None
+    id: int
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
+    action: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Required action key if any"""
-    error: Optional[str] = None
-    percentage: Optional[int] = None
-    documents: Optional[List[BulkSignActionDocumentModel]] = None
+    error: Optional[str] = dataclass_field(default=None, kw_only=True)
+    percentage: int
+    documents: Optional[
+        List[BulkSignActionDocumentModel | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Documents in the current package"""
 
 
@@ -2894,8 +3786,13 @@ class BulkSignActionDocumentModel:
     Definition: BulkSignActionDocumentModel
     """
 
-    id: Optional[int] = None
-    fields: Optional[List[BulkSignActionFieldModel]] = None
+    id: int
+    fields: Optional[
+        List[BulkSignActionFieldModel | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -2904,9 +3801,9 @@ class BulkSignActionFieldModel:
     Definition: BulkSignActionFieldModel
     """
 
-    name: Optional[str] = None
-    hash: Optional[str] = None
-    hashing_algo: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    hash: Optional[str] = dataclass_field(default=None, kw_only=True)
+    hashing_algo: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -2915,7 +3812,7 @@ class BulkSignStatusRequest:
     Definition: BulkSignStatusRequest
     """
 
-    transaction_id: Optional[str] = None
+    transaction_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The identification number of the bulk signing transaction"""
 
 
@@ -2925,9 +3822,9 @@ class SignDocumentRequest:
     Definition: SignDocumentRequest
     """
 
-    field_name: Optional[str] = None
+    field_name: str
     """Unique identifier of the signature field in the document."""
-    hand_signature_image: Optional[str] = None
+    hand_signature_image: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Base64 encoded string image of the visible signature appearance, which is
     placed onto the document. Note this can be retrieved from the user's
@@ -2936,45 +3833,50 @@ class SignDocumentRequest:
     is binary, so the business application must then Base64 encode it before
     submitting in this API call.)
     """
-    hand_signature_method: Optional[HandSignature] = None
-    signing_reason: Optional[str] = None
+    hand_signature_method: Optional[HandSignature] = dataclass_field(default=None, kw_only=True)
+    signing_reason: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Reason of signing provided by the recipient. Note: Commitment type
     indication for XML documents
     """
-    signing_location: Optional[str] = None
+    signing_location: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Locale of the signer provided by the recipient."""
-    contact_information: Optional[str] = None
+    contact_information: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Contact information of the signer provided by the recipient."""
-    user_name: Optional[str] = None
+    user_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Name of the signer provided by the recipient. Note this applies to
     in-person signing operations only.
     """
-    user_password: Optional[str] = None
+    user_password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Password provided by the user subject to user's signature settings."""
-    appearance_design: Optional[str] = None
+    appearance_design: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Name of the signature appearance provided by user for signing. In case no
     appearance name is provided then default selected appearance would be used.
     Possible values are
     \"COMPANY_LOGO\",\"DETAILED_SIGNATURE\",\"HAND_SIGNATURE\"
     """
-    signing_capacity: Optional[str] = None
+    signing_capacity: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Name of certification profile/signing capacity using which the document is
     to be signed. If not provided the default capacity will be used to sign.
     Provided name must be exactly same as of the actual profile due to case
     sensitivity.
     """
-    skip_verification: Optional[bool] = None
+    skip_verification: bool
     """
     No signature verification returns in response body when it is set as true.
     Default value for this parameter set to false.
     """
-    signing_server: Optional[str] = None
+    signing_server: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of signing server using which the document is to be signed."""
-    authentication: Optional[Authentication] = None
+    authentication: Optional[
+        Authentication | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -2983,19 +3885,19 @@ class Authentication:
     Definition: Authentication
     """
 
-    mechanism: Optional[str] = None
+    mechanism: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Mechanism of the authentication. Possible values for mechanism are:
     AUTHENTICATION_PASSWORD, AUTHENTICATION_ACTIVE_DIRECTORY,
     AUTHENTICATION_AZURE_ACTIVE_DIRECTORY, AUTHENTICATION_OFFICE_365,
     AUTHENTICATION_OAUTH2, AUTHENTICATION_OIDC
     """
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     It is an optional parameter, but it's only required when using
     'AUTHENTICATION_PASSWORD' as a parameter value under 'mechanism'
     """
-    token: Optional[str] = None
+    token: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     It is an optional parameter that will be received from third party server,
     but it's only required when using either
@@ -3004,21 +3906,21 @@ class Authentication:
     'AUTHENTICATION_LINKED_IN' 'AUTHENTICATION_SALES_FORCE' as a parameter
     value under 'mechanism'
     """
-    user_identifier: Optional[str] = None
+    user_identifier: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     It is an optional parameter, but it's only required when using
     'AUTHENTICATION_ACTIVE_DIRECTORY' or 'AUTHENTICATION_SAML' as a parameter
     value under 'mechanism'
     """
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     It is an optional parameter, but it's only required when using
     'AUTHENTICATION_SALES_FORCE' or 'AUTHENTICATION_IDFY' as a parameter value
     under 'mechanism'. For 'AUTHENTICATION_IDFY' it's requestId
     """
-    code_verifier: Optional[str] = None
+    code_verifier: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Code Verifier if PKCE is enabled for the client."""
-    nonce: Optional[str] = None
+    nonce: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Nonce value if it is enabled for the client."""
 
 
@@ -3028,29 +3930,29 @@ class AutoPlaceFieldRequest:
     Definition: AutoPlaceFieldRequest
     """
 
-    search_text: Optional[str] = None
+    search_text: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Word that needs to be searched in the document."""
-    order: Optional[int] = None
+    order: int
     """
     Order of the user to which the fields will be assigned automatically.
     Workflow in SigningHub orders recipients. This list begins with \"1\" for
     the first designated signer.
     """
-    placement: Optional[str] = None
+    placement: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     If the text is found, fields are to be placed in the document. Placement of
     the field can be mentioned in this attribute. Possible values of placement
     of a field are LEFT, RIGHT, TOP, BOTTOM. If no value is provided the
     default value will be LEFT.
     """
-    field_type: Optional[str] = None
+    field_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Type of field to be created in the document. Possible values are
     \"SIGNATURE\", \"IN_PERSON_SIGNATURE\", \"INITIALS\", \"TEXT\", \"NUMBER\"
     ,\"NAME\", \"EMAIL\", \"COMPANY\", \"JOBTITLE\", \"RADIOBOX\",
     \"CHECKBOX\", \"DATE\", \"ATTACHMENT\"
     """
-    level_of_assurance: Optional[List[str]] = None
+    level_of_assurance: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     Level Of Assurance to be updated. Possible Values are
     \"ELECTRONIC_SIGNATURE\", \"ELECTRONIC_SEAL\",
@@ -3058,15 +3960,20 @@ class AutoPlaceFieldRequest:
     \"ADVANCED_ELECTRONIC_SIGNATURE\", \"HIGH_TRUST_ADVANCED\",
     \"QUALIFIED_ELECTRONIC_SIGNATURE\"
     """
-    dimensions: Optional[FieldDimension] = None
-    placeholder: Optional[str] = None
+    dimensions: Optional[
+        FieldDimension | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    placeholder: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Provide note in the case of Mandatory Attachment"""
-    radio_group_name: Optional[str] = None
+    radio_group_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The group name required only when adding a Radio Box type field to group
     multiple Radio boxes together.
     """
-    format: Optional[str] = None
+    format: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     <p>Text format of the field. Used for the date type field only. Possible
     values are</p><ul> <li>m/d</li> <li>m/d/yy</li> <li>m/d/yyyy</li>
@@ -3076,20 +3983,25 @@ class AutoPlaceFieldRequest:
     <li>mmm-yyyy</li> <li>mmmm-yy</li> <li>mmmm-yyyy</li> <li>mmmm d, yyyy</li>
     <li>dd/mm/yy</li> <li>ddmmmyyyy</li></ul>
     """
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Value that user want to show in the field."""
-    max_length: Optional[int] = None
+    max_length: int
     """
     Maximum length of the value allowed in the field. Must between 1 - 9999
     """
-    validation_rule: Optional[str] = None
+    validation_rule: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     One or more rules for validation of the fields possible values are
     \"MANDATORY\" or \"OPTIONAL\".
     """
-    validation: Optional[FieldValidationValue] = None
-    font: Optional[Font] = None
-    multiline: Optional[bool] = None
+    validation: Optional[
+        FieldValidationValue | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    font: Optional[Font | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    multiline: bool
     """
     This belongs to Text Area field type and If set to true, text area field
     would be created with multi line option.
@@ -3102,17 +4014,17 @@ class Font:
     Definition: Font
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Name of the font selected for the text field. Possible values are
     \"COURIER\", \"HELVETICA\".
     """
-    size: Optional[str] = None
+    size: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Size of the font selected for the text field. Possible values are 8, 10,
     12, 14, 16, 18, 20
     """
-    embedded_size: Optional[str] = None
+    embedded_size: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Size of the font in the original PDF document."""
 
 
@@ -3122,22 +4034,47 @@ class FormFillingRequest:
     Definition: FormFillingRequest
     """
 
-    auto_save: Optional[bool] = None
+    auto_save: bool
     """
     Default value is false. True, if the form fields are being saved without
     user intervention e.g., while closing the document or pressing back. For
     Signing, Initials, In-persons, Reviewing, Submit actions the value is
     false.
     """
-    text: Optional[List[TextFormFillingRequest]] = None
+    text: Optional[
+        List[TextFormFillingRequest | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """It has the list of textboxes data to save"""
-    radio: Optional[List[RadioFormFillingRequest]] = None
+    radio: Optional[
+        List[RadioFormFillingRequest | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """It has the list of radios value to save"""
-    checkbox: Optional[List[CheckBoxFormFillingRequest]] = None
+    checkbox: Optional[
+        List[CheckBoxFormFillingRequest | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """It has the list of checkboxes value to save"""
-    dropdown: Optional[List[DropDownFormFillingRequest]] = None
+    dropdown: Optional[
+        List[DropDownFormFillingRequest | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """It has the list of dropdowns value to save"""
-    listbox: Optional[List[ListBoxFormFillingRequest]] = None
+    listbox: Optional[
+        List[ListBoxFormFillingRequest | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """It has the list of listboxes value to save"""
 
 
@@ -3147,9 +4084,9 @@ class TextFormFillingRequest:
     Definition: TextFormFillingRequest
     """
 
-    field_name: Optional[str] = None
+    field_name: str
     """Unique identifier of the field in the document."""
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Value of the field to be saved in the document."""
 
 
@@ -3159,11 +4096,11 @@ class RadioFormFillingRequest:
     Definition: RadioFormFillingRequest
     """
 
-    field_name: Optional[str] = None
+    field_name: str
     """Unique identifier of the field in the document."""
-    radio_group_name: Optional[str] = None
+    radio_group_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Group name to which the radio button belongs."""
-    value: Optional[bool] = None
+    value: bool
     """Value of the field to be saved in the document."""
 
 
@@ -3173,9 +4110,9 @@ class CheckBoxFormFillingRequest:
     Definition: CheckBoxFormFillingRequest
     """
 
-    field_name: Optional[str] = None
+    field_name: str
     """Unique identifier of the field in the document."""
-    value: Optional[bool] = None
+    value: bool
     """Value of the field to be saved in the document."""
 
 
@@ -3185,9 +4122,9 @@ class DropDownFormFillingRequest:
     Definition: DropDownFormFillingRequest
     """
 
-    field_name: Optional[str] = None
+    field_name: str
     """Unique identifier of the field in the document."""
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Value of the field to be saved in the document."""
 
 
@@ -3197,9 +4134,9 @@ class ListBoxFormFillingRequest:
     Definition: ListBoxFormFillingRequest
     """
 
-    field_name: Optional[str] = None
+    field_name: str
     """Unique identifier of the field in the document."""
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Value of the field to be saved in the document."""
 
 
@@ -3209,16 +4146,16 @@ class InitialFieldRequest:
     Definition: InitialFieldRequest
     """
 
-    order: Optional[int] = None
+    order: int
     """The order of the user in workflow for which the field is being added."""
-    page_no: Optional[int] = None
+    page_no: int
     """Page number on which the field is to be created."""
-    field_name: Optional[str] = None
+    field_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Name of the field that is to be added. If not provided, system will assign
     an unique auto generated name to the field.
     """
-    dimensions: Optional[FieldDimension] = None
+    dimensions: FieldDimension | Mapping[str, Any]
 
 
 @dataclass
@@ -3227,12 +4164,12 @@ class InitialFillingRequest:
     Definition: InitialFillingRequest
     """
 
-    field_name: Optional[str] = None
+    field_name: str
     """Unique identifier of the field in the document."""
-    image: Optional[str] = None
+    image: str
     """Base64 image used for the filling of the initials."""
-    method: Optional[HandSignature] = None
-    apply_to_all: Optional[bool] = None
+    method: Optional[HandSignature] = dataclass_field(default=None, kw_only=True)
+    apply_to_all: bool
     """True if all initials are to be filled."""
 
 
@@ -3242,13 +4179,13 @@ class UpdateInitialFieldRequest:
     Definition: UpdateInitialFieldRequest
     """
 
-    field_name: Optional[str] = None
+    field_name: str
     """Current name of the field, that is to be updated."""
-    renamed_as: Optional[str] = None
+    renamed_as: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Updated name of the field if renaming is intended."""
-    page_no: Optional[int] = None
+    page_no: int
     """Page number on which the field is to be created."""
-    dimensions: Optional[FieldDimension] = None
+    dimensions: FieldDimension | Mapping[str, Any]
 
 
 @dataclass
@@ -3257,33 +4194,38 @@ class InPersonFieldRequest:
     Definition: InPersonFieldRequest
     """
 
-    order: Optional[int] = None
+    order: int
     """The order of the user in workflow for which the field is being added."""
-    page_no: Optional[int] = None
+    page_no: int
     """Page number on which the field is to be created."""
-    field_name: Optional[str] = None
+    field_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Name of the field that is to be added. If not provided, system will assign
     an unique auto generated name to the field.
     """
-    placeholder: Optional[str] = None
+    placeholder: str
     """
     String identifier for the inperson field, it can be Customer, Jack, CEO
     etc.
     """
-    dimensions: Optional[FieldDimension] = None
-    display: Optional[str] = None
+    dimensions: FieldDimension | Mapping[str, Any]
+    display: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Visibility of the field that is to be added, possible values are
     \"VISIBLE\" and \"INVISIBLE\"
     """
-    level_of_assurance: Optional[List[str]] = None
+    level_of_assurance: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     Level Of Assurance to be updated. Possible Values are \"ELECTRONIC_SEAL\",
     \"ADVANCED_ELECTRONIC_SEAL\", \"QUALIFIED_ELECTRONIC_SEAL\",
     \"ELECTRONIC_SIGNATURE\"
     """
-    authentication_signing: Optional[SignatureFieldAuthentication] = None
+    authentication_signing: Optional[
+        SignatureFieldAuthentication | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -3292,30 +4234,40 @@ class UpdateInPersonFieldRequest:
     Definition: UpdateInPersonFieldRequest
     """
 
-    field_name: Optional[str] = None
+    field_name: str
     """Current name of the field, that is to be updated."""
-    renamed_as: Optional[str] = None
+    renamed_as: Optional[str] = dataclass_field(default=None, kw_only=True)
     """updated name of the field, if renaming is intended."""
-    page_no: Optional[int] = None
+    page_no: int
     """Page number on which the field is to be created."""
-    placeholder: Optional[str] = None
+    placeholder: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     String identifier for the in-person field, it can be Customer, Jack, CEO
     etc.
     """
-    dimensions: Optional[FieldDimension] = None
-    display: Optional[str] = None
+    dimensions: Optional[
+        FieldDimension | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    display: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Visibility of the field that is to be updated, possible values are
     \"VISIBLE\" and \"INVISIBLE\"
     """
-    level_of_assurance: Optional[List[str]] = None
+    level_of_assurance: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     Level Of Assurance to be updated. Possible Values are \"ELECTRONIC_SEAL\",
     \"ADVANCED_ELECTRONIC_SEAL\", \"QUALIFIED_ELECTRONIC_SEAL\",
     \"ELECTRONIC_SIGNATURE\"
     """
-    authentication_signing: Optional[SignatureFieldAuthentication] = None
+    authentication_signing: Optional[
+        SignatureFieldAuthentication | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -3324,16 +4276,16 @@ class DigitalSignatureFieldRequest:
     Definition: DigitalSignatureFieldRequest
     """
 
-    order: Optional[int] = None
+    order: int
     """Order of the recipient for which the field is being created."""
-    page_no: Optional[int] = None
+    page_no: int
     """Page number at which the field is about to be created."""
-    field_name: Optional[str] = None
+    field_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Name of the field that is to be added. If not provided, system will assign
     an unique auto generated name to the field.
     """
-    level_of_assurance: Optional[List[str]] = None
+    level_of_assurance: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     Level Of Assurance to be added. Possible Values are
     \"ELECTRONIC_SIGNATURE\", \"ELECTRONIC_SEAL\",
@@ -3341,13 +4293,23 @@ class DigitalSignatureFieldRequest:
     \"ADVANCED_ELECTRONIC_SIGNATURE\", \"HIGH_TRUST_ADVANCED\",
     \"QUALIFIED_ELECTRONIC_SIGNATURE\"
     """
-    dimensions: Optional[FieldDimension] = None
-    display: Optional[str] = None
+    dimensions: Optional[
+        FieldDimension | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    display: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Visibility of the field that is to be added, possible values are
     \"VISIBLE\" and \"INVISIBLE\"
     """
-    authentication_signing: Optional[SignatureFieldAuthentication] = None
+    authentication_signing: Optional[
+        SignatureFieldAuthentication | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -3356,9 +4318,9 @@ class UpdateDigitalSignatureFieldRequest:
     Definition: UpdateDigitalSignatureFieldRequest
     """
 
-    field_name: Optional[str] = None
+    field_name: str
     """Current name of the field, which is to be updated."""
-    level_of_assurance: Optional[List[str]] = None
+    level_of_assurance: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     Level Of Assurance to be updated. Possible Values are
     \"ELECTRONIC_SIGNATURE\", \"ELECTRONIC_SEAL\",
@@ -3366,17 +4328,27 @@ class UpdateDigitalSignatureFieldRequest:
     \"ADVANCED_ELECTRONIC_SIGNATURE\", \"HIGH_TRUST_ADVANCED\",
     \"QUALIFIED_ELECTRONIC_SIGNATURE\"
     """
-    renamed_as: Optional[str] = None
+    renamed_as: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Updated name of the field if renaming of the field is intended."""
-    page_no: Optional[int] = None
+    page_no: int
     """Page number on which the field is to be created."""
-    dimensions: Optional[FieldDimension] = None
-    display: Optional[str] = None
+    dimensions: Optional[
+        FieldDimension | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    display: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Visibility of the field that is to be updated, possible values are
     \"VISIBLE\" and \"INVISIBLE\"
     """
-    authentication_signing: Optional[SignatureFieldAuthentication] = None
+    authentication_signing: Optional[
+        SignatureFieldAuthentication | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -3385,19 +4357,19 @@ class CheckBoxFieldRequest:
     Definition: CheckBoxFieldRequest
     """
 
-    order: Optional[int] = None
+    order: int
     """The order of the user in workflow for which the field is being added."""
-    page_no: Optional[int] = None
+    page_no: int
     """Page number on which the field is to be created."""
-    field_name: Optional[str] = None
+    field_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Name of the provided field that is to be added. If not provided, system
     will assign an unique auto generated name to the field.
     """
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Value of the field. Possible values are \"true\" or \"false\""""
-    dimensions: Optional[FieldDimension] = None
-    validation_rule: Optional[str] = None
+    dimensions: FieldDimension | Mapping[str, Any]
+    validation_rule: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     One or more rules for validation of the fields possible values are
     \"MANDATORY\" or \"OPTIONAL\".
@@ -3410,16 +4382,16 @@ class UpdateCheckBoxFieldRequest:
     Definition: UpdateCheckBoxFieldRequest
     """
 
-    field_name: Optional[str] = None
+    field_name: str
     """Current name of the field, that is to be updated."""
-    renamed_as: Optional[str] = None
+    renamed_as: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Updated name of the field if renaming is intended."""
-    page_no: Optional[int] = None
+    page_no: int
     """Page number on which the field is to be created."""
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Value of the field. Possible values are \"true\" or \"false\""""
-    dimensions: Optional[FieldDimension] = None
-    validation_rule: Optional[str] = None
+    dimensions: FieldDimension | Mapping[str, Any]
+    validation_rule: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     One or more rules for validation of the fields possible values are
     \"MANDATORY\" or \"OPTIONAL\".
@@ -3432,22 +4404,19 @@ class TextBoxFieldRequest:
     Definition: TextBoxFieldRequest
     """
 
-    order: Optional[int] = None
+    order: int
     """The order of the user in workflow for which the field is being added."""
-    page_no: Optional[int] = None
+    page_no: int
     """Page number on which the field is to be created."""
-    type_: Optional[TextboxType] = field(
-        default=None,
-        metadata={"wire_name": "type"},
-    )
-    value: Optional[str] = None
+    type_: TextboxType = dataclass_field(metadata={"wire_name": "type"})
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Value of the field. For type = DATE, the value is expected to follow ISO
     8601 format.Following the format YYYY-MM-DD hh:mm:ss +00. As the values are
     for date fields client applications can send YYYY-MM-DD and ignore hh:mm:ss
     +00. If value is not in proper format an error will be returned.
     """
-    placeholder: Optional[str] = None
+    placeholder: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Placeholder text for the text field. For name, email, company, job title
     and date, placeholder value can be \"NAME\", \"EMAIL\", \"COMPANY\",
@@ -3456,11 +4425,11 @@ class TextBoxFieldRequest:
     own placeholder texts. These placeholders appear in the text fields while
     viewing the document in viewer.
     """
-    max_length: Optional[int] = None
+    max_length: int
     """
     Maximum length of the value allowed in the field. Must between 1 - 9999
     """
-    format: Optional[str] = None
+    format: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     <p>Text format of the field. Used for the date type field only. Possible
     values are</p><ul> <li>m/d</li> <li>m/d/yy</li> <li>m/d/yyyy</li>
@@ -3470,17 +4439,22 @@ class TextBoxFieldRequest:
     <li>mmm-yyyy</li> <li>mmmm-yy</li> <li>mmmm-yyyy</li> <li>mmmm d, yyyy</li>
     <li>dd/mm/yy</li> <li>ddmmmyyyy</li></ul>
     """
-    field_name: Optional[str] = None
+    field_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Name of the field that is to be added. If not provided, system will assign
     an unique auto generated name to the field.
     """
-    field_type: Optional[FieldType] = None
-    validation_rule: Optional[ValidationRule] = None
-    validation: Optional[FieldValidationValue] = None
-    font: Optional[Font] = None
-    dimensions: Optional[FieldDimension] = None
-    multiline: Optional[bool] = None
+    field_type: FieldType
+    validation_rule: ValidationRule
+    validation: Optional[
+        FieldValidationValue | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    font: Font | Mapping[str, Any]
+    dimensions: FieldDimension | Mapping[str, Any]
+    multiline: bool
     """If set to true, text area field would be created"""
 
 
@@ -3490,33 +4464,38 @@ class UpdateTextBoxFieldRequest:
     Definition: UpdateTextBoxFieldRequest
     """
 
-    field_name: Optional[str] = None
+    field_name: str
     """Current name of the field, that is to be updated."""
-    renamed_as: Optional[str] = None
+    renamed_as: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Updated name of the field if renaming is intended."""
-    page_no: Optional[int] = None
+    page_no: int
     """Page number on which the field is to be created."""
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Value of the field. For type = DATE, the value is expected to follow ISO
     8601 format.Following the format YYYY-MM-DD hh:mm:ss +00. As the values are
     for date fields client applications can send YYYY-MM-DD and ignore hh:mm:ss
     +00. If value is not in proper format an error will be returned.
     """
-    max_length: Optional[int] = None
+    max_length: int
     """
     Maximum length of the value allowed in the field. Must between 1 - 9999
     """
-    field_type: Optional[FieldType] = None
-    validation_rule: Optional[ValidationRule] = None
-    font: Optional[Font] = None
-    dimensions: Optional[FieldDimension] = None
-    placeholder: Optional[str] = None
+    field_type: FieldType
+    validation_rule: ValidationRule
+    font: Optional[Font | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    dimensions: Optional[
+        FieldDimension | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    placeholder: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Developers can provide a their own placeholder texts. These placeholders
     appear in the text fields while viewing the document in viewer.
     """
-    format: Optional[str] = None
+    format: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     <p>Text format of the field. Used for the date type field only. Possible
     values are</p><ul> <li>m/d</li> <li>m/d/yy</li> <li>m/d/yyyy</li>
@@ -3526,7 +4505,12 @@ class UpdateTextBoxFieldRequest:
     <li>mmm-yyyy</li> <li>mmmm-yy</li> <li>mmmm-yyyy</li> <li>mmmm d, yyyy</li>
     <li>dd/mm/yy</li> <li>ddmmmyyyy</li></ul>
     """
-    validation: Optional[FieldValidationValue] = None
+    validation: Optional[
+        FieldValidationValue | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -3535,20 +4519,20 @@ class RadioBoxFieldRequest:
     Definition: RadioBoxFieldRequest
     """
 
-    order: Optional[int] = None
+    order: int
     """The order of the user in workflow for which the field is being added."""
-    page_no: Optional[int] = None
+    page_no: int
     """Page number on which the field is to be created."""
-    field_name: Optional[str] = None
+    field_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Name of the provided field that is to be added. If not provided, system
     will assign an unique auto generated name to the field.
     """
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Value of the field. Possible values are \"true\" or \"false\""""
-    validation_rule: Optional[ValidationRule] = None
-    radio_group_name: Optional[str] = None
-    dimensions: Optional[FieldDimension] = None
+    validation_rule: ValidationRule
+    radio_group_name: str
+    dimensions: FieldDimension | Mapping[str, Any]
 
 
 @dataclass
@@ -3557,18 +4541,18 @@ class UpdateRadioBoxFieldRequest:
     Definition: UpdateRadioBoxFieldRequest
     """
 
-    field_name: Optional[str] = None
+    field_name: str
     """Current name of the field, that is to be updated."""
-    renamed_as: Optional[str] = None
+    renamed_as: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Updated name of the field if renaming is intended."""
-    page_no: Optional[int] = None
+    page_no: int
     """Page number on which the field is to be created."""
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Value of the field. Possible values are \"true\" or \"false\""""
-    validation_rule: Optional[ValidationRule] = None
-    radio_group_name: Optional[str] = None
+    validation_rule: ValidationRule
+    radio_group_name: str
     """The group name to which the field belongs."""
-    dimensions: Optional[FieldDimension] = None
+    dimensions: FieldDimension | Mapping[str, Any]
 
 
 ContactSortBy = Literal["CREATEDON", "NAME", "EMAIL"]
@@ -3580,9 +4564,9 @@ class WorkSpaceMembers:
     Definition: WorkSpaceMembers
     """
 
-    name: Optional[str] = None
+    name: str
     """Name of work space member"""
-    email: Optional[str] = None
+    email: str
     """Email Address of work space member"""
 
 
@@ -3592,9 +4576,9 @@ class WorkSpaceOwner:
     Definition: WorkSpaceOwner
     """
 
-    name: Optional[str] = None
+    name: str
     """Name of work space owner"""
-    email: Optional[str] = None
+    email: str
     """Email Address of work space owner"""
 
 
@@ -3604,13 +4588,13 @@ class UploadDocumentLibraryCertifyResponse:
     Definition: UploadDocumentLibraryCertifyResponse
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True if certify signature is enabled for the document."""
-    allowed_permissions: Optional[List[str]] = None
+    allowed_permissions: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Set of allowed certify permission levels for the document."""
-    default_permission: Optional[str] = None
+    default_permission: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Selected permission level for the certify signature settings."""
-    permission: Optional[str] = None
+    permission: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     It is the certify permissions to be applied on the PDF document when the
     first signature is created. The possible values are \"NO_CHANGES_ALLOWED\",
@@ -3624,9 +4608,9 @@ class UploadDocumentLibraryTemplateResponse:
     Definition: UploadDocumentLibraryTemplateResponse
     """
 
-    template_name: Optional[str] = None
+    template_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the template applied on the document."""
-    read_only: Optional[bool] = None
+    read_only: bool
     """
     True if the applied template is read only. User will not be able to make
     any changes if a read only template is applied.
@@ -3639,12 +4623,12 @@ class WorkflowPermissionsUpdateRequest:
     Definition: WorkflowPermissionsUpdateRequest
     """
 
-    apply_to_all: Optional[bool] = None
+    apply_to_all: bool
     """
     True, if the permissions are to be applied on all the recipients in the
     workflow.
     """
-    permissions: Optional[WorkflowPermission] = None
+    permissions: WorkflowPermission | Mapping[str, Any]
 
 
 @dataclass
@@ -3653,23 +4637,33 @@ class WorkflowPermission:
     Definition: WorkflowPermission
     """
 
-    print: Optional[bool] = None
+    print: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """It defines whether recipient is allowed to print the document."""
-    download: Optional[bool] = None
+    download: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """It defines whether recipient is allowed to download the document."""
-    add_text: Optional[bool] = None
+    add_text: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     It defines whether recipient is allowed to add text fields in the document.
     """
-    change_recipients: Optional[bool] = None
+    change_recipients: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """It allows the user to change any recipient who has not signed yet."""
-    add_attachment: Optional[bool] = None
+    add_attachment: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     It defines whether recipient is allowed to add attachments in the PDF
     document.
     """
-    legal_notice: Optional[PermissionLegalNotice] = None
-    attachment: Optional[AttachmentPermissionRequest] = None
+    legal_notice: Optional[
+        PermissionLegalNotice | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    attachment: Optional[
+        AttachmentPermissionRequest | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -3678,7 +4672,7 @@ class AttachmentPermissionRequest:
     Definition: AttachmentPermissionRequest
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """Enabled"""
 
 
@@ -3688,9 +4682,9 @@ class PermissionLegalNotice:
     Definition: PermissionLegalNotice
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if legal notice is enabled."""
-    legal_notice_name: Optional[str] = None
+    legal_notice_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the legal notice selected for  the recipient."""
 
 
@@ -3700,21 +4694,26 @@ class DocumentLogsActions:
     Definition: DocumentLogsActions
     """
 
-    log_id: Optional[int] = None
+    log_id: int
     """ID of an action performed on the document."""
-    date_time: Optional[str] = None
+    date_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date and time when the action was performed."""
-    action_type: Optional[str] = None
-    user_email: Optional[str] = None
+    action_type: Optional[str] = dataclass_field(default=None, kw_only=True)
+    user_email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email of the user who performed the action."""
-    user_name: Optional[str] = None
+    user_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the user who performed the action."""
-    enterprise_name: Optional[str] = None
+    enterprise_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The name of Enterprise to which the user belongs. If the user doesn't
     belong to an enterprise, then this element is not present.
     """
-    information: Optional[DocumentLogsActionsInformation] = None
+    information: Optional[
+        DocumentLogsActionsInformation | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -3723,12 +4722,16 @@ class DocumentLogsActionsInformation:
     Definition: DocumentLogsActionsInformation
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """
     The type of extra information about the action e.g. \"SIGNING_METHOD\"
     which means what signing method user used to sign the document.
     """
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The value of the extra information about the action e.g. \"LOCAL\" which
     means user signed the document using locally held credentials.
@@ -3741,34 +4744,34 @@ class WorkflowUserUpdateRequest:
     Definition: WorkflowUserUpdateRequest
     """
 
-    user_email: Optional[str] = None
+    user_email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The email address of the new user to be updated in workflow. If no value is
     provided, old value will be retained.
     """
-    user_name: Optional[str] = None
+    user_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Name of the recipient to be updated. If no value is provided, old value
     will be retained.
     """
-    email_notification: Optional[bool] = None
+    email_notification: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Setting its value to \"true\" sends an email notification to the user when
     its turn arrives in workflow. Setting its value to \"false\" does not send
     the email notification to the user on its turn. If no value is provided,
     old value will be retained.
     """
-    mobile_number: Optional[str] = None
+    mobile_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Mobile number. If no value is provided, old value will be retained."""
-    role: Optional[WorkflowCollaboratorRole] = None
-    signing_order: Optional[int] = None
+    role: WorkflowCollaboratorRole
+    signing_order: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Order in which the workflow will be signed by the recipients. This signing
     order is important when workflow type is set to \"CUSTOM\".
     """
-    email_language_code: Optional[str] = None
+    email_language_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """email language code"""
-    delivery_method: Optional[DeliveryMethod] = None
+    delivery_method: DeliveryMethod
 
 
 WorkflowCollaboratorRole = Literal[
@@ -3786,7 +4789,7 @@ class WorkflowUserReorderRequest:
     Definition: WorkflowUserReorderRequest
     """
 
-    order: Optional[int] = None
+    order: int
     """The order of the recipient which is to be updated."""
 
 
@@ -3796,21 +4799,26 @@ class UpdateReminderRequest:
     Definition: UpdateReminderRequest
     """
 
-    apply_to_all: Optional[bool] = None
+    apply_to_all: bool
     """
     True, if reminder settings are to be applied on all the recipients in the
     workflow.
     """
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if reminder settings are to be enabled."""
-    frequency: Optional[str] = None
+    frequency: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Reminder Frequency. Possible Values are DAYS | HOURS. """
-    remind_after: Optional[int] = None
+    remind_after: int
     """
     Required, in case of enabled property will true. The number of days after
     which the first reminder would be sent to workflow user.
     """
-    repeat: Optional[RepeatRequest] = None
+    repeat: Optional[
+        RepeatRequest | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -3819,16 +4827,16 @@ class RepeatRequest:
     Definition: RepeatRequest
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if subsequent reminders are enabled."""
-    frequency: Optional[str] = None
+    frequency: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Repeat Reminder Frequency. Possible Values are DAYS | HOURS. """
-    keep_reminding_after: Optional[int] = None
+    keep_reminding_after: int
     """
     Required, in case of enabled property will true. The number of days after
     which the subsequent reminders would be sent to workflow user.
     """
-    total_reminders: Optional[int] = None
+    total_reminders: int
     """
     Required, in case of enabled property will true. The number of subsequent
     reminders would be sent to workflow user.
@@ -3841,17 +4849,17 @@ class WorflowGroupRequest:
     Definition: WorflowGroupRequest
     """
 
-    group_name: Optional[str] = None
+    group_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the new group to be added in workflow."""
-    email_notification: Optional[bool] = None
+    email_notification: bool
     """
     Setting its value to \"true\" sends an email notification to the user when
     its turn arrives in workflow. Setting its value to \"false\" does not send
     the email notification to the user on its turn. If no value is provided,
     default value of \"true\" will be set.
     """
-    role: Optional[CollaboratorRole] = None
-    signing_order: Optional[int] = None
+    role: CollaboratorRole
+    signing_order: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Order in which the workflow will be signed by the recipients. This signing
     order is important when workflow type is set to \"CUSTOM\".
@@ -3864,16 +4872,16 @@ class PlaceholderRequest:
     Definition: PlaceholderRequest
     """
 
-    placeholder: Optional[str] = None
+    placeholder: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the new placeholder to be added in workflow."""
-    email_notification: Optional[bool] = None
+    email_notification: bool
     """
     Setting its value to \"true\" sends an email notification to the user when
     its turn arrives in workflow. Setting its value to \"false\" does not send
     the email notification to the user on its turn.
     """
-    role: Optional[CollaboratorRole] = None
-    signing_order: Optional[int] = None
+    role: CollaboratorRole
+    signing_order: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Order in which the workflow will be signed by the recipients. This signing
     order is important when workflow type is set to \"CUSTOM\".
@@ -3886,20 +4894,20 @@ class WorkflowPlaceholderUpdateRequest:
     Definition: WorkflowPlaceholderUpdateRequest
     """
 
-    placeholder: Optional[str] = None
+    placeholder: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The name of the new placeholder to be added in workflow. If no value is
     provided, old value will be retained.
     """
-    email_notification: Optional[bool] = None
+    email_notification: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Setting its value to \"true\" sends an email notification to the user when
     its turn arrives in workflow. Setting its value to \"false\" does not send
     the email notification to the user on its turn. If no value is provided,
     old value will be retained.
     """
-    role: Optional[WorkflowCollaboratorRole] = None
-    signing_order: Optional[int] = None
+    role: WorkflowCollaboratorRole
+    signing_order: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Order in which the workflow will be signed by the recipients. This signing
     order is important when workflow type is set to \"CUSTOM\".
@@ -3912,9 +4920,14 @@ class UpdateWorkSpaceRequest:
     Definition: UpdateWorkSpaceRequest
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of shared space"""
-    members: Optional[List[WorkSpaceMembers]] = None
+    members: Optional[
+        List[WorkSpaceMembers | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Members of shared space"""
 
 
@@ -3924,7 +4937,7 @@ class MoveToRequest:
     Definition: MoveToRequest
     """
 
-    folder_name: Optional[str] = None
+    folder_name: str
     """Target folder name in which package need to move"""
 
 
@@ -3934,50 +4947,69 @@ class DigitalSignatureFieldResponse:
     Definition: DigitalSignatureFieldResponse
     """
 
-    order: Optional[int] = None
+    order: int
     """
     Order of the recipient to whom this field is assigned. If the field is not
     assigned to anyone, value will be null.
     """
-    display_order: Optional[int] = None
+    display_order: int
     """Display order according to the SigningHub viewer."""
-    field_name: Optional[str] = None
+    field_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the field."""
-    page_no: Optional[int] = None
+    page_no: int
     """Page number of the document on which the field exists."""
-    embedded: Optional[bool] = None
+    embedded: bool
     """True, if field is part of the PDF document."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """
     If field is assigned or not, possible values are ASSIGNED, UN_ASSIGNED,
     SIGNED, LOGGED_IN_USER, HIDDEN and PLACEHOLDER.
     """
-    process_status: Optional[str] = None
+    process_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Whether the field is processed or not. Possible values are UN_PROCESSED,
     PROCESSED.
     """
-    processed_on: Optional[str] = None
+    processed_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date time on which the document is processed."""
-    processed_as: Optional[str] = None
+    processed_as: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     User who processed the field as COLLABORATOR, DELEGATEE, GROUP_MEMBER or
     OWNER.
     """
-    created_on: Optional[str] = None
+    created_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date time on which the field is added"""
-    processed_by: Optional[str] = None
+    processed_by: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address of the user who processed the field."""
-    dimensions: Optional[FieldDimenssionResponse] = None
-    verification: Optional[VerificationResponse] = None
-    nid: Optional[str] = None
-    display: Optional[str] = None
+    dimensions: Optional[
+        FieldDimenssionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    verification: Optional[
+        VerificationResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    nid: Optional[str] = dataclass_field(default=None, kw_only=True)
+    display: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Returns the visibility value of the digital signature field, possible
     values are \"VISIBLE\" and \"INVISIBLE\".
     """
-    level_of_assurance: Optional[List[str]] = None
-    authentication: Optional[FieldAuthentication] = None
+    level_of_assurance: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
+    authentication: Optional[
+        FieldAuthentication | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -3986,8 +5018,8 @@ class FieldDimenssionResponse:
     Definition: FieldDimenssionResponse
     """
 
-    field: Optional[FieldResponse] = None
-    page: Optional[PageResponse] = None
+    field: Optional[FieldResponse | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    page: Optional[PageResponse | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -3996,13 +5028,13 @@ class FieldResponse:
     Definition: FieldResponse
     """
 
-    x: Optional[float] = None
+    x: float
     """Left location of the field in pixel."""
-    y: Optional[float] = None
+    y: float
     """Top location of the field in pixel."""
-    width: Optional[float] = None
+    width: float
     """Width of the field in pixel."""
-    height: Optional[float] = None
+    height: float
     """Height of the field in pixel."""
 
 
@@ -4012,9 +5044,9 @@ class PageResponse:
     Definition: PageResponse
     """
 
-    width: Optional[float] = None
+    width: float
     """Width of the page where field is placed in the PDF."""
-    height: Optional[float] = None
+    height: float
     """Height of the page where field is placed in the PDF."""
 
 
@@ -4024,12 +5056,22 @@ class FieldAuthentication:
     Definition: FieldAuthentication
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """
     True, if authentications are enabled for the electronic signature fields.
     """
-    sms_otp: Optional[AccessSecuritySmsOtpResponse] = None
-    totp: Optional[AccessSecurityTOTPResponse] = None
+    sms_otp: Optional[
+        AccessSecuritySmsOtpResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    totp: Optional[
+        AccessSecurityTOTPResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -4038,7 +5080,7 @@ class AccessSecurityTOTPResponse:
     Definition: AccessSecurityTOTPResponse
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool
     """True, if TOTP authentication is enabled for the package."""
 
 
@@ -4048,40 +5090,49 @@ class HandSignatureFieldResponse:
     Definition: HandSignatureFieldResponse
     """
 
-    order: Optional[int] = None
+    order: int
     """
     Order of the recipient to whom this field is assigned. If the field is not
     assigned to anyone, value will be null.
     """
-    display_order: Optional[int] = None
+    display_order: int
     """Display order according to the SigningHub viewer."""
-    field_name: Optional[str] = None
+    field_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the field."""
-    page_no: Optional[int] = None
+    page_no: int
     """Page number of the document on which the field exists."""
-    embedded: Optional[bool] = None
+    embedded: bool
     """True, if field is part of the PDF document."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """
     If field is assigned or not, possible values are ASSIGNED, UN_ASSIGNED,
     SIGNED, LOGGED_IN_USER, HIDDEN and PLACEHOLDER.
     """
-    process_status: Optional[str] = None
+    process_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Whether the field is processed or not. Possible values are UN_PROCESSED,
     PROCESSED.
     """
-    processed_on: Optional[str] = None
+    processed_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date time on which the document is processed."""
-    processed_as: Optional[str] = None
+    processed_as: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     User who processed the field as COLLABORATOR,DELEGATEE,GROUP_MEMBER or
     OWNER.
     """
-    processed_by: Optional[str] = None
+    processed_by: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address of the user who processed the field."""
-    dimensions: Optional[FieldDimenssionResponse] = None
-    nid: Optional[str] = None
+    dimensions: Optional[
+        FieldDimenssionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    nid: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -4090,47 +5141,66 @@ class ElectronicSignatureFieldResponse:
     Definition: ElectronicSignatureFieldResponse
     """
 
-    order: Optional[int] = None
+    order: int
     """Email address of the user who processed the field."""
-    display_order: Optional[int] = None
+    display_order: int
     """Display order according to the SigningHub viewer."""
-    field_name: Optional[str] = None
+    field_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the field."""
-    page_no: Optional[int] = None
+    page_no: int
     """Page number of the document on which the field exists."""
-    embedded: Optional[bool] = None
+    embedded: bool
     """True, if field is part of the PDF document."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """
     If field is assigned or not, possible values are ASSIGNED, UN_ASSIGNED,
     SIGNED, LOGGED_IN_USER, HIDDEN and PLACEHOLDER.
     """
-    process_status: Optional[str] = None
+    process_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Whether the field is processed or not. Possible values are UN_PROCESSED,
     PROCESSED.
     """
-    processed_on: Optional[str] = None
+    processed_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date time on which the document is processed."""
-    processed_as: Optional[str] = None
+    processed_as: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     User who processed the field as COLLABORATOR,DELEGATEE,GROUP_MEMBER or
     OWNER.
     """
-    processed_by: Optional[str] = None
+    processed_by: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address of the user who processed the field."""
-    dimensions: Optional[FieldDimenssionResponse] = None
-    signature_sub_type: Optional[str] = None
+    dimensions: Optional[
+        FieldDimenssionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    signature_sub_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The signature sub-type can be a WITNESS signature. If witness signatures
     are enabled in service plan, E-Signature fields are signed with a common
     certificate shared by all the users in the service plan. Possible values
     are WITNESS or NONE.
     """
-    authentication: Optional[FieldAuthentication] = None
-    verification: Optional[VerificationResponse] = None
-    nid: Optional[str] = None
-    display: Optional[str] = None
+    authentication: Optional[
+        FieldAuthentication | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    verification: Optional[
+        VerificationResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    nid: Optional[str] = dataclass_field(default=None, kw_only=True)
+    display: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Returns the visibility value of the electronic signature field, possible
     values are \"VISIBLE\" and \"INVISIBLE\".
@@ -4143,33 +5213,38 @@ class InitialFieldResponse:
     Definition: InitialFieldResponse
     """
 
-    order: Optional[int] = None
+    order: int
     """
     Order of the recipient to whom this field is assigned. If the field is not
     assigned to anyone, value will be null.
     """
-    display_order: Optional[int] = None
+    display_order: int
     """Display order according to the SigningHub viewer."""
-    field_name: Optional[str] = None
+    field_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the field."""
-    page_no: Optional[int] = None
+    page_no: int
     """Page number of the document on which the field exists."""
-    process_status: Optional[str] = None
+    process_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Whether the field is processed or not. Possible values are UN_PROCESSED,
     PROCESSED.
     """
-    processed_on: Optional[str] = None
+    processed_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date time on which the document is processed."""
-    processed_as: Optional[str] = None
+    processed_as: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     User who processed the field as COLLABORATOR,DELEGATEE,GROUP_MEMBER or
     OWNER.
     """
-    processed_by: Optional[str] = None
+    processed_by: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address of the user who processed the field."""
-    dimensions: Optional[FieldDimenssionResponse] = None
-    embedded: Optional[bool] = None
+    dimensions: Optional[
+        FieldDimenssionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    embedded: bool
     """True, if field is part of the PDF document."""
 
 
@@ -4179,56 +5254,75 @@ class InPersonFieldResponse:
     Definition: InPersonFieldResponse
     """
 
-    order: Optional[int] = None
+    order: int
     """
     Order of the recipient to whom this field is assigned. If the field is not
     assigned to anyone, value will be null.
     """
-    display_order: Optional[int] = None
+    display_order: int
     """Display order according to the SigningHub viewer."""
-    field_name: Optional[str] = None
+    field_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the field."""
-    page_no: Optional[int] = None
+    page_no: int
     """Page number of the document on which the field exists."""
-    embedded: Optional[bool] = None
+    embedded: bool
     """True, if field is part of the PDF document."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    process_status: Optional[str] = None
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    process_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Whether the field is processed or not. Possible values are UN_PROCESSED,
     PROCESSED.
     """
-    processed_on: Optional[str] = None
+    processed_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date time on which the document is processed."""
-    processed_as: Optional[str] = None
+    processed_as: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     User who processed the field as COLLABORATOR,DELEGATEE,GROUP_MEMBER or
     OWNER.
     """
-    processed_by: Optional[str] = None
+    processed_by: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address of the user who processed the field."""
-    placeholder: Optional[str] = None
+    placeholder: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Name of the in-person signer or placeholder e.g., Customer, Sales
     Representative etc.
     """
-    signature_sub_type: Optional[str] = None
+    signature_sub_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The signature sub-type for in-person signatures can be a WITNESS signature.
     If witness signatures are enabled in service plan, In-person fields are
     signed with a common certificate shared by all the users in the service
     plan. Possible values are WITNESS or NONE.
     """
-    dimensions: Optional[FieldDimenssionResponse] = None
-    verification: Optional[VerificationResponse] = None
-    display: Optional[str] = None
+    dimensions: Optional[
+        FieldDimenssionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    verification: Optional[
+        VerificationResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    display: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Returns the visibility value of the inperson field, possible values are
     \"VISIBLE\" and \"INVISIBLE\".
     """
-    level_of_assurance: Optional[List[str]] = None
+    level_of_assurance: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """In Person selected level of assurances"""
-    authentication: Optional[FieldAuthentication] = None
+    authentication: Optional[
+        FieldAuthentication | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -4237,29 +5331,33 @@ class TextFieldResponse:
     Definition: TextFieldResponse
     """
 
-    required: Optional[bool] = None
+    required: bool
     """True if field required in pdf"""
-    order: Optional[int] = None
+    order: int
     """
     Order of the recipient to whom this field is assigned. If the field is not
     assigned to anyone, value will be null.
     """
-    tab_order: Optional[int] = None
+    tab_order: int
     """Tab order in the PDF document"""
-    display_order: Optional[int] = None
+    display_order: int
     """Display order according to the SigningHub viewer."""
-    field_name: Optional[str] = None
+    field_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the field."""
-    page_no: Optional[int] = None
+    page_no: int
     """Page number of the document on which the field exists."""
-    embedded: Optional[bool] = None
+    embedded: bool
     """True, if field is part of the PDF document."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """
     Type of the text field, possible values are \"TEXT\", \"NAME\",
     \"COMPANY\", \"JOBTITLE\", \"EMAIL\", \"DATE\".
     """
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Value of the field. For type = DATE or format_type = DATE, the value is
     expected to follow ISO 8601 format.Following the format YYYY-MM-DD hh:mm:ss
@@ -4267,29 +5365,34 @@ class TextFieldResponse:
     YYYY-MM-DD and ignore hh:mm:ss +00. If value is not in proper format an
     error will be returned.
     """
-    read_only: Optional[bool] = None
+    read_only: bool
     """True, if the field is marked read only in the PDF document."""
-    validation_rule: Optional[str] = None
+    validation_rule: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     One or more rules for validation of the fields, possible values are
     \"MANDATORY\" or \"OPTIONAL\".
     """
-    validation: Optional[FieldValidationValue] = None
-    visible: Optional[bool] = None
+    validation: Optional[
+        FieldValidationValue | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    visible: bool
     """True, if the field is not hidden in the PDF document."""
-    multiline: Optional[bool] = None
+    multiline: bool
     """True, if the field is multi line in the PDF document."""
-    font: Optional[FontResponse] = None
-    max_length: Optional[int] = None
+    font: Optional[FontResponse | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    max_length: int
     """Maximum content length allowed to be filled in the field."""
-    format_type: Optional[str] = None
+    format_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     If field is a textbox it can follow different input types. Possible values
     are ALPHANUMERIC, NUMBER, TEXT, EMAIL, TIME or DATE.
     """
-    placeholder: Optional[str] = None
+    placeholder: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Placeholder text for the textbox field."""
-    format: Optional[str] = None
+    format: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     <p>Text format of the field. Used for the date type field only. Possible
     values are</p><ul> <li>m/d</li> <li>m/d/yy</li> <li>m/d/yyyy</li>
@@ -4299,20 +5402,25 @@ class TextFieldResponse:
     <li>mmm-yyyy</li> <li>mmmm-yy</li> <li>mmmm-yyyy</li> <li>mmmm d, yyyy</li>
     <li>dd/mm/yy</li> <li>ddmmmyyyy</li></ul>
     """
-    color: Optional[str] = None
+    color: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Color of the text in the form fields."""
-    border_color: Optional[str] = None
+    border_color: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Border color of the form field."""
-    tooltip: Optional[str] = None
+    tooltip: Optional[str] = dataclass_field(default=None, kw_only=True)
     """tooltip of the form field."""
-    field_rotation: Optional[int] = None
+    field_rotation: int
     """Field Rotation"""
-    align: Optional[str] = None
+    align: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Text alignment for the form field. Possible values are \"RIGHT\", \"LEFT\",
     \"CENTER\" or \"JUSTIFY\"
     """
-    dimensions: Optional[FieldDimenssionResponse] = None
+    dimensions: Optional[
+        FieldDimenssionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -4321,47 +5429,56 @@ class RadioFieldResponse:
     Definition: RadioFieldResponse
     """
 
-    required: Optional[bool] = None
+    required: bool
     """True if field required in pdf"""
-    order: Optional[int] = None
+    order: int
     """
     Order of the recipient to whom this field is assigned. If the field is not
     assigned to anyone, value will be null.
     """
-    tab_order: Optional[int] = None
+    tab_order: int
     """Tab order in the PDF document."""
-    display_order: Optional[int] = None
+    display_order: int
     """Display order according to the SigningHub viewer."""
-    field_name: Optional[str] = None
+    field_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the field."""
-    page_no: Optional[int] = None
+    page_no: int
     """Page number of the document on which the field exists."""
-    embedded: Optional[bool] = None
+    embedded: bool
     """True, if field is part of the PDF document."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    value: Optional[bool] = None
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    value: bool
     """Value of the field."""
-    read_only: Optional[bool] = None
+    read_only: bool
     """True, if the field is marked readonly in the PDF document."""
-    validation_rule: Optional[str] = None
+    validation_rule: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     One or more rules for validation of the fields possible values are
     \"MANDATORY\" or \"OPTIONAL\".
     """
-    radio_group_name: Optional[str] = None
+    radio_group_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The group name to which the field belongs."""
-    checked: Optional[bool] = None
+    checked: bool
     """True, if the field is selected"""
-    visible: Optional[bool] = None
+    visible: bool
     """True if the field is not hidden in the PDF document."""
-    dimensions: Optional[FieldDimenssionResponse] = None
-    color: Optional[str] = None
+    dimensions: Optional[
+        FieldDimenssionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    color: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Color of the text in the form fields."""
-    border_color: Optional[str] = None
+    border_color: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Border color of the form field."""
-    tooltip: Optional[str] = None
+    tooltip: Optional[str] = dataclass_field(default=None, kw_only=True)
     """tooltip of the form field."""
-    field_rotation: Optional[int] = None
+    field_rotation: int
     """Field Rotation"""
 
 
@@ -4371,45 +5488,54 @@ class CheckboxFieldResponse:
     Definition: CheckboxFieldResponse
     """
 
-    required: Optional[bool] = None
+    required: bool
     """True if field required in pdf"""
-    order: Optional[int] = None
+    order: int
     """
     Order of the recipient to whom this field is assigned. If the field is not
     assigned to anyone, value will be null.
     """
-    tab_order: Optional[int] = None
+    tab_order: int
     """Tab order in the PDF document"""
-    display_order: Optional[int] = None
+    display_order: int
     """Display order according to the SigningHub viewer."""
-    field_name: Optional[str] = None
+    field_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the field."""
-    page_no: Optional[int] = None
+    page_no: int
     """Page number of the document on which the field exists."""
-    embedded: Optional[bool] = None
+    embedded: bool
     """True, if field is part of the PDF document."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    value: Optional[bool] = None
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    value: bool
     """Value of the field."""
-    read_only: Optional[bool] = None
+    read_only: bool
     """True, if the field is marked read only in the PDF document."""
-    checked: Optional[bool] = None
+    checked: bool
     """True if the field is selected."""
-    visible: Optional[bool] = None
+    visible: bool
     """True if the field is not hidden in the PDF document."""
-    validation_rule: Optional[str] = None
+    validation_rule: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     One or more rules for validation of the fields possible values are
     \"MANDATORY\" or \"OPTIONAL\".
     """
-    dimensions: Optional[FieldDimenssionResponse] = None
-    color: Optional[str] = None
+    dimensions: Optional[
+        FieldDimenssionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    color: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Color of the text in the form fields."""
-    border_color: Optional[str] = None
+    border_color: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Border color of the form field."""
-    tooltip: Optional[str] = None
+    tooltip: Optional[str] = dataclass_field(default=None, kw_only=True)
     """tooltip of the form field."""
-    field_rotation: Optional[int] = None
+    field_rotation: int
     """Field Rotation"""
 
 
@@ -4419,45 +5545,50 @@ class DropdownFieldResponse:
     Definition: DropdownFieldResponse
     """
 
-    required: Optional[bool] = None
+    required: bool
     """True if field required in pdf"""
-    order: Optional[int] = None
+    order: int
     """
     Order of the recipient to whom this field is assigned. If the field is not
     assigned to anyone, value will be null.
     """
-    tab_order: Optional[int] = None
+    tab_order: int
     """Tab order in the PDF document."""
-    display_order: Optional[int] = None
+    display_order: int
     """Display order according to the SigningHub viewer."""
-    field_name: Optional[str] = None
+    field_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the field."""
-    page_no: Optional[int] = None
+    page_no: int
     """Page number of the document on which the field exists."""
-    embedded: Optional[bool] = None
+    embedded: bool
     """True, if field is part of the PDF document."""
-    validation_rule: Optional[str] = None
+    validation_rule: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     One or more rules for validation of the fields possible values are
     \"MANDATORY\" or \"OPTIONAL\".
     """
-    read_only: Optional[bool] = None
+    read_only: bool
     """True, if the field is marked read only in the PDF document."""
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Value of the field ."""
-    choices: Optional[List[str]] = None
+    choices: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Choices available for the dropdown to choose a value from."""
-    visible: Optional[bool] = None
+    visible: bool
     """True, if the field is not hidden in the PDF document."""
-    dimensions: Optional[FieldDimenssionResponse] = None
-    font: Optional[FontResponse] = None
-    color: Optional[str] = None
+    dimensions: Optional[
+        FieldDimenssionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    font: Optional[FontResponse | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    color: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Color of the text in the form fields."""
-    border_color: Optional[str] = None
+    border_color: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Border color of the form field."""
-    tooltip: Optional[str] = None
+    tooltip: Optional[str] = dataclass_field(default=None, kw_only=True)
     """tooltip of the form field."""
-    field_rotation: Optional[int] = None
+    field_rotation: int
     """Field Rotation"""
 
 
@@ -4467,43 +5598,48 @@ class ListBoxFieldResponse:
     Definition: ListBoxFieldResponse
     """
 
-    order: Optional[int] = None
+    order: int
     """
     Order of the recipient to whom this field is assigned. If the field is not
     assigned to anyone, value will be null.
     """
-    tab_order: Optional[int] = None
+    tab_order: int
     """Tab order in the PDF document."""
-    display_order: Optional[int] = None
+    display_order: int
     """Display order according to the SigningHub viewer."""
-    field_name: Optional[str] = None
+    field_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the field."""
-    page_no: Optional[int] = None
+    page_no: int
     """Page number of the document on which the field exists."""
-    embedded: Optional[bool] = None
+    embedded: bool
     """True, if field is part of the PDF document."""
-    validation_rule: Optional[str] = None
+    validation_rule: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     One or more rules for validation of the fields possible values are
     \"MANDATORY\" or \"OPTIONAL\".
     """
-    read_only: Optional[bool] = None
+    read_only: bool
     """True, if the field is marked read only in the PDF document."""
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Value of the field."""
-    choices: Optional[List[str]] = None
+    choices: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Choices available for the dropdown to choose a value from."""
-    visible: Optional[bool] = None
+    visible: bool
     """True, if the field is not hidden in the PDF document."""
-    dimensions: Optional[FieldDimenssionResponse] = None
-    font: Optional[FontResponse] = None
-    color: Optional[str] = None
+    dimensions: Optional[
+        FieldDimenssionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    font: Optional[FontResponse | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    color: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Color of the text in the form fields."""
-    border_color: Optional[str] = None
+    border_color: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Border color of the form field."""
-    tooltip: Optional[str] = None
+    tooltip: Optional[str] = dataclass_field(default=None, kw_only=True)
     """tooltip of the form field."""
-    field_rotation: Optional[int] = None
+    field_rotation: int
     """Field Rotation"""
 
 
@@ -4513,15 +5649,15 @@ class FontResponse:
     Definition: FontResponse
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Font name for the text field. For user defined fields SigningHub only
     support \"COURIER\", \"HELVETICA\". In case of existing fields in a PDF
     file, font value can be anything that is set in the PDF.
     """
-    size: Optional[int] = None
+    size: int
     """Font size for the text field."""
-    embedded_size: Optional[float] = None
+    embedded_size: float
     """Size of the font in the original PDF document."""
 
 
@@ -4531,24 +5667,38 @@ class QrCodeResponse:
     Definition: QrCodeResponse
     """
 
-    field_name: Optional[str] = None
+    field_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the field."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """Field Type PDF_FIELD_TYPE like QR"""
-    page_no: Optional[int] = None
+    page_no: int
     """Page number of the document on which the field exists."""
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """QrCode generated base64 will be provided inly in draft mode"""
-    dimensions: Optional[FieldDimenssionResponse] = None
-    data: Optional[str] = None
+    dimensions: Optional[
+        FieldDimenssionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    data: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The plain text data to be encoded in the QR code. Default is URL generated
     to access the related document. e.g.
     {base_url}/document/{document_unique_id}
     """
-    options: Optional[QrCodeOptions] = None
-    color: Optional[QrCodeColor] = None
-    logo: Optional[QrCodeLogo] = None
+    options: Optional[
+        QrCodeOptions | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    color: Optional[QrCodeColor | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    logo: Optional[QrCodeLogo | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -4557,37 +5707,43 @@ class AttachmentFieldResponse:
     Definition: AttachmentFieldResponse
     """
 
-    order: Optional[int] = None
+    order: int
     """Order of the recipient to whom this field is assigned."""
-    display_order: Optional[int] = None
+    display_order: int
     """Display order according to the SigningHub viewer."""
-    field_name: Optional[str] = None
+    field_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the field."""
-    page_no: Optional[int] = None
+    page_no: int
     """Page number of the document on which the field exists."""
-    process_status: Optional[str] = None
+    process_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Whether the field is processed or not. Possible values are UN_PROCESSED,
     PROCESSED.
     """
-    processed_on: Optional[str] = None
+    processed_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date time on which the document is processed."""
-    processed_as: Optional[str] = None
+    processed_as: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     User who processed the field as COLLABORATOR,DELEGATEE,GROUP_MEMBER or
     OWNER.
     """
-    processed_by: Optional[str] = None
+    processed_by: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address of the user who processed the field."""
-    attachment_ref_id: Optional[int] = field(
+    attachment_ref_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "attachmentRefId"},
     )
     """Attachmet ref id"""
-    note: Optional[str] = None
+    note: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Attachmet note Only in case of \"MANDATORY\" attachment rule"""
-    validation_rule: Optional[ValidationRule] = None
-    dimensions: Optional[FieldDimenssionResponse] = None
+    validation_rule: ValidationRule
+    dimensions: Optional[
+        FieldDimenssionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -4596,17 +5752,27 @@ class CommentFieldResponse:
     Definition: CommentFieldResponse
     """
 
-    id: Optional[int] = None
+    id: int
     """Comment field id"""
-    page_no: Optional[int] = None
+    page_no: int
     """Page number of the document on which the field exists."""
-    unread_count: Optional[int] = None
+    unread_count: int
     """Unread comments"""
-    private: Optional[bool] = None
+    private: bool
     """Private"""
-    recipients: Optional[List[CommentFieldRecipientResponse]] = None
+    recipients: Optional[
+        List[CommentFieldRecipientResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Recipients"""
-    dimensions: Optional[FieldDimenssionResponse] = None
+    dimensions: Optional[
+        FieldDimenssionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -4615,14 +5781,19 @@ class UniqueIdentifierFieldResponse:
     Definition: UniqueIdentifierFieldResponse
     """
 
-    field_name: Optional[str] = None
+    field_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the field."""
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Value of the field."""
-    page_no: Optional[int] = None
+    page_no: int
     """Page number of the document on which the field exists."""
-    font: Optional[FontResponse] = None
-    dimensions: Optional[FieldDimenssionResponse] = None
+    font: Optional[FontResponse | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    dimensions: Optional[
+        FieldDimenssionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -4631,9 +5802,9 @@ class CommentFieldRecipientResponse:
     Definition: CommentFieldRecipientResponse
     """
 
-    user_name: Optional[str] = None
+    user_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User name"""
-    user_email: Optional[str] = None
+    user_email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User email"""
 
 
@@ -4643,15 +5814,15 @@ class AssignFieldRequest:
     Definition: AssignFieldRequest
     """
 
-    field_name: Optional[str] = None
+    field_name: str
     """Name of the signature field that is to be assigned."""
-    radio_group_name: Optional[str] = None
+    radio_group_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """provide group name for radio box"""
-    order: Optional[int] = None
+    order: int
     """
     The order of the user in workflow, to which the field is being assigned.
     """
-    level_of_assurance: Optional[List[str]] = None
+    level_of_assurance: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     Level Of Assurance to be added. Possible Values are
     \"ELECTRONIC_SIGNATURE\", \"ELECTRONIC_SEAL\",
@@ -4669,16 +5840,16 @@ class SigninghubClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -4689,8 +5860,8 @@ class SigninghubClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -4698,8 +5869,8 @@ class SigninghubClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -4711,7 +5882,7 @@ class SigninghubClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -4726,7 +5897,84 @@ class SigninghubClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "signinghub"
 
-    async def attachment_delete_attachment_async(
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
+            if next_link.startswith("?"):
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
+
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
+    def attachment_delete_attachment(
         self,
         package_id: int,
         document_id: int,
@@ -4742,6 +5990,24 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to delete the attachment
         of a document.
+
+        Swagger operation ID: `V4_Attachment_DeleteAttachment`.
+
+        Args:
+            package_id: Package ID of the package to which the document is
+                added.
+            document_id: ID of the document to which the attachment is added.
+            attachment_id: ID of the attachment.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4754,7 +6020,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/{quote(str(attachment_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4768,6 +6034,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4775,7 +6042,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def attachment_download_attachment_async(
+    def attachment_download_attachment(
         self,
         package_id: int,
         document_id: int,
@@ -4791,6 +6058,24 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to download the
         attachment of a document.
+
+        Swagger operation ID: `V4_Attachment_DownloadAttachment`.
+
+        Args:
+            package_id: Package ID of the package to which the document is
+                added.
+            document_id: ID of the document to which the attachment is added.
+            attachment_id: ID of the attachment.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4803,7 +6088,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/{quote(str(attachment_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4817,6 +6102,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4824,7 +6110,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def attachment_get_attachments_async(
+    def list_attachment_get_attachments(
         self,
         package_id: int,
         document_id: int,
@@ -4833,12 +6119,33 @@ class SigninghubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Attachments
 
         Business applications can use this service API to get the attachments
         of a document.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `V4_Attachment_GetAttachments`.
+
+        Args:
+            package_id: Package ID of the package to which the document is
+                added.
+            document_id: ID of the document to which the attachment is added.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4849,29 +6156,50 @@ class SigninghubClient(ConnectorClientBase):
             f"/{quote(str(document_id), safe='')}"
             f"/attachments"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def attachment_upload_attachment_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def attachment_upload_attachment(
         self,
         input: bytes,
         package_id: int,
@@ -4887,6 +6215,25 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to upload a attachment
         in a document.
+
+        Swagger operation ID: `V4_Attachment_UploadAttachment`.
+
+        Args:
+            input: The binary request body.
+            package_id: Package ID of the package to which the document is
+                added.
+            document_id: ID of the document to which the attachment needs to be
+                add.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4898,7 +6245,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/attachments"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST",
             request_url,
             body=input,
@@ -4915,6 +6262,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4922,9 +6270,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def checkbox_add_check_box_async(
+    def checkbox_add_check_box(
         self,
-        input: CheckBoxFieldRequest,
+        input: CheckBoxFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -4950,6 +6298,24 @@ class SigninghubClient(ConnectorClientBase):
         will be assigned. If either width or height (or both) is provided, the
         system will compare these provided values with each other. The larger
         value between width and height will be assigned to both dimensions.
+
+        Swagger operation ID: `V4_Checkbox_AddCheckBox`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which the action is to be taken.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4962,7 +6328,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/checkbox"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4976,6 +6342,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4983,9 +6350,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def checkbox_update_check_box_async(
+    def checkbox_update_check_box(
         self,
-        input: UpdateCheckBoxFieldRequest,
+        input: UpdateCheckBoxFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -5006,6 +6373,24 @@ class SigninghubClient(ConnectorClientBase):
         be used when a template was applied or the document was created using
         the GUI interface. It's width and height cannot be updated. They will
         remain the same as when they were added.
+
+        Swagger operation ID: `V4_Checkbox_UpdateCheckBox`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which the action is to be taken.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5018,7 +6403,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/checkbox"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5032,6 +6417,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5039,18 +6425,18 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def contacts_get_async(
+    def list_contacts_get(
         self,
         record_per_page: int,
         page_no: int,
+        *,
         sort_by: Optional[str] = None,
         asc: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Contacts
 
@@ -5061,6 +6447,28 @@ class SigninghubClient(ConnectorClientBase):
         specific contacts or that of the enterprise to which the user belongs.
         The search response information contains the user email address and
         respective user name.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `V4_Contacts_Get`.
+
+        Args:
+            record_per_page: Total number of records to be retrieved in a page.
+            page_no: Page number to be retrieved.
+            sort_by: Sort the result by possible values are mentioned above.
+            asc: Order the result set by ascending or descending.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5083,29 +6491,50 @@ class SigninghubClient(ConnectorClientBase):
             query_params.append(f"asc={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def documents_delete_document_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def documents_delete_document(
         self,
         package_id: int,
         document_id: int,
@@ -5120,6 +6549,23 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to delete a document in
         a package.
+
+        Swagger operation ID: `V4_Documents_DeleteDocument`.
+
+        Args:
+            package_id: Package ID of the package to which the document is
+                added.
+            document_id: ID of the document to be deleted.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5130,7 +6576,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/{quote(str(document_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5144,6 +6590,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5151,7 +6598,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def documents_download_document_bytes_async(
+    def documents_download_document_bytes(
         self,
         package_id: int,
         document_id: int,
@@ -5166,6 +6613,23 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to download the document
         bytes. The package ID and document ID is provided in the resource URL.
+
+        Swagger operation ID: `V4_Documents_DownloadDocumentBytes`.
+
+        Args:
+            package_id: Package ID of the package to which the document is
+                added.
+            document_id: The ID of the document to be downloaded.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5176,7 +6640,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/{quote(str(document_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5190,6 +6654,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5197,7 +6662,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def documents_get_certify_policy_async(
+    def documents_get_certify_policy(
         self,
         package_id: int,
         document_id: int,
@@ -5212,6 +6677,23 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to get certify signature
         settings of a document in a package.
+
+        Swagger operation ID: `V4_Documents_GetCertifyPolicy`.
+
+        Args:
+            package_id: Package ID of the package to which the document is
+                added.
+            document_id: The ID of the document to be downloaded.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5223,7 +6705,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/certify"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5237,6 +6719,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5244,7 +6727,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def documents_get_document_details_async(
+    def documents_get_document_details(
         self,
         package_id: int,
         document_id: int,
@@ -5259,6 +6742,24 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to get the document
         details. The document ID is provided in the URL as \"{document_id}\".
+
+        Swagger operation ID: `V4_Documents_GetDocumentDetails`.
+
+        Args:
+            package_id: The Package ID of the package to which the document is
+                added.
+            document_id: The document ID for which the document details are
+                requested.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5270,7 +6771,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/details"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5284,6 +6785,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5291,9 +6793,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def documents_rename_document_async(
+    def documents_rename_document(
         self,
-        input: RenameDocumentRequest,
+        input: RenameDocumentRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -5307,6 +6809,26 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to rename a document in
         a package.
+
+        Swagger operation ID: `V4_Documents_RenameDocument`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID of the package to which the document is
+                added.
+            document_id: The ID of the document to on which the action is to be
+                performed.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5317,7 +6839,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/{quote(str(document_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5331,6 +6853,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5338,9 +6861,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def documents_update_certify_policy_async(
+    def documents_update_certify_policy(
         self,
-        input: UpdateCertifyPolicyRequest,
+        input: UpdateCertifyPolicyRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -5354,6 +6877,26 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to update certify
         signature settings for a document in a package.
+
+        Swagger operation ID: `V4_Documents_UpdateCertifyPolicy`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID of the package to which the document is
+                added.
+            document_id: The ID of the document on which the action is to be
+                performed.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5365,7 +6908,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/certify"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5379,6 +6922,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5386,7 +6930,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def documents_upload_from_library_async(
+    def documents_upload_from_library(
         self,
         package_id: int,
         document_id: int,
@@ -5405,6 +6949,23 @@ class SigninghubClient(ConnectorClientBase):
         resource URL to identify the library document to be copied. Note a
         package must already exist before you can add a document using this
         call.
+
+        Swagger operation ID: `V4_Documents_UploadFromLibrary`.
+
+        Args:
+            package_id: The Package ID of the package to which the document is
+                being added.
+            document_id: The library document ID that need to add/updated.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5416,7 +6977,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/{quote(str(document_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5430,6 +6991,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5437,7 +6999,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def documents_upload_stream_async(
+    def documents_upload_stream(
         self,
         input: bytes,
         package_id: int,
@@ -5461,13 +7023,30 @@ class SigninghubClient(ConnectorClientBase):
         converted to PDF format upon upload.Click here for the full list. Note
         PDF documents are not altered upon upload to the system. Note a package
         must already exist before you can add a document using this call.
+
+        Swagger operation ID: `V4_Documents_UploadStream`.
+
+        Args:
+            input: The binary request body.
+            package_id: Package ID of the package to which the document is
+                being added.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v4/packages/{quote(str(package_id), safe='')}/documents"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST",
             request_url,
             body=input,
@@ -5484,6 +7063,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5491,7 +7071,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def enterprise_documents_get_enterprise_workflow_access_async(
+    def enterprise_documents_get_enterprise_workflow_access(
         self,
         package_id: int,
         order: int,
@@ -5512,6 +7092,25 @@ class SigninghubClient(ConnectorClientBase):
         to access document package outside the scope of this duration if the
         access security is enabled. Document owner can also configure
         authentication based security of the package for a recipient.
+
+        Swagger operation ID:
+        `V4_EnterpriseDocuments_GetEnterpriseWorkflowAccess`.
+
+        Args:
+            package_id: The package ID for which workflow access security and
+                authentication is to be updated.
+            order: Order of the recipient in the workflow for which the access
+                security and authentication is to be updated.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5524,7 +7123,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/authentication"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5538,6 +7137,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5545,9 +7145,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def enterprise_documents_update_enterprise_workflow_access_async(
+    def enterprise_documents_update_enterprise_workflow_access(
         self,
-        input: AccessUpdateRequest,
+        input: AccessUpdateRequest | Mapping[str, Any],
         package_id: int,
         order: int,
         *,
@@ -5564,6 +7164,27 @@ class SigninghubClient(ConnectorClientBase):
         authentications and access duration for the recipients. This API can
         also be used by the enterprise administrator or the enterprise user if
         the \"scope\" variable was used in the authentication request
+
+        Swagger operation ID:
+        `V4_EnterpriseDocuments_UpdateEnterpriseWorkflowAccess`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: The package ID for which workflow access security and
+                authentication is to be updated.
+            order: Order of the recipient in the workflow for which the access
+                security and authentication is to be updated.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5576,7 +7197,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/authentication"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5590,6 +7211,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5597,7 +7219,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def fields_auto_assign_field_async(
+    def fields_auto_assign_field(
         self,
         input: FieldsAutoAssignFieldInput,
         package_id: int,
@@ -5621,6 +7243,24 @@ class SigninghubClient(ConnectorClientBase):
         they are numbered \"1\", \"2\", and \"3\" respectfully.This API call
         allows you to assign a user by their workflow order number, to an input
         field on the document.
+
+        Swagger operation ID: `V4_Fields_AutoAssignField`.
+
+        Args:
+            input: The request body.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which workflow user needs to be
+                updated.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5633,7 +7273,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/assign"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5647,6 +7287,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5654,9 +7295,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def fields_auto_place_async(
+    def fields_auto_place(
         self,
-        input: AutoPlaceFieldRequest,
+        input: AutoPlaceFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -5693,6 +7334,25 @@ class SigninghubClient(ConnectorClientBase):
         Workflow](#operation/Workflow_WorkflowAddUser) for more information.
         Note if you have a document with a template applied, or have applied
         one using the APIs, then the workflow will already contain users.
+
+        Swagger operation ID: `V4_Fields_AutoPlace`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: The ID of the package to which the document is added.
+            document_id: The ID of the document for which the fields are
+                requested.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5705,7 +7365,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/autoplace"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5719,6 +7379,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5726,9 +7387,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def fields_delete_document_field_async(
+    def fields_delete_document_field(
         self,
-        input: DeleteDocumentFieldRequest,
+        input: DeleteDocumentFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -5742,6 +7403,24 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to delete a field of
         document in a package.
+
+        Swagger operation ID: `V4_Fields_DeleteDocumentField`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which the action is to be taken.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5753,7 +7432,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/fields"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5767,6 +7446,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5774,9 +7454,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def fields_fill_form_fields_async(
+    def fields_fill_form_fields(
         self,
-        input: FormFillingRequest,
+        input: FormFillingRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -5790,6 +7470,24 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to fill one or more form
         fields in a document by a specified user in the order.
+
+        Swagger operation ID: `V4_Fields_FillFormFields`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The ID of the document.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5801,7 +7499,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/fields"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5815,6 +7513,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5822,7 +7521,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def fields_get_all_document_fields_async(
+    def fields_get_all_document_fields(
         self,
         package_id: int,
         document_id: int,
@@ -5838,6 +7537,26 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to get document fields
         i.e., initials, in-persons, signature fields or form fields.
+
+        Swagger operation ID: `V4_Fields_GetAllDocumentFields`.
+
+        Args:
+            package_id: The ID of the package to which the document is added.
+            document_id: The ID of the document for which the fields are
+                requested.
+            page_no: Page no of the document for which the fields are
+                requested. If page number is not provided fields of whole
+                document are returned.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5850,7 +7569,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/{quote(str(page_no), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5864,6 +7583,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5871,9 +7591,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def folder_move_package_async(
+    def folder_move_package(
         self,
-        input: MoveToRequest,
+        input: MoveToRequest | Mapping[str, Any],
         package_id: int,
         *,
         timeout: Optional[float] = None,
@@ -5886,13 +7606,30 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to move the document
         package to a shared space or user's custom folder.
+
+        Swagger operation ID: `V4_Folder_MovePackage`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package id that need to move to folder.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v4/packages/{quote(str(package_id), safe='')}/move_to"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5906,6 +7643,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5913,9 +7651,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def initials_add_initial_async(
+    def initials_add_initial(
         self,
-        input: InitialFieldRequest,
+        input: InitialFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -5937,6 +7675,24 @@ class SigninghubClient(ConnectorClientBase):
         Workflow](#operation/Workflow_WorkflowAddUser) for more information.
         Note if you have a document with a template applied, or have applied
         one using the APIs, then the workflow will already contain users.
+
+        Swagger operation ID: `V4_Initials_AddInitial`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which the action is to be taken.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5949,7 +7705,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/initials"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5963,6 +7719,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5970,9 +7727,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def initials_fill_async(
+    def initials_fill(
         self,
-        input: InitialFillingRequest,
+        input: InitialFillingRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -5986,6 +7743,24 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to fill an initials
         field in a document by a specified user in the order.
+
+        Swagger operation ID: `V4_Initials_Fill`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The ID of the document.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5997,7 +7772,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/initial"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6011,6 +7786,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6018,9 +7794,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def initials_update_initial_async(
+    def initials_update_initial(
         self,
-        input: UpdateInitialFieldRequest,
+        input: UpdateInitialFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -6040,6 +7816,24 @@ class SigninghubClient(ConnectorClientBase):
         Document Fields](#operation/Documents_GetDocumentFields).The latter can
         be used when a template was applied or the document was created using
         the GUI interface.
+
+        Swagger operation ID: `V4_Initials_UpdateInitial`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which the action is to be taken.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6052,7 +7846,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/initials"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6066,6 +7860,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6073,9 +7868,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def in_person_add_in_person_async(
+    def in_person_add_in_person(
         self,
-        input: InPersonFieldRequest,
+        input: InPersonFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -6106,6 +7901,24 @@ class SigninghubClient(ConnectorClientBase):
         recipient would be in the same location.This type of signature is not
         intended for use whereby a document is shared with recipients over
         email link in the normal loose integration method.
+
+        Swagger operation ID: `V4_InPerson_AddInPerson`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which the action is to be taken.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6118,7 +7931,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/in_person_signature"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6132,6 +7945,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6139,9 +7953,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def in_person_update_in_person_async(
+    def in_person_update_in_person(
         self,
-        input: UpdateInPersonFieldRequest,
+        input: UpdateInPersonFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -6162,6 +7976,24 @@ class SigninghubClient(ConnectorClientBase):
         Fields](#operation/Documents_GetDocumentFields).The latter can be used
         when a template was applied or the document was created using the GUI
         interface.
+
+        Swagger operation ID: `V4_InPerson_UpdateInPerson`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which the action is to be taken.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6174,7 +8006,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/in_person_signature"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6188,6 +8020,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6195,9 +8028,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def package_add_package_async(
+    def package_add_package(
         self,
-        input: AddDocumentPackageRequest,
+        input: AddDocumentPackageRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6214,10 +8047,26 @@ class SigninghubClient(ConnectorClientBase):
         exist before you can upload or add documents to SigningHub.. Even a
         single document is a part of a package: a package containing one
         document. Note: A package can be renamed if required once created.
+
+        Swagger operation ID: `V4_Package_AddPackage`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v4/packages"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6231,6 +8080,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6238,9 +8088,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def package_approve_async(
+    def package_approve(
         self,
-        input: ApproveRequest,
+        input: ApproveRequest | Mapping[str, Any],
         package_id: int,
         *,
         timeout: Optional[float] = None,
@@ -6253,13 +8103,30 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to approve a document by
         a specified user in the order.
+
+        Swagger operation ID: `V4_Package_Approve`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: The ID of the package to be approved.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v4/packages/{quote(str(package_id), safe='')}/approve"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6273,6 +8140,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6280,9 +8148,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def package_decline_async(
+    def package_decline(
         self,
-        input: DeclineRequest,
+        input: DeclineRequest | Mapping[str, Any],
         package_id: int,
         *,
         timeout: Optional[float] = None,
@@ -6295,13 +8163,30 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to decline a document by
         a specified user in the order.
+
+        Swagger operation ID: `V4_Package_Decline`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: The ID of the package to be declined.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v4/packages/{quote(str(package_id), safe='')}/decline"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6315,6 +8200,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6322,7 +8208,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def package_delete_package_async(
+    def package_delete_package(
         self,
         package_id_bulk_action: int,
         *,
@@ -6340,13 +8226,29 @@ class SigninghubClient(ConnectorClientBase):
         automatically declined as result of delete operation. If the document
         status is SHARED, then the document is automatically recalled and
         workflow is stopped before the document is deleted.
+
+        Swagger operation ID: `V4_Package_DeletePackage`.
+
+        Args:
+            package_id_bulk_action: Package ID of the package which contains
+                the document.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v4/packages/{quote(str(package_id_bulk_action), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6360,6 +8262,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6367,11 +8270,11 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def package_download_package_bytes_async(
+    def package_download_package_bytes(
         self,
         package_id_bulk_action: int,
-        document_ids: Optional[List[int]] = None,
         *,
+        document_ids: Optional[List[int]] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -6387,6 +8290,24 @@ class SigninghubClient(ConnectorClientBase):
         document, the download is the binary zip file of all documents. The
         x-password and x-otp headers are optional. They are required if the
         document owner set them during the workflow creation phase.
+
+        Swagger operation ID: `V4_Package_DownloadPackageBytes`.
+
+        Args:
+            package_id_bulk_action: The package ID to be downloaded.
+            document_ids: The Document IDs parameter is optional. If
+                x-combine-files is set to true, the documents will be merged
+                based on the mentioned documents of the package.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6412,7 +8333,7 @@ class SigninghubClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6426,6 +8347,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6433,7 +8355,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def package_finish_async(
+    def package_finish(
         self,
         package_id: int,
         *,
@@ -6464,13 +8386,28 @@ class SigninghubClient(ConnectorClientBase):
         SigningHub App, this method is invoked by the application to ensure the
         workflow continues to process and the next signatory is notified, and
         the document status is available via the configured call-back URL.
+
+        Swagger operation ID: `V4_Package_Finish`.
+
+        Args:
+            package_id: The ID of the package to be finished.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v4/packages/{quote(str(package_id), safe='')}/finish"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6484,6 +8421,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6491,9 +8429,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def package_gatekeeper_approve_async(
+    def package_gatekeeper_approve(
         self,
-        input: ApproveRequest,
+        input: ApproveRequest | Mapping[str, Any],
         package_id: int,
         *,
         timeout: Optional[float] = None,
@@ -6506,6 +8444,23 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to gatekeeper approve a
         document by a specified user in the order.
+
+        Swagger operation ID: `V4_Package_GatekeeperApprove`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: The ID of the package to be approved.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6516,7 +8471,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/approve"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6530,6 +8485,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6537,9 +8493,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def package_gatekeeper_decline_async(
+    def package_gatekeeper_decline(
         self,
-        input: DeclineRequest,
+        input: DeclineRequest | Mapping[str, Any],
         package_id: int,
         *,
         timeout: Optional[float] = None,
@@ -6552,6 +8508,23 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to gatekeeper decline a
         document by a specified user in the order.
+
+        Swagger operation ID: `V4_Package_GatekeeperDecline`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: The ID of the package to be declined.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6562,7 +8535,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/decline"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6576,6 +8549,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6583,11 +8557,12 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def package_get_all_packages_async(
+    def list_package_get_all_packages(
         self,
         document_status: str,
         page_no: int,
         record_per_page: int,
+        *,
         package_name: Optional[str] = None,
         package_id: Optional[int] = None,
         recipient_from: Optional[str] = None,
@@ -6607,18 +8582,61 @@ class SigninghubClient(ConnectorClientBase):
         document_statuses: Optional[List[str]] = None,
         owned_by: Optional[str] = None,
         smart_form: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Packages
 
         Business applications can use this service API to get a list of
         documents filtered by different statuses. Users can divide the records
         into pages by providing a number of records per page.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `V4_Package_GetAllPackages`.
+
+        Args:
+            document_status: Filter by document status possible values are ALL,
+                DRAFT, PENDING, SIGNED, DECLINED, INPROGRESS, EDITED, REVIEWED,
+                COMPLETED, EXPIRING_IN_SEVEN_DAYS.
+            page_no: Page number, according the division of records per page.
+            record_per_page: Number of records that are needed to be fetched in
+                one request.
+            package_name: Package Name.
+            package_id: Package Id.
+            recipient_from: From.
+            recipient_to: To.
+            document_id: Document Id.
+            expiry: Expiry (Days).
+            modified_from: From Modified Date.
+            modified_to: To Modified Date.
+            size_from: From Size (KB).
+            size_to: To Size (KB).
+            certified_documents: Only certified signed documents.
+            form_fields: Only documents that have form fields.
+            attachments: Only documents that have attachments.
+            document_type: Document Type like XML, PDF, DOCX etc.
+            sort_by: Sort the resultant records as per your choice.
+            asc: Sorted the resultant records by ascending or descending order.
+            document_statuses: Document Type.
+            owned_by: Owned By filter possible values are ME_OTHERS, ME,
+                OTHERS.
+            smart_form: Smart form name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6737,29 +8755,50 @@ class SigninghubClient(ConnectorClientBase):
             query_params.append(f"smart-form={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def package_get_package_details_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def package_get_package_details(
         self,
         package_id: int,
         *,
@@ -6775,13 +8814,28 @@ class SigninghubClient(ConnectorClientBase):
         package. This API can also be used by the business application to
         perform action on behalf of the enterprise user via \"Scope
         Authentication\".
+
+        Swagger operation ID: `V4_Package_GetPackageDetails`.
+
+        Args:
+            package_id: Package ID of the document package.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v4/packages/{quote(str(package_id), safe='')}/details"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6795,6 +8849,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6802,9 +8857,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def package_rename_package_async(
+    def package_rename_package(
         self,
-        input: RenameDocumentPackageRequest,
+        input: RenameDocumentPackageRequest | Mapping[str, Any],
         package_id_bulk_action: int,
         *,
         timeout: Optional[float] = None,
@@ -6817,13 +8872,30 @@ class SigninghubClient(ConnectorClientBase):
 
         This service API is used to rename a document package. The document
         package is identified by its unique identifier in the URL of the call.
+
+        Swagger operation ID: `V4_Package_RenamePackage`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id_bulk_action: Package ID to change the name of.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v4/packages/{quote(str(package_id_bulk_action), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6837,6 +8909,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6844,7 +8917,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def package_submit_async(
+    def package_submit(
         self,
         package_id: int,
         *,
@@ -6864,13 +8937,29 @@ class SigninghubClient(ConnectorClientBase):
         [SigningHub
         Roles](http://manuals.ascertia.com/SigningHubv7/default.aspx#pageid=1056)
         for a description of all available workflow recipient roles.
+
+        Swagger operation ID: `V4_Package_Submit`.
+
+        Args:
+            package_id: The SigningHub package ID that contains the document to
+                be submitted.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v4/packages/{quote(str(package_id), safe='')}/submit"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6884,6 +8973,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6891,9 +8981,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def qr_add_qr_code_async(
+    def qr_add_qr_code(
         self,
-        input: QrCodeRequest,
+        input: QrCodeRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -6907,6 +8997,24 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to add a QR Code to a
         document in a package.
+
+        Swagger operation ID: `V4_QR_AddQRCode`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which the action is to be taken.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6919,7 +9027,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/qrcode"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6933,6 +9041,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6940,9 +9049,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def qr_update_qr_code_async(
+    def qr_update_qr_code(
         self,
-        input: UpdateQrCodeRequest,
+        input: UpdateQrCodeRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -6956,6 +9065,24 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to update a QR Code of a
         document in a package.
+
+        Swagger operation ID: `V4_QR_UpdateQRCode`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which the action is to be taken.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6968,7 +9095,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/qrcode"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6982,6 +9109,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6989,9 +9117,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def radio_add_radio_box_async(
+    def radio_add_radio_box(
         self,
-        input: RadioBoxFieldRequest,
+        input: RadioBoxFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -7017,6 +9145,24 @@ class SigninghubClient(ConnectorClientBase):
         will be assigned. If either width or height (or both) is provided, the
         system will compare these provided values with each other. The larger
         value between width and height will be assigned to both dimensions.
+
+        Swagger operation ID: `V4_Radio_AddRadioBox`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which the action is to be taken.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7029,7 +9175,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/radio"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7043,6 +9189,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7050,9 +9197,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def radio_update_radio_box_async(
+    def radio_update_radio_box(
         self,
-        input: UpdateRadioBoxFieldRequest,
+        input: UpdateRadioBoxFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -7073,6 +9220,24 @@ class SigninghubClient(ConnectorClientBase):
         when a template was applied or the document was created using the GUI
         interface. It's width and height cannot be updated. They will remain
         the same as when they were added.
+
+        Swagger operation ID: `V4_Radio_UpdateRadioBox`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which the action is to be taken.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7085,7 +9250,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/radio"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7099,6 +9264,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7106,18 +9272,18 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def settings_get_templates_async(
+    def list_settings_get_templates(
         self,
         record_per_page: int,
         page_no: int,
+        *,
         sort_by: Optional[str] = None,
         asc: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Templates
 
@@ -7126,6 +9292,30 @@ class SigninghubClient(ConnectorClientBase):
         supplied under the \"x-search-text\" header.Furthermore, it is possible
         to search a user's personal templates or the enterprise templates as
         allowed against their user role by their enterprise admin.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `V4_Settings_GetTemplates`.
+
+        Args:
+            record_per_page: Total number of records to be retrieved in a page.
+            page_no: Page number to be retrieved.
+            sort_by: Sort by column. Possible Values are CREATED_ON and NAME.
+                Default is sort by CREATED_ON.
+            asc: The resulting list order. Default resulting list will be
+                descending.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7148,31 +9338,52 @@ class SigninghubClient(ConnectorClientBase):
             query_params.append(f"asc={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def signature_add_signature_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def signature_add_signature(
         self,
-        input: DigitalSignatureFieldRequest,
+        input: DigitalSignatureFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -7195,6 +9406,25 @@ class SigninghubClient(ConnectorClientBase):
         information.Note if you have a document with a template applied, or
         have applied one using the APIs, then the workflow will already contain
         users.
+
+        Swagger operation ID: `V4_Signature_AddSignature`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: The package ID for which workflow details need to be
+                updated.
+            document_id: The document ID where the field is to be added.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7207,7 +9437,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/signature"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7221,6 +9451,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7228,9 +9459,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def signature_update_signature_async(
+    def signature_update_signature(
         self,
-        input: UpdateDigitalSignatureFieldRequest,
+        input: UpdateDigitalSignatureFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -7251,6 +9482,24 @@ class SigninghubClient(ConnectorClientBase):
         Fields](#operation/Documents_GetDocumentFields).The latter can be used
         when a template was applied or the document was created using the GUI
         interface.
+
+        Swagger operation ID: `V4_Signature_UpdateSignature`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which the action is to be taken.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7263,7 +9512,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/signature"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7277,6 +9526,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7284,9 +9534,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def signing_bulk_sign_documents_async(
+    def signing_bulk_sign_documents(
         self,
-        input: BulkSignRequest,
+        input: BulkSignRequest | Mapping[str, Any],
         package_id_bulk_action: str,
         *,
         timeout: Optional[float] = None,
@@ -7334,13 +9584,31 @@ class SigninghubClient(ConnectorClientBase):
         applications must retrieve the OTP from the use and submit it when
         making the API call. This is done using the \"x-otp\" header in the
         request.
+
+        Swagger operation ID: `V4_Signing_BulkSignDocuments`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id_bulk_action: Bulk action to be performed. Possible
+                values are: SIGN | SHARE.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v4/packages/{quote(str(package_id_bulk_action), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7354,6 +9622,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7361,9 +9630,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def signing_bulk_sign_status_async(
+    def signing_bulk_sign_status(
         self,
-        input: BulkSignStatusRequest,
+        input: BulkSignStatusRequest | Mapping[str, Any],
         bulk_action: str,
         *,
         timeout: Optional[float] = None,
@@ -7392,13 +9661,31 @@ class SigninghubClient(ConnectorClientBase):
         signing process to complete the signing process on failed documents,
         the ACTION property will be REINITIATE_SIGNING_PROCESS, and the STATUS
         property will be PENDING.
+
+        Swagger operation ID: `V4_Signing_BulkSignStatus`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            bulk_action: Bulk action to be performed. Possible values are: SIGN
+                | SHARE.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v4/packages/{quote(str(bulk_action), safe='')}/status"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7412,6 +9699,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7419,9 +9707,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def signing_sign_document_async(
+    def signing_sign_document(
         self,
-        input: SignDocumentRequest,
+        input: SignDocumentRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -7466,6 +9754,25 @@ class SigninghubClient(ConnectorClientBase):
         business applications must retrieve the OTP from the use and submit it
         when making the API call. This is done using the \"x-otp\" header in
         the request.
+
+        Swagger operation ID: `V4_Signing_SignDocument`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: The identifier of the package that contains the
+                document for signature.
+            document_id: Identifier of the document to be signed.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7477,7 +9784,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/sign"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7491,6 +9798,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7498,19 +9806,19 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def template_get_enterprise_templates_async(
+    def list_template_get_enterprise_templates(
         self,
         record_per_page: int,
         page_no: int,
+        *,
         sort_by: Optional[str] = None,
         asc: Optional[bool] = None,
         id: Optional[List[int]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Enterprise Templates
 
@@ -7519,6 +9827,29 @@ class SigninghubClient(ConnectorClientBase):
         administrator or the enterprise user if the \"scope\" variable was used
         in the authentication request. It is possible to search based upon the
         criterion supplied under the \"x-search-text\" header.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `V4_Template_GetEnterpriseTemplates`.
+
+        Args:
+            record_per_page: Total number of records to be retrieved in a page.
+            page_no: Page number to be retrieved.
+            sort_by: Sort the result by possible values are mentioned above.
+            asc: Order the result set by ascending or descending.
+            id: Search by template ids.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7557,31 +9888,52 @@ class SigninghubClient(ConnectorClientBase):
                 query_params.append(f"id={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def text_box_add_text_box_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def text_box_add_text_box(
         self,
-        input: TextBoxFieldRequest,
+        input: TextBoxFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -7603,6 +9955,24 @@ class SigninghubClient(ConnectorClientBase):
         to Workflow](#operation/Workflow_WorkflowAddUser) for more information.
         Note if you have a document with a template applied, or have applied
         one using the APIs, then the workflow will already contain users.
+
+        Swagger operation ID: `V4_TextBox_AddTextBox`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which the action is to be taken.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7615,7 +9985,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/text"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7629,6 +9999,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7636,9 +10007,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def text_box_update_text_box_async(
+    def text_box_update_text_box(
         self,
-        input: UpdateTextBoxFieldRequest,
+        input: UpdateTextBoxFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -7658,6 +10029,24 @@ class SigninghubClient(ConnectorClientBase):
         Fields](#operation/Documents_GetDocumentFields). The latter can be used
         when a template was applied or the document was created using the GUI
         interface.
+
+        Swagger operation ID: `V4_TextBox_UpdateTextBox`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which the action is to be taken.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7670,7 +10059,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/text"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7684,6 +10073,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7691,9 +10081,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def workflow_apply_template_async(
+    def workflow_apply_template(
         self,
-        input: ApplyTemplateRequest,
+        input: ApplyTemplateRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -7722,6 +10112,27 @@ class SigninghubClient(ConnectorClientBase):
         applying such a template, these form fields will be created on the
         target document even if these form fields were already present in the
         document.
+
+        Swagger operation ID: `V4_Workflow_ApplyTemplate`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: The Package ID of the package to which the template
+                needs to be applied.
+            document_id: The document ID on which the template needs to be
+                applied. If the value is set to 0, if template is to be applied
+                on all the documents in the package.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7733,7 +10144,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/template"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7747,6 +10158,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7754,7 +10166,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def workflow_evidence_report_download_bytes_async(
+    def workflow_evidence_report_download_bytes(
         self,
         package_id: int,
         *,
@@ -7768,13 +10180,28 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to download the workflow
         process evidence report of a document.
+
+        Swagger operation ID: `V4_WorkflowEvidenceReport_DownloadBytes`.
+
+        Args:
+            package_id: The ID of the document.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v4/packages/{quote(str(package_id), safe='')}/report"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7788,6 +10215,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7795,7 +10223,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def workflow_get_workflow_detail_async(
+    def workflow_get_workflow_detail(
         self,
         package_id: int,
         *,
@@ -7809,13 +10237,28 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to get workflow details
         for the package.
+
+        Swagger operation ID: `V4_Workflow_GetWorkflowDetail`.
+
+        Args:
+            package_id: The ID of the package to be downloaded.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v4/packages/{quote(str(package_id), safe='')}/workflow"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7829,6 +10272,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7836,7 +10280,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def workflow_get_workflow_history_async(
+    def workflow_get_workflow_history(
         self,
         package_id: int,
         page_no: int,
@@ -7854,6 +10298,24 @@ class SigninghubClient(ConnectorClientBase):
         of actions performed on a document. The package ID is provided in the
         resource URL. The search field (x-search-text header) is intended for
         email, document name, action, infokey, and infovalue.
+
+        Swagger operation ID: `V4_Workflow_GetWorkflowHistory`.
+
+        Args:
+            package_id: The ID of the document for which the log is required.
+            page_no: Page number to be retrieved.
+            records_per_page: Total number of records to be retrieved in a
+                page.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7865,7 +10327,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/{quote(str(records_per_page), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7879,6 +10341,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7886,7 +10349,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def workflow_get_workflow_reminder_async(
+    def workflow_get_workflow_reminder(
         self,
         package_id: int,
         order: int,
@@ -7906,6 +10369,24 @@ class SigninghubClient(ConnectorClientBase):
         the workflow. The ID of the workflow document is provided in the
         resource URL, and the workflow recipient is identified by the order at
         which it is added to the workflow.
+
+        Swagger operation ID: `V4_Workflow_GetWorkflowReminder`.
+
+        Args:
+            package_id: The package ID for which workflow reminders to be
+                updated.
+            order: The order of the user for which the workflow reminders to be
+                updated.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7917,7 +10398,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/reminders"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7931,6 +10412,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -7938,7 +10420,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def workflow_get_workflow_users_async(
+    def list_workflow_get_workflow_users(
         self,
         package_id: int,
         *,
@@ -7946,40 +10428,80 @@ class SigninghubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Workflow Users
 
         Business applications can use this service API to get workflow details
         for the package.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `V4_Workflow_GetWorkflowUsers`.
+
+        Args:
+            package_id: The ID of the package to be downloaded.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v4/packages/{quote(str(package_id), safe='')}/workflow/users"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def workflow_mark_workflow_completed_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def workflow_mark_workflow_completed(
         self,
         package_id: int,
         *,
@@ -7999,13 +10521,29 @@ class SigninghubClient(ConnectorClientBase):
         Bearer token should belong to document owner or enterprise admin can
         use scope variable to get the access token on behalf of document owner
         to perform this action.
+
+        Swagger operation ID: `V4_Workflow_MarkWorkflowCompleted`.
+
+        Args:
+            package_id: The package ID from which the recipient is to be
+                deleted.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v4/packages/{quote(str(package_id), safe='')}/complete"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8019,6 +10557,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8026,7 +10565,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def workflow_permission_get_workflow_permissions_async(
+    def workflow_permission_get_workflow_permissions(
         self,
         package_id: int,
         order: int,
@@ -8042,6 +10581,26 @@ class SigninghubClient(ConnectorClientBase):
         Business applications can use this service API to get document
         permissions for a recipient. Recipient is identified by the order in
         the workflow. The ID of the package is provided in the resource URL.
+
+        Swagger operation ID: `V4_WorkflowPermission_GetWorkflowPermissions`.
+
+        Args:
+            package_id: The document ID for which workflow user needs to be
+                updated.
+            order: The order of the user in workflow for which the permissions
+                are requested. By providing the value 0 in order, service would
+                return the permissions of most recently added collaborator in
+                the workflow.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8053,7 +10612,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/permissions"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8067,6 +10626,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8074,9 +10634,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def workflow_permission_update_workflow_permissions_async(
+    def workflow_permission_update_workflow_permissions(
         self,
-        input: WorkflowPermissionsUpdateRequest,
+        input: WorkflowPermissionsUpdateRequest | Mapping[str, Any],
         package_id: int,
         order: int,
         *,
@@ -8095,6 +10655,27 @@ class SigninghubClient(ConnectorClientBase):
         within the workflow. The ID of the document package is provided in the
         resource URL, and the workflow user is identified by the order at which
         it is added to the workflow.
+
+        Swagger operation ID:
+        `V4_WorkflowPermission_UpdateWorkflowPermissions`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: The package ID for which workflow permissions to be
+                updated.
+            order: The order of the recipient for which the workflow
+                permissions to be updated.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8106,7 +10687,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/permissions"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8120,6 +10701,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8127,7 +10709,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def workflow_recall_workflow_async(
+    def workflow_recall_workflow(
         self,
         package_id: int,
         *,
@@ -8142,13 +10724,28 @@ class SigninghubClient(ConnectorClientBase):
         Business applications can use this service API to stop a workflow in
         progress. The document ID is provided in the resource URL. After recall
         the document status automatically changes to \"DRAFT\".
+
+        Swagger operation ID: `V4_Workflow_RecallWorkflow`.
+
+        Args:
+            package_id: The ID of the package to be recalled.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v4/packages/{quote(str(package_id), safe='')}/workflow"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8162,6 +10759,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8169,7 +10767,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def workflow_start_workflow_async(
+    def workflow_start_workflow(
         self,
         package_id: int,
         *,
@@ -8186,13 +10784,28 @@ class SigninghubClient(ConnectorClientBase):
         already have been prepared by applying a template and optionally
         updating the users and actions defined in template. The package ID to
         be shared is provided in the resource URL.
+
+        Swagger operation ID: `V4_Workflow_StartWorkflow`.
+
+        Args:
+            package_id: The document package to be shared.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v4/packages/{quote(str(package_id), safe='')}/workflow"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8206,6 +10819,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8213,9 +10827,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def workflow_update_workflow_async(
+    def workflow_update_workflow(
         self,
-        input: WorkflowDetailUpdateRequest,
+        input: WorkflowDetailUpdateRequest | Mapping[str, Any],
         package_id: int,
         *,
         timeout: Optional[float] = None,
@@ -8231,13 +10845,31 @@ class SigninghubClient(ConnectorClientBase):
         to a document, but business applications wants to override the certify
         permission or post processing details. The package ID is provided in
         the resource URL.
+
+        Swagger operation ID: `V4_Workflow_UpdateWorkflow`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: The package ID for which workflow details need to be
+                updated.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v4/packages/{quote(str(package_id), safe='')}/workflow"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8251,6 +10883,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8258,9 +10891,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def workflow_update_workflow_post_process_async(
+    def workflow_update_workflow_post_process(
         self,
-        input: PostProcessUpdateRequest,
+        input: PostProcessUpdateRequest | Mapping[str, Any],
         package_id: int,
         *,
         timeout: Optional[float] = None,
@@ -8273,6 +10906,24 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to add placeholder to a
         workflow a document in a package.
+
+        Swagger operation ID: `V4_Workflow_UpdateWorkflowPostProcess`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: ID of the document package for which the post
+                processing is being updated.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8283,7 +10934,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/post_process"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8297,6 +10948,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8304,9 +10956,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def workflow_update_workflow_reminder_async(
+    def workflow_update_workflow_reminder(
         self,
-        input: UpdateReminderRequest,
+        input: UpdateReminderRequest | Mapping[str, Any],
         package_id: int,
         order: int,
         *,
@@ -8325,6 +10977,26 @@ class SigninghubClient(ConnectorClientBase):
         settings within the workflow. The ID of the workflow document is
         provided in the resource URL, and the workflow recipient is identified
         by the order at which it is added to the workflow.
+
+        Swagger operation ID: `V4_Workflow_UpdateWorkflowReminder`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: The package ID for which workflow reminders to be
+                updated.
+            order: The order of the user for which the workflow reminders to be
+                updated.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8336,7 +11008,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/reminders"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8350,6 +11022,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8357,7 +11030,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def workflow_workflow_add_group_async(
+    def workflow_workflow_add_group(
         self,
         input: WorkflowWorkflowAddGroupInput,
         package_id: int,
@@ -8378,13 +11051,29 @@ class SigninghubClient(ConnectorClientBase):
         user/group, already present in the workflow. While XML type document
         preparation, only supported role types are \"SIGNER\", \"REVIEWER\" and
         \"CARBON_COPY\"
+
+        Swagger operation ID: `V4_Workflow_WorkflowAddGroup`.
+
+        Args:
+            input: The request body.
+            package_id: ID of the package for which the group is to be added.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v4/packages/{quote(str(package_id), safe='')}/workflow/groups"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8398,6 +11087,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8405,7 +11095,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def workflow_workflow_add_placeholder_async(
+    def workflow_workflow_add_placeholder(
         self,
         input: WorkflowWorkflowAddPlaceholderInput,
         package_id: int,
@@ -8428,6 +11118,23 @@ class SigninghubClient(ConnectorClientBase):
         be assigned to individual users at a later stage. While XML type
         document preparation, only supported role types are \"SIGNER\",
         \"REVIEWER\" and \"CARBON_COPY\"
+
+        Swagger operation ID: `V4_Workflow_WorkflowAddPlaceholder`.
+
+        Args:
+            input: The request body.
+            package_id: ID of the package for which the placeholder is to be
+                added.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8438,7 +11145,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/placeholder"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8452,6 +11159,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8459,7 +11167,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def workflow_workflow_add_user_async(
+    def workflow_workflow_add_user(
         self,
         input: WorkflowWorkflowAddUserInput,
         package_id: int,
@@ -8500,13 +11208,30 @@ class SigninghubClient(ConnectorClientBase):
         workflow; all in parallel order. Note, while XML type document
         preparation, only supported role types are \"SIGNER\", \"REVIEWER\" and
         \"CARBON_COPY\"
+
+        Swagger operation ID: `V4_Workflow_WorkflowAddUser`.
+
+        Args:
+            input: The request body.
+            package_id: SigningHub package ID, which the recipients are to be
+                added to.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v4/packages/{quote(str(package_id), safe='')}/workflow/users"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8520,6 +11245,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8527,7 +11253,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def workflow_workflow_delete_user_async(
+    def workflow_workflow_delete_user(
         self,
         package_id: int,
         order: int,
@@ -8542,6 +11268,24 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to delete workflow
         recipient.
+
+        Swagger operation ID: `V4_Workflow_WorkflowDeleteUser`.
+
+        Args:
+            package_id: The package ID from which the recipient is to be
+                deleted.
+            order: Order of the recipient in the workflow which is to be
+                deleted.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8552,7 +11296,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/{quote(str(order), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8566,6 +11310,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8573,9 +11318,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def workflow_workflow_update_placeholder_async(
+    def workflow_workflow_update_placeholder(
         self,
-        input: WorkflowPlaceholderUpdateRequest,
+        input: WorkflowPlaceholderUpdateRequest | Mapping[str, Any],
         package_id: int,
         order: int,
         *,
@@ -8595,6 +11340,25 @@ class SigninghubClient(ConnectorClientBase):
         place holder is identified by the order at which it is added to the
         workflow. While XML type document preparation, only supported role
         types are \"SIGNER\", \"REVIEWER\" and \"CARBON_COPY\"
+
+        Swagger operation ID: `V4_Workflow_WorkflowUpdatePlaceholder`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: ID of the package for which the placeholder is to be
+                added.
+            order: Order of the recipient in the workflow.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8606,7 +11370,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/placeholder"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8620,6 +11384,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8627,9 +11392,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def workflow_workflow_user_update_async(
+    def workflow_workflow_user_update(
         self,
-        input: WorkflowUserUpdateRequest,
+        input: WorkflowUserUpdateRequest | Mapping[str, Any],
         package_id: int,
         order: int,
         *,
@@ -8650,6 +11415,25 @@ class SigninghubClient(ConnectorClientBase):
         identified by the order at which it is added to the workflow. Note,
         while XML type document preparation, only supports role types
         \"SIGNER\", \"REVIEWER\" and \"CARBON_COPY\".
+
+        Swagger operation ID: `V4_Workflow_WorkflowUserUpdate`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: The package ID for which workflow user needs to be
+                updated.
+            order: The order of the user in workflow.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8661,7 +11445,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/user"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8675,6 +11459,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8682,9 +11467,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def workflow_workflow_user_update_order_async(
+    def workflow_workflow_user_update_order(
         self,
-        input: WorkflowUserReorderRequest,
+        input: WorkflowUserReorderRequest | Mapping[str, Any],
         package_id: int,
         order: int,
         *,
@@ -8698,6 +11483,25 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to update order of the
         recipient in the workflow.
+
+        Swagger operation ID: `V4_Workflow_WorkflowUserUpdateOrder`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: ID of the package to which the recipients are to be
+                added.
+            order: Existing order of the recipient which is to be updated.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8709,7 +11513,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/reorder"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8723,6 +11527,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8730,7 +11535,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def work_space_delete_shared_space_async(
+    def work_space_delete_shared_space(
         self,
         id: int,
         *,
@@ -8746,13 +11551,28 @@ class SigninghubClient(ConnectorClientBase):
         The availability of deleting shared spaces is subject to the assigned
         enterprise user role. To allow this provision Enterprise Admin will
         enable the 'Manage Shared Space' option in Roles>Document Settings.
+
+        Swagger operation ID: `V4_WorkSpace_DeleteSharedSpace`.
+
+        Args:
+            id: Id of shared space that you want to delete.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v4/shared_spaces/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8766,6 +11586,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8773,7 +11594,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def work_space_get_shared_space_async(
+    def work_space_get_shared_space(
         self,
         id: int,
         *,
@@ -8788,13 +11609,28 @@ class SigninghubClient(ConnectorClientBase):
         Business applications can use this service API to get a specific shared
         space. This API returns information about shared space, its owner and
         collaborator.
+
+        Swagger operation ID: `V4_WorkSpace_GetSharedSpace`.
+
+        Args:
+            id: Id of shared space that you want to get.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v4/shared_spaces/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8808,6 +11644,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -8815,9 +11652,9 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def work_space_update_shared_space_async(
+    def work_space_update_shared_space(
         self,
-        input: UpdateWorkSpaceRequest,
+        input: UpdateWorkSpaceRequest | Mapping[str, Any],
         id: int,
         *,
         timeout: Optional[float] = None,
@@ -8832,13 +11669,30 @@ class SigninghubClient(ConnectorClientBase):
         The availability of updating shared spaces is subject to the assigned
         enterprise user role. To allow this provision Enterprise Admin will
         enable the 'Manage Shared Space' option in Roles>Document Settings.
+
+        Swagger operation ID: `V4_WorkSpace_UpdateSharedSpace`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Id of shared space that you want to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v4/shared_spaces/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8852,6 +11706,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

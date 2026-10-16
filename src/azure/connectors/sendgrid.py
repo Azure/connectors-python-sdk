@@ -5,20 +5,40 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "SendgridClient",
+    "AddGlobalSuppressRequestAndResponse",
+    "Bounce",
+    "Bounces",
+    "EmailAttachment",
+    "EmailIsUnsubscribedResponse",
+    "EmailRequest",
+    "EmailResponse",
+    "GetGlobalSuppressEmptyResponse",
+    "GetGlobalSuppressResponse",
+    "ObjectEntity",
+    "Recipient",
+    "RecipientList",
+    "RecipientLists",
+    "Recipients",
+    "ScopeList",
+]
 
 
 # Type Definitions
@@ -29,7 +49,7 @@ class AddGlobalSuppressRequestAndResponse:
     Response for Add a global suppression
     """
 
-    recipient_emails: Optional[List[str]] = None
+    recipient_emails: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Recipient email"""
 
 
@@ -39,7 +59,7 @@ class GetGlobalSuppressResponse:
     Response for Get the global suppression
     """
 
-    recipient_email: Optional[str] = None
+    recipient_email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Recipient email"""
 
 
@@ -49,14 +69,14 @@ class ObjectEntity:
     Response for Add recipient to list
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
     """
 
 
-Bounces = List["Bounce"]
+Bounces = List["Bounce | Mapping[str, Any]"]
 
 
 @dataclass
@@ -65,8 +85,9 @@ class EmailIsUnsubscribedResponse:
     Response for Check if email is in unsubscribed email list
     """
 
-    is_unsubscribed: Optional[bool] = field(
+    is_unsubscribed: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isUnsubscribed"},
     )
     """Is Email Unsubscribed"""
@@ -78,7 +99,12 @@ class RecipientLists:
     Response for List Recipient Lists
     """
 
-    lists: Optional[List[RecipientList]] = None
+    lists: Optional[
+        List[RecipientList | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of recipient lists"""
 
 
@@ -88,7 +114,12 @@ class Recipients:
     Response for List Recipients
     """
 
-    recipients: Optional[List[Recipient]] = None
+    recipients: Optional[
+        List[Recipient | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of recipients"""
 
 
@@ -98,7 +129,7 @@ class EmailResponse:
     Definition: EmailResponse
     """
 
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Status message from send email response"""
 
 
@@ -108,7 +139,7 @@ class GetGlobalSuppressEmptyResponse:
     Definition: GetGlobalSuppressEmptyResponse
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -121,36 +152,41 @@ class EmailRequest:
     Definition: EmailRequest
     """
 
-    attachments: Optional[List[EmailAttachment]] = None
+    attachments: Optional[
+        List[EmailAttachment | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Attachments"""
-    from_: Optional[str] = field(default=None, metadata={"wire_name": "from"})
+    from_: str = dataclass_field(metadata={"wire_name": "from"})
     """
     Origination address of your email. Must be a valid email address from your
     domain
     """
-    fromname: Optional[str] = None
+    fromname: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Origination name of your email"""
-    to: Optional[str] = None
+    to: str
     """Valid email addresses separated by a semicolon or comma"""
-    toname: Optional[str] = None
+    toname: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A display name for each email address separated by a semicolon or comma
     """
-    subject: Optional[str] = None
+    subject: str
     """Subject of your email"""
-    text: Optional[str] = None
+    text: str
     """Content of your email"""
-    ishtml: Optional[bool] = None
+    ishtml: bool
     """Specify whether the content of the email is HTML or plain text"""
-    cc: Optional[str] = None
+    cc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Valid email addresses separated by a semicolon or comma"""
-    ccname: Optional[str] = None
+    ccname: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A display name for each CC email address separated by a semicolon or comma
     """
-    bcc: Optional[str] = None
+    bcc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Valid email addresses separated by a semicolon or comma"""
-    bccname: Optional[str] = None
+    bccname: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A display name for each BCC email address separated by a semicolon or comma
     """
@@ -162,11 +198,11 @@ class EmailAttachment:
     Definition: EmailAttachment
     """
 
-    content: Optional[str] = None
+    content: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Attachment file content"""
-    filename: Optional[str] = None
+    filename: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Attachment file name"""
-    contenttype: Optional[str] = None
+    contenttype: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Type of content in the attachment."""
 
 
@@ -176,11 +212,11 @@ class RecipientList:
     Definition: RecipientList
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Unique list id"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name"""
-    recipient_count: Optional[int] = None
+    recipient_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Recipient count"""
 
 
@@ -190,13 +226,13 @@ class Recipient:
     Definition: Recipient
     """
 
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address"""
-    last_name: Optional[str] = None
+    last_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Last name"""
-    first_name: Optional[str] = None
+    first_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """First name"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique recipient id"""
 
 
@@ -206,7 +242,7 @@ class ScopeList:
     Definition: ScopeList
     """
 
-    scopes: Optional[List[str]] = None
+    scopes: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """List of scopes"""
 
 
@@ -216,13 +252,13 @@ class Bounce:
     Definition: Bounce
     """
 
-    created: Optional[int] = None
+    created: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Created"""
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email"""
-    reason: Optional[str] = None
+    reason: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Reason"""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Status"""
 
 
@@ -234,16 +270,16 @@ class SendgridClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -254,8 +290,8 @@ class SendgridClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -263,8 +299,8 @@ class SendgridClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -276,7 +312,7 @@ class SendgridClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -291,9 +327,86 @@ class SendgridClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "sendgrid"
 
-    async def add_global_suppression_async(
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
+            if next_link.startswith("?"):
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
+
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
+    def add_global_suppression(
         self,
-        input: AddGlobalSuppressRequestAndResponse,
+        input: AddGlobalSuppressRequestAndResponse | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -304,10 +417,26 @@ class SendgridClient(ConnectorClientBase):
         Add a global suppression
 
         Add a global suppression
+
+        Swagger operation ID: `AddGlobalSuppression`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/suppressions/global"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -321,6 +450,7 @@ class SendgridClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -328,7 +458,7 @@ class SendgridClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_global_suppression_async(
+    def get_global_suppression(
         self,
         email: str,
         *,
@@ -341,13 +471,28 @@ class SendgridClient(ConnectorClientBase):
         Get the global suppression
 
         Get the global suppression
+
+        Swagger operation ID: `GetGlobalSuppression`.
+
+        Args:
+            email: The email to check.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/suppressions/global/{quote(str(email), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -361,6 +506,7 @@ class SendgridClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -368,7 +514,7 @@ class SendgridClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_global_suppression_async(
+    def delete_global_suppression(
         self,
         email: str,
         *,
@@ -381,13 +527,28 @@ class SendgridClient(ConnectorClientBase):
         Delete the global suppression
 
         Delete the global suppression
+
+        Swagger operation ID: `DeleteGlobalSuppression`.
+
+        Args:
+            email: The email to delete.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/suppressions/global/{quote(str(email), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -401,9 +562,10 @@ class SendgridClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def add_recipient_to_list_async(
+    def add_recipient_to_list(
         self,
         list_id: str,
         recipient_id: str,
@@ -417,6 +579,22 @@ class SendgridClient(ConnectorClientBase):
         Add recipient to list
 
         Add an individual recipient to a recipient list.
+
+        Swagger operation ID: `AddRecipientToList`.
+
+        Args:
+            list_id: Unique id of the recipient list.
+            recipient_id: Unique id of the recipient.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -428,7 +606,7 @@ class SendgridClient(ConnectorClientBase):
             f"/{quote(str(recipient_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -442,6 +620,7 @@ class SendgridClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -449,7 +628,7 @@ class SendgridClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_bounce_async(
+    def list_bounce(
         self,
         email: str,
         *,
@@ -457,39 +636,79 @@ class SendgridClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get bounce for an email
 
         Get a specific bounce for a given email address.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetBounce`.
+
+        Args:
+            email: The email to check.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/suppression/bounces/{quote(str(email), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def delete_bounce_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def delete_bounce(
         self,
         email: str,
         *,
@@ -502,13 +721,28 @@ class SendgridClient(ConnectorClientBase):
         Delete an email from bounce list
 
         Delete an email address from your bounce list.
+
+        Swagger operation ID: `DeleteBounce`.
+
+        Args:
+            email: The email to delete.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/suppression/bounces/{quote(str(email), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -522,9 +756,10 @@ class SendgridClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def check_email_is_in_unsubscribes_list_async(
+    def check_email_is_in_unsubscribes_list(
         self,
         email: str,
         *,
@@ -537,13 +772,28 @@ class SendgridClient(ConnectorClientBase):
         Check if email is in unsubscribed email list
 
         Check if email is in unsubscribed email list.
+
+        Swagger operation ID: `CheckEmailIsInUnsubscribesList`.
+
+        Args:
+            email: The email to check.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/unsubscribes/{quote(str(email), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -557,6 +807,7 @@ class SendgridClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -564,9 +815,9 @@ class SendgridClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def send_email_async(
+    def send_email(
         self,
-        input: EmailRequest,
+        input: EmailRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -577,10 +828,26 @@ class SendgridClient(ConnectorClientBase):
         Send email
 
         Sends an email (V4). Limited to 1000 recipients.
+
+        Swagger operation ID: `SendEmailV4`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v4/mail/send"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -594,6 +861,7 @@ class SendgridClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -601,74 +869,152 @@ class SendgridClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_recipient_lists_async(
+    def list_recipient_lists(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List Recipient Lists
 
         Retrieves all the recipient lists.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListRecipientLists`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v3/contactdb/lists"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_recipients_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("lists", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_recipients(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List Recipients
 
         Retrieves all registered recipients.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListRecipients`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v3/contactdb/recipients"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("recipients", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)

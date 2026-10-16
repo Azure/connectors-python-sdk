@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-OneNote Connector SDK Sample
+OneNote sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the OneNote connector SDK
+This sample demonstrates how to use the OneNote client from the Azure Connectors Python SDK
 for notebook, section, and page operations.
 
 Prerequisites:
@@ -20,10 +20,8 @@ Usage:
 
     python sample_connector_usage_onenote.py
 """
-
-import asyncio
 import os
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.onenote import (
     OnenoteClient,
@@ -38,18 +36,17 @@ CONNECTION_RUNTIME_URL = os.environ.get(
 )
 
 
-async def example_1_list_notebooks():
+def example_1_list_notebooks():
     """Example 1: List recent notebooks."""
     print("\n=== Example 1: List Notebooks ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_notebooks_async()
+                notebooks = list(client.list_notebooks())
 
-                if result and "value" in result:
-                    notebooks = result["value"]
+                if notebooks:
                     print(f"Found {len(notebooks)} notebooks:")
                     for nb in notebooks[:5]:
                         print(f"  - {nb.get('fileName', 'N/A')} (key: {nb.get('key', 'N/A')})")
@@ -62,23 +59,22 @@ async def example_1_list_notebooks():
                 print(f"Error: {ex}")
 
 
-async def example_2_list_sections():
+def example_2_list_sections():
     """Example 2: List sections in a notebook."""
     print("\n=== Example 2: List Sections ===")
 
     # Replace with your actual notebook key
     NOTEBOOK_KEY = "your-notebook-key-here"
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_sections_in_notebook_async(
+                sections = list(client.list_sections_in_notebook(
                     notebook_key=NOTEBOOK_KEY
-                )
+                ))
 
-                if result and "value" in result:
-                    sections = result["value"]
+                if sections:
                     print(f"Found {len(sections)} sections:")
                     for section in sections[:5]:
                         print(f"  - {section.get('name', 'N/A')} (id: {section.get('id', 'N/A')})")
@@ -91,7 +87,7 @@ async def example_2_list_sections():
                 print(f"Error: {ex}")
 
 
-async def example_3_get_pages_in_section():
+def example_3_get_pages_in_section():
     """Example 3: Get pages in a section."""
     print("\n=== Example 3: Get Pages ===")
 
@@ -99,11 +95,11 @@ async def example_3_get_pages_in_section():
     NOTEBOOK_KEY = "your-notebook-key-here"
     SECTION_ID = "your-section-id-here"
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                pages = [item async for item in client.get_pages_in_section_async(
+                pages = [item for item in client.list_pages_in_section(
                     notebook_key=NOTEBOOK_KEY,
                     section_id=SECTION_ID
                 )]
@@ -121,20 +117,20 @@ async def example_3_get_pages_in_section():
                 print(f"Error: {ex}")
 
 
-async def example_4_create_section():
+def example_4_create_section():
     """Example 4: Create a new section in a notebook."""
     print("\n=== Example 4: Create Section ===")
 
     # Replace with your actual notebook key
     NOTEBOOK_KEY = "your-notebook-key-here"
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 section_request = CreateSectionRequest(name="SDK Test Section")
 
-                result = await client.create_section_in_notebook_async(
+                result = client.create_section_in_notebook(
                     input=section_request,
                     notebook_key=NOTEBOOK_KEY
                 )
@@ -152,20 +148,20 @@ async def example_4_create_section():
                 print(f"Error: {ex}")
 
 
-async def example_5_create_quick_note():
+def example_5_create_quick_note():
     """Example 5: Create a page in Quick Notes."""
     print("\n=== Example 5: Create Quick Note ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 page_input = (
                     "<html><head><title>Quick Note</title></head>"
                     "<body><p>Created via Azure Connectors Python SDK</p></body></html>"
                 )
 
-                result = await client.create_page_in_quick_notes_async(input=page_input)
+                result = client.create_page_in_quick_notes(input=page_input)
 
                 if result:
                     print("Quick note created successfully!")
@@ -180,7 +176,7 @@ async def example_5_create_quick_note():
                 print(f"Error: {ex}")
 
 
-async def example_6_get_page_content():
+def example_6_get_page_content():
     """Example 6: Get page content."""
     print("\n=== Example 6: Get Page Content ===")
 
@@ -189,11 +185,11 @@ async def example_6_get_page_content():
     SECTION_ID = "your-section-id-here"
     PAGE_ID = "your-page-id-here"
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_page_content_async(
+                result = client.get_page_content(
                     notebook_key=NOTEBOOK_KEY,
                     section_id=SECTION_ID,
                     page_id=PAGE_ID,
@@ -212,7 +208,7 @@ async def example_6_get_page_content():
                 print(f"Error: {ex}")
 
 
-async def main():
+def main():
     """Run all examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: ONENOTE_CONNECTION_URL environment variable not set.")
@@ -221,7 +217,7 @@ async def main():
 
     print(f"Using connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
 
-    await example_1_list_notebooks()
+    example_1_list_notebooks()
 
     # The following examples require valid IDs:
     # await example_2_list_sections()
@@ -234,4 +230,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

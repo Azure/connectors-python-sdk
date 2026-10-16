@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.microsoftbookings import MicrosoftbookingsClient
 from azure.connectors.microsoftbookings import (
-    MicrosoftbookingsClient,
     CreateAppointmentInput,
     UpdateAppointmentInput,
     CancelAppointmentInput,
@@ -24,6 +24,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestMicrosoftbookingsClientInitialization:
@@ -69,7 +70,7 @@ class TestMicrosoftbookingsClientInitialization:
         client = MicrosoftbookingsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -170,22 +171,28 @@ class TestListBookingsBusinessUserAsAdminAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_bookings_business_user_as_admin_async()
+            result = await resolve_generated_result(
+                client.list_bookings_business_user_as_admin()
+            )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/bookingBusinessesUserAsAdmin" in call_args[0][1]
-            assert result is not None
-            assert "mailboxes" in result
+            assert result == [
+                {
+                    "display_name": "Contoso Bookings",
+                    "email": "bookings@contoso.com",
+                }
+            ]
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_credential):
-        """Test empty response returns None."""
+    async def test_empty_response_returns_empty_page(self, mock_credential):
+        """Test empty response yields no mailbox items."""
         mock_response = MockResponse(status=200, text='')
 
         client = MicrosoftbookingsClient(
@@ -195,12 +202,14 @@ class TestListBookingsBusinessUserAsAdminAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.list_bookings_business_user_as_admin_async()
-            assert result is None
+            result = await resolve_generated_result(
+                client.list_bookings_business_user_as_admin()
+            )
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -217,12 +226,14 @@ class TestListBookingsBusinessUserAsAdminAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.list_bookings_business_user_as_admin_async()
+                await resolve_generated_result(
+                    client.list_bookings_business_user_as_admin()
+                )
 
             assert exc_info.value.status_code == 401
 
@@ -230,10 +241,12 @@ class TestListBookingsBusinessUserAsAdminAsync:
 class TestDataClasses:
     """Tests for dataclass definitions."""
 
-    def test_create_appointment_input_defaults(self):
-        """Test CreateAppointmentInput dataclass with defaults."""
-        input_obj = CreateAppointmentInput()
-        assert input_obj.webhook is None
+    def test_create_appointment_input_required_webhook(self):
+        """Test CreateAppointmentInput requires webhook data."""
+        input_obj = CreateAppointmentInput(
+            webhook={"callbackUrl": "https://example.com/create"}
+        )
+        assert input_obj.webhook["callbackUrl"] == "https://example.com/create"
 
     def test_create_appointment_input_with_values(self):
         """Test CreateAppointmentInput dataclass with values."""
@@ -242,15 +255,19 @@ class TestDataClasses:
         )
         assert input_obj.webhook["callbackUrl"] == "https://example.com/callback"
 
-    def test_update_appointment_input_defaults(self):
-        """Test UpdateAppointmentInput dataclass with defaults."""
-        input_obj = UpdateAppointmentInput()
-        assert input_obj.webhook is None
+    def test_update_appointment_input_required_webhook(self):
+        """Test UpdateAppointmentInput requires webhook data."""
+        input_obj = UpdateAppointmentInput(
+            webhook={"callbackUrl": "https://example.com/update"}
+        )
+        assert input_obj.webhook["callbackUrl"] == "https://example.com/update"
 
-    def test_cancel_appointment_input_defaults(self):
-        """Test CancelAppointmentInput dataclass with defaults."""
-        input_obj = CancelAppointmentInput()
-        assert input_obj.webhook is None
+    def test_cancel_appointment_input_required_webhook(self):
+        """Test CancelAppointmentInput requires webhook data."""
+        input_obj = CancelAppointmentInput(
+            webhook={"callbackUrl": "https://example.com/cancel"}
+        )
+        assert input_obj.webhook["callbackUrl"] == "https://example.com/cancel"
 
     def test_webhook_response_defaults(self):
         """Test WebhookResponse dataclass with defaults."""

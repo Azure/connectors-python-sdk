@@ -6,50 +6,53 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.box import BoxClient
 from azure.connectors.box import (
     BlobMetadata,
     BlobMetadataPage,
-    BoxClient,
 )
 from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 async def _invoke_operation(client: BoxClient, operation: str):
     """Invoke a Box operation by name for shared parameterized tests."""
     if operation == "get_file_metadata":
-        return await client.get_file_metadata_async(id="file123")
+        return await client.get_file_metadata(id="file123")
     if operation == "update_file":
-        return await client.update_file_async(input=b"updated content", id="file123")
+        return await client.update_file(input=b"updated content", id="file123")
     if operation == "delete_file":
-        return await client.delete_file_async(id="file123")
+        return await client.delete_file(id="file123")
     if operation == "get_file_metadata_by_path":
-        return await client.get_file_metadata_by_path_async(path="/Documents/file.txt")
+        return await client.get_file_metadata_by_path(path="/Documents/file.txt")
     if operation == "get_file_content_by_path":
-        return await client.get_file_content_by_path_async(path="/Documents/file.txt")
+        return await client.get_file_content_by_path(path="/Documents/file.txt")
     if operation == "get_file_content":
-        return await client.get_file_content_async(id="file123")
+        return await client.get_file_content(id="file123")
     if operation == "create_file":
-        return await client.create_file_async(
+        return await client.create_file(
             input=b"file content",
             folder_path="/Documents",
             name="created.txt",
         )
     if operation == "copy_file":
-        return await client.copy_file_async(
+        return await client.copy_file(
             source="/Documents/source.txt",
             destination="/Documents/copy.txt",
         )
     if operation == "list_folder":
-        return await client.list_folder_async(id="folder123")
+        return await resolve_generated_result(client.list_folder(id="folder123"))
     if operation == "list_root_folder":
-        return await client.list_root_folder_async()
+        return await resolve_generated_result(client.list_root_folder())
     if operation == "extract_folder":
-        return await client.extract_folder_async(
-            source="/Documents/archive.zip",
-            destination="/Documents/extracted",
+        return await resolve_generated_result(
+            client.extract_folder(
+                source="/Documents/archive.zip",
+                destination="/Documents/extracted",
+            )
         )
     raise ValueError(f"Unsupported operation '{operation}'.")
 
@@ -87,7 +90,7 @@ class TestBoxClientInitialization:
         client = BoxClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -154,11 +157,11 @@ class TestBoxClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_file_metadata_async(id="file123")
+            result = await client.get_file_metadata(id="file123")
 
             assert result["name"] == "doc.txt"
             call_args = mock_send.call_args
@@ -176,11 +179,11 @@ class TestBoxClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.update_file_async(input=b"updated content", id="file123")
+            result = await client.update_file(input=b"updated content", id="file123")
 
             assert result["name"] == "updated.txt"
             call_args = mock_send.call_args
@@ -198,11 +201,11 @@ class TestBoxClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.delete_file_async(id="file123")
+            result = await client.delete_file(id="file123")
 
             assert result is None
             call_args = mock_send.call_args
@@ -219,11 +222,11 @@ class TestBoxClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_file_content_by_path_async(path="/Documents/file.txt")
+            result = await client.get_file_content_by_path(path="/Documents/file.txt")
 
             assert result == b"box file content"
             assert "path=%2FDocuments%2Ffile.txt" in mock_send.call_args[0][1]
@@ -239,11 +242,11 @@ class TestBoxClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_file_async(
+            result = await client.create_file(
                 input=b"file content",
                 folder_path="/Documents",
                 name="created.txt",
@@ -264,19 +267,18 @@ class TestBoxClientMethods:
         )
         mock_response = MockResponse(
             status=200,
-            text='{"value":[{"id":"1","name":"Docs"}]}'
+            text='[{"id":"1","name":"Docs"}]'
         )
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.list_root_folder_async()
+            result = await resolve_generated_result(client.list_root_folder())
 
-            assert len(result["value"]) == 1
-            assert result["value"][0]["name"] == "Docs"
+            assert result == [{"id": "1", "name": "Docs"}]
 
 
 class TestBoxClientErrorHandling:
@@ -313,7 +315,7 @@ class TestBoxClientErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):

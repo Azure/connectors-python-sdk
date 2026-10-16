@@ -1,6 +1,6 @@
 ---
 name: add-connector
-description: 'Add a new connector to the Azure Connectors Python SDK. USE WHEN: adding a new connector client, scaffolding connector files, creating unit tests, updating __init__.py exports, updating README status table, creating sample usage files. Covers the full workflow from connector file creation through test validation. NOT FOR: modifying existing connectors, connection setup, or trigger registration.'
+description: 'Add a new connector to the Azure Connectors Python SDK. USE WHEN: adding a generated root/aio connector pair, creating paired unit tests and samples, or updating connector documentation. Covers the full workflow from generation through validation. NOT FOR: modifying existing connectors, connection setup, or trigger registration.'
 argument-hint: 'Provide the connector name (e.g., "dynamics365", "servicenow")'
 ---
 
@@ -17,8 +17,8 @@ Automates the complete workflow for adding a new connector to the Azure Connecto
 
 ## Prerequisites
 
-- The connector module file (e.g., `dynamics365.py`) is provided or needs to be created
-- The connector follows the `ConnectorClientBase` pattern
+- The connector can be generated as root and aio modules from one contract
+- Both clients follow the matching `ConnectorClientBase` runtime patterns
 - A .NET sample exists to port to Python (optional)
 
 ## Procedure
@@ -39,9 +39,12 @@ Collect the following details from the user:
 
 ### Step 2: Create/Verify Connector Module
 
-Ensure the connector file exists at `src/azure/connectors/{connector_name}.py`.
+Generate both files from one CodefulSdkGenerator invocation:
 
-The connector must follow this structure:
+- `src/azure/connectors/{connector_name}.py`
+- `src/azure/connectors/aio/{connector_name}.py`
+
+The root connector owns shared declarations and the synchronous client:
 
 ```python
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -56,9 +59,8 @@ from typing import Optional, Any, Dict, List
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import ConnectorClientBase, ConnectorException
 
@@ -74,21 +76,18 @@ class {ClientClassName}(ConnectorClientBase):
     def connector_name(self) -> str:
         return "{connector_name}"
 
-    # ... async methods ...
+    # ... synchronous unsuffixed methods ...
 ```
 
-### Step 3: Update `__init__.py` Exports
+The aio module imports and re-exports root models, aliases, enums, and
+`TRIGGER_OPERATIONS`. Its client uses `AsyncTokenCredential`,
+`AsyncHttpTransport`, and the same unsuffixed operations. Pageable operations
+return `ItemPaged` from root and `AsyncItemPaged` from aio.
 
-Add the connector import to `src/azure/connectors/__init__.py`:
+### Step 3: Keep Package Initializers Minimal
 
-```python
-try:
-    from .{connector_name} import {ClientClassName}
-except (ImportError, NameError):
-    {ClientClassName} = None  # type: ignore[assignment,misc]
-```
-
-Also add to the `__all__` list if present.
+Do not add generated clients to `azure.connectors` or `azure.connectors.aio`
+package exports. Consumers import clients from each connector module.
 
 ### Step 4: Update README Connector Table
 
@@ -113,9 +112,9 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.{connector_name} import {ClientClassName}
 from azure.connectors.{connector_name} import (
-    {ClientClassName},
-    # Import all public dataclasses from the connector
+    {RequestModelName},
 )
 from azure.connectors.sdk import ConnectorException
 from tests.conftest import MockResponse
@@ -216,7 +215,7 @@ class Test{ClientClassName}Lifecycle:
 # Follow the pattern:
 #
 # class Test{MethodName}:
-#     """Tests for {method_name}_async method."""
+#     """Tests for {method_name} on the aio client."""
 #
 #     @pytest.mark.asyncio
 #     async def test_success(self, mock_credential):
@@ -230,16 +229,26 @@ class Test{ClientClassName}Lifecycle:
 ```
 
 **Required test categories:**
+
 1. **Initialization tests** — constructor, URL handling, options, error cases
 2. **Lifecycle tests** — close(), context manager
-3. **Method tests** — one class per public async method with:
-   - Success case with mocked response
-   - Parameter handling tests
-   - Error response handling
+3. **Method tests** — exercise matching root and aio operations with:
+    - Success cases with synchronous and asynchronous mocked responses
+    - Matching parameter and request-control signatures
+    - Error response handling in both modes
+    - Shared declaration identity
+    - Paging behavior for `ItemPaged` and `AsyncItemPaged`, when applicable
 
 ### Step 6: Create Sample Usage File
 
-Create `samples/sample_connector_usage/sample_connector_usage_{connector_name}.py`:
+Create both sample files:
+
+- `samples/sample_connector_usage/sample_connector_usage_{connector_name}.py`
+- `samples/sample_connector_usage/aio/sample_connector_usage_{connector_name}.py`
+
+The following template shows the aio variant. The root variant uses
+`azure.identity.DefaultAzureCredential`, imports its client from the root
+connector module, uses `with`, and calls the same operations without `await`.
 
 ```python
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -268,9 +277,9 @@ import asyncio
 import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.aio.{connector_name} import {ClientClassName}
 from azure.connectors.{connector_name} import (
-    {ClientClassName},
-    # Import relevant dataclasses for the examples
+    {RequestModelName},
 )
 
 # Connection runtime URL format:
@@ -290,7 +299,7 @@ async def example_1_basic_operation():
     async with {ClientClassName}(CONNECTION_RUNTIME_URL, credential) as client:
         try:
             # Call a basic read operation
-            result = await client.{example_method}_async()
+            result = await client.{example_method}()
             
             print(f"Result: {{result}}")
                 
@@ -309,7 +318,7 @@ async def example_2_advanced_operation():
     async with {ClientClassName}(CONNECTION_RUNTIME_URL, credential) as client:
         try:
             # Call a write or complex operation
-            # result = await client.{another_method}_async(...)
+            # result = await client.{another_method}(...)
             print("Advanced operation completed")
             
         except ConnectorException as ex:
@@ -338,10 +347,11 @@ if __name__ == "__main__":
 ```
 
 **When porting from .NET:**
+
 1. Find the corresponding .NET sample
-2. Translate each example method to Python async/await syntax
+2. Create matching synchronous and asynchronous examples
 3. Convert C# types to Python dataclasses
-4. Use `async with` for client lifecycle
+4. Use `with` for root and `async with` for aio client lifecycle
 5. Handle exceptions with `ConnectorException`
 
 ### Step 7: Update Samples README
@@ -392,6 +402,7 @@ Execute the full test suite to validate:
 ```
 
 **Required checks:**
+
 - [ ] All tests pass
 - [ ] No import errors
 - [ ] Code quality tests pass (imports, structure)

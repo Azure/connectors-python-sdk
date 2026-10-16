@@ -3,7 +3,8 @@
 """Contract tests for WaywedoClient."""
 
 import azure.connectors.waywedo as waywedo_module
-from azure.connectors.waywedo import TRIGGER_OPERATIONS, WaywedoClient
+from azure.connectors.aio.waywedo import WaywedoClient
+from azure.connectors.waywedo import TRIGGER_OPERATIONS
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 
 
@@ -11,17 +12,17 @@ OPERATION_CONTRACTS = {
     "comment_add": ("POST", True),
     "checklist_instances": ("POST", True),
     "checklist_instances_get": ("GET", False),
-    "checklist_instances_activity": ("GET", False),
-    "find_steps": ("GET", False),
+    "list_checklist_instances_activity": ("GET", False),
+    "list_find_steps": ("GET", False),
     "checklist_steps_get": ("GET", False),
     "checklist_steps_complete": ("POST", True),
     "collaborators_add": ("POST", True),
-    "find_checklist": ("GET", False),
+    "list_find_checklist": ("GET", False),
     "procedures_get": ("GET", False),
-    "find_checklist_instances": ("GET", False),
-    "find_user": ("GET", False),
+    "list_find_checklist_instances": ("GET", False),
+    "list_find_user": ("GET", False),
     "users": ("POST", True),
-    "get_all_checklist_instances": ("GET", False),
+    "list_all_checklist_instances": ("GET", False),
 }
 
 

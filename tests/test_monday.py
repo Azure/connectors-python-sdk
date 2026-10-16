@@ -7,112 +7,36 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
+import azure.connectors.monday as monday_module
+from azure.connectors.aio.monday import MondayClient
 from azure.connectors.monday import (
     CreateBoardInput,
-    CreateColumnInput,
-    CreateGroupInput,
     CreateItemInput,
     CreateItemResponse,
     CreateNotificationInput,
-    CreateSubitemInput,
-    CreateUpdateInput,
     CreateWorkspaceInput,
-    DuplicateBoardInput,
     GetSubitemSchemaResponse,
     GetTagsResponse,
     GetUsersResponse,
     GetWorkspacesResponse,
-    MondayClient,
-    MoveItemToGroupInput,
     UpdateItemColumnInput,
-    UpdateMultipleItemColumnsInput,
     TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
-from tests.generated_connector_test_utils import get_generated_operations
+from tests.generated_connector_test_utils import (
+    get_generated_operations,
+    invoke_generated_operation,
+    model_instance,
+    resolve_generated_result,
+)
 
 
 async def _invoke_operation(client: MondayClient, operation: str):
     """Invoke a Monday operation by name for shared tests."""
-    if operation == "create_item":
-        return await client.create_item_async(input=CreateItemInput())
-    if operation == "duplicate_board":
-        return await client.duplicate_board_async(input=DuplicateBoardInput())
-    if operation == "create_board":
-        return await client.create_board_async(input=CreateBoardInput())
-    if operation == "create_column":
-        return await client.create_column_async(input=CreateColumnInput())
-    if operation == "create_group":
-        return await client.create_group_async(input=CreateGroupInput())
-    if operation == "update_item_column":
-        return await client.update_item_column_async(input=UpdateItemColumnInput())
-    if operation == "update_multiple_item_columns":
-        return await client.update_multiple_item_columns_async(
-            input=UpdateMultipleItemColumnsInput()
-        )
-    if operation == "move_item_to_group":
-        return await client.move_item_to_group_async(input=MoveItemToGroupInput())
-    if operation == "create_notification":
-        return await client.create_notification_async(input=CreateNotificationInput())
-    if operation == "create_subitem":
-        return await client.create_subitem_async(input=CreateSubitemInput())
-    if operation == "create_update":
-        return await client.create_update_async(input=CreateUpdateInput())
-    if operation == "create_workspace":
-        return await client.create_workspace_async(input=CreateWorkspaceInput())
-    if operation == "get_subitems":
-        return await client.get_subitems_async(
-            workspace_id="1", board_id="2", item_id="3"
-        )
-    if operation == "get_item_by_id":
-        return await client.get_item_by_id_async(
-            item_id="1", workspace_id="2", board_id="3"
-        )
-    if operation == "get_items":
-        return await client.get_items_async(
-            workspace_id="1", board_id="2", group_id="3"
-        )
-    if operation == "get_tags":
-        return await client.get_tags_async()
-    if operation == "get_users":
-        return await client.get_users_async()
-    if operation == "get_workspaces":
-        return await client.get_workspaces_async()
-    if operation == "get_boards":
-        return await client.get_boards_async()
-    if operation == "get_groups_for_get_items":
-        return await client.get_groups_for_get_items_async(board_id="1")
-    if operation == "get_columns_for_item_filtering":
-        return await client.get_columns_for_item_filtering_async(board_id="1")
-    if operation == "get_column_filter_operator":
-        return await client.get_column_filter_operator_async(board_id="1")
-    if operation == "get_column_names_schema":
-        return await client.get_column_names_schema_async()
-    if operation == "get_single_column_schema":
-        return await client.get_single_column_schema_async()
-    if operation == "get_column_names_schema_for_webhook":
-        return await client.get_column_names_schema_for_webhook_async()
-    if operation == "get_schema_for_get_items_action":
-        return await client.get_schema_for_get_items_action_async()
-    if operation == "get_column_names_schema_for_update_webhook":
-        return await client.get_column_names_schema_for_update_webhook_async()
-    if operation == "get_column_names_schema_for_item_name_change_webhook":
-        return await client.get_column_names_schema_for_item_name_change_webhook_async()
-    if operation == "get_column_names_schema_for_subitem_name_change_webhook":
-        return await client.get_column_names_schema_for_subitem_name_change_webhook_async(
-            parent_board_id="1"
-        )
-    if operation == "get_column_names_schema_for_column_changes_webhook":
-        return await client.get_column_names_schema_for_column_changes_webhook_async()
-    if operation == "get_subitem_column_names":
-        return await client.get_subitem_column_names_async(parent_board_id="1")
-    if operation == "get_subitem_schema":
-        return await client.get_subitem_schema_async(parent_board_id="1")
-
-    raise ValueError(f"Unsupported operation '{operation}'.")
+    return await invoke_generated_operation(client, operation, monday_module)
 
 
 ALL_OPERATIONS = [
@@ -134,10 +58,10 @@ ALL_OPERATIONS = [
     "get_tags",
     "get_users",
     "get_workspaces",
-    "get_boards",
-    "get_groups_for_get_items",
-    "get_columns_for_item_filtering",
-    "get_column_filter_operator",
+    "list_boards",
+    "list_groups_for_get_items",
+    "list_columns_for_item_filtering",
+    "list_column_filter_operator",
     "get_column_names_schema",
     "get_single_column_schema",
     "get_column_names_schema_for_webhook",
@@ -184,7 +108,7 @@ class TestMondayClientInitialization:
         client = MondayClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -255,11 +179,13 @@ class TestMondayClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_item_async(input=CreateItemInput())
+            result = await client.create_item(
+                input=model_instance(CreateItemInput),
+            )
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "POST"
@@ -278,11 +204,13 @@ class TestMondayClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.update_item_column_async(input=UpdateItemColumnInput())
+            result = await client.update_item_column(
+                input=model_instance(UpdateItemColumnInput),
+            )
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "POST"
@@ -301,11 +229,11 @@ class TestMondayClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_tags_async()
+            result = await client.get_tags()
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
@@ -313,8 +241,8 @@ class TestMondayClientOperations:
             assert result == {"data": []}
 
     @pytest.mark.asyncio
-    async def test_get_boards_includes_query_parameter(self, mock_credential):
-        """Test get boards appends the workspaceId query parameter."""
+    async def test_list_boards_includes_query_parameter(self, mock_credential):
+        """Test list boards appends the workspaceId query parameter."""
         client = MondayClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
@@ -323,11 +251,13 @@ class TestMondayClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.get_boards_async(workspace_id="42")
+            await resolve_generated_result(
+                client.list_boards(workspace_id="42")
+            )
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
@@ -345,11 +275,11 @@ class TestMondayClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.get_subitems_async(workspace_id="1", board_id="2", item_id="3")
+            await client.get_subitems(workspace_id="1", board_id="2", item_id="3")
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
@@ -367,11 +297,13 @@ class TestMondayClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.create_item_async(input=CreateItemInput())
+            result = await client.create_item(
+                input=model_instance(CreateItemInput),
+            )
 
             assert result is None
 
@@ -395,7 +327,7 @@ class TestMondayClientErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
@@ -439,7 +371,7 @@ class TestMondayTriggerOperations:
 
 
 class TestMondayTypeSerialization:
-    """Tests for Monday connector dataclass defaults."""
+    """Tests for Monday connector dataclass construction."""
 
     def test_response_dataclasses_initialize_expected_defaults(self):
         """Test generated response dataclasses initialize with None defaults."""
@@ -450,8 +382,8 @@ class TestMondayTypeSerialization:
         assert GetSubitemSchemaResponse().schema is None
 
     def test_request_dataclasses_instantiate(self):
-        """Test generated request dataclasses instantiate without arguments."""
-        assert CreateItemInput().item_name is None
-        assert CreateBoardInput().board_name is None
-        assert CreateNotificationInput().text is None
-        assert CreateWorkspaceInput() is not None
+        """Test generated request dataclasses populate required fields."""
+        assert model_instance(CreateItemInput).item_name is not None
+        assert model_instance(CreateBoardInput).board_name is not None
+        assert model_instance(CreateNotificationInput).text is not None
+        assert model_instance(CreateWorkspaceInput).name is not None

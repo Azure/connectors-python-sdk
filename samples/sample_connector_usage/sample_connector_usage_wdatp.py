@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Windows Defender ATP (Microsoft Defender for Endpoint) Connector SDK Sample
+Windows Defender ATP (Microsoft Defender for Endpoint) sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Windows Defender ATP connector SDK
+This sample demonstrates how to use the Windows Defender ATP client from the Azure Connectors Python SDK
 to interact with Microsoft Defender for Endpoint for security operations.
 
 Prerequisites:
@@ -21,10 +21,8 @@ Usage:
 
     python sample_connector_usage_wdatp.py
 """
-
-import asyncio
 import os
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.wdatp import (
     WdatpClient,
@@ -40,15 +38,15 @@ CONNECTION_RUNTIME_URL = os.environ.get(
 )
 
 
-async def example_1_list_alerts():
+def example_1_list_alerts():
     """Example 1: List recent security alerts."""
     print("\n=== Example 1: List Security Alerts ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                alerts = [item async for item in client.get_alerts_async(
+                alerts = [item for item in client.list_alerts(
                     top=5,
                     orderby="alertCreationTime desc"
                 )]
@@ -68,16 +66,16 @@ async def example_1_list_alerts():
                 print(f"Error: {ex}")
 
 
-async def example_2_get_machines():
+def example_2_get_machines():
     """Example 2: List machines in the organization."""
     print("\n=== Example 2: List Machines ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 machines = [
-                    item async for item in client.get_machines_async(top=10)
+                    item for item in client.list_machines(top=10)
                 ]
 
                 if machines:
@@ -96,19 +94,19 @@ async def example_2_get_machines():
                 print(f"Error: {ex}")
 
 
-async def example_3_advanced_hunting():
+def example_3_advanced_hunting():
     """Example 3: Run an advanced hunting query."""
     print("\n=== Example 3: Advanced Hunting Query ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Query for device information
                 query = "DeviceInfo | take 5 | project DeviceName, OSPlatform, PublicIP"
                 input_data = AdvancedHuntingInput(query=query)
 
-                result = await client.advanced_hunting_async(input=input_data)
+                result = client.advanced_hunting(input=input_data)
 
                 if result and result.get("results"):
                     print(f"Query returned {len(result['results'])} results:")
@@ -126,7 +124,7 @@ async def example_3_advanced_hunting():
                 print(f"Error: {ex}")
 
 
-async def example_4_update_alert():
+def example_4_update_alert():
     """Example 4: Update an alert status."""
     print("\n=== Example 4: Update Alert Status ===")
 
@@ -137,9 +135,9 @@ async def example_4_update_alert():
         print("Skipping this example.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 input_data = PatchAlertInput(
                     status="InProgress",
@@ -147,7 +145,7 @@ async def example_4_update_alert():
                     classification="TruePositive"
                 )
 
-                result = await client.patch_alert_async(
+                result = client.patch_alert(
                     input=input_data,
                     alert_id=alert_id
                 )
@@ -162,7 +160,7 @@ async def example_4_update_alert():
                 print(f"Error: {ex}")
 
 
-async def example_5_get_file_stats():
+def example_5_get_file_stats():
     """Example 5: Get file statistics by SHA1 hash."""
     print("\n=== Example 5: Get File Statistics ===")
 
@@ -173,11 +171,11 @@ async def example_5_get_file_stats():
         print("Skipping this example.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_file_stats_async(file_id=file_sha1)
+                result = client.get_file_stats(file_id=file_sha1)
 
                 print(f"File statistics for {file_sha1}:")
                 print(f"  Global prevalence: {result.get('globallyPrevalence', 'N/A')}")
@@ -190,15 +188,15 @@ async def example_5_get_file_stats():
                 print(f"Error: {ex}")
 
 
-async def example_6_machine_actions():
+def example_6_machine_actions():
     """Example 6: List recent machine actions."""
     print("\n=== Example 6: List Machine Actions ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                machine_actions = [item async for item in client.get_machine_actions_async(
+                machine_actions = [item for item in client.list_machine_actions(
                     top=5,
                     orderby="creationDateTimeUtc desc"
                 )]
@@ -218,16 +216,16 @@ async def example_6_machine_actions():
                 print(f"Error: {ex}")
 
 
-async def example_7_investigations():
+def example_7_investigations():
     """Example 7: List automated investigations."""
     print("\n=== Example 7: List Investigations ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with WdatpClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 investigations = [
-                    item async for item in client.get_investigations_async(top=5)
+                    item for item in client.list_investigations(top=5)
                 ]
 
                 if investigations:
@@ -245,7 +243,7 @@ async def example_7_investigations():
                 print(f"Error: {ex}")
 
 
-async def main():
+def main():
     """Run all examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: WDATP_CONNECTION_URL environment variable not set.")
@@ -258,18 +256,18 @@ async def main():
     print(f"Using connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
 
     # Read operations
-    await example_1_list_alerts()
-    await example_2_get_machines()
-    await example_3_advanced_hunting()
-    await example_5_get_file_stats()
-    await example_6_machine_actions()
-    await example_7_investigations()
+    example_1_list_alerts()
+    example_2_get_machines()
+    example_3_advanced_hunting()
+    example_5_get_file_stats()
+    example_6_machine_actions()
+    example_7_investigations()
 
     # Update operations (requires specific IDs)
-    await example_4_update_alert()
+    example_4_update_alert()
 
     print("\n=== All examples completed ===")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Box Connector SDK Sample
+Box sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Box connector SDK.
+This sample demonstrates how to use the Box client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Box connection
@@ -19,11 +19,9 @@ Usage:
 
     python sample_connector_usage_box.py
 """
-
-import asyncio
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.box import BoxClient
 
@@ -35,25 +33,25 @@ CONNECTION_RUNTIME_URL = os.environ.get(
 )
 
 
-async def example_1_list_root_folder():
+def example_1_list_root_folder():
     """Example 1: List items in the root folder."""
     print("\n=== Example 1: List Root Folder ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with BoxClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.list_root_folder_async()
+        with BoxClient(CONNECTION_RUNTIME_URL, credential) as client:
+            items = list(client.list_root_folder())
 
-            if result and "value" in result:
-                print(f"Found {len(result['value'])} items in root folder:")
-                for item in result["value"][:10]:
+            if items:
+                print(f"Found {len(items)} items in root folder:")
+                for item in items[:10]:
                     icon = "[DIR]" if item.get("IsFolder") else "[FILE]"
                     print(f"  {icon} {item.get('Name', 'N/A')}")
             else:
                 print("No root-folder items returned.")
 
 
-async def example_2_get_file_metadata_by_path():
+def example_2_get_file_metadata_by_path():
     """Example 2: Get file metadata by path."""
     print("\n=== Example 2: Get Metadata by Path ===")
 
@@ -62,11 +60,11 @@ async def example_2_get_file_metadata_by_path():
         print("Set BOX_TEST_FILE_PATH, for example '/Documents/report.pdf'.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with BoxClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with BoxClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                metadata = await client.get_file_metadata_by_path_async(path=file_path)
+                metadata = client.get_file_metadata_by_path(path=file_path)
 
                 if metadata:
                     print(f"Name: {metadata.get('Name', 'N/A')}")
@@ -78,18 +76,18 @@ async def example_2_get_file_metadata_by_path():
                 print(f"Connector error: {ex}")
 
 
-async def example_3_create_file():
+def example_3_create_file():
     """Example 3: Upload a file from bytes content."""
     print("\n=== Example 3: Create File ===")
 
     destination_folder = os.environ.get("BOX_TEST_DEST_FOLDER", "/Documents")
     destination_name = os.environ.get("BOX_TEST_FILE_NAME", "sdk-sample.txt")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with BoxClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with BoxClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.create_file_async(
+                result = client.create_file(
                     input=b"Hello from azure-connectors Box sample!",
                     folder_path=destination_folder,
                     name=destination_name,
@@ -103,7 +101,7 @@ async def example_3_create_file():
                 print(f"Connector error: {ex}")
 
 
-async def example_4_list_folder_for_polling():
+def example_4_list_folder_for_polling():
     """Example 4: List a folder as the basis for polling logic."""
     print("\n=== Example 4: List Folder for Polling ===")
 
@@ -112,19 +110,18 @@ async def example_4_list_folder_for_polling():
         print("Set BOX_TEST_FOLDER_ID to test trigger polling calls.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with BoxClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with BoxClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.list_folder_async(id=folder_id)
-                items = result.get("value", []) if result else []
+                items = list(client.list_folder(id=folder_id))
                 print(f"Folder listing returned {len(items)} item(s).")
                 print("Persist item IDs or timestamps to implement polling with this action client.")
             except ConnectorException as ex:
                 print(f"Connector error: {ex}")
 
 
-async def main():
+def main():
     """Run all Box connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: BOX_CONNECTION_URL environment variable is not set.")
@@ -133,13 +130,13 @@ async def main():
 
     print(f"Using connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
 
-    await example_1_list_root_folder()
-    await example_2_get_file_metadata_by_path()
-    await example_3_create_file()
-    await example_4_list_folder_for_polling()
+    example_1_list_root_folder()
+    example_2_get_file_metadata_by_path()
+    example_3_create_file()
+    example_4_list_folder_for_polling()
 
     print("\n=== Box sample completed ===")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

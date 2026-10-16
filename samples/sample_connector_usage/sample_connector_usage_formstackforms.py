@@ -1,9 +1,7 @@
-"""Formstack Forms connector SDK sample."""
-
-import asyncio
+"""Formstack Forms sample for the Azure Connectors Python SDK."""
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
 from azure.connectors.formstackforms import FormstackformsClient
@@ -12,23 +10,23 @@ from azure.connectors.formstackforms import FormstackformsClient
 CONNECTION_RUNTIME_URL = os.environ.get("FORMSTACKFORMS_CONNECTION_URL", "")
 
 
-async def main() -> None:
+def main() -> None:
     """List available Formstack forms."""
     if not CONNECTION_RUNTIME_URL:
         print("Set FORMSTACKFORMS_CONNECTION_URL to run this sample.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
         try:
-            async with FormstackformsClient(
+            with FormstackformsClient(
                 CONNECTION_RUNTIME_URL,
                 credential,
             ) as client:
-                forms = await client.get_available_forms_async()
+                forms = client.get_available_forms()
                 print(f"Forms: {forms}")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

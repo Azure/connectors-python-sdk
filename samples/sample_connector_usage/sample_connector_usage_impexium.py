@@ -1,9 +1,7 @@
-"""Impexium connector SDK sample."""
-
-import asyncio
+"""Impexium sample for the Azure Connectors Python SDK."""
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
 from azure.connectors.impexium import ImpexiumClient
@@ -12,20 +10,20 @@ from azure.connectors.impexium import ImpexiumClient
 CONNECTION_RUNTIME_URL = os.environ.get("IMPEXIUM_CONNECTION_URL", "")
 
 
-async def main() -> None:
+def main() -> None:
     """List countries from Impexium."""
     if not CONNECTION_RUNTIME_URL:
         print("Set IMPEXIUM_CONNECTION_URL to run this sample.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
         try:
-            async with ImpexiumClient(CONNECTION_RUNTIME_URL, credential) as client:
-                countries = await client.list_all_countries_async(page_number=1)
+            with ImpexiumClient(CONNECTION_RUNTIME_URL, credential) as client:
+                countries = list(client.list_all_countries(page_number=1))
                 print(f"Countries: {countries}")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure IoT Central Connector SDK Sample
+Azure IoT Central sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure IoT Central connector SDK.
+This sample demonstrates how to use the Azure IoT Central client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with an Azure IoT Central connection
@@ -22,11 +22,9 @@ Usage:
 
     python sample_connector_usage_azureiotcentral.py
 """
-
-import asyncio
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.azureiotcentral import (
     AzureiotcentralClient,
@@ -44,15 +42,15 @@ CONNECTION_RUNTIME_URL = os.environ.get(
 APPLICATION = os.environ.get("AZUREIOTCENTRAL_APPLICATION", "")
 
 
-async def example_1_list_devices():
+def example_1_list_devices():
     """Example 1: List devices in the IoT Central application."""
     print("\n=== Example 1: List Devices ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with AzureiotcentralClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with AzureiotcentralClient(CONNECTION_RUNTIME_URL, credential) as client:
             devices = [
-                item async for item in client.devices_list_async(
+                item for item in client.list_devices(
                     application=APPLICATION
                 )
             ]
@@ -64,15 +62,15 @@ async def example_1_list_devices():
                 print(f"  - {display_name} ({device_id})")
 
 
-async def example_2_list_device_groups():
+def example_2_list_device_groups():
     """Example 2: List device groups in the IoT Central application."""
     print("\n=== Example 2: List Device Groups ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with AzureiotcentralClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with AzureiotcentralClient(CONNECTION_RUNTIME_URL, credential) as client:
             device_groups = [
-                item async for item in client.device_groups_list_async(
+                item for item in client.list_device_groups(
                     application=APPLICATION
                 )
             ]
@@ -84,7 +82,7 @@ async def example_2_list_device_groups():
                 print(f"  - {display_name} ({group_id})")
 
 
-async def example_3_create_device_group():
+def example_3_create_device_group():
     """Example 3: Create or update a device group."""
     print("\n=== Example 3: Create Device Group ===")
 
@@ -94,12 +92,15 @@ async def example_3_create_device_group():
         print("Set AZUREIOTCENTRAL_DEVICE_GROUP_ID to run this example.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with AzureiotcentralClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with AzureiotcentralClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.device_groups_set_async(
-                    input=DeviceGroup(display_name="SDK sample group"),
+                result = client.device_groups_set(
+                    input=DeviceGroup(
+                        display_name="SDK sample group",
+                        filter="status = 'registered'",
+                    ),
                     device_group_id=device_group_id,
                     application=APPLICATION,
                 )
@@ -109,7 +110,7 @@ async def example_3_create_device_group():
                 print(f"Connector error: {ex}")
 
 
-async def main():
+def main():
     """Run all Azure IoT Central connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: AZUREIOTCENTRAL_CONNECTION_URL environment variable is not set.")
@@ -118,12 +119,12 @@ async def main():
 
     print(f"Using connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
 
-    await example_1_list_devices()
-    await example_2_list_device_groups()
-    await example_3_create_device_group()
+    example_1_list_devices()
+    example_2_list_device_groups()
+    example_3_create_device_group()
 
     print("\n=== Azure IoT Central sample completed ===")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

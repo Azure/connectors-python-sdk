@@ -178,21 +178,30 @@ az rest --method GET --uri "$runtimeUrl/v2/datasets" --resource "https://apihub.
 
 ## Next Steps
 
-- **SDK usage:** Use the connection runtime URL with a caller-owned async Azure credential:
-  ```python
-  from azure.identity.aio import DefaultAzureCredential
+### SDK Usage
 
-  from azure.connectors.office365 import Office365Client, SendEmailInput
+Use the connection runtime URL with a caller-owned Azure credential. Root
+clients are synchronous:
 
-  async with DefaultAzureCredential() as credential:
-      async with Office365Client(runtime_url, credential) as client:
-          await client.send_email_async(
-              input=SendEmailInput(
-                  to="recipient@example.com",
-                  subject="Hello",
-                  body="Sent with Azure Connectors.",
-              )
-          )
-  ```
+```python
+from azure.identity import DefaultAzureCredential
+
+from azure.connectors.office365 import Office365Client, SendEmailInput
+
+with DefaultAzureCredential() as credential:
+    with Office365Client(runtime_url, credential) as client:
+        client.send_email(
+            input=SendEmailInput(
+                to="recipient@example.com",
+                subject="Hello",
+                body="Sent with Azure Connectors.",
+            )
+        )
+```
+
+Asynchronous applications import the client from
+`azure.connectors.aio.office365`, use `azure.identity.aio`, and await the same
+unsuffixed `send_email` operation. Models remain in the root module.
+
 - **Azure Functions triggers:** To register connector triggers (e.g., OnNewEmail, OnNewFile) for Azure Functions, use the [trigger-registration skill](../trigger-registration/SKILL.md).
 - **Azure Functions signatures:** For a complete mapping of trigger operations to Azure Functions signatures, see [Operations to Functions Signature Match](https://github.com/Azure/azure-functions-connector-extension/blob/main/docs/operations-functions-match.md).

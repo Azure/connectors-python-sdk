@@ -23,8 +23,8 @@ Type-safe Python clients for [Azure connectors](https://learn.microsoft.com/conn
 
 Azure provides a rich ecosystem of [managed connectors](https://learn.microsoft.com/connectors/connector-reference/) that bridge your code to SaaS services, PaaS resources, and on-premises systems. Originally powering Azure Logic Apps and Power Automate, these connectors are now available as **standalone, strongly-typed Python clients** for any Python application — no workflow service required.
 
-- **Async/await native** — Built on `aiohttp` with full async support for modern Python applications
-- **Type-safe operations** — Generated async methods with type hints and comprehensive docstrings
+- **Sync and async clients** — Use synchronous clients at the package root or matching asynchronous clients under `.aio`
+- **Type-safe operations** — Both modes expose identical unsuffixed methods with type hints and comprehensive docstrings
 - **Built-in authentication** — Managed identity, Azure Identity, and API key token providers
 - **Resilient HTTP** — Configurable retries with exponential backoff for safe HTTP methods; unsafe methods make one attempt by default
 - **1,000+ connectors** — Any Azure managed connector available via API Hub can be generated
@@ -37,17 +37,17 @@ Azure provides a rich ecosystem of [managed connectors](https://learn.microsoft.
 ┌─────────────────────────────────────┐
 │  Your Azure Function / Python App   │
 │                                     │
-│  async with Office365Client(...):   │
-│      await client.send_email(...)   │
+│  with Office365Client(...):         │
+│      client.send_email(...)         │
 └──────────────┬──────────────────────┘
                │
                ▼
 ┌─────────────────────────────────────┐
 │   Generated Connector Clients       │
-│   (office365.py, teams.py, etc.)    │
+│   (root sync + aio async modules)   │
 │                                     │
-│  • Typed async methods per action   │
-│  • Dataclass models from Swagger    │
+│  • Matching unsuffixed operations   │
+│  • Shared models from Swagger       │
 │  • Docstrings from connector meta   │
 └──────────────┬──────────────────────┘
                │ depends on
@@ -78,39 +78,34 @@ pip install azure-connectors[dev]
 
 ## Quick Start
 
-### Example: Send an email with Office 365
+### Example: Send an email synchronously
 
 ```python
-import asyncio
-
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors.office365 import Office365Client, SendEmailInput
 
 
-async def send_email_example():
+def send_email_example():
     connection_url = "https://example.azure.com/connections/office365"
 
-    async with DefaultAzureCredential() as credential:
-        async with Office365Client(connection_url, credential) as client:
-            await client.send_email_async(
+    with DefaultAzureCredential() as credential:
+        with Office365Client(connection_url, credential) as client:
+            client.send_email(
                 input=SendEmailInput(
                     to="recipient@example.com",
                     subject="Hello from Python SDK",
                     body="<p>Sent with the Azure Connectors Python SDK.</p>",
                 )
             )
-
-
-asyncio.run(send_email_example())
 ```
 
-### Example: List SharePoint items
+### Example: List SharePoint items asynchronously
 
 ```python
 from azure.identity.aio import DefaultAzureCredential
 
-from azure.connectors.sharepointonline import SharepointonlineClient
+from azure.connectors.aio.sharepointonline import SharepointonlineClient
 
 
 async def list_sharepoint_items():
@@ -120,7 +115,7 @@ async def list_sharepoint_items():
         async with SharepointonlineClient(connection_url, credential) as client:
             items = [
                 item
-                async for item in client.get_items_async(
+                async for item in client.list_items(
                     dataset="https://contoso.sharepoint.com/sites/MySite",
                     table="MyList",
                 )
@@ -135,7 +130,8 @@ async def list_sharepoint_items():
 ```python
 from azure.identity.aio import DefaultAzureCredential
 
-from azure.connectors.teams import DynamicPostMessageRequest, TeamsClient
+from azure.connectors.aio.teams import TeamsClient
+from azure.connectors.teams import DynamicPostMessageRequest
 
 
 async def post_teams_message():
@@ -143,7 +139,7 @@ async def post_teams_message():
 
     async with DefaultAzureCredential() as credential:
         async with TeamsClient(connection_url, credential) as client:
-            await client.post_message_to_conversation_async(
+            await client.post_message_to_conversation(
                 input=DynamicPostMessageRequest(
                     additional_properties={
                         "body": {
@@ -157,6 +153,36 @@ async def post_teams_message():
             )
 ```
 
+### Example: Wait for a long-running Kusto query
+
+Long-running operations use an Azure SDK-style `begin_*` method. Keep the
+client open until the poller reaches its terminal response:
+
+```python
+from azure.identity import DefaultAzureCredential
+
+from azure.connectors.kusto import KustoClient, QueryAndListSchema
+
+
+def run_kusto_query():
+    connection_url = "https://example.azure.com/connections/kusto"
+
+    with DefaultAzureCredential() as credential:
+        with KustoClient(connection_url, credential) as client:
+            poller = client.begin_list_kusto_results(
+                input=QueryAndListSchema(
+                    cluster="https://contoso.kusto.windows.net",
+                    db="Samples",
+                    csl="StormEvents | take 5",
+                )
+            )
+            return poller.result()
+```
+
+The matching aio method is awaited to create the poller, then
+`await poller.result()` waits for completion. See the
+[long-running operations guide](docs/long-running-operations.md).
+
 ### Retry safety
 
 By default, `GET`, `HEAD`, `OPTIONS`, and `TRACE` use the configured retry settings. `POST`, `PUT`, `PATCH`, `DELETE`, and other methods make one attempt after a transient response or transport error because the connector may already have completed the side effect.
@@ -164,14 +190,14 @@ By default, `GET`, `HEAD`, `OPTIONS`, and `TRACE` use the configured retry setti
 Only opt in when the connector operation can tolerate replay, preferably with a service-supported idempotency key or deduplication:
 
 ```python
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors.teams import TeamsClient
 
 
-async def use_teams_client(connection_url: str):
-    async with DefaultAzureCredential() as credential:
-        async with TeamsClient(
+def use_teams_client(connection_url: str):
+    with DefaultAzureCredential() as credential:
+        with TeamsClient(
             connection_url,
             credential,
             max_retry_attempts=3,
@@ -181,6 +207,7 @@ async def use_teams_client(connection_url: str):
 ```
 
 `max_retry_attempts`, timeout, and backoff settings govern eligible retries. This is the same [cross-language retry-safety contract](https://github.com/Azure/Connectors-NET-SDK/blob/main/docs/retry-safety.md) as the .NET and Node.js SDKs.
+
 ## Validated Connectors
 
 The following connectors have been generated and validated with comprehensive test coverage:
@@ -298,14 +325,14 @@ Generated clients require a caller-owned Azure Core credential.
 ### Managed Identity
 
 ```python
-from azure.identity.aio import ManagedIdentityCredential
+from azure.identity import ManagedIdentityCredential
 
 from azure.connectors.office365 import Office365Client
 
 
-async def use_managed_identity(connection_url: str):
-    async with ManagedIdentityCredential() as credential:
-        async with Office365Client(connection_url, credential) as client:
+def use_managed_identity(connection_url: str):
+    with ManagedIdentityCredential() as credential:
+        with Office365Client(connection_url, credential) as client:
             print(client.connector_name)
 ```
 
@@ -313,10 +340,10 @@ Pass `client_id="your-client-id"` to `ManagedIdentityCredential` for a user-assi
 
 ### Azure Identity Credentials
 
-Any asynchronous Azure Identity credential can be passed directly:
+Root clients accept synchronous Azure Identity credentials:
 
 ```python
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors.office365 import Office365Client
 
@@ -324,7 +351,16 @@ credential = DefaultAzureCredential()
 client = Office365Client(connection_url, credential)
 ```
 
-The caller owns the credential and must close it. Prefer an `async with` credential context as shown above.
+Asynchronous clients use the matching credential and client modules:
+
+```python
+from azure.identity.aio import DefaultAzureCredential
+
+from azure.connectors.aio.office365 import Office365Client
+```
+
+The caller owns the credential and must close it. Prefer `with` for synchronous
+credentials and `async with` for asynchronous credentials.
 
 ### API Key
 
@@ -345,29 +381,31 @@ Pass retry, timeout, transport, and Azure Core policy settings directly to the g
 client = Office365Client(
     connection_url,
     credential,
-    timeout_seconds=60.0,
+    timeout=60.0,
     max_retry_attempts=5,
     use_exponential_backoff=True,
     initial_retry_delay_seconds=1.0,
 )
 ```
 
-`timeout_seconds` is one total network budget for each request, including
+The client-level `timeout` sets a total network budget for each request, including
 retries, response loading, and body reads. Each generated operation also accepts
 keyword-only `timeout`, `headers`, `client_request_id`, and `response_hook`
-request controls; `timeout` overrides that total budget for one operation. Set
-either timeout to zero or a negative value to disable SDK and transport
+request controls; the operation-level `timeout` overrides that total budget for
+one operation. Set either timeout to zero or a negative value to disable SDK and transport
 deadlines for the selected requests.
 
-Generated clients accept any Azure Core `AsyncHttpTransport`. The client closes
-an injected transport through its asynchronous lifecycle; the caller retains
-ownership of the credential. The SDK enforces the total request budget across
-transports and applies transport-specific timeout options only when supported.
-`per_call_policies` and `per_retry_policies` are composed with the default or an
-explicit `policies` chain. An explicit chain using `per_retry_policies` must
-contain an `AsyncRetryPolicy`. Explicit chains without a retry policy remain
-supported; the SDK enforces positive total request deadlines without forwarding
-retry-only options to the transport.
+Root clients accept Azure Core `HttpTransport` implementations and aio clients
+accept `AsyncHttpTransport` implementations. Clients close injected transports
+through the matching lifecycle; callers retain ownership of credentials. The
+SDK applies transport-specific timeout options only when supported. For sync
+clients, the default owned Requests transport enforces network receive deadlines
+across status lines, headers, and response bodies, even when data arrives in small
+chunks. Caller-provided transports and sessions are responsible for enforcing
+their own network deadlines. Blocking credentials, policies, and callbacks must
+bound their own execution; the SDK cannot interrupt them. `per_call_policies` and
+`per_retry_policies` compose with the default or an explicit `policies` chain.
+Per-retry extensions require the matching sync or async retry policy.
 
 ## Project Structure
 
@@ -376,16 +414,22 @@ azure-connectors/
 ├── src/azure/connectors/
 │   ├── sdk/                    # Azure Core runtime infrastructure
 │   │   ├── client_base.py      # Base connector client
-│   │   ├── http_client.py      # Async pipeline and retry policies
+│   │   ├── http_client.py      # Sync pipeline and retry policies
+│   │   ├── aio/                # Async runtime counterparts
 │   │   ├── response.py         # Immutable response hook contracts
 │   │   └── exceptions.py       # Exception types
-│   ├── office365.py            # Office 365 generated client
+│   ├── aio/                     # Async generated clients
+│   ├── office365.py            # Sync client and shared models
 │   ├── sharepointonline.py     # SharePoint generated client
 │   └── teams.py                # Teams generated client
 ├── tests/                      # Comprehensive test suite
 ├── samples/                    # Usage examples
 └── docs/                       # Additional documentation
 ```
+
+See [Migrate to sync and aio clients](docs/migration-sync-aio.md) for the
+breaking changes from the asynchronous-only preview.
+
 ## SDK-Type Bindings for Azure Functions
 
 The SDK supports **SDK-type bindings** for Python Function apps, allowing functions to bind to and return rich, strongly-typed objects instead of raw JSON payloads. This enables cleaner code and better IDE support with type hints.

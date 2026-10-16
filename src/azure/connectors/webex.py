@@ -5,20 +5,54 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "WebexClient",
+    "CreateSpaceInput",
+    "CreateSpaceMemberInput",
+    "CreateSpaceMemberResponse",
+    "CreateSpaceResponse",
+    "CreateTeamMemberInput",
+    "CreateTeamMemberResponse",
+    "GetMessageDetailsResponse",
+    "GetMessagesResponse",
+    "GetMyOwnDetailsResponse",
+    "GetPeopleResponse",
+    "GetSpaceDetailResponse",
+    "GetSpacesResponse",
+    "MembershipsCreatedInput",
+    "MembershipsCreatedResponse",
+    "MembershipsDeletedInput",
+    "MembershipsDeletedResponse",
+    "MembershipsUpdatedInput",
+    "MembershipsUpdatedResponse",
+    "MessagesCreatedInput",
+    "MessagesCreatedResponse",
+    "MessagesDeletedInput",
+    "MessagesDeletedResponse",
+    "SendMessageInput",
+    "SendMessageResponse",
+    "SpaceCreatedInput",
+    "SpaceCreatedResponse",
+    "SpaceUpdatedInput",
+    "SpaceUpdatedResponse",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -29,25 +63,21 @@ class CreateSpaceMemberInput:
     Add Member to Space
     """
 
-    is_moderator: Optional[bool] = field(
-        default=None,
-        metadata={"wire_name": "isModerator"},
-    )
+    is_moderator: bool = dataclass_field(metadata={"wire_name": "isModerator"})
     """Is moderator?"""
-    person_email: Optional[str] = field(
+    person_email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "personEmail"},
     )
     """Email address"""
-    person_id: Optional[str] = field(
+    person_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "personId"},
     )
     """Person ID of the new member"""
-    room_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "roomId"},
-    )
+    room_id: str = dataclass_field(metadata={"wire_name": "roomId"})
     """Select a space"""
 
 
@@ -57,42 +87,49 @@ class CreateSpaceMemberResponse:
     Response for Add Member to Space
     """
 
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """created"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """id"""
-    is_moderator: Optional[bool] = field(
+    is_moderator: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isModerator"},
     )
     """isModerator"""
-    is_monitor: Optional[bool] = field(
+    is_monitor: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isMonitor"},
     )
     """isMonitor"""
-    person_display_name: Optional[str] = field(
+    person_display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "personDisplayName"},
     )
     """personDisplayName"""
-    person_email: Optional[str] = field(
+    person_email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "personEmail"},
     )
     """personEmail"""
-    person_id: Optional[str] = field(
+    person_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "personId"},
     )
     """personId"""
-    person_org_id: Optional[str] = field(
+    person_org_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "personOrgId"},
     )
     """personOrgId"""
-    room_id: Optional[str] = field(
+    room_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "roomId"},
     )
     """roomId"""
@@ -104,7 +141,7 @@ class GetMessagesResponse:
     Response for Get Messages
     """
 
-    items: Optional[List[Dict[str, Any]]] = None
+    items: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """items"""
 
 
@@ -114,26 +151,29 @@ class SendMessageInput:
     Send a Message
     """
 
-    files: Optional[List[str]] = None
+    files: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """files"""
-    markdown: Optional[str] = None
+    markdown: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Message, in markdown format"""
-    room_id: Optional[str] = field(
+    room_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "roomId"},
     )
     """Select a recipient space"""
-    text: Optional[str] = None
+    text: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Message Text, in plain text, used for clients that do not support markdown
     """
-    to_person_email: Optional[str] = field(
+    to_person_email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "toPersonEmail"},
     )
     """The email address of the recipient when sending a private 1:1 message"""
-    to_person_id: Optional[str] = field(
+    to_person_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "toPersonId"},
     )
     """The ID of the recipient when sending a 1:1 message"""
@@ -145,34 +185,39 @@ class SendMessageResponse:
     Response for Send a Message
     """
 
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """created"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """id"""
-    person_email: Optional[str] = field(
+    person_email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "personEmail"},
     )
     """personEmail"""
-    person_id: Optional[str] = field(
+    person_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "personId"},
     )
     """personId"""
-    room_id: Optional[str] = field(
+    room_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "roomId"},
     )
     """roomId"""
-    room_type: Optional[str] = field(
+    room_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "roomType"},
     )
     """roomType"""
-    text: Optional[str] = None
+    text: Optional[str] = dataclass_field(default=None, kw_only=True)
     """text"""
-    to_person_email: Optional[str] = field(
+    to_person_email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "toPersonEmail"},
     )
     """toPersonEmail"""
@@ -184,53 +229,61 @@ class GetMessageDetailsResponse:
     Response for Get Message Details
     """
 
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """created"""
-    files: Optional[List[str]] = None
+    files: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """files"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """id"""
-    markdown: Optional[str] = None
+    markdown: Optional[str] = dataclass_field(default=None, kw_only=True)
     """markdown"""
-    mentioned_groups: Optional[List[str]] = field(
+    mentioned_groups: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mentionedGroups"},
     )
     """mentionedGroups"""
-    mentioned_people: Optional[List[str]] = field(
+    mentioned_people: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mentionedPeople"},
     )
     """mentionedPeople"""
-    person_email: Optional[str] = field(
+    person_email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "personEmail"},
     )
     """personEmail"""
-    person_id: Optional[str] = field(
+    person_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "personId"},
     )
     """personId"""
-    room_id: Optional[str] = field(
+    room_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "roomId"},
     )
     """roomId"""
-    room_type: Optional[str] = field(
+    room_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "roomType"},
     )
     """roomType"""
-    text: Optional[str] = None
+    text: Optional[str] = dataclass_field(default=None, kw_only=True)
     """text"""
-    to_person_email: Optional[str] = field(
+    to_person_email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "toPersonEmail"},
     )
     """toPersonEmail"""
-    to_person_id: Optional[str] = field(
+    to_person_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "toPersonId"},
     )
     """toPersonId"""
@@ -242,10 +295,11 @@ class GetPeopleResponse:
     Response for Get People
     """
 
-    items: Optional[List[Dict[str, Any]]] = None
+    items: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """items"""
-    not_found_ids: Optional[List[str]] = field(
+    not_found_ids: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "notFoundIds"},
     )
     """notFoundIds"""
@@ -257,52 +311,63 @@ class GetMyOwnDetailsResponse:
     Response for Get My Own Details
     """
 
-    avatar: Optional[str] = None
+    avatar: Optional[str] = dataclass_field(default=None, kw_only=True)
     """avatar"""
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """created"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """displayName"""
-    emails: Optional[List[str]] = None
+    emails: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """emails"""
-    first_name: Optional[str] = field(
+    first_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "firstName"},
     )
     """firstName"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """id"""
-    last_activity: Optional[str] = field(
+    last_activity: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastActivity"},
     )
     """lastActivity"""
-    last_name: Optional[str] = field(
+    last_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastName"},
     )
     """lastName"""
-    nick_name: Optional[str] = field(
+    nick_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nickName"},
     )
     """nickName"""
-    org_id: Optional[str] = field(
+    org_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "orgId"},
     )
     """orgId"""
-    phone_numbers: Optional[List[Dict[str, Any]]] = field(
+    phone_numbers: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "phoneNumbers"},
     )
     """phoneNumbers"""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """status"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """type"""
 
 
@@ -312,7 +377,7 @@ class GetSpacesResponse:
     Response for Get Spaces List
     """
 
-    items: Optional[List[Dict[str, Any]]] = None
+    items: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """items"""
 
 
@@ -322,12 +387,13 @@ class CreateSpaceInput:
     Create Space
     """
 
-    team_id: Optional[str] = field(
+    team_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "teamId"},
     )
     """Optionally select a team"""
-    title: Optional[str] = None
+    title: str
     """Space Title"""
 
 
@@ -337,28 +403,35 @@ class CreateSpaceResponse:
     Response for Create Space
     """
 
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """created"""
-    creator_id: Optional[str] = field(
+    creator_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "creatorId"},
     )
     """creatorId"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """id"""
-    is_locked: Optional[bool] = field(
+    is_locked: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isLocked"},
     )
     """isLocked"""
-    last_activity: Optional[str] = field(
+    last_activity: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastActivity"},
     )
     """lastActivity"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """title"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """type"""
 
 
@@ -368,28 +441,35 @@ class GetSpaceDetailResponse:
     Response for Get Space Details
     """
 
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """created"""
-    creator_id: Optional[str] = field(
+    creator_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "creatorId"},
     )
     """creatorId"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """id"""
-    is_locked: Optional[bool] = field(
+    is_locked: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isLocked"},
     )
     """isLocked"""
-    last_activity: Optional[str] = field(
+    last_activity: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastActivity"},
     )
     """lastActivity"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """title"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """type"""
 
 
@@ -399,25 +479,21 @@ class CreateTeamMemberInput:
     Add Member to Team
     """
 
-    is_moderator: Optional[bool] = field(
-        default=None,
-        metadata={"wire_name": "isModerator"},
-    )
+    is_moderator: bool = dataclass_field(metadata={"wire_name": "isModerator"})
     """Is Moderator?"""
-    person_email: Optional[str] = field(
+    person_email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "personEmail"},
     )
     """Email address"""
-    person_id: Optional[str] = field(
+    person_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "personId"},
     )
     """Person ID of the new member"""
-    team_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "teamId"},
-    )
+    team_id: str = dataclass_field(metadata={"wire_name": "teamId"})
     """Select a team"""
 
 
@@ -427,37 +503,43 @@ class CreateTeamMemberResponse:
     Response for Add Member to Team
     """
 
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """created"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """id"""
-    is_moderator: Optional[bool] = field(
+    is_moderator: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isModerator"},
     )
     """isModerator"""
-    person_display_name: Optional[str] = field(
+    person_display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "personDisplayName"},
     )
     """personDisplayName"""
-    person_email: Optional[str] = field(
+    person_email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "personEmail"},
     )
     """personEmail"""
-    person_id: Optional[str] = field(
+    person_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "personId"},
     )
     """personId"""
-    person_org_id: Optional[str] = field(
+    person_org_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "personOrgId"},
     )
     """personOrgId"""
-    team_id: Optional[str] = field(
+    team_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "teamId"},
     )
     """teamId"""
@@ -469,16 +551,13 @@ class MembershipsUpdatedInput:
     When a membership is updated
     """
 
-    event: Optional[str] = None
+    event: str
     """event"""
-    name: Optional[str] = None
+    name: str
     """name"""
-    resource: Optional[str] = None
+    resource: str
     """resource"""
-    target_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "targetUrl"},
-    )
+    target_url: str = dataclass_field(metadata={"wire_name": "targetUrl"})
     """targetUrl"""
 
 
@@ -488,26 +567,27 @@ class MembershipsUpdatedResponse:
     Response for When a membership is updated
     """
 
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """created"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """id"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    target_url: Optional[str] = field(
+    target_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "targetUrl"},
     )
     """targetUrl"""
-    resource: Optional[str] = None
+    resource: Optional[str] = dataclass_field(default=None, kw_only=True)
     """resource"""
-    event: Optional[str] = None
+    event: Optional[str] = dataclass_field(default=None, kw_only=True)
     """event"""
-    filter: Optional[str] = None
+    filter: Optional[str] = dataclass_field(default=None, kw_only=True)
     """filter"""
-    secret: Optional[str] = None
+    secret: Optional[str] = dataclass_field(default=None, kw_only=True)
     """secret"""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """status"""
 
 
@@ -517,16 +597,13 @@ class MembershipsDeletedInput:
     When a membership is deleted
     """
 
-    event: Optional[str] = None
+    event: str
     """event"""
-    name: Optional[str] = None
+    name: str
     """name"""
-    resource: Optional[str] = None
+    resource: str
     """resource"""
-    target_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "targetUrl"},
-    )
+    target_url: str = dataclass_field(metadata={"wire_name": "targetUrl"})
     """targetUrl"""
 
 
@@ -536,26 +613,27 @@ class MembershipsDeletedResponse:
     Response for When a membership is deleted
     """
 
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """created"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """id"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    target_url: Optional[str] = field(
+    target_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "targetUrl"},
     )
     """targetUrl"""
-    resource: Optional[str] = None
+    resource: Optional[str] = dataclass_field(default=None, kw_only=True)
     """resource"""
-    event: Optional[str] = None
+    event: Optional[str] = dataclass_field(default=None, kw_only=True)
     """event"""
-    filter: Optional[str] = None
+    filter: Optional[str] = dataclass_field(default=None, kw_only=True)
     """filter"""
-    secret: Optional[str] = None
+    secret: Optional[str] = dataclass_field(default=None, kw_only=True)
     """secret"""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """status"""
 
 
@@ -565,16 +643,13 @@ class MembershipsCreatedInput:
     When a membership is created
     """
 
-    event: Optional[str] = None
+    event: str
     """event"""
-    name: Optional[str] = None
+    name: str
     """name"""
-    resource: Optional[str] = None
+    resource: str
     """resource"""
-    target_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "targetUrl"},
-    )
+    target_url: str = dataclass_field(metadata={"wire_name": "targetUrl"})
     """targetUrl"""
 
 
@@ -584,26 +659,27 @@ class MembershipsCreatedResponse:
     Response for When a membership is created
     """
 
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """created"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """id"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    target_url: Optional[str] = field(
+    target_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "targetUrl"},
     )
     """targetUrl"""
-    resource: Optional[str] = None
+    resource: Optional[str] = dataclass_field(default=None, kw_only=True)
     """resource"""
-    event: Optional[str] = None
+    event: Optional[str] = dataclass_field(default=None, kw_only=True)
     """event"""
-    filter: Optional[str] = None
+    filter: Optional[str] = dataclass_field(default=None, kw_only=True)
     """filter"""
-    secret: Optional[str] = None
+    secret: Optional[str] = dataclass_field(default=None, kw_only=True)
     """secret"""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """status"""
 
 
@@ -613,16 +689,13 @@ class MessagesCreatedInput:
     When a message is created
     """
 
-    event: Optional[str] = None
+    event: str
     """event"""
-    name: Optional[str] = None
+    name: str
     """name"""
-    resource: Optional[str] = None
+    resource: str
     """resource"""
-    target_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "targetUrl"},
-    )
+    target_url: str = dataclass_field(metadata={"wire_name": "targetUrl"})
     """targetUrl"""
 
 
@@ -632,26 +705,27 @@ class MessagesCreatedResponse:
     Response for When a message is created
     """
 
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """created"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """id"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    target_url: Optional[str] = field(
+    target_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "targetUrl"},
     )
     """targetUrl"""
-    resource: Optional[str] = None
+    resource: Optional[str] = dataclass_field(default=None, kw_only=True)
     """resource"""
-    event: Optional[str] = None
+    event: Optional[str] = dataclass_field(default=None, kw_only=True)
     """event"""
-    filter: Optional[str] = None
+    filter: Optional[str] = dataclass_field(default=None, kw_only=True)
     """filter"""
-    secret: Optional[str] = None
+    secret: Optional[str] = dataclass_field(default=None, kw_only=True)
     """secret"""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """status"""
 
 
@@ -661,16 +735,13 @@ class MessagesDeletedInput:
     When a message is deleted
     """
 
-    event: Optional[str] = None
+    event: str
     """event"""
-    name: Optional[str] = None
+    name: str
     """name"""
-    resource: Optional[str] = None
+    resource: str
     """resource"""
-    target_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "targetUrl"},
-    )
+    target_url: str = dataclass_field(metadata={"wire_name": "targetUrl"})
     """targetUrl"""
 
 
@@ -680,26 +751,27 @@ class MessagesDeletedResponse:
     Response for When a message is deleted
     """
 
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """created"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """id"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    target_url: Optional[str] = field(
+    target_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "targetUrl"},
     )
     """targetUrl"""
-    resource: Optional[str] = None
+    resource: Optional[str] = dataclass_field(default=None, kw_only=True)
     """resource"""
-    event: Optional[str] = None
+    event: Optional[str] = dataclass_field(default=None, kw_only=True)
     """event"""
-    filter: Optional[str] = None
+    filter: Optional[str] = dataclass_field(default=None, kw_only=True)
     """filter"""
-    secret: Optional[str] = None
+    secret: Optional[str] = dataclass_field(default=None, kw_only=True)
     """secret"""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """status"""
 
 
@@ -709,16 +781,13 @@ class SpaceCreatedInput:
     When a space is created
     """
 
-    event: Optional[str] = None
+    event: str
     """event"""
-    name: Optional[str] = None
+    name: str
     """name"""
-    resource: Optional[str] = None
+    resource: str
     """resource"""
-    target_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "targetUrl"},
-    )
+    target_url: str = dataclass_field(metadata={"wire_name": "targetUrl"})
     """targetUrl"""
 
 
@@ -728,26 +797,27 @@ class SpaceCreatedResponse:
     Response for When a space is created
     """
 
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """created"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """id"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    target_url: Optional[str] = field(
+    target_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "targetUrl"},
     )
     """targetUrl"""
-    resource: Optional[str] = None
+    resource: Optional[str] = dataclass_field(default=None, kw_only=True)
     """resource"""
-    event: Optional[str] = None
+    event: Optional[str] = dataclass_field(default=None, kw_only=True)
     """event"""
-    filter: Optional[str] = None
+    filter: Optional[str] = dataclass_field(default=None, kw_only=True)
     """filter"""
-    secret: Optional[str] = None
+    secret: Optional[str] = dataclass_field(default=None, kw_only=True)
     """secret"""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """status"""
 
 
@@ -757,16 +827,13 @@ class SpaceUpdatedInput:
     When a space is updated
     """
 
-    event: Optional[str] = None
+    event: str
     """event"""
-    name: Optional[str] = None
+    name: str
     """name"""
-    resource: Optional[str] = None
+    resource: str
     """resource"""
-    target_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "targetUrl"},
-    )
+    target_url: str = dataclass_field(metadata={"wire_name": "targetUrl"})
     """targetUrl"""
 
 
@@ -776,26 +843,27 @@ class SpaceUpdatedResponse:
     Response for When a space is updated
     """
 
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """created"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """id"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    target_url: Optional[str] = field(
+    target_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "targetUrl"},
     )
     """targetUrl"""
-    resource: Optional[str] = None
+    resource: Optional[str] = dataclass_field(default=None, kw_only=True)
     """resource"""
-    event: Optional[str] = None
+    event: Optional[str] = dataclass_field(default=None, kw_only=True)
     """event"""
-    filter: Optional[str] = None
+    filter: Optional[str] = dataclass_field(default=None, kw_only=True)
     """filter"""
-    secret: Optional[str] = None
+    secret: Optional[str] = dataclass_field(default=None, kw_only=True)
     """secret"""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """status"""
 
 
@@ -807,16 +875,16 @@ class WebexClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -827,8 +895,8 @@ class WebexClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -836,8 +904,8 @@ class WebexClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -849,7 +917,7 @@ class WebexClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -864,9 +932,86 @@ class WebexClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "webex"
 
-    async def create_space_member_async(
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
+            if next_link.startswith("?"):
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
+
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
+    def create_space_member(
         self,
-        input: CreateSpaceMemberInput,
+        input: CreateSpaceMemberInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -877,10 +1022,26 @@ class WebexClient(ConnectorClientBase):
         Add Member to Space
 
         Add a member to an existing space
+
+        Swagger operation ID: `CreateSpaceMember`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/memberships"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -894,6 +1055,7 @@ class WebexClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -901,23 +1063,48 @@ class WebexClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_messages_async(
+    def list_messages(
         self,
         room_id: str,
+        *,
         mentioned_people: Optional[str] = None,
         before_message: Optional[str] = None,
         before: Optional[str] = None,
         max: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Messages
 
         Get a list of recent messages for a space
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetMessages`.
+
+        Args:
+            room_id: List messages in a space for a given space ID.
+            mentioned_people: List messages where the caller is mentioned by
+                specifying \"me\" or the caller personId.
+            before_message: List messages sent before a message, by ID.
+            before: List messages sent before a date and time, in ISO8601
+                format.
+            max: Limit the maximum number of messages in the response.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/messages"
         query_params = []
@@ -947,31 +1134,52 @@ class WebexClient(ConnectorClientBase):
             query_params.append(f"max={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def send_message_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("items", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def send_message(
         self,
-        input: SendMessageInput,
+        input: SendMessageInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -982,10 +1190,26 @@ class WebexClient(ConnectorClientBase):
         Send a Message
 
         Send a message to webex
+
+        Swagger operation ID: `SendMessage`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/messages"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -999,6 +1223,7 @@ class WebexClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1006,7 +1231,7 @@ class WebexClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_message_details_async(
+    def get_message_details(
         self,
         message_id: str,
         *,
@@ -1019,13 +1244,28 @@ class WebexClient(ConnectorClientBase):
         Get Message Details
 
         Shows details for a message, by message ID.
+
+        Swagger operation ID: `GetMessageDetails`.
+
+        Args:
+            message_id: The message ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1/messages/{quote(str(message_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1039,6 +1279,7 @@ class WebexClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1046,20 +1287,41 @@ class WebexClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_people_async(
+    def list_people(
         self,
+        *,
         id: Optional[str] = None,
         email: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get People
 
         Lookup details and presence information for people in your organization
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetPeople`.
+
+        Args:
+            id: List people by ID. Accepts up to 85 person IDs separated by
+                commas.
+            email: List people with this email address.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/people"
         query_params = []
@@ -1075,29 +1337,50 @@ class WebexClient(ConnectorClientBase):
             query_params.append(f"email={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_my_own_details_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("items", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_my_own_details(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1109,10 +1392,24 @@ class WebexClient(ConnectorClientBase):
         Get My Own Details
 
         Lookup your own details
+
+        Swagger operation ID: `GetMyOwnDetails`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/people/me"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1126,6 +1423,7 @@ class WebexClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1133,21 +1431,44 @@ class WebexClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_spaces_async(
+    def list_spaces(
         self,
+        *,
         max: Optional[int] = None,
         type_: Optional[str] = None,
         sort_by: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Spaces List
 
         This action retrieves a list of spaces
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetSpaces`.
+
+        Args:
+            max: Maximum number of spaces to return.
+            type_: (group) only include group spaces, (direct) only include 1
+                to 1 spaces, returns all if not specified.
+            sort_by: (id) the space id, (lastactivity) the last activity
+                timestamp, (created) space creation date.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/rooms"
         query_params = []
@@ -1168,31 +1489,52 @@ class WebexClient(ConnectorClientBase):
             query_params.append(f"sortBy={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def create_space_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("items", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def create_space(
         self,
-        input: CreateSpaceInput,
+        input: CreateSpaceInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1203,10 +1545,26 @@ class WebexClient(ConnectorClientBase):
         Create Space
 
         Create space or team space
+
+        Swagger operation ID: `CreateSpace`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/rooms"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1220,6 +1578,7 @@ class WebexClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1227,7 +1586,7 @@ class WebexClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_space_detail_async(
+    def get_space_detail(
         self,
         room_id: str,
         *,
@@ -1240,13 +1599,28 @@ class WebexClient(ConnectorClientBase):
         Get Space Details
 
         Return details of a given space
+
+        Swagger operation ID: `GetSpaceDetail`.
+
+        Args:
+            room_id: Select a space.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1/rooms/{quote(str(room_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1260,6 +1634,7 @@ class WebexClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1267,9 +1642,9 @@ class WebexClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_team_member_async(
+    def create_team_member(
         self,
-        input: CreateTeamMemberInput,
+        input: CreateTeamMemberInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1280,10 +1655,26 @@ class WebexClient(ConnectorClientBase):
         Add Member to Team
 
         Add a member to a team
+
+        Swagger operation ID: `CreateTeamMember`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/team/memberships"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1297,6 +1688,7 @@ class WebexClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

@@ -7,9 +7,9 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.insightly import InsightlyClient
 from azure.connectors.insightly import (
     ContactRequest,
-    InsightlyClient,
     LeadRequest,
     ListContactsResponse,
     ListEventsResponse,
@@ -26,48 +26,61 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import (
+    generated_pager_response_text,
+    model_instance,
+    resolve_generated_result,
+)
 
 
 async def _invoke_operation(client: InsightlyClient, operation: str):
     """Invoke an Insightly operation by name for shared tests."""
     if operation == "list_tasks":
-        return await client.list_tasks_async()
+        return await resolve_generated_result(client.list_tasks())
     if operation == "update_task":
-        return await client.update_task_async(input=TaskRequest(), id="1")
+        return await client.update_task(input=model_instance(TaskRequest), id="1")
     if operation == "add_task":
-        return await client.add_task_async(input=TaskRequest())
+        return await client.add_task(input=model_instance(TaskRequest))
     if operation == "list_projects":
-        return await client.list_projects_async()
+        return await resolve_generated_result(client.list_projects())
     if operation == "update_project":
-        return await client.update_project_async(input=ProjectRequest(), id="1")
+        return await client.update_project(
+            input=model_instance(ProjectRequest),
+            id="1",
+        )
     if operation == "add_project":
-        return await client.add_project_async(input=ProjectRequest())
+        return await client.add_project(input=model_instance(ProjectRequest))
     if operation == "list_leads":
-        return await client.list_leads_async()
+        return await resolve_generated_result(client.list_leads())
     if operation == "update_lead":
-        return await client.update_lead_async(input=LeadRequest(), id="1")
+        return await client.update_lead(input=model_instance(LeadRequest), id="1")
     if operation == "add_lead":
-        return await client.add_lead_async(input=LeadRequest())
+        return await client.add_lead(input=model_instance(LeadRequest))
     if operation == "list_contacts":
-        return await client.list_contacts_async()
+        return await resolve_generated_result(client.list_contacts())
     if operation == "update_contact":
-        return await client.update_contact_async(input=ContactRequest(), id="1")
+        return await client.update_contact(
+            input=model_instance(ContactRequest),
+            id="1",
+        )
     if operation == "add_contact":
-        return await client.add_contact_async(input=ContactRequest())
+        return await client.add_contact(input=model_instance(ContactRequest))
     if operation == "list_users":
-        return await client.list_users_async()
+        return await resolve_generated_result(client.list_users())
     if operation == "delete_task":
-        return await client.delete_task_async(task_id="1")
+        return await client.delete_task(task_id="1")
     if operation == "follow_task":
-        return await client.follow_task_async(task_id="1")
+        return await client.follow_task(task_id="1")
     if operation == "delete_project":
-        return await client.delete_project_async(project_id="1")
+        return await client.delete_project(project_id="1")
     if operation == "delete_lead":
-        return await client.delete_lead_async(lead_id="1")
+        return await client.delete_lead(lead_id="1")
     if operation == "delete_contact":
-        return await client.delete_contact_async(contact_id="1")
+        return await client.delete_contact(contact_id="1")
     if operation == "add_organization":
-        return await client.add_organization_async(input=OrganizationRequest())
+        return await client.add_organization(
+            input=model_instance(OrganizationRequest)
+        )
 
     raise ValueError(f"Unsupported operation '{operation}'.")
 
@@ -128,7 +141,7 @@ class TestInsightlyClientInitialization:
         client = InsightlyClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -191,20 +204,23 @@ class TestInsightlyClientOperations:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        mock_response = MockResponse(status=200, text='{"tasks": [{"TASK_ID": 1}]}')
+        mock_response = MockResponse(
+            status=200,
+            text=generated_pager_response_text(client.list_tasks),
+        )
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_tasks_async()
+            result = await resolve_generated_result(client.list_tasks())
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
             assert path.endswith("/Tasks")
-            assert result == {"tasks": [{"TASK_ID": 1}]}
+            assert result == [{"ok": True}]
 
     @pytest.mark.asyncio
     async def test_add_task_success(self, mock_credential):
@@ -217,11 +233,11 @@ class TestInsightlyClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.add_task_async(input=TaskRequest())
+            result = await client.add_task(input=model_instance(TaskRequest))
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "POST"
@@ -240,11 +256,14 @@ class TestInsightlyClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.update_task_async(input=TaskRequest(), id="5")
+            result = await client.update_task(
+                input=model_instance(TaskRequest),
+                id="5",
+            )
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "PUT"
@@ -263,11 +282,11 @@ class TestInsightlyClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.delete_task_async(task_id="7")
+            result = await client.delete_task(task_id="7")
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "DELETE"
@@ -285,11 +304,11 @@ class TestInsightlyClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.follow_task_async(task_id="7")
+            result = await client.follow_task(task_id="7")
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "POST"
@@ -307,11 +326,13 @@ class TestInsightlyClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.add_organization_async(input=OrganizationRequest())
+            result = await client.add_organization(
+                input=model_instance(OrganizationRequest)
+            )
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "POST"
@@ -319,8 +340,8 @@ class TestInsightlyClientOperations:
             assert result == {"ORGANISATION_ID": 3}
 
     @pytest.mark.asyncio
-    async def test_empty_response_body_returns_none(self, mock_credential):
-        """Test a 2xx response with no body returns None."""
+    async def test_empty_response_body_returns_empty_page(self, mock_credential):
+        """Test a pageable 2xx response with no body returns no items."""
         client = InsightlyClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
@@ -329,13 +350,13 @@ class TestInsightlyClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.list_tasks_async()
+            result = await resolve_generated_result(client.list_tasks())
 
-            assert result is None
+            assert result == []
 
 
 class TestInsightlyClientErrorHandling:
@@ -357,7 +378,7 @@ class TestInsightlyClientErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
@@ -417,9 +438,9 @@ class TestInsightlyTypeSerialization:
         assert ListEventsResponse().events is None
 
     def test_request_dataclasses_instantiate(self):
-        """Test generated request dataclasses instantiate without arguments."""
-        assert TaskRequest() is not None
-        assert ProjectRequest() is not None
-        assert LeadRequest() is not None
-        assert ContactRequest() is not None
-        assert OrganizationRequest() is not None
+        """Test generated request dataclasses initialize required fields."""
+        assert model_instance(TaskRequest) is not None
+        assert model_instance(ProjectRequest) is not None
+        assert model_instance(LeadRequest) is not None
+        assert model_instance(ContactRequest) is not None
+        assert model_instance(OrganizationRequest) is not None

@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure Storage Tables Connector SDK Sample
+Azure Storage Tables sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure Storage Tables connector SDK
+This sample demonstrates how to use the Azure Storage Tables client from the Azure Connectors Python SDK
 to interact with Azure Table Storage.
 
 Prerequisites:
@@ -23,10 +23,8 @@ Usage:
 
     python sample_connector_usage_azuretables.py
 """
-
-import asyncio
 import os
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.azuretables import (
     AzuretablesClient,
@@ -48,7 +46,7 @@ STORAGE_ACCOUNT = os.environ.get("AZURETABLES_STORAGE_ACCOUNT", "")
 TABLE_NAME = os.environ.get("AZURETABLES_TABLE_NAME", "")
 
 
-async def example_1_list_tables():
+def example_1_list_tables():
     """Example 1: List all tables in a storage account."""
     print("\n=== Example 1: List Tables ===")
 
@@ -57,24 +55,19 @@ async def example_1_list_tables():
         print("Example: $env:AZURETABLES_STORAGE_ACCOUNT = 'mystorageaccount'")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_tables_async(
-                    storage_account_name=STORAGE_ACCOUNT
+                tables = list(
+                    client.list_tables(storage_account_name=STORAGE_ACCOUNT)
                 )
 
-                if result:
+                if tables:
                     print(f"Tables in storage account '{STORAGE_ACCOUNT}':")
-                    # Response contains 'value' with list of tables
-                    tables = result.get("value", [])
-                    if tables:
-                        for table in tables:
-                            table_name = table.get("TableName", table)
-                            print(f"  - {table_name}")
-                    else:
-                        print("  No tables found.")
+                    for table in tables:
+                        table_name = table.get("TableName", table)
+                        print(f"  - {table_name}")
                 else:
                     print("No tables found or empty response.")
 
@@ -84,7 +77,7 @@ async def example_1_list_tables():
                 print(f"Error: {ex}")
 
 
-async def example_2_create_table():
+def example_2_create_table():
     """Example 2: Create a new table in the storage account."""
     print("\n=== Example 2: Create Table ===")
 
@@ -95,16 +88,16 @@ async def example_2_create_table():
         print("  $env:AZURETABLES_NEW_TABLE_NAME = 'MyNewTable'")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Create table input with table name in additional_properties
                 table_input = CreateTableInput(
                     additional_properties={"TableName": new_table_name}
                 )
 
-                result = await client.create_table_async(
+                result = client.create_table(
                     input=table_input,
                     storage_account_name=STORAGE_ACCOUNT
                 )
@@ -120,7 +113,7 @@ async def example_2_create_table():
                 print(f"Error: {ex}")
 
 
-async def example_3_create_entity():
+def example_3_create_entity():
     """Example 3: Insert a new entity into a table."""
     print("\n=== Example 3: Create Entity ===")
 
@@ -130,9 +123,9 @@ async def example_3_create_entity():
         print("  $env:AZURETABLES_TABLE_NAME = '<table-name>'")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Create entity with PartitionKey, RowKey, and custom properties
                 entity_input = CreateEntityInput(
@@ -146,7 +139,7 @@ async def example_3_create_entity():
                     }
                 )
 
-                result = await client.create_entity_async(
+                result = client.create_entity(
                     input=entity_input,
                     storage_account_name=STORAGE_ACCOUNT,
                     table_name=TABLE_NAME
@@ -165,7 +158,7 @@ async def example_3_create_entity():
                 print(f"Error: {ex}")
 
 
-async def example_4_get_entities():
+def example_4_get_entities():
     """Example 4: Query entities from a table."""
     print("\n=== Example 4: Get Entities ===")
 
@@ -175,12 +168,12 @@ async def example_4_get_entities():
         print("  $env:AZURETABLES_TABLE_NAME = '<table-name>'")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Query entities with optional filter
-                entities = [item async for item in client.get_entities_async(
+                entities = [item for item in client.list_entities(
                     storage_account_name=STORAGE_ACCOUNT,
                     table_name=TABLE_NAME,
                     # Optional: filter entities
@@ -206,7 +199,7 @@ async def example_4_get_entities():
                 print(f"Error: {ex}")
 
 
-async def example_5_get_entity():
+def example_5_get_entity():
     """Example 5: Get a specific entity by PartitionKey and RowKey."""
     print("\n=== Example 5: Get Entity ===")
 
@@ -222,11 +215,11 @@ async def example_5_get_entity():
         print("  $env:AZURETABLES_ROW_KEY = '<row-key>'")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_entity_async(
+                result = client.get_entity(
                     storage_account_name=STORAGE_ACCOUNT,
                     table_name=TABLE_NAME,
                     partition_key=partition_key,
@@ -258,9 +251,9 @@ async def example_5_get_entity():
                 print(f"Error: {ex}")
 
 
-async def main():
+def main():
     """Run all examples."""
-    print("Azure Storage Tables Connector SDK - Sample Usage")
+    print("Azure Storage Tables sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
 
     if not CONNECTION_RUNTIME_URL:
@@ -269,15 +262,15 @@ async def main():
         print("Format: https://[region].azure-apihub.net/apim/azuretables/[id]")
         return
 
-    await example_1_list_tables()
-    await example_2_create_table()
-    await example_3_create_entity()
-    await example_4_get_entities()
-    await example_5_get_entity()
+    example_1_list_tables()
+    example_2_create_table()
+    example_3_create_entity()
+    example_4_get_entities()
+    example_5_get_entity()
 
     print("\n" + "=" * 60)
     print("Sample completed!")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

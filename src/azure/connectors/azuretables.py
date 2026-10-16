@@ -5,20 +5,40 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core import MatchConditions
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "AzuretablesClient",
+    "CreateEntityInput",
+    "CreateTableInput",
+    "EntityItem",
+    "GetEntitiesResponse",
+    "GetEntityResponse",
+    "GetTableResponse",
+    "GetTablesResponse",
+    "InsertEntityResponse",
+    "InsertMergeEntityInput",
+    "InsertReplaceEntityInput",
+    "MergeEntityInput",
+    "ReplaceEntityInput",
+    "StorageAccount",
+    "StorageAccountList",
+]
 
 
 # Type Definitions
@@ -29,7 +49,7 @@ class CreateEntityInput:
     Insert Entity
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -42,23 +62,27 @@ class InsertEntityResponse:
     Response for Insert Entity
     """
 
-    odata_metadata: Optional[str] = field(
+    odata_metadata: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "odata.metadata"},
     )
     """Entity Metadata location"""
-    partition_key: Optional[str] = field(
+    partition_key: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PartitionKey"},
     )
     """Partition Key"""
-    row_key: Optional[str] = field(
+    row_key: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RowKey"},
     )
     """Row Key"""
-    additional_properties: Optional[str] = field(
+    additional_properties: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "additionalProperties"},
     )
     """Dynamic entity columns returned by the service."""
@@ -73,13 +97,15 @@ class GetTableResponse:
     Response for Create table
     """
 
-    odata_id: Optional[str] = field(
+    odata_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "odata.id"},
     )
     """URL to the Table data"""
-    table_name: Optional[str] = field(
+    table_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TableName"},
     )
     """Table Name"""
@@ -91,15 +117,22 @@ class GetEntitiesResponse:
     Response for Get entities
     """
 
-    odata_metadata: Optional[str] = field(
+    odata_metadata: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "odata.metadata"},
     )
     """Table Metadata location"""
-    value: Optional[List[EntityItem]] = None
-    """List of Entities"""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[EntityItem | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of Entities"""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -111,23 +144,27 @@ class GetEntityResponse:
     Response for Get entity
     """
 
-    odata_metadata: Optional[str] = field(
+    odata_metadata: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "odata.metadata"},
     )
     """Table Metadata location"""
-    partition_key: Optional[str] = field(
+    partition_key: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PartitionKey"},
     )
     """Partition Key"""
-    row_key: Optional[str] = field(
+    row_key: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RowKey"},
     )
     """Row Key"""
-    additional_properties: Optional[str] = field(
+    additional_properties: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "additionalProperties"},
     )
     """Dynamic entity columns returned by the service."""
@@ -139,12 +176,13 @@ class GetTablesResponse:
     Response for List tables
     """
 
-    odata_metadata: Optional[str] = field(
+    odata_metadata: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "odata.metadata"},
     )
     """URL to the account metadata"""
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of tables"""
 
 
@@ -154,7 +192,7 @@ class InsertMergeEntityInput:
     Insert or Merge Entity
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -167,7 +205,7 @@ class InsertReplaceEntityInput:
     Insert or Replace Entity
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -180,7 +218,7 @@ class MergeEntityInput:
     Merge Entity
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -193,7 +231,7 @@ class ReplaceEntityInput:
     Replace Entity
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -206,7 +244,12 @@ class StorageAccountList:
     Response for Get storage accounts
     """
 
-    value: Optional[List[StorageAccount]] = None
+    value: Optional[
+        List[StorageAccount | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of storage account names"""
 
 
@@ -216,10 +259,15 @@ class StorageAccount:
     Definition: StorageAccount
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """The name of the storage account."""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """The name of the storage account."""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the storage account."""
@@ -231,18 +279,21 @@ class EntityItem:
     Definition: Item
     """
 
-    partition_key: Optional[str] = field(
+    partition_key: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PartitionKey"},
     )
     """Partition Key"""
-    row_key: Optional[str] = field(
+    row_key: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RowKey"},
     )
     """Row Key"""
-    additional_properties: Optional[str] = field(
+    additional_properties: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "additionalProperties"},
     )
     """Dynamic entity columns returned by the service."""
@@ -256,16 +307,16 @@ class AzuretablesClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -276,8 +327,8 @@ class AzuretablesClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -285,8 +336,8 @@ class AzuretablesClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -298,7 +349,7 @@ class AzuretablesClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -313,16 +364,87 @@ class AzuretablesClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "azuretables"
 
+    @staticmethod
+    def _prepare_match_headers(
+        headers: Optional[Mapping[str, str]],
+        etag: Optional[str],
+        match_condition: Optional[MatchConditions],
+        *,
+        if_match_required: bool,
+    ) -> Optional[Mapping[str, str]]:
+        request_headers = dict(headers) if headers is not None else {}
+        existing_if_match = next(
+            (name for name in request_headers if name.lower() == "if-match"),
+            None,
+        )
+        if etag is None and match_condition is None:
+            if if_match_required and existing_if_match is None:
+                request_headers["If-Match"] = "*"
+            return request_headers or None
+
+        if existing_if_match is not None:
+            del request_headers[existing_if_match]
+        if match_condition is None:
+            assert etag is not None
+            request_headers["If-Match"] = etag
+        elif match_condition == MatchConditions.IfNotModified:
+            if etag is None:
+                raise ValueError(
+                    "etag is required for MatchConditions.IfNotModified."
+                )
+            request_headers["If-Match"] = etag
+        elif match_condition == MatchConditions.Unconditionally:
+            request_headers["If-Match"] = "*"
+        else:
+            raise ValueError(
+                "If-Match operations support only IfNotModified or Unconditionally."
+            )
+        return request_headers or None
+
     def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
-        parsed_next_link = urlsplit(next_link)
-        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
             if next_link.startswith("/"):
                 return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
             if next_link.startswith("?"):
-                return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
 
-        parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
         connection_hostname = parsed_connection.hostname
         if next_link_hostname is None or connection_hostname is None:
@@ -339,7 +461,11 @@ class AzuretablesClient(ConnectorClientBase):
                 parsed_next_link.scheme == parsed_connection.scheme
                 and next_link_port == connection_port
             ):
-                return next_link
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
 
             raise ValueError(
                 "Pagination URL origin "
@@ -352,9 +478,9 @@ class AzuretablesClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def create_entity_async(
+    def create_entity(
         self,
-        input: CreateEntityInput,
+        input: CreateEntityInput | Mapping[str, Any],
         storage_account_name: str,
         table_name: str,
         *,
@@ -367,6 +493,24 @@ class AzuretablesClient(ConnectorClientBase):
         Insert Entity
 
         Operation to add an entity to a table.
+
+        Swagger operation ID: `CreateEntity_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            storage_account_name: Azure Storage account name or table endpoint.
+            table_name: Specify the table.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -378,7 +522,7 @@ class AzuretablesClient(ConnectorClientBase):
             f"/entities"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -392,6 +536,7 @@ class AzuretablesClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -399,7 +544,7 @@ class AzuretablesClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_table_async(
+    def create_table(
         self,
         input: CreateTableInput,
         storage_account_name: str,
@@ -413,6 +558,22 @@ class AzuretablesClient(ConnectorClientBase):
         Create table
 
         This operation adds a table to the storage account.
+
+        Swagger operation ID: `CreateTable_V2`.
+
+        Args:
+            input: The request body.
+            storage_account_name: Azure Storage account name or table endpoint.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -422,7 +583,7 @@ class AzuretablesClient(ConnectorClientBase):
             f"/tables"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -436,6 +597,7 @@ class AzuretablesClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -443,13 +605,15 @@ class AzuretablesClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_entity_async(
+    def delete_entity(
         self,
         storage_account_name: str,
         table_name: str,
         partition_key: str,
         row_key: str,
         *,
+        etag: Optional[str] = None,
+        match_condition: Optional[MatchConditions] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -459,7 +623,34 @@ class AzuretablesClient(ConnectorClientBase):
         Delete Entity
 
         Operation to delete an entity.
+
+        Swagger operation ID: `DeleteEntity_V2`.
+
+        Args:
+            storage_account_name: Azure Storage account name or table endpoint.
+            table_name: Specify the table.
+            partition_key: The partition id containing this entity.
+            row_key: The row id containing this entity.
+            etag: The entity tag for the conditional request.
+            match_condition: The Azure Core match condition.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
+        headers = self._prepare_match_headers(
+            headers,
+            etag,
+            match_condition,
+            if_match_required=False,
+        )
+
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v2"
@@ -475,7 +666,7 @@ class AzuretablesClient(ConnectorClientBase):
             f"')"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -489,9 +680,10 @@ class AzuretablesClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def delete_table_async(
+    def delete_table(
         self,
         storage_account_name: str,
         table_name: str,
@@ -505,6 +697,22 @@ class AzuretablesClient(ConnectorClientBase):
         Delete a table
 
         Delete a table.
+
+        Swagger operation ID: `DeleteTable_V2`.
+
+        Args:
+            storage_account_name: Azure Storage account name or table endpoint.
+            table_name: Specify the table.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -515,7 +723,7 @@ class AzuretablesClient(ConnectorClientBase):
             f"/{quote(str(table_name), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -529,27 +737,50 @@ class AzuretablesClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_entities_async(
+    def list_entities(
         self,
         storage_account_name: str,
         table_name: str,
+        *,
         filter: Optional[str] = None,
         select: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get entities
 
         This operation queries the entities in a table.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetEntities_V2`.
+
+        Args:
+            storage_account_name: Azure Storage account name or table endpoint.
+            table_name: Specify the table.
+            filter: OData filter query for which entities to return. Example:
+                Column eq 'Value' and Column2 ne 2. Invalid OData queries, such
+                as not wrapping string values in quotes will return 501.
+            select: OData select query for the columns to be returned. Example:
+                Column, PartitionKey.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -573,11 +804,18 @@ class AzuretablesClient(ConnectorClientBase):
             query_params.append(f"$select={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -590,30 +828,39 @@ class AzuretablesClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_entity_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_entity(
         self,
         storage_account_name: str,
         table_name: str,
         partition_key: str,
         row_key: str,
-        select: Optional[str] = None,
         *,
+        select: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -624,6 +871,26 @@ class AzuretablesClient(ConnectorClientBase):
 
         This operation gets the entity in a table based on the partition and
         row key.
+
+        Swagger operation ID: `GetEntity_V2`.
+
+        Args:
+            storage_account_name: Azure Storage account name or table endpoint.
+            table_name: Specify the table.
+            partition_key: The partition id containing this entity.
+            row_key: The row id containing this entity.
+            select: OData select query for the columns to be returned. Example:
+                Column, PartitionKey.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -647,7 +914,7 @@ class AzuretablesClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -661,6 +928,7 @@ class AzuretablesClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -668,7 +936,7 @@ class AzuretablesClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_table_async(
+    def get_table(
         self,
         storage_account_name: str,
         table_name: str,
@@ -682,6 +950,22 @@ class AzuretablesClient(ConnectorClientBase):
         Get a table
 
         This operation gets the metadata of a table.
+
+        Swagger operation ID: `GetTable_V2`.
+
+        Args:
+            storage_account_name: Azure Storage account name or table endpoint.
+            table_name: Specify the table.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -692,7 +976,7 @@ class AzuretablesClient(ConnectorClientBase):
             f"/{quote(str(table_name), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -706,6 +990,7 @@ class AzuretablesClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -713,7 +998,7 @@ class AzuretablesClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_tables_async(
+    def list_tables(
         self,
         storage_account_name: str,
         *,
@@ -721,11 +1006,30 @@ class AzuretablesClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List tables
 
         List all the tables for your storage account.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetTables_V2`.
+
+        Args:
+            storage_account_name: Azure Storage account name or table endpoint.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -734,31 +1038,52 @@ class AzuretablesClient(ConnectorClientBase):
             f"/{quote(quote(str(storage_account_name), safe=''), safe='')}"
             f"/tables"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def insert_merge_entity_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def insert_merge_entity(
         self,
-        input: InsertMergeEntityInput,
+        input: InsertMergeEntityInput | Mapping[str, Any],
         storage_account_name: str,
         table_name: str,
         partition_key: str,
@@ -774,6 +1099,26 @@ class AzuretablesClient(ConnectorClientBase):
 
         Operation to merge data with an entity in a table, creating a new
         entity if needed.
+
+        Swagger operation ID: `InsertMergeEntity_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            storage_account_name: Azure Storage account name or table endpoint.
+            table_name: Specify the table.
+            partition_key: The partition id containing this entity.
+            row_key: The row id containing this entity.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -789,7 +1134,7 @@ class AzuretablesClient(ConnectorClientBase):
             f"')"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -803,11 +1148,12 @@ class AzuretablesClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def insert_replace_entity_async(
+    def insert_replace_entity(
         self,
-        input: InsertReplaceEntityInput,
+        input: InsertReplaceEntityInput | Mapping[str, Any],
         storage_account_name: str,
         table_name: str,
         partition_key: str,
@@ -823,6 +1169,26 @@ class AzuretablesClient(ConnectorClientBase):
 
         Operation to replace an entity in a table, creating a new entity if
         needed.
+
+        Swagger operation ID: `InsertReplaceEntity_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            storage_account_name: Azure Storage account name or table endpoint.
+            table_name: Specify the table.
+            partition_key: The partition id containing this entity.
+            row_key: The row id containing this entity.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -838,7 +1204,7 @@ class AzuretablesClient(ConnectorClientBase):
             f"')"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -852,16 +1218,19 @@ class AzuretablesClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def merge_entity_async(
+    def merge_entity(
         self,
-        input: MergeEntityInput,
+        input: MergeEntityInput | Mapping[str, Any],
         storage_account_name: str,
         table_name: str,
         partition_key: str,
         row_key: str,
         *,
+        etag: Optional[str] = None,
+        match_condition: Optional[MatchConditions] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -871,7 +1240,36 @@ class AzuretablesClient(ConnectorClientBase):
         Merge Entity
 
         Operation to merge data with an entity in a table.
+
+        Swagger operation ID: `MergeEntity_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            storage_account_name: Azure Storage account name or table endpoint.
+            table_name: Specify the table.
+            partition_key: The partition id containing this entity.
+            row_key: The row id containing this entity.
+            etag: The entity tag for the conditional request.
+            match_condition: The Azure Core match condition.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
+        headers = self._prepare_match_headers(
+            headers,
+            etag,
+            match_condition,
+            if_match_required=True,
+        )
+
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v2"
@@ -887,7 +1285,7 @@ class AzuretablesClient(ConnectorClientBase):
             f"')"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -901,16 +1299,19 @@ class AzuretablesClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def replace_entity_async(
+    def replace_entity(
         self,
-        input: ReplaceEntityInput,
+        input: ReplaceEntityInput | Mapping[str, Any],
         storage_account_name: str,
         table_name: str,
         partition_key: str,
         row_key: str,
         *,
+        etag: Optional[str] = "*",
+        match_condition: Optional[MatchConditions] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -920,7 +1321,36 @@ class AzuretablesClient(ConnectorClientBase):
         Replace Entity
 
         Operation to replace an entity in a table.
+
+        Swagger operation ID: `ReplaceEntity_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            storage_account_name: Azure Storage account name or table endpoint.
+            table_name: Specify the table.
+            partition_key: The partition id containing this entity.
+            row_key: The row id containing this entity.
+            etag: The entity tag for the conditional request.
+            match_condition: The Azure Core match condition.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
+        headers = self._prepare_match_headers(
+            headers,
+            etag,
+            match_condition,
+            if_match_required=True,
+        )
+
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v2"
@@ -936,7 +1366,7 @@ class AzuretablesClient(ConnectorClientBase):
             f"')"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -950,40 +1380,80 @@ class AzuretablesClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_storage_accounts_async(
+    def list_storage_accounts(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get storage accounts
 
         This operation list the user's Azure Storage Account.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetStorageAccounts`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/GetStorageAccounts"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)

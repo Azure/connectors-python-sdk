@@ -7,9 +7,9 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.shifts import ShiftsClient
 from azure.connectors.shifts import (
     TRIGGER_OPERATIONS,
-    ShiftsClient,
     CreateShiftRequest,
     EditOpenShiftRequest,
     WebhookPushResponseResourceEntity,
@@ -19,7 +19,7 @@ from azure.connectors.sdk import (
 )
 from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
-from tests.generated_connector_test_utils import resolve_generated_result
+from tests.generated_connector_test_utils import model_instance, resolve_generated_result
 
 
 class TestShiftsClientInitialization:
@@ -55,7 +55,7 @@ class TestShiftsClientInitialization:
         client = ShiftsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -139,18 +139,17 @@ class TestGetAllTeamsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_all_teams_async()
+            result = await resolve_generated_result(client.list_all_teams())
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
             assert "/v1.0/me/joinedTeams" in path
-            assert result is not None
-            assert "value" in result
+            assert result == [{"id": "team-1", "displayName": "Store Team"}]
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -163,12 +162,12 @@ class TestGetAllTeamsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.get_all_teams_async()
+                await resolve_generated_result(client.list_all_teams())
 
 
 class TestGetScheduleAsync:
@@ -185,11 +184,11 @@ class TestGetScheduleAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_schedule_async(team_id="team-123")
+            result = await client.get_schedule(team_id="team-123")
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -209,12 +208,12 @@ class TestGetScheduleAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.get_schedule_async(team_id="missing-team")
+                await client.get_schedule(team_id="missing-team")
 
 
 class TestListShiftsAsync:
@@ -231,11 +230,11 @@ class TestListShiftsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await resolve_generated_result(client.list_shifts_async(
+            result = await resolve_generated_result(client.list_shifts(
                 team_id="team-123",
                 start_time="2026-07-01T00:00:00Z",
                 end_time="2026-07-31T00:00:00Z",
@@ -262,12 +261,12 @@ class TestListShiftsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await resolve_generated_result(client.list_shifts_async(team_id="team-123"))
+                await resolve_generated_result(client.list_shifts(team_id="team-123"))
 
 
 class TestCreateShiftAsync:
@@ -280,16 +279,20 @@ class TestCreateShiftAsync:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        payload = CreateShiftRequest(scheduling_group_id="group-1", user_id="user-1")
+        payload = model_instance(
+            CreateShiftRequest,
+            scheduling_group_id="group-1",
+            user_id="user-1",
+        )
         mock_response = MockResponse(status=201, text='{"id": "shift-1"}')
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_shift_async(input=payload, team_id="team-123")
+            result = await client.create_shift(input=payload, team_id="team-123")
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -306,17 +309,21 @@ class TestCreateShiftAsync:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        payload = CreateShiftRequest(scheduling_group_id="group-1", user_id="user-1")
+        payload = model_instance(
+            CreateShiftRequest,
+            scheduling_group_id="group-1",
+            user_id="user-1",
+        )
         mock_response = MockResponse(status=400, text='{"error": "Bad request"}')
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.create_shift_async(input=payload, team_id="team-123")
+                await client.create_shift(input=payload, team_id="team-123")
 
 
 class TestTriggerForShifts:
@@ -346,11 +353,11 @@ class TestDeleteTimeOffAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.delete_time_off_async(team_id="team-1", time_off_id="toff-1")
+            await client.delete_time_off(team_id="team-1", time_off_id="toff-1")
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -364,16 +371,16 @@ class TestDeleteTimeOffAsync:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        mock_response = MockResponse(status=404, text='{"error": "Time off not found"}')
+        mock_response = MockResponse(status=500, text='{"error": "Server error"}')
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.delete_time_off_async(team_id="team-1", time_off_id="missing")
+                await client.delete_time_off(team_id="team-1", time_off_id="missing")
 
 
 class TestUpdateOpenShiftAsync:
@@ -391,11 +398,11 @@ class TestUpdateOpenShiftAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.update_open_shift_async(
+            result = await client.update_open_shift(
                 input=payload,
                 team_id="team-1",
                 open_shift_id="oshift-1",
@@ -421,12 +428,12 @@ class TestUpdateOpenShiftAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.update_open_shift_async(
+                await client.update_open_shift(
                     input=payload,
                     team_id="team-1",
                     open_shift_id="oshift-1",

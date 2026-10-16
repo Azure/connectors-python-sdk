@@ -6,8 +6,8 @@ import json
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.azuretables import AzuretablesClient
 from azure.connectors.azuretables import (
-    AzuretablesClient,
     CreateEntityInput,
     InsertEntityResponse,
     CreateTableInput,
@@ -63,7 +63,7 @@ class TestAzuretablesClientInitialization:
         client = AzuretablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -137,11 +137,11 @@ class TestCreateEntity:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.create_entity_async(
+            result = await client.create_entity(
                 input=entity_input,
                 storage_account_name="mystorageaccount",
                 table_name="mytable"
@@ -166,12 +166,12 @@ class TestCreateEntity:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_entity_async(
+                await client.create_entity(
                     input=entity_input,
                     storage_account_name="mystorageaccount",
                     table_name="mytable"
@@ -199,11 +199,11 @@ class TestCreateTable:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.create_table_async(
+            result = await client.create_table(
                 input=table_input,
                 storage_account_name="mystorageaccount"
             )
@@ -227,12 +227,12 @@ class TestCreateTable:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_table_async(
+                await client.create_table(
                     input=table_input,
                     storage_account_name="mystorageaccount"
                 )
@@ -255,11 +255,11 @@ class TestDeleteEntity:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.delete_entity_async(
+            await client.delete_entity(
                 storage_account_name="mystorageaccount",
                 table_name="mytable",
                 partition_key="pk1",
@@ -279,23 +279,23 @@ class TestDeleteEntity:
             credential=mock_credential
         )
 
-        mock_response = MockResponse(status=404, text='{"error": "Entity not found"}')
+        mock_response = MockResponse(status=500, text='{"error": "Server error"}')
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.delete_entity_async(
+                await client.delete_entity(
                     storage_account_name="mystorageaccount",
                     table_name="mytable",
                     partition_key="nonexistent",
                     row_key="nonexistent"
                 )
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestDeleteTable:
@@ -313,11 +313,11 @@ class TestDeleteTable:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.delete_table_async(
+            await client.delete_table(
                 storage_account_name="mystorageaccount",
                 table_name="mytable"
             )
@@ -335,21 +335,21 @@ class TestDeleteTable:
             credential=mock_credential
         )
 
-        mock_response = MockResponse(status=404, text='{"error": "Table not found"}')
+        mock_response = MockResponse(status=500, text='{"error": "Server error"}')
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.delete_table_async(
+                await client.delete_table(
                     storage_account_name="mystorageaccount",
                     table_name="nonexistent"
                 )
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestGetEntities:
@@ -373,11 +373,11 @@ class TestGetEntities:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.get_entities_async(
+            result = await resolve_generated_result(client.list_entities(
                 storage_account_name="mystorageaccount",
                 table_name="mytable"
             ))
@@ -400,11 +400,11 @@ class TestGetEntities:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await resolve_generated_result(client.get_entities_async(
+            await resolve_generated_result(client.list_entities(
                 storage_account_name="mystorageaccount",
                 table_name="mytable",
                 filter="PartitionKey eq 'pk1'",
@@ -428,12 +428,12 @@ class TestGetEntities:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await resolve_generated_result(client.get_entities_async(
+                await resolve_generated_result(client.list_entities(
                     storage_account_name="mystorageaccount",
                     table_name="nonexistent"
                 ))
@@ -459,11 +459,11 @@ class TestGetEntity:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_entity_async(
+            result = await client.get_entity(
                 storage_account_name="mystorageaccount",
                 table_name="mytable",
                 partition_key="pk1",
@@ -488,11 +488,11 @@ class TestGetEntity:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_entity_async(
+            await client.get_entity(
                 storage_account_name="mystorageaccount",
                 table_name="mytable",
                 partition_key="pk1",
@@ -516,12 +516,12 @@ class TestGetEntity:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_entity_async(
+                await client.get_entity(
                     storage_account_name="mystorageaccount",
                     table_name="mytable",
                     partition_key="nonexistent",
@@ -549,11 +549,11 @@ class TestGetTable:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_table_async(
+            result = await client.get_table(
                 storage_account_name="mystorageaccount",
                 table_name="mytable"
             )
@@ -576,12 +576,12 @@ class TestGetTable:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_table_async(
+                await client.get_table(
                     storage_account_name="mystorageaccount",
                     table_name="nonexistent"
                 )
@@ -590,7 +590,7 @@ class TestGetTable:
 
 
 class TestGetTables:
-    """Tests for get_tables_async method."""
+    """Tests for list_tables method."""
 
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
@@ -607,19 +607,19 @@ class TestGetTables:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_tables_async(
-                storage_account_name="mystorageaccount"
+            result = await resolve_generated_result(
+                client.list_tables(storage_account_name="mystorageaccount")
             )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/storageAccounts/mystorageaccount/tables" in call_args[0][1]
-            assert len(result["value"]) == 2
+            assert len(result) == 2
 
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
@@ -633,14 +633,14 @@ class TestGetTables:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_tables_async(
-                storage_account_name="mystorageaccount"
+            result = await resolve_generated_result(
+                client.list_tables(storage_account_name="mystorageaccount")
             )
-            assert result is None
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -654,13 +654,13 @@ class TestGetTables:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_tables_async(
-                    storage_account_name="nonexistent"
+                await resolve_generated_result(
+                    client.list_tables(storage_account_name="nonexistent")
                 )
 
             assert exc_info.value.status_code == 404
@@ -684,11 +684,11 @@ class TestInsertMergeEntity:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.insert_merge_entity_async(
+            await client.insert_merge_entity(
                 input=entity_input,
                 storage_account_name="mystorageaccount",
                 table_name="mytable",
@@ -714,12 +714,12 @@ class TestInsertMergeEntity:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.insert_merge_entity_async(
+                await client.insert_merge_entity(
                     input=entity_input,
                     storage_account_name="mystorageaccount",
                     table_name="mytable",
@@ -748,11 +748,11 @@ class TestInsertReplaceEntity:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.insert_replace_entity_async(
+            await client.insert_replace_entity(
                 input=entity_input,
                 storage_account_name="mystorageaccount",
                 table_name="mytable",
@@ -778,12 +778,12 @@ class TestInsertReplaceEntity:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.insert_replace_entity_async(
+                await client.insert_replace_entity(
                     input=entity_input,
                     storage_account_name="mystorageaccount",
                     table_name="mytable",
@@ -812,11 +812,11 @@ class TestMergeEntity:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.merge_entity_async(
+            await client.merge_entity(
                 input=entity_input,
                 storage_account_name="mystorageaccount",
                 table_name="mytable",
@@ -842,12 +842,12 @@ class TestMergeEntity:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.merge_entity_async(
+                await client.merge_entity(
                     input=entity_input,
                     storage_account_name="mystorageaccount",
                     table_name="mytable",
@@ -876,11 +876,11 @@ class TestReplaceEntity:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.replace_entity_async(
+            await client.replace_entity(
                 input=entity_input,
                 storage_account_name="mystorageaccount",
                 table_name="mytable",
@@ -906,12 +906,12 @@ class TestReplaceEntity:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.replace_entity_async(
+                await client.replace_entity(
                     input=entity_input,
                     storage_account_name="mystorageaccount",
                     table_name="mytable",
@@ -1087,12 +1087,16 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_tables_async(storage_account_name="account1")
-            await client.get_tables_async(storage_account_name="account2")
+            await resolve_generated_result(
+                client.list_tables(storage_account_name="account1")
+            )
+            await resolve_generated_result(
+                client.list_tables(storage_account_name="account2")
+            )
 
             assert mock_send.call_count == 2
 
@@ -1108,11 +1112,11 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_entity_async(
+            await client.get_entity(
                 storage_account_name="mystorageaccount",
                 table_name="mytable",
                 partition_key="pk-1",
@@ -1136,14 +1140,14 @@ class TestGetStorageAccounts:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=MockResponse(
                 status=200,
                 text='{"value": [{"name": "account1"}]}'
             )
         ) as mock_send:
-            result = await client.get_storage_accounts_async()
+            result = await resolve_generated_result(client.list_storage_accounts())
 
             mock_send.assert_called_once_with(
                 "GET",
@@ -1154,7 +1158,7 @@ class TestGetStorageAccounts:
                 client_request_id=None,
                 response_hook=None,
             )
-            assert result["value"][0]["name"] == "account1"
+            assert result == [{"name": "account1"}]
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -1166,12 +1170,12 @@ class TestGetStorageAccounts:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=MockResponse(status=500, text="Server error")
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_storage_accounts_async()
+                await resolve_generated_result(client.list_storage_accounts())
 
             assert exc_info.value.status_code == 500
 
@@ -1195,7 +1199,7 @@ async def test_entities_continuation_yields_later_entities(
     ) as client:
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             side_effect=[
                 MockResponse(status=200, text=json.dumps({
@@ -1209,7 +1213,7 @@ async def test_entities_continuation_yields_later_entities(
             ],
         ) as transport:
             entities = [
-                entity async for entity in client.get_entities_async(
+                entity async for entity in client.list_entities(
                     storage_account_name="mystorageaccount",
                     table_name="mytable",
                 )

@@ -5,20 +5,62 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "ExcelonlinebusinessClient",
+    "BlobDataSetsMetadata",
+    "BlobMetadata",
+    "Comment",
+    "CommentDetails",
+    "CommentsList",
+    "CreateFileMetadata",
+    "CreateWorksheetInput",
+    "DataSetsMetadata",
+    "GetAllWorksheetsResponse",
+    "GetColumnsResponse",
+    "GetDrivesResponse",
+    "GetItemResponse",
+    "GetSingleScriptResponse",
+    "GetSourcesResponse",
+    "GetTablesResponse",
+    "Item",
+    "ItemsList",
+    "ObjectEntity",
+    "RawAndFormattedTableSchema",
+    "RunScriptProdInput",
+    "RunScriptProdResponse",
+    "ScriptParameters",
+    "ScriptReturnValues",
+    "SensitivityLabelMetadata",
+    "Table",
+    "TableCapabilitiesMetadata",
+    "TableFilterRestrictionsMetadata",
+    "TableMetadata",
+    "TableSelectRestrictionsMetadata",
+    "TableSortRestrictionsMetadata",
+    "TableToCreate",
+    "TablesList",
+    "TabularDataSetsMetadata",
+    "TabularItem",
+    "TabularItemsList",
+    "WorkbookRange",
+    "WorksheetMetadata",
+]
 
 
 # Type Definitions
@@ -29,26 +71,30 @@ class TableMetadata:
     Response for Create table
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Table name"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Table title"""
-    x_ms_permission: Optional[str] = field(
+    x_ms_permission: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "x-ms-permission"},
     )
     """Table permission"""
-    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = field(
+    x_ms_capabilities: Optional[TableCapabilitiesMetadata | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "x-ms-capabilities"},
     )
-    schema: Optional[ObjectEntity] = None
-    referenced_entities: Optional[ObjectEntity] = field(
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    referenced_entities: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "referencedEntities"},
     )
-    web_url: Optional[str] = field(
+    web_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "webUrl"},
     )
     """Url link"""
@@ -60,14 +106,23 @@ class ItemsList:
     Response for List rows present in a table
     """
 
-    value: Optional[List[Item]] = None
-    """List of Items"""
-    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = field(
+    value: Optional[
+        List[Item | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of Items"""
+    sensitivity_label_info: Optional[
+        List[SensitivityLabelMetadata | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "sensitivityLabelInfo"},
     )
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -79,7 +134,12 @@ class CommentsList:
     Response for List all comments present in a workbook
     """
 
-    value: Optional[List[Comment]] = None
+    value: Optional[
+        List[Comment | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of Comments"""
 
 
@@ -89,12 +149,13 @@ class Comment:
     Response for Get a comment present in a workbook
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique identifier for the comment."""
-    content: Optional[str] = None
+    content: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The content of the comment."""
-    content_type: Optional[str] = field(
+    content_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentType"},
     )
     """The content type of the comment."""
@@ -106,12 +167,16 @@ class GetItemResponse:
     Response for Get a row
     """
 
-    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dynamicProperties"},
     )
-    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = field(
+    sensitivity_label_info: Optional[
+        List[SensitivityLabelMetadata | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sensitivityLabelInfo"},
     )
 
@@ -122,8 +187,9 @@ class Item:
     Response for Update a row
     """
 
-    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dynamicProperties"},
     )
 
@@ -134,9 +200,17 @@ class GetAllWorksheetsResponse:
     Response for Get worksheets
     """
 
-    value: Optional[List[WorksheetMetadata]] = None
-    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = field(
+    value: Optional[
+        List[WorksheetMetadata | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    sensitivity_label_info: Optional[
+        List[SensitivityLabelMetadata | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "sensitivityLabelInfo"},
     )
 
@@ -147,7 +221,7 @@ class CreateWorksheetInput:
     Create worksheet
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Worksheet name."""
 
 
@@ -157,13 +231,13 @@ class WorksheetMetadata:
     Response for Create worksheet
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Worksheet Id."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Worksheet name."""
-    position: Optional[int] = None
+    position: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Worksheet position."""
-    visibility: Optional[str] = None
+    visibility: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Worksheet visibility."""
 
 
@@ -173,9 +247,12 @@ class GetTablesResponse:
     Response for Get tables
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
-    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = field(
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    sensitivity_label_info: Optional[
+        List[SensitivityLabelMetadata | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sensitivityLabelInfo"},
     )
 
@@ -186,7 +263,7 @@ class RunScriptProdInput:
     Run script from SharePoint library
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -199,7 +276,7 @@ class RunScriptProdResponse:
     Response for Run script from SharePoint library
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -212,7 +289,7 @@ class GetSourcesResponse:
     Response for Get sources
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -221,7 +298,7 @@ class GetDrivesResponse:
     Response for Get drives
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -230,7 +307,7 @@ class GetColumnsResponse:
     Response for Get table columns
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -239,8 +316,9 @@ class GetSingleScriptResponse:
     Response for Gets one script
     """
 
-    parameter_info: Optional[Dict[str, Any]] = field(
+    parameter_info: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parameterInfo"},
     )
 
@@ -251,13 +329,15 @@ class CreateFileMetadata:
     Definition: CreateFileMetadata
     """
 
-    file_name: Optional[str] = field(
+    file_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FileName"},
     )
     """Name of the newly created file"""
-    web_url: Optional[str] = field(
+    web_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebUrl"},
     )
     """URL to open the file in the browser on your OneDrive"""
@@ -269,8 +349,18 @@ class DataSetsMetadata:
     Definition: DataSetsMetadata
     """
 
-    tabular: Optional[TabularDataSetsMetadata] = None
-    blob: Optional[BlobDataSetsMetadata] = None
+    tabular: Optional[
+        TabularDataSetsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    blob: Optional[
+        BlobDataSetsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -279,25 +369,29 @@ class TabularDataSetsMetadata:
     Definition: TabularDataSetsMetadata
     """
 
-    source: Optional[str] = None
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Dataset source"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Dataset display name"""
-    url_encoding: Optional[str] = field(
+    url_encoding: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "urlEncoding"},
     )
     """Dataset url encoding"""
-    table_display_name: Optional[str] = field(
+    table_display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tableDisplayName"},
     )
     """Table display name"""
-    table_plural_name: Optional[str] = field(
+    table_plural_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tablePluralName"},
     )
     """Table plural display name"""
@@ -309,15 +403,17 @@ class BlobDataSetsMetadata:
     Definition: BlobDataSetsMetadata
     """
 
-    source: Optional[str] = None
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Blob dataset source"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Blob dataset display name"""
-    url_encoding: Optional[str] = field(
+    url_encoding: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "urlEncoding"},
     )
     """Blob dataset url encoding"""
@@ -329,7 +425,12 @@ class TablesList:
     Definition: TablesList
     """
 
-    value: Optional[List[Table]] = None
+    value: Optional[
+        List[Table | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of Tables"""
 
 
@@ -339,15 +440,21 @@ class Table:
     Definition: Table
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """The name of the table. The name is used at runtime."""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """The name of the table. The name is used at runtime."""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the table."""
-    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DynamicProperties"},
     )
     """Additional table properties provided by the connector to the clients."""
@@ -359,15 +466,17 @@ class TableToCreate:
     Definition: TableToCreate
     """
 
-    table_name: Optional[str] = field(
+    table_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TableName"},
     )
     """Enter the Excel table name."""
-    range: Optional[str] = field(default=None, metadata={"wire_name": "Range"})
+    range: str = dataclass_field(metadata={"wire_name": "Range"})
     """Enter the table address using A1 notation."""
-    columns_names: Optional[str] = field(
+    columns_names: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ColumnsNames"},
     )
     """Enter the columns names separated by ';' or ','."""
@@ -379,30 +488,42 @@ class TableCapabilitiesMetadata:
     Definition: TableCapabilitiesMetadata
     """
 
-    sort_restrictions: Optional[TableSortRestrictionsMetadata] = field(
+    sort_restrictions: Optional[
+        TableSortRestrictionsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sortRestrictions"},
     )
-    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = field(
+    filter_restrictions: Optional[
+        TableFilterRestrictionsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "filterRestrictions"},
     )
-    select_restrictions: Optional[TableSelectRestrictionsMetadata] = field(
+    select_restrictions: Optional[
+        TableSelectRestrictionsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "selectRestrictions"},
     )
-    is_only_server_pagable: Optional[bool] = field(
+    is_only_server_pagable: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isOnlyServerPagable"},
     )
     """Server paging restrictions"""
-    filter_function_support: Optional[List[str]] = field(
+    filter_function_support: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "filterFunctionSupport"},
     )
     """List of supported filter capabilities"""
-    server_paging_options: Optional[List[str]] = field(
+    server_paging_options: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "serverPagingOptions"},
     )
     """List of supported server-driven paging capabilities"""
@@ -414,7 +535,7 @@ class ObjectEntity:
     Definition: Object
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -427,15 +548,17 @@ class TableSortRestrictionsMetadata:
     Definition: TableSortRestrictionsMetadata
     """
 
-    sortable: Optional[bool] = None
+    sortable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether this table has sortable columns"""
-    unsortable_properties: Optional[List[str]] = field(
+    unsortable_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "unsortableProperties"},
     )
     """List of unsortable properties"""
-    ascending_only_properties: Optional[List[str]] = field(
+    ascending_only_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ascendingOnlyProperties"},
     )
     """List of properties which support ascending order only"""
@@ -447,15 +570,17 @@ class TableFilterRestrictionsMetadata:
     Definition: TableFilterRestrictionsMetadata
     """
 
-    filterable: Optional[bool] = None
+    filterable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether this table has filterable columns"""
-    non_filterable_properties: Optional[List[str]] = field(
+    non_filterable_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nonFilterableProperties"},
     )
     """List of non filterable properties"""
-    required_properties: Optional[List[str]] = field(
+    required_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "requiredProperties"},
     )
     """List of required properties"""
@@ -467,7 +592,7 @@ class TableSelectRestrictionsMetadata:
     Definition: TableSelectRestrictionsMetadata
     """
 
-    selectable: Optional[bool] = None
+    selectable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether this table has selectable columns"""
 
 
@@ -477,10 +602,11 @@ class CommentDetails:
     Definition: CommentDetails
     """
 
-    content: Optional[str] = None
+    content: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The content of the comment."""
-    content_type: Optional[str] = field(
+    content_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentType"},
     )
     """The content type of the comment."""
@@ -492,7 +618,12 @@ class TabularItemsList:
     Definition: TabularItemsList
     """
 
-    value: Optional[List[TabularItem]] = None
+    value: Optional[
+        List[TabularItem | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of Items"""
 
 
@@ -502,8 +633,9 @@ class TabularItem:
     Definition: TabularItem
     """
 
-    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dynamicProperties"},
     )
 
@@ -514,7 +646,7 @@ class ScriptParameters:
     Definition: ScriptParameters
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -527,7 +659,7 @@ class ScriptReturnValues:
     Definition: ScriptReturnValues
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -540,8 +672,9 @@ class RawAndFormattedTableSchema:
     Definition: RawAndFormattedTableSchema
     """
 
-    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dynamicProperties"},
     )
 
@@ -552,24 +685,39 @@ class BlobMetadata:
     Definition: BlobMetadata
     """
 
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """The unique id of the file or folder."""
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """The name of the file or folder."""
-    display_name: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """The unique id of the file or folder."""
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """The name of the file or folder."""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the file or folder."""
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
-    """The path of the file or folder."""
-    media_type: Optional[str] = field(
+    path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
+    """The path of the file or folder."""
+    media_type: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "MediaType"},
     )
     """The media type of the file or folder."""
-    is_folder: Optional[bool] = field(
+    is_folder: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsFolder"},
     )
     """
@@ -584,41 +732,47 @@ class SensitivityLabelMetadata:
     Definition: SensitivityLabelMetadata
     """
 
-    sensitivity_label_id: Optional[str] = field(
+    sensitivity_label_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sensitivityLabelId"},
     )
     """SensitivityLabel Id."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel name."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """SensitivityLabel displayName info"""
-    tooltip: Optional[str] = None
+    tooltip: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel details on tooltip."""
-    priority: Optional[int] = None
+    priority: Optional[int] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel priority."""
-    color: Optional[str] = None
+    color: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel color."""
-    is_encrypted: Optional[bool] = field(
+    is_encrypted: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isEncrypted"},
     )
     """ is  SensitivityLabel Encrypted."""
-    is_enabled: Optional[bool] = field(
+    is_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isEnabled"},
     )
     """Whether  SensitivityLabel is Enabled."""
-    is_parent: Optional[bool] = field(
+    is_parent: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isParent"},
     )
     """Whether  SensitivityLabel is Parent."""
-    parent_sensitivity_label_id: Optional[str] = field(
+    parent_sensitivity_label_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parentSensitivityLabelId"},
     )
     """Parent  SensitivityLabel Id."""
@@ -630,44 +784,52 @@ class WorkbookRange:
     Definition: WorkbookRange
     """
 
-    address: Optional[str] = None
+    address: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Range address including the sheet name, e.g. Sheet1!A1:D10."""
-    address_local: Optional[str] = field(
+    address_local: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "addressLocal"},
     )
-    cell_count: Optional[int] = field(
+    cell_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "cellCount"},
     )
-    column_count: Optional[int] = field(
+    column_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "columnCount"},
     )
-    row_count: Optional[int] = field(
+    row_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "rowCount"},
     )
-    column_index: Optional[int] = field(
+    column_index: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "columnIndex"},
     )
-    row_index: Optional[int] = field(
+    row_index: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "rowIndex"},
     )
-    values: Optional[List[List[Any]]] = None
+    values: Optional[List[List[Any]]] = dataclass_field(default=None, kw_only=True)
     """2-D array of cell values."""
-    text: Optional[List[List[str]]] = None
+    text: Optional[List[List[str]]] = dataclass_field(default=None, kw_only=True)
     """2-D array of display text."""
-    formulas: Optional[List[List[str]]] = None
+    formulas: Optional[List[List[str]]] = dataclass_field(default=None, kw_only=True)
     """2-D array of formulas."""
-    number_format: Optional[List[List[str]]] = field(
+    number_format: Optional[List[List[str]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "numberFormat"},
     )
-    value_types: Optional[List[List[str]]] = field(
+    value_types: Optional[List[List[str]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "valueTypes"},
     )
     """2-D array of value type names (e.g. String, Double, Empty)."""
@@ -681,16 +843,16 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -701,8 +863,8 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -710,8 +872,8 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -723,7 +885,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -739,15 +901,49 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         return "excelonlinebusiness"
 
     def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
-        parsed_next_link = urlsplit(next_link)
-        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
             if next_link.startswith("/"):
                 return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
             if next_link.startswith("?"):
-                return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
 
-        parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
         connection_hostname = parsed_connection.hostname
         if next_link_hostname is None or connection_hostname is None:
@@ -764,7 +960,11 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
                 parsed_next_link.scheme == parsed_connection.scheme
                 and next_link_port == connection_port
             ):
-                return next_link
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
 
             raise ValueError(
                 "Pagination URL origin "
@@ -777,9 +977,9 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def create_table_async(
+    def create_table(
         self,
-        input: TableToCreate,
+        input: TableToCreate | Mapping[str, Any],
         drive: str,
         file: str,
         source: str,
@@ -793,6 +993,28 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         Create table
 
         Create a new table in the Excel workbook.
+
+        Swagger operation ID: `CreateTable`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (the colons are required).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -810,7 +1032,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -824,6 +1046,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -831,14 +1054,14 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_id_column_async(
+    def create_id_column(
         self,
         drive: str,
         file: str,
         table: str,
         source: str,
-        id_column: Optional[str] = None,
         *,
+        id_column: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -849,6 +1072,28 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
 
         Add a key column to an Excel table. The new column will be appended to
         the right.
+
+        Swagger operation ID: `CreateIdColumn`.
+
+        Args:
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            table: Select a table from the drop-down.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (the colons are required).
+            id_column: Provide the key column name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -874,7 +1119,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -888,14 +1133,16 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_items_async(
+    def list_items(
         self,
         drive: str,
         file: str,
         table: str,
         source: str,
+        *,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
         top: Optional[int] = None,
@@ -904,19 +1151,52 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         date_time_format: Optional[str] = None,
         extract_sensitivity_label: Optional[bool] = None,
         fetch_sensitivity_label_metadata: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List rows present in a table
 
         List rows present in a table.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetItems`.
+
+        Args:
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            table: Select a table from the drop-down.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (the colons are required).
+            filter: An ODATA filter query to restrict the entries returned.
+            orderby: An ODATA orderBy query for specifying the order of
+                entries.
+            top: Total number of entries to retrieve (default = all).
+            skip: The number of entries to skip (default = 0).
+            select: Comma-separated list of columns to retrieve (first 500 by
+                default).
+            date_time_format: DateTime Format.
+            extract_sensitivity_label: A boolean whether to extract sensitivity
+                label Id for associated artefact.
+            fetch_sensitivity_label_metadata: A boolean whether to fetch
+                sensitivity label Metadata for associated LabelId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -975,11 +1255,18 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
             query_params.append(f"fetchSensitivityLabelMetadata={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -992,37 +1279,70 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_comments_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_comments(
         self,
         drive: str,
         file: str,
-        source: Optional[str] = None,
         *,
+        source: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List all comments present in a workbook
 
         List all comments present in a workbook.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetComments`.
+
+        Args:
+            drive: Ask user to select a document library from the drop-down.
+            file: Ask user to select an Excel file through File Browse.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (the colons are required).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1041,35 +1361,56 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
             query_params.append(f"source={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_comment_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_comment(
         self,
         drive: str,
         file: str,
         commentid: str,
-        source: Optional[str] = None,
         *,
+        source: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1079,6 +1420,27 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         Get a comment present in a workbook
 
         Get a comment present in a workbook.
+
+        Swagger operation ID: `GetComment`.
+
+        Args:
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            commentid: Provide a comment Id .
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (the colons are required).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1099,7 +1461,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1113,6 +1475,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1120,14 +1483,14 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def reply_comment_async(
+    def reply_comment(
         self,
-        input: CommentDetails,
+        input: CommentDetails | Mapping[str, Any],
         drive: str,
         file: str,
         commentid: str,
-        source: Optional[str] = None,
         *,
+        source: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1137,6 +1500,29 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         Reply to a comment present in a workbook
 
         Reply to a comment present in a workbook.
+
+        Swagger operation ID: `ReplyComment`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            drive: Ask user to select a document library from the drop-down.
+            file: Ask user to select an Excel file through File Browse.
+            commentid: Provide a comment Id .
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (the colons are required).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1158,7 +1544,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1172,6 +1558,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1179,7 +1566,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_item_async(
+    def get_item(
         self,
         drive: str,
         file: str,
@@ -1187,10 +1574,10 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         id: str,
         source: str,
         id_column: str,
+        *,
         date_time_format: Optional[str] = None,
         extract_sensitivity_label: Optional[bool] = None,
         fetch_sensitivity_label_metadata: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1200,6 +1587,34 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         Get a row
 
         Get a row using a key column.
+
+        Swagger operation ID: `GetItem`.
+
+        Args:
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            table: Select a table from the drop-down.
+            id: Enter the key value.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (the colons are required).
+            id_column: Select a column from the drop-down.
+            date_time_format: DateTime Format.
+            extract_sensitivity_label: A boolean whether to extract sensitivity
+                label Id for associated artefact.
+            fetch_sensitivity_label_metadata: A boolean whether to fetch
+                sensitivity label Metadata for associated LabelId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1239,7 +1654,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1253,6 +1668,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1260,7 +1676,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_item_async(
+    def delete_item(
         self,
         drive: str,
         file: str,
@@ -1278,6 +1694,29 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         Delete a row
 
         Delete a row using a key column.
+
+        Swagger operation ID: `DeleteItem`.
+
+        Args:
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            table: Select a table from the drop-down.
+            id: Enter the key value.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (the colons are required).
+            id_column: Select a column from the drop-down.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1302,7 +1741,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1316,19 +1755,20 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def patch_item_async(
+    def patch_item(
         self,
-        input: Item,
+        input: Item | Mapping[str, Any],
         drive: str,
         file: str,
         table: str,
         id: str,
         source: str,
         id_column: str,
-        date_time_format: Optional[str] = None,
         *,
+        date_time_format: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1341,6 +1781,32 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         specified cells and columns left blank will not be updated. In order to
         append (instead of overwrite) a value, use the \"Get a row\" action to
         retrieve the content first.
+
+        Swagger operation ID: `PatchItem`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            table: Select a table from the drop-down.
+            id: Enter the key value.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (the colons are required).
+            id_column: Select a column from the drop-down.
+            date_time_format: DateTime Format.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1370,7 +1836,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1384,6 +1850,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1391,23 +1858,51 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_all_worksheets_async(
+    def list_all_worksheets(
         self,
         drive: str,
         file: str,
         source: str,
+        *,
         extract_sensitivity_label: Optional[bool] = None,
         fetch_sensitivity_label_metadata: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get worksheets
 
         Get a list of worksheets in the Excel workbook.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetAllWorksheets`.
+
+        Args:
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (colons are required).
+            extract_sensitivity_label: A boolean whether to extract sensitivity
+                label Id for associated artefact.
+            fetch_sensitivity_label_metadata: A boolean whether to fetch
+                sensitivity label Metadata for associated LabelId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1437,31 +1932,52 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
             query_params.append(f"fetchSensitivityLabelMetadata={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def create_worksheet_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def create_worksheet(
         self,
-        input: CreateWorksheetInput,
+        input: CreateWorksheetInput | Mapping[str, Any],
         drive: str,
         file: str,
         source: str,
@@ -1475,6 +1991,28 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         Create worksheet
 
         Create a new worksheet in the Excel workbook.
+
+        Swagger operation ID: `CreateWorksheet`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (colons are required).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1495,7 +2033,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1509,6 +2047,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1516,23 +2055,51 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_tables_async(
+    def list_tables(
         self,
         drive: str,
         file: str,
         source: str,
+        *,
         extract_sensitivity_label: Optional[bool] = None,
         fetch_sensitivity_label_metadata: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get tables
 
         Get a list of tables in the Excel workbook.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetTables`.
+
+        Args:
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (colons are required).
+            extract_sensitivity_label: A boolean whether to extract sensitivity
+                label Id for associated artefact.
+            fetch_sensitivity_label_metadata: A boolean whether to fetch
+                sensitivity label Metadata for associated LabelId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1562,37 +2129,58 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
             query_params.append(f"fetchSensitivityLabelMetadata={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def add_row_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def add_row(
         self,
-        input: Item,
+        input: Item | Mapping[str, Any],
         drive: str,
         file: str,
         table: str,
         source: str,
-        date_time_format: Optional[str] = None,
         *,
+        date_time_format: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1602,6 +2190,30 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         Add a row into a table
 
         Add a new row into the Excel table.
+
+        Swagger operation ID: `AddRowV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            table: Select a table from the drop-down.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (colons are required).
+            date_time_format: DateTime Format.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1629,7 +2241,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1643,6 +2255,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1650,9 +2263,9 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def run_script_prod_async(
+    def run_script_prod(
         self,
-        input: RunScriptProdInput,
+        input: RunScriptProdInput | Mapping[str, Any],
         drive: str,
         file: str,
         script_drive: str,
@@ -1670,6 +2283,37 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
 
         Runs an Office Script against an Excel workbook. Use this action when
         the script is saved outside of the default location.
+
+        Swagger operation ID: `RunScriptProdV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            drive: Select a document library from the drop-down.
+            file: Select an Excel workbook through File Browse.
+            script_drive: Select the SharePoint library of your Office Script
+                file (.osts) from the drop-down.
+            script_id: Select an Office Script file (.osts) in a SharePoint
+                library from the drop-down.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (colons are required).
+            script_source: Select from the drop-down or specify one of the
+                following: - \"me\" - \"SharePoint Site URL\" -
+                \"users/someone's UPN\" - \"groups/group Id\" -
+                \"sites/SharePoint Site URL:/teams/team name:\" (the colons are
+                required).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1695,7 +2339,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1709,6 +2353,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1716,19 +2361,38 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_sources_async(
+    def list_sources(
         self,
-        top: Optional[str] = None,
         *,
+        top: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get sources
 
         Get a list of sources.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetSources`.
+
+        Args:
+            top: Top.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/codeless/v1.0/sources"
         query_params = []
@@ -1739,29 +2403,50 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_drives_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_drives(
         self,
         source: str,
         *,
@@ -1769,11 +2454,33 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get drives
 
         Get a list of drives.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetDrives`.
+
+        Args:
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (colons are required).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/codeless/v1.0/drives"
         query_params = []
@@ -1783,29 +2490,50 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         query_params.append(f"source={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_columns_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_columns(
         self,
         drive: str,
         file: str,
@@ -1816,11 +2544,36 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get table columns
 
         Get table columns.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetColumns`.
+
+        Args:
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            table: Select a table from the drop-down.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (colons are required).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1842,29 +2595,50 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         query_params.append(f"source={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_table_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_table(
         self,
         drive: str,
         file: str,
@@ -1880,6 +2654,27 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         Get metadata of a table
 
         Get metadata of a table.
+
+        Swagger operation ID: `GetTable`.
+
+        Args:
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            table: Select a table from the drop-down.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (colons are required).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1902,7 +2697,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1916,6 +2711,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1923,7 +2719,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_single_script_async(
+    def get_single_script(
         self,
         script_source: str,
         script_drive: str,
@@ -1938,6 +2734,23 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         Gets one script
 
         Gets one of the scripts.
+
+        Swagger operation ID: `GetSingleScriptV2`.
+
+        Args:
+            script_source: script source.
+            script_drive: script drive.
+            script_id: Script chosen to use.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1959,7 +2772,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1973,6 +2786,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

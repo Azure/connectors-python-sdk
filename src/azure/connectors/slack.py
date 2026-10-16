@@ -5,20 +5,33 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "SlackClient",
+    "Channel",
+    "CreateChannelResponse",
+    "JoinChannelResponse",
+    "ListChannelsResponse",
+    "PostMessageRequest",
+    "PostMessageResponse",
+    "SetDNDResponse",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -29,7 +42,7 @@ class SetDNDResponse:
     Response for Set do not disturb
     """
 
-    snooze_enabled: Optional[bool] = None
+    snooze_enabled: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether snooze is enabled."""
 
 
@@ -39,7 +52,7 @@ class CreateChannelResponse:
     Response for Create a channel
     """
 
-    channel: Optional[Channel] = None
+    channel: Optional[Channel | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -48,8 +61,8 @@ class JoinChannelResponse:
     Response for Join a public channel
     """
 
-    channel: Optional[Channel] = None
-    warning: Optional[str] = None
+    channel: Optional[Channel | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    warning: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Whether the user is already in the channel or not."""
 
 
@@ -59,9 +72,15 @@ class ListChannelsResponse:
     Response for List public channels (Pagination support)
     """
 
-    value: Optional[List[Channel]] = None
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[Channel | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """Link to get next page of results"""
@@ -73,15 +92,15 @@ class PostMessageResponse:
     Response for Post message
     """
 
-    ok: Optional[bool] = None
+    ok: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates if the operation was successful."""
-    channel: Optional[str] = None
+    channel: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The channel which the message was posted to."""
-    ts: Optional[str] = None
+    ts: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unix timestamp for when the message was created."""
-    message: Optional[Dict[str, Any]] = None
+    message: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """A channel message."""
-    error: Optional[str] = None
+    error: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Details of the error messages, if any."""
 
 
@@ -91,9 +110,9 @@ class Channel:
     Definition: Channel
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The id of the channel."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of channel."""
 
 
@@ -103,40 +122,40 @@ class PostMessageRequest:
     Definition: PostMessageRequest
     """
 
-    channel: Optional[str] = None
+    channel: str
     """
     Channel, private group, or IM channel to send message to. Can be a name(ex:
     #general) or an encoded ID.
     """
-    text: Optional[str] = None
+    text: str
     """
     Body of the message to send. Slack API will truncate messages containing
     more than 40,000 characters. For formatting options, see
     https://api.slack.com/docs/formatting
     """
-    username: Optional[str] = None
+    username: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the bot."""
-    as_user: Optional[bool] = None
+    as_user: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Pass true to post the message as the authenticated user, instead of as a
     bot.
     """
-    parse: Optional[str] = None
+    parse: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Change how messages are treated. For details, see
     https://api.slack.com/docs/formatting
     """
-    mrkdwn: Optional[bool] = None
+    mrkdwn: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Slack markup parsing setting. Enabled by default."""
-    link_names: Optional[int] = None
+    link_names: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Find and link channel names and usernames."""
-    unfurl_links: Optional[bool] = None
+    unfurl_links: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Pass true to enable unfurling of primarily text-based content."""
-    unfurl_media: Optional[bool] = None
+    unfurl_media: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Pass false to disable unfurling of media content."""
-    icon_url: Optional[str] = None
+    icon_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """URL to an image to use as an icon for this message."""
-    icon_emoji: Optional[str] = None
+    icon_emoji: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Emoji to use as an icon for this message."""
 
 
@@ -148,16 +167,16 @@ class SlackClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -168,8 +187,8 @@ class SlackClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -177,8 +196,8 @@ class SlackClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -190,7 +209,7 @@ class SlackClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -206,15 +225,49 @@ class SlackClient(ConnectorClientBase):
         return "slack"
 
     def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
-        parsed_next_link = urlsplit(next_link)
-        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
             if next_link.startswith("/"):
                 return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
             if next_link.startswith("?"):
-                return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
 
-        parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
         connection_hostname = parsed_connection.hostname
         if next_link_hostname is None or connection_hostname is None:
@@ -231,7 +284,11 @@ class SlackClient(ConnectorClientBase):
                 parsed_next_link.scheme == parsed_connection.scheme
                 and next_link_port == connection_port
             ):
-                return next_link
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
 
             raise ValueError(
                 "Pagination URL origin "
@@ -244,10 +301,10 @@ class SlackClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def set_dnd_async(
+    def set_dnd(
         self,
-        num_minutes: Optional[str] = None,
         *,
+        num_minutes: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -257,6 +314,21 @@ class SlackClient(ConnectorClientBase):
         Set do not disturb
 
         Set the do not disturb status for the user.
+
+        Swagger operation ID: `SetDND`.
+
+        Args:
+            num_minutes: The number of minutes to set do not disturb.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/dnd.setSnooze"
         query_params = []
@@ -268,7 +340,7 @@ class SlackClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -282,6 +354,7 @@ class SlackClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -289,11 +362,11 @@ class SlackClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_channel_async(
+    def create_channel(
         self,
+        *,
         name: Optional[str] = None,
         is_private: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -303,6 +376,22 @@ class SlackClient(ConnectorClientBase):
         Create a channel
 
         Create a channel in slack.
+
+        Swagger operation ID: `CreateChannel_V2`.
+
+        Args:
+            name: The name of the new channel.
+            is_private: Channel is private or not.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/conversations.create"
         query_params = []
@@ -319,7 +408,7 @@ class SlackClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -333,6 +422,7 @@ class SlackClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -340,10 +430,10 @@ class SlackClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def join_channel_async(
+    def join_channel(
         self,
-        channel: Optional[str] = None,
         *,
+        channel: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -353,6 +443,21 @@ class SlackClient(ConnectorClientBase):
         Join a public channel
 
         Join a public channel in slack.
+
+        Swagger operation ID: `JoinChannel_V2`.
+
+        Args:
+            channel: The name of the channel.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/conversations.join"
         query_params = []
@@ -364,7 +469,7 @@ class SlackClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -378,6 +483,7 @@ class SlackClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -385,28 +491,50 @@ class SlackClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_channels_async(
+    def list_channels(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List public channels (Pagination support)
 
         List the public channels in slack.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `ListChannels_V3`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v3/conversations.list"
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -419,25 +547,34 @@ class SlackClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def post_message_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def post_message(
         self,
-        input: PostMessageRequest,
+        input: PostMessageRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -448,10 +585,26 @@ class SlackClient(ConnectorClientBase):
         Post message
 
         This operation is used to post a message to the specified channel.
+
+        Swagger operation ID: `PostMessage_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/chat.postMessage"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -465,6 +618,7 @@ class SlackClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

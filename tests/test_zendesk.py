@@ -8,9 +8,9 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.zendesk import ZendeskClient
 from azure.connectors.zendesk import (
     Item,
-    ZendeskClient,
     TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
@@ -22,22 +22,24 @@ from tests.generated_connector_test_utils import resolve_generated_result
 
 async def _invoke_operation(client: ZendeskClient, operation: str):
     """Invoke a Zendesk operation by name for shared tests."""
-    if operation == "get_tables":
-        return await client.get_tables_async()
-    if operation == "get_items":
-        return await resolve_generated_result(client.get_items_async(table="tickets"))
+    if operation == "list_tables":
+        return await resolve_generated_result(client.list_tables())
+    if operation == "list_items":
+        return await resolve_generated_result(client.list_items(table="tickets"))
     if operation == "post_item":
-        return await client.post_item_async(input=Item(), table="tickets")
+        return await client.post_item(input=Item(), table="tickets")
     if operation == "get_item":
-        return await client.get_item_async(table="tickets", id="1")
+        return await client.get_item(table="tickets", id="1")
     if operation == "delete_item":
-        return await client.delete_item_async(table="tickets", id="1")
+        return await client.delete_item(table="tickets", id="1")
     if operation == "patch_item":
-        return await client.patch_item_async(input=Item(), table="tickets", id="1")
-    if operation == "search_articles":
-        return await client.search_articles_async(query="password")
+        return await client.patch_item(input=Item(), table="tickets", id="1")
+    if operation == "list_search_articles":
+        return await resolve_generated_result(
+            client.list_search_articles(query="password")
+        )
     if operation == "get_table":
-        return await client.get_table_async(table="tickets")
+        return await client.get_table(table="tickets")
 
     raise ValueError(f"Unsupported operation '{operation}'.")
 
@@ -75,7 +77,7 @@ class TestZendeskClientInitialization:
         client = ZendeskClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -142,13 +144,13 @@ class TestZendeskClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_tables_async()
+            result = await resolve_generated_result(client.list_tables())
 
-            assert result["value"][0]["name"] == "tickets"
+            assert result == [{"name": "tickets"}]
             assert mock_send.call_args[0][0] == "GET"
             assert "/datasets/default/tables" in mock_send.call_args[0][1]
 
@@ -163,11 +165,11 @@ class TestZendeskClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await resolve_generated_result(client.get_items_async(
+            await resolve_generated_result(client.list_items(
                 table="tickets",
                 filter="status eq 'open'",
                 top="10",
@@ -191,11 +193,11 @@ class TestZendeskClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.post_item_async(input=body, table="tickets")
+            result = await client.post_item(input=body, table="tickets")
 
             assert result["dynamic_properties"]["id"] == 1
             assert mock_send.call_args[0][0] == "POST"
@@ -213,11 +215,11 @@ class TestZendeskClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_item_async(table="tickets", id="42")
+            result = await client.get_item(table="tickets", id="42")
 
             assert result["dynamic_properties"]["id"] == 42
             assert mock_send.call_args[0][0] == "GET"
@@ -234,11 +236,11 @@ class TestZendeskClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.delete_item_async(table="tickets", id="42")
+            result = await client.delete_item(table="tickets", id="42")
 
             assert result is None
             assert mock_send.call_args[0][0] == "DELETE"
@@ -256,11 +258,11 @@ class TestZendeskClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.patch_item_async(input=body, table="tickets", id="42")
+            result = await client.patch_item(input=body, table="tickets", id="42")
 
             assert result["dynamic_properties"]["id"] == 42
             assert mock_send.call_args[0][0] == "PATCH"
@@ -278,17 +280,21 @@ class TestZendeskClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.search_articles_async(query="password reset", locale="en-us")
+            result = await resolve_generated_result(client.list_search_articles(
+                query="password reset",
+                locale="en-us",
+            ))
 
             request_url = mock_send.call_args[0][1]
             assert mock_send.call_args[0][0] == "GET"
             assert "/api/v2/help_center/articles/search" in request_url
             assert "query=password%20reset" in request_url
             assert "locale=en-us" in request_url
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_get_table_success(self, mock_credential):
@@ -301,11 +307,11 @@ class TestZendeskClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_table_async(table="tickets")
+            result = await client.get_table(table="tickets")
 
             assert result["name"] == "tickets"
             assert mock_send.call_args[0][0] == "GET"
@@ -322,13 +328,13 @@ class TestZendeskClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.get_tables_async()
+            result = await resolve_generated_result(client.list_tables())
 
-            assert result is None
+            assert result == []
 
 
 class TestZendeskClientErrorHandling:
@@ -338,13 +344,13 @@ class TestZendeskClientErrorHandling:
     @pytest.mark.parametrize(
         "operation",
         [
-            "get_tables",
-            "get_items",
+            "list_tables",
+            "list_items",
             "post_item",
             "get_item",
             "delete_item",
             "patch_item",
-            "search_articles",
+            "list_search_articles",
             "get_table",
         ],
     )
@@ -362,7 +368,7 @@ class TestZendeskClientErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
@@ -375,14 +381,14 @@ class TestZendeskClientSignatures:
 
     def test_search_articles_query_required_and_annotated_str(self):
         """Test the query parameter is required and annotated as str, not Optional."""
-        signature = inspect.signature(ZendeskClient.search_articles_async)
+        signature = inspect.signature(ZendeskClient.list_search_articles)
 
         assert signature.parameters["query"].default is inspect.Parameter.empty
         assert signature.parameters["query"].annotation == "str"
 
     def test_search_articles_optional_params_default_to_none(self):
         """Test optional search params default to None."""
-        signature = inspect.signature(ZendeskClient.search_articles_async)
+        signature = inspect.signature(ZendeskClient.list_search_articles)
 
         assert signature.parameters["locale"].default is None
 
@@ -395,19 +401,19 @@ class TestZendeskClientSignatures:
         )
 
         with pytest.raises(TypeError):
-            await client.search_articles_async()
+            await resolve_generated_result(client.list_search_articles())
 
     @pytest.mark.parametrize(
         "method_name",
         [
-            "get_tables_async",
-            "get_items_async",
-            "post_item_async",
-            "get_item_async",
-            "delete_item_async",
-            "patch_item_async",
-            "search_articles_async",
-            "get_table_async",
+            "list_tables",
+            "list_items",
+            "post_item",
+            "get_item",
+            "delete_item",
+            "patch_item",
+            "list_search_articles",
+            "get_table",
         ],
     )
     def test_public_methods_have_return_annotation(self, method_name):
@@ -416,7 +422,7 @@ class TestZendeskClientSignatures:
 
         assert signature.return_annotation is not inspect.Signature.empty
         assert signature.return_annotation in (
-            "AsyncIterator[dict[str, Any]]",
+            "AsyncItemPaged[dict[str, Any]]",
             "dict[str, Any] | None",
             "None",
         )

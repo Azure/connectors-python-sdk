@@ -3,7 +3,7 @@
 """Contract tests for CloudconvertClient."""
 
 import azure.connectors.cloudconvert as cloudconvert_module
-from azure.connectors.cloudconvert import CloudconvertClient
+from azure.connectors.aio.cloudconvert import CloudconvertClient
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 
 

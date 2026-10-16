@@ -2,42 +2,45 @@
 
 """Contract tests for SeismicplannerClient."""
 
-from typing import Any, Dict, Optional, get_type_hints
+from typing import Any, Dict, Mapping, Optional, get_type_hints
 from unittest.mock import AsyncMock, patch
 
 import pytest
 
 import azure.connectors.seismicplanner as seismicplanner_module
+from azure.connectors.aio.seismicplanner import SeismicplannerClient
 from azure.connectors.seismicplanner import (
     CustomPropertyDataDisplay,
     CustomPropertyValues,
-    SeismicplannerClient,
 )
 from tests.conftest import MockResponse
-from tests.generated_connector_test_utils import GeneratedConnectorContractTests
+from tests.generated_connector_test_utils import (
+    GeneratedConnectorContractTests,
+    resolve_generated_result,
+)
 
 
 OPERATION_CONTRACTS = {
-    "get_comments": ("GET", False),
+    "list_comments": ("GET", False),
     "create_comment": ("POST", True),
     "get_comment": ("GET", False),
     "delete_comment": ("DELETE", False),
     "update_comment": ("PUT", True),
-    "get_projects": ("GET", False),
+    "list_projects": ("GET", False),
     "delete_projects": ("DELETE", False),
     "create_project": ("POST", True),
     "get_project": ("GET", False),
     "delete_project": ("DELETE", False),
     "update_project": ("PUT", True),
-    "get_requests": ("GET", False),
+    "list_requests": ("GET", False),
     "delete_requests": ("DELETE", True),
     "create_request": ("POST", True),
     "get_request": ("GET", False),
     "delete_request": ("DELETE", False),
     "update_request": ("PUT", True),
-    "get_status_schemas": ("GET", False),
+    "list_status_schemas": ("GET", False),
     "get_status_schema": ("GET", False),
-    "get_tasks": ("GET", False),
+    "list_tasks": ("GET", False),
     "create_task": ("POST", True),
     "get_task": ("GET", False),
     "delete_task": ("DELETE", False),
@@ -73,11 +76,13 @@ class TestSeismicplannerClient(GeneratedConnectorContractTests):
         ) as client:
             with patch.object(
                 client._http_client,
-                "send_async",
+                "send",
                 new_callable=AsyncMock,
                 return_value=MockResponse(status=200, text='{"value": []}'),
             ) as transport:
-                await client.get_requests_async(space_id="space-id", ids=identifiers)
+                await resolve_generated_result(
+                    client.list_requests(space_id="space-id", ids=identifiers)
+                )
 
             transport.assert_awaited_once()
             method, request_url = transport.await_args.args
@@ -96,7 +101,7 @@ class TestSeismicplannerClient(GeneratedConnectorContractTests):
         )
 
         assert type_hints["localizations"] == Optional[
-            Dict[str, CustomPropertyDataDisplay]
+            Dict[str, CustomPropertyDataDisplay | Mapping[str, Any]]
         ]
         assert model.localizations is not None
         assert model.localizations["en-US"].name == "English"

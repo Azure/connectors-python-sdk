@@ -5,20 +5,40 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "AzureadClient",
+    "AssignManagerRequest",
+    "CheckMemberGroupsRequest",
+    "CreateGroupInput",
+    "CreateGroupResponse",
+    "CreateOffice365GroupInput",
+    "CreateSecurityGroupInput",
+    "CreateUserRequest",
+    "GetGroupMembersResponse",
+    "GetGroupRequest",
+    "GetGroupResponse",
+    "GetMemberGroupsRequest",
+    "GetMemberGroupsResponse",
+    "GetMemberGroupsResponseV2",
+    "GetUserResponse",
+    "UpdateUserRequest",
+]
 
 
 # Type Definitions
@@ -29,32 +49,23 @@ class CreateOffice365GroupInput:
     Create Office 365 group
     """
 
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """Display name of the new group."""
-    description: Optional[str] = None
+    description: str
     """Description of the new group."""
-    mail_nickname: Optional[str] = field(
-        default=None,
+    mail_nickname: str = dataclass_field(
         metadata={"wire_name": "mailNickname"},
     )
     """The mail alias of the new group."""
-    group_types: Optional[List[str]] = field(
-        default=None,
+    group_types: List[str] = dataclass_field(
         metadata={"wire_name": "groupTypes"},
     )
     """For Office 365, group type is 'Unified'."""
-    security_enabled: Optional[bool] = field(
-        default=None,
+    security_enabled: bool = dataclass_field(
         metadata={"wire_name": "securityEnabled"},
     )
     """True if the new group is a security group."""
-    mail_enabled: Optional[bool] = field(
-        default=None,
-        metadata={"wire_name": "mailEnabled"},
-    )
+    mail_enabled: bool = dataclass_field(metadata={"wire_name": "mailEnabled"})
     """True if the new group is a mailing group."""
 
 
@@ -64,80 +75,93 @@ class CreateGroupResponse:
     Response for Create Office 365 group
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """@odata.context"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """id"""
-    deleted_date_time: Optional[str] = field(
+    deleted_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "deletedDateTime"},
     )
     """deletedDateTime"""
-    classification: Optional[str] = None
+    classification: Optional[str] = dataclass_field(default=None, kw_only=True)
     """classification"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """createdDateTime"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """description"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """displayName"""
-    group_types: Optional[List[str]] = field(
+    group_types: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "groupTypes"},
     )
     """groupTypes"""
-    mail: Optional[str] = None
+    mail: Optional[str] = dataclass_field(default=None, kw_only=True)
     """mail"""
-    mail_enabled: Optional[bool] = field(
+    mail_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mailEnabled"},
     )
     """mailEnabled"""
-    mail_nickname: Optional[str] = field(
+    mail_nickname: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mailNickname"},
     )
     """mailNickname"""
-    on_premises_last_sync_date_time: Optional[str] = field(
+    on_premises_last_sync_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onPremisesLastSyncDateTime"},
     )
     """onPremisesLastSyncDateTime"""
-    on_premises_security_identifier: Optional[str] = field(
+    on_premises_security_identifier: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onPremisesSecurityIdentifier"},
     )
     """onPremisesSecurityIdentifier"""
-    on_premises_sync_enabled: Optional[bool] = field(
+    on_premises_sync_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onPremisesSyncEnabled"},
     )
     """onPremisesSyncEnabled"""
-    proxy_addresses: Optional[List[str]] = field(
+    proxy_addresses: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "proxyAddresses"},
     )
     """proxyAddresses"""
-    renewed_date_time: Optional[str] = field(
+    renewed_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "renewedDateTime"},
     )
     """renewedDateTime"""
-    security_enabled: Optional[bool] = field(
+    security_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "securityEnabled"},
     )
     """securityEnabled"""
-    visibility: Optional[str] = None
+    visibility: Optional[str] = dataclass_field(default=None, kw_only=True)
     """visibility"""
 
 
@@ -147,27 +171,19 @@ class CreateSecurityGroupInput:
     Create security group
     """
 
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """Display name of the new group."""
-    description: Optional[str] = None
+    description: str
     """Description of the new group."""
-    mail_nickname: Optional[str] = field(
-        default=None,
+    mail_nickname: str = dataclass_field(
         metadata={"wire_name": "mailNickname"},
     )
     """The mail alias of the new group."""
-    security_enabled: Optional[bool] = field(
-        default=None,
+    security_enabled: bool = dataclass_field(
         metadata={"wire_name": "securityEnabled"},
     )
     """True if the new group is a security group."""
-    mail_enabled: Optional[bool] = field(
-        default=None,
-        metadata={"wire_name": "mailEnabled"},
-    )
+    mail_enabled: bool = dataclass_field(metadata={"wire_name": "mailEnabled"})
     """True if the new group is a mailing group."""
 
 
@@ -177,51 +193,58 @@ class GetGroupResponse:
     Response for Get group
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique identifier for the group."""
-    deleted_date_time: Optional[str] = field(
+    deleted_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "deletedDateTime"},
     )
     """Date-time the group was deleted."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """Date-time the group was created."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """An optional description for the group."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The display name for the group."""
-    mail: Optional[str] = None
+    mail: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The SMTP address for the group."""
-    mail_enabled: Optional[bool] = field(
+    mail_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mailEnabled"},
     )
     """True if the group is mail-enabled."""
-    on_premises_last_sync_date_time: Optional[str] = field(
+    on_premises_last_sync_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onPremisesLastSyncDateTime"},
     )
     """
     A date-time indicating the last time at which the group was synced with the
     on-premises directory.
     """
-    on_premises_sync_enabled: Optional[bool] = field(
+    on_premises_sync_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onPremisesSyncEnabled"},
     )
     """True if this group is synced from an on-premises directory."""
-    security_enabled: Optional[bool] = field(
+    security_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "securityEnabled"},
     )
     """True if the group is a security group."""
-    visibility: Optional[str] = None
+    visibility: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Visibility of the group (public or private)."""
 
 
@@ -231,51 +254,59 @@ class GetUserResponse:
     Response for Get user
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A unique identifier for the user."""
-    business_phones: Optional[List[str]] = field(
+    business_phones: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "businessPhones"},
     )
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The name displayed in the address book for the user."""
-    given_name: Optional[str] = field(
+    given_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "givenName"},
     )
     """The given name (first name) of the user."""
-    job_title: Optional[str] = field(
+    job_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobTitle"},
     )
     """The user's job title."""
-    mail: Optional[str] = None
+    mail: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The SMTP address for the user."""
-    mobile_phone: Optional[str] = field(
+    mobile_phone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mobilePhone"},
     )
     """The primary cellular telephone number for the user."""
-    office_location: Optional[str] = field(
+    office_location: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "officeLocation"},
     )
     """The office location in the user's place of business."""
-    preferred_language: Optional[str] = field(
+    preferred_language: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "preferredLanguage"},
     )
     """
     The preferred language for the user. Should follow ISO 639-1 Code; for
     example 'en-US'.
     """
-    surname: Optional[str] = None
+    surname: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The user's surname (family name or last name)."""
-    user_principal_name: Optional[str] = field(
+    user_principal_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userPrincipalName"},
     )
     """The user principal name (UPN) of the user."""
@@ -287,12 +318,18 @@ class GetGroupMembersResponse:
     Response for Get group members
     """
 
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """Link to get next page of results"""
-    value: Optional[List[GetUserResponse]] = None
+    value: Optional[
+        List[GetUserResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Array of users that are members of the group."""
 
 
@@ -302,34 +339,25 @@ class CreateGroupInput:
     Create group
     """
 
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """Display name of the new group."""
-    description: Optional[str] = None
+    description: str
     """Description of the new group."""
-    mail_nickname: Optional[str] = field(
-        default=None,
+    mail_nickname: str = dataclass_field(
         metadata={"wire_name": "mailNickname"},
     )
     """The mail alias of the new group."""
-    group_types: Optional[List[str]] = field(
-        default=None,
+    group_types: List[str] = dataclass_field(
         metadata={"wire_name": "groupTypes"},
     )
     """
     Choose 'Unified' for an O365 group. Choose 'None' for a security group.
     """
-    security_enabled: Optional[bool] = field(
-        default=None,
+    security_enabled: bool = dataclass_field(
         metadata={"wire_name": "securityEnabled"},
     )
     """True if the new group is a security group."""
-    mail_enabled: Optional[bool] = field(
-        default=None,
-        metadata={"wire_name": "mailEnabled"},
-    )
+    mail_enabled: bool = dataclass_field(metadata={"wire_name": "mailEnabled"})
     """True if the new group is a mailing group."""
 
 
@@ -339,7 +367,7 @@ class GetMemberGroupsResponseV2:
     Response for Check group membership (V2)
     """
 
-    value: Optional[GetMemberGroupsResponse] = None
+    value: Optional[GetMemberGroupsResponse] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -348,10 +376,7 @@ class GetGroupRequest:
     Definition: GetGroup_Request
     """
 
-    id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "@odata.id"},
-    )
+    id: str = dataclass_field(metadata={"wire_name": "@odata.id"})
     """
     Unique identifier of a user (Ex. '5e6cf5c7-b511-4842-6aae-3f6b8ae5e95b').
     """
@@ -363,10 +388,7 @@ class AssignManagerRequest:
     Definition: AssignManager_Request
     """
 
-    id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "@odata.id"},
-    )
+    id: str = dataclass_field(metadata={"wire_name": "@odata.id"})
     """
     Unique identifier of a manager (Ex.
     '5f6cf5c7-a561-4842-9aae-3e6d8ce5e95b').
@@ -379,76 +401,89 @@ class UpdateUserRequest:
     Definition: UpdateUser_Request
     """
 
-    user_principal_name: Optional[str] = field(
+    user_principal_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userPrincipalName"},
     )
     """The user principal name (UPN) of the user."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The name displayed in the address book for the user."""
-    mail_nickname: Optional[str] = field(
+    mail_nickname: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mailNickname"},
     )
     """The mail alias for the user."""
-    given_name: Optional[str] = field(
+    given_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "givenName"},
     )
     """The given name (first name) of the user."""
-    surname: Optional[str] = None
+    surname: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The user's surname (family name or last name)."""
-    account_enabled: Optional[bool] = field(
+    account_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "accountEnabled"},
     )
     """True if the new account should be enabled."""
-    job_title: Optional[str] = field(
+    job_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobTitle"},
     )
     """The user's job title."""
-    department: Optional[str] = None
+    department: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name for the department in which the user works."""
-    mobile_phone: Optional[str] = field(
+    mobile_phone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mobilePhone"},
     )
     """
     The mobile phone number for the user in any format such as '1 (234)
     567-8910'.
     """
-    office_location: Optional[str] = field(
+    office_location: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "officeLocation"},
     )
     """The office location in the user's place of business."""
-    preferred_language: Optional[str] = field(
+    preferred_language: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "preferredLanguage"},
     )
     """
     The preferred language for the user. Should follow ISO 639-1 Code; for
     example 'en-US'.
     """
-    business_phones: Optional[List[str]] = field(
+    business_phones: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "businessPhones"},
     )
-    other_mails: Optional[List[str]] = field(
+    other_mails: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "otherMails"},
     )
-    custom_properties: Optional[Dict[str, str]] = field(
+    custom_properties: Optional[Dict[str, str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customProperties"},
     )
     """Free form property name and value for this user."""
-    on_premises_extension_attributes: Optional[Dict[str, Any]] = field(
+    on_premises_extension_attributes: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onPremisesExtensionAttributes"},
     )
 
@@ -459,8 +494,7 @@ class GetMemberGroupsRequest:
     Definition: GetMemberGroups_Request
     """
 
-    security_enabled_only: Optional[bool] = field(
-        default=None,
+    security_enabled_only: bool = dataclass_field(
         metadata={"wire_name": "securityEnabledOnly"},
     )
     """Determines if only security enabled groups should be fetched."""
@@ -475,64 +509,63 @@ class CreateUserRequest:
     Definition: CreateUser_Request
     """
 
-    account_enabled: Optional[bool] = field(
-        default=None,
+    account_enabled: bool = dataclass_field(
         metadata={"wire_name": "accountEnabled"},
     )
     """True if the new account should be enabled when it is created."""
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """The name displayed in the address book for the user."""
-    mail_nickname: Optional[str] = field(
-        default=None,
+    mail_nickname: str = dataclass_field(
         metadata={"wire_name": "mailNickname"},
     )
     """The mail alias for the user."""
-    password_profile: Optional[Dict[str, Any]] = field(
-        default=None,
+    password_profile: Dict[str, Any] = dataclass_field(
         metadata={"wire_name": "passwordProfile"},
     )
     """passwordProfile"""
-    user_principal_name: Optional[str] = field(
-        default=None,
+    user_principal_name: str = dataclass_field(
         metadata={"wire_name": "userPrincipalName"},
     )
     """The user principal name (UPN) of the user."""
-    given_name: Optional[str] = field(
+    given_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "givenName"},
     )
     """The user's given name (first name)."""
-    surname: Optional[str] = None
+    surname: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The user's surname (family name or last name)."""
-    business_phones: Optional[List[str]] = field(
+    business_phones: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "businessPhones"},
     )
-    department: Optional[str] = None
+    department: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name for the department in which the user works."""
-    job_title: Optional[str] = field(
+    job_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobTitle"},
     )
     """The user's job title."""
-    mobile_phone: Optional[str] = field(
+    mobile_phone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mobilePhone"},
     )
     """
     The mobile phone number for the user in any format such as '1 (234)
     567-8910'.
     """
-    office_location: Optional[str] = field(
+    office_location: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "officeLocation"},
     )
     """The office location in the user's place of business."""
-    preferred_language: Optional[str] = field(
+    preferred_language: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "preferredLanguage"},
     )
     """
@@ -547,10 +580,7 @@ class CheckMemberGroupsRequest:
     Definition: CheckMemberGroups_Request
     """
 
-    group_ids: Optional[List[str]] = field(
-        default=None,
-        metadata={"wire_name": "groupIds"},
-    )
+    group_ids: List[str] = dataclass_field(metadata={"wire_name": "groupIds"})
 
 
 # Client Class
@@ -561,16 +591,16 @@ class AzureadClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -581,8 +611,8 @@ class AzureadClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -590,8 +620,8 @@ class AzureadClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -603,7 +633,7 @@ class AzureadClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -619,15 +649,49 @@ class AzureadClient(ConnectorClientBase):
         return "azuread"
 
     def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
-        parsed_next_link = urlsplit(next_link)
-        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
             if next_link.startswith("/"):
                 return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
             if next_link.startswith("?"):
-                return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
 
-        parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
         connection_hostname = parsed_connection.hostname
         if next_link_hostname is None or connection_hostname is None:
@@ -644,7 +708,11 @@ class AzureadClient(ConnectorClientBase):
                 parsed_next_link.scheme == parsed_connection.scheme
                 and next_link_port == connection_port
             ):
-                return next_link
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
 
             raise ValueError(
                 "Pagination URL origin "
@@ -657,9 +725,9 @@ class AzureadClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def create_office365_group_async(
+    def create_office365_group(
         self,
-        input: CreateOffice365GroupInput,
+        input: CreateOffice365GroupInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -670,10 +738,26 @@ class AzureadClient(ConnectorClientBase):
         Create Office 365 group
 
         Create an Office 365 group in your Microsoft Entra ID tenant.
+
+        Swagger operation ID: `CreateOffice365Group`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/groups/office365"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -687,6 +771,7 @@ class AzureadClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -694,9 +779,9 @@ class AzureadClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_security_group_async(
+    def create_security_group(
         self,
-        input: CreateSecurityGroupInput,
+        input: CreateSecurityGroupInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -707,12 +792,28 @@ class AzureadClient(ConnectorClientBase):
         Create security group
 
         Create a security group in your Microsoft Entra ID tenant.
+
+        Swagger operation ID: `CreateSecurityGroup`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/v1.0/groups/securityGroup"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -726,6 +827,7 @@ class AzureadClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -733,7 +835,7 @@ class AzureadClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_group_async(
+    def get_group(
         self,
         id: str,
         *,
@@ -746,13 +848,29 @@ class AzureadClient(ConnectorClientBase):
         Get group
 
         Get details for a group.
+
+        Swagger operation ID: `GetGroup`.
+
+        Args:
+            id: Unique identifier of a group (Ex.
+                '40639f36-46a6-73a6-91e2-9584b7913429').
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/groups/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -766,6 +884,7 @@ class AzureadClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -773,7 +892,7 @@ class AzureadClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_user_async(
+    def get_user(
         self,
         id: str,
         *,
@@ -786,13 +905,29 @@ class AzureadClient(ConnectorClientBase):
         Get user
 
         Get details for a user.
+
+        Swagger operation ID: `GetUser`.
+
+        Args:
+            id: Unique identifier of a user (Ex. 'user@tennant.onmicrosoft.com'
+                or '5f6ce5c7-b521-4842-9bbe-3f6d5aa5e35b').
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/users/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -806,6 +941,7 @@ class AzureadClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -813,9 +949,9 @@ class AzureadClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_user_async(
+    def update_user(
         self,
-        input: UpdateUserRequest,
+        input: UpdateUserRequest | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -827,13 +963,31 @@ class AzureadClient(ConnectorClientBase):
         Update user
 
         Update the info for a user.
+
+        Swagger operation ID: `UpdateUser`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Unique identifier of a user (Ex. 'user@tennant.onmicrosoft.com'
+                or '5f6ce5c7-b521-4842-9bbe-3f6d5aa5e35b').
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/users/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -847,9 +1001,10 @@ class AzureadClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def refresh_tokens_async(
+    def refresh_tokens(
         self,
         id: str,
         *,
@@ -862,13 +1017,29 @@ class AzureadClient(ConnectorClientBase):
         Refresh tokens
 
         Invalidate all refresh tokens for a user
+
+        Swagger operation ID: `RefreshTokens`.
+
+        Args:
+            id: Unique identifier of a user (Ex. 'user@tennant.onmicrosoft.com'
+                or '5f6ce5c7-b521-4842-9bbe-3f6d5aa5e35b').
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/users/{quote(str(id), safe='')}/revokeSignInSessions"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -882,11 +1053,12 @@ class AzureadClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def create_user_async(
+    def create_user(
         self,
-        input: CreateUserRequest,
+        input: CreateUserRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -897,10 +1069,26 @@ class AzureadClient(ConnectorClientBase):
         Create user
 
         Create a new user in your Microsoft Entra ID tenant.
+
+        Swagger operation ID: `CreateUser`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/users"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -914,6 +1102,7 @@ class AzureadClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -921,16 +1110,16 @@ class AzureadClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_group_members_async(
+    def list_group_members(
         self,
         id: str,
-        top: Optional[int] = None,
         *,
+        top: Optional[int] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get group members
 
@@ -939,8 +1128,27 @@ class AzureadClient(ConnectorClientBase):
         values, please turn on the Settings->Pagination feature and provide a
         Threshold limit.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetGroupMembers`.
+
+        Args:
+            id: Unique identifier of a group (Ex.
+                '40639f36-46a6-73a6-91e2-9584b7913429').
+            top: Limit on the number of results to return (from 1 to 999,
+                default is 100).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -954,11 +1162,18 @@ class AzureadClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -971,23 +1186,32 @@ class AzureadClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def remove_member_from_group_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def remove_member_from_group(
         self,
         group_id: str,
         member_id: str,
@@ -1001,6 +1225,22 @@ class AzureadClient(ConnectorClientBase):
         Remove Member From Group
 
         Remove Member From Group
+
+        Swagger operation ID: `RemoveMemberFromGroup`.
+
+        Args:
+            group_id: The Id of the group.
+            member_id: The Id of the member.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1012,7 +1252,7 @@ class AzureadClient(ConnectorClientBase):
             f"/$ref"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1026,11 +1266,12 @@ class AzureadClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def add_user_to_group_async(
+    def add_user_to_group(
         self,
-        input: GetGroupRequest,
+        input: GetGroupRequest | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -1042,13 +1283,31 @@ class AzureadClient(ConnectorClientBase):
         Add user to group
 
         Add a user to a group in this Microsoft Entra ID tenant.
+
+        Swagger operation ID: `AddUserToGroup`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Unique identifier of a group (Ex.
+                '40639f36-46a6-73a6-91e2-9584b7913429').
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/groups/{quote(str(id), safe='')}/members/$ref"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1062,11 +1321,12 @@ class AzureadClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def assign_manager_async(
+    def assign_manager(
         self,
-        input: AssignManagerRequest,
+        input: AssignManagerRequest | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -1078,13 +1338,31 @@ class AzureadClient(ConnectorClientBase):
         Assign manager
 
         Assign a manager for a user.
+
+        Swagger operation ID: `AssignManager`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Unique identifier of a user (Ex. 'user@tennant.onmicrosoft.com'
+                or '5f6ce5c7-b521-4842-9bbe-3f6d5aa5e35b').
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/users/{quote(str(id), safe='')}/manager/$ref"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1098,11 +1376,12 @@ class AzureadClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def create_group_async(
+    def create_group(
         self,
-        input: CreateGroupInput,
+        input: CreateGroupInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1113,10 +1392,26 @@ class AzureadClient(ConnectorClientBase):
         Create group
 
         Create a group in your Microsoft Entra ID tenant.
+
+        Swagger operation ID: `CreateGroup`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/groups"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1130,6 +1425,7 @@ class AzureadClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1137,9 +1433,9 @@ class AzureadClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def check_member_groups_async(
+    def check_member_groups(
         self,
-        input: CheckMemberGroupsRequest,
+        input: CheckMemberGroupsRequest | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -1152,13 +1448,31 @@ class AzureadClient(ConnectorClientBase):
 
         If the user is a member of the given group, the result will contain the
         given id. Otherwise the result will be empty.
+
+        Swagger operation ID: `CheckMemberGroupsV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Unique identifier of a user (Ex. 'user@tennant.onmicrosoft.com'
+                or '5f6ce5c7-b521-4842-9bbe-3f6d5aa5e35b').
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v2/v1.0/users/{quote(str(id), safe='')}/checkMemberGroups"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1172,6 +1486,7 @@ class AzureadClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1179,43 +1494,86 @@ class AzureadClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_member_groups_async(
+    def list_member_groups(
         self,
-        input: GetMemberGroupsRequest,
+        input: GetMemberGroupsRequest | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[str]:
         """
         Get groups of a user
 
         Get the groups a user is a member of.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetMemberGroupsV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Unique identifier of a user (Ex. 'user@tennant.onmicrosoft.com'
+                or '5f6ce5c7-b521-4842-9bbe-3f6d5aa5e35b').
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[str]: An Azure Core pager over connector results. Consume
+                it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v2/v1.0/users/{quote(str(id), safe='')}/getMemberGroups"
         )
+        initial_request_url = request_url
+        request_body = input
 
-        response = await self.http_client.send_async(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[str]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[str]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)

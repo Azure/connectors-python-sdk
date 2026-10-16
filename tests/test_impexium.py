@@ -3,7 +3,8 @@
 """Contract tests for ImpexiumClient."""
 
 import azure.connectors.impexium as impexium_module
-from azure.connectors.impexium import ImpexiumClient, TRIGGER_OPERATIONS
+from azure.connectors.aio.impexium import ImpexiumClient
+from azure.connectors.impexium import TRIGGER_OPERATIONS
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 
 
@@ -45,16 +46,12 @@ OPERATION_CONTRACTS = {
             "get_committee_information_for_an_individual",
             "get_committee_members_by_committee_id_or_code",
             "get_course_attendees",
-            "get_individual_active_memberships",
-            "get_individual_custom_field_values",
             "get_individual_inactive_memberships",
             "get_individuals_active_subscriptions",
             "get_individuals_relationships",
             "get_list_of_active_certifications_for_an_individual",
             "get_list_of_active_certifications_for_an_organization",
             "get_nominees_by_committee",
-            "get_organization_active_memberships",
-            "get_organization_custom_field_values",
             "get_organization_inactive_memberships",
             "get_organizations_active_subscriptions",
             "get_organizations_relationships",
@@ -70,11 +67,15 @@ OPERATION_CONTRACTS = {
             "list_all_exhibits",
             "list_all_individuals",
             "list_all_open_customer_request",
+            "list_individual_active_memberships",
+            "list_individual_custom_field_values",
             "list_completed_user_tasks_by_user_id_or_email",
             "list_of_all_individual_members",
             "list_of_all_organization_members",
             "list_of_customer_relationships",
             "list_of_exams",
+            "list_organization_active_memberships",
+            "list_organization_custom_field_values",
             "list_pending_user_tasks_by_user_id_or_email",
             "list_registrants",
             "organization_get_profile",
@@ -94,13 +95,10 @@ OPERATION_CONTRACTS = {
             "add_customer_request",
             "add_email_to_individual",
             "add_email_to_organization",
-            "add_exam_scores",
             "add_individual",
             "add_nominee",
             "add_note_to_sales_opportunity",
             "add_notification_to_individual",
-            "add_or_update_a_list_of_custom_fields_per_individual",
-            "add_or_update_a_list_of_custom_fields_per_organization",
             "add_or_update_address_to_individual",
             "add_or_update_address_to_organization",
             "add_organization",
@@ -114,6 +112,9 @@ OPERATION_CONTRACTS = {
             "awards_add_award_nomination",
             "individual_add_education_credit",
             "individual_add_note",
+            "add_exam_scores",
+            "add_or_update_a_list_of_custom_fields_per_individual",
+            "add_or_update_a_list_of_custom_fields_per_organization",
             "organization_add_note",
             "register_an_individual_for_a_free_session",
             "save_relationship_for_organization",

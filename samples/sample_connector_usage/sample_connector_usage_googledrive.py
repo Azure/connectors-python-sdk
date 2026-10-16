@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Google Drive Connector SDK Sample
+Google Drive sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Google Drive connector SDK.
+This sample demonstrates how to use the Google Drive client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Google Drive connection
@@ -21,11 +21,9 @@ Usage:
 
     python sample_connector_usage_googledrive.py
 """
-
-import asyncio
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.googledrive import GoogledriveClient
 
@@ -37,25 +35,25 @@ CONNECTION_RUNTIME_URL = os.environ.get(
 )
 
 
-async def example_1_list_root_folder():
+def example_1_list_root_folder():
     """Example 1: List items in the root folder."""
     print("\n=== Example 1: List Root Folder ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with GoogledriveClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.list_root_folder_async()
+        with GoogledriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+            items = list(client.list_root_folder())
 
-            if result and "value" in result:
-                print(f"Found {len(result['value'])} items in root folder:")
-                for item in result["value"][:10]:
+            if items:
+                print(f"Found {len(items)} items in root folder:")
+                for item in items[:10]:
                     icon = "[DIR]" if item.get("IsFolder") else "[FILE]"
                     print(f"  {icon} {item.get('Name', 'N/A')}")
             else:
                 print("No root-folder items returned.")
 
 
-async def example_2_get_file_metadata_by_path():
+def example_2_get_file_metadata_by_path():
     """Example 2: Retrieve file metadata by path."""
     print("\n=== Example 2: Get Metadata by Path ===")
 
@@ -64,11 +62,11 @@ async def example_2_get_file_metadata_by_path():
         print("Set GOOGLEDRIVE_TEST_FILE_PATH, for example '/Documents/report.pdf'.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with GoogledriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with GoogledriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                metadata = await client.get_file_metadata_by_path_async(path=file_path)
+                metadata = client.get_file_metadata_by_path(path=file_path)
 
                 if metadata:
                     print(f"Name: {metadata.get('Name', 'N/A')}")
@@ -80,18 +78,18 @@ async def example_2_get_file_metadata_by_path():
                 print(f"Connector error: {ex}")
 
 
-async def example_3_create_file():
+def example_3_create_file():
     """Example 3: Upload a text file."""
     print("\n=== Example 3: Create File ===")
 
     destination_folder = os.environ.get("GOOGLEDRIVE_TEST_DEST_FOLDER", "/Documents")
     destination_name = os.environ.get("GOOGLEDRIVE_TEST_FILE_NAME", "sdk-sample.txt")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with GoogledriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with GoogledriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.create_file_async(
+                result = client.create_file(
                     input=b"Hello from azure-connectors Google Drive sample!",
                     folder_id=destination_folder,
                     name=destination_name,
@@ -105,7 +103,7 @@ async def example_3_create_file():
                 print(f"Connector error: {ex}")
 
 
-async def example_4_list_drive_items_for_sheet_selection():
+def example_4_list_drive_items_for_sheet_selection():
     """Example 4: List Drive items to locate a Google Sheet file."""
     print("\n=== Example 4: Find Google Sheet Files ===")
 
@@ -114,15 +112,15 @@ async def example_4_list_drive_items_for_sheet_selection():
         print("Set GOOGLEDRIVE_TEST_SHEET_FOLDER to a Drive folder id.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with GoogledriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with GoogledriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.list_folder_async(id=folder_id)
+                items = list(client.list_folder(id=folder_id))
 
-                if result and "value" in result:
-                    print(f"Found {len(result['value'])} Drive item(s):")
-                    for item in result["value"]:
+                if items:
+                    print(f"Found {len(items)} Drive item(s):")
+                    for item in items:
                         print(f"  - {item.get('Name', 'N/A')}")
                 else:
                     print("No Drive items returned.")
@@ -130,7 +128,7 @@ async def example_4_list_drive_items_for_sheet_selection():
                 print(f"Connector error: {ex}")
 
 
-async def main():
+def main():
     """Run all Google Drive connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: GOOGLEDRIVE_CONNECTION_URL environment variable is not set.")
@@ -139,13 +137,13 @@ async def main():
 
     print(f"Using connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
 
-    await example_1_list_root_folder()
-    await example_2_get_file_metadata_by_path()
-    await example_3_create_file()
-    await example_4_list_drive_items_for_sheet_selection()
+    example_1_list_root_folder()
+    example_2_get_file_metadata_by_path()
+    example_3_create_file()
+    example_4_list_drive_items_for_sheet_selection()
 
     print("\n=== Google Drive sample completed ===")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

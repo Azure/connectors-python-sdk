@@ -5,25 +5,39 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "ServicebusClient",
+    "CreateTopicSubscriptionInput",
+    "ObjectEntity",
+    "SendMessagesInput",
+    "ServiceBusEntity",
+    "ServiceBusMessage",
+    "Subscription",
+    "SubscriptionCorrelationFilter",
+    "SubscriptionFilter",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
 
-SendMessagesInput = List["ServiceBusMessage"]
+SendMessagesInput = List["ServiceBusMessage | Mapping[str, Any]"]
 
 
 @dataclass
@@ -32,70 +46,90 @@ class ServiceBusMessage:
     Response for When a message is received in a queue (auto-complete)
     """
 
-    content_data: Optional[str] = field(
+    content_data: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContentData"},
     )
     """Content of the message"""
-    content_type: Optional[str] = field(
+    content_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContentType"},
     )
     """Content type of the message content"""
-    properties: Optional[Dict[str, str]] = field(
+    properties: Optional[Dict[str, str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Properties"},
     )
     """Key-value pairs for each brokered property"""
-    message_id: Optional[str] = field(
+    message_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "MessageId"},
     )
     """
     This is a user-defined value that Service Bus can use to identify duplicate
     messages, if enabled.
     """
-    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
-    """Send to address"""
-    reply_to: Optional[str] = field(
+    to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "To"},
+    )
+    """Send to address"""
+    reply_to: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "ReplyTo"},
     )
     """Address of the queue to reply to"""
-    reply_to_session_id: Optional[str] = field(
+    reply_to_session_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReplyToSessionId"},
     )
     """Identifier of the session to reply to"""
-    label: Optional[str] = field(default=None, metadata={"wire_name": "Label"})
-    """Application specific label"""
-    scheduled_enqueue_time_utc: Optional[str] = field(
+    label: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Label"},
+    )
+    """Application specific label"""
+    scheduled_enqueue_time_utc: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "ScheduledEnqueueTimeUtc"},
     )
     """Date and time, in UTC, when the message will be added to the queue"""
-    session_id: Optional[str] = field(
+    session_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SessionId"},
     )
     """Identifier of the session"""
-    correlation_id: Optional[str] = field(
+    correlation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CorrelationId"},
     )
     """Identifier of the correlation"""
-    sequence_number: Optional[int] = field(
+    sequence_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SequenceNumber"},
     )
     """Identifier of the sequence number"""
-    lock_token: Optional[str] = field(
+    lock_token: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "LockToken"},
     )
     """The lock token of the message as a string."""
-    time_to_live: Optional[str] = field(
+    time_to_live: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TimeToLive"},
     )
     """
@@ -110,7 +144,7 @@ class CreateTopicSubscriptionInput:
     Create a topic subscription
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -123,8 +157,9 @@ class Subscription:
     Response for Create a topic subscription
     """
 
-    subscription_name: Optional[str] = field(
+    subscription_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SubscriptionName"},
     )
     """Subscription name."""
@@ -136,10 +171,15 @@ class ServiceBusEntity:
     Response for Get all entities
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """The entity name"""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """The entity name"""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The display name for the entity"""
@@ -151,7 +191,7 @@ class ObjectEntity:
     Response for Get metadata of a filter
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -164,8 +204,11 @@ class SubscriptionFilter:
     Definition: SubscriptionFilter
     """
 
-    correlation_filter: Optional[SubscriptionCorrelationFilter] = field(
+    correlation_filter: Optional[
+        SubscriptionCorrelationFilter | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CorrelationFilter"},
     )
 
@@ -176,45 +219,60 @@ class SubscriptionCorrelationFilter:
     Definition: SubscriptionCorrelationFilter
     """
 
-    correlation_id: Optional[str] = field(
+    correlation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CorrelationId"},
     )
     """Identifier of the correlation"""
-    label: Optional[str] = field(default=None, metadata={"wire_name": "Label"})
-    """Application specific label"""
-    message_id: Optional[str] = field(
+    label: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Label"},
+    )
+    """Application specific label"""
+    message_id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "MessageId"},
     )
     """
     This is a user-defined value that Service Bus can use to identify duplicate
     messages, if enabled.
     """
-    properties: Optional[Dict[str, str]] = field(
+    properties: Optional[Dict[str, str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Properties"},
     )
     """Key-value pairs for each brokered property"""
-    reply_to: Optional[str] = field(
+    reply_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReplyTo"},
     )
     """Address of the queue to reply to"""
-    reply_to_session_id: Optional[str] = field(
+    reply_to_session_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReplyToSessionId"},
     )
     """Identifier of the session to reply to"""
-    session_id: Optional[str] = field(
+    session_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SessionId"},
     )
     """Identifier of the session"""
-    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
-    """Send to address"""
-    content_type: Optional[str] = field(
+    to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "To"},
+    )
+    """Send to address"""
+    content_type: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "ContentType"},
     )
     """Content type of the message content"""
@@ -228,16 +286,16 @@ class ServicebusClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -248,8 +306,8 @@ class ServicebusClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -257,8 +315,8 @@ class ServicebusClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -270,7 +328,7 @@ class ServicebusClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -285,12 +343,89 @@ class ServicebusClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "servicebus"
 
-    async def send_message_async(
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
+            if next_link.startswith("?"):
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
+
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
+    def send_message(
         self,
-        input: ServiceBusMessage,
+        input: ServiceBusMessage | Mapping[str, Any],
         entity_name: str,
-        system_properties: Optional[str] = None,
         *,
+        system_properties: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -300,6 +435,26 @@ class ServicebusClient(ConnectorClientBase):
         Send message
 
         This operation sends a message to a queue or topic.
+
+        Swagger operation ID: `SendMessage`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            entity_name: Name of the queue or topic.
+            system_properties: System properties - None or Run Details. Run
+                Details will add run metadata property details as custom
+                properties in the message.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -314,7 +469,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -328,14 +483,15 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def send_messages_async(
+    def send_messages(
         self,
         input: SendMessagesInput,
         entity_name: str,
-        system_properties: Optional[str] = None,
         *,
+        system_properties: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -345,6 +501,25 @@ class ServicebusClient(ConnectorClientBase):
         Send one or more messages
 
         This operation sends one or more messages to a queue or topic.
+
+        Swagger operation ID: `SendMessages`.
+
+        Args:
+            input: The request body.
+            entity_name: Name of the queue or topic.
+            system_properties: System properties - None or Run Details. Run
+                Details will add run metadata property details as custom
+                properties in the message.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -361,7 +536,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -375,15 +550,16 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def complete_message_in_queue_async(
+    def complete_message_in_queue(
         self,
         queue_name: str,
         lock_token: str,
+        *,
         queue_type: Optional[str] = None,
         session_id: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -393,6 +569,24 @@ class ServicebusClient(ConnectorClientBase):
         Complete the message in a queue
 
         The operation completes a message in a queue.
+
+        Swagger operation ID: `CompleteMessageInQueue`.
+
+        Args:
+            queue_name: Name of the queue.
+            lock_token: Lock token of the message to complete.
+            queue_type: Queue type - Main or DeadLetter.
+            session_id: Session id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -418,7 +612,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -432,15 +626,16 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def abandon_message_in_queue_async(
+    def abandon_message_in_queue(
         self,
         queue_name: str,
         lock_token: str,
+        *,
         queue_type: Optional[str] = None,
         session_id: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -450,6 +645,24 @@ class ServicebusClient(ConnectorClientBase):
         Abandon the message in a queue
 
         The operation abandons a message in a queue.
+
+        Swagger operation ID: `AbandonMessageInQueue`.
+
+        Args:
+            queue_name: Name of the queue.
+            lock_token: Lock token of the message to abandon.
+            queue_type: Queue type - Main or DeadLetter.
+            session_id: Session id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -475,7 +688,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -489,15 +702,16 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_deferred_message_from_queue_async(
+    def get_deferred_message_from_queue(
         self,
         queue_name: str,
         sequence_number: int,
+        *,
         queue_type: Optional[str] = None,
         session_id: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -507,6 +721,24 @@ class ServicebusClient(ConnectorClientBase):
         Get deferred message from a queue
 
         The operation gets a deferred message from a queue.
+
+        Swagger operation ID: `GetDeferredMessageFromQueue`.
+
+        Args:
+            queue_name: Name of the queue.
+            sequence_number: Sequence number of message.
+            queue_type: Queue type - Main or DeadLetter.
+            session_id: Session id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -532,7 +764,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -546,6 +778,7 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -553,13 +786,13 @@ class ServicebusClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def defer_message_in_queue_async(
+    def defer_message_in_queue(
         self,
         queue_name: str,
         lock_token: str,
+        *,
         queue_type: Optional[str] = None,
         session_id: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -569,6 +802,24 @@ class ServicebusClient(ConnectorClientBase):
         Defer the message in a queue
 
         The operation defers a message in a queue.
+
+        Swagger operation ID: `DeferMessageInQueue`.
+
+        Args:
+            queue_name: Name of the queue.
+            lock_token: Lock token of the message to defer.
+            queue_type: Queue type - Main or DeadLetter.
+            session_id: Session id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -594,7 +845,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -608,16 +859,17 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def dead_letter_message_in_queue_async(
+    def dead_letter_message_in_queue(
         self,
         queue_name: str,
         lock_token: str,
+        *,
         session_id: Optional[str] = None,
         dead_letter_reason: Optional[str] = None,
         dead_letter_error_description: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -627,6 +879,25 @@ class ServicebusClient(ConnectorClientBase):
         Dead-letter the message in a queue
 
         The operation moves the message to the Dead-Letter Queue.
+
+        Swagger operation ID: `DeadLetterMessageInQueue`.
+
+        Args:
+            queue_name: Name of the queue.
+            lock_token: Lock token of the message to dead-letter.
+            session_id: Session id.
+            dead_letter_reason: Dead letter reason.
+            dead_letter_error_description: Dead letter error description.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -657,7 +928,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -671,14 +942,15 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def renew_lock_on_message_in_queue_async(
+    def renew_lock_on_message_in_queue(
         self,
         queue_name: str,
         lock_token: str,
-        queue_type: Optional[str] = None,
         *,
+        queue_type: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -688,6 +960,23 @@ class ServicebusClient(ConnectorClientBase):
         Renew lock on the message in a queue
 
         The operation renews lock on a message in a queue.
+
+        Swagger operation ID: `RenewLockOnMessageInQueue`.
+
+        Args:
+            queue_name: Name of the queue.
+            lock_token: Lock token of the message to renew lock.
+            queue_type: Queue type - Main or DeadLetter.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -708,7 +997,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -722,25 +1011,49 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_messages_from_queue_with_peek_lock_async(
+    def list_messages_from_queue_with_peek_lock(
         self,
         queue_name: str,
+        *,
         max_message_count: Optional[int] = None,
         queue_type: Optional[str] = None,
         session_id: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get messages from a queue (peek-lock)
 
         The operation receives messages from a queue with peek-lock. If maximum
         message count is not provided, it reads 20 messages.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetMessagesFromQueueWithPeekLock`.
+
+        Args:
+            queue_name: Name of the queue.
+            max_message_count: The maximum number of messages to return in the
+                batch.
+            queue_type: Queue type - Main or DeadLetter.
+            session_id: Session id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -767,29 +1080,50 @@ class ServicebusClient(ConnectorClientBase):
             query_params.append(f"sessionId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def close_session_in_queue_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def close_session_in_queue(
         self,
         queue_name: str,
         session_id: str,
@@ -803,6 +1137,22 @@ class ServicebusClient(ConnectorClientBase):
         Close a session in a queue
 
         The operation closes a session in a queue.
+
+        Swagger operation ID: `CloseSessionInQueue`.
+
+        Args:
+            queue_name: Name of a queue.
+            session_id: Session id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -812,7 +1162,7 @@ class ServicebusClient(ConnectorClientBase):
             f"/close"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -826,9 +1176,10 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def renew_lock_on_session_in_queue_async(
+    def renew_lock_on_session_in_queue(
         self,
         queue_name: str,
         session_id: str,
@@ -842,6 +1193,22 @@ class ServicebusClient(ConnectorClientBase):
         Renew lock on the session in a queue
 
         The operation renews a session in a queue.
+
+        Swagger operation ID: `RenewLockOnSessionInQueue`.
+
+        Args:
+            queue_name: Name of the queue.
+            session_id: Session id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -851,7 +1218,7 @@ class ServicebusClient(ConnectorClientBase):
             f"/renewlock"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -865,16 +1232,17 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def complete_message_in_topic_async(
+    def complete_message_in_topic(
         self,
         topic_name: str,
         subscription_name: str,
         lock_token: str,
+        *,
         subscription_type: Optional[str] = None,
         session_id: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -884,6 +1252,25 @@ class ServicebusClient(ConnectorClientBase):
         Complete the message in a topic subscription
 
         The operation completes a message in a topic subscription.
+
+        Swagger operation ID: `CompleteMessageInTopic`.
+
+        Args:
+            topic_name: Name of the topic.
+            subscription_name: Name of the topic subscription.
+            lock_token: Lock token of the message to complete.
+            subscription_type: Subscription type - Main or DeadLetter.
+            session_id: Session id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -911,7 +1298,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -925,16 +1312,17 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def abandon_message_in_topic_async(
+    def abandon_message_in_topic(
         self,
         topic_name: str,
         subscription_name: str,
         lock_token: str,
+        *,
         subscription_type: Optional[str] = None,
         session_id: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -944,6 +1332,25 @@ class ServicebusClient(ConnectorClientBase):
         Abandon the message in a topic subscription
 
         The operation abandons a message in a topic subscription.
+
+        Swagger operation ID: `AbandonMessageInTopic`.
+
+        Args:
+            topic_name: Name of the topic.
+            subscription_name: Name of the topic subscription.
+            lock_token: Lock token of the message to abandon.
+            subscription_type: Subscription type - Main or DeadLetter.
+            session_id: Session id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -971,7 +1378,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -985,16 +1392,17 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_deferred_message_from_topic_async(
+    def get_deferred_message_from_topic(
         self,
         topic_name: str,
         subscription_name: str,
         sequence_number: int,
+        *,
         subscription_type: Optional[str] = None,
         session_id: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1004,6 +1412,25 @@ class ServicebusClient(ConnectorClientBase):
         Get deferred message from a topic subscription
 
         The operation gets a deferred message from a topic subscription.
+
+        Swagger operation ID: `GetDeferredMessageFromTopic`.
+
+        Args:
+            topic_name: Name of the topic.
+            subscription_name: Name of the topic subscription.
+            sequence_number: Sequence number of message.
+            subscription_type: Queue type - Main or DeadLetter.
+            session_id: Session id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1031,7 +1458,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1045,6 +1472,7 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1052,14 +1480,14 @@ class ServicebusClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def defer_message_in_topic_async(
+    def defer_message_in_topic(
         self,
         topic_name: str,
         subscription_name: str,
         lock_token: str,
+        *,
         subscription_type: Optional[str] = None,
         session_id: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1069,6 +1497,25 @@ class ServicebusClient(ConnectorClientBase):
         Defer the message in a topic subscription
 
         The operation defers a message in a topic subscription.
+
+        Swagger operation ID: `DeferMessageInTopic`.
+
+        Args:
+            topic_name: Name of the topic.
+            subscription_name: Name of the topic subscription.
+            lock_token: Lock token of the message to defer.
+            subscription_type: Subscription type - Main or DeadLetter.
+            session_id: Session id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1096,7 +1543,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1110,17 +1557,18 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def dead_letter_message_in_topic_async(
+    def dead_letter_message_in_topic(
         self,
         topic_name: str,
         subscription_name: str,
         lock_token: str,
+        *,
         session_id: Optional[str] = None,
         dead_letter_reason: Optional[str] = None,
         dead_letter_error_description: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1130,6 +1578,26 @@ class ServicebusClient(ConnectorClientBase):
         Dead-letter the message in a topic subscription
 
         The operation moves the message to the topic Dead-Letter Queue.
+
+        Swagger operation ID: `DeadLetterMessageInTopic`.
+
+        Args:
+            topic_name: Name of the topic.
+            subscription_name: Name of the topic subscription.
+            lock_token: Lock token of the message to dead-letter.
+            session_id: Session id.
+            dead_letter_reason: Dead letter reason.
+            dead_letter_error_description: Dead letter error description.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1162,7 +1630,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1176,15 +1644,16 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def renew_lock_on_message_in_topic_async(
+    def renew_lock_on_message_in_topic(
         self,
         topic_name: str,
         subscription_name: str,
         lock_token: str,
-        subscription_type: Optional[str] = None,
         *,
+        subscription_type: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1194,6 +1663,24 @@ class ServicebusClient(ConnectorClientBase):
         Renew lock on the message in a topic subscription
 
         The operation renews lock on a message in a topic subscription.
+
+        Swagger operation ID: `RenewLockOnMessageInTopic`.
+
+        Args:
+            topic_name: Name of the topic.
+            subscription_name: Name of the topic subscription.
+            lock_token: Lock token of the message to renew lock.
+            subscription_type: Subscription type - Main or DeadLetter.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1216,7 +1703,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1230,15 +1717,16 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def create_topic_subscription_async(
+    def create_topic_subscription(
         self,
-        input: CreateTopicSubscriptionInput,
+        input: CreateTopicSubscriptionInput | Mapping[str, Any],
         topic_name: str,
         subscription_name: str,
-        subscription_filter_type: Optional[str] = None,
         *,
+        subscription_filter_type: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1248,6 +1736,25 @@ class ServicebusClient(ConnectorClientBase):
         Create a topic subscription
 
         The operation creates a topic subscription.
+
+        Swagger operation ID: `CreateTopicSubscription`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            topic_name: Name of the topic.
+            subscription_name: Name of the topic subscription.
+            subscription_filter_type: Filter type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1264,7 +1771,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1278,6 +1785,7 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1285,7 +1793,7 @@ class ServicebusClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_topic_subscription_async(
+    def delete_topic_subscription(
         self,
         topic_name: str,
         subscription_name: str,
@@ -1299,6 +1807,22 @@ class ServicebusClient(ConnectorClientBase):
         Delete a topic subscription
 
         The operation deletes a topic subscription.
+
+        Swagger operation ID: `DeleteTopicSubscription`.
+
+        Args:
+            topic_name: Name of the topic.
+            subscription_name: Name of the topic subscription.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1307,7 +1831,7 @@ class ServicebusClient(ConnectorClientBase):
             f"/{quote(str(subscription_name), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1321,27 +1845,52 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_messages_from_topic_with_peek_lock_async(
+    def list_messages_from_topic_with_peek_lock(
         self,
         topic_name: str,
         subscription_name: str,
+        *,
         max_message_count: Optional[int] = None,
         subscription_type: Optional[str] = None,
         session_id: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get messages from a topic subscription (peek-lock)
 
         The operation receives messages from a topic subscription with
         peek-lock. If maximum message count is not provided, it reads 20
         messages.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetMessagesFromTopicWithPeekLock`.
+
+        Args:
+            topic_name: Name of the topic.
+            subscription_name: Name of the topic subscription.
+            max_message_count: The maximum number of messages to return in the
+                batch.
+            subscription_type: Subscription type - Main or DeadLetter.
+            session_id: Session id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1370,29 +1919,50 @@ class ServicebusClient(ConnectorClientBase):
             query_params.append(f"sessionId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def close_session_in_topic_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def close_session_in_topic(
         self,
         topic_name: str,
         subscription_name: str,
@@ -1407,6 +1977,23 @@ class ServicebusClient(ConnectorClientBase):
         Close a session in the topic
 
         The operation closes a session in the topic.
+
+        Swagger operation ID: `CloseSessionInTopic`.
+
+        Args:
+            topic_name: Name of the topic.
+            subscription_name: Name of the topic subscription.
+            session_id: Session id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1418,7 +2005,7 @@ class ServicebusClient(ConnectorClientBase):
             f"/close"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1432,9 +2019,10 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def renew_lock_on_session_in_topic_async(
+    def renew_lock_on_session_in_topic(
         self,
         topic_name: str,
         subscription_name: str,
@@ -1449,6 +2037,23 @@ class ServicebusClient(ConnectorClientBase):
         Renew lock on the session in a topic subscription
 
         The operation renews a session in a topic subscription.
+
+        Swagger operation ID: `RenewLockOnSessionInTopic`.
+
+        Args:
+            topic_name: Name of the topic.
+            subscription_name: Name of the topic subscription.
+            session_id: Session id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1460,7 +2065,7 @@ class ServicebusClient(ConnectorClientBase):
             f"/renewlock"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1474,190 +2079,386 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_entities_async(
+    def list_entities(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get all entities
 
         This operation gets all queues and topics in the Service Bus namespace.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetEntities`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/entities"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_system_properties_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_system_properties(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[str]:
         """
         Get the list of system properties
 
         This operation gets list of properties.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetSystemProperties`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[str]: An Azure Core pager over connector results. Consume
+                it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/systemproperties"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_queues_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[str]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[str]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_queues(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[str]:
         """
         Get all queues
 
         This operation gets all queues in the Service Bus namespace.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetQueues`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[str]: An Azure Core pager over connector results. Consume
+                it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/queues"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_session_options_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[str]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[str]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_session_options(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[str]:
         """
         Get session options
 
         This operation gets the list of options for session handling - None,
         Next available.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetSessionOptions`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[str]: An Azure Core pager over connector results. Consume
+                it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/sessionoptions"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_topics_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[str]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[str]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_topics(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[str]:
         """
         Get all topics
 
         This operation gets all topics in the Service Bus namespace.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetTopics`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[str]: An Azure Core pager over connector results. Consume
+                it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/topics"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_subscriptions_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[str]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[str]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_subscriptions(
         self,
         topic_name: str,
         *,
@@ -1665,12 +2466,31 @@ class ServicebusClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[str]:
         """
         Get the subscriptions for a topic
 
         This operation gets the list of subscriptions for a topic in the
         Service Bus namespace.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
+
+        Swagger operation ID: `GetSubscriptions`.
+
+        Args:
+            topic_name: Topic name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[str]: An Azure Core pager over connector results. Consume
+                it with `for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1678,29 +2498,50 @@ class ServicebusClient(ConnectorClientBase):
             f"/{quote(quote(str(topic_name), safe=''), safe='')}"
             f"/subscriptions"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_subscription_filter_async(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[str]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[str]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_subscription_filter(
         self,
         subscription_filter_type: str,
         *,
@@ -1713,6 +2554,21 @@ class ServicebusClient(ConnectorClientBase):
         Get metadata of a filter
 
         Get metadata of a filter.
+
+        Swagger operation ID: `GetSubscriptionFilterV2`.
+
+        Args:
+            subscription_filter_type: Subscription filter type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/subscriptionfilterV2"
         query_params = []
@@ -1723,7 +2579,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1737,6 +2593,7 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
