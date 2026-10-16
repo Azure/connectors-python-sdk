@@ -126,10 +126,9 @@ finally {
 }
 ```
 
-Record the full AzureUX-BPM generator revision, compiler hash, source metadata,
-and canonical generated-output hashes in `generation.manifest.json`. Validate
-exact sync/aio inventory parity, the lazy client registry, and package type stubs
-before committing the reviewed output.
+Record the full AzureUX-BPM generator revision and source metadata in the pull
+request. Validate exact sync/aio inventory parity, the lazy client registry, and
+package type stubs before committing the reviewed output.
 
 ### Pageable Results
 

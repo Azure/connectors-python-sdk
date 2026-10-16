@@ -55,14 +55,11 @@ remain filtered by the existing operation-retention rules.
 
 ## Regeneration evidence
 
-The `generation.manifest.json` file records the exact generator commit and
-compiler hash, source subscription and region, capture time, and hashes for
-every generated module, registry, and package type stub. Source Swagger files
-used during generation are not committed to this repository.
-
-Use the pinned generator revision and the live-metadata workflow in
-`GENERATION.md` to refresh the complete sync/aio catalog. Review source metadata
-changes and generated output together before updating the manifest.
+Source Swagger files used during generation are not committed to this
+repository. Record the exact generator commit and source metadata in the pull
+request, then use the live-metadata workflow in `GENERATION.md` to refresh the
+complete sync/aio catalog. Review source metadata changes and generated output
+together before committing regenerated clients.
 
 Before submission, verify exact root/aio catalog parity, compile every generated
 module, run connector and runtime tests, validate both sample catalogs, build

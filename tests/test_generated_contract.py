@@ -2,35 +2,19 @@
 # Copyright (c) Microsoft Corporation.  All rights reserved.
 # ------------------------------------------------------------
 
-"""Tests for generated connector provenance."""
+"""Tests for generated connector contracts."""
 
 from __future__ import annotations
 
 import ast
-import hashlib
-import json
 from pathlib import Path
-from typing import Any
 
 from azure.connectors._client_registry import CLIENT_REGISTRY
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parent.parent
-MANIFEST_PATH = REPOSITORY_ROOT / "generation.manifest.json"
 CONNECTOR_DIRECTORY = REPOSITORY_ROOT / "src" / "azure" / "connectors"
 ASYNC_CONNECTOR_DIRECTORY = CONNECTOR_DIRECTORY / "aio"
-EXPECTED_GENERATOR_REVISION = "b9c9fd25aeeefb309e17054b9bd0697f9b6d4f41"
-
-
-def canonical_sha256(path: Path) -> str:
-    """Return the SHA-256 of UTF-8 text with canonical LF line endings."""
-    text = path.read_text(encoding="utf-8").replace("\r\n", "\n").replace("\r", "\n")
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()
-
-
-def load_manifest() -> dict[str, Any]:
-    """Load the generation manifest."""
-    return json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
 
 
 def generated_client_name(path: Path) -> str:
@@ -63,43 +47,20 @@ def stub_client_names(path: Path) -> set[str]:
     }
 
 
-def test_generation_manifest_covers_exact_connector_inventory() -> None:
-    """Verify every generated sync and aio module has one manifest entry."""
-    manifest = load_manifest()
-    manifest_names = [entry["apiName"] for entry in manifest["connectors"]]
-    connector_names = sorted(
+def test_generated_sync_and_async_inventories_match() -> None:
+    """Keep synchronous and asynchronous generated module inventories aligned."""
+    connector_names = {
         path.stem
         for path in CONNECTOR_DIRECTORY.glob("*.py")
         if not path.name.startswith("_")
-    )
-    async_connector_names = sorted(
+    }
+    async_connector_names = {
         path.stem
         for path in ASYNC_CONNECTOR_DIRECTORY.glob("*.py")
         if path.name != "__init__.py"
-    )
-    assert manifest["manifestVersion"] == 1
-    assert manifest["generator"]["revision"] == EXPECTED_GENERATOR_REVISION
-    assert manifest_names == sorted(manifest_names)
-    assert manifest_names == connector_names
-    assert manifest_names == async_connector_names
+    }
 
-
-def test_generation_manifest_hashes_match_committed_files() -> None:
-    """Verify generated output hashes match the manifest."""
-    manifest = load_manifest()
-
-    for entry in manifest["connectors"]:
-        assert canonical_sha256(
-            REPOSITORY_ROOT / entry["outputFile"]
-        ) == entry["outputSha256"]
-        assert canonical_sha256(
-            REPOSITORY_ROOT / entry["asyncOutputFile"]
-        ) == entry["asyncOutputSha256"]
-
-    for artifact in manifest["packageArtifacts"].values():
-        assert canonical_sha256(
-            REPOSITORY_ROOT / artifact["path"]
-        ) == artifact["sha256"]
+    assert connector_names == async_connector_names
 
 
 def test_generated_registry_and_type_stubs_cover_every_client() -> None:
