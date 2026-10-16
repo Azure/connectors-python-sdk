@@ -24,16 +24,16 @@ def main() -> None:
 
     with DefaultAzureCredential() as credential:
         with ExcelonlineClient(connection_url, credential) as client:
-            worksheets = client.list_all_worksheets(
+            worksheets = list(client.list_all_worksheets(
                 drive=drive_id,
                 file=file_id,
-            )
+            ))
             print("worksheets", worksheets)
 
-            tables = client.list_tables(
+            tables = list(client.list_tables(
                 drive=drive_id,
                 file=file_id,
-            )
+            ))
             print("tables", tables)
 
             new_sheet = client.create_worksheet(

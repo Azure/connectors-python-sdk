@@ -45,9 +45,7 @@ def example_1_list_calendars():
     with DefaultAzureCredential() as credential:
 
         with GooglecalendarClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = client.list_calendars(min_access_role="reader")
-
-            items = result.get("items", []) if result else []
+            items = list(client.list_calendars(min_access_role="reader"))
             print(f"Found {len(items)} calendar(s).")
             for calendar in items[:10]:
                 print(f"  - {calendar.get('summary', 'N/A')} ({calendar.get('id', 'N/A')})")
@@ -65,9 +63,7 @@ def example_2_list_events():
     with DefaultAzureCredential() as credential:
 
         with GooglecalendarClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = client.list_events(calendar_id=calendar_id)
-
-            events = result.get("items", []) if result else []
+            events = list(client.list_events(calendar_id=calendar_id))
             print(f"Found {len(events)} event(s) in calendar '{calendar_id}'.")
             for event in events[:10]:
                 print(f"  - {event.get('summary', 'N/A')} ({event.get('id', 'N/A')})")
@@ -117,12 +113,11 @@ def example_4_list_events_for_polling():
 
         with GooglecalendarClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.list_events(
+                events = list(client.list_events(
                     calendar_id=calendar_id,
                     time_min="2026-07-09T00:00:00Z",
                     time_max="2026-07-10T00:00:00Z",
-                )
-                events = result.get("items", []) if result else []
+                ))
                 print(f"Time-window query returned {len(events)} event(s).")
                 print("Persist event IDs and update times to implement change polling.")
             except ConnectorException as ex:

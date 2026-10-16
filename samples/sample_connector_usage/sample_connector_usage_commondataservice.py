@@ -59,11 +59,11 @@ def example_1_list_datasets():
 
         with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.list_data_sets()
+                datasets = list(client.list_data_sets())
 
-                if result and result.get("value"):
-                    print(f"Found {len(result['value'])} datasets:")
-                    for dataset in result["value"][:5]:
+                if datasets:
+                    print(f"Found {len(datasets)} datasets:")
+                    for dataset in datasets[:5]:
                         print(f"  - {dataset.get('Name', dataset.get('DisplayName', 'N/A'))}")
                 else:
                     print("No datasets found")

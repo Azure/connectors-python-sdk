@@ -50,14 +50,14 @@ async def example_1_get_outlook_categories():
             try:
                 categories = [item async for item in client.list_outlook_category_names()]
 
-                if categories and 'value' in categories:
-                    print(f"Found {len(categories['value'])} Outlook categories:")
-                    for category in categories['value'][:5]:
+                if categories:
+                    print(f"Found {len(categories)} Outlook categories:")
+                    for category in categories[:5]:
                         display_name = category.get('DisplayName', 'Unknown')
                         color = category.get('Color', 'N/A')
                         print(f"  - {display_name} (Color: {color})")
                 else:
-                    print("No categories found or unexpected response format.")
+                    print("No categories found.")
 
             except ConnectorException as ex:
                 print(f"Connector error: {ex}")
@@ -104,9 +104,9 @@ async def example_3_get_emails():
             try:
                 emails = [item async for item in client.list_emails()]
 
-                if emails and 'value' in emails:
-                    print(f"Found {len(emails['value'])} emails:")
-                    for email in emails['value']:
+                if emails:
+                    print(f"Found {len(emails)} emails:")
+                    for email in emails:
                         subject = email.get('Subject', 'No Subject')
                         from_addr = email.get('From', 'Unknown')
                         received = email.get('DateTimeReceived', 'Unknown')
@@ -114,7 +114,7 @@ async def example_3_get_emails():
                         print(f"    From: {from_addr}")
                         print(f"    Received: {received}")
                 else:
-                    print("No emails found or unexpected response format.")
+                    print("No emails found.")
 
             except ConnectorException as ex:
                 print(f"Connector error: {ex}")

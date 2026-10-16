@@ -30,8 +30,7 @@ async def main() -> None:
                 feed_url=feed_url,
                 since_property="PublishDate",
             )]
-            values = (latest_items or {}).get("value", [])
-            print(f"Polling query returned {len(values)} item(s).")
+            print(f"Polling query returned {len(latest_items)} item(s).")
 
 
 if __name__ == "__main__":

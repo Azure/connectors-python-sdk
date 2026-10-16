@@ -19,7 +19,7 @@ def main() -> None:
     with DefaultAzureCredential() as credential:
         try:
             with TypeformClient(CONNECTION_RUNTIME_URL, credential) as client:
-                forms = client.list_forms()
+                forms = list(client.list_forms())
                 print(f"Forms: {forms}")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")

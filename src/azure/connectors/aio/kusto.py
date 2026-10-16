@@ -189,6 +189,7 @@ class KustoClient(ConnectorClientBase):
             ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="location",
                 timeout=timeout,
                 headers=headers,
@@ -263,6 +264,7 @@ class KustoClient(ConnectorClientBase):
             ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="location",
                 timeout=timeout,
                 headers=headers,
@@ -336,6 +338,7 @@ class KustoClient(ConnectorClientBase):
             ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="location",
                 timeout=timeout,
                 headers=headers,
@@ -409,6 +412,7 @@ class KustoClient(ConnectorClientBase):
             ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="location",
                 timeout=timeout,
                 headers=headers,
@@ -483,6 +487,7 @@ class KustoClient(ConnectorClientBase):
             ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="location",
                 timeout=timeout,
                 headers=headers,

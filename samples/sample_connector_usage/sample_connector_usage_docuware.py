@@ -43,11 +43,11 @@ def example_1_get_file_cabinets():
 
         with DocuwareClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.list_file_cabinets(
+                file_cabinets = list(client.list_file_cabinets(
                     file_cabinet_type="<file-cabinet-type>",
-                )
+                ))
 
-                print(f"File cabinets result: {result}")
+                print(f"File cabinets result: {file_cabinets}")
 
             except ConnectorException as ex:
                 print(f"Connector error: {ex}")

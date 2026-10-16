@@ -19,7 +19,7 @@ def main() -> None:
 
     with DefaultAzureCredential() as credential:
         with FtpClient(connection_url, credential) as client:
-            root_listing = client.list_root_folder()
+            root_listing = list(client.list_root_folder())
             print("root listing", root_listing)
 
             created = client.create_file(
@@ -29,7 +29,7 @@ def main() -> None:
             )
             print("created file", created)
 
-            folder_items = client.list_folder(id=folder_path)
+            folder_items = list(client.list_folder(id=folder_path))
             print("folder items available for polling", folder_items)
 
 

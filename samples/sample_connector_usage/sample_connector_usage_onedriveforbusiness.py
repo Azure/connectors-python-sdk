@@ -17,8 +17,7 @@ def example_list_root_folder() -> None:
     with DefaultAzureCredential() as credential:
 
         with OnedriveforbusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = client.list_root_folder()
-            values = result.get("value", []) if result else []
+            values = list(client.list_root_folder())
             print(f"Found {len(values)} items in root folder.")
 
 

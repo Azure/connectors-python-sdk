@@ -46,14 +46,13 @@ def example_2_list_issues(repository_owner: str, repository_name: str) -> None:
 
     with DefaultAzureCredential() as credential:
         with GithubClient(CONNECTION_RUNTIME_URL, credential) as client:
-            issues = client.list_issues(
+            issue_list = list(client.list_issues(
                 repository_owner=repository_owner,
                 repository_name=repository_name,
                 state="open",
                 per_page=5,
-            )
+            ))
 
-            issue_list = issues if isinstance(issues, list) else []
             print(f"Found {len(issue_list)} issues")
             for issue in issue_list[:5]:
                 print(f"  - #{issue.get('number')}: {issue.get('title')}")

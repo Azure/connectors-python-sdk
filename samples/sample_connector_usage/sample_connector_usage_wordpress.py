@@ -14,7 +14,7 @@ def list_sites() -> None:
     """List WordPress sites available to the connection."""
     with DefaultAzureCredential() as credential:
         with WordpressClient(CONNECTION_RUNTIME_URL, credential) as client:
-            sites = client.list_sites()
+            sites = list(client.list_sites())
             print(f"Sites: {sites}")
 
 

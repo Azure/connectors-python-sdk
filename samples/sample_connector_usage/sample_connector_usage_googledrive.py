@@ -42,11 +42,11 @@ def example_1_list_root_folder():
     with DefaultAzureCredential() as credential:
 
         with GoogledriveClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = client.list_root_folder()
+            items = list(client.list_root_folder())
 
-            if result and "value" in result:
-                print(f"Found {len(result['value'])} items in root folder:")
-                for item in result["value"][:10]:
+            if items:
+                print(f"Found {len(items)} items in root folder:")
+                for item in items[:10]:
                     icon = "[DIR]" if item.get("IsFolder") else "[FILE]"
                     print(f"  {icon} {item.get('Name', 'N/A')}")
             else:
@@ -116,11 +116,11 @@ def example_4_list_drive_items_for_sheet_selection():
 
         with GoogledriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.list_folder(id=folder_id)
+                items = list(client.list_folder(id=folder_id))
 
-                if result and "value" in result:
-                    print(f"Found {len(result['value'])} Drive item(s):")
-                    for item in result["value"]:
+                if items:
+                    print(f"Found {len(items)} Drive item(s):")
+                    for item in items:
                         print(f"  - {item.get('Name', 'N/A')}")
                 else:
                     print("No Drive items returned.")

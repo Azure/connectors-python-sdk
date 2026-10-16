@@ -36,8 +36,7 @@ def example_1_list_tasks() -> None:
 
     with DefaultAzureCredential() as credential:
         with InsightlyClient(CONNECTION_RUNTIME_URL, credential) as client:
-            response = client.list_tasks()
-            tasks = response.get("tasks", []) if response else []
+            tasks = list(client.list_tasks())
 
             print(f"Found {len(tasks)} tasks")
             for task in tasks[:5]:
@@ -50,8 +49,7 @@ def example_2_list_contacts() -> None:
 
     with DefaultAzureCredential() as credential:
         with InsightlyClient(CONNECTION_RUNTIME_URL, credential) as client:
-            response = client.list_contacts()
-            contacts = response.get("contacts", []) if response else []
+            contacts = list(client.list_contacts())
 
             print(f"Found {len(contacts)} contacts")
             for contact in contacts[:5]:

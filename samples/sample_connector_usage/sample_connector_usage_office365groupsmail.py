@@ -29,8 +29,8 @@ def main() -> None:
             conversation_count = len(conversations)
             print(f"Found {conversation_count} conversation(s) in group '{group_id}'.")
 
-            groups = client.list_groups()
-            group_count = len((groups or {}).get("value", []))
+            groups = list(client.list_groups())
+            group_count = len(groups)
             print(f"Current user is in {group_count} Office 365 group(s).")
 
 

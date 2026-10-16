@@ -40,11 +40,11 @@ def example_1_list_root_folder():
     with DefaultAzureCredential() as credential:
 
         with BoxClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = client.list_root_folder()
+            items = list(client.list_root_folder())
 
-            if result and "value" in result:
-                print(f"Found {len(result['value'])} items in root folder:")
-                for item in result["value"][:10]:
+            if items:
+                print(f"Found {len(items)} items in root folder:")
+                for item in items[:10]:
                     icon = "[DIR]" if item.get("IsFolder") else "[FILE]"
                     print(f"  {icon} {item.get('Name', 'N/A')}")
             else:
@@ -114,8 +114,7 @@ def example_4_list_folder_for_polling():
 
         with BoxClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.list_folder(id=folder_id)
-                items = result.get("value", []) if result else []
+                items = list(client.list_folder(id=folder_id))
                 print(f"Folder listing returned {len(items)} item(s).")
                 print("Persist item IDs or timestamps to implement polling with this action client.")
             except ConnectorException as ex:

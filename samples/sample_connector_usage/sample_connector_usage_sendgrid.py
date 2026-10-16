@@ -57,7 +57,7 @@ def example_2_list_recipient_lists() -> None:
 
     with DefaultAzureCredential() as credential:
         with SendgridClient(CONNECTION_RUNTIME_URL, credential) as client:
-            lists = client.list_recipient_lists()
+            lists = list(client.list_recipient_lists())
             print(f"Recipient lists: {lists}")
 
 
@@ -67,7 +67,7 @@ def example_3_list_recipients() -> None:
 
     with DefaultAzureCredential() as credential:
         with SendgridClient(CONNECTION_RUNTIME_URL, credential) as client:
-            recipients = client.list_recipients()
+            recipients = list(client.list_recipients())
             print(f"Recipients: {recipients}")
 
 
@@ -77,7 +77,7 @@ def example_4_get_bounce() -> None:
 
     with DefaultAzureCredential() as credential:
         with SendgridClient(CONNECTION_RUNTIME_URL, credential) as client:
-            bounce = client.list_bounce(email="recipient@example.com")
+            bounce = list(client.list_bounce(email="recipient@example.com"))
             print(f"Bounce: {bounce}")
 
 

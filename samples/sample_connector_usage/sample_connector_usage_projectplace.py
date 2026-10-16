@@ -40,7 +40,7 @@ def example_1_list_boards() -> None:
 
     with DefaultAzureCredential() as credential:
         with ProjectplaceClient(CONNECTION_RUNTIME_URL, credential) as client:
-            boards = client.list_boards()
+            boards = list(client.list_boards())
             print(f"Boards: {boards}")
 
 

@@ -2,12 +2,19 @@
 
 """Synchronous HTTP client for connector operations."""
 
+from __future__ import annotations
+
+import io
 import json
 import random
 import time
+from contextvars import ContextVar
+from http.client import HTTPResponse
 from importlib.metadata import PackageNotFoundError, version
+from threading import Lock
 from typing import Any, Dict, Generic, List, Mapping, Optional, TypeVar
 
+import requests
 from azure.core.credentials import AzureKeyCredential, TokenCredential
 from azure.core.exceptions import ServiceResponseTimeoutError
 from azure.core.pipeline import Pipeline
@@ -28,12 +35,21 @@ from azure.core.pipeline.policies import (
 )
 from azure.core.pipeline.transport import HttpTransport, RequestsTransport
 from azure.core.rest import HttpRequest
+from requests.adapters import HTTPAdapter
+from urllib3.exceptions import ReadTimeoutError
+from urllib3.util.retry import Retry
 
 from .exceptions import ConnectorException
 from .response import ConnectorResponseHook, ConnectorResponseSnapshot
 from .serialization import to_wire
 
 ResponseT = TypeVar("ResponseT")
+_REQUEST_DEADLINE: ContextVar[Optional[float]] = ContextVar(
+    "connector_request_deadline", default=None
+)
+_REQUEST_RESPONSES: ContextVar[Optional[List[Any]]] = ContextVar(
+    "connector_request_responses", default=None
+)
 _SAFE_RETRY_METHODS = frozenset({"GET", "HEAD", "OPTIONS", "TRACE"})
 _ALL_RETRY_METHODS = frozenset(
     {"DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT", "TRACE"}
@@ -47,6 +63,152 @@ try:
     _SDK_VERSION = version("azure-connectors")
 except PackageNotFoundError:
     _SDK_VERSION = "0.0.0"
+
+
+class _DeadlineReader(io.RawIOBase):
+    """Apply an absolute deadline before each underlying socket receive."""
+
+    def __init__(self, response_socket: Any, deadline: float) -> None:
+        """Own a socket file, but not the connection's socket itself."""
+        super().__init__()
+        self._raw: Any = None
+        self._socket = response_socket
+        self._deadline = deadline
+        self._idle_timeout = response_socket.gettimeout()
+        self._raw = response_socket.makefile("rb", buffering=0)
+
+    def readable(self) -> bool:
+        """Allow BufferedReader to consume this socket file."""
+        return True
+
+    def readinto(self, buffer: Any) -> Optional[int]:
+        """Bound each receive, including receives inside header parsing."""
+        remaining = self._deadline - time.monotonic()
+        if remaining <= 0:
+            raise TimeoutError("The connector response deadline expired.")
+        self._socket.settimeout(
+            remaining
+            if self._idle_timeout is None
+            else min(remaining, self._idle_timeout)
+        )
+        return self._raw.readinto(buffer)
+
+    def close(self) -> None:
+        """Release the socket file using normal socket makefile ownership."""
+        try:
+            if self._raw is not None:
+                self._raw.close()
+        finally:
+            super().close()
+
+
+class _DeadlineHTTPResponse(HTTPResponse):
+    """Include status lines, headers and body framing in the read deadline."""
+
+    def __init__(self, response_socket: Any, *args: Any, **kwargs: Any) -> None:
+        """Replace only the unread socket file, preserving HTTP parsing."""
+        super().__init__(response_socket, *args, **kwargs)
+        deadline = _REQUEST_DEADLINE.get()
+        if deadline is not None:
+            original_file = self.fp
+            try:
+                self.fp = io.BufferedReader(_DeadlineReader(response_socket, deadline))
+            finally:
+                if original_file is not None:
+                    original_file.close()
+
+
+class _DeadlineAdapter(HTTPAdapter):
+    """Use deadline-aware response parsing without changing global pools."""
+
+    def __init__(self) -> None:
+        """Leave retries to Azure Core and serialize proxy pool creation."""
+        self._proxy_lock = Lock()
+        super().__init__(
+            max_retries=Retry(total=False, redirect=False, raise_on_status=False)
+        )
+
+    @staticmethod
+    def _configure_pools(manager: Any) -> None:
+        """Preserve TLS and proxy connection behavior in instance-local subclasses."""
+        pool_classes = {}
+        for scheme, pool_class in manager.pool_classes_by_scheme.items():
+            connection_class = type(
+                f"_Deadline{pool_class.ConnectionCls.__name__}",
+                (pool_class.ConnectionCls,),
+                {"response_class": _DeadlineHTTPResponse},
+            )
+            pool_classes[scheme] = type(
+                f"_Deadline{pool_class.__name__}",
+                (pool_class,),
+                {"ConnectionCls": connection_class},
+            )
+        manager.pool_classes_by_scheme = pool_classes
+
+    def init_poolmanager(
+        self, connections: int, maxsize: int, block: bool = False, **kwargs: Any
+    ) -> None:
+        """Customize the adapter's own pools, not urllib3's shared registry."""
+        super().init_poolmanager(connections, maxsize, block=block, **kwargs)
+        self._configure_pools(self.poolmanager)
+
+    def proxy_manager_for(self, proxy: str, **kwargs: Any) -> Any:
+        """Apply the same parser to proxy pools without replacing proxy support."""
+        with self._proxy_lock:
+            if proxy in self.proxy_manager:
+                return self.proxy_manager[proxy]
+            manager = super().proxy_manager_for(proxy, **kwargs)
+            self._configure_pools(manager)
+            return manager
+
+
+class _DeadlineRequestsTransport(RequestsTransport):
+    """Install deadline-aware adapters only on transport-created sessions."""
+
+    def _init_session(self, session: requests.Session) -> None:
+        """Keep Azure Core environment settings and caller session ownership."""
+        super()._init_session(session)
+        for adapter in set(session.adapters.values()):
+            adapter.close()
+        adapter = _DeadlineAdapter()
+        session.mount("http://", adapter)
+        session.mount("https://", adapter)
+
+    def send(self, request: Any, **kwargs: Any) -> Any:
+        """Account for policy time and release abandoned retry responses."""
+        responses = _REQUEST_RESPONSES.get()
+        if responses:
+            responses.pop().close()
+        deadline = _REQUEST_DEADLINE.get()
+        if deadline is not None:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise ServiceResponseTimeoutError("The connector deadline expired.")
+            for option in ("connection_timeout", "read_timeout"):
+                configured = kwargs.get(option)
+                if configured is None or isinstance(configured, (int, float)):
+                    kwargs[option] = (
+                        remaining if configured is None else min(configured, remaining)
+                    )
+        response = super().send(request, **kwargs)
+        if responses is not None:
+            responses.append(response)
+        return response
+
+    def sleep(self, duration: float) -> None:
+        """Release retry responses and keep retry delays inside the deadline."""
+        responses = _REQUEST_RESPONSES.get()
+        if responses:
+            responses.pop().close()
+        deadline = _REQUEST_DEADLINE.get()
+        if deadline is not None:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise ServiceResponseTimeoutError("The connector deadline expired.")
+            if duration >= remaining:
+                super().sleep(remaining)
+                raise ServiceResponseTimeoutError("The connector deadline expired.")
+        super().sleep(duration)
 
 
 class _JitterRetryPolicy(RetryPolicy):
@@ -113,7 +275,7 @@ class ConnectorHttpClient:
         self._credential = credential
         self._timeout_seconds = timeout_seconds
         self._retry_unsafe_http_methods = retry_unsafe_http_methods
-        self._transport = transport or RequestsTransport(**kwargs)
+        self._transport = transport or _DeadlineRequestsTransport(**kwargs)
         policy_options = dict(kwargs)
         per_call_policies = self._as_policy_list(
             policy_options.pop("per_call_policies", [])
@@ -317,7 +479,12 @@ class ConnectorHttpClient:
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
     ) -> ConnectorResponseSnapshot:
-        """Send an HTTP request with the selected network timeout."""
+        """Send a request with the selected elapsed network timeout.
+
+        The owned default session bounds header and body receives. Custom
+        transports/sessions must provide their own interruptible I/O. Credential
+        and policy callbacks execute synchronously and cannot be preempted.
+        """
         is_binary_body = isinstance(body, (bytes, bytearray))
         if content_type is None:
             content_type = (
@@ -412,29 +579,27 @@ class ConnectorHttpClient:
         url: Optional[str] = None,
     ) -> ConnectorResponseSnapshot:
         """Run the pipeline and buffer its response within an optional deadline."""
-        started_at = time.monotonic()
-        pipeline_response = pipeline.run(request, **request_options)
-        http_response = pipeline_response.http_response
-        if total_timeout is None:
-            return ConnectorHttpClient._snapshot_response(http_response)
-
-        deadline = started_at + total_timeout
+        deadline = (
+            time.monotonic() + total_timeout if total_timeout is not None else None
+        )
+        deadline_token = _REQUEST_DEADLINE.set(deadline)
+        responses: List[Any] = []
+        responses_token = _REQUEST_RESPONSES.set(responses)
+        http_response = None
         try:
+            pipeline_response = pipeline.run(request, **request_options)
+            http_response = pipeline_response.http_response
+            if deadline is None:
+                return ConnectorHttpClient._snapshot_response(http_response)
+
+            assert total_timeout is not None
             response_chunks = []
-            while True:
-                remaining_timeout = deadline - time.monotonic()
-                if remaining_timeout <= 0:
+            for response_chunk in http_response.iter_bytes():
+                if time.monotonic() >= deadline:
                     raise ConnectorHttpClient._create_timeout_error(
                         url=url,
                         total_timeout=total_timeout,
                     )
-
-                response_chunk = ConnectorHttpClient._read_response_chunk(
-                    http_response,
-                    read_timeout=remaining_timeout,
-                )
-                if not response_chunk:
-                    break
                 response_chunks.append(response_chunk)
 
             if time.monotonic() >= deadline:
@@ -452,9 +617,21 @@ class ConnectorHttpClient:
                     encoding=http_response.encoding,
                 ),
             )
+        except (ReadTimeoutError, requests.exceptions.Timeout) as ex:
+            raise ServiceResponseTimeoutError(
+                message="The connector response read timed out.", error=ex
+            ) from ex
+        except requests.exceptions.ConnectionError as ex:
+            if any(isinstance(argument, ReadTimeoutError) for argument in ex.args):
+                raise ServiceResponseTimeoutError(
+                    message="The connector response read timed out.", error=ex
+                ) from ex
+            raise
         except Exception as ex:
             if (
-                time.monotonic() >= deadline
+                deadline is not None
+                and total_timeout is not None
+                and time.monotonic() >= deadline
                 and not isinstance(ex, ServiceResponseTimeoutError)
             ):
                 raise ConnectorHttpClient._create_timeout_error(
@@ -464,7 +641,16 @@ class ConnectorHttpClient:
                 ) from ex
             raise
         finally:
-            http_response.close()
+            try:
+                if http_response is not None and not any(
+                    response is http_response for response in responses
+                ):
+                    http_response.close()
+                for response in responses:
+                    response.close()
+            finally:
+                _REQUEST_RESPONSES.reset(responses_token)
+                _REQUEST_DEADLINE.reset(deadline_token)
 
     @staticmethod
     def _create_timeout_error(
@@ -481,45 +667,6 @@ class ConnectorHttpClient:
             ),
             error=error,
         )
-
-    @staticmethod
-    def _read_response_chunk(
-        http_response: Any,
-        *,
-        read_timeout: float,
-    ) -> bytes:
-        """Read one available chunk from an Azure Core Requests response."""
-        internal_response = getattr(http_response, "_internal_response", None)
-        raw_response = getattr(internal_response, "raw", None)
-        read_chunk = getattr(raw_response, "read1", None)
-        if not callable(read_chunk):
-            raise RuntimeError(
-                "The Azure Core Requests response does not expose incremental "
-                "body reads required for total timeout enforcement."
-            )
-
-        response_socket = getattr(
-            getattr(
-                getattr(
-                    getattr(raw_response, "_fp", None),
-                    "fp",
-                    None,
-                ),
-                "raw",
-                None,
-            ),
-            "_sock",
-            None,
-        )
-        set_timeout = getattr(response_socket, "settimeout", None)
-        if not callable(set_timeout):
-            raise RuntimeError(
-                "The Azure Core Requests response does not expose the active "
-                "socket required for total timeout enforcement."
-            )
-        set_timeout(read_timeout)
-
-        return read_chunk(64 * 1024, decode_content=True)
 
     @staticmethod
     def _decode_response_content(

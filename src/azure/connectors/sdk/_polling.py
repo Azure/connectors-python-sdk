@@ -6,7 +6,7 @@ import math
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from typing import Mapping, Optional
-from urllib.parse import urljoin, urlsplit
+from urllib.parse import SplitResult, urljoin, urlsplit
 
 from .response import ConnectorResponseSnapshot
 
@@ -31,21 +31,56 @@ def get_location(response: ConnectorResponseSnapshot) -> Optional[str]:
     return get_header(response.headers, "Location")
 
 
+def _split_safe_url(value: str) -> SplitResult:
+    """Reject URL spellings that HTTP transports can interpret differently."""
+    if "\\" in value or any(
+        ord(character) <= 32 or ord(character) == 127 for character in value
+    ):
+        raise ValueError(
+            "Polling URLs must not contain backslashes or control characters."
+        )
+    parsed = urlsplit(value)
+    if parsed.scheme or parsed.netloc or value.startswith("//"):
+        if (
+            parsed.scheme not in ("http", "https")
+            or not parsed.hostname
+            or "@" in parsed.netloc
+            or "%" in parsed.netloc
+        ):
+            raise ValueError(
+                "Polling URLs must use an unambiguous HTTP authority without userinfo."
+            )
+        authority = parsed.hostname
+        if ":" in authority:
+            authority = f"[{authority}]"
+        if parsed.port is not None:
+            authority += f":{parsed.port}"
+        if parsed.netloc.casefold() != authority.casefold():
+            raise ValueError("Polling URLs must use an unambiguous HTTP authority.")
+    return parsed
+
+
 def resolve_polling_url(
     polling_url: str,
     connection_runtime_url: str,
     current_polling_url: Optional[str] = None,
 ) -> str:
     """Route a connector polling URL through the authenticated runtime origin."""
+    parsed_connection = _split_safe_url(connection_runtime_url)
+    parsed_polling_url = _split_safe_url(polling_url)
+    if parsed_connection.hostname is None:
+        raise ValueError("Polling URLs must include a hostname.")
     if polling_url.startswith("/"):
         return f"{connection_runtime_url}{polling_url}"
 
-    parsed_polling_url = urlsplit(polling_url)
     if not parsed_polling_url.scheme and not parsed_polling_url.netloc:
         base_url = current_polling_url or f"{connection_runtime_url.rstrip('/')}/"
-        return urljoin(base_url, polling_url)
+        if _split_safe_url(base_url).hostname is None:
+            raise ValueError("Polling URLs must include a hostname.")
+        return resolve_polling_url(
+            urljoin(base_url, polling_url), connection_runtime_url
+        )
 
-    parsed_connection = urlsplit(connection_runtime_url)
     polling_hostname = parsed_polling_url.hostname
     connection_hostname = parsed_connection.hostname
     if polling_hostname is None or connection_hostname is None:
@@ -62,7 +97,11 @@ def resolve_polling_url(
             parsed_polling_url.scheme == parsed_connection.scheme
             and polling_port == connection_port
         ):
-            return polling_url
+            return parsed_connection._replace(
+                path=parsed_polling_url.path,
+                query=parsed_polling_url.query,
+                fragment=parsed_polling_url.fragment,
+            ).geturl()
         raise ValueError(
             "Polling URL origin must use the connection runtime scheme and port."
         )

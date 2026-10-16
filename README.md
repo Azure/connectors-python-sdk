@@ -388,7 +388,7 @@ client = Office365Client(
 )
 ```
 
-The client-level `timeout` is one total network budget for each request, including
+The client-level `timeout` sets a total network budget for each request, including
 retries, response loading, and body reads. Each generated operation also accepts
 keyword-only `timeout`, `headers`, `client_request_id`, and `response_hook`
 request controls; the operation-level `timeout` overrides that total budget for
@@ -398,8 +398,12 @@ deadlines for the selected requests.
 Root clients accept Azure Core `HttpTransport` implementations and aio clients
 accept `AsyncHttpTransport` implementations. Clients close injected transports
 through the matching lifecycle; callers retain ownership of credentials. The
-SDK enforces the total request budget across transports and applies
-transport-specific timeout options only when supported. `per_call_policies` and
+SDK applies transport-specific timeout options only when supported. For sync
+clients, the default owned Requests transport enforces network receive deadlines
+across status lines, headers, and response bodies, even when data arrives in small
+chunks. Caller-provided transports and sessions are responsible for enforcing
+their own network deadlines. Blocking credentials, policies, and callbacks must
+bound their own execution; the SDK cannot interrupt them. `per_call_policies` and
 `per_retry_policies` compose with the default or an explicit `policies` chain.
 Per-retry extensions require the matching sync or async retry policy.
 

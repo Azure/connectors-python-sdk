@@ -44,10 +44,9 @@ def example_1_list_notebooks():
 
         with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.list_notebooks()
+                notebooks = list(client.list_notebooks())
 
-                if result and "value" in result:
-                    notebooks = result["value"]
+                if notebooks:
                     print(f"Found {len(notebooks)} notebooks:")
                     for nb in notebooks[:5]:
                         print(f"  - {nb.get('fileName', 'N/A')} (key: {nb.get('key', 'N/A')})")
@@ -71,12 +70,11 @@ def example_2_list_sections():
 
         with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.list_sections_in_notebook(
+                sections = list(client.list_sections_in_notebook(
                     notebook_key=NOTEBOOK_KEY
-                )
+                ))
 
-                if result and "value" in result:
-                    sections = result["value"]
+                if sections:
                     print(f"Found {len(sections)} sections:")
                     for section in sections[:5]:
                         print(f"  - {section.get('name', 'N/A')} (id: {section.get('id', 'N/A')})")

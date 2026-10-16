@@ -55,21 +55,17 @@ def example_1_list_queues():
 
         with AzurequeuesClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.list_queues(
+                queues = list(client.list_queues(
                     storage_account_name=STORAGE_ACCOUNT
-                )
+                ))
 
-                if result:
+                if queues:
                     print(f"Queues in storage account '{STORAGE_ACCOUNT}':")
-                    # Result may be a list or dict with queue names
-                    if isinstance(result, list):
-                        for queue in result:
-                            if isinstance(queue, dict):
-                                print(f"  - {queue.get('name', queue)}")
-                            else:
-                                print(f"  - {queue}")
-                    elif isinstance(result, dict):
-                        print(f"  Response: {result}")
+                    for queue in queues:
+                        if isinstance(queue, dict):
+                            print(f"  - {queue.get('name', queue)}")
+                        else:
+                            print(f"  - {queue}")
                 else:
                     print("No queues found or empty response.")
 

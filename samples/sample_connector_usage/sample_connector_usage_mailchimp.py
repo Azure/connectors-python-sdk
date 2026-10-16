@@ -42,7 +42,7 @@ def example_1_list_campaigns() -> None:
 
     with DefaultAzureCredential() as credential:
         with MailchimpClient(CONNECTION_RUNTIME_URL, credential) as client:
-            campaigns = client.list_campaigns()
+            campaigns = list(client.list_campaigns())
             print(f"Campaigns: {campaigns}")
 
 

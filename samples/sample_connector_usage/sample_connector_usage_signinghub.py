@@ -44,12 +44,12 @@ def example_1_get_contacts():
 
         with SigninghubClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.list_contacts_get(
+                contacts = list(client.list_contacts_get(
                     record_per_page=10,
                     page_no=1,
-                )
+                ))
 
-                print(f"Contacts result: {result}")
+                print(f"Contacts result: {contacts}")
 
             except ConnectorException as ex:
                 print(f"Connector error: {ex}")

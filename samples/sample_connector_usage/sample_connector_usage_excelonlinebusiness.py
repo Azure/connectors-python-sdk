@@ -149,14 +149,13 @@ def example_3_list_workbook_comments():
 
         with ExcelonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.list_comments(
+                comments = list(client.list_comments(
                     drive=DRIVE_ID,
                     file=FILE_ID,
                     source=SOURCE_URL if SOURCE_URL else None,
-                )
+                ))
 
-                if result and "value" in result:
-                    comments = result["value"]
+                if comments:
                     print(f"Found {len(comments)} comment(s):")
                     for comment in comments[:5]:
                         comment_id = comment.get("id", "N/A")

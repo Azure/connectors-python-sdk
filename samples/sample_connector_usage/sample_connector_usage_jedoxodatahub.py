@@ -22,7 +22,7 @@ def main() -> None:
                 CONNECTION_RUNTIME_URL,
                 credential,
             ) as client:
-                databases = client.list_databases()
+                databases = list(client.list_databases())
                 print(f"Databases: {databases}")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")

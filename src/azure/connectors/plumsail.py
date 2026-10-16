@@ -1411,6 +1411,7 @@ class PlumsailClient(ConnectorClientBase):
             deserialization_callback=lambda polling_response: polling_response.content,
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -1480,6 +1481,7 @@ class PlumsailClient(ConnectorClientBase):
             deserialization_callback=lambda polling_response: polling_response.content,
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -1553,6 +1555,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -1629,6 +1632,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -1705,6 +1709,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -1779,6 +1784,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -1853,6 +1859,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -1927,6 +1934,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -1996,6 +2004,7 @@ class PlumsailClient(ConnectorClientBase):
             deserialization_callback=lambda polling_response: polling_response.content,
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -2065,6 +2074,7 @@ class PlumsailClient(ConnectorClientBase):
             deserialization_callback=lambda polling_response: polling_response.content,
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -2133,6 +2143,7 @@ class PlumsailClient(ConnectorClientBase):
             deserialization_callback=lambda polling_response: polling_response.content,
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -2201,6 +2212,7 @@ class PlumsailClient(ConnectorClientBase):
             deserialization_callback=lambda polling_response: polling_response.content,
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -2270,6 +2282,7 @@ class PlumsailClient(ConnectorClientBase):
             deserialization_callback=lambda polling_response: polling_response.content,
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -2339,6 +2352,7 @@ class PlumsailClient(ConnectorClientBase):
             deserialization_callback=lambda polling_response: polling_response.content,
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -2408,6 +2422,7 @@ class PlumsailClient(ConnectorClientBase):
             deserialization_callback=lambda polling_response: polling_response.content,
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -2490,6 +2505,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -2560,6 +2576,7 @@ class PlumsailClient(ConnectorClientBase):
             deserialization_callback=lambda polling_response: polling_response.content,
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -2635,6 +2652,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -2710,6 +2728,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -2777,6 +2796,7 @@ class PlumsailClient(ConnectorClientBase):
             deserialization_callback=lambda polling_response: polling_response.content,
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -2851,6 +2871,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -2925,6 +2946,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -2999,6 +3021,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -3074,6 +3097,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -3143,6 +3167,7 @@ class PlumsailClient(ConnectorClientBase):
             deserialization_callback=lambda polling_response: polling_response.content,
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -3226,6 +3251,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -3300,6 +3326,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -3373,6 +3400,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -3441,6 +3469,7 @@ class PlumsailClient(ConnectorClientBase):
             deserialization_callback=lambda polling_response: polling_response.content,
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -3509,6 +3538,7 @@ class PlumsailClient(ConnectorClientBase):
             deserialization_callback=lambda polling_response: polling_response.content,
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -3577,6 +3607,7 @@ class PlumsailClient(ConnectorClientBase):
             deserialization_callback=lambda polling_response: polling_response.content,
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -3654,6 +3685,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -3731,6 +3763,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -3807,6 +3840,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -3880,6 +3914,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -3953,6 +3988,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -4027,6 +4063,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -4107,6 +4144,7 @@ class PlumsailClient(ConnectorClientBase):
             deserialization_callback=lambda polling_response: polling_response.content,
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,
@@ -4188,6 +4226,7 @@ class PlumsailClient(ConnectorClientBase):
             deserialization_callback=lambda polling_response: polling_response.content,
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
+                request_url=request_url,
                 polling_header_name="Location",
                 timeout=timeout,
                 headers=headers,

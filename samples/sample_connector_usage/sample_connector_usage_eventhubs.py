@@ -180,8 +180,8 @@ def example_4_list_event_hubs():
 
         with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.list_event_hubs()
-                print(f"Event Hubs: {result}")
+                event_hubs = list(client.list_event_hubs())
+                print(f"Event Hubs: {event_hubs}")
 
             except ConnectorException as ex:
                 print(f"Connector error (status {ex.status_code}): {ex}")
@@ -201,10 +201,10 @@ def example_5_list_consumer_groups():
 
         with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.list_consumer_groups(
+                consumer_groups = list(client.list_consumer_groups(
                     event_hub_name=EVENT_HUB_NAME
-                )
-                print(f"Consumer groups for '{EVENT_HUB_NAME}': {result}")
+                ))
+                print(f"Consumer groups for '{EVENT_HUB_NAME}': {consumer_groups}")
 
             except ConnectorException as ex:
                 print(f"Connector error (status {ex.status_code}): {ex}")

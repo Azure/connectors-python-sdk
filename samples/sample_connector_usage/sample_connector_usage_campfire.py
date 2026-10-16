@@ -36,7 +36,7 @@ def example_1_list_accounts() -> None:
 
     with DefaultAzureCredential() as credential:
         with CampfireClient(CONNECTION_RUNTIME_URL, credential) as client:
-            accounts = client.list_accounts()
+            accounts = list(client.list_accounts())
             print(f"Accounts: {accounts}")
 
 
@@ -46,7 +46,7 @@ def example_2_list_rooms() -> None:
 
     with DefaultAzureCredential() as credential:
         with CampfireClient(CONNECTION_RUNTIME_URL, credential) as client:
-            rooms = client.list_rooms(account="ACCOUNT_ID")
+            rooms = list(client.list_rooms(account="ACCOUNT_ID"))
             print(f"Rooms: {rooms}")
 
 

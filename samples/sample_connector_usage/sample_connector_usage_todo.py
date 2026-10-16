@@ -36,8 +36,7 @@ def example_1_list_lists() -> list[dict]:
 
     with DefaultAzureCredential() as credential:
         with TodoClient(CONNECTION_RUNTIME_URL, credential) as client:
-            lists_response = client.list_all_todo_lists()
-            lists = lists_response.get("value", []) if lists_response else []
+            lists = list(client.list_all_todo_lists())
 
             print(f"Found {len(lists)} lists")
             for todo_list in lists[:10]:

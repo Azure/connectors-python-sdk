@@ -36,8 +36,7 @@ def example_1_list_groups() -> list[dict]:
 
     with DefaultAzureCredential() as credential:
         with PowerbiClient(CONNECTION_RUNTIME_URL, credential) as client:
-            groups_response = client.list_groups()
-            groups = groups_response.get("value", []) if groups_response else []
+            groups = list(client.list_groups())
 
             print(f"Found {len(groups)} groups")
             for group in groups[:5]:
@@ -52,8 +51,7 @@ def example_2_list_datasets(group_id: str) -> list[dict]:
 
     with DefaultAzureCredential() as credential:
         with PowerbiClient(CONNECTION_RUNTIME_URL, credential) as client:
-            datasets_response = client.list_datasets(groupid=group_id)
-            datasets = datasets_response.get("value", []) if datasets_response else []
+            datasets = list(client.list_datasets(groupid=group_id))
 
             print(f"Found {len(datasets)} datasets in group '{group_id}'")
             for dataset in datasets[:5]:

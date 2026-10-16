@@ -44,7 +44,7 @@ def example_1_get_networks():
 
         with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                networks = client.list_networks()
+                networks = list(client.list_networks())
 
                 if networks:
                     print(f"Found {len(networks)} network(s):")
@@ -68,7 +68,7 @@ def example_2_get_groups():
         with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Get only groups the user belongs to
-                groups = client.list_groups(mine=1)
+                groups = list(client.list_groups(mine=1))
 
                 if groups:
                     print(f"Found {len(groups)} group(s):")

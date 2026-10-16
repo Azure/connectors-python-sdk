@@ -44,9 +44,7 @@ def example_1_list_deals():
 
         with PipedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.list_deals()
-
-                deals = (result or {}).get("data", []) if isinstance(result, dict) else []
+                deals = list(client.list_deals())
                 print(f"Found {len(deals)} deal(s).")
 
             except ConnectorException as ex:

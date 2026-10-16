@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urljoin, urlsplit
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -815,15 +815,49 @@ class JiraClient(ConnectorClientBase):
         return "jira"
 
     def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
-        parsed_next_link = urlsplit(next_link)
-        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
             if next_link.startswith("/"):
                 return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
             if next_link.startswith("?"):
-                return f"{current_request_url.partition('?')[0]}{next_link}"
-            return urljoin(current_request_url, next_link)
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
 
-        parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
         connection_hostname = parsed_connection.hostname
         if next_link_hostname is None or connection_hostname is None:
@@ -840,7 +874,11 @@ class JiraClient(ConnectorClientBase):
                 parsed_next_link.scheme == parsed_connection.scheme
                 and next_link_port == connection_port
             ):
-                return next_link
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
 
             raise ValueError(
                 "Pagination URL origin "
@@ -945,8 +983,8 @@ class JiraClient(ConnectorClientBase):
 
         This operation returns a list of issues using JQL.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core pager that follows opaque continuation tokens.
+        Resume with by_page(continuation_token=...).
 
         Swagger operation ID: `ListIssues`.
 
@@ -993,7 +1031,11 @@ class JiraClient(ConnectorClientBase):
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
-                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+                separator = '&' if '?' in request_url else '?'
+                request_url += (
+                    separator + "nextPageToken="
+                    + quote(continuation_token, safe='')
+                )
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -1019,12 +1061,15 @@ class JiraClient(ConnectorClientBase):
         ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
+            continuation_token = page.get("nextPageToken") or None
+            if page.get("isLast") is True:
+                continuation_token = None
 
             def items() -> Iterator[dict[str, Any]]:
                 for item in page.get("issues", []):
                     yield item
 
-            return None, items()
+            return continuation_token, items()
 
         return ItemPaged(get_next, extract_data)
 

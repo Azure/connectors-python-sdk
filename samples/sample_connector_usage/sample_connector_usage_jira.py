@@ -36,12 +36,7 @@ def example_1_list_resources() -> list[dict]:
 
     with DefaultAzureCredential() as credential:
         with JiraClient(CONNECTION_RUNTIME_URL, credential) as client:
-            resources_response = client.list_resources()
-            resources = (
-                resources_response
-                if isinstance(resources_response, list)
-                else resources_response.get("value", []) if resources_response else []
-            )
+            resources = list(client.list_resources())
 
             print(f"Found {len(resources)} resources")
             for resource in resources[:5]:
@@ -58,9 +53,7 @@ def example_2_list_issues(cloud_id: str) -> None:
         with JiraClient(CONNECTION_RUNTIME_URL, credential) as client:
             del cloud_id
 
-            issues_response = client.list_issues()
-
-            issues = issues_response.get("issues", []) if issues_response else []
+            issues = list(client.list_issues())
             print(f"Found {len(issues)} issues")
             for issue in issues[:5]:
                 print(f"  - {issue.get('key')}: {issue.get('fields', {}).get('summary')}")

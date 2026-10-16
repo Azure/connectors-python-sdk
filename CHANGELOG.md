@@ -57,6 +57,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Synchronous completed responses**: Preserve already-loaded response bodies without re-reading consumed streams.
+- **Jira continuation tokens**: Treat next-page tokens as opaque values rather than continuation URLs.
+- **Initial polling URLs**: Resolve relative initial `Location` headers against the initiating request URL.
+- **Sample pager consumption**: Iterate sync and aio pagers directly instead of treating them as response envelopes or awaiting pager construction.
 - **Collection response contracts**: Mutation and action arrays execute eagerly and preserve their response envelopes instead of delaying the request behind a pager. Primitive read collections now expose `ItemPaged[str]` and `AsyncItemPaged[str]` rather than dictionary item types.
 - **Finite polling delays**: Non-finite `Retry-After` values such as `Infinity`, `NaN`, and numeric overflow now use the finite default polling interval.
 - **Collection paging classification**: Explicit pageable responses now infer omitted item properties and follow continuation fields present in the response schema. Bounded read envelopes select their primary array over auxiliary array metadata and expose Azure-guideline `list_*` operations returning `ItemPaged` or `AsyncItemPaged`; mutation and action arrays execute eagerly under their action names.
@@ -69,9 +73,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Request timeout enforcement**: Client-level and per-operation `timeout`
   configures Azure Core retry and transport deadlines. Async clients also bound
   the complete network operation, including response loading and body reads.
-  Sync clients now bound response-body loading as part of the same total deadline,
-  including time already spent receiving headers and responses that continuously
-  deliver small chunks.
+  The default owned Requests transport now enforces a total receive deadline
+  across status lines, headers, and response bodies, including responses that
+  continuously deliver small chunks. Caller-provided transports and sessions
+  must enforce their own network deadlines; blocking credentials, policies, and
+  callbacks must bound their own execution.
   Sync clients preserve transport timeouts for explicit policy chains without a
   retry policy.
   Sync clients no longer run timed requests on uncancellable daemon threads, so

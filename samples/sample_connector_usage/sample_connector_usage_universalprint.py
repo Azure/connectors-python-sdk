@@ -42,9 +42,7 @@ def example_1_list_recent_shares():
 
         with UniversalprintClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.list_recent_shares()
-
-                shares = (result or {}).get("value", []) if isinstance(result, dict) else []
+                shares = list(client.list_recent_shares())
                 print(f"Found {len(shares)} recent printer share(s).")
                 for share in shares:
                     print(f"  - {share}")

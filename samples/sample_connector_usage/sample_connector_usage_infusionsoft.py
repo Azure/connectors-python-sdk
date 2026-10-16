@@ -36,8 +36,7 @@ def example_1_list_tasks() -> None:
 
     with DefaultAzureCredential() as credential:
         with InfusionsoftClient(CONNECTION_RUNTIME_URL, credential) as client:
-            response = client.list_tasks()
-            tasks = response.get("tasks", []) if response else []
+            tasks = list(client.list_tasks())
 
             print(f"Found {len(tasks)} tasks")
             for task in tasks[:5]:

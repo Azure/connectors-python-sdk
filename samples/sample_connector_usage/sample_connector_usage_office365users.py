@@ -136,12 +136,12 @@ def example_4_get_direct_reports():
 
         with Office365usersClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                reports = client.list_direct_reports(id=user_id)
+                reports = list(client.list_direct_reports(id=user_id))
 
-                if reports and "value" in reports:
+                if reports:
                     print(f"Direct reports for '{user_id}':")
-                    print(f"  Found {len(reports['value'])} reports")
-                    for report in reports["value"][:5]:  # Show first 5
+                    print(f"  Found {len(reports)} reports")
+                    for report in reports[:5]:  # Show first 5
                         display_name = report.get("displayName", "N/A")
                         job_title = report.get("jobTitle", "N/A")
                         print(f"    - {display_name} ({job_title})")

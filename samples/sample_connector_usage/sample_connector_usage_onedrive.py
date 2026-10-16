@@ -39,11 +39,11 @@ def example_1_list_root_folder():
     with DefaultAzureCredential() as credential:
 
         with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = client.list_root_folder()
+            items = list(client.list_root_folder())
 
-            if result and "value" in result:
-                print(f"Found {len(result['value'])} items in root folder:")
-                for item in result["value"][:10]:  # Show first 10
+            if items:
+                print(f"Found {len(items)} items in root folder:")
+                for item in items[:10]:  # Show first 10
                     item_type = "📁" if item.get("IsFolder") else "📄"
                     print(f"  {item_type} {item.get('Name', 'N/A')}")
             else:
@@ -153,15 +153,15 @@ def example_5_search_files():
 
         with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.list_find_files(
+                files = list(client.list_find_files(
                     id=folder_id,
                     query=search_query,
                     find_mode="search"
-                )
+                ))
 
-                if result and "value" in result:
-                    print(f"Found {len(result['value'])} files matching '{search_query}':")
-                    for item in result["value"]:
+                if files:
+                    print(f"Found {len(files)} files matching '{search_query}':")
+                    for item in files:
                         print(f"  📄 {item.get('Name', 'N/A')}")
                 else:
                     print(f"No files found matching '{search_query}'.")
@@ -210,10 +210,10 @@ def example_7_file_tags():
         with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Get existing tags
-                tags_result = client.list_file_tags(id=file_id)
+                tags = list(client.list_file_tags(id=file_id))
 
-                if tags_result and "tags" in tags_result:
-                    print(f"Current tags: {', '.join(tags_result['tags'])}")
+                if tags:
+                    print(f"Current tags: {', '.join(tags)}")
                 else:
                     print("No tags found on file.")
 
@@ -222,9 +222,9 @@ def example_7_file_tags():
                 client.add_file_tag(id=file_id, tag="sdk-sample")
 
                 # Get updated tags
-                tags_result = client.list_file_tags(id=file_id)
-                if tags_result and "tags" in tags_result:
-                    print(f"Updated tags: {', '.join(tags_result['tags'])}")
+                tags = list(client.list_file_tags(id=file_id))
+                if tags:
+                    print(f"Updated tags: {', '.join(tags)}")
             except ConnectorException as e:
                 print(f"Error managing tags: {e}")
 

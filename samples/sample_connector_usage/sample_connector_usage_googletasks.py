@@ -47,8 +47,7 @@ def example_1_list_task_lists():
     with DefaultAzureCredential() as credential:
 
         with GoogletasksClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = client.list_task_lists()
-            items = result.get("items", []) if result else []
+            items = list(client.list_task_lists())
 
             print(f"Found {len(items)} task list(s).")
             for task_list in items[:10]:

@@ -49,10 +49,9 @@ def example_1_list_keys():
 
         with KeyvaultClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.list_keys()
+                keys = list(client.list_keys())
 
-                if result and result.get("value"):
-                    keys = result["value"]
+                if keys:
                     print(f"Found {len(keys)} keys:")
                     for key in keys:
                         print(f"  - {key.get('name')} (enabled: {key.get('is_enabled')})")
@@ -145,10 +144,9 @@ def example_4_list_secrets():
 
         with KeyvaultClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.list_secrets()
+                secrets = list(client.list_secrets())
 
-                if result and result.get("value"):
-                    secrets = result["value"]
+                if secrets:
                     print(f"Found {len(secrets)} secrets:")
                     for _ in secrets:
                         print("  - [REDACTED]")

@@ -97,10 +97,9 @@ def example_3_list_owned_groups():
 
         with Office365groupsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.list_owned_groups()
+                groups = list(client.list_owned_groups())
 
-                if result and "value" in result:
-                    groups = result["value"]
+                if groups:
                     print(f"You own or belong to {len(groups)} groups:")
                     for group in groups[:5]:
                         print(f"  - {group.get('displayName', 'N/A')}")

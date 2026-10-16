@@ -22,7 +22,7 @@ def main() -> None:
                 CONNECTION_RUNTIME_URL,
                 credential,
             ) as client:
-                categories = client.list_categories()
+                categories = list(client.list_categories())
                 print(f"Categories: {categories}")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")

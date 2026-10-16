@@ -29,7 +29,7 @@ def list_messages() -> None:
     """List messages for an account."""
     with DefaultAzureCredential() as credential:
         with PlivoClient(CONNECTION_RUNTIME_URL, credential) as client:
-            messages = client.list_messages(auth_id="PLIVO_AUTH_ID")
+            messages = list(client.list_messages(auth_id="PLIVO_AUTH_ID"))
             print(f"Messages: {messages}")
 
 

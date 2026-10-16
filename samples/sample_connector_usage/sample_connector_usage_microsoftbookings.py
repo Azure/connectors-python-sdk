@@ -58,10 +58,9 @@ def example_1_list_booking_businesses():
 
         with MicrosoftbookingsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.list_bookings_business_user_as_admin()
+                mailboxes = list(client.list_bookings_business_user_as_admin())
 
-                if result and result.get("mailboxes"):
-                    mailboxes = result["mailboxes"]
+                if mailboxes:
                     print(f"Found {len(mailboxes)} booking business(es):")
                     for mailbox in mailboxes:
                         print(f"  - {mailbox.get('display_name')}")

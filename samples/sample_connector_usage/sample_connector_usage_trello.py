@@ -36,7 +36,7 @@ def example_1_list_boards() -> None:
 
     with DefaultAzureCredential() as credential:
         with TrelloClient(CONNECTION_RUNTIME_URL, credential) as client:
-            boards = client.list_boards_simple()
+            boards = list(client.list_boards_simple())
             print(f"Boards: {boards}")
 
 

@@ -27,16 +27,28 @@ class ConnectorPollingMethod(PollingMethod[PollingResultT], Generic[PollingResul
         http_client: Any,
         polling_header_name: str,
         *,
+        request_url: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
-        """Initialize connector polling request options."""
+        """Initialize polling with the initiating request URI as the relative base.
+
+        Args:
+            http_client: HTTP client used for polling requests.
+            polling_header_name: Supported Location response header name.
+            request_url: Initiating operation URI for the first relative Location.
+            timeout: Timeout for each polling request.
+            headers: Additional polling request headers.
+            client_request_id: Caller-provided request identifier.
+            response_hook: Callback invoked after a polling response.
+        """
         if polling_header_name.casefold() != "location":
             raise ValueError("Only the 'Location' polling header is supported.")
 
         self._http_client = http_client
+        self._request_url = request_url
         self._timeout = timeout
         self._headers = headers
         self._client_request_id = client_request_id
@@ -58,6 +70,7 @@ class ConnectorPollingMethod(PollingMethod[PollingResultT], Generic[PollingResul
     ) -> None:
         """Initialize polling from the operation's first response."""
         self._response = initial_response
+        self._polling_url = self._request_url
         self._connection_runtime_url = client._connection_runtime_url
         self._deserialization_callback = deserialization_callback
         if initial_response.status == 202:

@@ -48,10 +48,9 @@ def example_1_list_calendars():
 
         with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.list_calendar_get_tables()
+                calendars = list(client.list_calendar_get_tables())
 
-                if result:
-                    calendars = result.get("value", [])
+                if calendars:
                     print(f"Found {len(calendars)} calendar(s):")
                     for cal in calendars:
                         name = cal.get("Name", cal.get("name", "N/A"))
@@ -79,10 +78,9 @@ def example_2_list_contact_folders():
 
         with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.list_contact_get_tables()
+                folders = list(client.list_contact_get_tables())
 
-                if result:
-                    folders = result.get("value", [])
+                if folders:
                     print(f"Found {len(folders)} contact folder(s):")
                     for folder in folders:
                         name = folder.get("Name", folder.get("name", "N/A"))
@@ -112,13 +110,12 @@ def example_3_get_calendar_events():
 
         with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.list_calendar_get_items(
+                events = list(client.list_calendar_get_items(
                     table=calendar_id,
                     top=5  # Get up to 5 events
-                )
+                ))
 
-                if result:
-                    events = result.get("value", [])
+                if events:
                     print(f"Found {len(events)} event(s) in calendar:")
                     for event in events[:5]:
                         subject = event.get("Subject", event.get("subject", "N/A"))
@@ -145,13 +142,12 @@ def example_4_get_contacts():
 
         with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.list_contact_get_items(
+                contacts = list(client.list_contact_get_items(
                     table=folder_id,
                     top=10  # Get up to 10 contacts
-                )
+                ))
 
-                if result:
-                    contacts = result.get("value", [])
+                if contacts:
                     print(f"Found {len(contacts)} contact(s):")
                     for contact in contacts[:5]:
                         display_name = contact.get("DisplayName", "N/A")

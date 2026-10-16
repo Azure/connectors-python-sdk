@@ -42,11 +42,11 @@ def example_1_list_users():
 
         with MsgraphgroupsanduserClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                users = client.list_users()
+                users = list(client.list_users())
 
-                if users and "value" in users:
-                    print(f"Found {len(users['value'])} users:")
-                    for user in users["value"][:5]:  # Show first 5
+                if users:
+                    print(f"Found {len(users)} users:")
+                    for user in users[:5]:  # Show first 5
                         display_name = user.get("displayName", "Unknown")
                         user_principal = user.get("userPrincipalName", "N/A")
                         print(f"  - {display_name} ({user_principal})")
@@ -69,15 +69,15 @@ def example_2_list_groups():
 
         with MsgraphgroupsanduserClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                groups = client.list_groups_by_display_name_search(
+                groups = list(client.list_groups_by_display_name_search(
                     search=search_term,
-                )
+                ))
 
                 search_display = search_term or "(all)"
-                if groups and "value" in groups:
+                if groups:
                     print(f"Search: {search_display}")
-                    print(f"Found {len(groups['value'])} groups:")
-                    for group in groups["value"][:5]:  # Show first 5
+                    print(f"Found {len(groups)} groups:")
+                    for group in groups[:5]:  # Show first 5
                         display_name = group.get("displayName", "Unknown")
                         group_id = group.get("id", "N/A")
                         mail = group.get("mail", "No email")
@@ -140,13 +140,13 @@ def example_4_list_group_members():
 
         with MsgraphgroupsanduserClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                members = client.list_direct_group_members(
+                members = list(client.list_direct_group_members(
                     group_id=group_id,
-                )
+                ))
 
-                if members and "value" in members:
-                    print(f"Found {len(members['value'])} members:")
-                    for member in members["value"][:5]:  # Show first 5
+                if members:
+                    print(f"Found {len(members)} members:")
+                    for member in members[:5]:  # Show first 5
                         display_name = member.get("displayName", "Unknown")
                         member_type = member.get("@odata.type", "Unknown type")
                         print(f"  - {display_name} ({member_type})")
@@ -167,11 +167,11 @@ def example_5_list_subscribed_skus():
 
         with MsgraphgroupsanduserClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                skus = client.list_subscribed_skus()
+                skus = list(client.list_subscribed_skus())
 
-                if skus and "value" in skus:
-                    print(f"Found {len(skus['value'])} subscribed SKUs:")
-                    for sku in skus["value"][:5]:  # Show first 5
+                if skus:
+                    print(f"Found {len(skus)} subscribed SKUs:")
+                    for sku in skus[:5]:  # Show first 5
                         sku_part_number = sku.get("skuPartNumber", "Unknown")
                         consumed = sku.get("consumedUnits", 0)
                         print(f"  - {sku_part_number} (Consumed: {consumed} units)")

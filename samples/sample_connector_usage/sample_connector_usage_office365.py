@@ -46,11 +46,11 @@ def example_1_get_outlook_categories():
 
         with Office365Client(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                categories = client.list_outlook_category_names()
+                categories = list(client.list_outlook_category_names())
 
-                if categories and 'value' in categories:
-                    print(f"Found {len(categories['value'])} Outlook categories:")
-                    for category in categories['value'][:5]:
+                if categories:
+                    print(f"Found {len(categories)} Outlook categories:")
+                    for category in categories[:5]:
                         display_name = category.get('DisplayName', 'Unknown')
                         color = category.get('Color', 'N/A')
                         print(f"  - {display_name} (Color: {color})")
@@ -100,11 +100,11 @@ def example_3_get_emails():
 
         with Office365Client(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                emails = client.list_emails()
+                emails = list(client.list_emails())
 
-                if emails and 'value' in emails:
-                    print(f"Found {len(emails['value'])} emails:")
-                    for email in emails['value']:
+                if emails:
+                    print(f"Found {len(emails)} emails:")
+                    for email in emails:
                         subject = email.get('Subject', 'No Subject')
                         from_addr = email.get('From', 'Unknown')
                         received = email.get('DateTimeReceived', 'Unknown')

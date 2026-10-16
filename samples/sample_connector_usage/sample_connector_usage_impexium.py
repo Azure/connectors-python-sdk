@@ -19,7 +19,7 @@ def main() -> None:
     with DefaultAzureCredential() as credential:
         try:
             with ImpexiumClient(CONNECTION_RUNTIME_URL, credential) as client:
-                countries = client.list_all_countries(page_number=1)
+                countries = list(client.list_all_countries(page_number=1))
                 print(f"Countries: {countries}")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")
