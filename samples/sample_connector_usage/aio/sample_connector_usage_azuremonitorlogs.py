@@ -109,7 +109,7 @@ async def example_run_query():
                     resourcename=RESOURCE_NAME,
                 )
 
-                rows = result
+                rows = result.get("value", []) if result else []
                 print(f"Returned {len(rows)} rows.")
                 for index, row in enumerate(rows[:3], 1):
                     print(f"  Row {index}: {row}")

@@ -3945,6 +3945,7 @@ class TeamsClient(ConnectorClientBase):
         etag: Optional[str],
         match_condition: Optional[MatchConditions],
         *,
+        default_etag: Optional[str],
         if_match_required: bool,
     ) -> Optional[Mapping[str, str]]:
         request_headers = dict(headers) if headers is not None else {}
@@ -3953,7 +3954,11 @@ class TeamsClient(ConnectorClientBase):
             None,
         )
         if etag is None and match_condition is None:
-            if if_match_required and existing_if_match is None:
+            if existing_if_match is not None:
+                return request_headers
+            if default_etag is not None:
+                request_headers["If-Match"] = default_etag
+            elif if_match_required:
                 request_headers["If-Match"] = "*"
             return request_headers or None
 
@@ -7273,6 +7278,7 @@ class TeamsClient(ConnectorClientBase):
             headers,
             etag,
             match_condition,
+            default_etag=None,
             if_match_required=True,
         )
 
@@ -7398,6 +7404,7 @@ class TeamsClient(ConnectorClientBase):
             headers,
             etag,
             match_condition,
+            default_etag=None,
             if_match_required=True,
         )
 
@@ -7465,6 +7472,7 @@ class TeamsClient(ConnectorClientBase):
             headers,
             etag,
             match_condition,
+            default_etag=None,
             if_match_required=True,
         )
 
@@ -7618,6 +7626,7 @@ class TeamsClient(ConnectorClientBase):
             headers,
             etag,
             match_condition,
+            default_etag=None,
             if_match_required=True,
         )
 
@@ -7695,6 +7704,7 @@ class TeamsClient(ConnectorClientBase):
             headers,
             etag,
             match_condition,
+            default_etag=None,
             if_match_required=True,
         )
 
@@ -7772,6 +7782,7 @@ class TeamsClient(ConnectorClientBase):
             headers,
             etag,
             match_condition,
+            default_etag=None,
             if_match_required=True,
         )
 

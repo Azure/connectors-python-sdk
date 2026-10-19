@@ -19,24 +19,28 @@ from azure.core.paging import ItemPaged
 
 ROOT = Path(__file__).resolve().parent.parent
 SAMPLES = ROOT / "samples" / "sample_connector_usage"
-FIXED_CONNECTORS = set("""
-azureeventgrid azurequeues box campfire commondataservice docusign docuware
-dropbox dynamicsax eventbrite eventhubs excelonline excelonlinebusiness ftp
-github googlecalendar googledrive googletasks impexium infusionsoft insightly
-jedoxodatahub jira keyvault mailchimp meetingroommap microsoftbookings
-microsoftforms msgraphgroupsanduser office365 office365groups office365groupsmail
-office365users onedrive onedriveforbusiness onenote outlook pipedrive plivo
-powerbi projectplace rss sendgrid servicebus signinghub sql starrezrestv1 todo
-trello twitter typeform universalprint waywedo webex wordpress yammer zendesk
-zohosign
-""".split())
+
+
+def top_level_imports(tree: ast.Module) -> list[ast.ImportFrom]:
+    """Find imports under module-level guards without entering local scopes."""
+    imports = []
+    pending = list(tree.body)
+    while pending:
+        node = pending.pop()
+        if isinstance(node, ast.ImportFrom):
+            imports.append(node)
+            continue
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            continue
+        pending.extend(ast.iter_child_nodes(node))
+    return imports
 
 
 def pageable_methods(tree: ast.Module) -> dict[str, set[str]]:
     """Resolve imported clients' pageable methods from their generated annotations."""
     clients = {}
-    for node in tree.body:
-        if not isinstance(node, ast.ImportFrom) or not node.module:
+    for node in top_level_imports(tree):
+        if not node.module:
             continue
         if not node.module.startswith("azure.connectors."):
             continue
@@ -63,10 +67,9 @@ def pageable_methods(tree: ast.Module) -> dict[str, set[str]]:
 
 
 def sample_cases() -> list[tuple[Path, str, str, tuple[str, ...]]]:
-    """Discover affected functions without importing or executing sample code."""
+    """Discover all actual sample functions calling generated pageable operations."""
     cases = []
-    for connector in sorted(FIXED_CONNECTORS):
-        sample_path = SAMPLES / f"sample_connector_usage_{connector}.py"
+    for sample_path in sorted(SAMPLES.glob("sample_connector_usage_*.py")):
         tree = ast.parse(sample_path.read_text(encoding="utf-8-sig"))
         for client_name, operations in pageable_methods(tree).items():
             for function in tree.body:
@@ -80,14 +83,44 @@ def sample_cases() -> list[tuple[Path, str, str, tuple[str, ...]]]:
                     and node.func.attr in operations
                 }
                 if called_operations:
-                    cases.append((
-                        sample_path, client_name, function.name,
-                        tuple(sorted(called_operations)),
-                    ))
+                    if sample_path.stem == "sample_connector_usage_azureblob":
+                        for operation in sorted(called_operations):
+                            cases.append((
+                                sample_path, client_name, function.name, (operation,),
+                            ))
+                    else:
+                        cases.append((
+                            sample_path, client_name, function.name,
+                            tuple(sorted(called_operations)),
+                        ))
     return cases
 
 
 CASES = sample_cases()
+
+
+def test_sharepoint_pageable_call_sites_are_discovered() -> None:
+    """Prove imports under SharePoint's top-level try block remain in the sweep."""
+    discovered = {
+        (sample_path.stem, function_name, operation)
+        for sample_path, _, function_name, operations in CASES
+        for operation in operations
+    }
+    assert (
+        "sample_connector_usage_sharepoint",
+        "example_1_get_lists",
+        "list_tables",
+    ) in discovered
+    assert (
+        "sample_connector_usage_sharepoint",
+        "example_6_file_operations",
+        "list_root_folder",
+    ) in discovered
+    assert (
+        "sample_connector_usage_sharepoint",
+        "example_6_file_operations",
+        "list_folder",
+    ) in discovered
 
 
 def load_sample(sample_path: Path) -> Any:
@@ -141,7 +174,7 @@ def sample_item(tree: ast.Module, index: int) -> dict[str, Any]:
     item.update({
         "id": marker, "name": marker, "Name": marker, "contentData": marker,
         "fields": {"summary": marker}, "EmailAddresses": [{"Address": marker}],
-        "lockToken": marker,
+        "lockToken": marker, "subscriptionPolicies": {"quotaId": marker},
     })
     return item
 
@@ -163,6 +196,10 @@ def test_sync_sample_consumes_pages_and_reports_items(
     """Exercise actual functions, empty first pages, later items, and termination."""
     module = load_sample(sample_path)
     client = configure_sample(module, sample_path, monkeypatch)
+    if sample_path.stem == "sample_connector_usage_azureblob":
+        monkeypatch.setenv(
+            "TEST_FOLDER_ID", "" if operations == ("list_root_folder",) else "sample-value",
+        )
     tree = ast.parse(sample_path.read_text(encoding="utf-8-sig"))
     generated_client = getattr(module, client_name)
     all_operations = pageable_methods(tree)[client_name]
@@ -257,8 +294,8 @@ def test_all_sync_pageable_call_sites_are_explicitly_consumed() -> None:
                 and parent.iter is call
             )
             assert consumed, (sample_path.name, call.lineno, ast.unparse(call))
-    assert pageable_sample_count == 73
-    assert call_count == 145
+    assert pageable_sample_count == 75
+    assert call_count == 152
 
 
 @pytest.mark.parametrize("response", [None, {}, {"value": [{"id": "created"}]}])

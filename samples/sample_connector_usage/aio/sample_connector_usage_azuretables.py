@@ -30,7 +30,6 @@ from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.aio.azuretables import AzuretablesClient
 from azure.connectors.azuretables import (
-    CreateTableInput,
     CreateEntityInput,
 )
 
@@ -97,14 +96,9 @@ async def example_2_create_table():
 
         async with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                # Create table input with table name in additional_properties
-                table_input = CreateTableInput(
-                    additional_properties={"TableName": new_table_name}
-                )
-
                 result = await client.create_table(
-                    input=table_input,
-                    storage_account_name=STORAGE_ACCOUNT
+                    input=new_table_name,
+                    storage_account_name=STORAGE_ACCOUNT,
                 )
 
                 print(f"Table '{new_table_name}' created successfully.")

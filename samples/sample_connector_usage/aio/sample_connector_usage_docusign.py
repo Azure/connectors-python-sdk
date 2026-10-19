@@ -59,7 +59,9 @@ async def example_2_search_envelopes(account_id: str) -> None:
                 top=5,
             )
 
-            envelopes = envelopes_response
+            envelopes = (
+                envelopes_response.get("value", []) if envelopes_response else []
+            )
             print(f"Found {len(envelopes)} envelopes")
             for envelope in envelopes[:5]:
                 print(f"  - {envelope.get('envelopeId')} ({envelope.get('status')})")

@@ -28,7 +28,6 @@ from azure.identity import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.azuretables import (
     AzuretablesClient,
-    CreateTableInput,
     CreateEntityInput,
 )
 
@@ -92,13 +91,8 @@ def example_2_create_table():
 
         with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                # Create table input with table name in additional_properties
-                table_input = CreateTableInput(
-                    additional_properties={"TableName": new_table_name}
-                )
-
                 result = client.create_table(
-                    input=table_input,
+                    input=new_table_name,
                     storage_account_name=STORAGE_ACCOUNT
                 )
 

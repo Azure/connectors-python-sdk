@@ -557,7 +557,7 @@ non-2xx responses raise `ConnectorException`.
 | POST with body | At least 1 test asserting body is forwarded + 1 error test |
 | PUT with body | At least 1 test asserting body is forwarded + 1 error test |
 | PATCH with body | At least 1 test asserting body is forwarded + 1 error test |
-| DELETE | At least 1 success test + 1 non-404 error test verifying exception raised; HTTP 404 must be covered as success regardless of the operation name |
+| DELETE | At least 1 success test + 1 error test verifying the exception; cover HTTP 404 as success only for explicitly allow-listed resource-delete operations (currently ARM `Deployments_Delete`) |
 
 **Connectors with >20 public methods** are not required to have a test class per method. Representative coverage — one test group per HTTP verb type used by the connector — satisfies the acceptance criteria, provided the body-forwarding and non-2xx paths are both covered.
 
@@ -628,7 +628,7 @@ Track known generator issues here to prevent silent recurrence across releases.
 | Mutation arrays were lazy and primitive pagers used dictionary item types | Fixed in generator | `azuread`, `docusign`, `eventhubs`, `meetingroommap`, `mq`, `msgraphgroupsanduser`, `onedrive`, `powerbi`, `replicon`, `sendgrid`, `servicebus`, `yammer` | Fixed | Bounded mutation responses execute eagerly under action names and preserve response envelopes. Read collections retain primitive pager item types in sync and aio contracts. |
 | Caller continuation URLs bypassed pagination origin normalization | Fixed in generator | All pageable connectors | Fixed | `by_page(continuation_token=...)` now routes caller tokens through the same URL resolver as service-provided next links before transport receives the request. |
 | Typeless dynamic request models omitted mapping inputs | Fixed in generator | `docuware` | Fixed | Dynamic dataclass request annotations now accept either the generated model or `Mapping[str, Any]`. |
-| Operation name used as a proxy for HTTP DELETE semantics | Fixed in generator | `arm`, `zohosign`, and other delete operations | Fixed | Generated HTTP `DELETE` methods return `None` for HTTP 404 regardless of their normalized names. Non-DELETE operations preserve their response and ordinary failure behavior even when their names begin with `delete_`. |
+| Operation name used as a proxy for HTTP DELETE semantics | Fixed in generator | `arm`, `zohosign`, and other delete operations | Fixed | The generator uses a narrow operation-ID allow-list for resource-delete contracts that accept HTTP 404 (currently ARM `Deployments_Delete`). Other `DELETE` operations preserve ordinary failure behavior, and non-DELETE operations do so even when their names begin with `delete_`. |
 | Successful response discarded when Swagger omits its schema | Fixed in generator | `orderful` | Fixed | The Python-specific `ListTransactions` override preserves the runtime JSON payload without changing other language emitters. |
 | Create/update operations missing request body | [BPM #TBD](https://dev.azure.com/msazure/One/_workitems/edit/TBD) | Varies by connector | Investigation | Some POST/PATCH operations may drop body parameters |
 

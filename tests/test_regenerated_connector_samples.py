@@ -475,6 +475,151 @@ async def test_nonpageable_samples_preserve_nullable_responses(
         assert empty_message in output
 
 
+@pytest.mark.parametrize("response_kind", ["none", "empty", "populated"])
+@pytest.mark.parametrize(
+    "connector,function_name,client_name,operation_name,item_key,marker",
+    [
+        (
+            "docusign",
+            "example_2_search_envelopes",
+            "DocusignClient",
+            "search_list_envelopes",
+            "value",
+            "sample-envelope",
+        ),
+        (
+            "azuremonitorlogs",
+            "example_run_query",
+            "AzuremonitorlogsClient",
+            "query_data",
+            "value",
+            "sample-row",
+        ),
+    ],
+)
+@pytest.mark.asyncio
+async def test_aio_eager_list_samples_unwrap_nullable_envelopes(
+    connector: str,
+    function_name: str,
+    client_name: str,
+    operation_name: str,
+    item_key: str,
+    marker: str,
+    response_kind: str,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Execute eager aio samples so dictionaries are not sliced as collected lists."""
+    module = importlib.import_module(
+        f"samples.sample_connector_usage.aio.sample_connector_usage_{connector}"
+    )
+    response = None if response_kind == "none" else {}
+    if response_kind == "populated":
+        response = {item_key: [{"envelopeId": marker, "status": marker, "row": marker}]}
+    client = MagicMock()
+    operation = AsyncMock(return_value=response)
+    setattr(client, operation_name, operation)
+    client.__aenter__.return_value = client
+    monkeypatch.setattr(module, client_name, MagicMock(return_value=client))
+    monkeypatch.setattr(module, "DefaultAzureCredential", MagicMock())
+    for setting in (
+        "SUBSCRIPTION_ID",
+        "RESOURCE_GROUP",
+        "RESOURCE_NAME",
+        "RESOURCE_TYPE",
+    ):
+        if hasattr(module, setting):
+            monkeypatch.setattr(module, setting, "sample-value")
+
+    arguments = ["sample-account"] if connector == "docusign" else []
+    await invoke_sample(module, function_name, *arguments)
+
+    output = capsys.readouterr().out
+    assert "Error:" not in output
+    assert "Connector error" not in output
+    operation.assert_awaited_once()
+    if response_kind == "populated":
+        assert marker in output
+    else:
+        assert "0" in output
+
+
+@pytest.mark.parametrize("surface", ["sync", "aio"])
+@pytest.mark.asyncio
+async def test_eventhubs_batch_sample_passes_send_event_list(
+    surface: str,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Execute the batch sample and verify its list alias is passed directly."""
+    package_name = "samples.sample_connector_usage"
+    if surface == "aio":
+        package_name += ".aio"
+    module = importlib.import_module(
+        f"{package_name}.sample_connector_usage_eventhubs"
+    )
+    client = MagicMock()
+    operation = AsyncMock(return_value=None) if surface == "aio" else MagicMock(return_value=None)
+    client.send_events = operation
+    client.__enter__.return_value = client
+    client.__aenter__.return_value = client
+    monkeypatch.setattr(module, "EventhubsClient", MagicMock(return_value=client))
+    monkeypatch.setattr(module, "DefaultAzureCredential", MagicMock())
+    monkeypatch.setattr(module, "EVENT_HUB_NAME", "sample-hub")
+
+    await invoke_sample(module, "example_3_send_batch_events")
+
+    output = capsys.readouterr().out
+    assert "Error:" not in output
+    assert "Connector error" not in output
+    if surface == "aio":
+        operation.assert_awaited_once()
+    else:
+        operation.assert_called_once()
+    batch_input = operation.call_args.kwargs["input"]
+    assert isinstance(batch_input, list)
+    assert len(batch_input) == 3
+    assert all(isinstance(event, module.SendEvent) for event in batch_input)
+    assert "Batch of 3 events" in output
+
+
+@pytest.mark.parametrize("surface", ["sync", "aio"])
+@pytest.mark.asyncio
+async def test_azuretables_create_sample_passes_scalar_table_name(
+    surface: str,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Execute the create-table sample and verify its string alias is passed directly."""
+    package_name = "samples.sample_connector_usage"
+    if surface == "aio":
+        package_name += ".aio"
+    module = importlib.import_module(
+        f"{package_name}.sample_connector_usage_azuretables"
+    )
+    client = MagicMock()
+    operation = AsyncMock(return_value={}) if surface == "aio" else MagicMock(return_value={})
+    client.create_table = operation
+    client.__enter__.return_value = client
+    client.__aenter__.return_value = client
+    monkeypatch.setattr(module, "AzuretablesClient", MagicMock(return_value=client))
+    monkeypatch.setattr(module, "DefaultAzureCredential", MagicMock())
+    monkeypatch.setattr(module, "STORAGE_ACCOUNT", "sample-account")
+    monkeypatch.setenv("AZURETABLES_NEW_TABLE_NAME", "SampleTable")
+
+    await invoke_sample(module, "example_2_create_table")
+
+    output = capsys.readouterr().out
+    assert "Error:" not in output
+    assert "Connector error" not in output
+    if surface == "aio":
+        operation.assert_awaited_once()
+    else:
+        operation.assert_called_once()
+    assert operation.call_args.kwargs["input"] == "SampleTable"
+    assert "Table 'SampleTable' created successfully." in output
+
+
 def test_sample_validator_rejects_incompatible_literal_type() -> None:
     """Test a string literal is rejected for an integer parameter."""
     tree = ast.parse(

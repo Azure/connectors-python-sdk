@@ -31,7 +31,6 @@ from azure.connectors import ConnectorException
 from azure.connectors.aio.eventhubs import EventhubsClient
 from azure.connectors.eventhubs import (
     SendEvent,
-    SendEventsInput,
 )
 
 # Connection runtime URL format:
@@ -138,24 +137,20 @@ async def example_3_send_batch_events():
         async with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Create batch with multiple events
-                batch_input = SendEventsInput(
-                    additional_properties={
-                        "events": [
-                            {
-                                "contentData": json.dumps({"id": 1, "name": "Event 1"}),
-                                "properties": {"index": "1"}
-                            },
-                            {
-                                "contentData": json.dumps({"id": 2, "name": "Event 2"}),
-                                "properties": {"index": "2"}
-                            },
-                            {
-                                "contentData": json.dumps({"id": 3, "name": "Event 3"}),
-                                "properties": {"index": "3"}
-                            }
-                        ]
-                    }
-                )
+                batch_input = [
+                    SendEvent(
+                        content_data=json.dumps({"id": 1, "name": "Event 1"}),
+                        properties={"index": "1"},
+                    ),
+                    SendEvent(
+                        content_data=json.dumps({"id": 2, "name": "Event 2"}),
+                        properties={"index": "2"},
+                    ),
+                    SendEvent(
+                        content_data=json.dumps({"id": 3, "name": "Event 3"}),
+                        properties={"index": "3"},
+                    ),
+                ]
 
                 await client.send_events(
                     input=batch_input,
@@ -163,10 +158,9 @@ async def example_3_send_batch_events():
                     partition_key=os.environ.get("EVENTHUBS_PARTITION_KEY", "partition-1")
                 )
 
-                events = batch_input.additional_properties.get("events", [])
-                print(f"Batch of {len(events)} events sent to '{EVENT_HUB_NAME}':")
-                for i, evt in enumerate(events, 1):
-                    print(f"  {i}. {evt.get('contentData', 'N/A')[:40]}...")
+                print(f"Batch of {len(batch_input)} events sent to '{EVENT_HUB_NAME}':")
+                for i, event in enumerate(batch_input, 1):
+                    print(f"  {i}. {event.content_data[:40]}...")
 
             except ConnectorException as ex:
                 print(f"Connector error (status {ex.status_code}): {ex}")

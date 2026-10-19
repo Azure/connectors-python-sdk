@@ -22,13 +22,28 @@ ROOT = Path(__file__).resolve().parent.parent
 SAMPLES = ROOT / "samples" / "sample_connector_usage" / "aio"
 
 
+def top_level_imports(tree: ast.Module) -> list[ast.ImportFrom]:
+    """Find imports under module-level guards without entering local scopes."""
+    imports = []
+    pending = list(tree.body)
+    while pending:
+        node = pending.pop()
+        if isinstance(node, ast.ImportFrom):
+            imports.append(node)
+            continue
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            continue
+        pending.extend(ast.iter_child_nodes(node))
+    return imports
+
+
 @lru_cache(maxsize=None)
 def pageable_methods(sample_path: Path) -> dict[str, set[str]]:
     """Resolve imported async clients' pageable methods from generated annotations."""
     clients = {}
     tree = ast.parse(sample_path.read_text(encoding="utf-8-sig"))
-    for node in tree.body:
-        if not isinstance(node, ast.ImportFrom) or not node.module:
+    for node in top_level_imports(tree):
+        if not node.module:
             continue
         if not node.module.startswith("azure.connectors.aio."):
             continue
@@ -81,6 +96,30 @@ def sample_cases() -> list[tuple[Path, str, str, tuple[str, ...]]]:
 
 
 CASES = sample_cases()
+
+
+def test_sharepoint_pageable_call_sites_are_discovered() -> None:
+    """Prove imports under SharePoint's top-level try block remain in the sweep."""
+    discovered = {
+        (sample_path.stem, function_name, operation)
+        for sample_path, _, function_name, operations in CASES
+        for operation in operations
+    }
+    assert (
+        "sample_connector_usage_sharepoint",
+        "example_1_get_lists",
+        "list_tables",
+    ) in discovered
+    assert (
+        "sample_connector_usage_sharepoint",
+        "example_6_file_operations",
+        "list_root_folder",
+    ) in discovered
+    assert (
+        "sample_connector_usage_sharepoint",
+        "example_6_file_operations",
+        "list_folder",
+    ) in discovered
 
 
 def load_sample(sample_path: Path) -> Any:
@@ -279,8 +318,8 @@ def test_all_async_pageable_call_sites_are_explicitly_consumed() -> None:
             ) or (
                 isinstance(parent, ast.AsyncFor) and parent.iter is call
             ), (sample_path.name, call.lineno, ast.unparse(call))
-    assert pageable_sample_count == 73
-    assert call_count == 145
+    assert pageable_sample_count == 75
+    assert call_count == 152
 
 
 @pytest.mark.parametrize("response", [None, {}, {"value": [{"id": "created"}]}])

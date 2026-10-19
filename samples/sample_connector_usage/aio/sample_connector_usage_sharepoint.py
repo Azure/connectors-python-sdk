@@ -65,14 +65,14 @@ async def example_1_get_lists():
             try:
                 lists = [item async for item in client.list_tables(dataset=SHAREPOINT_SITE_URL)]
 
-                if lists and 'value' in lists:
-                    print(f"Found {len(lists['value'])} lists and libraries:")
-                    for list_item in lists['value'][:5]:
+                if lists:
+                    print(f"Found {len(lists)} lists and libraries:")
+                    for list_item in lists[:5]:
                         display_name = list_item.get('DisplayName', 'Unknown')
                         name = list_item.get('Name', 'Unknown')
                         print(f"  - {display_name} ({name})")
                 else:
-                    print("No lists found or unexpected response format.")
+                    print("No lists found.")
 
             except ConnectorException as ex:
                 print(f"Connector error: {ex}")
@@ -264,6 +264,8 @@ async def example_5_query_with_filters():
                         title = item.get('Title', 'No Title')
                         created = item.get('Created', 'Unknown')
                         print(f"  - {title} (Created: {created})")
+                else:
+                    print("No items found.")
 
                 # Clean up test items
                 print("\nCleaning up test items...")
@@ -295,15 +297,15 @@ async def example_6_file_operations():
                 print("Listing root folder...")
                 root_folder = [item async for item in client.list_root_folder(dataset=SHAREPOINT_SITE_URL)]
 
-                if root_folder and 'value' in root_folder:
-                    print(f"Found {len(root_folder['value'])} items in root folder:")
-                    for item in root_folder['value'][:5]:
+                if root_folder:
+                    print(f"Found {len(root_folder)} items in root folder:")
+                    for item in root_folder[:5]:
                         name = item.get('Name', 'Unknown')
                         is_folder = item.get('IsFolder', False)
                         item_type = 'Folder' if is_folder else 'File'
                         print(f"  - {name} ({item_type})")
                 else:
-                    print("Root folder is empty or unexpected response format.")
+                    print("Root folder is empty.")
 
                 # List a specific folder (Shared Documents is common)
                 print("\nListing 'Shared Documents' folder...")
@@ -312,9 +314,9 @@ async def example_6_file_operations():
                     id='/Shared Documents',
                 )]
 
-                if folder and 'value' in folder:
-                    print(f"Found {len(folder['value'])} items in Shared Documents:")
-                    for item in folder['value'][:5]:
+                if folder:
+                    print(f"Found {len(folder)} items in Shared Documents:")
+                    for item in folder[:5]:
                         name = item.get('Name', 'Unknown')
                         is_folder = item.get('IsFolder', False)
                         size = item.get('Size', 0)
