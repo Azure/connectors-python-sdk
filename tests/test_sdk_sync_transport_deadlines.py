@@ -11,12 +11,12 @@ from collections.abc import Callable, Generator
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 import requests
 from azure.core.credentials import AzureKeyCredential
-from azure.core.exceptions import ServiceResponseTimeoutError
+from azure.core.exceptions import ServiceResponseError, ServiceResponseTimeoutError
 from azure.core.pipeline.policies import SansIOHTTPPolicy
 from azure.core.rest import HttpRequest, HttpResponse
 from urllib3.exceptions import ReadTimeoutError
@@ -246,6 +246,90 @@ def test_raw_urllib3_read_timeout_is_normalized_before_deadline(phase: str) -> N
         )
 
     assert raised.value.__cause__ is error
+    if phase == "body":
+        response.close.assert_called_once_with()
+    assert _REQUEST_DEADLINE.get() is None
+    assert _REQUEST_RESPONSES.get() is None
+
+
+@pytest.mark.parametrize("phase", ["pipeline", "body"])
+@pytest.mark.parametrize("cause", ["requests", "urllib3"])
+def test_azure_core_wrapped_read_timeout_is_normalized_before_deadline(
+    phase: str, cause: str,
+) -> None:
+    """Normalize known wrapped read timeouts without waiting for clock expiry."""
+    inner_error = (
+        requests.exceptions.ReadTimeout("injected idle timeout")
+        if cause == "requests"
+        else ReadTimeoutError(None, "/", "injected idle timeout")
+    )
+    error = ServiceResponseError("injected transport failure", error=inner_error)
+    response = MagicMock()
+    pipeline = MagicMock()
+    if phase == "pipeline":
+        pipeline.run.side_effect = error
+    else:
+        pipeline.run.return_value.http_response = response
+        response.iter_bytes.side_effect = error
+
+    with patch("azure.connectors.sdk.http_client.time.monotonic", return_value=100.0):
+        with pytest.raises(ServiceResponseTimeoutError) as raised:
+            ConnectorHttpClient._run_pipeline(
+                pipeline,
+                HttpRequest("GET", "https://example.test/"),
+                {},
+                total_timeout=10.0,
+            )
+
+    assert raised.value.__cause__ is error
+    assert raised.value.inner_exception is error
+    assert error.inner_exception is inner_error
+    if phase == "body":
+        response.close.assert_called_once_with()
+    assert _REQUEST_DEADLINE.get() is None
+    assert _REQUEST_RESPONSES.get() is None
+
+
+@pytest.mark.parametrize("phase", ["pipeline", "body"])
+@pytest.mark.parametrize("expired", [False, True])
+@pytest.mark.parametrize("normalized", [False, True])
+def test_azure_core_response_error_preserves_non_timeout_and_normalized_errors(
+    phase: str, expired: bool, normalized: bool,
+) -> None:
+    """Preserve unrelated transport failures and existing timeout identities."""
+    error = (
+        ServiceResponseTimeoutError(
+            "already normalized timeout",
+            error=requests.exceptions.ReadTimeout("injected idle timeout"),
+        )
+        if normalized
+        else ServiceResponseError(
+            "injected transport failure",
+            error=requests.exceptions.ConnectionError("connection reset"),
+        )
+    )
+    response = MagicMock()
+    pipeline = MagicMock()
+    if phase == "pipeline":
+        pipeline.run.side_effect = error
+    else:
+        pipeline.run.return_value.http_response = response
+        response.iter_bytes.side_effect = error
+
+    with patch(
+        "azure.connectors.sdk.http_client.time.monotonic",
+        side_effect=[100.0, 111.0 if expired else 100.0],
+    ):
+        with pytest.raises(type(error)) as raised:
+            ConnectorHttpClient._run_pipeline(
+                pipeline,
+                HttpRequest("GET", "https://example.test/"),
+                {},
+                total_timeout=10.0,
+            )
+
+    assert raised.value is error
+    assert raised.value.__cause__ is None
     if phase == "body":
         response.close.assert_called_once_with()
     assert _REQUEST_DEADLINE.get() is None

@@ -16,7 +16,7 @@ from typing import Any, Dict, Generic, List, Mapping, Optional, TypeVar
 
 import requests
 from azure.core.credentials import AzureKeyCredential, TokenCredential
-from azure.core.exceptions import ServiceResponseTimeoutError
+from azure.core.exceptions import ServiceResponseError, ServiceResponseTimeoutError
 from azure.core.pipeline import Pipeline
 from azure.core.pipeline.policies import (
     AzureKeyCredentialPolicy,
@@ -623,6 +623,14 @@ class ConnectorHttpClient:
             ) from ex
         except requests.exceptions.ConnectionError as ex:
             if any(isinstance(argument, ReadTimeoutError) for argument in ex.args):
+                raise ServiceResponseTimeoutError(
+                    message="The connector response read timed out.", error=ex
+                ) from ex
+            raise
+        except ServiceResponseError as ex:
+            if not isinstance(ex, ServiceResponseTimeoutError) and isinstance(
+                ex.inner_exception, (ReadTimeoutError, requests.exceptions.ReadTimeout)
+            ):
                 raise ServiceResponseTimeoutError(
                     message="The connector response read timed out.", error=ex
                 ) from ex
