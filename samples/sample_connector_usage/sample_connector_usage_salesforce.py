@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Salesforce Connector SDK Sample
+Salesforce sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Salesforce connector SDK.
+This sample demonstrates how to use the Salesforce client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Salesforce connection
@@ -26,7 +26,8 @@ import asyncio
 import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
-from azure.connectors.salesforce import ExecuteSoqlQueryParameters, SalesforceClient
+from azure.connectors.salesforce import SalesforceClient
+from azure.connectors.salesforce import ExecuteSoqlQueryParameters
 
 # Connection runtime URL format:
 # https://[region].azure-apihub.net/apim/salesforce/[connection-id]
@@ -44,7 +45,7 @@ async def example_1_get_tables():
 
         async with SalesforceClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                tables = [item async for item in client.get_tables_async()]
+                tables = [item async for item in client.list_tables()]
 
                 if tables:
                     print(f"Found {len(tables)} table(s):")
@@ -70,7 +71,7 @@ async def example_2_get_records():
 
         async with SalesforceClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                records = [item async for item in client.get_items_async(
+                records = [item async for item in client.list_items(
                     table="account",
                     top=5,
                     select="Id,Name,Phone",
@@ -103,7 +104,7 @@ async def example_3_execute_soql():
                 query_input = ExecuteSoqlQueryParameters(
                     query="SELECT Id, Name FROM Account LIMIT 5",
                 )
-                result = await client.execute_soql_query_async(input=query_input)
+                result = await client.execute_soql_query(input=query_input)
 
                 if result:
                     records = result.get("records", [])

@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure Storage Tables Connector SDK Sample
+Azure Storage Tables sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure Storage Tables connector SDK
+This sample demonstrates how to use the Azure Storage Tables client from the Azure Connectors Python SDK
 to interact with Azure Table Storage.
 
 Prerequisites:
@@ -28,9 +28,8 @@ import asyncio
 import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.azuretables import AzuretablesClient
 from azure.connectors.azuretables import (
-    AzuretablesClient,
-    CreateTableInput,
     CreateEntityInput,
 )
 
@@ -61,20 +60,18 @@ async def example_1_list_tables():
 
         async with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_tables_async(
-                    storage_account_name=STORAGE_ACCOUNT
-                )
+                tables = [
+                    table
+                    async for table in client.list_tables(
+                        storage_account_name=STORAGE_ACCOUNT
+                    )
+                ]
 
-                if result:
+                if tables:
                     print(f"Tables in storage account '{STORAGE_ACCOUNT}':")
-                    # Response contains 'value' with list of tables
-                    tables = result.get("value", [])
-                    if tables:
-                        for table in tables:
-                            table_name = table.get("TableName", table)
-                            print(f"  - {table_name}")
-                    else:
-                        print("  No tables found.")
+                    for table in tables:
+                        table_name = table.get("TableName", table)
+                        print(f"  - {table_name}")
                 else:
                     print("No tables found or empty response.")
 
@@ -99,14 +96,9 @@ async def example_2_create_table():
 
         async with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                # Create table input with table name in additional_properties
-                table_input = CreateTableInput(
-                    additional_properties={"TableName": new_table_name}
-                )
-
-                result = await client.create_table_async(
-                    input=table_input,
-                    storage_account_name=STORAGE_ACCOUNT
+                result = await client.create_table(
+                    input=new_table_name,
+                    storage_account_name=STORAGE_ACCOUNT,
                 )
 
                 print(f"Table '{new_table_name}' created successfully.")
@@ -146,7 +138,7 @@ async def example_3_create_entity():
                     }
                 )
 
-                result = await client.create_entity_async(
+                result = await client.create_entity(
                     input=entity_input,
                     storage_account_name=STORAGE_ACCOUNT,
                     table_name=TABLE_NAME
@@ -180,7 +172,7 @@ async def example_4_get_entities():
         async with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Query entities with optional filter
-                entities = [item async for item in client.get_entities_async(
+                entities = [item async for item in client.list_entities(
                     storage_account_name=STORAGE_ACCOUNT,
                     table_name=TABLE_NAME,
                     # Optional: filter entities
@@ -226,7 +218,7 @@ async def example_5_get_entity():
 
         async with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_entity_async(
+                result = await client.get_entity(
                     storage_account_name=STORAGE_ACCOUNT,
                     table_name=TABLE_NAME,
                     partition_key=partition_key,
@@ -260,7 +252,7 @@ async def example_5_get_entity():
 
 async def main():
     """Run all examples."""
-    print("Azure Storage Tables Connector SDK - Sample Usage")
+    print("Azure Storage Tables sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
 
     if not CONNECTION_RUNTIME_URL:

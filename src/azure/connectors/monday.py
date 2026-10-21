@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, AsyncIterator, Dict, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
+from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
 from azure.core.credentials_async import AsyncTokenCredential
 from azure.core.pipeline.transport import AsyncHttpTransport
@@ -18,7 +19,77 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "MondayClient",
+    "CreateBoardInput",
+    "CreateBoardResponse",
+    "CreateColumnInput",
+    "CreateColumnResponse",
+    "CreateGroupInput",
+    "CreateGroupResponse",
+    "CreateItemInput",
+    "CreateItemResponse",
+    "CreateNotificationInput",
+    "CreateNotificationResponse",
+    "CreateSubitemInput",
+    "CreateSubitemResponse",
+    "CreateUpdateInput",
+    "CreateUpdateResponse",
+    "CreateWorkspaceInput",
+    "CreateWorkspaceResponse",
+    "DuplicateBoardInput",
+    "DuplicateBoardResponse",
+    "DynamicGetColumnNamesForUpdateWebhook",
+    "DynamicGetColumnNamesForWebhook",
+    "DynamicGetGetItemsSchema",
+    "DynamicGetSubitemColumnNamesForWebhook",
+    "DynamicResponseGetListSchema",
+    "DynamicResponseGetListSchemaGet",
+    "DynamicResponseGetSingleColumnSchema",
+    "FieldBoard",
+    "FieldColumnsToUpdateSingleColumn",
+    "FieldWorkspace",
+    "GetColumnNamesSchemaForColumnChangesWebhookResponse",
+    "GetColumnNamesSchemaForItemNameChangeWebhookResponse",
+    "GetColumnNamesSchemaForSubitemNameChangeWebhookResponse",
+    "GetColumnNamesSchemaForUpdateWebhookResponse",
+    "GetColumnNamesSchemaForWebhookResponse",
+    "GetColumnNamesSchemaResponse",
+    "GetSchemaForGetItemsActionResponse",
+    "GetSingleColumnSchemaResponse",
+    "GetSubitemColumnNamesForGetSubitems",
+    "GetSubitemColumnNamesResponse",
+    "GetSubitemSchemaResponse",
+    "GetTagsResponse",
+    "GetUsersResponse",
+    "GetWorkspacesResponse",
+    "MoveItemToGroupInput",
+    "MoveItemToGroupResponse",
+    "UpdateItemColumnInput",
+    "UpdateItemColumnResponse",
+    "UpdateMultipleItemColumnsInput",
+    "UpdateMultipleItemColumnsResponse",
+    "WebhookAnyColumnChangesInput",
+    "WebhookAnyColumnChangesResponse",
+    "WebhookChangeNameInput",
+    "WebhookChangeNameResponse",
+    "WebhookChangeSubitemNameInput",
+    "WebhookChangeSubitemNameResponse",
+    "WebhookColumnChangesInput",
+    "WebhookColumnChangesResponse",
+    "WebhookCreateItemInput",
+    "WebhookCreateItemResponse",
+    "WebhookCreateSubitemInput",
+    "WebhookCreateSubitemResponse",
+    "WebhookCreateUpdateInput",
+    "WebhookCreateUpdateResponse",
+    "WebhookSubitemColumnChangesInput",
+    "WebhookSubitemColumnChangesResponse",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -29,20 +100,11 @@ class WebhookCreateItemInput:
     When an item is created
     """
 
-    workspace_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "workspaceId"},
-    )
+    workspace_id: str = dataclass_field(metadata={"wire_name": "workspaceId"})
     """Select a workspace from the drop-down or specify a workspace ID."""
-    board_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
+    board_id: str = dataclass_field(metadata={"wire_name": "boardId"})
     """Select a board from the drop-down or specify a board ID."""
-    callback_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callbackUrl"},
-    )
+    callback_url: str = dataclass_field(metadata={"wire_name": "callbackUrl"})
     """Specify the callback URL"""
 
 
@@ -52,7 +114,7 @@ class WebhookCreateItemResponse:
     Response for When an item is created
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -65,20 +127,11 @@ class WebhookCreateUpdateInput:
     When a new update is posted
     """
 
-    workspace_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "workspaceId"},
-    )
+    workspace_id: str = dataclass_field(metadata={"wire_name": "workspaceId"})
     """Select a workspace from the drop-down or specify a workspace ID."""
-    board_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
+    board_id: str = dataclass_field(metadata={"wire_name": "boardId"})
     """Select a board from the drop-down or specify a board ID."""
-    callback_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callbackUrl"},
-    )
+    callback_url: str = dataclass_field(metadata={"wire_name": "callbackUrl"})
     """Specify the callback URL."""
 
 
@@ -88,7 +141,7 @@ class WebhookCreateUpdateResponse:
     Response for When a new update is posted
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -101,20 +154,11 @@ class WebhookChangeNameInput:
     When an item's name changes
     """
 
-    workspace_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "workspaceId"},
-    )
+    workspace_id: str = dataclass_field(metadata={"wire_name": "workspaceId"})
     """Select a workspace from the drop-down or specify a workspace ID."""
-    board_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
+    board_id: str = dataclass_field(metadata={"wire_name": "boardId"})
     """Select a board from the drop-down or specify a board ID."""
-    callback_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callbackUrl"},
-    )
+    callback_url: str = dataclass_field(metadata={"wire_name": "callbackUrl"})
     """Specify the callback URL."""
 
 
@@ -124,7 +168,7 @@ class WebhookChangeNameResponse:
     Response for When an item's name changes
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -137,20 +181,11 @@ class WebhookChangeSubitemNameInput:
     When a subitem's name changes
     """
 
-    workspace_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "workspaceId"},
-    )
+    workspace_id: str = dataclass_field(metadata={"wire_name": "workspaceId"})
     """Select a workspace from the drop-down or specify a workspace ID."""
-    board_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
+    board_id: str = dataclass_field(metadata={"wire_name": "boardId"})
     """Select a board from the drop-down or specify a board ID."""
-    callback_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callbackUrl"},
-    )
+    callback_url: str = dataclass_field(metadata={"wire_name": "callbackUrl"})
     """Specify the callback URL."""
 
 
@@ -160,7 +195,7 @@ class WebhookChangeSubitemNameResponse:
     Response for When a subitem's name changes
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -173,20 +208,11 @@ class WebhookCreateSubitemInput:
     When a subitem is created
     """
 
-    workspace_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "workspaceId"},
-    )
+    workspace_id: str = dataclass_field(metadata={"wire_name": "workspaceId"})
     """Select a workspace from the drop-down or specify a workspace ID."""
-    board_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
+    board_id: str = dataclass_field(metadata={"wire_name": "boardId"})
     """Select a board from the drop-down or specify a board ID."""
-    callback_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callbackUrl"},
-    )
+    callback_url: str = dataclass_field(metadata={"wire_name": "callbackUrl"})
     """Specify the callback URL."""
 
 
@@ -196,7 +222,7 @@ class WebhookCreateSubitemResponse:
     Response for When a subitem is created
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -209,25 +235,13 @@ class WebhookColumnChangesInput:
     When a column changes
     """
 
-    workspace_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "workspaceId"},
-    )
+    workspace_id: str = dataclass_field(metadata={"wire_name": "workspaceId"})
     """Select a workspace from the drop-down or specify a workspace ID."""
-    board_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
+    board_id: str = dataclass_field(metadata={"wire_name": "boardId"})
     """Select a board from the drop-down or specify a board ID."""
-    column_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "columnId"},
-    )
+    column_id: str = dataclass_field(metadata={"wire_name": "columnId"})
     """Select a column from the drop-down."""
-    callback_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callbackUrl"},
-    )
+    callback_url: str = dataclass_field(metadata={"wire_name": "callbackUrl"})
     """Specify the callback URL."""
 
 
@@ -237,7 +251,7 @@ class WebhookColumnChangesResponse:
     Response for When a column changes
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -250,20 +264,11 @@ class WebhookAnyColumnChangesInput:
     When any column changes
     """
 
-    workspace_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "workspaceId"},
-    )
+    workspace_id: str = dataclass_field(metadata={"wire_name": "workspaceId"})
     """Select a workspace from the drop-down or specify a workspace ID."""
-    board_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
+    board_id: str = dataclass_field(metadata={"wire_name": "boardId"})
     """Select a board from the drop-down or specify a board ID."""
-    callback_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callbackUrl"},
-    )
+    callback_url: str = dataclass_field(metadata={"wire_name": "callbackUrl"})
     """Specify the callback URL."""
 
 
@@ -273,7 +278,7 @@ class WebhookAnyColumnChangesResponse:
     Response for When any column changes
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -286,20 +291,11 @@ class WebhookSubitemColumnChangesInput:
     When any subitem column changes
     """
 
-    workspace_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "workspaceId"},
-    )
+    workspace_id: str = dataclass_field(metadata={"wire_name": "workspaceId"})
     """Select a workspace from the drop-down or specify a workspace ID."""
-    board_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
+    board_id: str = dataclass_field(metadata={"wire_name": "boardId"})
     """Select a board from the drop-down or specify a board ID."""
-    callback_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callbackUrl"},
-    )
+    callback_url: str = dataclass_field(metadata={"wire_name": "callbackUrl"})
     """Specify the callback URL."""
 
 
@@ -309,7 +305,7 @@ class WebhookSubitemColumnChangesResponse:
     Response for When any subitem column changes
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -322,26 +318,17 @@ class CreateItemInput:
     Create an item
     """
 
-    workspace_id: Optional[FieldWorkspace] = field(
-        default=None,
+    workspace_id: FieldWorkspace = dataclass_field(
         metadata={"wire_name": "workspaceId"},
     )
-    board_id: Optional[FieldBoard] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
-    group_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "groupId"},
-    )
+    board_id: FieldBoard = dataclass_field(metadata={"wire_name": "boardId"})
+    group_id: str = dataclass_field(metadata={"wire_name": "groupId"})
     """Select a group from the drop-down or specify a group ID."""
-    item_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "itemName"},
-    )
+    item_name: str = dataclass_field(metadata={"wire_name": "itemName"})
     """Specify the name of the item you want to create."""
-    column_values: Optional[DynamicResponseGetListSchema] = field(
+    column_values: Optional[DynamicResponseGetListSchema | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "columnValues"},
     )
 
@@ -352,7 +339,7 @@ class CreateItemResponse:
     Response for Create an item
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -361,38 +348,37 @@ class DuplicateBoardInput:
     Duplicate a board
     """
 
-    source_workspace_id: Optional[str] = field(
-        default=None,
+    source_workspace_id: str = dataclass_field(
         metadata={"wire_name": "sourceWorkspaceId"},
     )
     """Select the workspace for the board you want to duplicate."""
-    source_board_id: Optional[str] = field(
-        default=None,
+    source_board_id: str = dataclass_field(
         metadata={"wire_name": "sourceBoardId"},
     )
     """Select the board to duplicate."""
-    duplicated_board_name: Optional[str] = field(
+    duplicated_board_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "duplicatedBoardName"},
     )
     """Specify the name of the duplicated board."""
-    duplication_type: Optional[str] = field(
-        default=None,
+    duplication_type: str = dataclass_field(
         metadata={"wire_name": "duplicationType"},
     )
     """Select the duplication type from the drop-down."""
-    destination_workspace_id: Optional[str] = field(
+    destination_workspace_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "destinationWorkspaceId"},
     )
     """Select the destination workspace for the duplicated board."""
-    destination_folder: Optional[str] = field(
+    destination_folder: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "destinationFolder"},
     )
     """Select the destination folder for the duplicated board."""
-    keep_board_subscribers: Optional[bool] = field(
-        default=None,
+    keep_board_subscribers: bool = dataclass_field(
         metadata={"wire_name": "keepBoardSubscribers"},
     )
     """Select whether to keep board subscribers."""
@@ -404,7 +390,7 @@ class DuplicateBoardResponse:
     Response for Duplicate a board
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ID of the duplicated board"""
 
 
@@ -414,15 +400,9 @@ class CreateBoardInput:
     Create a board
     """
 
-    workspace_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "workspaceId"},
-    )
+    workspace_id: str = dataclass_field(metadata={"wire_name": "workspaceId"})
     """Specify the ID of a monday.com workspace."""
-    board_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "boardName"},
-    )
+    board_name: str = dataclass_field(metadata={"wire_name": "boardName"})
     """Specify the desired name of the board you want to create."""
 
 
@@ -432,7 +412,7 @@ class CreateBoardResponse:
     Response for Create a board
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -441,22 +421,15 @@ class CreateColumnInput:
     Create a column
     """
 
-    workspace_id: Optional[FieldWorkspace] = field(
-        default=None,
+    workspace_id: FieldWorkspace = dataclass_field(
         metadata={"wire_name": "workspaceId"},
     )
-    board_id: Optional[FieldBoard] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
-    title: Optional[str] = None
+    board_id: FieldBoard = dataclass_field(metadata={"wire_name": "boardId"})
+    title: str
     """Specify the title of the column you want to create."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Specify the description of the column you want to create."""
-    column_type: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "columnType"},
-    )
+    column_type: str = dataclass_field(metadata={"wire_name": "columnType"})
     """Select a column type from the drop-down."""
 
 
@@ -466,7 +439,7 @@ class CreateColumnResponse:
     Response for Create a column
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -475,18 +448,11 @@ class CreateGroupInput:
     Create a group
     """
 
-    workspace_id: Optional[FieldWorkspace] = field(
-        default=None,
+    workspace_id: FieldWorkspace = dataclass_field(
         metadata={"wire_name": "workspaceId"},
     )
-    board_id: Optional[FieldBoard] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
-    group_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "groupName"},
-    )
+    board_id: FieldBoard = dataclass_field(metadata={"wire_name": "boardId"})
+    group_name: str = dataclass_field(metadata={"wire_name": "groupName"})
     """Specify your desired group name."""
 
 
@@ -496,7 +462,7 @@ class CreateGroupResponse:
     Response for Create a group
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -505,27 +471,16 @@ class UpdateItemColumnInput:
     Update an item's column value
     """
 
-    workspace_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "workspaceId"},
-    )
+    workspace_id: str = dataclass_field(metadata={"wire_name": "workspaceId"})
     """Select the workspace the item belongs to from the drop-down."""
-    board_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
+    board_id: str = dataclass_field(metadata={"wire_name": "boardId"})
     """Select the board the item belongs to from the drop-down."""
-    column_id: Optional[FieldColumnsToUpdateSingleColumn] = field(
-        default=None,
+    column_id: FieldColumnsToUpdateSingleColumn = dataclass_field(
         metadata={"wire_name": "columnId"},
     )
-    item_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "itemId"},
-    )
+    item_id: str = dataclass_field(metadata={"wire_name": "itemId"})
     """Specify the ID of the item to update."""
-    column_values: Optional[DynamicResponseGetSingleColumnSchema] = field(
-        default=None,
+    column_values: DynamicResponseGetSingleColumnSchema | Mapping[str, Any] = dataclass_field(
         metadata={"wire_name": "columnValues"},
     )
 
@@ -536,7 +491,7 @@ class UpdateItemColumnResponse:
     Response for Update an item's column value
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -545,30 +500,23 @@ class UpdateMultipleItemColumnsInput:
     Update multiple item column values
     """
 
-    workspace_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "workspaceId"},
-    )
+    workspace_id: str = dataclass_field(metadata={"wire_name": "workspaceId"})
     """Select the workspace the item belongs to from the drop-down."""
-    board_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
+    board_id: str = dataclass_field(metadata={"wire_name": "boardId"})
     """Select the board the item belongs to from the drop-down."""
-    item_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "itemId"},
-    )
+    item_id: str = dataclass_field(metadata={"wire_name": "itemId"})
     """Specify the ID of the item to update."""
-    item_name: Optional[str] = field(
+    item_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "itemName"},
     )
     """
     Specify a new name for the item. Leave blank to keep the current name.
     """
-    column_values: Optional[DynamicResponseGetListSchema] = field(
+    column_values: Optional[DynamicResponseGetListSchema | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "columnValues"},
     )
 
@@ -579,7 +527,7 @@ class UpdateMultipleItemColumnsResponse:
     Response for Update multiple item column values
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -588,23 +536,13 @@ class MoveItemToGroupInput:
     Move an item to a group
     """
 
-    workspace_id: Optional[FieldWorkspace] = field(
-        default=None,
+    workspace_id: FieldWorkspace = dataclass_field(
         metadata={"wire_name": "workspaceId"},
     )
-    board_id: Optional[FieldBoard] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
-    group_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "groupId"},
-    )
+    board_id: FieldBoard = dataclass_field(metadata={"wire_name": "boardId"})
+    group_id: str = dataclass_field(metadata={"wire_name": "groupId"})
     """Select the group to move the item to from the drop-down."""
-    item_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "itemId"},
-    )
+    item_id: str = dataclass_field(metadata={"wire_name": "itemId"})
     """Specify the ID of the item to move."""
 
 
@@ -614,7 +552,7 @@ class MoveItemToGroupResponse:
     Response for Move an item to a group
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -623,17 +561,11 @@ class CreateNotificationInput:
     Create a notification
     """
 
-    user_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "userId"},
-    )
+    user_id: str = dataclass_field(metadata={"wire_name": "userId"})
     """Select a user from the drop-down or specify a user ID."""
-    target_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "targetId"},
-    )
+    target_id: str = dataclass_field(metadata={"wire_name": "targetId"})
     """Specify a board ID or item ID the notification will go to."""
-    text: Optional[str] = None
+    text: str
     """Specify the notification text."""
 
 
@@ -643,7 +575,7 @@ class CreateNotificationResponse:
     Response for Create a notification
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Data"""
 
 
@@ -653,27 +585,20 @@ class CreateSubitemInput:
     Create a subitem
     """
 
-    workspace_id: Optional[FieldWorkspace] = field(
-        default=None,
+    workspace_id: FieldWorkspace = dataclass_field(
         metadata={"wire_name": "workspaceId"},
     )
-    board_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
+    board_id: str = dataclass_field(metadata={"wire_name": "boardId"})
     """Select a board from the drop-down or specify a board ID."""
-    parent_item_id: Optional[str] = field(
-        default=None,
+    parent_item_id: str = dataclass_field(
         metadata={"wire_name": "parentItemId"},
     )
     """Select a parent item from the drop-down or specify a parent item ID."""
-    item_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "itemName"},
-    )
+    item_name: str = dataclass_field(metadata={"wire_name": "itemName"})
     """Specify a name for the subitem."""
-    column_values: Optional[DynamicResponseGetListSchema] = field(
+    column_values: Optional[DynamicResponseGetListSchema | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "columnValues"},
     )
 
@@ -684,7 +609,7 @@ class CreateSubitemResponse:
     Response for Create a subitem
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -693,7 +618,7 @@ class GetSubitemColumnNamesForGetSubitems:
     Response for Get subitems
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -706,25 +631,15 @@ class CreateUpdateInput:
     Create an update
     """
 
-    workspace_id: Optional[FieldWorkspace] = field(
-        default=None,
+    workspace_id: FieldWorkspace = dataclass_field(
         metadata={"wire_name": "workspaceId"},
     )
-    board_id: Optional[FieldBoard] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
-    group_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "groupId"},
-    )
+    board_id: FieldBoard = dataclass_field(metadata={"wire_name": "boardId"})
+    group_id: str = dataclass_field(metadata={"wire_name": "groupId"})
     """Select a group from the drop-down or specify a group ID."""
-    item_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "itemId"},
-    )
+    item_id: str = dataclass_field(metadata={"wire_name": "itemId"})
     """Select an item from the drop-down or specify an item ID."""
-    body: Optional[str] = None
+    body: str
     """Specify text for the update."""
 
 
@@ -734,7 +649,7 @@ class CreateUpdateResponse:
     Response for Create an update
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -743,7 +658,7 @@ class DynamicResponseGetListSchemaGet:
     Response for Get an item by ID
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -756,9 +671,9 @@ class CreateWorkspaceInput:
     Create a workspace
     """
 
-    name: Optional[str] = None
+    name: str
     """Specify a name for the new workspace."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Specify a description for the new workspace."""
 
 
@@ -768,7 +683,7 @@ class CreateWorkspaceResponse:
     Response for Create a workspace
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -777,7 +692,7 @@ class DynamicGetGetItemsSchema:
     Response for Get items
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -790,7 +705,7 @@ class GetTagsResponse:
     Response for Get tags
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -799,7 +714,7 @@ class GetUsersResponse:
     Response for Get users
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -808,7 +723,7 @@ class GetWorkspacesResponse:
     Response for Get workspaces
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -818,7 +733,7 @@ class GetColumnNamesSchemaResponse:
     Response for Get column names for a board ID
     """
 
-    schema: Optional[Dict[str, Any]] = None
+    schema: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Schema of the requested schema type"""
 
 
@@ -828,7 +743,7 @@ class GetSingleColumnSchemaResponse:
     Response for Gets single column schema for a board ID
     """
 
-    schema: Optional[Dict[str, Any]] = None
+    schema: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Schema of the requested schema type"""
 
 
@@ -838,7 +753,7 @@ class GetColumnNamesSchemaForWebhookResponse:
     Response for Get column names for a board ID for a webhook
     """
 
-    schema: Optional[Dict[str, Any]] = None
+    schema: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Schema of the requested schema type"""
 
 
@@ -848,7 +763,7 @@ class GetSchemaForGetItemsActionResponse:
     Response for Get column names for a board ID for a webhook
     """
 
-    schema: Optional[Dict[str, Any]] = None
+    schema: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Schema of the requested schema type"""
 
 
@@ -858,7 +773,7 @@ class GetColumnNamesSchemaForUpdateWebhookResponse:
     Response for Get column names for a board ID for an update webhook
     """
 
-    schema: Optional[Dict[str, Any]] = None
+    schema: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Schema of the requested schema type"""
 
 
@@ -868,7 +783,7 @@ class GetSubitemColumnNamesResponse:
     Response for Get subitem column names
     """
 
-    schema: Optional[Dict[str, Any]] = None
+    schema: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Schema of the requested schema type"""
 
 
@@ -878,7 +793,7 @@ class GetSubitemSchemaResponse:
     Response for Get subitem column names
     """
 
-    schema: Optional[Dict[str, Any]] = None
+    schema: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Schema of the requested schema type"""
 
 
@@ -888,7 +803,7 @@ class GetColumnNamesSchemaForItemNameChangeWebhookResponse:
     Response for Get column names schema for column changes
     """
 
-    schema: Optional[Dict[str, Any]] = None
+    schema: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Schema of the requested schema type"""
 
 
@@ -898,7 +813,7 @@ class GetColumnNamesSchemaForSubitemNameChangeWebhookResponse:
     Response for Get column names schema for column changes
     """
 
-    schema: Optional[Dict[str, Any]] = None
+    schema: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Schema of the requested schema type"""
 
 
@@ -908,7 +823,7 @@ class GetColumnNamesSchemaForColumnChangesWebhookResponse:
     Response for Get column names schema for column changes
     """
 
-    schema: Optional[Dict[str, Any]] = None
+    schema: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Schema of the requested schema type"""
 
 
@@ -918,7 +833,7 @@ class DynamicResponseGetListSchema:
     Definition: DynamicResponseGetListSchema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -931,7 +846,7 @@ class DynamicResponseGetSingleColumnSchema:
     Definition: DynamicResponseGetSingleColumnSchema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -944,7 +859,7 @@ class DynamicGetColumnNamesForWebhook:
     Definition: DynamicGetColumnNamesForWebhook
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -957,7 +872,7 @@ class DynamicGetColumnNamesForUpdateWebhook:
     Definition: DynamicGetColumnNamesForUpdateWebhook
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -970,7 +885,7 @@ class DynamicGetSubitemColumnNamesForWebhook:
     Definition: DynamicGetSubitemColumnNamesForWebhook
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -997,7 +912,7 @@ class MondayClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -1014,8 +929,8 @@ class MondayClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -1036,7 +951,7 @@ class MondayClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -1051,9 +966,86 @@ class MondayClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "monday"
 
-    async def create_item_async(
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
+            if next_link.startswith("?"):
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
+
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
+    async def create_item(
         self,
-        input: CreateItemInput,
+        input: CreateItemInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1064,13 +1056,29 @@ class MondayClient(ConnectorClientBase):
         Create an item
 
         Creates an item in the selected monday.com board and group.
+
+        Swagger operation ID: `CreateItem`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/executePowerAutomateAction/CreateItem"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1084,6 +1092,7 @@ class MondayClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1091,9 +1100,9 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def duplicate_board_async(
+    async def duplicate_board(
         self,
-        input: DuplicateBoardInput,
+        input: DuplicateBoardInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1104,13 +1113,29 @@ class MondayClient(ConnectorClientBase):
         Duplicate a board
 
         Duplicates a board in monday.com.
+
+        Swagger operation ID: `DuplicateBoard`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/executePowerAutomateAction/DuplicateBoard"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1124,6 +1149,7 @@ class MondayClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1131,9 +1157,9 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_board_async(
+    async def create_board(
         self,
-        input: CreateBoardInput,
+        input: CreateBoardInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1144,13 +1170,29 @@ class MondayClient(ConnectorClientBase):
         Create a board
 
         Creates a board in monday.com.
+
+        Swagger operation ID: `CreateBoard`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/executePowerAutomateAction/CreateBoard"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1164,6 +1206,7 @@ class MondayClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1171,9 +1214,9 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_column_async(
+    async def create_column(
         self,
-        input: CreateColumnInput,
+        input: CreateColumnInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1184,13 +1227,29 @@ class MondayClient(ConnectorClientBase):
         Create a column
 
         Creates a column in monday.com for the specified board.
+
+        Swagger operation ID: `CreateColumn`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/executePowerAutomateAction/CreateColumn"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1204,6 +1263,7 @@ class MondayClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1211,9 +1271,9 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_group_async(
+    async def create_group(
         self,
-        input: CreateGroupInput,
+        input: CreateGroupInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1224,13 +1284,29 @@ class MondayClient(ConnectorClientBase):
         Create a group
 
         Creates a group in monday.com for the specified board.
+
+        Swagger operation ID: `CreateGroup`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/executePowerAutomateAction/CreateGroup"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1244,6 +1320,7 @@ class MondayClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1251,9 +1328,9 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_item_column_async(
+    async def update_item_column(
         self,
-        input: UpdateItemColumnInput,
+        input: UpdateItemColumnInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1265,13 +1342,29 @@ class MondayClient(ConnectorClientBase):
 
         Updates a single item's column. If the value is blank, the column value
         will be cleared.
+
+        Swagger operation ID: `UpdateItemColumn`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/executePowerAutomateAction/UpdateItemColumn"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1285,6 +1378,7 @@ class MondayClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1292,9 +1386,9 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_multiple_item_columns_async(
+    async def update_multiple_item_columns(
         self,
-        input: UpdateMultipleItemColumnsInput,
+        input: UpdateMultipleItemColumnsInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1306,13 +1400,29 @@ class MondayClient(ConnectorClientBase):
 
         Updates multiple item columns. Leave the column value blank to keep the
         current value.
+
+        Swagger operation ID: `UpdateMultipleItemColumns`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/executePowerAutomateAction/UpdateMultipleItemColumns"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1326,6 +1436,7 @@ class MondayClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1333,9 +1444,9 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def move_item_to_group_async(
+    async def move_item_to_group(
         self,
-        input: MoveItemToGroupInput,
+        input: MoveItemToGroupInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1346,13 +1457,29 @@ class MondayClient(ConnectorClientBase):
         Move an item to a group
 
         Moves an item to another group on the same board.
+
+        Swagger operation ID: `MoveItemToGroup`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/executePowerAutomateAction/MoveItemToGroup"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1366,6 +1493,7 @@ class MondayClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1373,9 +1501,9 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_notification_async(
+    async def create_notification(
         self,
-        input: CreateNotificationInput,
+        input: CreateNotificationInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1387,13 +1515,29 @@ class MondayClient(ConnectorClientBase):
 
         Creates a notification in monday.com for a user for either a specific
         board or item.
+
+        Swagger operation ID: `CreateNotification`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/executePowerAutomateAction/CreateNotification"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1407,6 +1551,7 @@ class MondayClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1414,9 +1559,9 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_subitem_async(
+    async def create_subitem(
         self,
-        input: CreateSubitemInput,
+        input: CreateSubitemInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1427,13 +1572,29 @@ class MondayClient(ConnectorClientBase):
         Create a subitem
 
         Creates a subitem in monday.com for the selected board and parent item.
+
+        Swagger operation ID: `CreateSubitem`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/executePowerAutomateAction/CreateSubitem"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1447,6 +1608,7 @@ class MondayClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1454,7 +1616,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_subitems_async(
+    async def get_subitems(
         self,
         workspace_id: str,
         board_id: str,
@@ -1469,6 +1631,25 @@ class MondayClient(ConnectorClientBase):
         Get subitems
 
         Gets subitems in monday.com for a specific item in a board.
+
+        Swagger operation ID: `GetSubitems`.
+
+        Args:
+            workspace_id: Select a workspace from the drop-down or specify a
+                workspace ID.
+            board_id: Select the item's board from the drop-down or specify a
+                board ID.
+            item_id: Specify an item ID to retrieve the subitems for.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/getData/getSubitems"
         query_params = []
@@ -1487,7 +1668,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1501,6 +1682,7 @@ class MondayClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1508,9 +1690,9 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_update_async(
+    async def create_update(
         self,
-        input: CreateUpdateInput,
+        input: CreateUpdateInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1521,13 +1703,29 @@ class MondayClient(ConnectorClientBase):
         Create an update
 
         Creates an update in monday.com for a specific item.
+
+        Swagger operation ID: `CreateUpdate`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/executePowerAutomateAction/CreateUpdate"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1541,6 +1739,7 @@ class MondayClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1548,7 +1747,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_item_by_id_async(
+    async def get_item_by_id(
         self,
         item_id: str,
         workspace_id: str,
@@ -1563,6 +1762,25 @@ class MondayClient(ConnectorClientBase):
         Get an item by ID
 
         Gets a monday.com item using the specified item ID and board.
+
+        Swagger operation ID: `GetItemById`.
+
+        Args:
+            item_id: Specify an item ID to retrieve.
+            workspace_id: Select the item's workspace from the drop-down or
+                specify a workspace ID.
+            board_id: Select the item's board from the drop-down or specify a
+                board ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/getData/getItemById"
         query_params = []
@@ -1581,7 +1799,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1595,6 +1813,7 @@ class MondayClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1602,9 +1821,9 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_workspace_async(
+    async def create_workspace(
         self,
-        input: CreateWorkspaceInput,
+        input: CreateWorkspaceInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1616,13 +1835,29 @@ class MondayClient(ConnectorClientBase):
 
         Creates a monday.com workspace with a user-specified name and
         description.
+
+        Swagger operation ID: `CreateWorkspace_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/executePowerAutomateAction/CreateWorkspaceV2"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1636,6 +1871,7 @@ class MondayClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1643,11 +1879,12 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_items_async(
+    async def get_items(
         self,
         workspace_id: str,
         board_id: str,
         group_id: str,
+        *,
         filter1_column: Optional[str] = None,
         filter1_operator: Optional[str] = None,
         filter1_value: Optional[str] = None,
@@ -1660,7 +1897,6 @@ class MondayClient(ConnectorClientBase):
         filter4_column: Optional[str] = None,
         filter4_operator: Optional[str] = None,
         filter4_value: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1673,6 +1909,40 @@ class MondayClient(ConnectorClientBase):
         by column values using the filters found under advanced options. More
         info on filtering can be found here:
         https://plugingenie.com/docs/filtering-items.
+
+        Swagger operation ID: `GetItems_V2`.
+
+        Args:
+            workspace_id: Select a workspace from the drop-down or specify a
+                workspace ID.
+            board_id: Select a board from the drop-down or specify a board ID.
+            group_id: Select a group from the drop-down or specify a group ID.
+            filter1_column: Select a column from the drop-down or specify a
+                column ID.
+            filter1_operator: Select an operator from the drop-down.
+            filter1_value: Specify a value (if applicable).
+            filter2_column: Select a column from the drop-down or specify a
+                column ID.
+            filter2_operator: Select an operator from the drop-down.
+            filter2_value: Specify a value (if applicable).
+            filter3_column: Select a column from the drop-down or specify a
+                column ID.
+            filter3_operator: Select an operator from the drop-down.
+            filter3_value: Specify a value (if applicable).
+            filter4_column: Select a column from the drop-down or specify a
+                column ID.
+            filter4_operator: Select an operator from the drop-down.
+            filter4_value: Specify a value (if applicable).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/getData/getItemsV2"
         query_params = []
@@ -1751,7 +2021,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1765,6 +2035,7 @@ class MondayClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1772,7 +2043,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_tags_async(
+    async def get_tags(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1784,10 +2055,24 @@ class MondayClient(ConnectorClientBase):
         Get tags
 
         This operation gets monday.com tags.
+
+        Swagger operation ID: `GetTags_V2`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/getData/getTagsV2"
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1801,6 +2086,7 @@ class MondayClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1808,7 +2094,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_users_async(
+    async def get_users(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1821,10 +2107,24 @@ class MondayClient(ConnectorClientBase):
 
         This operation gets the name, email, and ID of users in your monday.com
         account.
+
+        Swagger operation ID: `GetUsers_V2`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/getData/getUsersV2"
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1838,6 +2138,7 @@ class MondayClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1845,7 +2146,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_workspaces_async(
+    async def get_workspaces(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1857,10 +2158,24 @@ class MondayClient(ConnectorClientBase):
         Get workspaces
 
         This operation gets the workspaces from monday.com.
+
+        Swagger operation ID: `GetWorkspaces_V2`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/getData/getWorkspacesV2"
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1874,6 +2189,7 @@ class MondayClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1881,19 +2197,37 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_boards_async(
+    def list_boards(
         self,
-        workspace_id: Optional[str] = None,
         *,
+        workspace_id: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get boards
 
         This operation gets the boards from monday.com.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetBoards`.
+
+        Args:
+            workspace_id: Specify the ID of the monday.com workspace.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/getData/getBoards"
         query_params = []
@@ -1904,29 +2238,50 @@ class MondayClient(ConnectorClientBase):
             query_params.append(f"workspaceId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_groups_for_get_items_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_groups_for_get_items(
         self,
         board_id: str,
         *,
@@ -1934,12 +2289,30 @@ class MondayClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get groups for the Get Items operation
 
         This operation gets the groups from monday.com, which includes the
         option to select all groups.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetGroupsForGetItems`.
+
+        Args:
+            board_id: Specify the ID of a monday.com board.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/getData/getGroupsForGetItems"
@@ -1951,29 +2324,50 @@ class MondayClient(ConnectorClientBase):
         query_params.append(f"boardId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_columns_for_item_filtering_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_columns_for_item_filtering(
         self,
         board_id: str,
         *,
@@ -1981,11 +2375,29 @@ class MondayClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get columns for item filtering
 
         This operation gets the columns from monday.com for item filtering.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetColumnsForItemFiltering`.
+
+        Args:
+            board_id: Specify the ID of a monday.com board.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1998,43 +2410,83 @@ class MondayClient(ConnectorClientBase):
         query_params.append(f"boardId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_column_filter_operator_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_column_filter_operator(
         self,
         board_id: str,
-        column_id: Optional[str] = None,
         *,
+        column_id: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get column filter operator
 
         This operation gets the available item filter operator for the selected
         monday.com column.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetColumnFilterOperator`.
+
+        Args:
+            board_id: Specify the ID of a monday.com board.
+            column_id: Specify the ID of a monday.com column.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/getData/getColumnFilterOperator"
@@ -2051,32 +2503,53 @@ class MondayClient(ConnectorClientBase):
             query_params.append(f"columnId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_column_names_schema_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def get_column_names_schema(
         self,
-        board_id: Optional[str] = None,
         *,
+        board_id: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2086,6 +2559,21 @@ class MondayClient(ConnectorClientBase):
         Get column names for a board ID
 
         This operation gets the column names for a board ID.
+
+        Swagger operation ID: `GetColumnNamesSchema`.
+
+        Args:
+            board_id: Specify the ID of a monday.com board.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/getSchema/getColumnNames"
@@ -2099,7 +2587,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2113,6 +2601,7 @@ class MondayClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2120,11 +2609,11 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_single_column_schema_async(
+    async def get_single_column_schema(
         self,
+        *,
         board_id: Optional[str] = None,
         column_id: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2134,6 +2623,22 @@ class MondayClient(ConnectorClientBase):
         Gets single column schema for a board ID
 
         This operation gets the single column schema for a board ID.
+
+        Swagger operation ID: `GetSingleColumnSchema`.
+
+        Args:
+            board_id: Specify the ID of a monday.com board.
+            column_id: Specify the ID of a monday.com column.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/getSchema/getSingleColumnSchema"
@@ -2152,7 +2657,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2166,6 +2671,7 @@ class MondayClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2173,10 +2679,10 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_column_names_schema_for_webhook_async(
+    async def get_column_names_schema_for_webhook(
         self,
-        board_id: Optional[str] = None,
         *,
+        board_id: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2187,6 +2693,21 @@ class MondayClient(ConnectorClientBase):
 
         This operation gets the column names for a board ID for a webhook
         (includes itemId).
+
+        Swagger operation ID: `GetColumnNamesSchemaForWebhook`.
+
+        Args:
+            board_id: Specify the ID of a monday.com board.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2201,7 +2722,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2215,6 +2736,7 @@ class MondayClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2222,10 +2744,10 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_schema_for_get_items_action_async(
+    async def get_schema_for_get_items_action(
         self,
-        board_id: Optional[str] = None,
         *,
+        board_id: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2235,6 +2757,21 @@ class MondayClient(ConnectorClientBase):
         Get column names for a board ID for a webhook
 
         This operation gets the schema for the GetItems action.
+
+        Swagger operation ID: `GetSchemaForGetItemsAction`.
+
+        Args:
+            board_id: Specify the ID of a monday.com board.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2249,7 +2786,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2263,6 +2800,7 @@ class MondayClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2270,10 +2808,10 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_column_names_schema_for_update_webhook_async(
+    async def get_column_names_schema_for_update_webhook(
         self,
-        board_id: Optional[str] = None,
         *,
+        board_id: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2284,6 +2822,21 @@ class MondayClient(ConnectorClientBase):
 
         This operation gets the column names for a board ID for a webhook
         (includes itemId).
+
+        Swagger operation ID: `GetColumnNamesSchemaForUpdateWebhook`.
+
+        Args:
+            board_id: Specify the ID of a monday.com board.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2298,7 +2851,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2312,6 +2865,7 @@ class MondayClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2319,7 +2873,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_subitem_column_names_async(
+    async def get_subitem_column_names(
         self,
         parent_board_id: str,
         *,
@@ -2332,6 +2886,21 @@ class MondayClient(ConnectorClientBase):
         Get subitem column names
 
         Gets subitem column names in monday.com given a board ID.
+
+        Swagger operation ID: `GetSubitemColumnNames`.
+
+        Args:
+            parent_board_id: Specify the ID of the monday.com parent board.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/getSchema/getSubitemColumnNames"
@@ -2344,7 +2913,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2358,6 +2927,7 @@ class MondayClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2365,7 +2935,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_subitem_schema_async(
+    async def get_subitem_schema(
         self,
         parent_board_id: str,
         *,
@@ -2378,6 +2948,21 @@ class MondayClient(ConnectorClientBase):
         Get subitem column names
 
         Gets subitem schema in monday.com given a board ID.
+
+        Swagger operation ID: `GetSubitemSchema`.
+
+        Args:
+            parent_board_id: Specify the ID of the monday.com parent board.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/getSchema/getSubitemSchema"
@@ -2390,7 +2975,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2404,6 +2989,7 @@ class MondayClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2411,10 +2997,10 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_column_names_schema_for_item_name_change_webhook_async(
+    async def get_column_names_schema_for_item_name_change_webhook(
         self,
-        board_id: Optional[str] = None,
         *,
+        board_id: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2425,6 +3011,21 @@ class MondayClient(ConnectorClientBase):
 
         This operation gets the column names for a board ID for a webhook when
         the item's name changes.
+
+        Swagger operation ID: `GetColumnNamesSchemaForItemNameChangeWebhook`.
+
+        Args:
+            board_id: Specify the ID of a monday.com board.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2439,7 +3040,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2453,6 +3054,7 @@ class MondayClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2460,7 +3062,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_column_names_schema_for_subitem_name_change_webhook_async(
+    async def get_column_names_schema_for_subitem_name_change_webhook(
         self,
         parent_board_id: str,
         *,
@@ -2474,6 +3076,22 @@ class MondayClient(ConnectorClientBase):
 
         This operation gets the column names for a board ID for a webhook when
         the subitem's name changes.
+
+        Swagger operation ID:
+        `GetColumnNamesSchemaForSubitemNameChangeWebhook`.
+
+        Args:
+            parent_board_id: Specify the ID of the monday.com parent board.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2487,7 +3105,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2501,6 +3119,7 @@ class MondayClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2508,10 +3127,10 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_column_names_schema_for_column_changes_webhook_async(
+    async def get_column_names_schema_for_column_changes_webhook(
         self,
-        board_id: Optional[str] = None,
         *,
+        board_id: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2522,6 +3141,21 @@ class MondayClient(ConnectorClientBase):
 
         This operation gets the column names for a board ID for a webhook
         (includes itemId).
+
+        Swagger operation ID: `GetColumnNamesSchemaForColumnChangesWebhook`.
+
+        Args:
+            board_id: Specify the ID of a monday.com board.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2536,7 +3170,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2550,6 +3184,7 @@ class MondayClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

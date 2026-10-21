@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Yammer (Viva Engage) Connector SDK Sample
+Yammer (Viva Engage) sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Yammer connector SDK to interact with
+This sample demonstrates how to use the Yammer client from the Azure Connectors Python SDK to interact with
 Viva Engage (formerly Yammer) networks, groups, messages, and users.
 
 Prerequisites:
@@ -25,8 +25,8 @@ import asyncio
 import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.yammer import YammerClient
 from azure.connectors.yammer import (
-    YammerClient,
     PostOperationRequest,
 )
 
@@ -46,7 +46,7 @@ async def example_1_get_networks():
 
         async with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                networks = await client.get_networks_async()
+                networks = [item async for item in client.list_networks()]
 
                 if networks:
                     print(f"Found {len(networks)} network(s):")
@@ -70,7 +70,7 @@ async def example_2_get_groups():
         async with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Get only groups the user belongs to
-                groups = await client.get_groups_async(mine=1)
+                groups = [item async for item in client.list_groups(mine=1)]
 
                 if groups:
                     print(f"Found {len(groups)} group(s):")
@@ -95,7 +95,7 @@ async def example_3_get_messages():
             try:
                 # Get recent messages (limit to 10)
                 messages = [
-                    item async for item in client.get_all_messages_async(limit=10)
+                    item async for item in client.list_all_messages(limit=10)
                 ]
 
                 if messages:
@@ -121,7 +121,7 @@ async def example_4_get_following_feed():
         async with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 messages = [
-                    item async for item in client.get_messages_following_async(
+                    item async for item in client.list_messages_following(
                         limit=5
                     )
                 ]
@@ -156,7 +156,7 @@ async def example_5_post_message():
                     title="SDK Test Message"
                 )
 
-                result = await client.post_message_async(input=message)
+                result = await client.post_message(input=message)
 
                 if result:
                     print("Message posted successfully!")
@@ -181,7 +181,7 @@ async def example_6_get_user_details():
             try:
                 # Replace with an actual user ID
                 user_id = 123456789
-                user = await client.get_user_details_by_id_async(user_id=user_id)
+                user = await client.get_user_details_by_id(user_id=user_id)
 
                 if user:
                     print("User details:")

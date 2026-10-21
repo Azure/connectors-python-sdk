@@ -1,7 +1,7 @@
 """
-SendGrid Connector SDK Sample
+SendGrid sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the SendGrid connector SDK.
+This sample demonstrates how to use the SendGrid client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a SendGrid connection
@@ -24,10 +24,10 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
+from azure.connectors.sendgrid import SendgridClient
 from azure.connectors.sendgrid import (
     EmailRequest,
-    SendgridClient,
-)
+    )
 
 
 # Connection runtime URL format:
@@ -41,12 +41,13 @@ async def example_1_send_email() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with SendgridClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.send_email_async(
+            result = await client.send_email(
                 input=EmailRequest(
                     from_="sender@example.com",
                     to="recipient@example.com",
                     subject="Hello from the SDK sample",
-                    text="This message was sent via the SendGrid connector SDK.",
+                    text="This message was sent via the SendGrid client from the Azure Connectors Python SDK.",
+                    ishtml=False,
                 ),
             )
             print(f"Send result: {result}")
@@ -58,7 +59,7 @@ async def example_2_list_recipient_lists() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with SendgridClient(CONNECTION_RUNTIME_URL, credential) as client:
-            lists = await client.list_recipient_lists_async()
+            lists = [item async for item in client.list_recipient_lists()]
             print(f"Recipient lists: {lists}")
 
 
@@ -68,7 +69,7 @@ async def example_3_list_recipients() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with SendgridClient(CONNECTION_RUNTIME_URL, credential) as client:
-            recipients = await client.list_recipients_async()
+            recipients = [item async for item in client.list_recipients()]
             print(f"Recipients: {recipients}")
 
 
@@ -78,7 +79,7 @@ async def example_4_get_bounce() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with SendgridClient(CONNECTION_RUNTIME_URL, credential) as client:
-            bounce = await client.get_bounce_async(email="recipient@example.com")
+            bounce = [item async for item in client.list_bounce(email="recipient@example.com")]
             print(f"Bounce: {bounce}")
 
 
@@ -89,7 +90,7 @@ async def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("SendGrid Connector SDK - Sample Usage")
+    print("SendGrid sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

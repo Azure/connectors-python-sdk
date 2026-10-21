@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Box Connector SDK Sample
+Box sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Box connector SDK.
+This sample demonstrates how to use the Box client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Box connection
@@ -42,11 +42,11 @@ async def example_1_list_root_folder():
     async with DefaultAzureCredential() as credential:
 
         async with BoxClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.list_root_folder_async()
+            items = [item async for item in client.list_root_folder()]
 
-            if result and "value" in result:
-                print(f"Found {len(result['value'])} items in root folder:")
-                for item in result["value"][:10]:
+            if items:
+                print(f"Found {len(items)} items in root folder:")
+                for item in items[:10]:
                     icon = "[DIR]" if item.get("IsFolder") else "[FILE]"
                     print(f"  {icon} {item.get('Name', 'N/A')}")
             else:
@@ -66,7 +66,7 @@ async def example_2_get_file_metadata_by_path():
 
         async with BoxClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                metadata = await client.get_file_metadata_by_path_async(path=file_path)
+                metadata = await client.get_file_metadata_by_path(path=file_path)
 
                 if metadata:
                     print(f"Name: {metadata.get('Name', 'N/A')}")
@@ -89,7 +89,7 @@ async def example_3_create_file():
 
         async with BoxClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.create_file_async(
+                result = await client.create_file(
                     input=b"Hello from azure-connectors Box sample!",
                     folder_path=destination_folder,
                     name=destination_name,
@@ -116,8 +116,7 @@ async def example_4_list_folder_for_polling():
 
         async with BoxClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.list_folder_async(id=folder_id)
-                items = result.get("value", []) if result else []
+                items = [item async for item in client.list_folder(id=folder_id)]
                 print(f"Folder listing returned {len(items)} item(s).")
                 print("Persist item IDs or timestamps to implement polling with this action client.")
             except ConnectorException as ex:

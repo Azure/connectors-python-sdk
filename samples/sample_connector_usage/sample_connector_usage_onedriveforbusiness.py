@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""OneDrive for Business Connector SDK sample."""
+"""OneDrive for Business sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os
@@ -19,8 +19,8 @@ async def example_list_root_folder() -> None:
     async with DefaultAzureCredential() as credential:
 
         async with OnedriveforbusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.list_root_folder_async()
-            values = result.get("value", []) if result else []
+            items = [item async for item in client.list_root_folder()]
+            values = items
             print(f"Found {len(values)} items in root folder.")
 
 
@@ -30,7 +30,7 @@ async def example_get_file_metadata() -> None:
     async with DefaultAzureCredential() as credential:
 
         async with OnedriveforbusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
-            metadata = await client.get_file_metadata_by_path_async(path=file_path)
+            metadata = await client.get_file_metadata_by_path(path=file_path)
             if metadata:
                 print(f"Name: {metadata.get('name')}, Size: {metadata.get('size')} bytes")
             else:
@@ -47,7 +47,7 @@ async def example_create_share_link() -> None:
     async with DefaultAzureCredential() as credential:
 
         async with OnedriveforbusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.create_share_link_async(id=file_id, type_="view")
+            result = await client.create_share_link(id=file_id, type_="view")
             if result:
                 print(f"Share URL: {result.get('webUrl')}")
             else:

@@ -23,8 +23,9 @@ from azure.core.pipeline.transport import (
     AsyncioRequestsTransport,
 )
 
-from azure.connectors.sdk import ConnectorClientBase, ConnectorException, ConnectorHttpClient
+from azure.connectors.sdk import ConnectorClientBase, ConnectorHttpClient
 from azure.connectors.sdk.http_client import _JitterRetryPolicy
+from azure.connectors.sdk.exceptions import ConnectorException
 
 
 class RecordingCredential:
@@ -134,7 +135,7 @@ async def test_token_credential_uses_fixed_scope_and_remains_open() -> None:
     transport = RecordingTransport(create_response(status=204, content=b""))
     client = ConnectorHttpClient(credential, transport=transport)
 
-    await client.send_async("GET", "https://example.test/items")
+    await client.send("GET", "https://example.test/items")
     await client.close()
 
     assert credential.scopes == ("https://apihub.azure.com/.default",)
@@ -152,7 +153,7 @@ async def test_key_credential_uses_bearer_authorization() -> None:
         transport=transport,
     )
 
-    await client.send_async("GET", "https://example.test/items")
+    await client.send("GET", "https://example.test/items")
 
     assert transport.requests[0].headers["Authorization"] == "Bearer test-key"
 
@@ -170,7 +171,7 @@ async def test_request_controls_and_response_hook_are_applied() -> None:
         transport=transport,
     )
 
-    response = await client.send_async(
+    response = await client.send(
         "GET",
         "https://example.test/items",
         timeout=5.0,
@@ -204,7 +205,7 @@ async def test_request_controls_override_client_default_headers() -> None:
         transport=transport,
     )
 
-    await client.send_async(
+    await client.send(
         "GET",
         "https://example.test/items",
         headers={"x-custom": "operation"},
@@ -252,7 +253,7 @@ async def test_timeout_bounds_slow_response_body(
 
     try:
         with pytest.raises(ServiceResponseTimeoutError):
-            await client.send_async(
+            await client.send(
                 "GET",
                 str(server.make_url("/")),
                 timeout=request_timeout,
@@ -284,7 +285,7 @@ async def test_nonpositive_timeout_disables_request_deadlines(
         transport=transport,
     )
 
-    response = await client.send_async(
+    response = await client.send(
         "GET",
         "https://example.test/items",
         timeout=request_timeout,
@@ -329,7 +330,7 @@ async def test_nonpositive_timeout_allows_slow_response_body(
     )
 
     try:
-        response = await client.send_async(
+        response = await client.send(
             "GET",
             str(server.make_url("/")),
             timeout=request_timeout,
@@ -372,7 +373,7 @@ async def test_empty_buffered_response_creates_snapshot_and_invokes_hook(
     )
 
     try:
-        response = await client.send_async(
+        response = await client.send(
             method,
             str(server.make_url("/")),
             response_hook=hook,
@@ -406,7 +407,7 @@ async def test_empty_buffered_error_raises_connector_exception() -> None:
 
     try:
         with pytest.raises(ConnectorException) as error:
-            await client.get_async(str(server.make_url("/")))
+            await client.get(str(server.make_url("/")))
     finally:
         await client.close()
         await server.close()
@@ -439,7 +440,7 @@ async def test_requests_transport_accepts_timeout_controls(
             side_effect=requests.ConnectionError("synthetic connection error"),
         ) as request:
             with pytest.raises(ServiceRequestError):
-                await client.send_async(
+                await client.send(
                     "GET",
                     "https://example.test/items",
                     **request_options,
@@ -481,7 +482,7 @@ async def test_unsafe_method_does_not_retry_by_default() -> None:
         transport=transport,
     )
 
-    response = await client.send_async("POST", "https://example.test/items")
+    response = await client.send("POST", "https://example.test/items")
 
     assert response.status == 500
     assert len(transport.requests) == 1
@@ -502,7 +503,7 @@ async def test_unsafe_method_retries_when_enabled() -> None:
         transport=transport,
     )
 
-    response = await client.send_async("POST", "https://example.test/items")
+    response = await client.send("POST", "https://example.test/items")
 
     assert response.status == 200
     assert len(transport.requests) == 2
@@ -581,7 +582,7 @@ async def test_injected_policies_run_at_their_configured_retry_scope() -> None:
         transport=transport,
     )
 
-    response = await client.send_async("GET", "https://example.test/items")
+    response = await client.send("GET", "https://example.test/items")
 
     assert response.status == 200
     assert events == [
@@ -610,7 +611,7 @@ async def test_explicit_chain_composes_injected_policy_scopes() -> None:
         transport=transport,
     )
 
-    response = await client.send_async("GET", "https://example.test/items")
+    response = await client.send("GET", "https://example.test/items")
 
     assert response.status == 200
     assert events == [
@@ -674,7 +675,7 @@ async def test_explicit_no_retry_chain_dispatches_through_builtin_transport(
     )
 
     try:
-        response = await client.send_async(
+        response = await client.send(
             "GET",
             str(server.make_url("/")),
             **request_options,
@@ -700,7 +701,7 @@ async def test_explicit_no_retry_chain_omits_retry_policy_options() -> None:
         transport=transport,
     )
 
-    response = await client.send_async("POST", "https://example.test/items")
+    response = await client.send("POST", "https://example.test/items")
 
     assert response.status == 200
     assert "timeout" not in transport.request_options[0]

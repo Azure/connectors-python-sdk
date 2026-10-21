@@ -1,4 +1,4 @@
-"""WordPress connector SDK sample."""
+"""WordPress sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os
@@ -6,7 +6,8 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.wordpress import CreatePostModel, WordpressClient
+from azure.connectors.wordpress import WordpressClient
+from azure.connectors.wordpress import CreatePostModel
 
 
 CONNECTION_RUNTIME_URL = os.environ.get("WORDPRESS_CONNECTION_URL", "")
@@ -16,7 +17,7 @@ async def list_sites() -> None:
     """List WordPress sites available to the connection."""
     async with DefaultAzureCredential() as credential:
         async with WordpressClient(CONNECTION_RUNTIME_URL, credential) as client:
-            sites = await client.list_sites_async()
+            sites = [item async for item in client.list_sites()]
             print(f"Sites: {sites}")
 
 
@@ -24,7 +25,7 @@ async def create_post() -> None:
     """Create a draft WordPress post."""
     async with DefaultAzureCredential() as credential:
         async with WordpressClient(CONNECTION_RUNTIME_URL, credential) as client:
-            post = await client.create_async(
+            post = await client.create(
                 input=CreatePostModel(
                     title="Generated connector sample",
                     content="Created with the Azure Connectors Python SDK.",

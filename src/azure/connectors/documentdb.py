@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
+from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
 from azure.core.credentials_async import AsyncTokenCredential
 from azure.core.pipeline.transport import AsyncHttpTransport
@@ -18,7 +19,39 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "DocumentdbClient",
+    "CosmosDbAccount",
+    "CosmosDbAccountList",
+    "CreateStoredProcedureInput",
+    "CreateStoredProcedureResponse",
+    "DataWithSensitivityLabelInfo",
+    "DocumentsCollection",
+    "DocumentsQuery",
+    "ExecuteStoredProcedureInput",
+    "GetAccountResponse",
+    "GetCollectionResponse",
+    "GetCollectionsResponse",
+    "GetDatabaseResponse",
+    "GetDatabasesResponse",
+    "GetDocumentResponse",
+    "GetDocumentsResponse",
+    "GetStoredProceduresResponse",
+    "ObjectEntity",
+    "ObjectWithoutType",
+    "PostDocumentsRequest",
+    "PostDocumentsResponse",
+    "PutDocumentRequest",
+    "PutDocumentResponse",
+    "QueryDocumentsResponse",
+    "QueryRequest",
+    "QueryResponse",
+    "ReplaceStoredProcedureInput",
+    "SensitivityLabelMetadata",
+]
 
 
 # Type Definitions
@@ -29,15 +62,32 @@ class PostDocumentsResponse:
     Response for Create or update document
     """
 
-    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
-    ts: Optional[int] = field(default=None, metadata={"wire_name": "_ts"})
-    self: Optional[str] = field(default=None, metadata={"wire_name": "_self"})
-    etag: Optional[str] = field(default=None, metadata={"wire_name": "_etag"})
-    attachments: Optional[str] = field(
+    rid: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "_rid"},
+    )
+    ts: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "_ts"},
+    )
+    self: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "_self"},
+    )
+    etag: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "_etag"},
+    )
+    attachments: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "_attachments"},
     )
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -46,11 +96,11 @@ class CreateStoredProcedureInput:
     Create stored procedure
     """
 
-    body: Optional[str] = None
+    body: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Function that defines the stored procedure, e.g. 'function(params){ ... }'
     """
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """New id of the stored procedure."""
 
 
@@ -60,17 +110,33 @@ class CreateStoredProcedureResponse:
     Response for Create stored procedure
     """
 
-    etag: Optional[str] = field(default=None, metadata={"wire_name": "_etag"})
+    etag: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "_etag"},
+    )
     """_etag"""
-    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
+    rid: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "_rid"},
+    )
     """_rid"""
-    self: Optional[str] = field(default=None, metadata={"wire_name": "_self"})
+    self: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "_self"},
+    )
     """_self"""
-    ts: Optional[int] = field(default=None, metadata={"wire_name": "_ts"})
+    ts: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "_ts"},
+    )
     """_ts"""
-    body: Optional[str] = None
+    body: Optional[str] = dataclass_field(default=None, kw_only=True)
     """body"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """id"""
 
 
@@ -83,7 +149,7 @@ class ObjectWithoutType:
     Response for Execute stored procedure
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -96,8 +162,11 @@ class GetDocumentResponse:
     Response for Get a document
     """
 
-    metadata: Optional[List[DataWithSensitivityLabelInfo]] = field(
+    metadata: Optional[
+        List[DataWithSensitivityLabelInfo | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@metadata"},
     )
     """List of columns along with their Sensitivity Labels"""
@@ -109,13 +178,21 @@ class GetDocumentsResponse:
     Response for Get all documents
     """
 
-    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
-    documents: Optional[List[Dict[str, Any]]] = field(
+    rid: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "_rid"},
+    )
+    documents: Optional[List[Dict[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Documents"},
     )
-    metadata: Optional[List[DataWithSensitivityLabelInfo]] = field(
+    metadata: Optional[
+        List[DataWithSensitivityLabelInfo | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@metadata"},
     )
     """List of columns along with their Sensitivity Labels"""
@@ -127,15 +204,21 @@ class GetStoredProceduresResponse:
     Response for Get stored procedures
     """
 
-    count: Optional[int] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_count"},
     )
     """_count"""
-    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
-    """_rid"""
-    stored_procedures: Optional[List[Dict[str, Any]]] = field(
+    rid: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "_rid"},
+    )
+    """_rid"""
+    stored_procedures: Optional[List[Dict[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "StoredProcedures"},
     )
     """StoredProcedures"""
@@ -147,31 +230,48 @@ class QueryDocumentsResponse:
     Response for Query documents
     """
 
-    value: Optional[List[ObjectWithoutType]] = None
-    continuation_token: Optional[str] = field(
+    value: Optional[
+        List[ObjectWithoutType | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    continuation_token: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "ContinuationToken"},
     )
-    count: Optional[int] = field(default=None, metadata={"wire_name": "Count"})
-    request_charge: Optional[float] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Count"},
+    )
+    request_charge: Optional[float] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "RequestCharge"},
     )
-    session_token: Optional[str] = field(
+    session_token: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SessionToken"},
     )
-    activity_id: Optional[str] = field(
+    activity_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ActivityId"},
     )
-    metadata: Optional[List[DataWithSensitivityLabelInfo]] = field(
+    metadata: Optional[
+        List[DataWithSensitivityLabelInfo | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@metadata"},
     )
     """List of columns along with their Sensitivity Labels"""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -183,8 +283,12 @@ class PutDocumentResponse:
     Response for Replace a document
     """
 
-    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
-    id: Optional[str] = None
+    rid: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "_rid"},
+    )
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -193,11 +297,11 @@ class ReplaceStoredProcedureInput:
     Replace stored procedure
     """
 
-    body: Optional[str] = None
+    body: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Function that defines the stored procedure, e.g. 'function(params){ ... }'
     """
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Id of the existing stored procedure."""
 
 
@@ -207,7 +311,12 @@ class CosmosDbAccountList:
     Response for Get Cosmos DB accounts
     """
 
-    value: Optional[List[CosmosDbAccount]] = None
+    value: Optional[
+        List[CosmosDbAccount | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of Azure Cosmos DB account names"""
 
 
@@ -217,13 +326,19 @@ class GetDatabasesResponse:
     Response for Get all databases
     """
 
-    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
-    databases: Optional[List[Dict[str, Any]]] = field(
+    rid: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "_rid"},
+    )
+    databases: Optional[List[Dict[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Databases"},
     )
-    count: Optional[int] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_count"},
     )
 
@@ -234,13 +349,19 @@ class GetCollectionsResponse:
     Response for Get all collections
     """
 
-    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
-    document_collections: Optional[List[Dict[str, Any]]] = field(
+    rid: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "_rid"},
+    )
+    document_collections: Optional[List[Dict[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DocumentCollections"},
     )
-    count: Optional[int] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_count"},
     )
 
@@ -251,8 +372,9 @@ class DocumentsQuery:
     Definition: DocumentsQuery
     """
 
-    query_text: Optional[str] = field(
+    query_text: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "QueryText"},
     )
     """SQL Syntax Query over documents"""
@@ -264,7 +386,7 @@ class ObjectEntity:
     Definition: Object
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -277,22 +399,35 @@ class DocumentsCollection:
     Definition: DocumentsCollection
     """
 
-    value: Optional[List[ObjectWithoutType]] = None
-    continuation_token: Optional[str] = field(
+    value: Optional[
+        List[ObjectWithoutType | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    continuation_token: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "ContinuationToken"},
     )
-    count: Optional[int] = field(default=None, metadata={"wire_name": "Count"})
-    request_charge: Optional[float] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Count"},
+    )
+    request_charge: Optional[float] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "RequestCharge"},
     )
-    session_token: Optional[str] = field(
+    session_token: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SessionToken"},
     )
-    activity_id: Optional[str] = field(
+    activity_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ActivityId"},
     )
 
@@ -303,9 +438,17 @@ class GetAccountResponse:
     Definition: getAccountResponse
     """
 
-    self: Optional[str] = field(default=None, metadata={"wire_name": "_self"})
-    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
-    id: Optional[str] = None
+    self: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "_self"},
+    )
+    rid: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "_rid"},
+    )
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -314,19 +457,37 @@ class GetDatabaseResponse:
     Definition: getDatabaseResponse
     """
 
-    id: Optional[str] = None
-    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
-    self: Optional[str] = field(default=None, metadata={"wire_name": "_self"})
-    etag: Optional[str] = field(default=None, metadata={"wire_name": "_etag"})
-    colls: Optional[str] = field(
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    rid: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "_rid"},
+    )
+    self: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "_self"},
+    )
+    etag: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "_etag"},
+    )
+    colls: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "_colls"},
     )
-    users: Optional[str] = field(
+    users: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_users"},
     )
-    ts: Optional[int] = field(default=None, metadata={"wire_name": "_ts"})
+    ts: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "_ts"},
+    )
 
 
 GetCollectionResponse = List[Dict[str, Any]]
@@ -338,7 +499,7 @@ class PostDocumentsRequest:
     Definition: postDocumentsRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -351,7 +512,7 @@ class PutDocumentRequest:
     Definition: putDocumentRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -364,7 +525,7 @@ class QueryRequest:
     Definition: queryRequest
     """
 
-    query: Optional[str] = None
+    query: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -373,13 +534,19 @@ class QueryResponse:
     Definition: queryResponse
     """
 
-    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
-    count: Optional[float] = field(
+    rid: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "_rid"},
+    )
+    count: Optional[float] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "_count"},
     )
-    documents: Optional[List[Any]] = field(
+    documents: Optional[List[Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Documents"},
     )
 
@@ -390,10 +557,13 @@ class DataWithSensitivityLabelInfo:
     Definition: DataWithSensitivityLabelInfo
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name"""
-    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = field(
+    sensitivity_label_info: Optional[
+        List[SensitivityLabelMetadata | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sensitivityLabelInfo"},
     )
     """List of Sensitivity Label Information"""
@@ -405,41 +575,47 @@ class SensitivityLabelMetadata:
     Definition: SensitivityLabelMetadata
     """
 
-    sensitivity_label_id: Optional[str] = field(
+    sensitivity_label_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sensitivityLabelId"},
     )
     """SensitivityLabel Id."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel name."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """SensitivityLabel displayName info"""
-    tooltip: Optional[str] = None
+    tooltip: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel details on tooltip."""
-    priority: Optional[int] = None
+    priority: Optional[int] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel priority."""
-    color: Optional[str] = None
+    color: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel color."""
-    is_encrypted: Optional[bool] = field(
+    is_encrypted: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isEncrypted"},
     )
     """ is  SensitivityLabel Encrypted."""
-    is_enabled: Optional[bool] = field(
+    is_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isEnabled"},
     )
     """Whether  SensitivityLabel is Enabled."""
-    is_parent: Optional[bool] = field(
+    is_parent: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isParent"},
     )
     """Whether  SensitivityLabel is Parent."""
-    parent_sensitivity_label_id: Optional[str] = field(
+    parent_sensitivity_label_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parentSensitivityLabelId"},
     )
     """Parent  SensitivityLabel Id."""
@@ -451,10 +627,15 @@ class CosmosDbAccount:
     Definition: CosmosDbAccount
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """The name of the Azure Cosmos DB account."""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """The name of the Azure Cosmos DB account."""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the Azure Cosmos DB account."""
@@ -471,7 +652,7 @@ class DocumentdbClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -488,8 +669,8 @@ class DocumentdbClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -510,7 +691,7 @@ class DocumentdbClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -526,15 +707,49 @@ class DocumentdbClient(ConnectorClientBase):
         return "documentdb"
 
     def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
-        parsed_next_link = urlsplit(next_link)
-        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
             if next_link.startswith("/"):
                 return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
             if next_link.startswith("?"):
-                return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
 
-        parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
         connection_hostname = parsed_connection.hostname
         if next_link_hostname is None or connection_hostname is None:
@@ -551,7 +766,11 @@ class DocumentdbClient(ConnectorClientBase):
                 parsed_next_link.scheme == parsed_connection.scheme
                 and next_link_port == connection_port
             ):
-                return next_link
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
 
             raise ValueError(
                 "Pagination URL origin "
@@ -564,9 +783,9 @@ class DocumentdbClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def create_document_async(
+    async def create_document(
         self,
-        input: PostDocumentsRequest,
+        input: PostDocumentsRequest | Mapping[str, Any],
         cosmos_db_account_name: str,
         database_id: str,
         collection_id: str,
@@ -581,6 +800,26 @@ class DocumentdbClient(ConnectorClientBase):
 
         Create or update document. When creating a document in DocumentDB, the
         body must include an id property.
+
+        Swagger operation ID: `CreateDocument_V3`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            cosmos_db_account_name: The Azure Cosmos DB account name (without
+                documents.azure.com).
+            database_id: The name of the database.
+            collection_id: The name of the collection.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -594,7 +833,7 @@ class DocumentdbClient(ConnectorClientBase):
             f"/docs"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -608,6 +847,7 @@ class DocumentdbClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -615,9 +855,9 @@ class DocumentdbClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_stored_procedure_async(
+    async def create_stored_procedure(
         self,
-        input: CreateStoredProcedureInput,
+        input: CreateStoredProcedureInput | Mapping[str, Any],
         cosmos_db_account_name: str,
         database_id: str,
         collection_id: str,
@@ -631,6 +871,26 @@ class DocumentdbClient(ConnectorClientBase):
         Create stored procedure
 
         Create stored procedure.
+
+        Swagger operation ID: `CreateStoredProcedure_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            cosmos_db_account_name: The Azure Cosmos DB account name (without
+                documents.azure.com).
+            database_id: The name of the database.
+            collection_id: The name of the collection.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -644,7 +904,7 @@ class DocumentdbClient(ConnectorClientBase):
             f"/sprocs"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -658,6 +918,7 @@ class DocumentdbClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -665,7 +926,7 @@ class DocumentdbClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_document_async(
+    async def delete_document(
         self,
         cosmos_db_account_name: str,
         database_id: str,
@@ -681,6 +942,25 @@ class DocumentdbClient(ConnectorClientBase):
         Delete a document
 
         Delete a document.
+
+        Swagger operation ID: `DeleteDocument_V2`.
+
+        Args:
+            cosmos_db_account_name: The Azure Cosmos DB account name (without
+                documents.azure.com).
+            database_id: The name of the database.
+            collection_id: The name of the collection.
+            document_id: The identifier of the document.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -695,7 +975,7 @@ class DocumentdbClient(ConnectorClientBase):
             f"/{quote(str(document_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -709,9 +989,10 @@ class DocumentdbClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def delete_stored_procedure_async(
+    async def delete_stored_procedure(
         self,
         cosmos_db_account_name: str,
         database_id: str,
@@ -727,6 +1008,25 @@ class DocumentdbClient(ConnectorClientBase):
         Delete stored procedure
 
         Delete stored procedure.
+
+        Swagger operation ID: `DeleteStoredProcedure_V2`.
+
+        Args:
+            cosmos_db_account_name: The Azure Cosmos DB account name (without
+                documents.azure.com).
+            database_id: The name of the database.
+            collection_id: The name of the collection.
+            sproc_id: The name of the stored procedure.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -741,7 +1041,7 @@ class DocumentdbClient(ConnectorClientBase):
             f"/{quote(str(sproc_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -755,6 +1055,7 @@ class DocumentdbClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -762,7 +1063,7 @@ class DocumentdbClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def execute_stored_procedure_async(
+    async def execute_stored_procedure(
         self,
         input: ExecuteStoredProcedureInput,
         cosmos_db_account_name: str,
@@ -779,6 +1080,26 @@ class DocumentdbClient(ConnectorClientBase):
         Execute stored procedure
 
         Execute stored procedure in specified collection.
+
+        Swagger operation ID: `ExecuteStoredProcedure_V2`.
+
+        Args:
+            input: The request body.
+            cosmos_db_account_name: The Azure Cosmos DB account name (without
+                documents.azure.com).
+            database_id: The name of the database.
+            collection_id: The name of the collection.
+            sproc_id: The name of the stored procedure.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -793,7 +1114,7 @@ class DocumentdbClient(ConnectorClientBase):
             f"/{quote(str(sproc_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -807,6 +1128,7 @@ class DocumentdbClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -814,24 +1136,49 @@ class DocumentdbClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_document_async(
+    def list_document(
         self,
         cosmos_db_account_name: str,
         database_id: str,
         collection_id: str,
         document_id: str,
+        *,
         extract_sensitivity_label: Optional[bool] = None,
         purview_account_name: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get a document
 
         Get a document.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetDocument_V2`.
+
+        Args:
+            cosmos_db_account_name: The Azure Cosmos DB account name (without
+                documents.azure.com).
+            database_id: The name of the database.
+            collection_id: The name of the collection.
+            document_id: The identifier for the document.
+            extract_sensitivity_label: Specify whether to extract MIP labels.
+            purview_account_name: Default collection will be queried unless
+                specified.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -858,45 +1205,90 @@ class DocumentdbClient(ConnectorClientBase):
             query_params.append(f"purviewAccountName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_documents_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("@metadata", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_documents(
         self,
         cosmos_db_account_name: str,
         database_id: str,
         collection_id: str,
+        *,
         extract_sensitivity_label: Optional[bool] = None,
         purview_account_name: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get all documents
 
         Get all documents.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetDocuments_V3`.
+
+        Args:
+            cosmos_db_account_name: The Azure Cosmos DB account name (without
+                documents.azure.com).
+            database_id: The name of the database.
+            collection_id: The name of the collection.
+            extract_sensitivity_label: Specify whether to extract MIP labels.
+            purview_account_name: Default collection will be queried unless
+                specified.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -922,29 +1314,50 @@ class DocumentdbClient(ConnectorClientBase):
             query_params.append(f"purviewAccountName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_stored_procedures_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("Documents", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def get_stored_procedures(
         self,
         cosmos_db_account_name: str,
         database_id: str,
@@ -959,6 +1372,24 @@ class DocumentdbClient(ConnectorClientBase):
         Get stored procedures
 
         Get stored procedures in the specified collection.
+
+        Swagger operation ID: `GetStoredProcedures_V2`.
+
+        Args:
+            cosmos_db_account_name: The Azure Cosmos DB account name (without
+                documents.azure.com).
+            database_id: The name of the database.
+            collection_id: The name of the collection.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -972,7 +1403,7 @@ class DocumentdbClient(ConnectorClientBase):
             f"/sprocs"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -986,6 +1417,7 @@ class DocumentdbClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -993,32 +1425,62 @@ class DocumentdbClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def query_documents_async(
+    def list_query_documents(
         self,
         cosmos_db_account_name: str,
         database_id: str,
         container_id: str,
+        *,
         query_text: Optional[str] = None,
         partition_key: Optional[str] = None,
         max_item_count: Optional[int] = None,
-        continuation_token: Optional[str] = None,
         consistency_level: Optional[str] = None,
         session_token: Optional[str] = None,
         extract_sensitivity_label: Optional[bool] = None,
         purview_account_name: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Query documents
 
         Query documents.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `QueryDocuments_V5`.
+
+        Args:
+            cosmos_db_account_name: The Azure Cosmos DB account name (without
+                documents.azure.com).
+            database_id: The name of the database.
+            container_id: The name of the container.
+            query_text: SQL query. If empty, will return all documents.
+            partition_key: Value must be provided according to its type
+                (\"string\", 42, 0.5). If empty, all partitions will be used to
+                search for documents.
+            max_item_count: An integer indicating the maximum number of items
+                to be returned per page.
+            consistency_level: Consistency level required for the feed
+                (query/read feed) operation.
+            session_token: The session token for use with session consistency.
+            extract_sensitivity_label: Specify whether to extract MIP labels.
+            purview_account_name: Default collection will be queried unless
+                specified.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1047,11 +1509,6 @@ class DocumentdbClient(ConnectorClientBase):
             if isinstance(max_item_count, bool):
                 value = value.lower()
             query_params.append(f"maxItemCount={quote(value, safe='')}")
-        if continuation_token is not None:
-            value = str(continuation_token)
-            if isinstance(continuation_token, bool):
-                value = value.lower()
-            query_params.append(f"continuationToken={quote(value, safe='')}")
         if consistency_level is not None:
             value = str(consistency_level)
             if isinstance(consistency_level, bool):
@@ -1074,11 +1531,18 @@ class DocumentdbClient(ConnectorClientBase):
             query_params.append(f"purviewAccountName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1091,25 +1555,34 @@ class DocumentdbClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def replace_document_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def replace_document(
         self,
-        input: PutDocumentRequest,
+        input: PutDocumentRequest | Mapping[str, Any],
         cosmos_db_account_name: str,
         database_id: str,
         collection_id: str,
@@ -1124,6 +1597,27 @@ class DocumentdbClient(ConnectorClientBase):
         Replace a document
 
         Replace a document.
+
+        Swagger operation ID: `ReplaceDocument_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            cosmos_db_account_name: The Azure Cosmos DB account name (without
+                documents.azure.com).
+            database_id: The name of the database.
+            collection_id: The name of the collection.
+            document_id: The identifier of the document.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1138,7 +1632,7 @@ class DocumentdbClient(ConnectorClientBase):
             f"/{quote(str(document_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1152,6 +1646,7 @@ class DocumentdbClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1159,9 +1654,9 @@ class DocumentdbClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def replace_stored_procedure_async(
+    async def replace_stored_procedure(
         self,
-        input: ReplaceStoredProcedureInput,
+        input: ReplaceStoredProcedureInput | Mapping[str, Any],
         cosmos_db_account_name: str,
         database_id: str,
         collection_id: str,
@@ -1176,6 +1671,27 @@ class DocumentdbClient(ConnectorClientBase):
         Replace stored procedure
 
         Replace stored procedure.
+
+        Swagger operation ID: `ReplaceStoredProcedure_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            cosmos_db_account_name: The Azure Cosmos DB account name (without
+                documents.azure.com).
+            database_id: The name of the database.
+            collection_id: The name of the collection.
+            sproc_id: The name of the stored procedure.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1190,7 +1706,7 @@ class DocumentdbClient(ConnectorClientBase):
             f"/{quote(str(sproc_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1204,6 +1720,7 @@ class DocumentdbClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1211,43 +1728,81 @@ class DocumentdbClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_cosmos_db_accounts_async(
+    def list_cosmos_db_accounts(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get Cosmos DB accounts
 
         This operation list the user's Azure Cosmos DB accounts.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetCosmosDbAccounts`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/cosmosdbaccounts"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_databases_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def get_databases(
         self,
         cosmos_db_account_name: str,
         *,
@@ -1260,13 +1815,29 @@ class DocumentdbClient(ConnectorClientBase):
         Get all databases
 
         Get all databases.
+
+        Swagger operation ID: `GetDatabases_V2`.
+
+        Args:
+            cosmos_db_account_name: The Azure Cosmos DB account name (without
+                documents.azure.com).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v2/cosmosdb/{quote(str(cosmos_db_account_name), safe='')}/dbs"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1280,6 +1851,7 @@ class DocumentdbClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1287,7 +1859,7 @@ class DocumentdbClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_collections_async(
+    async def get_collections(
         self,
         cosmos_db_account_name: str,
         database_id: str,
@@ -1301,6 +1873,23 @@ class DocumentdbClient(ConnectorClientBase):
         Get all collections
 
         Get all collections.
+
+        Swagger operation ID: `GetCollections_V2`.
+
+        Args:
+            cosmos_db_account_name: The Azure Cosmos DB account name (without
+                documents.azure.com).
+            database_id: The name of the database.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1312,7 +1901,7 @@ class DocumentdbClient(ConnectorClientBase):
             f"/colls"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1326,6 +1915,7 @@ class DocumentdbClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

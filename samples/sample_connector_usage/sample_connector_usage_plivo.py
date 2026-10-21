@@ -1,4 +1,4 @@
-"""Plivo connector SDK sample."""
+"""Plivo sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os
@@ -6,7 +6,8 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.plivo import PlivoClient, SMS
+from azure.connectors.plivo import PlivoClient
+from azure.connectors.plivo import SMS
 
 
 CONNECTION_RUNTIME_URL = os.environ.get("PLIVO_CONNECTION_URL", "")
@@ -16,7 +17,7 @@ async def send_sms() -> None:
     """Send an SMS message."""
     async with DefaultAzureCredential() as credential:
         async with PlivoClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.send_sms_async(
+            result = await client.send_sms(
                 input=SMS(
                     src="15550000000",
                     dst="15551111111",
@@ -31,7 +32,10 @@ async def list_messages() -> None:
     """List messages for an account."""
     async with DefaultAzureCredential() as credential:
         async with PlivoClient(CONNECTION_RUNTIME_URL, credential) as client:
-            messages = await client.list_messages_async(auth_id="PLIVO_AUTH_ID")
+            messages = [
+                message
+                async for message in client.list_messages(auth_id="PLIVO_AUTH_ID")
+            ]
             print(f"Messages: {messages}")
 
 

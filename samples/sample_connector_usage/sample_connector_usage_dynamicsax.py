@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Dynamics 365 for Finance and Operations (Dynamics AX) Connector SDK Sample
+Dynamics 365 for Finance and Operations (Dynamics AX) sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Dynamics AX connector SDK.
+This sample demonstrates how to use the Dynamics AX client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a Dynamics AX connection
@@ -28,8 +28,8 @@ import os
 
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.dynamicsax import DynamicsaxClient
 from azure.connectors.dynamicsax import (
-    DynamicsaxClient,
     PostItemInput,
 )
 
@@ -51,8 +51,8 @@ async def example_1_list_instances():
     async with DefaultAzureCredential() as credential:
 
         async with DynamicsaxClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.get_data_sets_async()
-            datasets = result.get("value", []) if result else []
+            items = [item async for item in client.list_data_sets()]
+            datasets = items
 
             print(f"Found {len(datasets)} instance(s).")
             for dataset in datasets[:10]:
@@ -70,8 +70,8 @@ async def example_2_list_tables():
     async with DefaultAzureCredential() as credential:
 
         async with DynamicsaxClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.get_tables_async(dataset=DATASET)
-            tables = result.get("value", []) if result else []
+            items = [item async for item in client.list_tables(dataset=DATASET)]
+            tables = items
 
             print(f"Found {len(tables)} table(s).")
             for table in tables[:10]:
@@ -94,7 +94,7 @@ async def example_3_create_record():
             try:
                 record = PostItemInput()
                 record.additional_properties = {"Name": "SDK Sample"}
-                result = await client.post_item_async(
+                result = await client.post_item(
                     input=record,
                     dataset=DATASET,
                     table=table,

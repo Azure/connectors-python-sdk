@@ -3,17 +3,128 @@
 """Unit tests for JiraClient."""
 
 import inspect
+import json
 from typing import Optional, get_type_hints
 from unittest.mock import AsyncMock, patch
 
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.jira import JiraClient, CreateIssueInput, EditIssueInput
+from azure.connectors.jira import JiraClient
+from azure.connectors.jira import CreateIssueInput, EditIssueInput
 from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
+
+
+@pytest.fixture(params=[
+    pytest.param("last_page", id="last-page"),
+    pytest.param("empty_intermediate_page", id="empty-intermediate-page"),
+    pytest.param("missing_token", id="missing-token"),
+    pytest.param("empty_token", id="empty-token"),
+    pytest.param("null_token", id="null-token"),
+    pytest.param("stale_token", id="is-last-overrides-stale-token"),
+])
+def jira_issue_token_pages(request):
+    """Provide opaque-token pages for the generated async client tests."""
+    first_page = {
+        "issues": [{"id": "first"}],
+        "isLast": False,
+        "nextPageToken": "opaque/page2",
+    }
+    last_page = {"issues": [{"id": "second"}], "isLast": True}
+    pages = [first_page, last_page]
+    expected_tokens = [None, "opaque%2Fpage2"]
+    if request.param == "empty_intermediate_page":
+        pages.insert(1, {
+            "issues": [],
+            "isLast": False,
+            "nextPageToken": "opaque/page3",
+        })
+        expected_tokens.append("opaque%2Fpage3")
+    elif request.param in {"missing_token", "empty_token", "null_token"}:
+        last_page["isLast"] = False
+        if request.param == "empty_token":
+            last_page["nextPageToken"] = ""
+        elif request.param == "null_token":
+            last_page["nextPageToken"] = None
+    elif request.param == "stale_token":
+        last_page["nextPageToken"] = "stale/page3"
+
+    return (
+        [MockResponse(status=200, text=json.dumps(page)) for page in pages],
+        expected_tokens,
+    )
+
+
+class TestListIssuesKeyCredential:
+    """Behavioral paging tests for the async Jira client with a key credential."""
+
+    @pytest.mark.asyncio
+    async def test_opaque_token_paging(self, jira_issue_token_pages):
+        """Test later items, encoded query binding, empty pages, and termination."""
+        responses, expected_tokens = jira_issue_token_pages
+        async with JiraClient(
+            "https://example.azure.com/connections/test",
+            credential=AzureKeyCredential("test-key"),
+        ) as client:
+            with patch.object(
+                client._http_client,
+                "send",
+                new_callable=AsyncMock,
+                side_effect=responses,
+            ) as transport:
+                issues = [issue async for issue in client.list_issues(
+                    jql="project = DEMO",
+                    fields="summary,status",
+                )]
+
+        assert issues == [{"id": "first"}, {"id": "second"}]
+        assert transport.await_count == len(expected_tokens)
+        initial_url = (
+            "https://example.azure.com/connections/test/2/search"
+            "?expand=%2A&jql=project%20%3D%20DEMO&fields=summary%2Cstatus"
+        )
+        assert [request.args for request in transport.await_args_list] == [
+            ("GET", initial_url if token is None else (
+                f"{initial_url}&nextPageToken={token}"
+            ))
+            for token in expected_tokens
+        ]
+
+    @pytest.mark.asyncio
+    async def test_named_continuation_token_keeps_its_query_binding(self):
+        """Test by_page resumes with a raw opaque token and stops at exhaustion."""
+        async with JiraClient(
+            "https://example.azure.com/connections/test",
+            credential=AzureKeyCredential("test-key"),
+        ) as client:
+            with patch.object(
+                client._http_client,
+                "send",
+                new_callable=AsyncMock,
+                side_effect=[MockResponse(
+                    status=200,
+                    text='{"issues": [{"id": "resumed"}], "isLast": false}',
+                )],
+            ) as transport:
+                pages = client.list_issues(jql="project = DEMO").by_page(
+                    continuation_token="page/2",
+                )
+                page = await anext(pages)
+                assert [issue async for issue in page] == [{"id": "resumed"}]
+                assert pages.continuation_token is None
+                with pytest.raises(StopAsyncIteration):
+                    await anext(pages)
+
+        transport.assert_awaited_once()
+        assert transport.await_args.args == (
+            "GET",
+            "https://example.azure.com/connections/test/2/search"
+            "?expand=%2A&jql=project%20%3D%20DEMO&nextPageToken=page%2F2",
+        )
 
 
 class TestJiraClientInitialization:
@@ -49,7 +160,7 @@ class TestJiraClientInitialization:
         client = JiraClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -114,23 +225,22 @@ class TestListResourcesAsync:
         )
         mock_response = MockResponse(
             status=200,
-            text='{"value": [{"id": "site-1"}]}',
+            text='[{"id": "site-1"}]',
         )
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_resources_async()
+            result = await resolve_generated_result(client.list_resources())
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
             assert "/oauth/token/accessible-resources" in path
-            assert result is not None
-            assert "value" in result
+            assert result == [{"id": "site-1"}]
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -146,12 +256,53 @@ class TestListResourcesAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.list_resources_async()
+                await resolve_generated_result(client.list_resources())
+
+
+class TestListFiltersAsync:
+    """Tests for list_filters paging behavior."""
+
+    @pytest.mark.asyncio
+    async def test_follows_next_page_url(self, mock_credential):
+        """Test Jira's schema continuation URL is followed to the second page."""
+        client = JiraClient(
+            "https://example.azure.com/connections/test",
+            credential=mock_credential,
+        )
+        next_page_url = (
+            "https://example.azure.com/connections/test/v2/filter/search"
+            "?startAt=50"
+        )
+        responses = [
+            MockResponse(
+                status=200,
+                text=(
+                    '{"values": [{"id": "filter-1"}], '
+                    f'"nextPage": "{next_page_url}"}}'
+                ),
+            ),
+            MockResponse(
+                status=200,
+                text='{"values": [{"id": "filter-2"}]}',
+            ),
+        ]
+
+        with patch.object(
+            client._http_client,
+            "send",
+            new_callable=AsyncMock,
+            side_effect=responses,
+        ) as transport:
+            result = await resolve_generated_result(client.list_filters())
+
+        assert result == [{"id": "filter-1"}, {"id": "filter-2"}]
+        assert transport.await_count == 2
+        assert transport.await_args_list[1].args[1] == next_page_url
 
 
 class TestListIssuesAsync:
@@ -159,10 +310,10 @@ class TestListIssuesAsync:
 
     def test_fields_are_an_optional_string(self):
         """Test the live fields parameter is exposed without an implicit all-fields default."""
-        fields = inspect.signature(JiraClient.list_issues_async).parameters["fields"]
+        fields = inspect.signature(JiraClient.list_issues).parameters["fields"]
 
         assert fields.default is None
-        assert get_type_hints(JiraClient.list_issues_async)["fields"] == Optional[str]
+        assert get_type_hints(JiraClient.list_issues)["fields"] == Optional[str]
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
@@ -179,14 +330,14 @@ class TestListIssuesAsync:
         ) as client:
             with patch.object(
                 client._http_client,
-                "send_async",
+                "send",
                 new_callable=AsyncMock,
                 return_value=MockResponse(status=200, text='{"issues": []}'),
             ) as transport:
                 arguments = {"jql": "project = DEMO"}
                 if fields is not None:
                     arguments["fields"] = fields
-                await client.list_issues_async(**arguments)
+                await resolve_generated_result(client.list_issues(**arguments))
 
             transport.assert_awaited_once()
             method, request_url = transport.await_args.args
@@ -199,22 +350,67 @@ class TestListIssuesAsync:
 
     @pytest.mark.asyncio
     async def test_named_continuation_token_keeps_its_query_binding(self, mock_credential):
-        """Test callers can retain token binding by using the existing named parameter."""
+        """Test by_page resumes with a raw opaque token and stops at exhaustion."""
         async with JiraClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         ) as client:
             with patch.object(
                 client._http_client,
-                "send_async",
+                "send",
                 new_callable=AsyncMock,
-                return_value=MockResponse(status=200, text='{"issues": []}'),
+                side_effect=[MockResponse(
+                    status=200,
+                    text='{"issues": [{"id": "resumed"}], "isLast": false}',
+                )],
             ) as transport:
-                await client.list_issues_async(next_page_token="page/2")
+                pages = client.list_issues(jql="project = DEMO").by_page(
+                    continuation_token="page/2",
+                )
+                page = await anext(pages)
+                assert [issue async for issue in page] == [{"id": "resumed"}]
+                assert pages.continuation_token is None
+                with pytest.raises(StopAsyncIteration):
+                    await anext(pages)
 
-            request_url = transport.await_args.args[1]
-            assert "nextPageToken=page%2F2" in request_url
-            assert "fields=" not in request_url
+        transport.assert_awaited_once()
+        assert transport.await_args.args == (
+            "GET",
+            "https://example.azure.com/connections/test/2/search"
+            "?expand=%2A&jql=project%20%3D%20DEMO&nextPageToken=page%2F2",
+        )
+
+    @pytest.mark.asyncio
+    async def test_opaque_token_paging(self, mock_credential, jira_issue_token_pages):
+        """Test later items, encoded query binding, empty pages, and termination."""
+        responses, expected_tokens = jira_issue_token_pages
+        async with JiraClient(
+            "https://example.azure.com/connections/test",
+            credential=mock_credential,
+        ) as client:
+            with patch.object(
+                client._http_client,
+                "send",
+                new_callable=AsyncMock,
+                side_effect=responses,
+            ) as transport:
+                issues = [issue async for issue in client.list_issues(
+                    jql="project = DEMO",
+                    fields="summary,status",
+                )]
+
+        assert issues == [{"id": "first"}, {"id": "second"}]
+        assert transport.await_count == len(expected_tokens)
+        initial_url = (
+            "https://example.azure.com/connections/test/2/search"
+            "?expand=%2A&jql=project%20%3D%20DEMO&fields=summary%2Cstatus"
+        )
+        assert [request.args for request in transport.await_args_list] == [
+            ("GET", initial_url if token is None else (
+                f"{initial_url}&nextPageToken={token}"
+            ))
+            for token in expected_tokens
+        ]
 
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
@@ -230,13 +426,15 @@ class TestListIssuesAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_issues_async(
-                jql="created >= -3650d",
-                fields="summary,status",
+            result = await resolve_generated_result(
+                client.list_issues(
+                    jql="created >= -3650d",
+                    fields="summary,status",
+                )
             )
 
             mock_send.assert_called_once()
@@ -246,8 +444,7 @@ class TestListIssuesAsync:
             assert "jql=created%20%3E%3D%20-3650d" in path
             assert "fields=summary%2Cstatus" in path
             assert "fields=%2Aall" not in path
-            assert result is not None
-            assert "issues" in result
+            assert result == [{"key": "PROJ-1"}]
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -263,12 +460,12 @@ class TestListIssuesAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.list_issues_async()
+                await resolve_generated_result(client.list_issues())
 
 
 class TestCreateIssueAsync:
@@ -291,11 +488,11 @@ class TestCreateIssueAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_issue_async(
+            result = await client.create_issue(
                 input=payload,
                 project_key="PROJ",
                 issue_type_ids="10001",
@@ -327,12 +524,12 @@ class TestCreateIssueAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.create_issue_async(
+                await client.create_issue(
                     input=payload,
                     project_key="PROJ",
                     issue_type_ids="10001",
@@ -356,11 +553,11 @@ class TestGetIssueAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_issue_async(issue_key="PROJ-1")
+            result = await client.get_issue(issue_key="PROJ-1")
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -384,11 +581,11 @@ class TestDeleteProjectAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.delete_project_async(project_id_or_key="PROJ")
+            await client.delete_project(project_id_or_key="PROJ")
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -406,12 +603,12 @@ class TestDeleteProjectAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.delete_project_async(project_id_or_key="PROJ")
+                await client.delete_project(project_id_or_key="PROJ")
 
 
 class TestEditIssueAsync:
@@ -429,11 +626,11 @@ class TestEditIssueAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.edit_issue_async(
+            result = await client.edit_issue(
                 input=payload,
                 issue_id_or_key="PROJ-1",
             )
@@ -458,12 +655,12 @@ class TestEditIssueAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.edit_issue_async(
+                await client.edit_issue(
                     input=payload,
                     issue_id_or_key="PROJ-1",
                 )

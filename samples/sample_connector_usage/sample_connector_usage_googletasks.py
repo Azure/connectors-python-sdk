@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Google Tasks Connector SDK Sample
+Google Tasks sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Google Tasks connector SDK.
+This sample demonstrates how to use the Google Tasks client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Google Tasks connection
@@ -27,8 +27,8 @@ import os
 
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.googletasks import GoogletasksClient
 from azure.connectors.googletasks import (
-    GoogletasksClient,
     TRIGGER_OPERATIONS,
     TaskCreate,
     TaskListCreate,
@@ -49,8 +49,7 @@ async def example_1_list_task_lists():
     async with DefaultAzureCredential() as credential:
 
         async with GoogletasksClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.list_task_lists_async()
-            items = result.get("items", []) if result else []
+            items = [item async for item in client.list_task_lists()]
 
             print(f"Found {len(items)} task list(s).")
             for task_list in items[:10]:
@@ -65,7 +64,7 @@ async def example_2_create_task_list_and_task():
 
         async with GoogletasksClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                list_result = await client.create_task_list_async(
+                list_result = await client.create_task_list(
                     input=TaskListCreate(title="SDK Sample List"),
                 )
                 task_list_id = list_result.get("id") if list_result else None
@@ -74,7 +73,7 @@ async def example_2_create_task_list_and_task():
                     print("Task list creation returned no id.")
                     return
 
-                task_result = await client.create_task_async(
+                task_result = await client.create_task(
                     input=TaskCreate(
                         title="Follow up sample",
                         notes="Created by azure-connectors sample.",

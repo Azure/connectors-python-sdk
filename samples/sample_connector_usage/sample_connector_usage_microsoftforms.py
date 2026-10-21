@@ -1,7 +1,7 @@
 """
-Microsoft Forms Connector SDK Sample
+Microsoft Forms sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Microsoft Forms connector SDK.
+This sample demonstrates how to use the Microsoft Forms client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Microsoft Forms connection
@@ -40,8 +40,7 @@ async def example_1_list_forms() -> list[dict]:
 
     async with DefaultAzureCredential() as credential:
         async with MicrosoftformsClient(CONNECTION_RUNTIME_URL, credential) as client:
-            forms_response = await client.list_forms_async()
-            forms = forms_response.get("value", []) if forms_response else []
+            forms = [form async for form in client.list_forms()]
 
             print(f"Found {len(forms)} forms")
             for form in forms[:5]:
@@ -56,7 +55,7 @@ async def example_2_get_form_details(form_id: str) -> None:
 
     async with DefaultAzureCredential() as credential:
         async with MicrosoftformsClient(CONNECTION_RUNTIME_URL, credential) as client:
-            details = await client.get_form_details_by_id_async(form_id=form_id)
+            details = await client.get_form_details_by_id(form_id=form_id)
 
             if not details:
                 print("No details returned")
@@ -74,7 +73,7 @@ async def example_3_get_questions(form_id: str) -> None:
 
     async with DefaultAzureCredential() as credential:
         async with MicrosoftformsClient(CONNECTION_RUNTIME_URL, credential) as client:
-            await client.get_questions_async(form_id=form_id)
+            await client.get_questions(form_id=form_id)
             print("Question metadata request completed.")
 
 
@@ -85,7 +84,7 @@ async def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Microsoft Forms Connector SDK - Sample Usage")
+    print("Microsoft Forms sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

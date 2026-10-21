@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Microsoft Dataverse (Common Data Service) Connector SDK Sample
+Microsoft Dataverse (Common Data Service) sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Microsoft Dataverse connector SDK.
+This sample demonstrates how to use the Microsoft Dataverse client from the Azure Connectors Python SDK.
 This connector was formerly known as Common Data Service (legacy).
 
 Prerequisites:
@@ -31,8 +31,8 @@ import asyncio
 import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.commondataservice import CommondataserviceClient
 from azure.connectors.commondataservice import (
-    CommondataserviceClient,
     PostItemInput,
     PatchItemInput,
 )
@@ -61,11 +61,11 @@ async def example_1_list_datasets():
 
         async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_data_sets_async()
+                items = [item async for item in client.list_data_sets()]
 
-                if result and result.get("value"):
-                    print(f"Found {len(result['value'])} datasets:")
-                    for dataset in result["value"][:5]:
+                if items:
+                    print(f"Found {len(items)} datasets:")
+                    for dataset in items[:5]:
                         print(f"  - {dataset.get('Name', dataset.get('DisplayName', 'N/A'))}")
                 else:
                     print("No datasets found")
@@ -89,7 +89,7 @@ async def example_2_list_accounts():
             try:
                 accounts = [
                     account
-                    async for account in client.get_items_async(
+                    async for account in client.list_items(
                         dataset=DATASET,
                         table="accounts",
                         filter="statecode eq 0",  # Active accounts only
@@ -122,7 +122,7 @@ async def example_3_get_account_by_id():
 
         async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_item_async(
+                result = await client.get_item(
                     dataset=DATASET,
                     table="accounts",
                     id=account_id,
@@ -157,7 +157,7 @@ async def example_4_create_account():
                     }
                 )
 
-                result = await client.post_item_async(
+                result = await client.post_item(
                     input=new_account,
                     dataset=DATASET,
                     table="accounts",
@@ -192,7 +192,7 @@ async def example_5_update_account():
                     }
                 )
 
-                await client.patch_item_async(
+                await client.patch_item(
                     input=update_data,
                     dataset=DATASET,
                     table="accounts",
@@ -218,7 +218,7 @@ async def example_6_create_attachment():
 
         async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.create_attachment_async(
+                result = await client.create_attachment(
                     input=b"Sample attachment content",
                     dataset=DATASET,
                     table="accounts",
@@ -245,7 +245,7 @@ async def example_7_get_table_metadata():
 
         async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_table_async(
+                result = await client.get_table(
                     dataset=DATASET,
                     table="accounts",
                 )

@@ -1,4 +1,4 @@
-"""Zoho ZeptoMail connector SDK sample."""
+"""Zoho ZeptoMail sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os
@@ -24,7 +24,7 @@ async def main() -> None:
                 CONNECTION_RUNTIME_URL,
                 credential,
             ) as client:
-                mail_agents = await client.get_mail_agent_async()
+                mail_agents = await client.get_mail_agent()
                 print(f"Mail agents: {mail_agents}")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")

@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-SMTP Connector SDK Sample
+SMTP sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the SMTP connector SDK.
+This sample demonstrates how to use the SMTP client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with SMTP connection
@@ -25,8 +25,8 @@ import base64
 import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.smtp import SmtpClient
 from azure.connectors.smtp import (
-    SmtpClient,
     Email,
     Attachment,
 )
@@ -63,7 +63,7 @@ async def example_1_send_basic_email():
                     body="Hello! This is a test email sent via the Azure Connectors SDK for Python.",
                 )
 
-                await client.send_email_async(input=email)
+                await client.send_email(input=email)
 
                 print("Email sent successfully:")
                 print(f"  From: {sender}")
@@ -106,7 +106,7 @@ async def example_2_send_email_with_cc_bcc():
                     body="This email demonstrates CC and BCC functionality.",
                 )
 
-                await client.send_email_async(input=email)
+                await client.send_email(input=email)
 
                 print("Email sent successfully:")
                 print(f"  From: {sender}")
@@ -169,7 +169,7 @@ async def example_3_send_html_email():
                     body=html_body.strip(),
                 )
 
-                await client.send_email_async(input=email)
+                await client.send_email(input=email)
 
                 print("HTML email sent successfully:")
                 print(f"  From: {sender}")
@@ -217,7 +217,7 @@ async def example_4_send_email_with_attachment():
                     attachments=[attachment],
                 )
 
-                await client.send_email_async(input=email)
+                await client.send_email(input=email)
 
                 print("Email with attachment sent successfully:")
                 print(f"  From: {sender}")
@@ -257,7 +257,7 @@ async def example_5_send_email_with_options():
                     delivery_receipt=sender,
                 )
 
-                await client.send_email_async(input=email)
+                await client.send_email(input=email)
 
                 print("Email with options sent successfully:")
                 print(f"  From: {sender}")
@@ -274,7 +274,7 @@ async def example_5_send_email_with_options():
 
 async def main():
     """Run all examples."""
-    print("SMTP Connector SDK - Sample Usage")
+    print("SMTP sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
 
     if not CONNECTION_RUNTIME_URL:

@@ -1,7 +1,7 @@
 """
-Webex Connector SDK Sample
+Webex sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Webex connector SDK.
+This sample demonstrates how to use the Webex client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a Webex connection
@@ -24,11 +24,11 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
+from azure.connectors.webex import WebexClient
 from azure.connectors.webex import (
     CreateSpaceInput,
     SendMessageInput,
-    WebexClient,
-)
+    )
 
 
 # Connection runtime URL format:
@@ -42,10 +42,10 @@ async def example_1_send_message() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with WebexClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.send_message_async(
+            result = await client.send_message(
                 input=SendMessageInput(
                     room_id="ROOM_ID",
-                    text="Hello from the Webex connector SDK.",
+                    text="Hello from the Webex client in the Azure Connectors Python SDK.",
                 ),
             )
             print(f"Send result: {result}")
@@ -57,7 +57,7 @@ async def example_2_get_spaces() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with WebexClient(CONNECTION_RUNTIME_URL, credential) as client:
-            spaces = await client.get_spaces_async()
+            spaces = [item async for item in client.list_spaces()]
             print(f"Spaces: {spaces}")
 
 
@@ -67,7 +67,7 @@ async def example_3_create_space() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with WebexClient(CONNECTION_RUNTIME_URL, credential) as client:
-            space = await client.create_space_async(
+            space = await client.create_space(
                 input=CreateSpaceInput(title="My New Space"),
             )
             print(f"Created space: {space}")
@@ -79,7 +79,7 @@ async def example_4_get_my_own_details() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with WebexClient(CONNECTION_RUNTIME_URL, credential) as client:
-            me = await client.get_my_own_details_async()
+            me = await client.get_my_own_details()
             print(f"My details: {me}")
 
 
@@ -90,7 +90,7 @@ async def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Webex Connector SDK - Sample Usage")
+    print("Webex sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

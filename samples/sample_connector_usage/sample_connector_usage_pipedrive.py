@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Pipedrive Connector SDK Sample
+Pipedrive sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Pipedrive connector SDK.
+This sample demonstrates how to use the Pipedrive client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a Pipedrive connection
@@ -25,10 +25,10 @@ import os
 
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.pipedrive import PipedriveClient
 from azure.connectors.pipedrive import (
     AddDealRequest,
-    PipedriveClient,
-)
+    )
 
 # Connection runtime URL format:
 # https://[region].azure-apihub.net/apim/pipedrive/[connection-id]
@@ -46,9 +46,9 @@ async def example_1_list_deals():
 
         async with PipedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.list_deals_async()
+                items = [item async for item in client.list_deals()]
 
-                deals = (result or {}).get("data", []) if isinstance(result, dict) else []
+                deals = items
                 print(f"Found {len(deals)} deal(s).")
 
             except ConnectorException as ex:
@@ -65,7 +65,7 @@ async def example_2_get_deal():
 
         async with PipedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_deal_async(deal_id=1)
+                result = await client.get_deal(deal_id=1)
                 print(f"Deal: {result}")
 
             except ConnectorException as ex:
@@ -86,7 +86,7 @@ async def example_3_add_deal():
                     title="Sample deal",
                 )
 
-                result = await client.add_deal_async(input=new_deal)
+                result = await client.add_deal(input=new_deal)
                 print(f"Created deal: {result}")
 
             except ConnectorException as ex:

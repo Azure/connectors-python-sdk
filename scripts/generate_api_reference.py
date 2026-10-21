@@ -107,12 +107,16 @@ def _generate_reference() -> None:
     navigation = mkdocs_gen_files.Nav()
     navigation["Home"] = "index.md"
     navigation[("Guides", "Connection setup")] = "connection-setup.md"
+    navigation[("Guides", "Long-running operations")] = "long-running-operations.md"
+    navigation[("Guides", "Async operation migration")] = "migration-sync-aio.md"
     navigation[("Guides", "SDK-type bindings")] = "sdk-type-bindings.md"
+    navigation[("Design", "Azure SDK guidelines")] = "azure-sdk-guidelines.md"
+    navigation[("Design", "Generated contract")] = "generated-contract.md"
     navigation[("API reference",)] = "api/index.md"
 
     sections = (
         ("Core SDK", "core", PACKAGE_ROOT / "sdk", "azure.connectors.sdk"),
-        ("Connectors", "connectors", PACKAGE_ROOT, "azure.connectors"),
+        ("Async connectors", "connectors", PACKAGE_ROOT, "azure.connectors"),
     )
 
     for navigation_title, section, directory, package_name in sections:

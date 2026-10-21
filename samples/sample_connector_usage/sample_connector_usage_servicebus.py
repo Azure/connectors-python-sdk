@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure Service Bus Connector SDK Sample
+Azure Service Bus sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure Service Bus connector SDK
+This sample demonstrates how to use the Azure Service Bus client from the Azure Connectors Python SDK
 to send and receive messages from Azure Service Bus queues and topics.
 
 Prerequisites:
@@ -30,8 +30,8 @@ import json
 import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.servicebus import ServicebusClient
 from azure.connectors.servicebus import (
-    ServicebusClient,
     ServiceBusMessage,
 )
 
@@ -74,7 +74,7 @@ async def example_1_send_message_to_queue():
                     correlation_id="corr-abc-123"
                 )
 
-                await client.send_message_async(
+                await client.send_message(
                     input=message,
                     entity_name=QUEUE_NAME
                 )
@@ -102,11 +102,11 @@ async def example_2_receive_message_from_queue():
 
         async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_messages_from_queue_with_peek_lock_async(
+                items = [item async for item in client.list_messages_from_queue_with_peek_lock(
                     queue_name=QUEUE_NAME,
                     max_message_count=1,
-                )
-                messages = result.get("value", []) if result else []
+                )]
+                messages = items
 
                 if messages:
                     message = messages[0]
@@ -137,11 +137,11 @@ async def example_3_receive_with_peek_lock():
         async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Receive message with peek-lock (message is locked, not removed)
-                result = await client.get_messages_from_queue_with_peek_lock_async(
+                items = [item async for item in client.list_messages_from_queue_with_peek_lock(
                     queue_name=QUEUE_NAME,
                     max_message_count=1,
-                )
-                messages = result.get("value", []) if result else []
+                )]
+                messages = items
 
                 if messages:
                     message = messages[0]
@@ -155,7 +155,7 @@ async def example_3_receive_with_peek_lock():
 
                     # Complete the message (remove from queue)
                     if lock_token:
-                        await client.complete_message_in_queue_async(
+                        await client.complete_message_in_queue(
                             queue_name=QUEUE_NAME,
                             lock_token=lock_token,
                         )
@@ -181,11 +181,11 @@ async def example_4_receive_and_abandon():
 
         async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_messages_from_queue_with_peek_lock_async(
+                items = [item async for item in client.list_messages_from_queue_with_peek_lock(
                     queue_name=QUEUE_NAME,
                     max_message_count=1,
-                )
-                messages = result.get("value", []) if result else []
+                )]
+                messages = items
 
                 if messages:
                     message = messages[0]
@@ -195,7 +195,7 @@ async def example_4_receive_and_abandon():
 
                     # Abandon the message (return to queue for retry)
                     if lock_token:
-                        await client.abandon_message_in_queue_async(
+                        await client.abandon_message_in_queue(
                             queue_name=QUEUE_NAME,
                             lock_token=lock_token,
                         )
@@ -232,7 +232,7 @@ async def example_5_send_message_to_topic():
                     label="user-event"
                 )
 
-                await client.send_message_async(
+                await client.send_message(
                     input=message,
                     entity_name=TOPIC_NAME
                 )
@@ -258,12 +258,12 @@ async def example_6_receive_from_topic_subscription():
 
         async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_messages_from_topic_with_peek_lock_async(
+                items = [item async for item in client.list_messages_from_topic_with_peek_lock(
                     topic_name=TOPIC_NAME,
                     subscription_name=SUBSCRIPTION_NAME,
                     max_message_count=1,
-                )
-                messages = result.get("value", []) if result else []
+                )]
+                messages = items
 
                 if messages:
                     message = messages[0]
@@ -291,11 +291,11 @@ async def example_7_dead_letter_message():
 
         async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_messages_from_queue_with_peek_lock_async(
+                items = [item async for item in client.list_messages_from_queue_with_peek_lock(
                     queue_name=QUEUE_NAME,
                     max_message_count=1,
-                )
-                messages = result.get("value", []) if result else []
+                )]
+                messages = items
 
                 if messages:
                     message = messages[0]
@@ -305,7 +305,7 @@ async def example_7_dead_letter_message():
 
                     # Move to dead-letter queue
                     if lock_token:
-                        await client.dead_letter_message_in_queue_async(
+                        await client.dead_letter_message_in_queue(
                             queue_name=QUEUE_NAME,
                             lock_token=lock_token,
                             dead_letter_reason="Processing failed",
@@ -333,11 +333,11 @@ async def example_8_batch_receive():
 
         async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_messages_from_queue_with_peek_lock_async(
+                items = [item async for item in client.list_messages_from_queue_with_peek_lock(
                     queue_name=QUEUE_NAME,
                     max_message_count=5,
-                )
-                messages = result.get("value", []) if result else []
+                )]
+                messages = items
 
                 if messages:
                     print(f"Received {len(messages)} messages from '{QUEUE_NAME}':")

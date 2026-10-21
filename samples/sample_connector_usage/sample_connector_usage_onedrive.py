@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-OneDrive Connector SDK Sample
+OneDrive sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the OneDrive connector SDK.
+This sample demonstrates how to use the OneDrive client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with OneDrive connection
@@ -41,11 +41,11 @@ async def example_1_list_root_folder():
     async with DefaultAzureCredential() as credential:
 
         async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.list_root_folder_async()
+            items = [item async for item in client.list_root_folder()]
 
-            if result and "value" in result:
-                print(f"Found {len(result['value'])} items in root folder:")
-                for item in result["value"][:10]:  # Show first 10
+            if items:
+                print(f"Found {len(items)} items in root folder:")
+                for item in items[:10]:  # Show first 10
                     item_type = "📁" if item.get("IsFolder") else "📄"
                     print(f"  {item_type} {item.get('Name', 'N/A')}")
             else:
@@ -66,7 +66,7 @@ async def example_2_get_file_metadata():
 
         async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                metadata = await client.get_file_metadata_by_path_async(path=file_path)
+                metadata = await client.get_file_metadata_by_path(path=file_path)
 
                 if metadata:
                     print(f"File Metadata for '{file_path}':")
@@ -94,7 +94,7 @@ async def example_3_download_file():
 
         async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                content = await client.get_file_content_by_path_async(path=file_path)
+                content = await client.get_file_content_by_path(path=file_path)
 
                 if content:
                     print(f"Downloaded {len(content)} bytes")
@@ -117,7 +117,7 @@ async def example_4_list_folder():
     folder_id = os.environ.get("TEST_FOLDER_ID", "")
     if not folder_id:
         print("Set TEST_FOLDER_ID environment variable to a folder ID.")
-        print("You can get folder IDs from list_root_folder_async results.")
+        print("You can get folder IDs from list_root_folder results.")
         return
 
     async with DefaultAzureCredential() as credential:
@@ -125,7 +125,7 @@ async def example_4_list_folder():
         async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 entries = [
-                    item async for item in client.list_folder_async(id=folder_id)
+                    item async for item in client.list_folder(id=folder_id)
                 ]
 
                 if entries:
@@ -155,15 +155,15 @@ async def example_5_search_files():
 
         async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.find_files_async(
+                items = [item async for item in client.list_find_files(
                     id=folder_id,
                     query=search_query,
                     find_mode="search"
-                )
+                )]
 
-                if result and "value" in result:
-                    print(f"Found {len(result['value'])} files matching '{search_query}':")
-                    for item in result["value"]:
+                if items:
+                    print(f"Found {len(items)} files matching '{search_query}':")
+                    for item in items:
                         print(f"  📄 {item.get('Name', 'N/A')}")
                 else:
                     print(f"No files found matching '{search_query}'.")
@@ -184,7 +184,7 @@ async def example_6_create_share_link():
 
         async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.create_share_link_async(
+                result = await client.create_share_link(
                     id=file_id,
                     type_="view"  # "view" or "edit"
                 )
@@ -212,21 +212,23 @@ async def example_7_file_tags():
         async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Get existing tags
-                tags_result = await client.get_file_tags_async(id=file_id)
+                tags_items = [item async for item in client.list_file_tags(id=file_id)]
 
-                if tags_result and "tags" in tags_result:
-                    print(f"Current tags: {', '.join(tags_result['tags'])}")
+                if tags_items:
+                    print(f"Current tags: {tags_items}")
                 else:
                     print("No tags found on file.")
 
                 # Add a new tag
                 print("Adding tag 'sdk-sample'...")
-                await client.add_file_tag_async(id=file_id, tag="sdk-sample")
+                added_tags = await client.add_file_tag(id=file_id, tag="sdk-sample")
+                if added_tags:
+                    print(f"Add tag result: {added_tags}")
 
                 # Get updated tags
-                tags_result = await client.get_file_tags_async(id=file_id)
-                if tags_result and "tags" in tags_result:
-                    print(f"Updated tags: {', '.join(tags_result['tags'])}")
+                tags_items = [item async for item in client.list_file_tags(id=file_id)]
+                if tags_items:
+                    print(f"Updated tags: {tags_items}")
             except ConnectorException as e:
                 print(f"Error managing tags: {e}")
 
@@ -246,7 +248,7 @@ async def example_8_copy_file():
 
         async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.copy_drive_file_async(
+                result = await client.copy_drive_file(
                     id=file_id,
                     destination=dest_folder,
                     overwrite=False
@@ -275,7 +277,7 @@ async def main():
         print(f"$env:ONEDRIVE_CONNECTION_URL = '{url_example}'")
         return
 
-    print("OneDrive Connector SDK Sample")
+    print("OneDrive sample for the Azure Connectors Python SDK")
     print("=" * 50)
     print(f"Connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
 

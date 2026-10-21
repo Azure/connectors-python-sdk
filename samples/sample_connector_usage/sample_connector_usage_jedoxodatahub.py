@@ -1,4 +1,4 @@
-"""Jedox OData Hub connector SDK sample."""
+"""Jedox OData Hub sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os
@@ -24,7 +24,7 @@ async def main() -> None:
                 CONNECTION_RUNTIME_URL,
                 credential,
             ) as client:
-                databases = await client.databases_async()
+                databases = [item async for item in client.list_databases()]
                 print(f"Databases: {databases}")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")

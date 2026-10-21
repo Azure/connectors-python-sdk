@@ -7,9 +7,9 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.salesforce import SalesforceClient
 from azure.connectors.salesforce import (
     CloseJobRequest,
-    SalesforceClient,
     TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
@@ -58,7 +58,7 @@ class TestSalesforceClientInitialization:
         client = SalesforceClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -141,11 +141,11 @@ class TestGetTables:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await resolve_generated_result(client.get_tables_async())
+            result = await resolve_generated_result(client.list_tables())
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -165,12 +165,12 @@ class TestGetTables:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await resolve_generated_result(client.get_tables_async())
+                await resolve_generated_result(client.list_tables())
 
             assert exc_info.value.status_code == 401
 
@@ -190,11 +190,11 @@ class TestGetItems:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await resolve_generated_result(client.get_items_async(
+            await resolve_generated_result(client.list_items(
                 table="account",
                 filter="Name eq 'Contoso'",
                 top="5",
@@ -229,11 +229,11 @@ class TestCreateJob:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_job_async(input=payload)
+            result = await client.create_job(input=payload)
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
@@ -257,12 +257,12 @@ class TestCreateJob:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_job_async(input=payload)
+                await client.create_job(input=payload)
 
             mock_send.assert_called_once_with(
                 "POST",
@@ -295,11 +295,11 @@ class TestPostItem:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.post_item_async(input=payload, table="account")
+            result = await client.post_item(input=payload, table="account")
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
@@ -322,11 +322,11 @@ class TestDeleteItemAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.delete_item_async(table="account", id="001xx0000000001")
+            await client.delete_item(table="account", id="001xx0000000001")
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -340,16 +340,16 @@ class TestDeleteItemAsync:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        mock_response = MockResponse(status=404, text='{"error": "Not found"}')
+        mock_response = MockResponse(status=500, text='{"error": "Server error"}')
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.delete_item_async(table="account", id="missing-id")
+                await client.delete_item(table="account", id="missing-id")
 
 
 class TestUploadJobDataAsync:
@@ -367,11 +367,11 @@ class TestUploadJobDataAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.upload_job_data_async(input=payload, job_id="job-1")
+            await client.upload_job_data(input=payload, job_id="job-1")
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -395,12 +395,12 @@ class TestUploadJobDataAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.upload_job_data_async(input=payload, job_id="job-1")
+                await client.upload_job_data(input=payload, job_id="job-1")
 
 
 class TestHttpRequestAsync:
@@ -418,11 +418,11 @@ class TestHttpRequestAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.http_request_async(input=payload)
+            result = await client.http_request(input=payload)
 
             mock_send.assert_called_once_with(
                 "POST",
@@ -447,12 +447,12 @@ class TestHttpRequestAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.http_request_async(input=b"invalid request")
+                await client.http_request(input=b"invalid request")
 
             assert exc_info.value.status_code == 400
 
@@ -471,11 +471,11 @@ class TestExecuteSoslQueryAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.execute_sosl_query_async(q="FIND {Contoso}")
+            result = await client.execute_sosl_query(q="FIND {Contoso}")
 
             assert mock_send.call_args.args[0] == "GET"
             assert "/codeless/search?q=FIND%20%7BContoso%7D" in (
@@ -495,12 +495,12 @@ class TestExecuteSoslQueryAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.execute_sosl_query_async(q="FIND")
+                await client.execute_sosl_query(q="FIND")
 
 
 class TestCloseJobAsync:
@@ -518,11 +518,11 @@ class TestCloseJobAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.close_job_async(input=payload, job_id="job-1")
+            result = await client.close_job(input=payload, job_id="job-1")
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -544,12 +544,12 @@ class TestCloseJobAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.close_job_async(input=payload, job_id="missing-job")
+                await client.close_job(input=payload, job_id="missing-job")
 
 
 class TestSalesforceDiscoveryOperations:
@@ -560,23 +560,23 @@ class TestSalesforceDiscoveryOperations:
         ("method_name", "path_suffix"),
         [
             (
-                "get_external_id_fields_async",
+                "list_external_id_fields",
                 "/datasets/default/tables/account/externalIdFields",
             ),
             (
-                "get_metadata_for_get_item_async",
+                "get_metadata_for_get_item",
                 "/$metadata.json/datasets/default/tables/account/getitem",
             ),
             (
-                "get_metadata_for_patch_item_async",
+                "get_metadata_for_patch_item",
                 "/$metadata.json/datasets/default/tables/account/patchitem",
             ),
             (
-                "get_metadata_for_post_item_async",
+                "get_metadata_for_post_item",
                 "/$metadata.json/datasets/default/tables/account/postitem",
             ),
             (
-                "get_table_async",
+                "get_table",
                 "/$metadata.json/datasets/default/tables/account",
             ),
         ],
@@ -592,15 +592,22 @@ class TestSalesforceDiscoveryOperations:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        mock_response = MockResponse(status=200, text='{"name": "account"}')
+        response_text = (
+            '{"value": [{"name": "account"}]}'
+            if method_name == "list_external_id_fields"
+            else '{"name": "account"}'
+        )
+        mock_response = MockResponse(status=200, text=response_text)
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await getattr(client, method_name)(table="account")
+            result = await resolve_generated_result(
+                getattr(client, method_name)(table="account")
+            )
 
             mock_send.assert_called_once_with(
                 "GET",
@@ -611,17 +618,22 @@ class TestSalesforceDiscoveryOperations:
                 client_request_id=None,
                 response_hook=None,
             )
-            assert result == {"name": "account"}
+            expected_result = (
+                [{"name": "account"}]
+                if method_name == "list_external_id_fields"
+                else {"name": "account"}
+            )
+            assert result == expected_result
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
         "method_name",
         [
-            "get_external_id_fields_async",
-            "get_metadata_for_get_item_async",
-            "get_metadata_for_patch_item_async",
-            "get_metadata_for_post_item_async",
-            "get_table_async",
+            "list_external_id_fields",
+            "get_metadata_for_get_item",
+            "get_metadata_for_patch_item",
+            "get_metadata_for_post_item",
+            "get_table",
         ],
     )
     async def test_error_response_raises_exception(
@@ -638,12 +650,14 @@ class TestSalesforceDiscoveryOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await getattr(client, method_name)(table="account")
+                await resolve_generated_result(
+                    getattr(client, method_name)(table="account")
+                )
 
             assert exc_info.value.status_code == 404
 

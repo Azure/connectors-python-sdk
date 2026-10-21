@@ -20,7 +20,7 @@ class ConnectorClientBase(ABC):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -34,7 +34,7 @@ class ConnectorClientBase(ABC):
 
         Args:
             credential: Caller-owned Azure Core credential.
-            timeout_seconds: Total network timeout for each request, including
+            timeout: Total network timeout for each request, including
                 retries, response loading, and body reads. Nonpositive values
                 disable SDK and transport deadlines.
             transport: Optional Azure Core async HTTP transport closed by the
@@ -46,7 +46,7 @@ class ConnectorClientBase(ABC):
         self._http_client = ConnectorHttpClient(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout_seconds=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,

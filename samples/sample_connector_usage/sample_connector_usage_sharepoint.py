@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-SharePoint Online Connector SDK Sample
+SharePoint Online sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the SharePoint Online connector SDK.
+This sample demonstrates how to use the SharePoint Online client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with SharePoint Online connection
@@ -30,11 +30,11 @@ import os
 try:
     from azure.identity.aio import DefaultAzureCredential
     from azure.connectors import ConnectorException
+    from azure.connectors.sharepointonline import SharepointonlineClient
     from azure.connectors.sharepointonline import (
         PatchItemInput,
         PostItemInput,
-        SharepointonlineClient,
-    )
+        )
     IMPORTS_AVAILABLE = True
 except ImportError as import_error:
     IMPORTS_AVAILABLE = False
@@ -63,16 +63,16 @@ async def example_1_get_lists():
 
         async with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                lists = await client.get_tables_async(dataset=SHAREPOINT_SITE_URL)
+                lists = [item async for item in client.list_tables(dataset=SHAREPOINT_SITE_URL)]
 
-                if lists and 'value' in lists:
-                    print(f"Found {len(lists['value'])} lists and libraries:")
-                    for list_item in lists['value'][:5]:
+                if lists:
+                    print(f"Found {len(lists)} lists and libraries:")
+                    for list_item in lists[:5]:
                         display_name = list_item.get('DisplayName', 'Unknown')
                         name = list_item.get('Name', 'Unknown')
                         print(f"  - {display_name} ({name})")
                 else:
-                    print("No lists found or unexpected response format.")
+                    print("No lists found.")
 
             except ConnectorException as ex:
                 print(f"Connector error: {ex}")
@@ -91,7 +91,7 @@ async def example_2_get_list_items():
 
         async with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                items = [item async for item in client.get_items_async(
+                items = [item async for item in client.list_items(
                     dataset=SHAREPOINT_SITE_URL,
                     table=list_name,
                 )]
@@ -129,7 +129,7 @@ async def example_3_create_list_item():
                     additional_properties={'Title': 'Test Task from Python SDK'},
                 )
 
-                created = await client.post_item_async(
+                created = await client.post_item(
                     dataset=SHAREPOINT_SITE_URL,
                     table=list_name,
                     input=new_item,
@@ -141,7 +141,7 @@ async def example_3_create_list_item():
                     print(f"Title: {created.get('Title', 'N/A')}")
 
                     # Clean up: delete the item we just created
-                    await client.delete_item_async(
+                    await client.delete_item(
                         dataset=SHAREPOINT_SITE_URL,
                         table=list_name,
                         id=int(item_id),
@@ -173,7 +173,7 @@ async def example_4_update_list_item():
                 new_item = PostItemInput(
                     additional_properties={'Title': 'Task to Update'},
                 )
-                created = await client.post_item_async(
+                created = await client.post_item(
                     dataset=SHAREPOINT_SITE_URL,
                     table=list_name,
                     input=new_item,
@@ -183,7 +183,7 @@ async def example_4_update_list_item():
 
                 # READ
                 print("Reading item...")
-                item = await client.get_item_async(
+                item = await client.get_item(
                     dataset=SHAREPOINT_SITE_URL,
                     table=list_name,
                     id=int(item_id),
@@ -195,7 +195,7 @@ async def example_4_update_list_item():
                 updates = PatchItemInput(
                     additional_properties={'Title': 'Updated Task Title'},
                 )
-                await client.patch_item_async(
+                await client.patch_item(
                     dataset=SHAREPOINT_SITE_URL,
                     table=list_name,
                     id=int(item_id),
@@ -203,7 +203,7 @@ async def example_4_update_list_item():
                 )
 
                 # Verify update
-                updated_item = await client.get_item_async(
+                updated_item = await client.get_item(
                     dataset=SHAREPOINT_SITE_URL,
                     table=list_name,
                     id=int(item_id),
@@ -212,7 +212,7 @@ async def example_4_update_list_item():
 
                 # DELETE
                 print("Deleting item...")
-                await client.delete_item_async(
+                await client.delete_item(
                     dataset=SHAREPOINT_SITE_URL,
                     table=list_name,
                     id=int(item_id),
@@ -239,7 +239,7 @@ async def example_5_query_with_filters():
                 # Create some test items first
                 print("Creating test items...")
                 for i in range(3):
-                    await client.post_item_async(
+                    await client.post_item(
                         dataset=SHAREPOINT_SITE_URL,
                         table=list_name,
                         input=PostItemInput(
@@ -250,7 +250,7 @@ async def example_5_query_with_filters():
 
                 # Query with filters
                 print("\nQuerying items (ordered by creation date, top 5)...")
-                items = [item async for item in client.get_items_async(
+                items = [item async for item in client.list_items(
                     dataset=SHAREPOINT_SITE_URL,
                     table=list_name,
                     filter=None,
@@ -264,12 +264,14 @@ async def example_5_query_with_filters():
                         title = item.get('Title', 'No Title')
                         created = item.get('Created', 'Unknown')
                         print(f"  - {title} (Created: {created})")
+                else:
+                    print("No items found.")
 
                 # Clean up test items
                 print("\nCleaning up test items...")
                 for item in items[:3]:
                     if 'Test Item' in item.get('Title', ''):
-                        await client.delete_item_async(
+                        await client.delete_item(
                             dataset=SHAREPOINT_SITE_URL,
                             table=list_name,
                             id=int(item['Id']),
@@ -293,28 +295,28 @@ async def example_6_file_operations():
             try:
                 # List root folder
                 print("Listing root folder...")
-                root_folder = await client.list_root_folder_async(dataset=SHAREPOINT_SITE_URL)
+                root_folder = [item async for item in client.list_root_folder(dataset=SHAREPOINT_SITE_URL)]
 
-                if root_folder and 'value' in root_folder:
-                    print(f"Found {len(root_folder['value'])} items in root folder:")
-                    for item in root_folder['value'][:5]:
+                if root_folder:
+                    print(f"Found {len(root_folder)} items in root folder:")
+                    for item in root_folder[:5]:
                         name = item.get('Name', 'Unknown')
                         is_folder = item.get('IsFolder', False)
                         item_type = 'Folder' if is_folder else 'File'
                         print(f"  - {name} ({item_type})")
                 else:
-                    print("Root folder is empty or unexpected response format.")
+                    print("Root folder is empty.")
 
                 # List a specific folder (Shared Documents is common)
                 print("\nListing 'Shared Documents' folder...")
-                folder = await client.list_folder_async(
+                folder = [item async for item in client.list_folder(
                     dataset=SHAREPOINT_SITE_URL,
                     id='/Shared Documents',
-                )
+                )]
 
-                if folder and 'value' in folder:
-                    print(f"Found {len(folder['value'])} items in Shared Documents:")
-                    for item in folder['value'][:5]:
+                if folder:
+                    print(f"Found {len(folder)} items in Shared Documents:")
+                    for item in folder[:5]:
                         name = item.get('Name', 'Unknown')
                         is_folder = item.get('IsFolder', False)
                         size = item.get('Size', 0)
@@ -342,7 +344,7 @@ async def example_7_error_handling():
                 invalid_item_id = 99999
                 list_name = os.environ.get("TEST_LIST_NAME", "Tasks")
 
-                item = await client.get_item_async(
+                item = await client.get_item(
                     dataset=SHAREPOINT_SITE_URL,
                     table=list_name,
                     id=invalid_item_id,
@@ -359,7 +361,7 @@ async def example_7_error_handling():
 
 async def main():
     """Run all examples."""
-    print("SharePoint Online Connector SDK - Sample Usage")
+    print("SharePoint Online sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
     print()
 

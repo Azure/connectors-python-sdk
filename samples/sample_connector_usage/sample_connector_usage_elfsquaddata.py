@@ -1,4 +1,4 @@
-"""Elfsquad Data connector SDK sample."""
+"""Elfsquad Data sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os
@@ -28,7 +28,7 @@ async def main() -> None:
                 CONNECTION_RUNTIME_URL,
                 credential,
             ) as client:
-                entities = [item async for item in client.get_entities_async(
+                entities = [item async for item in client.list_entities(
                     entity_name=ENTITY_NAME,
                     top=10,
                 )]

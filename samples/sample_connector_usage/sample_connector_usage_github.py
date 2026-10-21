@@ -1,7 +1,7 @@
 """
-GitHub Connector SDK Sample
+GitHub sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the GitHub connector SDK.
+This sample demonstrates how to use the GitHub client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with GitHub connection
@@ -24,7 +24,8 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.github import GithubClient, IssueBasicDetailsModel
+from azure.connectors.github import GithubClient
+from azure.connectors.github import IssueBasicDetailsModel
 
 
 # Connection runtime URL format:
@@ -38,7 +39,7 @@ async def example_1_get_authenticated_user() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with GithubClient(CONNECTION_RUNTIME_URL, credential) as client:
-            user = await client.get_user_async()
+            user = await client.get_user()
             print(f"Authenticated as: {user.get('login') if user else 'unknown'}")
 
 
@@ -48,14 +49,14 @@ async def example_2_list_issues(repository_owner: str, repository_name: str) -> 
 
     async with DefaultAzureCredential() as credential:
         async with GithubClient(CONNECTION_RUNTIME_URL, credential) as client:
-            issues = await client.get_issues_async(
+            issues = [item async for item in client.list_issues(
                 repository_owner=repository_owner,
                 repository_name=repository_name,
                 state="open",
                 per_page=5,
-            )
+            )]
 
-            issue_list = issues if isinstance(issues, list) else []
+            issue_list = issues
             print(f"Found {len(issue_list)} issues")
             for issue in issue_list[:5]:
                 print(f"  - #{issue.get('number')}: {issue.get('title')}")
@@ -71,7 +72,7 @@ async def example_3_create_issue(repository_owner: str, repository_name: str) ->
                 title="SDK sample issue",
                 body="Created from github Python SDK sample.",
             )
-            created = await client.create_issue_async(
+            created = await client.create_issue(
                 input=request,
                 repository_owner=repository_owner,
                 repository_name=repository_name,
@@ -91,7 +92,7 @@ async def main() -> None:
     repository_owner = "octocat"
     repository_name = "hello-world"
 
-    print("GitHub Connector SDK - Sample Usage")
+    print("GitHub sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

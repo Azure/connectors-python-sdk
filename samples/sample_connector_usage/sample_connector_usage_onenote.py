@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-OneNote Connector SDK Sample
+OneNote sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the OneNote connector SDK
+This sample demonstrates how to use the OneNote client from the Azure Connectors Python SDK
 for notebook, section, and page operations.
 
 Prerequisites:
@@ -25,8 +25,8 @@ import asyncio
 import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.onenote import OnenoteClient
 from azure.connectors.onenote import (
-    OnenoteClient,
     CreateSectionRequest,
 )
 
@@ -46,10 +46,10 @@ async def example_1_list_notebooks():
 
         async with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_notebooks_async()
+                items = [item async for item in client.list_notebooks()]
 
-                if result and "value" in result:
-                    notebooks = result["value"]
+                if items:
+                    notebooks = items
                     print(f"Found {len(notebooks)} notebooks:")
                     for nb in notebooks[:5]:
                         print(f"  - {nb.get('fileName', 'N/A')} (key: {nb.get('key', 'N/A')})")
@@ -73,12 +73,12 @@ async def example_2_list_sections():
 
         async with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_sections_in_notebook_async(
+                items = [item async for item in client.list_sections_in_notebook(
                     notebook_key=NOTEBOOK_KEY
-                )
+                )]
 
-                if result and "value" in result:
-                    sections = result["value"]
+                if items:
+                    sections = items
                     print(f"Found {len(sections)} sections:")
                     for section in sections[:5]:
                         print(f"  - {section.get('name', 'N/A')} (id: {section.get('id', 'N/A')})")
@@ -103,7 +103,7 @@ async def example_3_get_pages_in_section():
 
         async with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                pages = [item async for item in client.get_pages_in_section_async(
+                pages = [item async for item in client.list_pages_in_section(
                     notebook_key=NOTEBOOK_KEY,
                     section_id=SECTION_ID
                 )]
@@ -134,7 +134,7 @@ async def example_4_create_section():
             try:
                 section_request = CreateSectionRequest(name="SDK Test Section")
 
-                result = await client.create_section_in_notebook_async(
+                result = await client.create_section_in_notebook(
                     input=section_request,
                     notebook_key=NOTEBOOK_KEY
                 )
@@ -165,7 +165,7 @@ async def example_5_create_quick_note():
                     "<body><p>Created via Azure Connectors Python SDK</p></body></html>"
                 )
 
-                result = await client.create_page_in_quick_notes_async(input=page_input)
+                result = await client.create_page_in_quick_notes(input=page_input)
 
                 if result:
                     print("Quick note created successfully!")
@@ -193,7 +193,7 @@ async def example_6_get_page_content():
 
         async with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_page_content_async(
+                result = await client.get_page_content(
                     notebook_key=NOTEBOOK_KEY,
                     section_id=SECTION_ID,
                     page_id=PAGE_ID,

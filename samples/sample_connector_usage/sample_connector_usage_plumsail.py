@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Plumsail Connector SDK Sample
+Plumsail sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Plumsail connector SDK.
+This sample demonstrates how to use the Plumsail client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a Plumsail connection
@@ -27,8 +27,8 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
+from azure.connectors.plumsail import PlumsailClient
 from azure.connectors.plumsail import (
-    PlumsailClient,
     Pdf2TextRequest,
 )
 
@@ -45,7 +45,7 @@ async def example_1_get_profile():
 
         async with PlumsailClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.profiles_me_get_async()
+                result = await client.profiles_me_get()
 
                 print(f"Profile result: {result}")
 
@@ -68,9 +68,10 @@ async def example_2_extract_text_from_pdf():
                     result_type="Raw",
                 )
 
-                result = await client.flow_v1_documents_jobs_extract_text_from_pdf_async(
+                poller = await client.begin_flow_v1_documents_jobs_extract_text_from_pdf(
                     input=request,
                 )
+                result = await poller.result()
 
                 print(f"Extracted text result: {result}")
 

@@ -1,4 +1,4 @@
-"""Orderful connector SDK sample."""
+"""Orderful sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os
@@ -21,7 +21,7 @@ async def main() -> None:
     async with DefaultAzureCredential() as credential:
         try:
             async with OrderfulClient(CONNECTION_RUNTIME_URL, credential) as client:
-                await client.list_transactions_async()
+                await client.list_transactions()
                 print("Transactions requested.")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")

@@ -1,4 +1,4 @@
-"""Starmind connector SDK sample."""
+"""Starmind sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os
@@ -6,7 +6,8 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.starmind import FindExpertsInput, StarmindClient
+from azure.connectors.starmind import StarmindClient
+from azure.connectors.starmind import FindExpertsInput
 
 
 CONNECTION_RUNTIME_URL = os.environ.get("STARMIND_CONNECTION_URL", "")
@@ -16,7 +17,7 @@ async def find_questions() -> None:
     """Find questions matching a query."""
     async with DefaultAzureCredential() as credential:
         async with StarmindClient(CONNECTION_RUNTIME_URL, credential) as client:
-            questions = await client.find_questions_async(
+            questions = await client.find_questions(
                 query="distributed systems",
                 limit=10,
             )
@@ -27,7 +28,7 @@ async def find_experts() -> None:
     """Find experts for a topic."""
     async with DefaultAzureCredential() as credential:
         async with StarmindClient(CONNECTION_RUNTIME_URL, credential) as client:
-            experts = await client.find_experts_async(
+            experts = await client.find_experts(
                 input=FindExpertsInput(text_query="distributed systems"),
             )
             print(f"Experts: {experts}")

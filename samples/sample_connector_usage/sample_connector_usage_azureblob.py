@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure Blob Storage Connector SDK Sample
+Azure Blob Storage sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure Blob Storage connector SDK.
+This sample demonstrates how to use the Azure Blob Storage client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Azure Blob Storage connection
@@ -60,7 +60,7 @@ async def example_1_get_blob_metadata():
 
         async with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
 
-            metadata = await client.get_file_metadata_by_path_async(
+            metadata = await client.get_file_metadata_by_path(
                 dataset=STORAGE_ACCOUNT,
                 path=blob_path,
             )
@@ -90,7 +90,7 @@ async def example_2_download_blob():
     async with DefaultAzureCredential() as credential:
 
         async with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
-            content = await client.get_file_content_by_path_async(
+            content = await client.get_file_content_by_path(
                 dataset=STORAGE_ACCOUNT,
                 path=blob_path,
             )
@@ -128,7 +128,7 @@ async def example_3_upload_blob():
 
         async with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                metadata = await client.create_file_async(
+                metadata = await client.create_file(
                     input=blob_content.encode("utf-8"),
                     dataset=STORAGE_ACCOUNT,
                     folder_path=folder_path,
@@ -157,7 +157,7 @@ async def example_4_list_blobs():
     if not folder_id:
         print("Set TEST_FOLDER_ID environment variable to a folder identifier.")
         print("Example: $env:TEST_FOLDER_ID = 'JTJmbXljb250YWluZXI='  (base64 encoded path)")
-        print("Or use list_root_folder_async to list root container blobs.")
+        print("Or use list_root_folder to list root container blobs.")
 
         # Try listing root folder instead
         print("\nListing root folder blobs instead...")
@@ -165,7 +165,7 @@ async def example_4_list_blobs():
 
             async with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
                 try:
-                    blobs = [item async for item in client.list_root_folder_async(
+                    blobs = [item async for item in client.list_root_folder(
                         dataset=STORAGE_ACCOUNT,
                     )]
 
@@ -190,7 +190,7 @@ async def example_4_list_blobs():
 
         async with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                blobs = [item async for item in client.list_folder_async(
+                blobs = [item async for item in client.list_folder(
                     dataset=STORAGE_ACCOUNT,
                     id=folder_id,
                 )]
@@ -220,14 +220,14 @@ async def example_5_delete_blob():
     if not blob_id:
         print("Set TEST_BLOB_ID environment variable to a blob identifier.")
         print("Example: $env:TEST_BLOB_ID = 'JTJmbXljb250YWluZXIlMmZmaWxlLnR4dA=='")
-        print("You can get blob IDs from the list_folder_async response.")
+        print("You can get blob IDs from the list_folder response.")
         return
 
     async with DefaultAzureCredential() as credential:
 
         async with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                await client.delete_file_async(
+                await client.delete_file(
                     dataset=STORAGE_ACCOUNT,
                     id=blob_id,
                 )
@@ -242,7 +242,7 @@ async def example_5_delete_blob():
 
 async def main():
     """Run all examples."""
-    print("Azure Blob Storage Connector SDK - Sample Usage")
+    print("Azure Blob Storage sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
 
     if not CONNECTION_RUNTIME_URL:

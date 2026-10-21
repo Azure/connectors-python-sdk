@@ -7,11 +7,13 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.powerbi import PowerbiClient, UpdateGoalRequest, QuerySpecification
+from azure.connectors.powerbi import PowerbiClient
+from azure.connectors.powerbi import UpdateGoalRequest, QuerySpecification
 from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestPowerbiClientInitialization:
@@ -47,7 +49,7 @@ class TestPowerbiClientInitialization:
         client = PowerbiClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -115,19 +117,18 @@ class TestListGroupsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_groups_async()
+            result = await resolve_generated_result(client.list_groups())
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
             assert "/v1.0/myorg/groups" in path
             assert "pbi_source=powerAutomate" in path
-            assert result is not None
-            assert "value" in result
+            assert result[0]["id"] == "group-1"
 
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
@@ -141,12 +142,12 @@ class TestListGroupsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.list_groups_async()
-            assert result is None
+            result = await resolve_generated_result(client.list_groups())
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -160,12 +161,12 @@ class TestListGroupsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.list_groups_async()
+                await resolve_generated_result(client.list_groups())
 
 
 class TestListDatasetsAsync:
@@ -183,11 +184,13 @@ class TestListDatasetsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_datasets_async(groupid="group-123")
+            result = await resolve_generated_result(
+                client.list_datasets(groupid="group-123")
+            )
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -208,12 +211,14 @@ class TestListDatasetsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.list_datasets_async(groupid="missing-group")
+                await resolve_generated_result(
+                    client.list_datasets(groupid="missing-group")
+                )
 
 
 class TestExecuteDatasetQueryAsync:
@@ -227,19 +232,21 @@ class TestExecuteDatasetQueryAsync:
             credential=mock_credential,
         )
 
-        query = QuerySpecification()
-        mock_response = MockResponse(status=200, text='{"results": [{"tables": []}]}')
+        query = QuerySpecification(query="EVALUATE ROW(\"Value\", 1)")
+        mock_response = MockResponse(status=200, text='{"firstTableRows": [{"Value": 1}]}')
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.execute_dataset_query_async(
-                input=query,
-                groupid="group-123",
-                datasetid="dataset-456",
+            result = await resolve_generated_result(
+                client.execute_dataset_query(
+                    input=query,
+                    groupid="group-123",
+                    datasetid="dataset-456",
+                )
             )
 
             mock_send.assert_called_once()
@@ -249,8 +256,7 @@ class TestExecuteDatasetQueryAsync:
             assert "/groups/group-123/datasets/dataset-456/executeQueries" in path
             assert "pbi_source=powerAutomate" in path
             assert body is query
-            assert result is not None
-            assert "results" in result
+            assert result == {"firstTableRows": [{"Value": 1}]}
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -260,20 +266,22 @@ class TestExecuteDatasetQueryAsync:
             credential=mock_credential,
         )
 
-        query = QuerySpecification()
+        query = QuerySpecification(query="EVALUATE ROW(\"Value\", 1)")
         mock_response = MockResponse(status=500, text='{"error": "Server error"}')
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.execute_dataset_query_async(
-                    input=query,
-                    groupid="group-123",
-                    datasetid="dataset-456",
+                await resolve_generated_result(
+                    client.execute_dataset_query(
+                        input=query,
+                        groupid="group-123",
+                        datasetid="dataset-456",
+                    )
                 )
 
 
@@ -292,11 +300,11 @@ class TestRefreshDatasetAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.refresh_dataset_async(
+            result = await client.refresh_dataset(
                 groupid="group-123",
                 datasetid="dataset-456",
             )
@@ -320,12 +328,12 @@ class TestRefreshDatasetAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.refresh_dataset_async(
+                await client.refresh_dataset(
                     groupid="group-123",
                     datasetid="dataset-456",
                 )
@@ -346,11 +354,11 @@ class TestUpdateGoalAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.update_goal_async(
+            await client.update_goal(
                 input=payload,
                 groupid="group-1",
                 scorecard_id="sc-1",
@@ -376,12 +384,12 @@ class TestUpdateGoalAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.update_goal_async(
+                await client.update_goal(
                     input=payload,
                     groupid="group-1",
                     scorecard_id="sc-1",

@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, AsyncIterator, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
+from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
 from azure.core.credentials_async import AsyncTokenCredential
 from azure.core.pipeline.transport import AsyncHttpTransport
@@ -18,7 +19,25 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "AzurevmClient",
+    "ResourceGroup",
+    "ResourceGroupListResult",
+    "Subscription",
+    "SubscriptionListResult",
+    "VirtualMachine",
+    "VirtualMachineInScaleSet",
+    "VirtualMachineInScaleSetListResult",
+    "VirtualMachineInScaleSetProperties",
+    "VirtualMachineListResult",
+    "VirtualMachineProperties",
+    "VirtualMachineScaleSet",
+    "VirtualMachineScaleSetListResult",
+    "VirtualMachineScaleSetProperties",
+]
 
 
 # Type Definitions
@@ -29,16 +48,22 @@ class VirtualMachineInScaleSet:
     Response for Get virtual machine in a VM scale set
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ID of the virtual machine."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Name of the virtual machine."""
-    instance_id: Optional[str] = field(
+    instance_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "instanceId"},
     )
     """The instance Id of the virtual machine."""
-    properties: Optional[VirtualMachineInScaleSetProperties] = None
+    properties: Optional[
+        VirtualMachineInScaleSetProperties | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -47,11 +72,16 @@ class VirtualMachine:
     Response for Get virtual machine
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ID of the virtual machine."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Name of the virtual machine."""
-    properties: Optional[VirtualMachineProperties] = None
+    properties: Optional[
+        VirtualMachineProperties | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -60,10 +90,16 @@ class SubscriptionListResult:
     Response for List subscriptions
     """
 
-    value: Optional[List[Subscription]] = None
-    """The subscriptions."""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[Subscription | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The subscriptions."""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results."""
@@ -75,10 +111,16 @@ class ResourceGroupListResult:
     Response for List resource groups
     """
 
-    value: Optional[List[ResourceGroup]] = None
-    """The list of resource groups."""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[ResourceGroup | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The list of resource groups."""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results."""
@@ -90,10 +132,16 @@ class VirtualMachineScaleSetListResult:
     Response for List virtual machine scale sets
     """
 
-    value: Optional[List[VirtualMachineScaleSet]] = None
-    """The list of virtual machine scale sets."""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[VirtualMachineScaleSet | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The list of virtual machine scale sets."""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results."""
@@ -105,10 +153,16 @@ class VirtualMachineInScaleSetListResult:
     Response for List virtual machines in a VM scale set
     """
 
-    value: Optional[List[VirtualMachineInScaleSet]] = None
-    """The list of virtual machines in a VM scale set."""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[VirtualMachineInScaleSet | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The list of virtual machines in a VM scale set."""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results."""
@@ -120,10 +174,16 @@ class VirtualMachineListResult:
     Response for List virtual machines
     """
 
-    value: Optional[List[VirtualMachine]] = None
-    """The list of virtual machines."""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[VirtualMachine | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The list of virtual machines."""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results."""
@@ -135,27 +195,31 @@ class Subscription:
     Definition: Subscription
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The fully qualified Id."""
-    subscription_id: Optional[str] = field(
+    subscription_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "subscriptionId"},
     )
     """The subscription Id."""
-    tenant_id: Optional[str] = field(
+    tenant_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tenantId"},
     )
     """The tenant Id."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The subscription display name."""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The subscription state."""
-    authorization_source: Optional[str] = field(
+    authorization_source: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "authorizationSource"},
     )
     """
@@ -171,12 +235,13 @@ class ResourceGroup:
     Definition: ResourceGroup
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ID of the resource group."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Name of the resource group."""
-    managed_by: Optional[str] = field(
+    managed_by: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managedBy"},
     )
     """Id of the resource that manages this resource group."""
@@ -188,11 +253,16 @@ class VirtualMachineScaleSet:
     Definition: VirtualMachineScaleSet
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ID of the virtual machine scale set."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Name of the virtual machine scale set."""
-    properties: Optional[VirtualMachineScaleSetProperties] = None
+    properties: Optional[
+        VirtualMachineScaleSetProperties | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -201,8 +271,9 @@ class VirtualMachineScaleSetProperties:
     Definition: VirtualMachineScaleSetProperties
     """
 
-    provisioning_state: Optional[str] = field(
+    provisioning_state: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "provisioningState"},
     )
     """The state of the virtual machine scale set."""
@@ -214,8 +285,9 @@ class VirtualMachineInScaleSetProperties:
     Definition: VirtualMachineInScaleSetProperties
     """
 
-    provisioning_state: Optional[str] = field(
+    provisioning_state: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "provisioningState"},
     )
     """The state of the virtual machine."""
@@ -227,8 +299,9 @@ class VirtualMachineProperties:
     Definition: VirtualMachineProperties
     """
 
-    provisioning_state: Optional[str] = field(
+    provisioning_state: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "provisioningState"},
     )
     """The state of the virtual machine."""
@@ -245,7 +318,7 @@ class AzurevmClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -262,8 +335,8 @@ class AzurevmClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -284,7 +357,7 @@ class AzurevmClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -300,15 +373,49 @@ class AzurevmClient(ConnectorClientBase):
         return "azurevm"
 
     def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
-        parsed_next_link = urlsplit(next_link)
-        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
             if next_link.startswith("/"):
                 return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
             if next_link.startswith("?"):
-                return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
 
-        parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
         connection_hostname = parsed_connection.hostname
         if next_link_hostname is None or connection_hostname is None:
@@ -325,7 +432,11 @@ class AzurevmClient(ConnectorClientBase):
                 parsed_next_link.scheme == parsed_connection.scheme
                 and next_link_port == connection_port
             ):
-                return next_link
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
 
             raise ValueError(
                 "Pagination URL origin "
@@ -338,7 +449,7 @@ class AzurevmClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def virtual_machine_in_scale_set_get_async(
+    async def virtual_machine_in_scale_set_get(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -354,6 +465,26 @@ class AzurevmClient(ConnectorClientBase):
         Get virtual machine in a VM scale set
 
         Gets a virtual machine in a VM scale set.
+
+        Swagger operation ID: `VirtualMachineInScaleSet_Get`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_scale_set_name: The name of the virtual machine
+                scale set.
+            virtual_machine_in_scale_set_instance_id: The name of the virtual
+                machine in a VM scale set.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -373,7 +504,7 @@ class AzurevmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -387,6 +518,7 @@ class AzurevmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -394,7 +526,7 @@ class AzurevmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def virtual_machine_in_scale_set_deallocate_async(
+    async def virtual_machine_in_scale_set_deallocate(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -413,6 +545,26 @@ class AzurevmClient(ConnectorClientBase):
         the virtual machine and releases the compute resources it uses. You are
         not billed for the compute resources of this virtual machine once it is
         deallocated.
+
+        Swagger operation ID: `VirtualMachineInScaleSet_Deallocate`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_scale_set_name: The name of the virtual machine
+                scale set.
+            virtual_machine_in_scale_set_instance_id: The name of the virtual
+                machine in a VM scale set.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -433,7 +585,7 @@ class AzurevmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -447,9 +599,10 @@ class AzurevmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def virtual_machine_in_scale_set_power_off_async(
+    async def virtual_machine_in_scale_set_power_off(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -467,6 +620,26 @@ class AzurevmClient(ConnectorClientBase):
         Power off (stop) a virtual machine in a VM scale set. Note that
         resources are still attached and you are getting charged for the
         resources.
+
+        Swagger operation ID: `VirtualMachineInScaleSet_PowerOff`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_scale_set_name: The name of the virtual machine
+                scale set.
+            virtual_machine_in_scale_set_instance_id: The name of the virtual
+                machine in a VM scale set.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -487,7 +660,7 @@ class AzurevmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -501,9 +674,10 @@ class AzurevmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def virtual_machine_in_scale_set_redeploy_async(
+    async def virtual_machine_in_scale_set_redeploy(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -520,6 +694,26 @@ class AzurevmClient(ConnectorClientBase):
 
         Shuts down the virtual machine in the VM scale set, moves it to a new
         node, and powers it back on.
+
+        Swagger operation ID: `VirtualMachineInScaleSet_Redeploy`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_scale_set_name: The name of the virtual machine
+                scale set.
+            virtual_machine_in_scale_set_instance_id: The name of the virtual
+                machine in a VM scale set.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -540,7 +734,7 @@ class AzurevmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -554,9 +748,10 @@ class AzurevmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def virtual_machine_in_scale_set_reimage_async(
+    async def virtual_machine_in_scale_set_reimage(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -573,6 +768,26 @@ class AzurevmClient(ConnectorClientBase):
 
         Reimages (upgrade the operating system) a specific virtual machine in a
         VM scale set.
+
+        Swagger operation ID: `VirtualMachineInScaleSet_Reimage`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_scale_set_name: The name of the virtual machine
+                scale set.
+            virtual_machine_in_scale_set_instance_id: The name of the virtual
+                machine in a VM scale set.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -593,7 +808,7 @@ class AzurevmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -607,9 +822,10 @@ class AzurevmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def virtual_machine_in_scale_set_restart_async(
+    async def virtual_machine_in_scale_set_restart(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -625,6 +841,26 @@ class AzurevmClient(ConnectorClientBase):
         Restart virtual machine in a VM scale set
 
         Restarts a virtual machine in a VM scale set.
+
+        Swagger operation ID: `VirtualMachineInScaleSet_Restart`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_scale_set_name: The name of the virtual machine
+                scale set.
+            virtual_machine_in_scale_set_instance_id: The name of the virtual
+                machine in a VM scale set.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -645,7 +881,7 @@ class AzurevmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -659,9 +895,10 @@ class AzurevmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def virtual_machine_in_scale_set_start_async(
+    async def virtual_machine_in_scale_set_start(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -677,6 +914,26 @@ class AzurevmClient(ConnectorClientBase):
         Start virtual machine in a VM scale set
 
         Starts a virtual machine in a VM scale set.
+
+        Swagger operation ID: `VirtualMachineInScaleSet_Start`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_scale_set_name: The name of the virtual machine
+                scale set.
+            virtual_machine_in_scale_set_instance_id: The name of the virtual
+                machine in a VM scale set.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -697,7 +954,7 @@ class AzurevmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -711,9 +968,10 @@ class AzurevmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def virtual_machine_get_async(
+    async def virtual_machine_get(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -728,6 +986,23 @@ class AzurevmClient(ConnectorClientBase):
         Get virtual machine
 
         Gets a virtual machine.
+
+        Swagger operation ID: `VirtualMachine_Get`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_name: The name of the virtual machine.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -745,7 +1020,7 @@ class AzurevmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -759,6 +1034,7 @@ class AzurevmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -766,7 +1042,7 @@ class AzurevmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def virtual_machine_start_async(
+    async def virtual_machine_start(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -781,6 +1057,23 @@ class AzurevmClient(ConnectorClientBase):
         Start virtual machine
 
         Starts a virtual machine.
+
+        Swagger operation ID: `VirtualMachine_Start`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_name: The name of the virtual machine.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -799,7 +1092,7 @@ class AzurevmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -813,9 +1106,10 @@ class AzurevmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def virtual_machine_deallocate_async(
+    async def virtual_machine_deallocate(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -832,6 +1126,23 @@ class AzurevmClient(ConnectorClientBase):
         Shuts down the virtual machine and releases the compute resources. You
         are not billed for the compute resources that this virtual machine
         uses.
+
+        Swagger operation ID: `VirtualMachine_Deallocate`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_name: The name of the virtual machine.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -850,7 +1161,7 @@ class AzurevmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -864,9 +1175,10 @@ class AzurevmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def virtual_machine_poweroff_async(
+    async def virtual_machine_poweroff(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -883,6 +1195,23 @@ class AzurevmClient(ConnectorClientBase):
         Power off (stop) a virtual machine. The virtual machine can be
         restarted with the same provisioned resources. You are still charged
         for this virtual machine.
+
+        Swagger operation ID: `VirtualMachine_Poweroff`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_name: The name of the virtual machine.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -901,7 +1230,7 @@ class AzurevmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -915,9 +1244,10 @@ class AzurevmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def virtual_machine_reapply_async(
+    async def virtual_machine_reapply(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -932,6 +1262,23 @@ class AzurevmClient(ConnectorClientBase):
         Reapply virtual machine
 
         Reapply a virtual machine's state.
+
+        Swagger operation ID: `VirtualMachine_Reapply`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_name: The name of the virtual machine.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -950,7 +1297,7 @@ class AzurevmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -964,9 +1311,10 @@ class AzurevmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def virtual_machine_redeploy_async(
+    async def virtual_machine_redeploy(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -982,6 +1330,23 @@ class AzurevmClient(ConnectorClientBase):
 
         Shuts down the virtual machine, moves it to a new node, and powers it
         back on.
+
+        Swagger operation ID: `VirtualMachine_Redeploy`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_name: The name of the virtual machine.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1000,7 +1365,7 @@ class AzurevmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1014,9 +1379,10 @@ class AzurevmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def virtual_machine_restart_async(
+    async def virtual_machine_restart(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -1031,6 +1397,23 @@ class AzurevmClient(ConnectorClientBase):
         Restart virtual machine
 
         Restarts a virtual machine.
+
+        Swagger operation ID: `VirtualMachine_Restart`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_name: The name of the virtual machine.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1049,7 +1432,7 @@ class AzurevmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1063,34 +1446,57 @@ class AzurevmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def subscriptions_list_async(
+    def list_subscriptions(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List subscriptions
 
         Gets a list of all the subscriptions to which the principal has access.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `Subscriptions_List`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/subscriptions"
         query_params = []
         query_params.append("x-ms-api-version=" + quote("2020-01-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1103,23 +1509,32 @@ class AzurevmClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def resource_groups_list_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_resource_groups(
         self,
         subscription_id: str,
         *,
@@ -1127,14 +1542,30 @@ class AzurevmClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List resource groups
 
         Lists all the resource groups within the subscription.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `ResourceGroups_List`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1146,11 +1577,18 @@ class AzurevmClient(ConnectorClientBase):
         query_params.append("x-ms-api-version=" + quote("2020-01-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1163,23 +1601,32 @@ class AzurevmClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def virtual_machine_scale_sets_list_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_virtual_machine_scale_sets(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -1188,14 +1635,31 @@ class AzurevmClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List virtual machine scale sets
 
         Lists all the virtual machine scale sets within the resource group.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `VirtualMachineScaleSets_List`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1211,11 +1675,18 @@ class AzurevmClient(ConnectorClientBase):
         query_params.append("x-ms-api-version=" + quote("2019-12-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1228,23 +1699,32 @@ class AzurevmClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def virtual_machines_in_scale_set_list_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_virtual_machines_in_scale_set(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -1254,14 +1734,33 @@ class AzurevmClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List virtual machines in a VM scale set
 
         Lists all the virtual machines in a VM scale set.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `VirtualMachinesInScaleSet_List`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_scale_set_name: The name of the virtual machine
+                scale set.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1279,11 +1778,18 @@ class AzurevmClient(ConnectorClientBase):
         query_params.append("x-ms-api-version=" + quote("2019-12-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1296,23 +1802,32 @@ class AzurevmClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def virtual_machines_list_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_virtual_machines(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -1321,14 +1836,31 @@ class AzurevmClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List virtual machines
 
         Lists all the virtual machines within the resource group.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `VirtualMachines_List`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1344,11 +1876,18 @@ class AzurevmClient(ConnectorClientBase):
         query_params.append("x-ms-api-version=" + quote("2019-12-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1361,18 +1900,27 @@ class AzurevmClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)

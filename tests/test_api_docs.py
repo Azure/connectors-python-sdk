@@ -118,6 +118,36 @@ def test_validate_api_docs_reports_missing_page(documentation_tree: Path) -> Non
     ]
 
 
+def test_validate_api_docs_reports_missing_core_page(
+    documentation_tree: Path,
+) -> None:
+    """Report a missing async runtime API page at its root location."""
+    (
+        documentation_tree
+        / "api"
+        / "core"
+        / "core"
+        / "index.html"
+    ).unlink()
+
+    assert validate_api_docs.validate_api_docs(documentation_tree) == [
+        "Missing core API pages: core",
+    ]
+
+
+@pytest.mark.parametrize("section", ["core-aio", "connectors-aio"])
+def test_validate_api_docs_rejects_obsolete_dual_mode_pages(
+    documentation_tree: Path,
+    section: str,
+) -> None:
+    """Reject stale duplicate namespace pages rather than treating them as async API."""
+    _write_api_page(documentation_tree, section, "obsolete")
+
+    assert validate_api_docs.validate_api_docs(documentation_tree) == [
+        f"Obsolete dual-mode API section: '{section}'. Build a clean site.",
+    ]
+
+
 @pytest.mark.parametrize("page_content", ["", "<html></html>"])
 def test_validate_api_docs_rejects_page_without_api_content(
     documentation_tree: Path,

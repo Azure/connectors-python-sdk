@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
+from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
 from azure.core.credentials_async import AsyncTokenCredential
 from azure.core.pipeline.transport import AsyncHttpTransport
@@ -18,7 +19,27 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "AzuredatafactoryClient",
+    "Activity",
+    "ActivityFull",
+    "CreatePipelineRunResponse",
+    "DataFactory",
+    "DataFactoryListResult",
+    "ParameterValueSpecification",
+    "Pipeline",
+    "PipelineListResult",
+    "PipelineRun",
+    "ResourceGroup",
+    "ResourceGroupListResult",
+    "ResourceGroupProperties",
+    "Subscription",
+    "SubscriptionListResult",
+    "SubscriptionPolicies",
+]
 
 
 # Type Definitions
@@ -29,8 +50,9 @@ class CreatePipelineRunResponse:
     Response for Create a pipeline run
     """
 
-    run_id: Optional[str] = field(
+    run_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "runId"},
     )
     """runId"""
@@ -42,53 +64,60 @@ class PipelineRun:
     Response for Get a pipeline run
     """
 
-    run_id: Optional[str] = field(
+    run_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "runId"},
     )
     """Identifier of a run"""
-    pipeline_name: Optional[str] = field(
+    pipeline_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pipelineName"},
     )
     """The pipeline name"""
-    parameters: Optional[Dict[str, Any]] = None
+    parameters: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """
     The full of partial list of parameter name, value pair used in the pipeline
     run.
     """
-    invoked_by: Optional[Dict[str, Any]] = field(
+    invoked_by: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "invokedBy"},
     )
     """Entity that started the pipeline."""
-    run_start: Optional[str] = field(
+    run_start: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "runStart"},
     )
     """The start time of a pipeline run in ISO8601 format."""
-    run_end: Optional[str] = field(
+    run_end: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "runEnd"},
     )
     """The end time of a pipeline run in ISO8601 format."""
-    duration_in_ms: Optional[int] = field(
+    duration_in_ms: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "durationInMs"},
     )
     """The duration of a pipeline run in milliseconds."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The status of the pipeline run."""
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The message from a pipeline run."""
-    last_updated: Optional[str] = field(
+    last_updated: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastUpdated"},
     )
     """
     The last updated timestamp for the pipeline run event in ISO8601 format.
     """
-    annotations: Optional[List[str]] = None
+    annotations: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """The annotations for the pipeline run."""
 
 
@@ -98,10 +127,16 @@ class SubscriptionListResult:
     Response for List subscriptions
     """
 
-    value: Optional[List[Subscription]] = None
-    """The subscriptions."""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[Subscription | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The subscriptions."""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results."""
@@ -113,10 +148,16 @@ class ResourceGroupListResult:
     Response for List resource groups
     """
 
-    value: Optional[List[ResourceGroup]] = None
-    """The list of resource groups."""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[ResourceGroup | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The list of resource groups."""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results."""
@@ -128,10 +169,16 @@ class DataFactoryListResult:
     Response for List Factories
     """
 
-    value: Optional[List[DataFactory]] = None
-    """The list of Data Factories."""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[DataFactory | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The list of Data Factories."""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results."""
@@ -143,10 +190,16 @@ class PipelineListResult:
     Response for List pipelines
     """
 
-    value: Optional[List[Pipeline]] = None
-    """The list of Data Factories."""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[Pipeline | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The list of Data Factories."""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results."""
@@ -158,19 +211,23 @@ class DataFactory:
     Definition: DataFactory
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The resource name."""
-    tags: Optional[Dict[str, Any]] = None
+    tags: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The resource tags."""
-    properties: Optional[Dict[str, Any]] = None
+    properties: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Data Factory additional properties."""
-    identity: Optional[Dict[str, Any]] = None
+    identity: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Managed service identity of the factory."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The resource identitfier."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """The resource type."""
-    location: Optional[str] = None
+    location: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The resource location"""
 
 
@@ -180,13 +237,13 @@ class Pipeline:
     Definition: Pipeline
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The resource identifier."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The resource name of the pipeline."""
-    properties: Optional[Dict[str, Any]] = None
+    properties: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The pipeline properties."""
-    etag: Optional[str] = None
+    etag: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Etag identifies change in the resource."""
 
 
@@ -196,7 +253,7 @@ class Activity:
     Definition: Activity
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -209,20 +266,25 @@ class ActivityFull:
     Definition: Activity-Full
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    """type"""
-    inputs: Optional[List[Dict[str, Any]]] = None
-    """inputs"""
-    outputs: Optional[List[Dict[str, Any]]] = None
-    """outputs"""
-    type_properties: Optional[Dict[str, Any]] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    """type"""
+    inputs: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    """inputs"""
+    outputs: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    """outputs"""
+    type_properties: Optional[Dict[str, Any]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "typeProperties"},
     )
     """typeProperties"""
-    policy: Optional[Dict[str, Any]] = None
+    policy: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """policy"""
 
 
@@ -232,7 +294,7 @@ class ParameterValueSpecification:
     Definition: ParameterValueSpecification
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -245,34 +307,39 @@ class Subscription:
     Definition: Subscription
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The fully qualified Id. For example,
     /subscriptions/00000000-0000-0000-0000-000000000000.
     """
-    subscription_id: Optional[str] = field(
+    subscription_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "subscriptionId"},
     )
     """The subscription Id."""
-    tenant_id: Optional[str] = field(
+    tenant_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tenantId"},
     )
     """The tenant Id."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The subscription display name."""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The subscription state."""
-    subscription_policies: Optional[SubscriptionPolicies] = field(
+    subscription_policies: Optional[SubscriptionPolicies | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "subscriptionPolicies"},
     )
-    authorization_source: Optional[str] = field(
+    authorization_source: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "authorizationSource"},
     )
     """
@@ -288,8 +355,9 @@ class SubscriptionPolicies:
     Definition: SubscriptionPolicies
     """
 
-    location_placement_id: Optional[str] = field(
+    location_placement_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "locationPlacementId"},
     )
     """
@@ -297,13 +365,15 @@ class SubscriptionPolicies:
     visible for a subscription. For example, a subscription with a location
     placement Id of Public_2014-09-01 has access to Azure public regions.
     """
-    quota_id: Optional[str] = field(
+    quota_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "quotaId"},
     )
     """The subscription quota Id."""
-    spending_limit: Optional[str] = field(
+    spending_limit: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "spendingLimit"},
     )
     """The subscription spending limit."""
@@ -315,26 +385,32 @@ class ResourceGroup:
     Definition: ResourceGroup
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The ID of the resource group (e.g. /subscriptions/XXX/resourceGroups/YYY).
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Name of the resource group."""
-    location: Optional[str] = None
+    location: str
     """
     The location of the resource group. It cannot be changed after the resource
     group has been created. Has to be one of the supported Azure Locations,
     such as West US, East US, West Europe, East Asia, etc.
     """
-    managed_by: Optional[str] = field(
+    managed_by: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managedBy"},
     )
     """Id of the resource that manages this resource group."""
-    tags: Optional[Dict[str, str]] = None
+    tags: Optional[Dict[str, str]] = dataclass_field(default=None, kw_only=True)
     """The tags attached to the resource group."""
-    properties: Optional[ResourceGroupProperties] = None
+    properties: Optional[
+        ResourceGroupProperties | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -343,8 +419,9 @@ class ResourceGroupProperties:
     Definition: ResourceGroupProperties
     """
 
-    provisioning_state: Optional[str] = field(
+    provisioning_state: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "provisioningState"},
     )
     """The provisioning state."""
@@ -361,7 +438,7 @@ class AzuredatafactoryClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -378,8 +455,8 @@ class AzuredatafactoryClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -400,7 +477,7 @@ class AzuredatafactoryClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -416,15 +493,49 @@ class AzuredatafactoryClient(ConnectorClientBase):
         return "azuredatafactory"
 
     def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
-        parsed_next_link = urlsplit(next_link)
-        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
             if next_link.startswith("/"):
                 return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
             if next_link.startswith("?"):
-                return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
 
-        parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
         connection_hostname = parsed_connection.hostname
         if next_link_hostname is None or connection_hostname is None:
@@ -441,7 +552,11 @@ class AzuredatafactoryClient(ConnectorClientBase):
                 parsed_next_link.scheme == parsed_connection.scheme
                 and next_link_port == connection_port
             ):
-                return next_link
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
 
             raise ValueError(
                 "Pagination URL origin "
@@ -454,15 +569,15 @@ class AzuredatafactoryClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def create_pipeline_run_async(
+    async def create_pipeline_run(
         self,
-        input: ParameterValueSpecification,
+        input: ParameterValueSpecification | Mapping[str, Any],
         subscription_id: str,
         resource_group_name: str,
         data_factory_name: str,
         pipeline_name: str,
-        reference_pipeline_run_id: Optional[str] = None,
         *,
+        reference_pipeline_run_id: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -472,6 +587,31 @@ class AzuredatafactoryClient(ConnectorClientBase):
         Create a pipeline run
 
         This operation creates a new pipeline run in your factory
+
+        Swagger operation ID: `CreatePipelineRun`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            data_factory_name: The name of the Data Factory.
+            pipeline_name: The name of the Data Factory pipeline.
+            reference_pipeline_run_id: The pipeline run identifier. If run ID
+                is specified the parameters of the specified run will be used
+                to create a new run.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -497,7 +637,7 @@ class AzuredatafactoryClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -511,6 +651,7 @@ class AzuredatafactoryClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -518,7 +659,7 @@ class AzuredatafactoryClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def cancel_pipeline_run_async(
+    async def cancel_pipeline_run(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -534,6 +675,26 @@ class AzuredatafactoryClient(ConnectorClientBase):
         Cancel a pipeline run
 
         This operation cancels a pipeline run by its run ID.
+
+        Swagger operation ID: `CancelPipelineRun`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            data_factory_name: The name of the Data Factory.
+            pipeline_run_name: The id of the Data Factory pipeline run.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -553,7 +714,7 @@ class AzuredatafactoryClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -567,9 +728,10 @@ class AzuredatafactoryClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_pipeline_run_async(
+    async def get_pipeline_run(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -585,6 +747,26 @@ class AzuredatafactoryClient(ConnectorClientBase):
         Get a pipeline run
 
         Get a particular pipeline run execution
+
+        Swagger operation ID: `GetPipelineRun`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            data_factory_name: The name of the Data Factory.
+            pipeline_run_name: The id of the Data Factory pipeline run.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -604,7 +786,7 @@ class AzuredatafactoryClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -618,6 +800,7 @@ class AzuredatafactoryClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -625,32 +808,54 @@ class AzuredatafactoryClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_subscriptions_async(
+    def list_subscriptions(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List subscriptions
 
         Gets a list of all the subscriptions to which the principal has access.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `ListSubscriptions`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/subscriptions"
         query_params = []
         query_params.append("x-ms-api-version=" + quote("2017-09-01-preview", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -663,41 +868,70 @@ class AzuredatafactoryClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def list_resource_groups_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_resource_groups(
         self,
         subscription_id: str,
+        *,
         filter: Optional[str] = None,
         top: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List resource groups
 
         Lists all the resource groups within the subscription. The results are
         paginated at 1,000+ records.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `ListResourceGroups`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            filter: The filter to apply on the operation.
+            top: Query parameters. If nothing is passed returns all values.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -719,11 +953,18 @@ class AzuredatafactoryClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -736,23 +977,32 @@ class AzuredatafactoryClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def list_data_factories_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_data_factories(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -761,14 +1011,33 @@ class AzuredatafactoryClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List Factories
 
         Get the list of Data Factories
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `ListDataFactories`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -784,11 +1053,18 @@ class AzuredatafactoryClient(ConnectorClientBase):
         query_params.append("x-ms-api-version=" + quote("2017-09-01-preview", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -801,23 +1077,32 @@ class AzuredatafactoryClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def list_pipelines_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_pipelines(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -827,14 +1112,34 @@ class AzuredatafactoryClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List pipelines
 
         List the list of pipelines from a particular factory
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `ListPipelines`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            data_factory_name: The name of the Data Factory.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -852,11 +1157,18 @@ class AzuredatafactoryClient(ConnectorClientBase):
         query_params.append("x-ms-api-version=" + quote("2017-09-01-preview", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -869,18 +1181,27 @@ class AzuredatafactoryClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)

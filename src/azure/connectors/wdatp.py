@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
+from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
 from azure.core.credentials_async import AsyncTokenCredential
 from azure.core.pipeline.transport import AsyncHttpTransport
@@ -18,7 +19,53 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "WdatpClient",
+    "AdvancedHuntingInput",
+    "AdvancedHuntingResponse",
+    "AdvancedHuntingSchemaInput",
+    "AdvancedHuntingSchemaResponse",
+    "Alert",
+    "CancelSingleMachineActionInput",
+    "CollectInvestigationPackageInput",
+    "CreateAlertByReferenceInput",
+    "DomainStats",
+    "FileStats",
+    "GetAlertsResponse",
+    "GetInvestigationPackageUriResponse",
+    "GetInvestigationsResponse",
+    "GetLiveResponseDownloadLinkResponse",
+    "GetMachineActionsResponse",
+    "GetMachinesResponse",
+    "GetRemediationActivitiesResponse",
+    "GetRemediationActivityMachineListResponse",
+    "InitiateInvestigationInput",
+    "InitiateInvestigationResponse",
+    "Investigation",
+    "IpStats",
+    "IsolateMachineInput",
+    "LiveResponseCommand",
+    "LiveResponseCommandStatus",
+    "Machine",
+    "MachineAction",
+    "MachineTagInput",
+    "OnNewRemediationActivityResponse",
+    "PatchAlertInput",
+    "RemediationActivity",
+    "RestrictAppExecutionInput",
+    "RunAntivirusScanInput",
+    "RunLiveResponseInput",
+    "StartInvestigationInput",
+    "UnisolateMachineInput",
+    "UnrestrictAppExecutionInput",
+    "WebHookNotification",
+    "WebHookSubscriptionRequest",
+    "WebHookSubscriptionTableEntity",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -29,7 +76,7 @@ class AdvancedHuntingInput:
     Advanced Hunting (Deprecated)
     """
 
-    query: Optional[str] = field(default=None, metadata={"wire_name": "Query"})
+    query: str = dataclass_field(metadata={"wire_name": "Query"})
     """The query to run"""
 
 
@@ -39,13 +86,15 @@ class AdvancedHuntingResponse:
     Response for Advanced Hunting (Deprecated)
     """
 
-    stats: Optional[Dict[str, Any]] = field(
+    stats: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Stats"},
     )
     """Stats"""
-    results: Optional[List[Dict[str, Any]]] = field(
+    results: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Results"},
     )
 
@@ -56,31 +105,21 @@ class CreateAlertByReferenceInput:
     Alerts - Create alert
     """
 
-    machine_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "machineId"},
-    )
+    machine_id: str = dataclass_field(metadata={"wire_name": "machineId"})
     """ID of the machine on which the event was identified"""
-    report_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "reportId"},
-    )
+    report_id: str = dataclass_field(metadata={"wire_name": "reportId"})
     """Report Id of the event"""
-    event_time: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "eventTime"},
-    )
+    event_time: str = dataclass_field(metadata={"wire_name": "eventTime"})
     """Time of the event as string, e.g. 2018-08-03T16:45:21.7115183Z"""
-    severity: Optional[str] = None
+    severity: str
     """Severity of the alert."""
-    category: Optional[str] = None
+    category: str
     """Category of the alert"""
-    title: Optional[str] = None
+    title: str
     """Title of the Alert"""
-    description: Optional[str] = None
+    description: str
     """Description of the Alert"""
-    recommended_action: Optional[str] = field(
-        default=None,
+    recommended_action: str = dataclass_field(
         metadata={"wire_name": "recommendedAction"},
     )
     """Recommended action for the Alert"""
@@ -92,69 +131,79 @@ class Alert:
     Response for Alerts - Create alert
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Alert identifier"""
-    incident_id: Optional[int] = field(
+    incident_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "incidentId"},
     )
     """The ID of the incident"""
-    investigation_id: Optional[int] = field(
+    investigation_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "investigationId"},
     )
     """The Id of the investigation"""
-    severity: Optional[str] = None
+    severity: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Alert severity"""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Status of the alert"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Alert description"""
-    alert_creation_time: Optional[str] = field(
+    alert_creation_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "alertCreationTime"},
     )
     """The time at which the alert was created"""
-    category: Optional[str] = None
+    category: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Alert category"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Alert title"""
-    threat_family_name: Optional[str] = field(
+    threat_family_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "threatFamilyName"},
     )
     """Threat family name"""
-    detection_source: Optional[str] = field(
+    detection_source: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "detectionSource"},
     )
     """Detection source"""
-    classification: Optional[str] = None
+    classification: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Alert classification"""
-    determination: Optional[str] = None
+    determination: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Alert determination"""
-    assigned_to: Optional[str] = field(
+    assigned_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assignedTo"},
     )
     """Person to whom the alert was assigned"""
-    resolved_time: Optional[str] = field(
+    resolved_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resolvedTime"},
     )
     """The time at which the alert was resolved"""
-    last_event_time: Optional[str] = field(
+    last_event_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastEventTime"},
     )
     """The time of the last event related to the alert"""
-    first_event_time: Optional[str] = field(
+    first_event_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "firstEventTime"},
     )
     """The time of the first event related to the alert"""
-    machine_id: Optional[str] = field(
+    machine_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "machineId"},
     )
     """The identifier of the machine related to the alert"""
@@ -166,15 +215,22 @@ class GetAlertsResponse:
     Response for Alerts - Get list of alerts
     """
 
-    count: Optional[int] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.count"},
     )
     """The number of available alerts by this query"""
-    value: Optional[List[Alert]] = None
-    """The alerts returned"""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[Alert | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The alerts returned"""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """
@@ -189,19 +245,20 @@ class PatchAlertInput:
     Alerts - Update alert
     """
 
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Status of the alert. One of 'New', 'InProgress' and 'Resolved'"""
-    assigned_to: Optional[str] = field(
+    assigned_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assignedTo"},
     )
     """Person to assign the alert to"""
-    classification: Optional[str] = None
+    classification: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Classification of the alert. One of 'Unknown', 'FalsePositive',
     'TruePositive'
     """
-    determination: Optional[str] = None
+    determination: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The determination of the alert. One of 'NotAvailable', 'Apt', 'Malware',
     'SecurityPersonnel', 'SecurityTesting', 'UnwantedSoftware', 'Other'
@@ -214,10 +271,7 @@ class InitiateInvestigationInput:
     Actions - Initiate investigation on a machine (to be deprecated)
     """
 
-    comment: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Comment"},
-    )
+    comment: str = dataclass_field(metadata={"wire_name": "Comment"})
     """A comment to associate to the investigation"""
 
 
@@ -227,7 +281,7 @@ class InitiateInvestigationResponse:
     Response for Actions - Initiate investigation on a machine (to be deprecated)
     """
 
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ID of the investigation"""
 
 
@@ -237,10 +291,7 @@ class StartInvestigationInput:
     Actions - Start automated investigation on a machine
     """
 
-    comment: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Comment"},
-    )
+    comment: str = dataclass_field(metadata={"wire_name": "Comment"})
     """A comment to associate to the investigation"""
 
 
@@ -250,32 +301,37 @@ class Investigation:
     Response for Actions - Start automated investigation on a machine
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ID of the investigation"""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The state of the investigation (e.g. 'Benign', 'Running', etc..)"""
-    status_details: Optional[str] = field(
+    status_details: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "statusDetails"},
     )
     """Details on the status"""
-    computer_dns_name: Optional[str] = field(
+    computer_dns_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "computerDnsName"},
     )
     """The computer name"""
-    machine_id: Optional[str] = field(
+    machine_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "machineId"},
     )
     """The machine ID"""
-    start_time: Optional[str] = field(
+    start_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startTime"},
     )
     """The UTC time at which investigation was started"""
-    end_time: Optional[str] = field(
+    end_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endTime"},
     )
     """The UTC time at which investigation was completed"""
@@ -287,42 +343,56 @@ class MachineAction:
     Response for Actions - Get single machine action
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ID of the machine action"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """
     The type of the action (e.g. 'Isolate', 'CollectInvestigationPackage', ...)
     """
-    requestor: Optional[str] = None
+    requestor: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The person that requested the machine action"""
-    requestor_comment: Optional[str] = field(
+    requestor_comment: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "requestorComment"},
     )
     """The comment associated to the machine action"""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The status of the machine action (e.g., 'InProgress')"""
-    machine_id: Optional[str] = field(
+    machine_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "machineId"},
     )
     """The ID of the machine on which the action has been performed"""
-    creation_date_time_utc: Optional[str] = field(
+    creation_date_time_utc: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "creationDateTimeUtc"},
     )
     """The UTC time at which the action has been requested"""
-    last_update_date_time_utc: Optional[str] = field(
+    last_update_date_time_utc: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastUpdateDateTimeUtc"},
     )
     """The last UTC time at which the action has been updated"""
-    related_file_info: Optional[Dict[str, Any]] = field(
+    related_file_info: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "relatedFileInfo"},
     )
     """relatedFileInfo"""
-    commands: Optional[List[LiveResponseCommandStatus]] = None
+    commands: Optional[
+        List[LiveResponseCommandStatus | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Live response machine action commands"""
 
 
@@ -332,10 +402,7 @@ class CancelSingleMachineActionInput:
     Actions - Cancel a single machine action
     """
 
-    comment: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Comment"},
-    )
+    comment: str = dataclass_field(metadata={"wire_name": "Comment"})
     """A comment to associate to the machine action cancellation"""
 
 
@@ -345,7 +412,7 @@ class GetLiveResponseDownloadLinkResponse:
     Response for Actions - Get live response command result download URI
     """
 
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The live response command download URI"""
 
 
@@ -355,15 +422,22 @@ class GetMachineActionsResponse:
     Response for Actions - Get list of machine actions
     """
 
-    count: Optional[int] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.count"},
     )
     """The number of available machine actions by this query"""
-    value: Optional[List[MachineAction]] = None
-    """The machine actions returned"""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[MachineAction | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The machine actions returned"""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """
@@ -378,40 +452,47 @@ class FileStats:
     Response for Files - Get the statistics for the given file
     """
 
-    sha1: Optional[str] = None
+    sha1: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The sha1 of the file"""
-    globally_prevalence: Optional[int] = field(
+    globally_prevalence: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "globallyPrevalence"},
     )
     """The file global prevalence."""
-    global_first_observed: Optional[str] = field(
+    global_first_observed: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "globalFirstObserved"},
     )
     """The first time the file was observed globally."""
-    global_last_observed: Optional[str] = field(
+    global_last_observed: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "globalLastObserved"},
     )
     """The Last time the file was observed."""
-    organization_prevalence: Optional[int] = field(
+    organization_prevalence: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "organizationPrevalence"},
     )
     """The file prevalence across organization"""
-    org_first_seen: Optional[str] = field(
+    org_first_seen: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "orgFirstSeen"},
     )
     """The first time the file was observed in the organization."""
-    org_last_seen: Optional[str] = field(
+    org_last_seen: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "orgLastSeen"},
     )
     """The last time the file was observed in the organization."""
-    top_file_names: Optional[List[str]] = field(
+    top_file_names: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "topFileNames"},
     )
     """The file names that this file has been presented."""
@@ -423,20 +504,23 @@ class DomainStats:
     Response for Domains - Get the statistics for the given domain name
     """
 
-    host: Optional[str] = None
+    host: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The domain host."""
-    organization_prevalence: Optional[int] = field(
+    organization_prevalence: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "organizationPrevalence"},
     )
     """The domain prevalence across organization"""
-    org_first_seen: Optional[str] = field(
+    org_first_seen: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "orgFirstSeen"},
     )
     """The first time the domain was observed in the organization."""
-    org_last_seen: Optional[str] = field(
+    org_last_seen: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "orgLastSeen"},
     )
     """The last time the domain was observed in the organization."""
@@ -448,23 +532,27 @@ class IpStats:
     Response for Ips - Get the statistics for the given ip address
     """
 
-    ip_address: Optional[str] = field(
+    ip_address: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ipAddress"},
     )
     """The ip address"""
-    organization_prevalence: Optional[int] = field(
+    organization_prevalence: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "organizationPrevalence"},
     )
     """The ip address prevalence across organization"""
-    org_first_seen: Optional[str] = field(
+    org_first_seen: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "orgFirstSeen"},
     )
     """The first time the ip address was observed in the organization."""
-    org_last_seen: Optional[str] = field(
+    org_last_seen: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "orgLastSeen"},
     )
     """The last time the ip address was observed in the organization."""
@@ -476,15 +564,22 @@ class GetInvestigationsResponse:
     Response for Actions - Get list of investigation
     """
 
-    count: Optional[int] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.count"},
     )
     """The number of available investigations by this query"""
-    value: Optional[List[Investigation]] = None
-    """The investigations returned"""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[Investigation | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The investigations returned"""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """
@@ -499,10 +594,7 @@ class CollectInvestigationPackageInput:
     Actions - Collect investigation package
     """
 
-    comment: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Comment"},
-    )
+    comment: str = dataclass_field(metadata={"wire_name": "Comment"})
     """A comment to associate to the collection"""
 
 
@@ -512,7 +604,7 @@ class GetInvestigationPackageUriResponse:
     Response for Actions - Get investigation package download URI
     """
 
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The investigation package SAS URI"""
 
 
@@ -522,13 +614,9 @@ class IsolateMachineInput:
     Actions - Isolate machine
     """
 
-    comment: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Comment"},
-    )
+    comment: str = dataclass_field(metadata={"wire_name": "Comment"})
     """A comment to associate to the isolation"""
-    isolation_type: Optional[str] = field(
-        default=None,
+    isolation_type: str = dataclass_field(
         metadata={"wire_name": "IsolationType"},
     )
     """
@@ -544,10 +632,7 @@ class UnisolateMachineInput:
     Actions - Unisolate machine
     """
 
-    comment: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Comment"},
-    )
+    comment: str = dataclass_field(metadata={"wire_name": "Comment"})
     """A comment to associate to the unisolation"""
 
 
@@ -557,10 +642,7 @@ class RestrictAppExecutionInput:
     Actions - Restrict app execution
     """
 
-    comment: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Comment"},
-    )
+    comment: str = dataclass_field(metadata={"wire_name": "Comment"})
     """A comment to associate to the restriction"""
 
 
@@ -570,10 +652,7 @@ class UnrestrictAppExecutionInput:
     Actions - Remove app execution restriction
     """
 
-    comment: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Comment"},
-    )
+    comment: str = dataclass_field(metadata={"wire_name": "Comment"})
     """A comment to associate to the restriction removal"""
 
 
@@ -583,15 +662,9 @@ class RunAntivirusScanInput:
     Actions - Run antivirus scan
     """
 
-    comment: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Comment"},
-    )
+    comment: str = dataclass_field(metadata={"wire_name": "Comment"})
     """A comment to associate to the scan request"""
-    scan_type: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "ScanType"},
-    )
+    scan_type: str = dataclass_field(metadata={"wire_name": "ScanType"})
     """Type of scan to perform. Allowed values are 'Quick' or 'Full'"""
 
 
@@ -601,13 +674,9 @@ class RunLiveResponseInput:
     Actions - Run live response
     """
 
-    comment: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Comment"},
-    )
+    comment: str = dataclass_field(metadata={"wire_name": "Comment"})
     """A comment to associate to the isolation"""
-    commands: Optional[List[LiveResponseCommand]] = field(
-        default=None,
+    commands: List[LiveResponseCommand | Mapping[str, Any]] = dataclass_field(
         metadata={"wire_name": "Commands"},
     )
     """The live response commands to execute"""
@@ -619,15 +688,22 @@ class GetRemediationActivitiesResponse:
     Response for Remediation tasks - Get list of remediation activities (Preview)
     """
 
-    count: Optional[int] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.count"},
     )
     """The number of remediation activities by this query"""
-    value: Optional[List[RemediationActivity]] = None
-    """The remediation activities returned"""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[RemediationActivity | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The remediation activities returned"""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """
@@ -642,124 +718,149 @@ class RemediationActivity:
     Response for RemediationActivities - Get single remediation activity (Preview)
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The remediation activity identifier"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The title of the remediation activit"""
-    created_on: Optional[str] = field(
+    created_on: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdOn"},
     )
     """The time when the remediation activity was created"""
-    status_last_modified_on: Optional[str] = field(
+    status_last_modified_on: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "statusLastModifiedOn"},
     )
     """The time when the status was last modified"""
-    requester_id: Optional[str] = field(
+    requester_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "requesterId"},
     )
     """The remediation activity creator id"""
-    requester_email: Optional[str] = field(
+    requester_email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "requesterEmail"},
     )
     """The remediation activity creator email address"""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """the remediation activity status"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The description of the remediation activity"""
-    related_component: Optional[str] = field(
+    related_component: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "relatedComponent"},
     )
     """The remediation activity related component"""
-    target_devices: Optional[int] = field(
+    target_devices: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "targetDevices"},
     )
     """The number of the remediation activity target machines"""
-    rbac_group_names: Optional[List[str]] = field(
+    rbac_group_names: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "rbacGroupNames"},
     )
     """The rbac group names associated to the remediation activity"""
-    fixed_devices: Optional[int] = field(
+    fixed_devices: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "fixedDevices"},
     )
     """The number of the remediation activity fixed machines"""
-    requester_notes: Optional[str] = field(
+    requester_notes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "requesterNotes"},
     )
     """The remediation activity creator notes"""
-    due_on: Optional[str] = field(
+    due_on: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dueOn"},
     )
     """The due time for the remediation activity"""
-    category: Optional[str] = None
+    category: Optional[str] = dataclass_field(default=None, kw_only=True)
     """the remediation activity category"""
-    productivity_impact_remediation_type: Optional[str] = field(
+    productivity_impact_remediation_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "productivityImpactRemediationType"},
     )
     """the remediation Productivity impact type"""
-    priority: Optional[str] = None
+    priority: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The remediation activity priority"""
-    completion_method: Optional[str] = field(
+    completion_method: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "completionMethod"},
     )
     """The remediation activity completion method"""
-    completer_id: Optional[str] = field(
+    completer_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "completerId"},
     )
     """The remediation activity completer object id"""
-    completer_email: Optional[str] = field(
+    completer_email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "completerEmail"},
     )
     """The remediation activity completer email address"""
-    scid: Optional[str] = None
+    scid: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The remediation activity security configuration id"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    """The remediation activity type"""
-    product_id: Optional[str] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    """The remediation activity type"""
+    product_id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "productId"},
     )
     """Product Id"""
-    vendor_id: Optional[str] = field(
+    vendor_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "vendorId"},
     )
     """Vendor id"""
-    name_id: Optional[str] = field(
+    name_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nameId"},
     )
     """Name id"""
-    recommended_version: Optional[str] = field(
+    recommended_version: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recommendedVersion"},
     )
     """Recommended version"""
-    recommended_vendor: Optional[str] = field(
+    recommended_vendor: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recommendedVendor"},
     )
     """Recommended vendor"""
-    recommended_program: Optional[str] = field(
+    recommended_program: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recommendedProgram"},
     )
     """Recommended program"""
-    recommendation_reference: Optional[str] = field(
+    recommendation_reference: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RecommendationReference"},
     )
     """Recommendation reference"""
@@ -771,15 +872,22 @@ class GetRemediationActivityMachineListResponse:
     Response for Remediation activities - Get list of related machines (Preview)
     """
 
-    count: Optional[int] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.count"},
     )
     """The number of available machines by this query"""
-    value: Optional[List[Machine]] = None
-    """The machines returned"""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[Machine | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The machines returned"""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """
@@ -794,15 +902,22 @@ class GetMachinesResponse:
     Response for Machines - Get list of machines
     """
 
-    count: Optional[int] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.count"},
     )
     """The number of available machines by this query"""
-    value: Optional[List[Machine]] = None
-    """The machines returned"""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[Machine | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The machines returned"""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """
@@ -817,90 +932,107 @@ class Machine:
     Response for Machines - Get single machine
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The machine identifier"""
-    computer_dns_name: Optional[str] = field(
+    computer_dns_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "computerDnsName"},
     )
     """The computer name"""
-    first_seen: Optional[str] = field(
+    first_seen: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "firstSeen"},
     )
     """The time of the first event received by the machine"""
-    last_seen: Optional[str] = field(
+    last_seen: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastSeen"},
     )
     """The time of the last event received by the machine"""
-    os_platform: Optional[str] = field(
+    os_platform: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "osPlatform"},
     )
     """The OS platform of the machine"""
-    os_version: Optional[str] = field(
+    os_version: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "osVersion"},
     )
     """The OS version of the machine"""
-    system_product_name: Optional[str] = field(
+    system_product_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "systemProductName"},
     )
     """systemProductName"""
-    last_ip_address: Optional[str] = field(
+    last_ip_address: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastIpAddress"},
     )
     """The last IP address of the machine"""
-    last_external_ip_address: Optional[str] = field(
+    last_external_ip_address: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastExternalIpAddress"},
     )
     """The last external IP address of the machine"""
-    agent_version: Optional[str] = field(
+    agent_version: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "agentVersion"},
     )
     """The agent version"""
-    os_build: Optional[int] = field(
+    os_build: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "osBuild"},
     )
     """The OS build of the machine"""
-    health_status: Optional[str] = field(
+    health_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "healthStatus"},
     )
     """The health status of the machine"""
-    is_aad_joined: Optional[bool] = field(
+    is_aad_joined: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isAadJoined"},
     )
     """A flag indicating whether the machine is joined to Microsoft Entra ID"""
-    machine_tags: Optional[List[str]] = field(
+    machine_tags: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "machineTags"},
     )
     """The tags associated to the machine"""
-    rbac_group_id: Optional[int] = field(
+    rbac_group_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "rbacGroupId"},
     )
     """The ID of the RBAC group to which the machine belongs"""
-    rbac_group_name: Optional[str] = field(
+    rbac_group_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "rbacGroupName"},
     )
     """The name of the RBAC group to which the machine belongs"""
-    risk_score: Optional[str] = field(
+    risk_score: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "riskScore"},
     )
     """A score indicating how much the machine is at risk"""
-    aad_device_id: Optional[str] = field(
+    aad_device_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "aadDeviceId"},
     )
     """aadDeviceId"""
@@ -912,12 +1044,9 @@ class MachineTagInput:
     Machines - Tag machine
     """
 
-    value: Optional[str] = field(default=None, metadata={"wire_name": "Value"})
+    value: str = dataclass_field(metadata={"wire_name": "Value"})
     """The tag to add or remove"""
-    action: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Action"},
-    )
+    action: str = dataclass_field(metadata={"wire_name": "Action"})
     """
     The action to perform. Value should be one of 'Add' (to add a tag) or
     'Remove' (to remove a tag)
@@ -930,14 +1059,16 @@ class WebHookSubscriptionTableEntity:
     Response for Triggers - Trigger when new WDATP alert occurs
     """
 
-    id: Optional[str] = None
-    notification_url: Optional[str] = field(
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    notification_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "notificationUrl"},
     )
     """Gets or sets the web hook subscription notification URL."""
-    client_state: Optional[str] = field(
+    client_state: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "clientState"},
     )
 
@@ -948,15 +1079,22 @@ class OnNewRemediationActivityResponse:
     Response for Triggers when a new remediation activity is created (Preview)
     """
 
-    count: Optional[int] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.count"},
     )
     """The number of remediation activities by this query"""
-    value: Optional[List[RemediationActivity]] = None
-    """The remediation activities returned"""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[RemediationActivity | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """The remediation activities returned"""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """
@@ -971,7 +1109,7 @@ class AdvancedHuntingSchemaInput:
     Advanced Hunting Schema
     """
 
-    query: Optional[str] = field(default=None, metadata={"wire_name": "Query"})
+    query: str = dataclass_field(metadata={"wire_name": "Query"})
     """The query to run"""
 
 
@@ -981,7 +1119,7 @@ class AdvancedHuntingSchemaResponse:
     Response for Advanced Hunting Schema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -994,29 +1132,37 @@ class LiveResponseCommandStatus:
     Definition: LiveResponseCommandStatus
     """
 
-    index: Optional[int] = None
+    index: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The index of the command"""
-    start_time: Optional[str] = field(
+    start_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startTime"},
     )
     """The command execution start time UTC"""
-    end_time: Optional[str] = field(
+    end_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endTime"},
     )
     """The command execution end time UTC"""
-    command_status: Optional[str] = field(
+    command_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "commandStatus"},
     )
     """The status of the command execution (e.g., 'Completed')"""
-    errors: Optional[List[str]] = None
+    errors: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     List of command execution errors. In case no errors reported this will be
     an empty list.
     """
-    command: Optional[LiveResponseCommand] = None
+    command: Optional[
+        LiveResponseCommand | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The live response command"""
 
 
@@ -1026,9 +1172,9 @@ class LiveResponseCommand:
     Definition: LiveResponseCommand
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """The type of the command"""
-    params: Optional[List[Dict[str, Any]]] = None
+    params: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of command parameters."""
 
 
@@ -1038,28 +1184,20 @@ class WebHookSubscriptionRequest:
     Definition: WebHookSubscriptionRequest
     """
 
-    client_state: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "clientState"},
-    )
+    client_state: str = dataclass_field(metadata={"wire_name": "clientState"})
     """Gets or sets the client state."""
-    change_type: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "changeType"},
-    )
+    change_type: str = dataclass_field(metadata={"wire_name": "changeType"})
     """
     Indicates the type of change in the subscribed resource that will raise a
     notification.
     """
-    resource: Optional[str] = None
+    resource: str
     """Specifies the resource that will be monitored for changes."""
-    expiration_date_time: Optional[str] = field(
-        default=None,
+    expiration_date_time: str = dataclass_field(
         metadata={"wire_name": "expirationDateTime"},
     )
     """Specifies the date and time when the webhook subscription expires."""
-    notification_url: Optional[str] = field(
-        default=None,
+    notification_url: str = dataclass_field(
         metadata={"wire_name": "notificationUrl"},
     )
     """Gets or sets the web hook callback URL."""
@@ -1071,9 +1209,10 @@ class WebHookNotification:
     Definition: WebHookNotification
     """
 
-    id: Optional[str] = None
-    machine_id: Optional[str] = field(
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    machine_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "machineId"},
     )
 
@@ -1089,7 +1228,7 @@ class WdatpClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -1106,8 +1245,8 @@ class WdatpClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -1128,7 +1267,7 @@ class WdatpClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -1144,15 +1283,49 @@ class WdatpClient(ConnectorClientBase):
         return "wdatp"
 
     def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
-        parsed_next_link = urlsplit(next_link)
-        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
             if next_link.startswith("/"):
                 return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
             if next_link.startswith("?"):
-                return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
 
-        parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
         connection_hostname = parsed_connection.hostname
         if next_link_hostname is None or connection_hostname is None:
@@ -1169,7 +1342,11 @@ class WdatpClient(ConnectorClientBase):
                 parsed_next_link.scheme == parsed_connection.scheme
                 and next_link_port == connection_port
             ):
-                return next_link
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
 
             raise ValueError(
                 "Pagination URL origin "
@@ -1182,9 +1359,9 @@ class WdatpClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def advanced_hunting_async(
+    async def advanced_hunting(
         self,
-        input: AdvancedHuntingInput,
+        input: AdvancedHuntingInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1199,10 +1376,26 @@ class WdatpClient(ConnectorClientBase):
         and will be retired on February 1, 2027. Migrate to the Microsoft Graph
         Security API. For migration guidance, see:
         https://learn.microsoft.com/en-us/graph/api/resources/security-api-overview?view=graph-rest-1.0#powerplatformflow-migrationpowerapps-power-automate-logic-apps
+
+        Swagger operation ID: `AdvancedHunting`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/advancedqueries/run"
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1216,6 +1409,7 @@ class WdatpClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1223,9 +1417,9 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_alert_by_reference_async(
+    async def create_alert_by_reference(
         self,
-        input: CreateAlertByReferenceInput,
+        input: CreateAlertByReferenceInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1236,12 +1430,28 @@ class WdatpClient(ConnectorClientBase):
         Alerts - Create alert
 
         Create Alert based on specific Event
+
+        Swagger operation ID: `CreateAlertByReference`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/alerts/createAlertByReference"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1255,6 +1465,7 @@ class WdatpClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1262,8 +1473,9 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_alerts_async(
+    def list_alerts(
         self,
+        *,
         expand: Optional[str] = None,
         filter: Optional[str] = None,
         select: Optional[str] = None,
@@ -1271,19 +1483,41 @@ class WdatpClient(ConnectorClientBase):
         top: Optional[int] = None,
         skip: Optional[int] = None,
         count: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Alerts - Get list of alerts
 
         Retrieve from Windows Defender ATP the most recent alerts
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `GetAlerts`.
+
+        Args:
+            expand: Expands related entities inline.
+            filter: Filters the results, using OData syntax.
+            select: Selects which properties to include in the response,
+                defaults to all.
+            orderby: Sorts the results.
+            top: Returns only the first n results.
+            skip: Skips the first n results.
+            count: Includes a count of the matching results in the response.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/alerts"
         query_params = []
@@ -1324,11 +1558,18 @@ class WdatpClient(ConnectorClientBase):
             query_params.append(f"$count={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1341,23 +1582,32 @@ class WdatpClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_single_alert_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def get_single_alert(
         self,
         alert_id: str,
         *,
@@ -1370,13 +1620,28 @@ class WdatpClient(ConnectorClientBase):
         Alerts - Get single alert
 
         Retrieve from Windows Defender ATP a specific alert
+
+        Swagger operation ID: `GetSingleAlert`.
+
+        Args:
+            alert_id: The identifier of the alert to retrieve.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/alerts/{quote(str(alert_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1390,6 +1655,7 @@ class WdatpClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1397,9 +1663,9 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def patch_alert_async(
+    async def patch_alert(
         self,
-        input: PatchAlertInput,
+        input: PatchAlertInput | Mapping[str, Any],
         alert_id: str,
         *,
         timeout: Optional[float] = None,
@@ -1411,13 +1677,30 @@ class WdatpClient(ConnectorClientBase):
         Alerts - Update alert
 
         Update a Windows Defender ATP alert
+
+        Swagger operation ID: `PatchAlert`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            alert_id: The identifier of the alert to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/alerts/{quote(str(alert_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1431,6 +1714,7 @@ class WdatpClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1438,9 +1722,9 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def initiate_investigation_async(
+    async def initiate_investigation(
         self,
-        input: InitiateInvestigationInput,
+        input: InitiateInvestigationInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -1452,6 +1736,23 @@ class WdatpClient(ConnectorClientBase):
         Actions - Initiate investigation on a machine (to be deprecated)
 
         Initiate investigation on a machine
+
+        Swagger operation ID: `InitiateInvestigation`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            machine_id: The ID of the machine to investigate.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1461,7 +1762,7 @@ class WdatpClient(ConnectorClientBase):
             f"/initiateInvestigation"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1475,6 +1776,7 @@ class WdatpClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1482,9 +1784,9 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def start_investigation_async(
+    async def start_investigation(
         self,
-        input: StartInvestigationInput,
+        input: StartInvestigationInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -1496,6 +1798,23 @@ class WdatpClient(ConnectorClientBase):
         Actions - Start automated investigation on a machine
 
         Start automated investigation on a machine
+
+        Swagger operation ID: `StartInvestigation`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            machine_id: The ID of the machine to investigate.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1505,7 +1824,7 @@ class WdatpClient(ConnectorClientBase):
             f"/startInvestigation"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1519,6 +1838,7 @@ class WdatpClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1526,7 +1846,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_single_machine_action_async(
+    async def get_single_machine_action(
         self,
         machine_action_id: str,
         *,
@@ -1539,13 +1859,29 @@ class WdatpClient(ConnectorClientBase):
         Actions - Get single machine action
 
         Retrieve from Windows Defender ATP a specific machine action
+
+        Swagger operation ID: `GetSingleMachineAction`.
+
+        Args:
+            machine_action_id: The identifier of the machine action to
+                retrieve.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/machineactions/{quote(str(machine_action_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1559,6 +1895,7 @@ class WdatpClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1566,9 +1903,9 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def cancel_single_machine_action_async(
+    async def cancel_single_machine_action(
         self,
-        input: CancelSingleMachineActionInput,
+        input: CancelSingleMachineActionInput | Mapping[str, Any],
         machine_action_id: str,
         *,
         timeout: Optional[float] = None,
@@ -1580,6 +1917,23 @@ class WdatpClient(ConnectorClientBase):
         Actions - Cancel a single machine action
 
         Cancel a specific machine action
+
+        Swagger operation ID: `CancelSingleMachineAction`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            machine_action_id: The identifier of the machine action to cancel.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1589,7 +1943,7 @@ class WdatpClient(ConnectorClientBase):
             f"/cancel"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1603,6 +1957,7 @@ class WdatpClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1610,7 +1965,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_live_response_download_link_async(
+    async def get_live_response_download_link(
         self,
         machine_action_id: str,
         command_index: int,
@@ -1624,6 +1979,23 @@ class WdatpClient(ConnectorClientBase):
         Actions - Get live response command result download URI
 
         Get result download URI for a completed live response command
+
+        Swagger operation ID: `GetLiveResponseDownloadLink`.
+
+        Args:
+            machine_action_id: The identifier of the machine action.
+            command_index: The index of the live response command to get the
+                results download URI for.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1635,7 +2007,7 @@ class WdatpClient(ConnectorClientBase):
             f")"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1649,6 +2021,7 @@ class WdatpClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1656,27 +2029,49 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_machine_actions_async(
+    def list_machine_actions(
         self,
+        *,
         filter: Optional[str] = None,
         select: Optional[str] = None,
         orderby: Optional[str] = None,
         top: Optional[int] = None,
         skip: Optional[int] = None,
         count: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Actions - Get list of machine actions
 
         Retrieve from Windows Defender ATP the most recent machine actions
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `GetMachineActions`.
+
+        Args:
+            filter: Filters the results, using OData syntax.
+            select: Selects which properties to include in the response,
+                defaults to all.
+            orderby: Sorts the results.
+            top: Returns only the first n results.
+            skip: Skips the first n results.
+            count: Includes a count of the matching results in the response.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/machineactions"
         query_params = []
@@ -1712,11 +2107,18 @@ class WdatpClient(ConnectorClientBase):
             query_params.append(f"$count={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1729,27 +2131,36 @@ class WdatpClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_file_stats_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def get_file_stats(
         self,
         file_id: str,
-        look_back_hours: Optional[int] = None,
         *,
+        look_back_hours: Optional[int] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1760,6 +2171,23 @@ class WdatpClient(ConnectorClientBase):
 
         Retrieve from Windows Defender ATP statistics for the given file to a
         given file by identifier Sha1, or Sha256
+
+        Swagger operation ID: `GetFileStats`.
+
+        Args:
+            file_id: The file identifier - Sha1, or Sha256.
+            look_back_hours: The look back period in hours to look by, the
+                default is 24 hours.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1774,7 +2202,7 @@ class WdatpClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1788,6 +2216,7 @@ class WdatpClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1795,11 +2224,11 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_domain_stats_async(
+    async def get_domain_stats(
         self,
         domain_name: str,
-        look_back_hours: Optional[int] = None,
         *,
+        look_back_hours: Optional[int] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1810,6 +2239,23 @@ class WdatpClient(ConnectorClientBase):
 
         Retrieve from Windows Defender ATP statistics related to a given domain
         name
+
+        Swagger operation ID: `GetDomainStats`.
+
+        Args:
+            domain_name: The domain name.
+            look_back_hours: The look back period in hours to look by, the
+                default is 24 hours.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1824,7 +2270,7 @@ class WdatpClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1838,6 +2284,7 @@ class WdatpClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1845,11 +2292,11 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_ip_stats_async(
+    async def get_ip_stats(
         self,
         ip_address: str,
-        look_back_hours: Optional[int] = None,
         *,
+        look_back_hours: Optional[int] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1860,6 +2307,23 @@ class WdatpClient(ConnectorClientBase):
 
         Retrieve from Windows Defender ATP statistics related to a given ip
         address - given in ipv4 or ipv6 format.
+
+        Swagger operation ID: `GetIpStats`.
+
+        Args:
+            ip_address: The ip address.
+            look_back_hours: The look back period in hours to look by, the
+                default is 24 hours.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1874,7 +2338,7 @@ class WdatpClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1888,6 +2352,7 @@ class WdatpClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1895,7 +2360,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_single_investigation_async(
+    async def get_single_investigation(
         self,
         investigation_id: str,
         *,
@@ -1908,13 +2373,28 @@ class WdatpClient(ConnectorClientBase):
         Actions - Get single investigation
 
         Retrieve from Microsoft Defender ATP a specific investigation
+
+        Swagger operation ID: `GetSingleInvestigation`.
+
+        Args:
+            investigation_id: The identifier of the investigation to retrieve.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/investigations/{quote(str(investigation_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1928,6 +2408,7 @@ class WdatpClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1935,27 +2416,49 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_investigations_async(
+    def list_investigations(
         self,
+        *,
         filter: Optional[str] = None,
         select: Optional[str] = None,
         orderby: Optional[str] = None,
         top: Optional[int] = None,
         skip: Optional[int] = None,
         count: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Actions - Get list of investigation
 
         Retrieve from Microsoft Defender ATP the most recent investigations
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `GetInvestigations`.
+
+        Args:
+            filter: Filters the results, using OData syntax.
+            select: Selects which properties to include in the response,
+                defaults to all.
+            orderby: Sorts the results.
+            top: Returns only the first n results.
+            skip: Skips the first n results.
+            count: Includes a count of the matching results in the response.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/investigations"
         query_params = []
@@ -1991,11 +2494,18 @@ class WdatpClient(ConnectorClientBase):
             query_params.append(f"$count={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2008,25 +2518,34 @@ class WdatpClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def collect_investigation_package_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def collect_investigation_package(
         self,
-        input: CollectInvestigationPackageInput,
+        input: CollectInvestigationPackageInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -2038,6 +2557,24 @@ class WdatpClient(ConnectorClientBase):
         Actions - Collect investigation package
 
         Collect investigation package from a machine
+
+        Swagger operation ID: `CollectInvestigationPackage`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            machine_id: The ID of the machine to collect the investigation
+                from.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2047,7 +2584,7 @@ class WdatpClient(ConnectorClientBase):
             f"/collectInvestigationPackage"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2061,6 +2598,7 @@ class WdatpClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2068,7 +2606,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_investigation_package_uri_async(
+    async def get_investigation_package_uri(
         self,
         machine_action_id: str,
         *,
@@ -2081,6 +2619,21 @@ class WdatpClient(ConnectorClientBase):
         Actions - Get investigation package download URI
 
         Get a URI that allows downloading of an investigation package
+
+        Swagger operation ID: `GetInvestigationPackageUri`.
+
+        Args:
+            machine_action_id: The ID of the investigation package collection.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2090,7 +2643,7 @@ class WdatpClient(ConnectorClientBase):
             f"/getPackageUri"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2104,6 +2657,7 @@ class WdatpClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2111,9 +2665,9 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def isolate_machine_async(
+    async def isolate_machine(
         self,
-        input: IsolateMachineInput,
+        input: IsolateMachineInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -2125,13 +2679,30 @@ class WdatpClient(ConnectorClientBase):
         Actions - Isolate machine
 
         Isolate a machine from network
+
+        Swagger operation ID: `IsolateMachine`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            machine_id: The ID of the machine to isolate.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/machines/{quote(str(machine_id), safe='')}/isolate"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2145,6 +2716,7 @@ class WdatpClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2152,9 +2724,9 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def unisolate_machine_async(
+    async def unisolate_machine(
         self,
-        input: UnisolateMachineInput,
+        input: UnisolateMachineInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -2166,13 +2738,30 @@ class WdatpClient(ConnectorClientBase):
         Actions - Unisolate machine
 
         Unisolate a machine from network
+
+        Swagger operation ID: `UnisolateMachine`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            machine_id: The ID of the machine to unisolate.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/machines/{quote(str(machine_id), safe='')}/unisolate"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2186,6 +2775,7 @@ class WdatpClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2193,9 +2783,9 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def restrict_app_execution_async(
+    async def restrict_app_execution(
         self,
-        input: RestrictAppExecutionInput,
+        input: RestrictAppExecutionInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -2208,6 +2798,23 @@ class WdatpClient(ConnectorClientBase):
 
         Restrict execution of all applications on the machine except a
         predefined set
+
+        Swagger operation ID: `RestrictAppExecution`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            machine_id: The ID of the machine to restrict.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2217,7 +2824,7 @@ class WdatpClient(ConnectorClientBase):
             f"/restrictCodeExecution"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2231,6 +2838,7 @@ class WdatpClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2238,9 +2846,9 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def unrestrict_app_execution_async(
+    async def unrestrict_app_execution(
         self,
-        input: UnrestrictAppExecutionInput,
+        input: UnrestrictAppExecutionInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -2252,6 +2860,23 @@ class WdatpClient(ConnectorClientBase):
         Actions - Remove app execution restriction
 
         Enable execution of any application on the machine
+
+        Swagger operation ID: `UnrestrictAppExecution`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            machine_id: The ID of the machine to unrestrict.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2261,7 +2886,7 @@ class WdatpClient(ConnectorClientBase):
             f"/unrestrictCodeExecution"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2275,6 +2900,7 @@ class WdatpClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2282,9 +2908,9 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def run_antivirus_scan_async(
+    async def run_antivirus_scan(
         self,
-        input: RunAntivirusScanInput,
+        input: RunAntivirusScanInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -2296,13 +2922,30 @@ class WdatpClient(ConnectorClientBase):
         Actions - Run antivirus scan
 
         Initiate Windows Defender Antivirus scan on a machine
+
+        Swagger operation ID: `RunAntivirusScan`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            machine_id: The ID of the machine to scan.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/machines/{quote(str(machine_id), safe='')}/runAntiVirusScan"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2316,6 +2959,7 @@ class WdatpClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2323,9 +2967,9 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def run_live_response_async(
+    async def run_live_response(
         self,
-        input: RunLiveResponseInput,
+        input: RunLiveResponseInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -2337,13 +2981,30 @@ class WdatpClient(ConnectorClientBase):
         Actions - Run live response
 
         Run live response api commands for a single machine
+
+        Swagger operation ID: `RunLiveResponse`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            machine_id: The ID of the machine to run live response session on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/machines/{quote(str(machine_id), safe='')}/runliveresponse"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2357,6 +3018,7 @@ class WdatpClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2364,27 +3026,49 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_remediation_activities_async(
+    def list_remediation_activities(
         self,
+        *,
         filter: Optional[str] = None,
         select: Optional[str] = None,
         orderby: Optional[str] = None,
         top: Optional[int] = None,
         skip: Optional[int] = None,
         count: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Remediation tasks - Get list of remediation activities (Preview)
 
         Retrieve from Windows Defender ATP the remediation activities
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `GetRemediationActivities`.
+
+        Args:
+            filter: Filters the results, using OData syntax.
+            select: Selects which properties to include in the response,
+                defaults to all.
+            orderby: Sorts the results.
+            top: Returns only the first n results.
+            skip: Skips the first n results.
+            count: Includes a count of the matching results in the response.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/remediationtasks"
         query_params = []
@@ -2420,11 +3104,18 @@ class WdatpClient(ConnectorClientBase):
             query_params.append(f"$count={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2437,23 +3128,32 @@ class WdatpClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_single_remediation_activity_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def get_single_remediation_activity(
         self,
         remediation_id: str,
         *,
@@ -2466,13 +3166,29 @@ class WdatpClient(ConnectorClientBase):
         RemediationActivities - Get single remediation activity (Preview)
 
         Retrieve from Windows Defender ATP a specific remediation activity
+
+        Swagger operation ID: `GetSingleRemediationActivity`.
+
+        Args:
+            remediation_id: The identifier of the remediation activity to
+                retrieve.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/remediationtasks/{quote(str(remediation_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2486,6 +3202,7 @@ class WdatpClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2493,7 +3210,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_remediation_activity_machine_list_async(
+    def list_get_remediation_activity_machine(
         self,
         remediation_id: str,
         *,
@@ -2501,15 +3218,32 @@ class WdatpClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Remediation activities - Get list of related machines (Preview)
 
         Retrieve from Windows Defender ATP the related machines to a specific
         remediation activity
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `GetRemediationActivityMachineList`.
+
+        Args:
+            remediation_id: The identifier of the remediation activity to
+                retrieve.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2518,11 +3252,18 @@ class WdatpClient(ConnectorClientBase):
             f"/{quote(str(remediation_id), safe='')}"
             f"/machinereferences"
         )
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2535,43 +3276,74 @@ class WdatpClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_machines_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_machines(
         self,
+        *,
         filter: Optional[str] = None,
         select: Optional[str] = None,
         orderby: Optional[str] = None,
         top: Optional[int] = None,
         skip: Optional[int] = None,
         count: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Machines - Get list of machines
 
         Retrieve from Windows Defender ATP the most recent machines
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `GetMachines`.
+
+        Args:
+            filter: Filters the results, using OData syntax.
+            select: Selects which properties to include in the response,
+                defaults to all.
+            orderby: Sorts the results.
+            top: Returns only the first n results.
+            skip: Skips the first n results.
+            count: Includes a count of the matching results in the response.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/machines"
         query_params = []
@@ -2607,11 +3379,18 @@ class WdatpClient(ConnectorClientBase):
             query_params.append(f"$count={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2624,23 +3403,32 @@ class WdatpClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_single_machine_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def get_single_machine(
         self,
         machine_id: str,
         *,
@@ -2653,13 +3441,28 @@ class WdatpClient(ConnectorClientBase):
         Machines - Get single machine
 
         Retrieve from Windows Defender ATP a specific machine
+
+        Swagger operation ID: `GetSingleMachine`.
+
+        Args:
+            machine_id: The identifier of the machine to retrieve.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/machines/{quote(str(machine_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2673,6 +3476,7 @@ class WdatpClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2680,9 +3484,9 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def machine_tag_async(
+    async def machine_tag(
         self,
-        input: MachineTagInput,
+        input: MachineTagInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -2694,13 +3498,31 @@ class WdatpClient(ConnectorClientBase):
         Machines - Tag machine
 
         Add or remove a tag to/from a machine
+
+        Swagger operation ID: `MachineTag`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            machine_id: The ID of the machine to which the tag should be added
+                or removed.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/machines/{quote(str(machine_id), safe='')}/tags"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2714,6 +3536,7 @@ class WdatpClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2721,9 +3544,9 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def advanced_hunting_schema_async(
+    async def advanced_hunting_schema(
         self,
-        input: AdvancedHuntingSchemaInput,
+        input: AdvancedHuntingSchemaInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2734,12 +3557,28 @@ class WdatpClient(ConnectorClientBase):
         Advanced Hunting Schema
 
         Gets the schema for a Windows Defender ATP custom query
+
+        Swagger operation ID: `AdvancedHuntingSchema`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/advancedqueries/schema"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2753,6 +3592,7 @@ class WdatpClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

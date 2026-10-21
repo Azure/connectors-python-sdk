@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Optional, Dict, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, AsyncIterator, Dict, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
+from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
 from azure.core.credentials_async import AsyncTokenCredential
 from azure.core.pipeline.transport import AsyncHttpTransport
@@ -18,7 +19,20 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "ProjectplaceClient",
+    "CreateCardInput",
+    "CreateCardResponse",
+    "MoveCardInput",
+    "MoveCardResponse",
+    "SetWebhookCardCreateInput",
+    "SetWebhookCardDueDateInput",
+    "SetWebhookPropertiesChangeInput",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -29,11 +43,11 @@ class SetWebhookCardCreateInput:
     When a card is created
     """
 
-    card_create: Optional[bool] = None
+    card_create: bool
     """Triggers when a card is created on the defined board"""
-    webhook: Optional[str] = None
+    webhook: str
     """webhook"""
-    board_id: Optional[int] = None
+    board_id: int
     """The id of the Board that the card belongs to"""
 
 
@@ -43,24 +57,24 @@ class SetWebhookPropertiesChangeInput:
     When a card's properties are changed
     """
 
-    card_blocked: Optional[bool] = None
+    card_blocked: bool
     """Triggers when a card is blocked"""
-    card_unblock: Optional[bool] = None
+    card_unblock: bool
     """Triggers when a card block is removed"""
-    status_change: Optional[bool] = None
+    status_change: bool
     """Triggers when a card is moved to another column on the"""
-    card_done: Optional[bool] = None
+    card_done: bool
     """
     Triggers when a card is set to done by moving it to the rightmost column on
     the board
     """
-    description_changed: Optional[bool] = None
+    description_changed: bool
     """Triggers when the description of a card changes"""
-    due_date_changed: Optional[bool] = None
+    due_date_changed: bool
     """Triggers when the due date of a card changes"""
-    webhook: Optional[str] = None
+    webhook: str
     """webhook"""
-    board_id: Optional[int] = None
+    board_id: int
     """The id of the Board that the card belongs to"""
 
 
@@ -70,11 +84,11 @@ class SetWebhookCardDueDateInput:
     When a card is due
     """
 
-    due_today: Optional[bool] = None
+    due_today: bool
     """Triggers on the date that the card is due"""
-    webhook: Optional[str] = None
+    webhook: str
     """webhook"""
-    board_id: Optional[int] = None
+    board_id: int
     """The id of the Board that the card belongs to"""
 
 
@@ -84,19 +98,19 @@ class CreateCardInput:
     Create Card
     """
 
-    column_id: Optional[int] = None
+    column_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The column where the card should be created"""
-    title: Optional[str] = None
+    title: str
     """The title of the created card"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The description of the created card"""
-    assignee_email: Optional[str] = None
+    assignee_email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The person that will be assigned to the created card"""
-    planlet_id: Optional[int] = None
+    planlet_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The activity the Card should be associated with"""
-    due_date: Optional[str] = None
+    due_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The due date of the created card"""
-    label_id: Optional[int] = None
+    label_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The label of the created card"""
 
 
@@ -106,39 +120,39 @@ class CreateCardResponse:
     Response for Create Card
     """
 
-    access: Optional[str] = None
+    access: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Access rights"""
-    assignee: Optional[Dict[str, Any]] = None
+    assignee: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The person who is assigned to the card"""
-    assignee_id: Optional[int] = None
+    assignee_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The id of the person who is assigned the card"""
-    board_id: Optional[int] = None
+    board_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The ID of the board"""
-    board_name: Optional[str] = None
+    board_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the board"""
-    direct_url: Optional[str] = None
+    direct_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The card's direct URL"""
-    due_date: Optional[str] = None
+    due_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The due date of the card"""
-    estimated_time: Optional[str] = None
+    estimated_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Estimated time for completion"""
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The ID of the card"""
-    is_blocked: Optional[bool] = None
+    is_blocked: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Is the card is"""
-    is_blocked_reason: Optional[str] = None
+    is_blocked_reason: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The blocking reason - if blocked"""
-    is_done: Optional[bool] = None
+    is_done: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Is the card done"""
-    is_template: Optional[bool] = None
+    is_template: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Is a template card"""
-    label_id: Optional[int] = None
+    label_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The id of the label"""
-    planlet_id: Optional[int] = None
+    planlet_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The id of the activity"""
-    reported_time: Optional[str] = None
+    reported_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """How much time was reported for the card"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The card's title"""
 
 
@@ -148,11 +162,11 @@ class MoveCardInput:
     Move card to another column
     """
 
-    card_id: Optional[int] = None
+    card_id: int
     """The card to be moved"""
-    card_title: Optional[str] = None
+    card_title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The title of the card to be moved"""
-    column_id: Optional[int] = None
+    column_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The column where the card should be moved to"""
 
 
@@ -162,45 +176,45 @@ class MoveCardResponse:
     Response for Move card to another column
     """
 
-    access: Optional[str] = None
+    access: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Access rights"""
-    assignee_id: Optional[int] = None
+    assignee_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The ID of the person the card assigned to"""
-    board_id: Optional[int] = None
+    board_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The ID of the board"""
-    board_name: Optional[str] = None
+    board_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the board"""
-    column_id: Optional[int] = None
+    column_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The id of the column the card is on"""
-    column_name: Optional[str] = None
+    column_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the column"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The description on the card"""
-    direct_url: Optional[str] = None
+    direct_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The direct URL of the card"""
-    due_date: Optional[str] = None
+    due_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The due date of the card"""
-    estimated_time: Optional[str] = None
+    estimated_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The estimated time of the card"""
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The id of the card"""
-    is_blocked: Optional[bool] = None
+    is_blocked: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Is the card blocked"""
-    is_blocked_reason: Optional[str] = None
+    is_blocked_reason: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The reason the card is blocked"""
-    is_done: Optional[bool] = None
+    is_done: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Is the card done"""
-    is_template: Optional[bool] = None
+    is_template: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Is a template card"""
-    label_id: Optional[int] = None
+    label_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The id of the card's label"""
-    label_name: Optional[str] = None
+    label_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the label"""
-    planlet_id: Optional[int] = None
+    planlet_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The id of the activity"""
-    reported_time: Optional[str] = None
+    reported_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The time reported for this card"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The title of the card"""
 
 
@@ -215,7 +229,7 @@ class ProjectplaceClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -232,8 +246,8 @@ class ProjectplaceClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -254,7 +268,7 @@ class ProjectplaceClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -269,9 +283,86 @@ class ProjectplaceClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "projectplace"
 
-    async def create_card_async(
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
+            if next_link.startswith("?"):
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
+
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
+    async def create_card(
         self,
-        input: CreateCardInput,
+        input: CreateCardInput | Mapping[str, Any],
         board_id: int,
         *,
         timeout: Optional[float] = None,
@@ -283,6 +374,23 @@ class ProjectplaceClient(ConnectorClientBase):
         Create Card
 
         Creates a new card with the parameters provided
+
+        Swagger operation ID: `create_card`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            board_id: The id of the Board where the card should be created.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -292,7 +400,7 @@ class ProjectplaceClient(ConnectorClientBase):
             f"/create_card"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -306,6 +414,7 @@ class ProjectplaceClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -313,9 +422,9 @@ class ProjectplaceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def move_card_async(
+    async def move_card(
         self,
-        input: MoveCardInput,
+        input: MoveCardInput | Mapping[str, Any],
         board_id: int,
         *,
         timeout: Optional[float] = None,
@@ -327,6 +436,23 @@ class ProjectplaceClient(ConnectorClientBase):
         Move card to another column
 
         Move a card on the selected board
+
+        Swagger operation ID: `move_card`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            board_id: The id of the Board where the card should be created.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -336,7 +462,7 @@ class ProjectplaceClient(ConnectorClientBase):
             f"/move_card"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -350,6 +476,7 @@ class ProjectplaceClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -357,44 +484,82 @@ class ProjectplaceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_boards_async(
+    def list_boards(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Lists the boards the user have access to
 
         Lists the boards that are part of the projects the user have access to
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `list_boards`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1/external_notifications/lists/list_boards"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
 
 
 # Trigger Operations

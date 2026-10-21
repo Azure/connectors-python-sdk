@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure VM Connector SDK Sample
+Azure VM sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure VM connector SDK to manage
+This sample demonstrates how to use the Azure VM client from the Azure Connectors Python SDK to manage
 virtual machines and VM scale sets.
 
 Prerequisites:
@@ -50,7 +50,7 @@ async def example_1_get_virtual_machine():
 
         async with AzurevmClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.virtual_machine_get_async(
+                result = await client.virtual_machine_get(
                     subscription_id=SUBSCRIPTION_ID,
                     resource_group_name=RESOURCE_GROUP,
                     virtual_machine_name=VM_NAME
@@ -78,7 +78,7 @@ async def example_2_start_virtual_machine():
 
         async with AzurevmClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                await client.virtual_machine_start_async(
+                await client.virtual_machine_start(
                     subscription_id=SUBSCRIPTION_ID,
                     resource_group_name=RESOURCE_GROUP,
                     virtual_machine_name=VM_NAME
@@ -101,7 +101,7 @@ async def example_3_deallocate_virtual_machine():
 
         async with AzurevmClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                await client.virtual_machine_deallocate_async(
+                await client.virtual_machine_deallocate(
                     subscription_id=SUBSCRIPTION_ID,
                     resource_group_name=RESOURCE_GROUP,
                     virtual_machine_name=VM_NAME
@@ -124,7 +124,7 @@ async def example_4_restart_virtual_machine():
 
         async with AzurevmClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                await client.virtual_machine_restart_async(
+                await client.virtual_machine_restart(
                     subscription_id=SUBSCRIPTION_ID,
                     resource_group_name=RESOURCE_GROUP,
                     virtual_machine_name=VM_NAME
@@ -146,7 +146,7 @@ async def example_5_get_vm_in_scale_set():
 
         async with AzurevmClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.virtual_machine_in_scale_set_get_async(
+                result = await client.virtual_machine_in_scale_set_get(
                     subscription_id=SUBSCRIPTION_ID,
                     resource_group_name=RESOURCE_GROUP,
                     virtual_machine_scale_set_name=VMSS_NAME,
@@ -177,7 +177,7 @@ async def example_6_scale_set_operations():
             try:
                 # Start VM in scale set
                 print(f"Starting VMSS instance {VMSS_INSTANCE_ID}...")
-                await client.virtual_machine_in_scale_set_start_async(
+                await client.virtual_machine_in_scale_set_start(
                     subscription_id=SUBSCRIPTION_ID,
                     resource_group_name=RESOURCE_GROUP,
                     virtual_machine_scale_set_name=VMSS_NAME,
@@ -186,11 +186,11 @@ async def example_6_scale_set_operations():
                 print("Start command sent")
 
                 # Other available operations (commented out):
-                # - virtual_machine_in_scale_set_deallocate_async
-                # - virtual_machine_in_scale_set_power_off_async
-                # - virtual_machine_in_scale_set_restart_async
-                # - virtual_machine_in_scale_set_redeploy_async
-                # - virtual_machine_in_scale_set_reimage_async
+                # - virtual_machine_in_scale_set_deallocate
+                # - virtual_machine_in_scale_set_power_off
+                # - virtual_machine_in_scale_set_restart
+                # - virtual_machine_in_scale_set_redeploy
+                # - virtual_machine_in_scale_set_reimage
 
             except ConnectorException as ex:
                 print(f"Connector error: {ex}")

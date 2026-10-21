@@ -1,7 +1,7 @@
 """
-Campfire Connector SDK Sample
+Campfire sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Campfire connector SDK.
+This sample demonstrates how to use the Campfire client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a Campfire connection
@@ -38,7 +38,7 @@ async def example_1_list_accounts() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with CampfireClient(CONNECTION_RUNTIME_URL, credential) as client:
-            accounts = await client.list_accounts_async()
+            accounts = [item async for item in client.list_accounts()]
             print(f"Accounts: {accounts}")
 
 
@@ -48,7 +48,7 @@ async def example_2_list_rooms() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with CampfireClient(CONNECTION_RUNTIME_URL, credential) as client:
-            rooms = await client.list_rooms_async(account="ACCOUNT_ID")
+            rooms = [item async for item in client.list_rooms(account="ACCOUNT_ID")]
             print(f"Rooms: {rooms}")
 
 
@@ -58,10 +58,10 @@ async def example_3_create_message() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with CampfireClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.create_message_async(
+            result = await client.create_message(
                 room_id="ROOM_ID",
                 account="ACCOUNT_ID",
-                message="Hello from the Campfire connector SDK.",
+                message="Hello from the Campfire client in the Azure Connectors Python SDK.",
             )
             print(f"Create message result: {result}")
 
@@ -72,7 +72,7 @@ async def example_4_get_user() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with CampfireClient(CONNECTION_RUNTIME_URL, credential) as client:
-            user = await client.get_user_async(user_id=12345, account="ACCOUNT_ID")
+            user = await client.get_user(user_id=12345, account="ACCOUNT_ID")
             print(f"User: {user}")
 
 
@@ -83,7 +83,7 @@ async def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Campfire Connector SDK - Sample Usage")
+    print("Campfire sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

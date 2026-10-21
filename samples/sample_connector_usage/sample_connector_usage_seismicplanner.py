@@ -1,4 +1,4 @@
-"""Seismic Planner connector SDK sample."""
+"""Seismic Planner sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os
@@ -25,7 +25,10 @@ async def main() -> None:
                 CONNECTION_RUNTIME_URL,
                 credential,
             ) as client:
-                projects = await client.get_projects_async(space_id=SPACE_ID)
+                projects = [
+                    project
+                    async for project in client.list_projects(space_id=SPACE_ID)
+                ]
                 print(f"Projects: {projects}")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")

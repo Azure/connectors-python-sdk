@@ -1,4 +1,4 @@
-"""Ticketmaster connector SDK sample."""
+"""Ticketmaster sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os
@@ -21,7 +21,7 @@ async def main() -> None:
     async with DefaultAzureCredential() as credential:
         try:
             async with TicketmasterClient(CONNECTION_RUNTIME_URL, credential) as client:
-                attractions = await client.attractions_get_async()
+                attractions = await client.attractions_get()
                 print(f"Attractions: {attractions}")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")

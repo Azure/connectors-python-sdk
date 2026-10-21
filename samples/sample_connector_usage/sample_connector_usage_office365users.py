@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Office 365 Users Connector SDK Sample
+Office 365 Users sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Office 365 Users connector SDK.
+This sample demonstrates how to use the Office 365 Users client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Office 365 Users connection
@@ -44,7 +44,7 @@ async def example_1_get_my_profile():
 
         async with Office365usersClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                profile = await client.my_profile_async()
+                profile = await client.my_profile()
 
                 if profile:
                     print("My Profile:")
@@ -76,7 +76,7 @@ async def example_2_get_user_profile():
 
         async with Office365usersClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                profile = await client.user_profile_async(id=user_id)
+                profile = await client.user_profile(id=user_id)
 
                 if profile:
                     print(f"User Profile for '{user_id}':")
@@ -108,7 +108,7 @@ async def example_3_get_manager():
 
         async with Office365usersClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                manager = await client.manager_async(id=user_id)
+                manager = await client.manager(id=user_id)
 
                 if manager:
                     print(f"Manager for '{user_id}':")
@@ -138,12 +138,12 @@ async def example_4_get_direct_reports():
 
         async with Office365usersClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                reports = await client.direct_reports_async(id=user_id)
+                reports = [item async for item in client.list_direct_reports(id=user_id)]
 
-                if reports and "value" in reports:
+                if reports:
                     print(f"Direct reports for '{user_id}':")
-                    print(f"  Found {len(reports['value'])} reports")
-                    for report in reports["value"][:5]:  # Show first 5
+                    print(f"  Found {len(reports)} reports")
+                    for report in reports[:5]:  # Show first 5
                         display_name = report.get("displayName", "N/A")
                         job_title = report.get("jobTitle", "N/A")
                         print(f"    - {display_name} ({job_title})")
@@ -170,7 +170,7 @@ async def example_5_search_users():
 
         async with Office365usersClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                results = [item async for item in client.search_user_async(
+                results = [item async for item in client.list_search_user(
                     search_term=search_term,
                     top=10,
                 )]
@@ -193,7 +193,7 @@ async def example_5_search_users():
 
 async def main():
     """Run all examples."""
-    print("Office 365 Users Connector SDK - Sample Usage")
+    print("Office 365 Users sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
 
     if not CONNECTION_RUNTIME_URL:

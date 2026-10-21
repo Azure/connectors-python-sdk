@@ -1,7 +1,7 @@
 """
-Mailchimp Connector SDK Sample
+Mailchimp sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Mailchimp connector SDK.
+This sample demonstrates how to use the Mailchimp client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a Mailchimp connection
@@ -24,8 +24,10 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
+from azure.connectors.mailchimp import MailchimpClient
 from azure.connectors.mailchimp import (
-    MailchimpClient,
+    CampaignDefaults,
+    Contact,
     NewListRequest,
     NewMemberInListRequest,
 )
@@ -42,7 +44,7 @@ async def example_1_list_campaigns() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with MailchimpClient(CONNECTION_RUNTIME_URL, credential) as client:
-            campaigns = await client.get_campaigns_async()
+            campaigns = [item async for item in client.list_campaigns()]
             print(f"Campaigns: {campaigns}")
 
 
@@ -52,7 +54,7 @@ async def example_2_get_lists() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with MailchimpClient(CONNECTION_RUNTIME_URL, credential) as client:
-            lists = await client.get_lists_async(count=10, offset=0)
+            lists = await client.get_lists(count=10, offset=0)
             print(f"Lists: {lists}")
 
 
@@ -62,10 +64,26 @@ async def example_3_new_list() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with MailchimpClient(CONNECTION_RUNTIME_URL, credential) as client:
-            new_list = await client.newlist_async(
+            new_list = await client.newlist(
                 input=NewListRequest(
                     name="SDK sample list",
                     permission_reminder="You signed up via the SDK sample.",
+                    contact=Contact(
+                        company="Contoso",
+                        address1="1 Microsoft Way",
+                        city="Redmond",
+                        state="WA",
+                        zip="98052",
+                        country="US",
+                        phone="425-555-0100",
+                    ),
+                    campaign_defaults=CampaignDefaults(
+                        from_name="SDK Sample",
+                        from_email="sample@example.com",
+                        subject="Welcome",
+                        language="en",
+                    ),
+                    email_type_option=True,
                 ),
             )
             print(f"Created list: {new_list}")
@@ -77,7 +95,7 @@ async def example_4_add_member() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with MailchimpClient(CONNECTION_RUNTIME_URL, credential) as client:
-            member = await client.addmember_async(
+            member = await client.addmember(
                 input=NewMemberInListRequest(
                     email_address="sample.user@example.com",
                     status="subscribed",
@@ -94,7 +112,7 @@ async def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Mailchimp Connector SDK - Sample Usage")
+    print("Mailchimp sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure Storage Queues Connector SDK Sample
+Azure Storage Queues sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure Storage Queues connector SDK
+This sample demonstrates how to use the Azure Storage Queues client from the Azure Connectors Python SDK
 to interact with Azure Storage Queue messages.
 
 Prerequisites:
@@ -57,21 +57,17 @@ async def example_1_list_queues():
 
         async with AzurequeuesClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.list_queues_async(
+                items = [item async for item in client.list_queues(
                     storage_account_name=STORAGE_ACCOUNT
-                )
+                )]
 
-                if result:
+                if items:
                     print(f"Queues in storage account '{STORAGE_ACCOUNT}':")
-                    # Result may be a list or dict with queue names
-                    if isinstance(result, list):
-                        for queue in result:
-                            if isinstance(queue, dict):
-                                print(f"  - {queue.get('name', queue)}")
-                            else:
-                                print(f"  - {queue}")
-                    elif isinstance(result, dict):
-                        print(f"  Response: {result}")
+                    for queue in items:
+                        if isinstance(queue, dict):
+                            print(f"  - {queue.get('name', queue)}")
+                        else:
+                            print(f"  - {queue}")
                 else:
                     print("No queues found or empty response.")
 
@@ -96,7 +92,7 @@ async def example_2_create_queue():
 
         async with AzurequeuesClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.put_queue_async(
+                result = await client.put_queue(
                     storage_account_name=STORAGE_ACCOUNT,
                     queue_name=new_queue_name
                 )
@@ -127,7 +123,7 @@ async def example_3_put_message():
             try:
                 message_input = "Hello from Azure Connectors SDK for Python!"
 
-                await client.put_message_async(
+                await client.put_message(
                     input=message_input,
                     storage_account_name=STORAGE_ACCOUNT,
                     queue_name=QUEUE_NAME
@@ -156,7 +152,7 @@ async def example_4_get_messages():
 
         async with AzurequeuesClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_messages_async(
+                result = await client.get_messages(
                     storage_account_name=STORAGE_ACCOUNT,
                     queue_name=QUEUE_NAME,
                     numofmessages="5",  # Get up to 5 messages
@@ -206,7 +202,7 @@ async def example_5_delete_message():
 
         async with AzurequeuesClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                await client.delete_message_async(
+                await client.delete_message(
                     storage_account_name=STORAGE_ACCOUNT,
                     queue_name=QUEUE_NAME,
                     message_id=message_id,
@@ -223,7 +219,7 @@ async def example_5_delete_message():
 
 async def main():
     """Run all examples."""
-    print("Azure Storage Queues Connector SDK - Sample Usage")
+    print("Azure Storage Queues sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
 
     if not CONNECTION_RUNTIME_URL:
