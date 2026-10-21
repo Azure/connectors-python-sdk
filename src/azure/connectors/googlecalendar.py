@@ -443,8 +443,7 @@ class GooglecalendarClient(ConnectorClientBase):
 
         This operation is used to list all calendars in your Google account.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListCalendars`.
 
@@ -533,8 +532,7 @@ class GooglecalendarClient(ConnectorClientBase):
         This operation is used to return the first page of arbitrarily ordered
         events on the selected calendar.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListEvents`.
 
@@ -883,8 +881,7 @@ class GooglecalendarClient(ConnectorClientBase):
         This operation is used to list all calendars in your Google account
         that you can write to.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListWritableCalendars`.
 

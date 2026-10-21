@@ -643,8 +643,7 @@ class SendgridClient(ConnectorClientBase):
 
         Get a specific bounce for a given email address.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetBounce`.
 
@@ -883,8 +882,7 @@ class SendgridClient(ConnectorClientBase):
 
         Retrieves all the recipient lists.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListRecipientLists`.
 
@@ -958,8 +956,7 @@ class SendgridClient(ConnectorClientBase):
 
         Retrieves all registered recipients.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListRecipients`.
 

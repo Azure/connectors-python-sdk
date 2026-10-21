@@ -5014,8 +5014,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         List All Exhibitors
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `List-All-Exhibitors`.
 
@@ -5106,8 +5105,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         List of Exams
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `List-of-Exams`.
 
@@ -5233,8 +5231,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         List Registrants
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `List-Registrants`.
 
@@ -5729,8 +5726,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         Get Individual Custom Field Values
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Get-Individual-Custom-Field-Values`.
 
@@ -5866,8 +5862,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         List All Event Cancellations by Event
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `List-All-Event-Cancellations-by-Event`.
 
@@ -6058,8 +6053,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         List Completed User Tasks by User ID or Email
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `List-Completed-User-Tasks-by-User-ID-or-Email`.
 
@@ -6146,8 +6140,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         List Pending User Tasks by User ID or Email
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `List-Pending-User-Tasks-by-User-ID-or-Email`.
 
@@ -6400,8 +6393,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         List All Countries
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `List-All-Countries`.
 
@@ -6544,8 +6536,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         List All Exhibits
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `List-All-Exhibits`.
 
@@ -6842,8 +6833,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         List of Customer Relationships
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `List-of-Customer-Relationships`.
 
@@ -6926,8 +6916,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         List All Open Customer Request
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `List-All-Open-Customer-Request`.
 
@@ -7627,8 +7616,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         List of All Organization Members
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `List-of-All-Organization-Members`.
 
@@ -7844,8 +7832,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         List of All Individual Members
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `List-of-All-Individual-Members`.
 
@@ -8401,8 +8388,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         List All Awards
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `List-All-Awards`.
 
@@ -9694,8 +9680,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         Get Organization Custom Field Values
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Get-Organization-Custom-Field-Values`.
 
@@ -9774,8 +9759,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         Get Organization Active Memberships
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Get-Organization-Active-Memberships`.
 
@@ -9939,8 +9923,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         Get Individual Active Memberships
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Get-Individual-Active-Memberships`.
 
@@ -11681,8 +11664,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         List all Individuals
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `List-all-Individuals`.
 

@@ -502,8 +502,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
 
         Retrieve all users in the organization (Microsoft Entra ID Tenant)
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListUsers`.
 
@@ -578,8 +577,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
 
         Retrieve groups by searching group's display name
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListGroupsByDisplayNameSearch`.
 
@@ -664,8 +662,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
 
         Details of organization's subscribed license plan SKUs
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListSubscribedSkus`.
 
@@ -742,8 +739,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
 
         Retrieve direct members of a group with count
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListDirectGroupMembers`.
 
@@ -839,8 +835,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
 
         Retrieve group member(user)'s license details
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetMemberLicenseDetails`.
 
@@ -985,8 +980,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
 
         Group memberships for a user (member)
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetMemberGroups`.
 

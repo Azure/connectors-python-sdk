@@ -1125,8 +1125,7 @@ class PowerbiClient(ConnectorClientBase):
 
         Gets a list of Power BI scorecards in the specified workspace.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetScorecards`.
 
@@ -1281,8 +1280,7 @@ class PowerbiClient(ConnectorClientBase):
 
         Get a list of Power BI goals in the specified scorecard.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetMultipleGoals`.
 
@@ -1932,8 +1930,7 @@ class PowerbiClient(ConnectorClientBase):
 
         Get all check-ins on a Power BI goal.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetGoalCheckins`.
 
@@ -2358,8 +2355,7 @@ class PowerbiClient(ConnectorClientBase):
 
         Get Groups for Power BI.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListGroups`.
 
@@ -2437,8 +2433,7 @@ class PowerbiClient(ConnectorClientBase):
 
         Return a list of alerts for a signed in user.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetAlerts`.
 
@@ -2517,8 +2512,7 @@ class PowerbiClient(ConnectorClientBase):
 
         Get datasets for Power BI group.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListDatasets`.
 
@@ -2602,8 +2596,7 @@ class PowerbiClient(ConnectorClientBase):
 
         Get tables for Power BI dataset.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListTables`.
 
@@ -2693,8 +2686,7 @@ class PowerbiClient(ConnectorClientBase):
 
         Returns a list of reports from the specified workspace.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetReportsInGroup`.
 

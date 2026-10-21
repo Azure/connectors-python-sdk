@@ -540,8 +540,7 @@ class WordonlinebusinessClient(ConnectorClientBase):
 
         Get a list of sources.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetSources`.
 
@@ -619,8 +618,7 @@ class WordonlinebusinessClient(ConnectorClientBase):
 
         Get a list of drives.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetDrives`.
 

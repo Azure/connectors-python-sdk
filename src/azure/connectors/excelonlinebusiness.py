@@ -1321,8 +1321,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
 
         List all comments present in a workbook.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetComments`.
 
@@ -1877,8 +1876,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
 
         Get a list of worksheets in the Excel workbook.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetAllWorksheets`.
 
@@ -2074,8 +2072,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
 
         Get a list of tables in the Excel workbook.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetTables`.
 
@@ -2376,8 +2373,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
 
         Get a list of sources.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetSources`.
 
@@ -2461,8 +2457,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
 
         Get a list of drives.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetDrives`.
 
@@ -2551,8 +2546,7 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
 
         Get table columns.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetColumns`.
 

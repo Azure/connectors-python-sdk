@@ -1019,8 +1019,7 @@ class AzuretablesClient(ConnectorClientBase):
 
         List all the tables for your storage account.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetTables_V2`.
 
@@ -1405,8 +1404,7 @@ class AzuretablesClient(ConnectorClientBase):
 
         This operation list the user's Azure Storage Account.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetStorageAccounts`.
 

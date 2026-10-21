@@ -271,8 +271,7 @@ class AzureeventgridClient(ConnectorClientBase):
 
         Gets a list of all the subscriptions to which the principal has access.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Subscriptions_List`.
 
@@ -348,8 +347,7 @@ class AzureeventgridClient(ConnectorClientBase):
         """
         TopicTypes_List
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `TopicTypes_List`.
 

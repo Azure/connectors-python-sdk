@@ -659,8 +659,7 @@ class EventbriteClient(ConnectorClientBase):
 
         Get a list of organizations for your account.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetOrganizations`.
 
@@ -737,8 +736,7 @@ class EventbriteClient(ConnectorClientBase):
 
         Get a list of organizers for organization.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetOrganizersV2`.
 
@@ -820,8 +818,7 @@ class EventbriteClient(ConnectorClientBase):
 
         Get venues for organization.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetMyVenuesV2`.
 
@@ -899,8 +896,7 @@ class EventbriteClient(ConnectorClientBase):
 
         Get the Eventbrite event categories.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetCategories`.
 
@@ -977,8 +973,7 @@ class EventbriteClient(ConnectorClientBase):
 
         Get organization events.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetOrganizationEvents`.
 

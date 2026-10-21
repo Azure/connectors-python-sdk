@@ -1952,8 +1952,7 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         Retrieves all Office 365 Groups the user is part of.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListGroups`.
 

@@ -1155,8 +1155,7 @@ class DocumentdbClient(ConnectorClientBase):
 
         Get a document.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetDocument_V2`.
 
@@ -1267,8 +1266,7 @@ class DocumentdbClient(ConnectorClientBase):
 
         Get all documents.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetDocuments_V3`.
 
@@ -1743,8 +1741,7 @@ class DocumentdbClient(ConnectorClientBase):
 
         This operation list the user's Azure Cosmos DB accounts.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetCosmosDbAccounts`.
 

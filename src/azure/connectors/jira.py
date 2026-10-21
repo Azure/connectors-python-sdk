@@ -905,8 +905,7 @@ class JiraClient(ConnectorClientBase):
 
         This operation returns a list of resources accessible to user.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListResources`.
 
@@ -1087,8 +1086,7 @@ class JiraClient(ConnectorClientBase):
 
         This operation returns a list of issues using JQL.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListIssues_Datacenter`.
 
@@ -1164,8 +1162,7 @@ class JiraClient(ConnectorClientBase):
         Returns a list of the transitions possible for this issue by the
         current user
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListTransitions`.
 
@@ -1877,8 +1874,7 @@ class JiraClient(ConnectorClientBase):
 
         Returns all project categories.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetAllProjectCategories_V2`.
 
@@ -2305,8 +2301,7 @@ class JiraClient(ConnectorClientBase):
         This operation is used to retrieve a list of all users associated with
         a project.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListProjectUsers_V2`.
 
@@ -2504,8 +2499,7 @@ class JiraClient(ConnectorClientBase):
         This operation is used to retrieve a list of issue types for a given
         project.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListIssueTypes_V2`.
 
@@ -2592,8 +2586,7 @@ class JiraClient(ConnectorClientBase):
         This operation is used to retrieve a list of fields for a specific
         issue type.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListIssueTypesFields_V2`.
 

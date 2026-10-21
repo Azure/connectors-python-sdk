@@ -748,8 +748,7 @@ class DocuwareClient(ConnectorClientBase):
 
         Gets a list of file cabinets and/or document trays.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetFileCabinets`.
 
@@ -1304,8 +1303,7 @@ class DocuwareClient(ConnectorClientBase):
 
         Gets a list of dialogs for a file cabinet or document tray.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetDialogs`.
 
@@ -1394,8 +1392,7 @@ class DocuwareClient(ConnectorClientBase):
 
         Gets a list of stamps for a file cabinet or document tray.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetStamps`.
 
@@ -1476,8 +1473,7 @@ class DocuwareClient(ConnectorClientBase):
 
         Gets a list of fields for a stamp.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetStampFields`.
 
@@ -1563,8 +1559,7 @@ class DocuwareClient(ConnectorClientBase):
 
         Gets a list of fields for a file cabinet.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetFileCabinetFields`.
 
@@ -1653,8 +1648,7 @@ class DocuwareClient(ConnectorClientBase):
 
         Gets the fields for a dialog
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetDialogFields`.
 
@@ -1738,8 +1732,7 @@ class DocuwareClient(ConnectorClientBase):
 
         List documents from the specified document tray.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListDocumentsInDocumentTray`.
 

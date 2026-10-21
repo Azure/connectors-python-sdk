@@ -395,8 +395,7 @@ class MicrosoftformsClient(ConnectorClientBase):
 
         This operation returns a list of forms in your account.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListForms`.
 

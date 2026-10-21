@@ -555,8 +555,7 @@ class MicrosoftbookingsClient(ConnectorClientBase):
         Operation used to list all mailboxes for which the accessing user is an
         Administrator.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListBookingsBusinessUserAsAdmin`.
 

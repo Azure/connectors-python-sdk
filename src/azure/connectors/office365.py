@@ -5282,8 +5282,7 @@ class Office365Client(ConnectorClientBase):
 
         This operation gets Outlook category display names.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetOutlookCategoryNames`.
 
@@ -6229,8 +6228,7 @@ class Office365Client(ConnectorClientBase):
 
         This operation gets events from a calendar using Graph API.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `V4CalendarGetItems`.
 
@@ -6342,8 +6340,7 @@ class Office365Client(ConnectorClientBase):
 
         This operation lists available calendars.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `CalendarGetTables_V2`.
 
@@ -6803,8 +6800,7 @@ class Office365Client(ConnectorClientBase):
 
         This operation lists available contacts folders using Graph API
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ContactGetTablesV2`.
 
@@ -7559,8 +7555,7 @@ class Office365Client(ConnectorClientBase):
         using first 250 items in a given mail folder. To avoid that limitation
         you can use 'Search Query' field.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetEmailsV3`.
 
@@ -7736,8 +7731,7 @@ class Office365Client(ConnectorClientBase):
         This operation gets all events (including instances of recurrences) in
         a calendar using Graph API. Recurrence property is null in this case.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetEventsCalendarViewV3`.
 
@@ -7868,8 +7862,7 @@ class Office365Client(ConnectorClientBase):
         Get mail tips for a mailbox such as automatic replies / OOF message or
         if the mailbox is full. This is not available in GccHigh and Mooncake.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetMailTips_V2`.
 
@@ -7947,8 +7940,7 @@ class Office365Client(ConnectorClientBase):
 
         Get all the room lists defined in the user's tenant
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetRoomLists_V2`.
 
@@ -8024,8 +8016,7 @@ class Office365Client(ConnectorClientBase):
 
         Get all the meeting rooms defined in the user's tenant
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetRooms_V2`.
 
@@ -8102,8 +8093,7 @@ class Office365Client(ConnectorClientBase):
 
         Get the meeting rooms in a specific room list
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetRoomsInRoomList_V2`.
 

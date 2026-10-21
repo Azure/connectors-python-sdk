@@ -603,6 +603,7 @@ Track known generator issues here to prevent silent recurrence across releases.
 | Typeless dynamic request models omitted mapping inputs | Fixed in generator | `docuware` | Fixed | Dynamic dataclass request annotations now accept either the generated model or `Mapping[str, Any]`. |
 | Operation name used as a proxy for HTTP DELETE semantics | Fixed in generator | `arm`, `zohosign`, and other delete operations | Fixed | The generator uses a narrow operation-ID allow-list for resource-delete contracts that accept HTTP 404 (currently ARM `Deployments_Delete`). Other `DELETE` operations preserve ordinary failure behavior, and non-DELETE operations do so even when their names begin with `delete_`. |
 | Successful response discarded when Swagger omits its schema | Fixed in generator | `orderful` | Fixed | The Python-specific `ListTransactions` override preserves the runtime JSON payload without changing other language emitters. |
+| Bounded collection docs promised continuation URLs | Fixed in generator | 76 connectors, including `rss` and `sharepointonline` | Fixed | Single-page collection docs now match the emitted continuation metadata. URL-backed and opaque-token pager docs retain their distinct contracts; runtime behavior is unchanged. All 99 clients were regenerated. |
 | Create/update operations missing request body | [BPM #TBD](https://dev.azure.com/msazure/One/_workitems/edit/TBD) | Varies by connector | Investigation | Some POST/PATCH operations may drop body parameters |
 
 **Adding a new defect:**

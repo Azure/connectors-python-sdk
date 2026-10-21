@@ -2211,8 +2211,7 @@ class MondayClient(ConnectorClientBase):
 
         This operation gets the boards from monday.com.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetBoards`.
 
@@ -2297,8 +2296,7 @@ class MondayClient(ConnectorClientBase):
         This operation gets the groups from monday.com, which includes the
         option to select all groups.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetGroupsForGetItems`.
 
@@ -2383,8 +2381,7 @@ class MondayClient(ConnectorClientBase):
 
         This operation gets the columns from monday.com for item filtering.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetColumnsForItemFiltering`.
 
@@ -2472,8 +2469,7 @@ class MondayClient(ConnectorClientBase):
         This operation gets the available item filter operator for the selected
         monday.com column.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetColumnFilterOperator`.
 

@@ -871,8 +871,7 @@ class WaywedoClient(ConnectorClientBase):
 
         Retrieve all activity for a checklist instance
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ChecklistInstances_Activity`.
 
@@ -955,8 +954,7 @@ class WaywedoClient(ConnectorClientBase):
 
         Find a step of a checklist instance
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Find_Steps`.
 
@@ -1226,8 +1224,7 @@ class WaywedoClient(ConnectorClientBase):
 
         Search for a checklist by title
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Find_Checklist`.
 
@@ -1369,8 +1366,7 @@ class WaywedoClient(ConnectorClientBase):
 
         Search for a checklist instance by title.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Find_Checklist_Instances`.
 
@@ -1461,8 +1457,7 @@ class WaywedoClient(ConnectorClientBase):
 
         Search for a user by name or email.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Find_User`.
 
@@ -1602,8 +1597,7 @@ class WaywedoClient(ConnectorClientBase):
 
         Retrieve a list of all activated checklist instances.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetAll_ChecklistInstances`.
 

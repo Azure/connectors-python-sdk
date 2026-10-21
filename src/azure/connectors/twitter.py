@@ -519,8 +519,7 @@ class TwitterClient(ConnectorClientBase):
         This operation gets a list of the most recent tweets posted by a given
         user.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `UserTimeline`.
 
@@ -610,8 +609,7 @@ class TwitterClient(ConnectorClientBase):
         This operation gets the most recent tweets and re-tweets posted by me
         and my followers.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `HomeTimeline`.
 
@@ -698,8 +696,7 @@ class TwitterClient(ConnectorClientBase):
         This operation gets a list of relevant tweets matching the search
         query.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `SearchTweet`.
 
@@ -796,8 +793,7 @@ class TwitterClient(ConnectorClientBase):
 
         This operation gets the list of users that follow a given user.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Followers`.
 
@@ -886,8 +882,7 @@ class TwitterClient(ConnectorClientBase):
 
         This operation gets the list of users who are following me.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `MyFollowers`.
 
@@ -972,8 +967,7 @@ class TwitterClient(ConnectorClientBase):
 
         The operation gets the list of people the given user follows.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Following`.
 
@@ -1062,8 +1056,7 @@ class TwitterClient(ConnectorClientBase):
 
         This operation gets the list of users that I am following.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `MyFollowing`.
 

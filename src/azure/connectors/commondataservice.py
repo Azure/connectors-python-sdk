@@ -1685,8 +1685,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         Retrieves all collection valued relationship items as an expand would
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetCollectionRelationships_V2`.
 
@@ -1778,8 +1777,7 @@ class CommondataserviceClient(ConnectorClientBase):
         """
         GetDataSets
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetDataSets_V2`.
 
@@ -1922,8 +1920,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         Retrieves all Notes (annotations) for the provided table row Id.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetItemAttachments_V2`.
 
@@ -2471,8 +2468,7 @@ class CommondataserviceClient(ConnectorClientBase):
         """
         GetTables
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetTables_V2`.
 

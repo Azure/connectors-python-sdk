@@ -1001,8 +1001,7 @@ class TodoClient(ConnectorClientBase):
 
         Returns a list of all the to-do lists.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetAllTodoListsV2`.
 
@@ -1195,8 +1194,7 @@ class TodoClient(ConnectorClientBase):
 
         This operation is used to retrieve all to-dos from a specific list.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListToDosByFolderV2`.
 

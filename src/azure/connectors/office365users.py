@@ -1055,8 +1055,7 @@ class Office365usersClient(ConnectorClientBase):
 
         Retrieves the trending documents for the signed in user
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `MyTrendingDocuments`.
 
@@ -1159,8 +1158,7 @@ class Office365usersClient(ConnectorClientBase):
 
         Get relevant people.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `RelevantPeople`.
 
@@ -1302,8 +1300,7 @@ class Office365usersClient(ConnectorClientBase):
 
         Retrieves the trending documents for a user
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `TrendingDocuments`.
 
@@ -1471,8 +1468,7 @@ class Office365usersClient(ConnectorClientBase):
         Learn more about available fields to select:
         https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/resources/user#properties
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `DirectReports_V2`.
 

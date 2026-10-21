@@ -5960,8 +5960,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Get the list of roles in an application.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Roles_List_V1`.
 
@@ -6184,8 +6183,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Get the list of users in an application
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Users_List_V1`.
 
@@ -6576,8 +6574,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         Workflow_GetComponents
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Workflow_GetComponents`.
 
@@ -6676,8 +6673,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         Workflow_GetCapabilities
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Workflow_GetCapabilities`.
 
@@ -6788,8 +6784,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         Workflow_GetCapabilities_V1
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Workflow_GetCapabilities_V1`.
 
@@ -6898,8 +6893,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         Workflow_GetComponents_V1
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Workflow_GetComponents_V1`.
 
@@ -6995,8 +6989,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         """
         Workflow_GetModules
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Workflow_GetModules_V1`.
 

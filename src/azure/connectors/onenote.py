@@ -1094,8 +1094,7 @@ class OnenoteClient(ConnectorClientBase):
 
         Get recent notebooks.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetNotebooks`.
 
@@ -1170,8 +1169,7 @@ class OnenoteClient(ConnectorClientBase):
 
         Get sections in a specific notebook.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetSectionsInNotebook`.
 

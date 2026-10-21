@@ -408,8 +408,7 @@ class EventhubsClient(ConnectorClientBase):
 
         Get all Event Hubs in a namespace.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetEventHubs`.
 
@@ -483,8 +482,7 @@ class EventhubsClient(ConnectorClientBase):
 
         Get all content types.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetContentTypes`.
 
@@ -559,8 +557,7 @@ class EventhubsClient(ConnectorClientBase):
 
         Get all the consumer groups for an event hub.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetConsumerGroups`.
 
@@ -643,8 +640,7 @@ class EventhubsClient(ConnectorClientBase):
 
         Get all partition keys in an Event Hub.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetPartitionKeys`.
 

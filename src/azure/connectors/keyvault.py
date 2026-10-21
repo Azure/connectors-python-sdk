@@ -441,8 +441,7 @@ class KeyvaultClient(ConnectorClientBase):
 
         List keys.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListKeys`.
 
@@ -517,8 +516,7 @@ class KeyvaultClient(ConnectorClientBase):
 
         List versions of a key.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListKeyVersions`.
 
@@ -966,8 +964,7 @@ class KeyvaultClient(ConnectorClientBase):
 
         List secrets.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListSecrets`.
 
@@ -1042,8 +1039,7 @@ class KeyvaultClient(ConnectorClientBase):
 
         List versions of a secret.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListSecretVersions`.
 

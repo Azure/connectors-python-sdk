@@ -522,8 +522,7 @@ class ZendeskClient(ConnectorClientBase):
 
         Retrieves Zendesk tables from a site
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetTables`.
 
@@ -985,8 +984,7 @@ class ZendeskClient(ConnectorClientBase):
         Returns a default number of 25 articles per page, up to a maximum of
         1000 results.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `SearchArticles`.
 

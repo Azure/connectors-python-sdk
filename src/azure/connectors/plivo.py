@@ -360,8 +360,7 @@ class PlivoClient(ConnectorClientBase):
         This operation returns a list of all messages associated with your
         Plivo account.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListMessages`.
 

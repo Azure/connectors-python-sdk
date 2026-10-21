@@ -1274,8 +1274,7 @@ class ArmClient(ConnectorClientBase):
 
         Lists the locations available for the subscription.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Subscriptions_ListLocations`.
 

@@ -1176,8 +1176,7 @@ class AzureblobClient(ConnectorClientBase):
 
         This operation gets available shared access policies for a blob.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetAccessPolicies_V2`.
 
@@ -1950,8 +1949,7 @@ class AzureblobClient(ConnectorClientBase):
 
         This operation list the user's Azure Storage Account.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetDataSets`.
 

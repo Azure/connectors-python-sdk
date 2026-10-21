@@ -2245,8 +2245,7 @@ class DocusignClient(ConnectorClientBase):
 
         Get document generation form fields from envelope
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetDocgenFormFields`.
 
@@ -2688,8 +2687,7 @@ class DocusignClient(ConnectorClientBase):
 
         Get document tabs from envelope
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetEnvelopeDocumentTabs`.
 
@@ -2841,8 +2839,7 @@ class DocusignClient(ConnectorClientBase):
 
         Get document tabs from template
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetTemplateDocumentTabs`.
 
@@ -2931,8 +2928,7 @@ class DocusignClient(ConnectorClientBase):
 
         Get document custom fields from envelope
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetEnvelopeDocumentFields`.
 
@@ -4587,8 +4583,7 @@ class DocusignClient(ConnectorClientBase):
 
         Login
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetLoginAccounts`.
 
@@ -4663,8 +4658,7 @@ class DocusignClient(ConnectorClientBase):
 
         List templates for a specific account.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetEnvelopeTemplates`.
 
@@ -4809,8 +4803,7 @@ class DocusignClient(ConnectorClientBase):
 
         List documents from a template
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListTemplateDocuments`.
 
@@ -4895,8 +4888,7 @@ class DocusignClient(ConnectorClientBase):
 
         List documents from an envelope
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListEnvelopeDocuments`.
 
@@ -5269,8 +5261,7 @@ class DocusignClient(ConnectorClientBase):
 
         Get recipient tabs from envelope
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetEnvelopeRecipientTabs`.
 
@@ -5898,8 +5889,7 @@ class DocusignClient(ConnectorClientBase):
 
         Get organizations
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetOrganizations`.
 
@@ -6033,8 +6023,7 @@ class DocusignClient(ConnectorClientBase):
 
         List folders for a specific account.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetFolderList`.
 
@@ -6114,8 +6103,7 @@ class DocusignClient(ConnectorClientBase):
 
         List envelopes under a particular folder.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetFolderEnvelopeList`.
 
@@ -6197,8 +6185,7 @@ class DocusignClient(ConnectorClientBase):
 
         Get recipient types.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `StaticResponseForRecipientTypes`.
 
@@ -6272,8 +6259,7 @@ class DocusignClient(ConnectorClientBase):
 
         Get signature types.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `StaticResponseForSignatureTypes`.
 
@@ -6348,8 +6334,7 @@ class DocusignClient(ConnectorClientBase):
 
         List signing groups for a specific account.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetSigningGroups`.
 
@@ -6427,8 +6412,7 @@ class DocusignClient(ConnectorClientBase):
 
         Get tab types.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `StaticResponseForTabTypes`.
 
@@ -6503,8 +6487,7 @@ class DocusignClient(ConnectorClientBase):
 
         Get Maestro Workflow Definitions
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetMaestroWorkflowDefinitions`.
 
@@ -6583,8 +6566,7 @@ class DocusignClient(ConnectorClientBase):
 
         Get All workflow ids
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetAllWorkflowIDs`.
 

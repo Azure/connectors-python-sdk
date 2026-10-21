@@ -1329,8 +1329,7 @@ class DynamicsaxClient(ConnectorClientBase):
 
         Retrieves a list of entities
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetTables`.
 
@@ -1408,8 +1407,7 @@ class DynamicsaxClient(ConnectorClientBase):
 
         Retrieves a list of accessable Dynamics 365 for Fin & Ops instances
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetDataSets`.
 
@@ -1484,8 +1482,7 @@ class DynamicsaxClient(ConnectorClientBase):
 
         Gets business events categories.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetBusinessEventCategories`.
 
@@ -1567,8 +1564,7 @@ class DynamicsaxClient(ConnectorClientBase):
 
         Gets business events.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetBusinessEvents`.
 
@@ -1654,8 +1650,7 @@ class DynamicsaxClient(ConnectorClientBase):
 
         Gets legal entities.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetLegalEntities`.
 
@@ -1749,8 +1744,7 @@ class DynamicsaxClient(ConnectorClientBase):
 
         Get actions
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetProcedures`.
 

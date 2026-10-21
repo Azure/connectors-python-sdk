@@ -467,8 +467,7 @@ class CampfireClient(ConnectorClientBase):
 
         Retrieves the list of accounts this user has access too
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListAccounts`.
 
@@ -552,8 +551,7 @@ class CampfireClient(ConnectorClientBase):
 
         Retrieves the list of rooms in an account
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListRooms`.
 

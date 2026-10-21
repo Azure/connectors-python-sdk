@@ -1033,8 +1033,7 @@ class ServicebusClient(ConnectorClientBase):
         The operation receives messages from a queue with peek-lock. If maximum
         message count is not provided, it reads 20 messages.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetMessagesFromQueueWithPeekLock`.
 
@@ -1869,8 +1868,7 @@ class ServicebusClient(ConnectorClientBase):
         peek-lock. If maximum message count is not provided, it reads 20
         messages.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetMessagesFromTopicWithPeekLock`.
 
@@ -2096,8 +2094,7 @@ class ServicebusClient(ConnectorClientBase):
 
         This operation gets all queues and topics in the Service Bus namespace.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetEntities`.
 
@@ -2171,8 +2168,7 @@ class ServicebusClient(ConnectorClientBase):
 
         This operation gets list of properties.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetSystemProperties`.
 
@@ -2246,8 +2242,7 @@ class ServicebusClient(ConnectorClientBase):
 
         This operation gets all queues in the Service Bus namespace.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetQueues`.
 
@@ -2322,8 +2317,7 @@ class ServicebusClient(ConnectorClientBase):
         This operation gets the list of options for session handling - None,
         Next available.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetSessionOptions`.
 
@@ -2397,8 +2391,7 @@ class ServicebusClient(ConnectorClientBase):
 
         This operation gets all topics in the Service Bus namespace.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetTopics`.
 
@@ -2474,8 +2467,7 @@ class ServicebusClient(ConnectorClientBase):
         This operation gets the list of subscriptions for a topic in the
         Service Bus namespace.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetSubscriptions`.
 

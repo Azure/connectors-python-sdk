@@ -1807,8 +1807,7 @@ class InsightlyClient(ConnectorClientBase):
 
         List tasks
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListTasks`.
 
@@ -2197,8 +2196,7 @@ class InsightlyClient(ConnectorClientBase):
 
         List leads
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListLeads`.
 
@@ -2389,8 +2387,7 @@ class InsightlyClient(ConnectorClientBase):
 
         List contacts
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListContacts`.
 
@@ -2581,8 +2578,7 @@ class InsightlyClient(ConnectorClientBase):
 
         List users
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListUsers`.
 

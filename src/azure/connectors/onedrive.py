@@ -1389,8 +1389,7 @@ class OnedriveClient(ConnectorClientBase):
 
         This operation gets the tags of a file.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetFileTags`.
 
@@ -1676,8 +1675,7 @@ class OnedriveClient(ConnectorClientBase):
         This operation gets the list of files and subfolders in the root
         folder.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListRootFolder`.
 
@@ -1758,8 +1756,7 @@ class OnedriveClient(ConnectorClientBase):
         This operation finds files within a folder using search or name pattern
         match.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `FindFiles`.
 
@@ -1869,8 +1866,7 @@ class OnedriveClient(ConnectorClientBase):
         This operation finds files within a folder by path using search or name
         pattern match.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `FindFilesByPath`.
 

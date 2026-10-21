@@ -11707,8 +11707,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         Retrieves one or more records from the Entry table.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `SelectEntry`.
 
@@ -11958,8 +11957,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         Retrieves one or more records from the Entry Custom Field table.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `SelectEntryCustomField`.
 
@@ -12100,8 +12098,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         Retrieves one or more records from the Term table.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `SelectTerm`.
 
@@ -12178,8 +12175,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         Retrieves one or more records from the Entry Address table.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `SelectEntryAddress`.
 
@@ -12319,8 +12315,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         Retrieves one or more records from the Entry Application table.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `SelectEntryApplication`.
 
@@ -12517,8 +12512,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         Retrieves one or more records from the Term Session table.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `SelectTermSession`.
 
@@ -12595,8 +12589,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         Retrieves one or more records from the Entry Detail table.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `SelectEntryDetail`.
 
@@ -12732,8 +12725,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         Retrieves one or more records from the Entry Enrollment table.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `SelectEntryEnrollment`.
 
@@ -12930,8 +12922,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         Retrieves one or more records from the Booking table.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `SelectBooking`.
 
@@ -13121,8 +13112,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         Retrieves one or more records from the Room Space table.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `SelectRoomSpace`.
 
@@ -13253,8 +13243,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         Retrieves one or more records from the Room Location table.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `SelectRoomLocation`.
 
@@ -13333,8 +13322,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         Retrieves one or more records from the Transaction table.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `SelectTransaction`.
 
@@ -13465,8 +13453,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         Retrieves one or more records from the Room Space Maintenance table.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `SelectRoomSpaceMaintenance`.
 

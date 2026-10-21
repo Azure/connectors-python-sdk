@@ -1114,8 +1114,7 @@ class GoogledriveClient(ConnectorClientBase):
 
         List files in a Google Drive folder
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListFolder`.
 
@@ -1196,8 +1195,7 @@ class GoogledriveClient(ConnectorClientBase):
 
         Lists files in the Google Drive root folder
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListRootFolder`.
 

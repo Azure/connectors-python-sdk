@@ -1173,8 +1173,7 @@ class ExcelonlineClient(ConnectorClientBase):
 
         Get a list of worksheets in the Excel workbook.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetAllWorksheets`.
 
@@ -1338,8 +1337,7 @@ class ExcelonlineClient(ConnectorClientBase):
 
         Get a list of tables in the Excel workbook.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetTables`.
 
@@ -1515,8 +1513,7 @@ class ExcelonlineClient(ConnectorClientBase):
 
         Get table columns.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetColumns`.
 

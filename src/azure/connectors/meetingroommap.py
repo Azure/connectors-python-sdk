@@ -436,8 +436,7 @@ class MeetingroommapClient(ConnectorClientBase):
 
         Get custom categories
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetCategories`.
 
@@ -566,8 +565,7 @@ class MeetingroommapClient(ConnectorClientBase):
 
         Search custom locations by name
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `SearchLocations`.
 
@@ -723,8 +721,7 @@ class MeetingroommapClient(ConnectorClientBase):
 
         Get list of all floorplans/images
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Images`.
 
@@ -1014,8 +1011,7 @@ class MeetingroommapClient(ConnectorClientBase):
 
         Search coworker by name/email
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `SearchCoworkers`.
 
@@ -1291,8 +1287,7 @@ class MeetingroommapClient(ConnectorClientBase):
 
         Get all rooms (defined in Azure AD as meeting rooms)
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetRooms`.
 
@@ -1367,8 +1362,7 @@ class MeetingroommapClient(ConnectorClientBase):
 
         Get rooms by name search (from Azure AD meeting rooms)
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `SearchMeetingRooms`.
 
@@ -1446,8 +1440,7 @@ class MeetingroommapClient(ConnectorClientBase):
 
         Get meeting rooms lists as defined in Azure AD
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `RoomLists`.
 
@@ -1522,8 +1515,7 @@ class MeetingroommapClient(ConnectorClientBase):
 
         Get all meeting rooms from specific list name
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `RoomsByListAddress`.
 

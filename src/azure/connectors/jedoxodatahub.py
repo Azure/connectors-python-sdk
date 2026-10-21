@@ -826,8 +826,7 @@ class JedoxodatahubClient(ConnectorClientBase):
         databases are excluded from the list, but can be requested by providing
         the ID.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Databases`.
 
@@ -990,8 +989,7 @@ class JedoxodatahubClient(ConnectorClientBase):
         URL encodings, Attribute cubes will be renamed, e.g. \\#_Years to
         ATT_Years.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Cubes`.
 
@@ -1168,8 +1166,7 @@ class JedoxodatahubClient(ConnectorClientBase):
         names. If the cell has a string value, the value is instead stored in
         the stringValue field. Element names are stored in dynamic properties.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `CubeCells`.
 
@@ -1315,8 +1312,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Get a list of dimensions in the given database.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Dimensions`.
 
@@ -1485,8 +1481,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Get a list of elements in the given dimension.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Elements`.
 
@@ -1660,8 +1655,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Get a list of stored views in the given database.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Views`.
 
@@ -1836,8 +1830,7 @@ class JedoxodatahubClient(ConnectorClientBase):
         names. If the cell has a string value, the value is instead stored in
         the stringValue field. Element names are stored in dynamic properties.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ViewCells`.
 
@@ -1981,8 +1974,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Get a list of integrator project groups found in the server.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `IntegratorProjectGroups`.
 
@@ -2143,8 +2135,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Get a list of integrator projects found in the server.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `IntegratorProjects`.
 
@@ -2313,8 +2304,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Get a list of extracts in the given integrator project.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Extracts`.
 
@@ -2491,8 +2481,7 @@ class JedoxodatahubClient(ConnectorClientBase):
         Stream the rows of the extract with the given name in the given
         integrator project.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ExtractRows`.
 
@@ -2607,8 +2596,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Get a list of jobs in the given integrator project.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Jobs`.
 
@@ -2918,8 +2906,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Get a list of loads in the given integrator project.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Loads`.
 
@@ -3229,8 +3216,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Get a list of transforms in the given integrator project.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Transforms`.
 
@@ -3407,8 +3393,7 @@ class JedoxodatahubClient(ConnectorClientBase):
         Stream the rows of the transform with the given name in the given
         integrator project.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `TransformRows`.
 

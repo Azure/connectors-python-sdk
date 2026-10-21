@@ -964,8 +964,7 @@ class DropboxClient(ConnectorClientBase):
 
         This operation gets the list of files and subfolders in a folder.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListFolder`.
 
@@ -1047,8 +1046,7 @@ class DropboxClient(ConnectorClientBase):
         This operation gets the list of files and subfolders in the root
         folder.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListRootFolder`.
 

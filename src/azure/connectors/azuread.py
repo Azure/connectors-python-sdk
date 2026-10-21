@@ -1510,8 +1510,7 @@ class AzureadClient(ConnectorClientBase):
 
         Get the groups a user is a member of.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetMemberGroupsV2`.
 

@@ -1516,8 +1516,7 @@ class TrelloClient(ConnectorClientBase):
 
         List the cards matching the query parameters in a specific board.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListCards`.
 
@@ -1686,8 +1685,7 @@ class TrelloClient(ConnectorClientBase):
 
         A simple version of the list cards API method used by dynamic values.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListCardsSimple`.
 
@@ -2093,8 +2091,7 @@ class TrelloClient(ConnectorClientBase):
 
         List the boards matching the specified query parameters.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListBoards`.
 
@@ -2252,8 +2249,7 @@ class TrelloClient(ConnectorClientBase):
         A simple version of the list boards API call with no parameters to be
         used by dynamic values.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListBoardsSimple`.
 
@@ -2744,8 +2740,7 @@ class TrelloClient(ConnectorClientBase):
 
         List the card lists and the cards within the list in a specific board.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListLists`.
 
@@ -2854,8 +2849,7 @@ class TrelloClient(ConnectorClientBase):
 
         A simple version of list lists to be used by dynamic values.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListListsSimple`.
 
@@ -3202,8 +3196,7 @@ class TrelloClient(ConnectorClientBase):
 
         The list of teams or organizations the account is a member of.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListTeams`.
 
@@ -3280,8 +3273,7 @@ class TrelloClient(ConnectorClientBase):
 
         List the members in a specific team.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListTeamMembers`.
 
@@ -3360,8 +3352,7 @@ class TrelloClient(ConnectorClientBase):
 
         List the members of a specific board.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListBoardMembers`.
 
@@ -3440,8 +3431,7 @@ class TrelloClient(ConnectorClientBase):
 
         List the labels of a specific board.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListBoardLabels`.
 
@@ -3581,8 +3571,7 @@ class TrelloClient(ConnectorClientBase):
 
         List the members for a specific card.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListCardMembers`.
 
@@ -3670,8 +3659,7 @@ class TrelloClient(ConnectorClientBase):
 
         List the comments for a specific card.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListCardComments`.
 

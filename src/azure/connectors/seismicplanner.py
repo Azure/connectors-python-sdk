@@ -2024,8 +2024,7 @@ class SeismicplannerClient(ConnectorClientBase):
         Get all comments for a given project, task, or request. Requires node
         (project, task, or request) ID.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetComments`.
 
@@ -2444,8 +2443,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         Get a list of projects with their attributes and associations.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetProjects`.
 
@@ -3068,8 +3066,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         Get a list of requests.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetRequests`.
 
@@ -3729,8 +3726,7 @@ class SeismicplannerClient(ConnectorClientBase):
         for set statuses for specific work. Example: `(Not started, In
         progress, Complete)`
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetStatusSchemas`.
 
@@ -3963,8 +3959,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         Get a list of tasks.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetTasks`.
 

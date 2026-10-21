@@ -497,8 +497,7 @@ class ProjectplaceClient(ConnectorClientBase):
 
         Lists the boards that are part of the projects the user have access to
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `list_boards`.
 

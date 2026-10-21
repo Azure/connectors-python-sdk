@@ -932,8 +932,7 @@ class PlannerClient(ConnectorClientBase):
 
         List plans owned by the group specified.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListGroupPlans`.
 
@@ -1289,8 +1288,7 @@ class PlannerClient(ConnectorClientBase):
 
         List the buckets in a plan.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListBuckets_V3`.
 
@@ -1670,8 +1668,7 @@ class PlannerClient(ConnectorClientBase):
 
         Get groups that the user is a direct member of.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListGroups`.
 

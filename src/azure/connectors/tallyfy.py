@@ -2915,8 +2915,7 @@ class TallyfyClient(ConnectorClientBase):
 
         Get all users belonging to an organization
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Get_Organization_Users`.
 

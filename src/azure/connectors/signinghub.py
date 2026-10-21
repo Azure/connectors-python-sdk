@@ -6127,8 +6127,7 @@ class SigninghubClient(ConnectorClientBase):
         Business applications can use this service API to get the attachments
         of a document.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `V4_Attachment_GetAttachments`.
 
@@ -6449,8 +6448,7 @@ class SigninghubClient(ConnectorClientBase):
         The search response information contains the user email address and
         respective user name.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `V4_Contacts_Get`.
 
@@ -8595,8 +8593,7 @@ class SigninghubClient(ConnectorClientBase):
         documents filtered by different statuses. Users can divide the records
         into pages by providing a number of records per page.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `V4_Package_GetAllPackages`.
 
@@ -9294,8 +9291,7 @@ class SigninghubClient(ConnectorClientBase):
         to search a user's personal templates or the enterprise templates as
         allowed against their user role by their enterprise admin.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `V4_Settings_GetTemplates`.
 
@@ -9829,8 +9825,7 @@ class SigninghubClient(ConnectorClientBase):
         in the authentication request. It is possible to search based upon the
         criterion supplied under the \"x-search-text\" header.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `V4_Template_GetEnterpriseTemplates`.
 
@@ -10436,8 +10431,7 @@ class SigninghubClient(ConnectorClientBase):
         Business applications can use this service API to get workflow details
         for the package.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `V4_Workflow_GetWorkflowUsers`.
 

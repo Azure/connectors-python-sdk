@@ -762,8 +762,7 @@ class AzureautomationClient(ConnectorClientBase):
 
         Lists Azure Automation accounts in a resource group.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `AutomationAccounts_List`.
 
@@ -857,8 +856,7 @@ class AzureautomationClient(ConnectorClientBase):
 
         Lists Azure Automation runbooks in an automation account.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `Runbooks_List`.
 
@@ -956,8 +954,7 @@ class AzureautomationClient(ConnectorClientBase):
 
         Get information on an Azure Automation runbook.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetRunbook`.
 

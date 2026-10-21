@@ -2382,8 +2382,7 @@ class SalesforceClient(ConnectorClientBase):
 
         Get a list of all jobs
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetAllJobs`.
 
@@ -3302,8 +3301,7 @@ class SalesforceClient(ConnectorClientBase):
 
         This operation retrieves external ID fields of Salesforce object type.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetExternalIdFields`.
 

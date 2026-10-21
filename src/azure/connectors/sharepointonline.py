@@ -2141,8 +2141,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Get all lists and libraries.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetAllTables`.
 
@@ -3043,8 +3042,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Returns files in the root SharePoint folder.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListRootFolder`.
 
@@ -3124,8 +3122,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Returns files contained in a SharePoint folder.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListFolder`.
 
@@ -3818,8 +3815,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Gets SharePoint lists from a site.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetTables`.
 
@@ -5686,8 +5682,7 @@ class SharepointonlineClient(ConnectorClientBase):
         add a \"Get attachment content\" step and use the \"File identifier\"
         property returned by this action to get to the contents of the file.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetItemAttachments`.
 
@@ -6083,8 +6078,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Gets views from a SharePoint list.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetTableViews`.
 
@@ -6249,8 +6243,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Gets the most recently used SharePoint sites.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetDataSets`.
 
@@ -6325,8 +6318,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Gets templates from a Agreements Solution workspace.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetAgreementsSolutionTemplates`.
 
@@ -6471,8 +6463,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Get libraries
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetTablesForLibraries`.
 
@@ -6685,8 +6676,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Get lists and libraries
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetTablesForListsAndLibraries`.
 
@@ -6770,8 +6760,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Returns User fields for a list.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetEntitiesForUser`.
 
@@ -6867,8 +6856,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Gets forms from a SharePoint list.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetTableForms`.
 
@@ -6954,8 +6942,7 @@ class SharepointonlineClient(ConnectorClientBase):
         Gets published document generation forms from a SharePoint document
         library.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetDocGenForms`.
 
@@ -7106,8 +7093,7 @@ class SharepointonlineClient(ConnectorClientBase):
         and Folders. RecursiveAll - Recursively query the folder. Return both
         Files and Folders.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetViewScopeOptions`.
 
@@ -7182,8 +7168,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Get lists and libraries where lightweight approvals is enabled
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetTablesForLightweightApproval`.
 
@@ -7441,8 +7426,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Get libraries where Content Approval is supported
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetTablesForApproval`.
 
@@ -7576,8 +7560,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Gets templates from a SharePoint document library.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetContentAssemblyTemplates`.
 

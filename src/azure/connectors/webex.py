@@ -1082,8 +1082,7 @@ class WebexClient(ConnectorClientBase):
 
         Get a list of recent messages for a space
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetMessages`.
 
@@ -1303,8 +1302,7 @@ class WebexClient(ConnectorClientBase):
 
         Lookup details and presence information for people in your organization
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetPeople`.
 
@@ -1448,8 +1446,7 @@ class WebexClient(ConnectorClientBase):
 
         This action retrieves a list of spaces
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetSpaces`.
 

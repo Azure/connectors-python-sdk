@@ -780,8 +780,7 @@ class RevaiClient(ConnectorClientBase):
         Retrieve a list of transcription jobs submitted within the last 30
         days.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `TranscriptionsGet`.
 
@@ -926,8 +925,7 @@ class RevaiClient(ConnectorClientBase):
 
         Returns the transcript for a completed transcription job.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `TranscriptGet`.
 
@@ -1115,8 +1113,7 @@ class RevaiClient(ConnectorClientBase):
         Retrieves a list of most recent custom vocabularies' processing
         information.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `VocabulariesGet`.
 
@@ -1373,8 +1370,7 @@ class RevaiClient(ConnectorClientBase):
         Retrieves a list of topic extraction jobs submitted within the last 30
         days in reverse chronological order.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ExtractionsGet`.
 
@@ -1636,8 +1632,7 @@ class RevaiClient(ConnectorClientBase):
 
         Returns the results for a completed topic extraction job.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ExtractionResultGet`.
 
@@ -1961,8 +1956,7 @@ class RevaiClient(ConnectorClientBase):
 
         Returns the results for a completed sentiment analysis job.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `AnalysisResultGet`.
 
@@ -2052,8 +2046,7 @@ class RevaiClient(ConnectorClientBase):
         Retrieves a list of language identification jobs submitted within the
         last 30 days in reverse chronological order.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `IdentificationsGet`.
 
@@ -2369,8 +2362,7 @@ class RevaiClient(ConnectorClientBase):
         Retrieve a list of alignment jobs submitted within the last 30 days in
         reverse chronological order.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `AlignmentsGet`.
 
@@ -2628,8 +2620,7 @@ class RevaiClient(ConnectorClientBase):
 
         Returns the results for a completed forced alignment job.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `AlignmentTranscriptGet`.
 

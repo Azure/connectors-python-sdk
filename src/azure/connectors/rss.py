@@ -243,8 +243,7 @@ class RssClient(ConnectorClientBase):
 
         This operation retrieves all items from an RSS feed.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListFeedItems`.
 

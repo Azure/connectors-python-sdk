@@ -631,8 +631,7 @@ class WordpressClient(ConnectorClientBase):
 
         List sites
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListSites`.
 

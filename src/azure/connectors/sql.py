@@ -1869,8 +1869,7 @@ class SqlClient(ConnectorClientBase):
 
         This operation gets tables from a database.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetTables_V2`.
 
@@ -2116,8 +2115,7 @@ class SqlClient(ConnectorClientBase):
 
         List the servers
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetServers`.
 
@@ -2192,8 +2190,7 @@ class SqlClient(ConnectorClientBase):
 
         List the databases
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetDatabases`.
 
@@ -2441,8 +2438,7 @@ class SqlClient(ConnectorClientBase):
 
         This operation gets stored procedures for a database.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetProcedures_V2`.
 
@@ -3285,8 +3281,7 @@ class SqlClient(ConnectorClientBase):
 
         This operation gets stored procedures for a database.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetProcedures`.
 

@@ -1474,8 +1474,7 @@ class GithubClient(ConnectorClientBase):
 
         Get all issues of a repository.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetIssues`.
 
@@ -2219,8 +2218,7 @@ class GithubClient(ConnectorClientBase):
         This operation is used to get the list of files from a pull request for
         the repository.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetPullRequestFiles`.
 
@@ -2510,8 +2508,7 @@ class GithubClient(ConnectorClientBase):
 
         Get all Pull Requests of A Repository.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetPullRequests`.
 
@@ -3266,8 +3263,7 @@ class GithubClient(ConnectorClientBase):
 
         Lists the available assignees for issues in a repository.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetAssignees`.
 
@@ -3368,8 +3364,7 @@ class GithubClient(ConnectorClientBase):
 
         List repository collaborators.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListCollaborators`.
 
@@ -3537,8 +3532,7 @@ class GithubClient(ConnectorClientBase):
 
         Lists all milestones of a repository.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetMilestones`.
 
@@ -3657,8 +3651,7 @@ class GithubClient(ConnectorClientBase):
 
         Lists all labels for a repository.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetLabels`.
 
@@ -3760,8 +3753,7 @@ class GithubClient(ConnectorClientBase):
 
         Lists all labels for an issue.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetIssueLabels`.
 
@@ -3867,8 +3859,7 @@ class GithubClient(ConnectorClientBase):
 
         Lists all public repositories for a user.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetRepos`.
 
@@ -3985,8 +3976,7 @@ class GithubClient(ConnectorClientBase):
 
         Lists all public repositories for an organization.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetOrgRepos`.
 
@@ -4107,8 +4097,7 @@ class GithubClient(ConnectorClientBase):
         Lists all repositories (both public and private) for the authenticated
         user.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetUserRepos`.
 
@@ -4245,8 +4234,7 @@ class GithubClient(ConnectorClientBase):
 
         Find issues by state and keyword.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `SearchIssues`.
 

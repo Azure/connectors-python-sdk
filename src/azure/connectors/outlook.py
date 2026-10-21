@@ -4085,8 +4085,7 @@ class OutlookClient(ConnectorClientBase):
 
         This operation lists available calendars.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `CalendarGetTables`.
 
@@ -4220,8 +4219,7 @@ class OutlookClient(ConnectorClientBase):
 
         This operation lists available contacts folders.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ContactGetTables`.
 
@@ -4302,8 +4300,7 @@ class OutlookClient(ConnectorClientBase):
 
         This operation gets contacts from a contacts folder.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ContactGetItems`.
 
@@ -4855,8 +4852,7 @@ class OutlookClient(ConnectorClientBase):
 
         This operation gets events from a calendar.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `V3CalendarGetItems`.
 
@@ -5111,8 +5107,7 @@ class OutlookClient(ConnectorClientBase):
 
         This operation gets emails from a folder.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetEmailsV2`.
 
@@ -5281,8 +5276,7 @@ class OutlookClient(ConnectorClientBase):
         This operation gets all events (including instances of recurrences) in
         a calendar.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetEventsCalendarViewV2`.
 

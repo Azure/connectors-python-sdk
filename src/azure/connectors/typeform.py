@@ -318,8 +318,7 @@ class TypeformClient(ConnectorClientBase):
         Retrieves a list of JSON descriptions for all forms in your Typeform
         account (public and private).
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListForms_V2`.
 

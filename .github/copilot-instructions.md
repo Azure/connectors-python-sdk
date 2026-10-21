@@ -400,30 +400,28 @@ When adding a new connector client to the SDK, use the **add-connector** skill (
 
 ### Steps
 
-1. **Generate the connector pair**:
-    - Root: `src/azure/connectors/<connector>.py`
-    - Async: `src/azure/connectors/aio/<connector>.py`
+1. **Generate one async-only root connector** using the live-download procedure in `GENERATION.md`:
+    - `src/azure/connectors/<connector>.py` owns the client, models, and trigger metadata
+    - Do not create a synchronous mirror or an `azure.connectors.aio` module
 
-2. **Verify matching client classes** following existing patterns:
+2. **Verify direct imports** from the root connector module:
 
     ```python
     from azure.connectors.office365 import Office365Client, SendEmailInput
-
-    from azure.connectors.aio.office365 import Office365Client as AsyncOffice365Client
     ```
 
-3. **Keep package initializers minimal** — do not add generated-client barrel exports
+3. **Keep package exports lazy** — regenerate `src/azure/connectors/_client_registry.py` and `src/azure/connectors/__init__.pyi` with the connector inventory. Preserve the lazy loader in `src/azure/connectors/__init__.py`; do not add eager generated-client barrel imports or try/except imports that replace broken clients with `None`.
 
 4. **Update `README.md`** — add the connector to the "Validated Connectors" table with status (`✅ E2E Validated` or `🔄 SDK Generated`) and test count
 
-5. **Add unit tests** — create `test_<connector>.py` in `tests/` following existing paired tests:
-    - Sync and aio constructors and lifecycle
-    - Matching operation names and signatures
-    - Mocked success and error behavior in both modes
-    - Shared model identity and serialization round-trips
-    - `ItemPaged` and `AsyncItemPaged` behavior when applicable
+5. **Add unit tests** — create `test_<connector>.py` in `tests/` for the root async client:
+    - Constructor options, `await client.close()`, and `async with` lifecycle
+    - Unsuffixed operations, mocked success and error responses, and serialization round-trips
+    - `AsyncItemPaged` iteration without awaiting construction, including continuation and empty pages
+    - Retained Location-backed operations: await `begin_*` for an `AsyncLROPoller`, then await `poller.result()` while the client remains open
+    - Direct imports and lazy package-root exports agree with the generated registry and type stub
 
-6. **Create paired samples** — add the sync file under `samples/sample_connector_usage/` and the aio file under `samples/sample_connector_usage/aio/`
+6. **Create one async sample** under `samples/sample_connector_usage/`. Use root connector imports, `azure.identity.aio` credentials, `async with`, and `await`. End the `__main__` guard with `asyncio.run(main())`, not an extra bare `main()` call.
 
 7. **Update `samples/sample_connector_usage/README.md`** — add the new sample to the samples table
 
@@ -441,11 +439,13 @@ When adding a new connector client to the SDK, use the **add-connector** skill (
 - [ ] Client class has proper type hints on all public methods
 - [ ] Docstrings present on class and all public methods
 - [ ] Existing connector tests still pass (no regressions)
-- [ ] New connector tests cover: constructor, mocked success, mocked error, exception handling
-- [ ] Root and aio modules expose matching unsuffixed operations
-- [ ] Models and trigger metadata are root-owned and shared with aio
+- [ ] New connector tests cover constructor options, async lifecycle, mocked responses, exceptions, and serialization
+- [ ] One root module owns the async-only client, models, and trigger metadata; no sync or aio mirror exists
+- [ ] Unsuffixed operations use `AsyncItemPaged` and awaited `AsyncLROPoller` contracts where applicable
+- [ ] Generated client registry and package type stub match; package-root exports remain lazy and import failures propagate
 - [ ] README.md connector table updated
-- [ ] Sync and aio sample files compile without errors
+- [ ] One async sample imports public root types and compiles without errors
+- [ ] Offline sample tests check output for empty and nonempty results and run the actual main guard without unawaited coroutine warnings
 - [ ] Samples README updated
 - [ ] CHANGELOG.md updated
 - [ ] Connection setup skill updated

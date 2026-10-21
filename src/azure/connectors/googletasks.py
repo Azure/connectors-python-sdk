@@ -297,8 +297,7 @@ class GoogletasksClient(ConnectorClientBase):
 
         List all task lists.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListTaskLists`.
 
@@ -427,8 +426,7 @@ class GoogletasksClient(ConnectorClientBase):
 
         Lists the tasks for a specific task list.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListTasks`.
 

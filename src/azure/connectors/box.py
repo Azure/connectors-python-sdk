@@ -971,8 +971,7 @@ class BoxClient(ConnectorClientBase):
 
         Lists the files and folders in a Box folder.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListFolder`.
 
@@ -1053,8 +1052,7 @@ class BoxClient(ConnectorClientBase):
 
         Lists the files and folders in the Box root folder.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListRootFolder`.
 

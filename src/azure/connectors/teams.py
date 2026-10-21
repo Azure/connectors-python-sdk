@@ -4132,8 +4132,7 @@ class TeamsClient(ConnectorClientBase):
 
         Lists all the teams in Microsoft Teams that you are a member of
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetAllTeams`.
 
@@ -4208,8 +4207,7 @@ class TeamsClient(ConnectorClientBase):
         Lists all the teams you are a direct member of, or are a member of a
         shared channel that is hosted inside the team.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetAllAssociatedTeams`.
 
@@ -4288,8 +4286,7 @@ class TeamsClient(ConnectorClientBase):
 
         Lists all the channels for a specific team
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetChannelsForGroup`.
 
@@ -4641,8 +4638,7 @@ class TeamsClient(ConnectorClientBase):
         Lists all the channels for a specific team, including channels that are
         shared with the team
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetAllChannelsForTeam`.
 
@@ -4739,8 +4735,7 @@ class TeamsClient(ConnectorClientBase):
 
         Lists recent chats you are a part of
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetChats`.
 
@@ -5119,8 +5114,7 @@ class TeamsClient(ConnectorClientBase):
         channels, the team ID must refer to the host team, which is the team
         that owns the shared channel.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListRepliesToMessage`.
 
@@ -5220,8 +5214,7 @@ class TeamsClient(ConnectorClientBase):
 
         List direct members of a group chat or a channel
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListMembers`.
 
@@ -5768,8 +5761,7 @@ class TeamsClient(ConnectorClientBase):
 
         Lists the members of a team in Microsoft Teams
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListTeamMembers`.
 
@@ -6759,8 +6751,7 @@ class TeamsClient(ConnectorClientBase):
 
         Lists all transcripts for an online meeting
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListMeetingTranscripts`.
 
@@ -6970,8 +6961,7 @@ class TeamsClient(ConnectorClientBase):
 
         Lists all recordings for an online meeting
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListMeetingRecordings`.
 
@@ -7177,8 +7167,7 @@ class TeamsClient(ConnectorClientBase):
 
         Lists the current user's teamwork sections
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListSections`.
 
@@ -7514,8 +7503,7 @@ class TeamsClient(ConnectorClientBase):
         Lists the items (chats, channels, meetings, communities) in a teamwork
         section. Each item belongs to exactly one section at a time.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListSectionItems`.
 
@@ -7835,8 +7823,7 @@ class TeamsClient(ConnectorClientBase):
 
         Lists the team's tags
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetTags`.
 
@@ -8225,8 +8212,7 @@ class TeamsClient(ConnectorClientBase):
 
         Lists the members of a team tag
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetTagMembers`.
 
@@ -8372,8 +8358,7 @@ class TeamsClient(ConnectorClientBase):
 
         Lists all recordings for an ad-hoc call
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListCallRecordings`.
 
@@ -8576,8 +8561,7 @@ class TeamsClient(ConnectorClientBase):
 
         Lists all transcripts for an ad-hoc call
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListCallTranscripts`.
 
@@ -8787,8 +8771,7 @@ class TeamsClient(ConnectorClientBase):
 
         Gets all recordings from ad-hoc calls for the signed-in user
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetAllAdhocCallRecordings`.
 
@@ -8903,8 +8886,7 @@ class TeamsClient(ConnectorClientBase):
 
         Gets all transcripts from ad-hoc calls for the signed-in user
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetAllAdhocCallTranscripts`.
 
@@ -9016,8 +8998,7 @@ class TeamsClient(ConnectorClientBase):
         Lists AI-generated insights for an online meeting. Requires Microsoft
         365 Copilot license.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `ListAiInsights`.
 
@@ -9168,8 +9149,7 @@ class TeamsClient(ConnectorClientBase):
         Returns a list of locations to post a message or reply based on who the
         user is posting as
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetMessageLocations`.
 

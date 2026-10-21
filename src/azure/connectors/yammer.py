@@ -399,8 +399,7 @@ class YammerClient(ConnectorClientBase):
 
         Gets all the networks that the user belongs to.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetNetworks`.
 
@@ -477,8 +476,7 @@ class YammerClient(ConnectorClientBase):
 
         Gets all groups. If mine = 1, get only groups to which the user belongs
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetGroups`.
 

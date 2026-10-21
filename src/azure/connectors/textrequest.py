@@ -1064,8 +1064,7 @@ class TextrequestClient(ConnectorClientBase):
 
         Get the conversation between the specified dashboard and phone number.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetMessagesByContactPhone`.
 
@@ -1595,8 +1594,7 @@ class TextrequestClient(ConnectorClientBase):
         the dashboard specified will be searched; there is no account level
         search for a number available.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetContacts`.
 
@@ -2120,8 +2118,7 @@ class TextrequestClient(ConnectorClientBase):
 
         Gets all groups for the user's account.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetGroups`.
 
@@ -2283,8 +2280,7 @@ class TextrequestClient(ConnectorClientBase):
         Gets all the tags for this dashboard. Tags are unique between
         dashboards.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetTags`.
 
@@ -2383,8 +2379,7 @@ class TextrequestClient(ConnectorClientBase):
         Gets all custom fields for this dashboard. Custom fields are unique
         between dashboards.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetCustomFields`.
 
@@ -2736,8 +2731,7 @@ class TextrequestClient(ConnectorClientBase):
         Gets all payments, including canceled and paid payments. These can be
         filtered using the query parameters.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetPayments`.
 
@@ -3112,8 +3106,7 @@ class TextrequestClient(ConnectorClientBase):
         Gets all conversations for this dashboard, and includes info on the
         last message for each conversation.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetConversations`.
 
@@ -3245,8 +3238,7 @@ class TextrequestClient(ConnectorClientBase):
 
         Gets all dashboards in an account.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
+        Returns a single-page Azure Core async collection.
 
         Swagger operation ID: `GetDashboards`.
 
