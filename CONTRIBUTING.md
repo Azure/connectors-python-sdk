@@ -99,14 +99,14 @@ This project follows Python best practices documented in [.github/copilot-instru
 
 - **PEP 8** — Standard Python style guide (79 character line limit)
 - **Type hints** — All public API signatures must have type hints (PEP 484)
-- **Sync/aio parity** — Keep root synchronous and `.aio` asynchronous behavior aligned
+- **Async-only clients** — Use unsuffixed async operations in root connector modules
 - **Naming conventions:**
   - `snake_case` for functions, methods, variables
   - `PascalCase` for classes
   - `UPPER_SNAKE_CASE` for constants
   - `_snake_case` for private methods/attributes
 - **Docstrings** — Google-style docstrings for all public APIs
-- **Context managers** — Use `with` for root clients and `async with` for aio clients
+- **Context managers** — Use `async with` for clients and caller-owned async credentials
 
 ### Automated Enforcement
 
@@ -121,7 +121,7 @@ Run `flake8 src/ tests/` locally before pushing to catch style issues early.
 
 ## Generated Code
 
-Connector client files in `src/azure/connectors/*.py` and `src/azure/connectors/aio/*.py` are produced by an internal Microsoft code generator. **Do not submit pull requests that directly modify generated files** — changes will be overwritten the next time the code is regenerated.
+Connector client files in `src/azure/connectors/*.py` are produced by an internal Microsoft code generator. Each root module contains an async client and its models. **Do not submit pull requests that directly modify generated files** — changes will be overwritten the next time the code is regenerated.
 
 If you find a bug or want to suggest an improvement in the generated code:
 
@@ -132,8 +132,7 @@ If you find a bug or want to suggest an improvement in the generated code:
 
 **Files safe to modify:**
 
-- `src/azure/connectors/sdk/*.py` — Core SDK infrastructure (not generated)
-- `src/azure/connectors/sdk/aio/*.py` — Async core SDK infrastructure (not generated)
+- `src/azure/connectors/sdk/*.py` — Async core SDK infrastructure (not generated)
 - `tests/*.py` — All test files
 - `samples/*.py` — Sample code
 - Documentation files (`.md` files)
@@ -238,9 +237,9 @@ See the detailed guide in [.github/copilot-instructions.md](.github/copilot-inst
 
 Quick checklist:
 
-1. Generate connector code using LogicAppsCompiler with `--python` flag
+1. Generate one async root module using LogicAppsCompiler with `--pythonDirectClient`
 2. Copy generated `.py` file to `src/azure/connectors/`
-3. Update `__init__.py` exports
+3. Regenerate the lazy client registry and root package type stubs
 4. Add comprehensive unit tests
 5. Add sample code to `samples/`
 6. Update `README.md` and `ROADMAP.md`
