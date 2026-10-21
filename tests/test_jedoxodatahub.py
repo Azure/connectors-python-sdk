@@ -3,7 +3,7 @@
 """Contract tests for JedoxodatahubClient."""
 
 import azure.connectors.jedoxodatahub as jedoxodatahub_module
-from azure.connectors.aio.jedoxodatahub import JedoxodatahubClient
+from azure.connectors.jedoxodatahub import JedoxodatahubClient
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 
 

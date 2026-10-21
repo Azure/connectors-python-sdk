@@ -6,7 +6,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.pipedrive import PipedriveClient
+from azure.connectors.pipedrive import PipedriveClient
 from azure.connectors.pipedrive import (
     AddActivityRequest,
     AddDealRequest,

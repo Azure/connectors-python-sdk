@@ -10,16 +10,11 @@ This directory contains samples demonstrating how to use the Azure Connectors SD
 
 ## Samples
 
-Each connector has a synchronous sample in this directory and an asynchronous
-counterpart under `aio/`. Both catalogs contain 99 files and use identical
-unsuffixed operation names. Run either mode with:
+Each of the 99 connectors has one async sample in this directory. Clients and
+models use root connector imports and unsuffixed operation names. Run a sample with:
 
 ```bash
-# Synchronous
 python sample_connector_usage_<connector>.py
-
-# Asynchronous
-python aio/sample_connector_usage_<connector>.py
 ```
 
 | Sample | Connector | Environment Variable |
@@ -136,28 +131,8 @@ export OFFICE365_CONNECTION_URL="https://[region].azure-apihub.net/apim/office36
 
 ## Usage Patterns
 
-Root connector modules provide synchronous clients and shared models:
-
-```python
-from azure.identity import DefaultAzureCredential
-
-from azure.connectors import ConnectorException
-from azure.connectors.<connector> import <Connector>Client
-
-CONNECTION_URL = "https://[region].azure-apihub.net/apim/<connector>/[connection-id]"
-
-def main():
-    with DefaultAzureCredential() as credential:
-        with <Connector>Client(CONNECTION_URL, credential) as client:
-            try:
-                result = client.<operation>()
-                print(result)
-            except ConnectorException as ex:
-                print(f"Connector error: {ex}")
-```
-
-Asynchronous clients live in the matching `aio` connector module. Import
-request and response models from the root module:
+Root connector modules provide async-only clients and models. Use async
+credentials and context managers:
 
 ```python
 import asyncio
@@ -165,7 +140,7 @@ import asyncio
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.aio.<connector> import <Connector>Client
+from azure.connectors.<connector> import <Connector>Client
 from azure.connectors.<connector> import <RequestModel>
 
 CONNECTION_URL = "https://[region].azure-apihub.net/apim/<connector>/[connection-id]"
@@ -184,20 +159,14 @@ async def main():
 asyncio.run(main())
 ```
 
-Pageable operations return `ItemPaged` from root clients and `AsyncItemPaged`
-from aio clients. Iterate the pager directly; do not await pager construction.
+Pageable operations return `AsyncItemPaged`. Consume them with `async for`;
+do not await pager construction. Await `begin_*` operations to obtain an
+`AsyncLROPoller`, then await `poller.result()` while the client remains open.
 
 ## Error Handling
 
-The SDK provides structured error handling via `ConnectorException` in both
-modes:
-
-```python
-try:
-    result = client.some_operation()
-except ConnectorException as ex:
-    print(f"Status: {ex.status_code}, Message: {ex}")
-```
+The SDK provides structured error handling via `ConnectorException`, which
+derives from Azure Core `HttpResponseError`:
 
 ```python
 try:
@@ -210,7 +179,7 @@ except ConnectorException as ex:
 
 1. Set up a connection in Azure Portal (see [connection-setup.md](../../docs/connection-setup.md))
 2. Set the connection runtime URL environment variable
-3. Run the sync or aio sample for your connector
+3. Run the async sample for your connector
 4. Use typed clients in your application
 5. Deploy to Azure Functions or run locally
 
@@ -218,4 +187,4 @@ except ConnectorException as ex:
 
 - API Reference: [Azure Connectors Python SDK](https://azure.github.io/connectors-python-sdk/)
 - Generation Guide: [GENERATION.md](../../GENERATION.md)
-- Migration Guide: [Sync/aio migration](../../docs/migration-sync-aio.md)
+- Migration Guide: [Unsuffixed async operations](../../docs/migration-sync-aio.md)

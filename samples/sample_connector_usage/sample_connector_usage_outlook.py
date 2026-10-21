@@ -24,11 +24,13 @@ Usage:
 
     python sample_connector_usage_outlook.py
 """
+
+import asyncio
 import os
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.outlook import OutlookClient
 from azure.connectors.outlook import (
-    OutlookClient,
     ClientSendHtmlMessage,
 )
 
@@ -40,17 +42,18 @@ CONNECTION_RUNTIME_URL = os.environ.get(
 )
 
 
-def example_1_list_calendars():
+async def example_1_list_calendars():
     """Example 1: List available calendars."""
     print("\n=== Example 1: List Calendars ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                calendars = list(client.list_calendar_get_tables())
+                items = [item async for item in client.list_calendar_get_tables()]
 
-                if calendars:
+                if items:
+                    calendars = items
                     print(f"Found {len(calendars)} calendar(s):")
                     for cal in calendars:
                         name = cal.get("Name", cal.get("name", "N/A"))
@@ -70,17 +73,18 @@ def example_1_list_calendars():
                 print(f"Error: {ex}")
 
 
-def example_2_list_contact_folders():
+async def example_2_list_contact_folders():
     """Example 2: List available contact folders."""
     print("\n=== Example 2: List Contact Folders ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                folders = list(client.list_contact_get_tables())
+                items = [item async for item in client.list_contact_get_tables()]
 
-                if folders:
+                if items:
+                    folders = items
                     print(f"Found {len(folders)} contact folder(s):")
                     for folder in folders:
                         name = folder.get("Name", folder.get("name", "N/A"))
@@ -99,23 +103,24 @@ def example_2_list_contact_folders():
                 print(f"Error: {ex}")
 
 
-def example_3_get_calendar_events():
+async def example_3_get_calendar_events():
     """Example 3: Get calendar events."""
     print("\n=== Example 3: Get Calendar Events ===")
 
     # Calendar ID - use 'Calendar' for default calendar or get ID from Example 1
     calendar_id = os.environ.get("OUTLOOK_CALENDAR_ID", "Calendar")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                events = list(client.list_calendar_get_items(
+                items = [item async for item in client.list_calendar_get_items(
                     table=calendar_id,
                     top=5  # Get up to 5 events
-                ))
+                )]
 
-                if events:
+                if items:
+                    events = items
                     print(f"Found {len(events)} event(s) in calendar:")
                     for event in events[:5]:
                         subject = event.get("Subject", event.get("subject", "N/A"))
@@ -131,23 +136,24 @@ def example_3_get_calendar_events():
                 print(f"Error: {ex}")
 
 
-def example_4_get_contacts():
+async def example_4_get_contacts():
     """Example 4: Get contacts from a contact folder."""
     print("\n=== Example 4: Get Contacts ===")
 
     # Contact folder ID - use 'Contacts' for default folder or get ID from Example 2
     folder_id = os.environ.get("OUTLOOK_CONTACTS_FOLDER_ID", "Contacts")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                contacts = list(client.list_contact_get_items(
+                items = [item async for item in client.list_contact_get_items(
                     table=folder_id,
                     top=10  # Get up to 10 contacts
-                ))
+                )]
 
-                if contacts:
+                if items:
+                    contacts = items
                     print(f"Found {len(contacts)} contact(s):")
                     for contact in contacts[:5]:
                         display_name = contact.get("DisplayName", "N/A")
@@ -166,7 +172,7 @@ def example_4_get_contacts():
                 print(f"Error: {ex}")
 
 
-def example_5_send_email():
+async def example_5_send_email():
     """Example 5: Send an email."""
     print("\n=== Example 5: Send Email ===")
 
@@ -177,9 +183,9 @@ def example_5_send_email():
         print("Skipping email send example...")
         return
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 email = ClientSendHtmlMessage(
                     to=recipient,
@@ -190,7 +196,7 @@ def example_5_send_email():
                     importance="Normal"
                 )
 
-                client.send_email(input=email)
+                await client.send_email(input=email)
 
                 print("Email sent successfully!")
                 print(f"  To: {recipient}")
@@ -202,7 +208,7 @@ def example_5_send_email():
                 print(f"Error: {ex}")
 
 
-def main():
+async def main():
     """Run all examples."""
     print("Outlook.com sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
@@ -213,15 +219,15 @@ def main():
         print("Format: https://[region].azure-apihub.net/apim/outlook/[id]")
         return
 
-    example_1_list_calendars()
-    example_2_list_contact_folders()
-    example_3_get_calendar_events()
-    example_4_get_contacts()
-    example_5_send_email()
+    await example_1_list_calendars()
+    await example_2_list_contact_folders()
+    await example_3_get_calendar_events()
+    await example_4_get_contacts()
+    await example_5_send_email()
 
     print("\n" + "=" * 60)
     print("Sample completed!")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

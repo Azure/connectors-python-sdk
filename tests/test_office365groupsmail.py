@@ -6,7 +6,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.office365groupsmail import Office365groupsmailClient
+from azure.connectors.office365groupsmail import Office365groupsmailClient
 from azure.connectors.office365groupsmail import (
     Conversation,
     CreateConversationBody,

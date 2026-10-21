@@ -6,13 +6,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
-from typing import Optional, Iterator, Dict, List, Any, Mapping
+from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
 from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.paging import ItemPaged
-from azure.core.credentials import AzureKeyCredential, TokenCredential
-from azure.core.pipeline.transport import HttpTransport
+from azure.core.async_paging import AsyncItemPaged
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
@@ -673,7 +674,7 @@ class JedoxodatahubClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: TokenCredential | AzureKeyCredential,
+        credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout: float = 30.0,
@@ -682,7 +683,7 @@ class JedoxodatahubClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[HttpTransport] = None,
+        transport: Optional[AsyncHttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -702,8 +703,8 @@ class JedoxodatahubClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core HTTP transport closed by
-                the client through its synchronous lifecycle.
+            transport: Optional Azure Core async HTTP transport closed by
+                the client through its asynchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -817,7 +818,7 @@ class JedoxodatahubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get databases
 
@@ -825,8 +826,8 @@ class JedoxodatahubClient(ConnectorClientBase):
         databases are excluded from the list, but can be requested by providing
         the ID.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `Databases`.
 
@@ -846,8 +847,8 @@ class JedoxodatahubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -874,14 +875,14 @@ class JedoxodatahubClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -900,21 +901,21 @@ class JedoxodatahubClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def database_by_id(
+    async def database_by_id(
         self,
         database_id: int,
         *,
@@ -948,7 +949,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Databases({quote(str(database_id), safe='')})"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -981,7 +982,7 @@ class JedoxodatahubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get cubes
 
@@ -989,8 +990,8 @@ class JedoxodatahubClient(ConnectorClientBase):
         URL encodings, Attribute cubes will be renamed, e.g. \\#_Years to
         ATT_Years.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `Cubes`.
 
@@ -1011,8 +1012,8 @@ class JedoxodatahubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1042,14 +1043,14 @@ class JedoxodatahubClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -1068,21 +1069,21 @@ class JedoxodatahubClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def cube_by_id(
+    async def cube_by_id(
         self,
         database_id: int,
         cube_id: int,
@@ -1121,7 +1122,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Cubes({quote(str(cube_id), safe='')})"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1159,7 +1160,7 @@ class JedoxodatahubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get cube cells
 
@@ -1167,8 +1168,8 @@ class JedoxodatahubClient(ConnectorClientBase):
         names. If the cell has a string value, the value is instead stored in
         the stringValue field. Element names are stored in dynamic properties.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `CubeCells`.
 
@@ -1204,8 +1205,8 @@ class JedoxodatahubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1257,14 +1258,14 @@ class JedoxodatahubClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -1283,19 +1284,19 @@ class JedoxodatahubClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
     def list_dimensions(
         self,
@@ -1308,14 +1309,14 @@ class JedoxodatahubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get dimensions
 
         Get a list of dimensions in the given database.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `Dimensions`.
 
@@ -1336,8 +1337,8 @@ class JedoxodatahubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1367,14 +1368,14 @@ class JedoxodatahubClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -1393,21 +1394,21 @@ class JedoxodatahubClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def dimension_by_id(
+    async def dimension_by_id(
         self,
         database_id: int,
         dimension_id: int,
@@ -1444,7 +1445,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Dimensions({quote(str(dimension_id), safe='')})"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1478,14 +1479,14 @@ class JedoxodatahubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get elements
 
         Get a list of elements in the given dimension.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `Elements`.
 
@@ -1507,8 +1508,8 @@ class JedoxodatahubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1540,14 +1541,14 @@ class JedoxodatahubClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -1566,21 +1567,21 @@ class JedoxodatahubClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def element_by_id(
+    async def element_by_id(
         self,
         database_id: int,
         dimension_id: int,
@@ -1620,7 +1621,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Elements({quote(str(element_id), safe='')})"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1653,14 +1654,14 @@ class JedoxodatahubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get stored views
 
         Get a list of stored views in the given database.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `Views`.
 
@@ -1681,8 +1682,8 @@ class JedoxodatahubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1712,14 +1713,14 @@ class JedoxodatahubClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -1738,21 +1739,21 @@ class JedoxodatahubClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def view_by_id(
+    async def view_by_id(
         self,
         database_id: int,
         view_id: str,
@@ -1789,7 +1790,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Views({quote(str(view_id), safe='')})"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1827,7 +1828,7 @@ class JedoxodatahubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get stored view cells
 
@@ -1835,8 +1836,8 @@ class JedoxodatahubClient(ConnectorClientBase):
         names. If the cell has a string value, the value is instead stored in
         the stringValue field. Element names are stored in dynamic properties.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `ViewCells`.
 
@@ -1871,8 +1872,8 @@ class JedoxodatahubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1924,14 +1925,14 @@ class JedoxodatahubClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -1950,19 +1951,19 @@ class JedoxodatahubClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
     def list_integrator_project_groups(
         self,
@@ -1974,14 +1975,14 @@ class JedoxodatahubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get Integrator project groups
 
         Get a list of integrator project groups found in the server.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `IntegratorProjectGroups`.
 
@@ -2001,8 +2002,8 @@ class JedoxodatahubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -2029,14 +2030,14 @@ class JedoxodatahubClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -2055,21 +2056,21 @@ class JedoxodatahubClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def integrator_projects_by_id(
+    async def integrator_projects_by_id(
         self,
         group_identifier: str,
         *,
@@ -2103,7 +2104,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Integrator('{quote(str(group_identifier), safe='')}')"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2136,14 +2137,14 @@ class JedoxodatahubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get Integrator projects
 
         Get a list of integrator projects found in the server.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `IntegratorProjects`.
 
@@ -2164,8 +2165,8 @@ class JedoxodatahubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -2195,14 +2196,14 @@ class JedoxodatahubClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -2221,21 +2222,21 @@ class JedoxodatahubClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def integrator_projects_by_name(
+    async def integrator_projects_by_name(
         self,
         group_identifier: str,
         project_name: str,
@@ -2272,7 +2273,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Projects('{quote(str(project_name), safe='')}')"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2306,14 +2307,14 @@ class JedoxodatahubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get extracts
 
         Get a list of extracts in the given integrator project.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `Extracts`.
 
@@ -2335,8 +2336,8 @@ class JedoxodatahubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -2368,14 +2369,14 @@ class JedoxodatahubClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -2394,21 +2395,21 @@ class JedoxodatahubClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def extract_by_name(
+    async def extract_by_name(
         self,
         group_identifier: str,
         project_name: str,
@@ -2448,7 +2449,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Extracts('{quote(str(extract_name), safe='')}')"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2483,15 +2484,15 @@ class JedoxodatahubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get extract rows
 
         Stream the rows of the extract with the given name in the given
         integrator project.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `ExtractRows`.
 
@@ -2514,8 +2515,8 @@ class JedoxodatahubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -2548,14 +2549,14 @@ class JedoxodatahubClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -2574,19 +2575,19 @@ class JedoxodatahubClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
     def list_jobs(
         self,
@@ -2600,14 +2601,14 @@ class JedoxodatahubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get jobs
 
         Get a list of jobs in the given integrator project.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `Jobs`.
 
@@ -2629,8 +2630,8 @@ class JedoxodatahubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -2662,14 +2663,14 @@ class JedoxodatahubClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -2688,21 +2689,21 @@ class JedoxodatahubClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def job_by_name(
+    async def job_by_name(
         self,
         group_identifier: str,
         project_name: str,
@@ -2742,7 +2743,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Jobs('{quote(str(job_name), safe='')}')"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2764,7 +2765,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def run_job(
+    async def run_job(
         self,
         group_identifier: str,
         project_name: str,
@@ -2806,7 +2807,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Run"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2828,7 +2829,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def run_job_with_variables(
+    async def run_job_with_variables(
         self,
         group_identifier: str,
         project_name: str,
@@ -2877,7 +2878,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"')"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2911,14 +2912,14 @@ class JedoxodatahubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get loads
 
         Get a list of loads in the given integrator project.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `Loads`.
 
@@ -2940,8 +2941,8 @@ class JedoxodatahubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -2973,14 +2974,14 @@ class JedoxodatahubClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -2999,21 +3000,21 @@ class JedoxodatahubClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def load_by_name(
+    async def load_by_name(
         self,
         group_identifier: str,
         project_name: str,
@@ -3053,7 +3054,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Loads('{quote(str(load_name), safe='')}')"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3075,7 +3076,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def run_load(
+    async def run_load(
         self,
         group_identifier: str,
         project_name: str,
@@ -3117,7 +3118,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Run()"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3139,7 +3140,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def run_load_with_variables(
+    async def run_load_with_variables(
         self,
         group_identifier: str,
         project_name: str,
@@ -3188,7 +3189,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"')"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3222,14 +3223,14 @@ class JedoxodatahubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get transforms
 
         Get a list of transforms in the given integrator project.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `Transforms`.
 
@@ -3251,8 +3252,8 @@ class JedoxodatahubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -3284,14 +3285,14 @@ class JedoxodatahubClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -3310,21 +3311,21 @@ class JedoxodatahubClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def transform_by_name(
+    async def transform_by_name(
         self,
         group_identifier: str,
         project_name: str,
@@ -3364,7 +3365,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Transforms('{quote(str(transform_name), safe='')}')"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3399,15 +3400,15 @@ class JedoxodatahubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get transform Rows
 
         Stream the rows of the transform with the given name in the given
         integrator project.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `TransformRows`.
 
@@ -3430,8 +3431,8 @@ class JedoxodatahubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -3464,14 +3465,14 @@ class JedoxodatahubClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -3490,21 +3491,21 @@ class JedoxodatahubClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def get_cube_cell_result_schema(
+    async def get_cube_cell_result_schema(
         self,
         database_id: int,
         cube_id: int,
@@ -3548,7 +3549,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/cells"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3570,7 +3571,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_extract_rows_result_schema(
+    async def get_extract_rows_result_schema(
         self,
         group_identifier: str,
         project_name: str,
@@ -3617,7 +3618,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/rows"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3639,7 +3640,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_transform_rows_result_schema(
+    async def get_transform_rows_result_schema(
         self,
         group_identifier: str,
         project_name: str,
@@ -3686,7 +3687,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/rows"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3708,7 +3709,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_view_cell_result_schema(
+    async def get_view_cell_result_schema(
         self,
         database_id: int,
         view_id: str,
@@ -3752,7 +3753,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/cells"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

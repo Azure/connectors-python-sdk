@@ -17,12 +17,15 @@ Usage:
 
     python sample_connector_usage_infusionsoft.py
 """
+
+import asyncio
 import os
 
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.infusionsoft import CreateTaskRequest, InfusionsoftClient
+from azure.connectors.infusionsoft import InfusionsoftClient
+from azure.connectors.infusionsoft import CreateTaskRequest
 
 
 # Connection runtime URL format:
@@ -30,51 +33,52 @@ from azure.connectors.infusionsoft import CreateTaskRequest, InfusionsoftClient
 CONNECTION_RUNTIME_URL = os.environ.get("INFUSIONSOFT_CONNECTION_URL", "")
 
 
-def example_1_list_tasks() -> None:
+async def example_1_list_tasks() -> None:
     """Example 1: List tasks ordered by due date."""
     print("\n=== Example 1: List Tasks ===")
 
-    with DefaultAzureCredential() as credential:
-        with InfusionsoftClient(CONNECTION_RUNTIME_URL, credential) as client:
-            tasks = list(client.list_tasks())
+    async with DefaultAzureCredential() as credential:
+        async with InfusionsoftClient(CONNECTION_RUNTIME_URL, credential) as client:
+            response = [item async for item in client.list_tasks()]
+            tasks = response
 
             print(f"Found {len(tasks)} tasks")
             for task in tasks[:5]:
                 print(f"  - {task.get('id')}: {task.get('title')}")
 
 
-def example_2_create_task() -> None:
+async def example_2_create_task() -> None:
     """Example 2: Create a task."""
     print("\n=== Example 2: Create Task ===")
 
-    with DefaultAzureCredential() as credential:
-        with InfusionsoftClient(CONNECTION_RUNTIME_URL, credential) as client:
+    async with DefaultAzureCredential() as credential:
+        async with InfusionsoftClient(CONNECTION_RUNTIME_URL, credential) as client:
             request = CreateTaskRequest(
                 title="SDK sample task",
                 description="Created from the infusionsoft SDK sample.",
                 priority=1,
             )
 
-            created = client.create_task(input=request)
+            created = await client.create_task(input=request)
             print(f"Created task: {created.get('id') if created else 'n/a'}")
 
 
-def example_3_update_task() -> None:
+async def example_3_update_task() -> None:
     """Example 3: Update an existing task."""
     print("\n=== Example 3: Update Task ===")
 
-    with DefaultAzureCredential() as credential:
-        with InfusionsoftClient(CONNECTION_RUNTIME_URL, credential) as client:
+    async with DefaultAzureCredential() as credential:
+        async with InfusionsoftClient(CONNECTION_RUNTIME_URL, credential) as client:
             request = CreateTaskRequest(
                 title="Updated SDK sample task",
                 description="Updated from the infusionsoft SDK sample.",
             )
 
-            updated = client.update_task(input=request, id=1)
+            updated = await client.update_task(input=request, id=1)
             print(f"Updated task: {updated.get('id') if updated else 'n/a'}")
 
 
-def main() -> None:
+async def main() -> None:
     """Run Infusionsoft connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: INFUSIONSOFT_CONNECTION_URL environment variable not set.")
@@ -85,7 +89,7 @@ def main() -> None:
     print("=" * 50)
 
     try:
-        example_1_list_tasks()
+        await example_1_list_tasks()
         # Uncomment to create or update a task in your Infusionsoft instance.
         # await example_2_create_task()
         # await example_3_update_task()
@@ -97,4 +101,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

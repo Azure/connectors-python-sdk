@@ -20,13 +20,15 @@ Usage:
 
     python sample_connector_usage_plumsail.py
 """
+
+import asyncio
 import os
 
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
+from azure.connectors.plumsail import PlumsailClient
 from azure.connectors.plumsail import (
-    PlumsailClient,
     Pdf2TextRequest,
 )
 
@@ -35,15 +37,15 @@ from azure.connectors.plumsail import (
 CONNECTION_RUNTIME_URL = os.environ.get("PLUMSAIL_CONNECTION_URL", "")
 
 
-def example_1_get_profile():
+async def example_1_get_profile():
     """Example 1: Get the current account profile."""
     print("\n=== Example 1: Get current profile ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with PlumsailClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with PlumsailClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.profiles_me_get()
+                result = await client.profiles_me_get()
 
                 print(f"Profile result: {result}")
 
@@ -53,23 +55,23 @@ def example_1_get_profile():
                 print(f"Error: {ex}")
 
 
-def example_2_extract_text_from_pdf():
+async def example_2_extract_text_from_pdf():
     """Example 2: Extract text content from a PDF document."""
     print("\n=== Example 2: Extract text from PDF ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with PlumsailClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with PlumsailClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 request = Pdf2TextRequest(
                     document_content="<base64-encoded-pdf-content>",
                     result_type="Raw",
                 )
 
-                poller = client.begin_flow_v1_documents_jobs_extract_text_from_pdf(
+                poller = await client.begin_flow_v1_documents_jobs_extract_text_from_pdf(
                     input=request,
                 )
-                result = poller.result()
+                result = await poller.result()
 
                 print(f"Extracted text result: {result}")
 
@@ -79,7 +81,7 @@ def example_2_extract_text_from_pdf():
                 print(f"Error: {ex}")
 
 
-def main():
+async def main():
     """Run all examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: PLUMSAIL_CONNECTION_URL environment variable not set.")
@@ -88,11 +90,11 @@ def main():
 
     print(f"Using connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
 
-    example_1_get_profile()
-    example_2_extract_text_from_pdf()
+    await example_1_get_profile()
+    await example_2_extract_text_from_pdf()
 
     print("\n=== All examples completed ===")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

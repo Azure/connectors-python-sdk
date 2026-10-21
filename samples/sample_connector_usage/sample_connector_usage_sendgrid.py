@@ -17,15 +17,17 @@ Usage:
 
     python sample_connector_usage_sendgrid.py
 """
+
+import asyncio
 import os
 
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
+from azure.connectors.sendgrid import SendgridClient
 from azure.connectors.sendgrid import (
     EmailRequest,
-    SendgridClient,
-)
+    )
 
 
 # Connection runtime URL format:
@@ -33,13 +35,13 @@ from azure.connectors.sendgrid import (
 CONNECTION_RUNTIME_URL = os.environ.get("SENDGRID_CONNECTION_URL", "")
 
 
-def example_1_send_email() -> None:
+async def example_1_send_email() -> None:
     """Example 1: Send an email."""
     print("\n=== Example 1: Send Email ===")
 
-    with DefaultAzureCredential() as credential:
-        with SendgridClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = client.send_email(
+    async with DefaultAzureCredential() as credential:
+        async with SendgridClient(CONNECTION_RUNTIME_URL, credential) as client:
+            result = await client.send_email(
                 input=EmailRequest(
                     from_="sender@example.com",
                     to="recipient@example.com",
@@ -51,37 +53,37 @@ def example_1_send_email() -> None:
             print(f"Send result: {result}")
 
 
-def example_2_list_recipient_lists() -> None:
+async def example_2_list_recipient_lists() -> None:
     """Example 2: List recipient lists."""
     print("\n=== Example 2: List Recipient Lists ===")
 
-    with DefaultAzureCredential() as credential:
-        with SendgridClient(CONNECTION_RUNTIME_URL, credential) as client:
-            lists = list(client.list_recipient_lists())
+    async with DefaultAzureCredential() as credential:
+        async with SendgridClient(CONNECTION_RUNTIME_URL, credential) as client:
+            lists = [item async for item in client.list_recipient_lists()]
             print(f"Recipient lists: {lists}")
 
 
-def example_3_list_recipients() -> None:
+async def example_3_list_recipients() -> None:
     """Example 3: List recipients."""
     print("\n=== Example 3: List Recipients ===")
 
-    with DefaultAzureCredential() as credential:
-        with SendgridClient(CONNECTION_RUNTIME_URL, credential) as client:
-            recipients = list(client.list_recipients())
+    async with DefaultAzureCredential() as credential:
+        async with SendgridClient(CONNECTION_RUNTIME_URL, credential) as client:
+            recipients = [item async for item in client.list_recipients()]
             print(f"Recipients: {recipients}")
 
 
-def example_4_get_bounce() -> None:
+async def example_4_get_bounce() -> None:
     """Example 4: Get a bounce record for an email address."""
     print("\n=== Example 4: Get Bounce ===")
 
-    with DefaultAzureCredential() as credential:
-        with SendgridClient(CONNECTION_RUNTIME_URL, credential) as client:
-            bounce = list(client.list_bounce(email="recipient@example.com"))
+    async with DefaultAzureCredential() as credential:
+        async with SendgridClient(CONNECTION_RUNTIME_URL, credential) as client:
+            bounce = [item async for item in client.list_bounce(email="recipient@example.com")]
             print(f"Bounce: {bounce}")
 
 
-def main() -> None:
+async def main() -> None:
     """Run SendGrid connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: SENDGRID_CONNECTION_URL environment variable not set.")
@@ -106,4 +108,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

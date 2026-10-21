@@ -5,7 +5,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.azuredatafactory import AzuredatafactoryClient
+from azure.connectors.azuredatafactory import AzuredatafactoryClient
 from azure.connectors.azuredatafactory import (
     CreatePipelineRunResponse,
     PipelineRun,

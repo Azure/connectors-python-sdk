@@ -7,9 +7,9 @@ This document describes how to generate typed Python connector clients using the
 The **CodefulSdkGenerator** tool generates typed Python clients from managed connector swagger definitions. The generated code provides:
 
 - **Type-safe contracts** - Dataclass models with proper JSON field mappings
-- **Paired client classes** - Root sync and `.aio` async clients with identical unsuffixed operations
+- **Async-only clients** - One root module per connector with unsuffixed async operations; no synchronous mirror
 - **Authentication handling** - Caller-owned Azure Core token or key credentials
-- **Azure Core paging** - `ItemPaged` and `AsyncItemPaged` for collection operations
+- **Azure Core paging** - `AsyncItemPaged` for collection operations
 
 ## Prerequisites
 
@@ -60,13 +60,13 @@ src\tools\CodefulSdkGenerator\LogicAppsCompiler.Cli\bin\Release\net8.0\LogicApps
 
 ## Generation Commands
 
-Capture live definitions only when intentionally refreshing the committed
-Swagger inputs. Normal regeneration uses the reviewed snapshots in this
-repository.
+Fetch live definitions with an explicit subscription and region and a new empty
+temporary response directory, as described below. Do not seed that directory
+with saved responses or fixtures.
 
 ### Generate Python Client SDK (Recommended)
 
-Generates synchronous and asynchronous Python clients in one request:
+Generates async-only Python clients in root connector modules:
 
 ```powershell
 # Generate all connectors
@@ -81,12 +81,10 @@ dotnet LogicAppsCompiler.dll "<path-to-sdk>/src/azure/connectors" --pythonDirect
 
 **Output structure per connector:**
 
-- `{connector}.py` - Synchronous client plus shared models, aliases, enums, and trigger metadata
-- `aio/{connector}.py` - Asynchronous client importing and re-exporting shared declarations from root
+- `{connector}.py` - Async client plus models, aliases, enums, and trigger metadata
 
-The generator writes each pair atomically and removes both outputs if either
-member fails. The CLI accepts one positional output directory. Use
-`--pythonDirectClient` for Python generation.
+The CLI accepts one positional output directory. Use `--pythonDirectClient`
+for Python generation. Do not generate an additional synchronous or aio catalog.
 
 ### Generate C# DirectClient SDK
 
@@ -127,7 +125,7 @@ finally {
 ```
 
 Record the full AzureUX-BPM generator revision and source metadata in the pull
-request. Validate exact sync/aio inventory parity, the lazy client registry, and
+request. Validate the complete 99-connector root inventory, the lazy client registry, and
 package type stubs before committing the reviewed output.
 
 ### Pageable Results
@@ -139,23 +137,20 @@ when the contract provides them and yields items directly; an empty response
 yields no items. Do not await pager construction:
 
 ```python
-for item in sync_client.list_items(...):
-    process_item(item)
-
-async for item in async_client.list_items(...):
+async for item in client.list_items(...):
     process_item(item)
 ```
 
-Root clients return `ItemPaged`; aio clients return `AsyncItemPaged`. Both
-support `by_page(continuation_token=...)`. Request controls and response hooks
+Root clients return `AsyncItemPaged` and support
+`by_page(continuation_token=...)`. Request controls and response hooks
 apply to every page request.
 
 ### Long-Running Operations
 
-Retained operations with an HTTP 202 `Location` polling contract use matching
-`begin_*` methods. Root clients return `LROPoller[T]`; aio clients return
-`AsyncLROPoller[T]` after the `begin_*` call is awaited. Resolve the final
-payload with `poller.result()` while the connector client remains open.
+Retained operations with an HTTP 202 `Location` polling contract use
+`begin_*` methods. Root clients return `AsyncLROPoller[T]` after the `begin_*`
+call is awaited. Resolve the final payload with `await poller.result()` while
+the connector client remains open.
 
 The generator does not infer polling from HTTP 202 alone. Status-document
 protocols, cancellation, and poller continuation tokens are not currently
@@ -188,8 +183,9 @@ every polling request.
 from dataclasses import dataclass, field as dataclass_field
 from typing import Any, Dict, List, Mapping, Optional
 from datetime import datetime
-from azure.core.credentials import AzureKeyCredential, TokenCredential
-from azure.core.pipeline.transport import HttpTransport
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
 
 from azure.connectors.sdk import ConnectorClientBase, ConnectorResponseHook
 
@@ -218,11 +214,11 @@ class Office365Client(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: TokenCredential | AzureKeyCredential,
+        credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout: float = 30.0,
-        transport: Optional[HttpTransport] = None,
+        transport: Optional[AsyncHttpTransport] = None,
         **kwargs: Any,
     ):
         """Initialize the Office 365 client with an Azure Core credential."""
@@ -238,7 +234,7 @@ class Office365Client(ConnectorClientBase):
         )
         self._connection_runtime_url = connection_runtime_url.rstrip("/")
     
-    def send_email(
+    async def send_email(
         self,
         input: SendEmailInput | Mapping[str, Any],
         *,
@@ -258,14 +254,15 @@ class Office365Client(ConnectorClientBase):
             client_request_id: A caller-provided request identifier.
             response_hook: A callback invoked with the connector response.
         """
-        # Generated implementation calls self.http_client.send(...)
+        # Generated implementation awaits self.http_client.send(...)
         # with proper serialization and error handling
 ```
 
-The paired `aio/office365.py` defines the same `Office365Client` operations
-with `async def`, `AsyncTokenCredential`, and `AsyncHttpTransport`. It imports
-models and other shared declarations from `azure.connectors.office365` rather
-than generating duplicate definitions.
+The root `office365.py` defines the async client and its models together.
+Async-only intentionally diverges from the Azure SDK synchronous-client guideline,
+aligned with the .NET connector SDK. Keep keyword-only optional parameters,
+unsuffixed async operations, and Azure Core errors, paging, and polling; do not
+restore the earlier preview signatures or add a synchronous mirror.
 
 ### Key Patterns in Generated Code
 
@@ -317,7 +314,7 @@ class SharepointonlineClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: TokenCredential | AzureKeyCredential,
+        credential: AsyncTokenCredential | AzureKeyCredential,
     ):
         super().__init__(credential)
         self._connection_runtime_url = connection_runtime_url.rstrip("/")
@@ -327,36 +324,13 @@ This inheritance provides:
 
 - HTTP client with retry logic
 - Authentication through caller-owned Azure Core credentials
-- Lifecycle management through matching sync or async context managers
+- Lifecycle management through async context managers
 - Error handling with `ConnectorException`
 
-#### 4. Matching Method Signatures
+#### 4. Async Method Signatures
 
-Root and aio clients expose the same unsuffixed operation names and parameters.
-The execution model and pager type differ:
-
-```python
-def list_items(
-    self,
-    dataset: str,
-    table: str,
-    *,
-    filter_query: Optional[str] = None,
-    order_by: Optional[str] = None,
-    top: Optional[int] = None,
-) -> ItemPaged[dict[str, Any]]:
-    """
-    Get items from a SharePoint list.
-    
-    Args:
-        dataset: SharePoint site URL
-        table: List name or ID
-        filter_query: OData filter expression
-        order_by: OData orderBy expression
-        top: Maximum number of items to return
-    """
-    ...
-```
+Operations use unsuffixed names and keyword-only optional parameters. Pageable
+methods return their async pager without awaiting construction:
 
 ```python
 def list_items(
@@ -385,15 +359,14 @@ The generator produces:
 
 After generating a new connector client:
 
-1. **Copy the generated pair** to `src/azure/connectors/`:
+1. **Copy the generated module** to `src/azure/connectors/`:
 
    ```powershell
    Copy-Item "output\office365.py" "src\azure\connectors\office365.py"
-    Copy-Item "output\aio\office365.py" "src\azure\connectors\aio\office365.py"
    ```
 
 2. **Regenerate package-level artifacts.** The helper writes the lazy client
-    registry and root/aio `.pyi` files. Do not edit them manually.
+    registry and root `.pyi` file. Do not edit them manually.
 
 3. **Create unit tests** following the pattern in `tests/`:
 
@@ -414,8 +387,8 @@ After generating a new connector client:
    pytest
    ```
 
-5. **Create both sample variants** under `samples/sample_connector_usage/` and
-    `samples/sample_connector_usage/aio/`.
+5. **Create one async sample** under `samples/sample_connector_usage/` using
+    root connector imports and unsuffixed operation names.
 
 6. **Update documentation**:
    - Add connector to README.md validated connectors table
@@ -512,7 +485,7 @@ Every generated connector client MUST satisfy these invariants before merge:
 
 **Correct pattern:**
 ```python
-response = self.http_client.send(
+response = await self.http_client.send(
     method="DELETE",
     url=request_uri,
 )
@@ -529,7 +502,7 @@ if not (200 <= response.status < 300):
 
 **Incorrect pattern (MUST NOT pass review):**
 ```python
-self.http_client.send(  # Result discarded - silent failures!
+await self.http_client.send(  # Result discarded - silent failures!
     method="DELETE",
     url=request_uri,
 )
@@ -539,8 +512,8 @@ The generator owns the narrow allow-list for resource-delete operations that
 accept HTTP 404. Do not infer idempotent success from the `DELETE` verb alone;
 connectors also use that verb for actions whose missing target is an error.
 
-The aio pattern awaits the same `send` method. **Validation:**
-`test_no_unchecked_send_calls` in `tests/test_code_quality.py` scans root and aio
+The async root pattern awaits `send`. **Validation:**
+`test_no_unchecked_send_calls` in `tests/test_code_quality.py` scans root
 modules for discarded calls. Unit tests for void methods must also assert that
 non-2xx responses raise `ConnectorException`.
 
@@ -585,7 +558,7 @@ When fixing generator bugs (per the "fix the generator, not generated output" ru
 
 The .NET SDK centralizes error handling in
 `ConnectorClientBase.CallConnectorAsync()`. The Python emitter must explicitly
-generate the status check in each root and aio method body because
+generate the status check in each async root method body because
 `http_client.send()` does not auto-raise.
 
 **If you find a Python generator bug:**
@@ -625,7 +598,7 @@ Track known generator issues here to prevent silent recurrence across releases.
 | Colliding wire names dropped after Python normalization | Fixed in generator | `teams`, `shifts`, `todo` | Fixed | Distinct generated fields preserve both `id` and `@odata.id`; serializer tests set both values together. |
 | String-encoded integer enum tokens emitted as string literals | Fixed in generator | `etsy` | Fixed | Python now normalizes quoted enum tokens to the declared integer schema type. All Phase 6 and 7 clients were regenerated; only `etsy` changed. |
 | Pageable item properties and bounded collection envelopes misclassified | Fixed in generator | `azuredigitaltwins`, `insightly`, `jira`, `documentdb`, `sql`, and other collection connectors | Fixed | Explicit pageable operations infer omitted item names and use recognized continuation fields present in the response schema. Bounded read envelopes select conventional primary arrays over auxiliary array metadata and emit `list_*` pagers, while mutation/action arrays remain eager. |
-| Mutation arrays were lazy and primitive pagers used dictionary item types | Fixed in generator | `azuread`, `docusign`, `eventhubs`, `meetingroommap`, `mq`, `msgraphgroupsanduser`, `onedrive`, `powerbi`, `replicon`, `sendgrid`, `servicebus`, `yammer` | Fixed | Bounded mutation responses execute eagerly under action names and preserve response envelopes. Read collections retain primitive pager item types in sync and aio contracts. |
+| Mutation arrays were lazy and primitive pagers used dictionary item types | Fixed in generator | `azuread`, `docusign`, `eventhubs`, `meetingroommap`, `mq`, `msgraphgroupsanduser`, `onedrive`, `powerbi`, `replicon`, `sendgrid`, `servicebus`, `yammer` | Fixed | Bounded mutation responses execute eagerly under action names and preserve response envelopes. Read collections retain primitive item types in async pagers. |
 | Caller continuation URLs bypassed pagination origin normalization | Fixed in generator | All pageable connectors | Fixed | `by_page(continuation_token=...)` now routes caller tokens through the same URL resolver as service-provided next links before transport receives the request. |
 | Typeless dynamic request models omitted mapping inputs | Fixed in generator | `docuware` | Fixed | Dynamic dataclass request annotations now accept either the generated model or `Mapping[str, Any]`. |
 | Operation name used as a proxy for HTTP DELETE semantics | Fixed in generator | `arm`, `zohosign`, and other delete operations | Fixed | The generator uses a narrow operation-ID allow-list for resource-delete contracts that accept HTTP 404 (currently ARM `Deployments_Delete`). Other `DELETE` operations preserve ordinary failure behavior, and non-DELETE operations do so even when their names begin with `delete_`. |

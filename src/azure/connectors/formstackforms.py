@@ -10,8 +10,9 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential, TokenCredential
-from azure.core.pipeline.transport import HttpTransport
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
@@ -75,7 +76,7 @@ class FormstackformsClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: TokenCredential | AzureKeyCredential,
+        credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout: float = 30.0,
@@ -84,7 +85,7 @@ class FormstackformsClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[HttpTransport] = None,
+        transport: Optional[AsyncHttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -104,8 +105,8 @@ class FormstackformsClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core HTTP transport closed by
-                the client through its synchronous lifecycle.
+            transport: Optional Azure Core async HTTP transport closed by
+                the client through its asynchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -132,7 +133,7 @@ class FormstackformsClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "formstackforms"
 
-    def get_available_forms(
+    async def get_available_forms(
         self,
         *,
         timeout: Optional[float] = None,
@@ -161,7 +162,7 @@ class FormstackformsClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/api/v2/form/"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -183,7 +184,7 @@ class FormstackformsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_form_schema(
+    async def get_form_schema(
         self,
         form_id: int,
         *,
@@ -221,7 +222,7 @@ class FormstackformsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

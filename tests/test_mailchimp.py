@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.mailchimp import MailchimpClient
+from azure.connectors.mailchimp import MailchimpClient
 from azure.connectors.mailchimp import (
     NewCampaignRequest,
     NewListRequest,

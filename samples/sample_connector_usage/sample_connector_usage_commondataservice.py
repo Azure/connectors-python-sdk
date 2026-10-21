@@ -26,11 +26,13 @@ Usage:
 
     python sample_connector_usage_commondataservice.py
 """
+
+import asyncio
 import os
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.commondataservice import CommondataserviceClient
 from azure.connectors.commondataservice import (
-    CommondataserviceClient,
     PostItemInput,
     PatchItemInput,
 )
@@ -51,19 +53,19 @@ DATASET = os.environ.get(
 )
 
 
-def example_1_list_datasets():
+async def example_1_list_datasets():
     """Example 1: List the datasets (environments) available to the connection."""
     print("\n=== Example 1: List Datasets ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                datasets = list(client.list_data_sets())
+                items = [item async for item in client.list_data_sets()]
 
-                if datasets:
-                    print(f"Found {len(datasets)} datasets:")
-                    for dataset in datasets[:5]:
+                if items:
+                    print(f"Found {len(items)} datasets:")
+                    for dataset in items[:5]:
                         print(f"  - {dataset.get('Name', dataset.get('DisplayName', 'N/A'))}")
                 else:
                     print("No datasets found")
@@ -74,20 +76,20 @@ def example_1_list_datasets():
                 print(f"Error: {ex}")
 
 
-def example_2_list_accounts():
+async def example_2_list_accounts():
     """Example 2: List rows from the 'accounts' table.
 
     Retrieves account rows with OData query options.
     """
     print("\n=== Example 2: List Accounts ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 accounts = [
                     account
-                    for account in client.list_items(
+                    async for account in client.list_items(
                         dataset=DATASET,
                         table="accounts",
                         filter="statecode eq 0",  # Active accounts only
@@ -109,18 +111,18 @@ def example_2_list_accounts():
                 print(f"Error: {ex}")
 
 
-def example_3_get_account_by_id():
+async def example_3_get_account_by_id():
     """Example 3: Get a single account row by its primary id."""
     print("\n=== Example 3: Get Account by ID ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
         # Replace with an actual account id from your Dataverse environment.
         account_id = "00000000-0000-0000-0000-000000000000"
 
-        with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.get_item(
+                result = await client.get_item(
                     dataset=DATASET,
                     table="accounts",
                     id=account_id,
@@ -138,13 +140,13 @@ def example_3_get_account_by_id():
                 print(f"Error: {ex}")
 
 
-def example_4_create_account():
+async def example_4_create_account():
     """Example 4: Add a new row to the 'accounts' table."""
     print("\n=== Example 4: Create Account ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 new_account = PostItemInput(
                     additional_properties={
@@ -155,7 +157,7 @@ def example_4_create_account():
                     }
                 )
 
-                result = client.post_item(
+                result = await client.post_item(
                     input=new_account,
                     dataset=DATASET,
                     table="accounts",
@@ -172,16 +174,16 @@ def example_4_create_account():
                 print(f"Error: {ex}")
 
 
-def example_5_update_account():
+async def example_5_update_account():
     """Example 5: Update an existing row in the 'accounts' table."""
     print("\n=== Example 5: Update Account ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
         # Replace with an actual account id.
         account_id = "00000000-0000-0000-0000-000000000000"
 
-        with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 update_data = PatchItemInput(
                     additional_properties={
@@ -190,7 +192,7 @@ def example_5_update_account():
                     }
                 )
 
-                client.patch_item(
+                await client.patch_item(
                     input=update_data,
                     dataset=DATASET,
                     table="accounts",
@@ -205,18 +207,18 @@ def example_5_update_account():
                 print(f"Error: {ex}")
 
 
-def example_6_create_attachment():
+async def example_6_create_attachment():
     """Example 6: Add a note attachment to an account row."""
     print("\n=== Example 6: Create Account Attachment ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
         # Replace with an actual account id from your Dataverse environment.
         account_id = "00000000-0000-0000-0000-000000000000"
 
-        with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.create_attachment(
+                result = await client.create_attachment(
                     input=b"Sample attachment content",
                     dataset=DATASET,
                     table="accounts",
@@ -235,15 +237,15 @@ def example_6_create_attachment():
                 print(f"Error: {ex}")
 
 
-def example_7_get_table_metadata():
+async def example_7_get_table_metadata():
     """Example 7: Get metadata for the 'accounts' table."""
     print("\n=== Example 7: Get Table Metadata ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.get_table(
+                result = await client.get_table(
                     dataset=DATASET,
                     table="accounts",
                 )
@@ -259,7 +261,7 @@ def example_7_get_table_metadata():
                 print(f"Error: {ex}")
 
 
-def main():
+async def main():
     """Run all examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: COMMONDATASERVICE_CONNECTION_URL environment variable not set.")
@@ -269,16 +271,16 @@ def main():
     print(f"Using connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
     print(f"Using dataset: {DATASET}")
 
-    example_1_list_datasets()
-    example_2_list_accounts()
-    example_3_get_account_by_id()
-    example_4_create_account()
-    example_5_update_account()
-    example_6_create_attachment()
-    example_7_get_table_metadata()
+    await example_1_list_datasets()
+    await example_2_list_accounts()
+    await example_3_get_account_by_id()
+    await example_4_create_account()
+    await example_5_update_account()
+    await example_6_create_attachment()
+    await example_7_get_table_metadata()
 
     print("\n=== All examples completed ===")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

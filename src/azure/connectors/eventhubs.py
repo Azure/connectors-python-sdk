@@ -6,13 +6,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
-from typing import Optional, Iterator, Dict, List, Any, Mapping
+from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
 from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.paging import ItemPaged
-from azure.core.credentials import AzureKeyCredential, TokenCredential
-from azure.core.pipeline.transport import HttpTransport
+from azure.core.async_paging import AsyncItemPaged
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
@@ -134,7 +135,7 @@ class EventhubsClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: TokenCredential | AzureKeyCredential,
+        credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout: float = 30.0,
@@ -143,7 +144,7 @@ class EventhubsClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[HttpTransport] = None,
+        transport: Optional[AsyncHttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -163,8 +164,8 @@ class EventhubsClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core HTTP transport closed by
-                the client through its synchronous lifecycle.
+            transport: Optional Azure Core async HTTP transport closed by
+                the client through its asynchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -268,7 +269,7 @@ class EventhubsClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    def send_event(
+    async def send_event(
         self,
         input: SendEvent | Mapping[str, Any],
         event_hub_name: str,
@@ -315,7 +316,7 @@ class EventhubsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -332,7 +333,7 @@ class EventhubsClient(ConnectorClientBase):
                 response=response,
             )
 
-    def send_events(
+    async def send_events(
         self,
         input: SendEventsInput,
         event_hub_name: str,
@@ -377,7 +378,7 @@ class EventhubsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -401,14 +402,14 @@ class EventhubsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[str]:
+    ) -> AsyncItemPaged[str]:
         """
         Get all Event Hubs in a namespace
 
         Get all Event Hubs in a namespace.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `GetEventHubs`.
 
@@ -419,8 +420,8 @@ class EventhubsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[str]: An Azure Core pager over connector results. Consume
-                it with `for`.
+            AsyncItemPaged[str]: An Azure Core pager over connector results.
+                Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -429,14 +430,14 @@ class EventhubsClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -455,19 +456,19 @@ class EventhubsClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[str]]:
+        ) -> tuple[Optional[str], AsyncIterator[str]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else []
 
-            def items() -> Iterator[str]:
+            async def items() -> AsyncIterator[str]:
                 for item in page:
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
     def list_content_types(
         self,
@@ -476,14 +477,14 @@ class EventhubsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[str]:
+    ) -> AsyncItemPaged[str]:
         """
         Get all content types
 
         Get all content types.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `GetContentTypes`.
 
@@ -494,8 +495,8 @@ class EventhubsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[str]: An Azure Core pager over connector results. Consume
-                it with `for`.
+            AsyncItemPaged[str]: An Azure Core pager over connector results.
+                Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -504,14 +505,14 @@ class EventhubsClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -530,19 +531,19 @@ class EventhubsClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[str]]:
+        ) -> tuple[Optional[str], AsyncIterator[str]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else []
 
-            def items() -> Iterator[str]:
+            async def items() -> AsyncIterator[str]:
                 for item in page:
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
     def list_consumer_groups(
         self,
@@ -552,14 +553,14 @@ class EventhubsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[str]:
+    ) -> AsyncItemPaged[str]:
         """
         Get all the consumer groups for an event hub
 
         Get all the consumer groups for an event hub.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `GetConsumerGroups`.
 
@@ -571,8 +572,8 @@ class EventhubsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[str]: An Azure Core pager over connector results. Consume
-                it with `for`.
+            AsyncItemPaged[str]: An Azure Core pager over connector results.
+                Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -588,14 +589,14 @@ class EventhubsClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -614,19 +615,19 @@ class EventhubsClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[str]]:
+        ) -> tuple[Optional[str], AsyncIterator[str]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else []
 
-            def items() -> Iterator[str]:
+            async def items() -> AsyncIterator[str]:
                 for item in page:
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
     def list_partition_keys(
         self,
@@ -636,14 +637,14 @@ class EventhubsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[str]:
+    ) -> AsyncItemPaged[str]:
         """
         Get all partition keys in an Event Hub
 
         Get all partition keys in an Event Hub.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `GetPartitionKeys`.
 
@@ -655,8 +656,8 @@ class EventhubsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[str]: An Azure Core pager over connector results. Consume
-                it with `for`.
+            AsyncItemPaged[str]: An Azure Core pager over connector results.
+                Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -672,14 +673,14 @@ class EventhubsClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -698,21 +699,21 @@ class EventhubsClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[str]]:
+        ) -> tuple[Optional[str], AsyncIterator[str]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else []
 
-            def items() -> Iterator[str]:
+            async def items() -> AsyncIterator[str]:
                 for item in page:
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def generate_event_schema(
+    async def generate_event_schema(
         self,
         content_type: str,
         *,
@@ -757,7 +758,7 @@ class EventhubsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

@@ -5,7 +5,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.keyvault import KeyvaultClient
+from azure.connectors.keyvault import KeyvaultClient
 from azure.connectors.keyvault import (
     KeyMetadataCollection,
     KeyMetadata,

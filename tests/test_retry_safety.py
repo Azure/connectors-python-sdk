@@ -10,7 +10,7 @@ from azure.core.credentials import AzureKeyCredential
 from azure.core.exceptions import ServiceRequestError
 from azure.core.pipeline.transport import AsyncHttpTransport
 
-from azure.connectors.sdk.aio.http_client import ConnectorHttpClient
+from azure.connectors.sdk.http_client import ConnectorHttpClient
 
 
 class RecordingTransport(AsyncHttpTransport):

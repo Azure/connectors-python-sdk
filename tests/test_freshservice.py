@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.freshservice import FreshserviceClient
+from azure.connectors.freshservice import FreshserviceClient
 from azure.connectors.freshservice import (
     AddNoteRequest,
     AddNoteResponse,

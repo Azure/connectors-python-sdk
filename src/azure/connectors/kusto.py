@@ -10,9 +10,10 @@ from typing import Optional, Dict, List, Literal, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.polling import LROPoller
-from azure.core.credentials import AzureKeyCredential, TokenCredential
-from azure.core.pipeline.transport import HttpTransport
+from azure.core.polling import AsyncLROPoller
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
@@ -240,7 +241,7 @@ class KustoClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: TokenCredential | AzureKeyCredential,
+        credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout: float = 30.0,
@@ -249,7 +250,7 @@ class KustoClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[HttpTransport] = None,
+        transport: Optional[AsyncHttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -269,8 +270,8 @@ class KustoClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core HTTP transport closed by
-                the client through its synchronous lifecycle.
+            transport: Optional Azure Core async HTTP transport closed by
+                the client through its asynchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -297,7 +298,7 @@ class KustoClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "kusto"
 
-    def begin_list_kusto_results(
+    async def begin_list_kusto_results(
         self,
         input: QueryAndListSchema | Mapping[str, Any],
         *,
@@ -305,14 +306,14 @@ class KustoClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[dict[str, Any] | None]:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Run KQL query
 
         Runs the KQL query and returns the result as a set of rows which can be
         iterated over in the following connectors e.g TableName | take 10.
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `listKustoResultsPost`.
 
@@ -325,7 +326,7 @@ class KustoClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[dict[str, Any] | None]: An Azure Core poller for the
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
                 connector operation.
 
         Raises:
@@ -333,7 +334,7 @@ class KustoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/ListKustoResults/false"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -350,7 +351,7 @@ class KustoClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: (
@@ -369,7 +370,7 @@ class KustoClient(ConnectorClientBase):
             ),
         )
 
-    def begin_list_kusto_show_command_results(
+    async def begin_list_kusto_show_command_results(
         self,
         input: ControlCommandAndListSchema | Mapping[str, Any],
         *,
@@ -377,7 +378,7 @@ class KustoClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[dict[str, Any] | None]:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Run show control command
 
@@ -385,7 +386,7 @@ class KustoClient(ConnectorClientBase):
         which can be iterated over in the following connectors e.g .show table
         TableName policy caching.
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `listKustoShowCommandResultsPost`.
 
@@ -398,7 +399,7 @@ class KustoClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[dict[str, Any] | None]: An Azure Core poller for the
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
                 connector operation.
 
         Raises:
@@ -408,7 +409,7 @@ class KustoClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/ListKustoShowCommandResults"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -425,7 +426,7 @@ class KustoClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: (
@@ -444,7 +445,7 @@ class KustoClient(ConnectorClientBase):
             ),
         )
 
-    def begin_run_kusto_query_and_visualize_results(
+    async def begin_run_kusto_query_and_visualize_results(
         self,
         input: QueryAndVisualizeSchema | Mapping[str, Any],
         *,
@@ -452,14 +453,14 @@ class KustoClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[dict[str, Any] | None]:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Run KQL query and render a chart
 
         Runs the KQL query and returns result as a chart of your choice e.g
         TableName | where Timestamp > ago(1h) | project timestamp, value.
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `runKustoQueryAndVisualizeResultsPost`.
 
@@ -472,7 +473,7 @@ class KustoClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[dict[str, Any] | None]: An Azure Core poller for the
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
                 connector operation.
 
         Raises:
@@ -482,7 +483,7 @@ class KustoClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/RunKustoAndVisualizeResults/false"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -499,7 +500,7 @@ class KustoClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: (
@@ -518,7 +519,7 @@ class KustoClient(ConnectorClientBase):
             ),
         )
 
-    def begin_run_kusto_command_and_visualize_results(
+    async def begin_run_kusto_command_and_visualize_results(
         self,
         input: CommandAndVisualizeSchema | Mapping[str, Any],
         *,
@@ -526,14 +527,14 @@ class KustoClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[dict[str, Any] | None]:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Run control command and render a chart
 
         Runs the control command and returns the result as a chart of your
         choice e.g .clear table TableName data.
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `runKustoCommandAndVisualizeResultsPost`.
 
@@ -546,7 +547,7 @@ class KustoClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[dict[str, Any] | None]: An Azure Core poller for the
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
                 connector operation.
 
         Raises:
@@ -556,7 +557,7 @@ class KustoClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/RunKustoAndVisualizeResults/true"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -573,7 +574,7 @@ class KustoClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: (
@@ -592,7 +593,7 @@ class KustoClient(ConnectorClientBase):
             ),
         )
 
-    def begin_run_async_control_command_and_wait(
+    async def begin_run_async_control_command_and_wait(
         self,
         input: ControlCommandAndListSchema | Mapping[str, Any],
         *,
@@ -600,7 +601,7 @@ class KustoClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[dict[str, Any] | None]:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Run async control command
 
@@ -608,7 +609,7 @@ class KustoClient(ConnectorClientBase):
         on completion. Command can run for maximum 1 hour. The 'async' keyword
         is mandatory e.g .set-or-append async TargetTable <| SourceTable.
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `runAsyncControlCommandAndWait`.
 
@@ -621,7 +622,7 @@ class KustoClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[dict[str, Any] | None]: An Azure Core poller for the
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
                 connector operation.
 
         Raises:
@@ -631,7 +632,7 @@ class KustoClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/RunAsyncControlCommandAndWait"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -648,7 +649,7 @@ class KustoClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: (
@@ -667,7 +668,7 @@ class KustoClient(ConnectorClientBase):
             ),
         )
 
-    def mcp_kusto_query_management(
+    async def mcp_kusto_query_management(
         self,
         input: MCPQueryRequest | Mapping[str, Any],
         *,
@@ -711,7 +712,7 @@ class KustoClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -733,7 +734,7 @@ class KustoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def list_kusto_results_schema(
+    async def list_kusto_results_schema(
         self,
         input: QueryAndListSchema | Mapping[str, Any],
         *,
@@ -765,7 +766,7 @@ class KustoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/ListKustoResultsSchema"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,

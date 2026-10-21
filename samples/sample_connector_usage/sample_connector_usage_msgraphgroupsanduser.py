@@ -21,8 +21,10 @@ Usage:
 
     python sample_connector_usage_msgraphgroupsanduser.py
 """
+
+import asyncio
 import os
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.msgraphgroupsanduser import MsgraphgroupsanduserClient
 
@@ -34,15 +36,15 @@ CONNECTION_RUNTIME_URL = os.environ.get(
 )
 
 
-def example_1_list_users():
+async def example_1_list_users():
     """Example 1: List users in the tenant."""
     print("\n=== Example 1: List Users ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with MsgraphgroupsanduserClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with MsgraphgroupsanduserClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                users = list(client.list_users())
+                users = [user async for user in client.list_users()]
 
                 if users:
                     print(f"Found {len(users)} users:")
@@ -59,19 +61,22 @@ def example_1_list_users():
                 print(f"Error: {ex}")
 
 
-def example_2_list_groups():
+async def example_2_list_groups():
     """Example 2: Search for groups by display name."""
     print("\n=== Example 2: List Groups (Search) ===")
 
     search_term = os.environ.get("TEST_GROUP_SEARCH", None)
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with MsgraphgroupsanduserClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with MsgraphgroupsanduserClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                groups = list(client.list_groups_by_display_name_search(
-                    search=search_term,
-                ))
+                groups = [
+                    group
+                    async for group in client.list_groups_by_display_name_search(
+                        search=search_term,
+                    )
+                ]
 
                 search_display = search_term or "(all)"
                 if groups:
@@ -93,7 +98,7 @@ def example_2_list_groups():
                 print(f"Error: {ex}")
 
 
-def example_3_get_group_properties():
+async def example_3_get_group_properties():
     """Example 3: Get properties of a specific group."""
     print("\n=== Example 3: Get Group Properties ===")
 
@@ -103,11 +108,11 @@ def example_3_get_group_properties():
         print("You can get a group ID from Example 2 output.")
         return
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with MsgraphgroupsanduserClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with MsgraphgroupsanduserClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                group = client.get_group_properties(group_id=group_id)
+                group = await client.get_group_properties(group_id=group_id)
 
                 if group:
                     print(f"Group properties for '{group.get('displayName', 'Unknown')}':")
@@ -126,7 +131,7 @@ def example_3_get_group_properties():
                 print(f"Error: {ex}")
 
 
-def example_4_list_group_members():
+async def example_4_list_group_members():
     """Example 4: List direct members of a group."""
     print("\n=== Example 4: List Group Members ===")
 
@@ -136,13 +141,16 @@ def example_4_list_group_members():
         print("You can get a group ID from Example 2 output.")
         return
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with MsgraphgroupsanduserClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with MsgraphgroupsanduserClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                members = list(client.list_direct_group_members(
-                    group_id=group_id,
-                ))
+                members = [
+                    member
+                    async for member in client.list_direct_group_members(
+                        group_id=group_id,
+                    )
+                ]
 
                 if members:
                     print(f"Found {len(members)} members:")
@@ -159,15 +167,15 @@ def example_4_list_group_members():
                 print(f"Error: {ex}")
 
 
-def example_5_list_subscribed_skus():
+async def example_5_list_subscribed_skus():
     """Example 5: List organization's subscribed license SKUs."""
     print("\n=== Example 5: List Subscribed SKUs ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with MsgraphgroupsanduserClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with MsgraphgroupsanduserClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                skus = list(client.list_subscribed_skus())
+                skus = [sku async for sku in client.list_subscribed_skus()]
 
                 if skus:
                     print(f"Found {len(skus)} subscribed SKUs:")
@@ -184,7 +192,7 @@ def example_5_list_subscribed_skus():
                 print(f"Error: {ex}")
 
 
-def main():
+async def main():
     """Run all examples."""
     print("MS Graph Groups & Users sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
@@ -195,15 +203,15 @@ def main():
         print("Format: https://[region].azure-apihub.net/apim/msgraphgroupsanduser/[connection-id]")
         return
 
-    example_1_list_users()
-    example_2_list_groups()
-    example_3_get_group_properties()
-    example_4_list_group_members()
-    example_5_list_subscribed_skus()
+    await example_1_list_users()
+    await example_2_list_groups()
+    await example_3_get_group_properties()
+    await example_4_list_group_members()
+    await example_5_list_subscribed_skus()
 
     print("\n" + "=" * 60)
     print("Sample completed!")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

@@ -1,14 +1,16 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """Sample usage for the RSS connector client."""
+
+import asyncio
 import os
 
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors.rss import RssClient
 
 
-def main() -> None:
+async def main() -> None:
     """Run a simple RSS sample flow."""
     connection_url = os.getenv("RSS_CONNECTION_URL")
     if not connection_url:
@@ -16,20 +18,20 @@ def main() -> None:
 
     feed_url = os.getenv("RSS_FEED_URL", "https://devblogs.microsoft.com/python/feed/")
 
-    with DefaultAzureCredential() as credential:
-        with RssClient(connection_url, credential) as client:
-            items = list(client.list_feed_items(
+    async with DefaultAzureCredential() as credential:
+        async with RssClient(connection_url, credential) as client:
+            items = [item async for item in client.list_feed_items(
                 feed_url=feed_url,
                 since_property="PublishDate",
-            ))
-            print(f"Retrieved {len(items)} item(s) from '{feed_url}'.")
+            )]
+            print(f"Retrieved {len(items or [])} item(s) from '{feed_url}'.")
 
-            latest_items = list(client.list_feed_items(
+            latest_items = [item async for item in client.list_feed_items(
                 feed_url=feed_url,
                 since_property="PublishDate",
-            ))
+            )]
             print(f"Polling query returned {len(latest_items)} item(s).")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

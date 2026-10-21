@@ -6,13 +6,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
-from typing import Optional, Iterator, Dict, List, Any, Mapping
+from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
 from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.paging import ItemPaged
-from azure.core.credentials import AzureKeyCredential, TokenCredential
-from azure.core.pipeline.transport import HttpTransport
+from azure.core.async_paging import AsyncItemPaged
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
@@ -660,7 +661,7 @@ class Office365groupsmailClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: TokenCredential | AzureKeyCredential,
+        credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout: float = 30.0,
@@ -669,7 +670,7 @@ class Office365groupsmailClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[HttpTransport] = None,
+        transport: Optional[AsyncHttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -689,8 +690,8 @@ class Office365groupsmailClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core HTTP transport closed by
-                the client through its synchronous lifecycle.
+            transport: Optional Azure Core async HTTP transport closed by
+                the client through its asynchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -802,14 +803,14 @@ class Office365groupsmailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List the conversations of a group
 
         Get all the conversations in this group.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `ListConversations`.
 
@@ -821,8 +822,8 @@ class Office365groupsmailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -834,14 +835,14 @@ class Office365groupsmailClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -860,9 +861,9 @@ class Office365groupsmailClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
@@ -872,15 +873,15 @@ class Office365groupsmailClient(ConnectorClientBase):
                 else None
             )
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return continuation_token, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def create_conversation(
+    async def create_conversation(
         self,
         input: CreateConversationBody | Mapping[str, Any],
         group_id: str,
@@ -917,7 +918,7 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"/v1.0/groups/{quote(str(group_id), safe='')}/conversations"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -939,7 +940,7 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_group_conversation(
+    async def get_group_conversation(
         self,
         group_id: str,
         conversation_id: str,
@@ -979,7 +980,7 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"/{quote(str(conversation_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1010,14 +1011,14 @@ class Office365groupsmailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List the conversation threads of a conversation
 
         Get all the threads in a group conversation.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `ListConversationThreads`.
 
@@ -1030,8 +1031,8 @@ class Office365groupsmailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1048,14 +1049,14 @@ class Office365groupsmailClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -1074,9 +1075,9 @@ class Office365groupsmailClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
@@ -1086,15 +1087,15 @@ class Office365groupsmailClient(ConnectorClientBase):
                 else None
             )
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return continuation_token, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def create_conversation_thread(
+    async def create_conversation_thread(
         self,
         input: CreateConversationBody | Mapping[str, Any],
         group_id: str,
@@ -1138,7 +1139,7 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"/threads"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1168,14 +1169,14 @@ class Office365groupsmailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List the threads of a group
 
         Get all the threads of a group.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `ListGroupThreads`.
 
@@ -1187,8 +1188,8 @@ class Office365groupsmailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1200,14 +1201,14 @@ class Office365groupsmailClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -1226,9 +1227,9 @@ class Office365groupsmailClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
@@ -1238,15 +1239,15 @@ class Office365groupsmailClient(ConnectorClientBase):
                 else None
             )
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return continuation_token, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def create_group_thread(
+    async def create_group_thread(
         self,
         input: CreateConversationBody | Mapping[str, Any],
         group_id: str,
@@ -1283,7 +1284,7 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"/v1.0/groups/{quote(str(group_id), safe='')}/threads"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1305,7 +1306,7 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_conversation_thread(
+    async def get_conversation_thread(
         self,
         group_id: str,
         thread_id: str,
@@ -1345,7 +1346,7 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"/{quote(str(thread_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1367,7 +1368,7 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def delete_conversation_thread(
+    async def delete_conversation_thread(
         self,
         group_id: str,
         thread_id: str,
@@ -1407,7 +1408,7 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"/{quote(str(thread_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1433,14 +1434,14 @@ class Office365groupsmailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List the posts of a conversation thread
 
         Get all the posts of the specified conversation thread.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `ListThreadPosts`.
 
@@ -1453,8 +1454,8 @@ class Office365groupsmailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1471,14 +1472,14 @@ class Office365groupsmailClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -1497,9 +1498,9 @@ class Office365groupsmailClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
@@ -1509,15 +1510,15 @@ class Office365groupsmailClient(ConnectorClientBase):
                 else None
             )
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return continuation_token, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def get_thread(
+    async def get_thread(
         self,
         group_id: str,
         thread_id: str,
@@ -1565,7 +1566,7 @@ class Office365groupsmailClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1597,14 +1598,14 @@ class Office365groupsmailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List the attachments of a post
 
         Retrieve a list of attachments that belong to a post.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `GetAttachments`.
 
@@ -1618,8 +1619,8 @@ class Office365groupsmailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1638,14 +1639,14 @@ class Office365groupsmailClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -1664,9 +1665,9 @@ class Office365groupsmailClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
@@ -1676,15 +1677,15 @@ class Office365groupsmailClient(ConnectorClientBase):
                 else None
             )
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return continuation_token, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def reply_to_a_thread(
+    async def reply_to_a_thread(
         self,
         input: ReplyConversationThreadBody | Mapping[str, Any],
         group_id: str,
@@ -1728,7 +1729,7 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"/reply"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1745,7 +1746,7 @@ class Office365groupsmailClient(ConnectorClientBase):
                 response=response,
             )
 
-    def reply(
+    async def reply(
         self,
         input: ReplyConversationThreadBody | Mapping[str, Any],
         group_id: str,
@@ -1794,7 +1795,7 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"/reply"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1811,7 +1812,7 @@ class Office365groupsmailClient(ConnectorClientBase):
                 response=response,
             )
 
-    def http_request(
+    async def http_request(
         self,
         input: bytes,
         *,
@@ -1843,7 +1844,7 @@ class Office365groupsmailClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/httprequest"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST",
             request_url,
             body=input,
@@ -1868,7 +1869,7 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def forward(
+    async def forward(
         self,
         input: ForwardPostBody | Mapping[str, Any],
         group_mail: str,
@@ -1921,7 +1922,7 @@ class Office365groupsmailClient(ConnectorClientBase):
             f"/forward"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1945,14 +1946,14 @@ class Office365groupsmailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List user groups
 
         Retrieves all Office 365 Groups the user is part of.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `ListGroups`.
 
@@ -1963,8 +1964,8 @@ class Office365groupsmailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1982,14 +1983,14 @@ class Office365groupsmailClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -2008,19 +2009,19 @@ class Office365groupsmailClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
 
 # Trigger Operations

@@ -18,7 +18,6 @@ from types import ModuleType, UnionType
 from typing import Any, Literal, Union, get_args, get_origin, get_type_hints
 
 from azure.core.async_paging import AsyncItemPaged
-from azure.core.paging import ItemPaged
 
 
 @dataclass(frozen=True)
@@ -41,7 +40,6 @@ class SampleVisitor(ast.NodeVisitor):
         self.client_variables: dict[str, type[Any]] = {}
         self.variable_types: dict[str, type[Any]] = {}
         self.credential_modes: dict[str, str] = {}
-        self.scoped_sync_credentials: set[int] = set()
         self.scoped_async_credentials: set[int] = set()
         self.awaited_calls: set[int] = set()
         self.issues: list[ValidationIssue] = []
@@ -55,9 +53,18 @@ class SampleVisitor(ast.NodeVisitor):
                 if imported_name.name == "DefaultAzureCredential":
                     local_name = imported_name.asname or imported_name.name
                     self.credential_modes[local_name] = mode
+                    if mode == "sync":
+                        self._add_issue(
+                            node,
+                            "connector samples require azure.identity.aio credentials",
+                        )
             return
 
         if not module_name.startswith("azure.connectors"):
+            return
+
+        if module_name.startswith(("azure.connectors.aio", "azure.connectors.sdk.aio")):
+            self._add_issue(node, "import async clients from root connector modules, not aio")
             return
 
         module = self.modules.get(module_name)
@@ -162,30 +169,22 @@ class SampleVisitor(ast.NodeVisitor):
                 if not self._is_async_client(client_type):
                     self._add_issue(
                         item.context_expr,
-                        "synchronous connector clients must use a context manager",
+                        "connector samples require an asynchronous client",
                     )
                 elif isinstance(item.optional_vars, ast.Name):
                     self.client_variables[item.optional_vars.id] = client_type
         self.generic_visit(node)
 
     def visit_With(self, node: ast.With) -> None:
-        """Track generated clients introduced by synchronous context managers."""
+        """Reject synchronous context management for generated clients."""
         for item in node.items:
-            if (
-                isinstance(item.context_expr, ast.Call)
-                and isinstance(item.context_expr.func, ast.Name)
-                and self.credential_modes.get(item.context_expr.func.id) == "sync"
-            ):
-                self.scoped_sync_credentials.add(id(item.context_expr))
-
             client_type = self._client_type_from_expression(item.context_expr)
             if client_type is not None:
-                if self._is_async_client(client_type):
-                    self._add_issue(
-                        item.context_expr,
-                        "asynchronous connector clients must use an async context manager",
-                    )
-                elif isinstance(item.optional_vars, ast.Name):
+                self._add_issue(
+                    item.context_expr,
+                    "asynchronous connector clients must use an async context manager",
+                )
+                if isinstance(item.optional_vars, ast.Name):
                     self.client_variables[item.optional_vars.id] = client_type
         self.generic_visit(node)
 
@@ -244,8 +243,6 @@ class SampleVisitor(ast.NodeVisitor):
             pageable_type = self._get_pageable_type(method)
             if pageable_type is AsyncItemPaged:
                 self._add_issue(node, f"'{call.func.attr}' must be consumed with async for")
-            elif pageable_type is ItemPaged:
-                self._add_issue(node, f"'{call.func.attr}' must be consumed with for")
             elif method is not None and not inspect.iscoroutinefunction(method):
                 self._add_issue(node, f"synchronous method '{call.func.attr}' cannot be awaited")
         self.generic_visit(node)
@@ -282,14 +279,6 @@ class SampleVisitor(ast.NodeVisitor):
                 self._add_issue(
                     node,
                     "asynchronous DefaultAzureCredential must use an async context manager",
-                )
-            elif (
-                credential_mode == "sync"
-                and id(node) not in self.scoped_sync_credentials
-            ):
-                self._add_issue(
-                    node,
-                    "synchronous DefaultAzureCredential must use a context manager",
                 )
 
         if isinstance(node.func, ast.Name):
@@ -345,8 +334,8 @@ class SampleVisitor(ast.NodeVisitor):
 
     @staticmethod
     def _is_async_client(client_type: type[Any]) -> bool:
-        """Return whether a generated client belongs to the aio package."""
-        return client_type.__module__.startswith("azure.connectors.aio.")
+        """Recognize async lifecycle without depending on a module namespace."""
+        return inspect.iscoroutinefunction(getattr(client_type, "__aenter__", None))
 
     @staticmethod
     def _get_pageable_type(method: Any) -> type[Any] | None:
@@ -364,7 +353,7 @@ class SampleVisitor(ast.NodeVisitor):
             return_annotation = inspect.signature(method).return_annotation
 
         return_origin = get_origin(return_annotation) or return_annotation
-        if return_origin in {ItemPaged, AsyncItemPaged}:
+        if return_origin is AsyncItemPaged:
             return return_origin
         return None
 
@@ -384,12 +373,7 @@ class SampleVisitor(ast.NodeVisitor):
         client_type = self._client_type_for_receiver(expression.func.value)
         method = getattr(client_type, expression.func.attr, None)
         pageable_type = self._get_pageable_type(method)
-        if pageable_type is ItemPaged and is_async:
-            self._add_issue(
-                expression,
-                f"'{expression.func.attr}' must be consumed with for",
-            )
-        elif pageable_type is AsyncItemPaged and not is_async:
+        if pageable_type is AsyncItemPaged and not is_async:
             self._add_issue(
                 expression,
                 f"'{expression.func.attr}' must be consumed with async for",
@@ -631,26 +615,16 @@ def _type_matches_annotation(value_type: type[Any], annotation: Any) -> bool:
 def load_connector_modules(source_root: Path) -> dict[str, ModuleType]:
     """Import connector modules from the checked-out source tree."""
     connector_package = importlib.import_module("azure.connectors")
-    aio_package = importlib.import_module("azure.connectors.aio")
     modules: dict[str, ModuleType] = {
         "azure.connectors": connector_package,
-        "azure.connectors.aio": aio_package,
     }
     connector_root = source_root / "azure" / "connectors"
-    module_paths = [
-        *connector_root.glob("*.py"),
-        *(connector_root / "aio").glob("*.py"),
-    ]
+    module_paths = connector_root.glob("*.py")
     for module_path in sorted(module_paths):
         if module_path.name == "__init__.py":
             continue
 
-        package_name = (
-            "azure.connectors.aio"
-            if module_path.parent.name == "aio"
-            else "azure.connectors"
-        )
-        module_name = f"{package_name}.{module_path.stem}"
+        module_name = f"azure.connectors.{module_path.stem}"
         module = importlib.import_module(module_name)
         resolved_path = Path(module.__file__ or "").resolve()
         if resolved_path != module_path.resolve():
@@ -668,13 +642,24 @@ def validate_samples(repo_root: Path) -> tuple[list[Path], list[ValidationIssue]
     sys.path.insert(0, str(source_root))
     modules = load_connector_modules(source_root)
     sample_root = repo_root / "samples" / "sample_connector_usage"
-    sample_paths = sorted(
-        [
-            *sample_root.glob("sample_connector_usage_*.py"),
-            *(sample_root / "aio").glob("sample_connector_usage_*.py"),
-        ]
-    )
+    sample_paths = sorted(sample_root.glob("sample_connector_usage_*.py"))
     issues: list[ValidationIssue] = []
+    for obsolete_path in sorted((sample_root / "aio").glob("sample_connector_usage_*.py")):
+        issues.append(
+            ValidationIssue(
+                obsolete_path,
+                1,
+                "remove the duplicate aio sample; keep one async root sample",
+            )
+        )
+
+    connector_root = source_root / "azure" / "connectors"
+    expected_connectors = {
+        f"azure.connectors.{path.stem}"
+        for path in connector_root.glob("*.py")
+        if not path.stem.startswith("_")
+    }
+    sampled_connectors: dict[str, Path] = {}
 
     for sample_path in sample_paths:
         module_name = f"sample_validation_{sample_path.stem}"
@@ -720,6 +705,22 @@ def validate_samples(repo_root: Path) -> tuple[list[Path], list[ValidationIssue]
         visitor = SampleVisitor(sample_path, modules)
         visitor.visit(tree)
         issues.extend(visitor.issues)
+        connector_imports = {
+            node.module
+            for node in ast.walk(tree)
+            if isinstance(node, ast.ImportFrom) and node.module in expected_connectors
+        }
+        for connector_name in connector_imports:
+            if connector_name in sampled_connectors:
+                issues.append(
+                    ValidationIssue(sample_path, 1, f"duplicate sample for '{connector_name}'")
+                )
+            sampled_connectors[connector_name] = sample_path
+
+    for connector_name in sorted(expected_connectors - sampled_connectors.keys()):
+        issues.append(
+            ValidationIssue(sample_root, 1, f"missing async sample for '{connector_name}'")
+        )
 
     return sample_paths, issues
 

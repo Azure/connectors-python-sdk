@@ -6,13 +6,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
-from typing import Optional, Iterator, Dict, List, Any, Mapping
+from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
 from urllib.parse import quote, SplitResult, urlsplit
 import json
 
-from azure.core.paging import ItemPaged
-from azure.core.credentials import AzureKeyCredential, TokenCredential
-from azure.core.pipeline.transport import HttpTransport
+from azure.core.async_paging import AsyncItemPaged
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
@@ -926,7 +927,7 @@ class CommondataserviceClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: TokenCredential | AzureKeyCredential,
+        credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout: float = 30.0,
@@ -935,7 +936,7 @@ class CommondataserviceClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[HttpTransport] = None,
+        transport: Optional[AsyncHttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -955,8 +956,8 @@ class CommondataserviceClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core HTTP transport closed by
-                the client through its synchronous lifecycle.
+            transport: Optional Azure Core async HTTP transport closed by
+                the client through its asynchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -1068,7 +1069,7 @@ class CommondataserviceClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    def get_data_sets_metadata(
+    async def get_data_sets_metadata(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1095,7 +1096,7 @@ class CommondataserviceClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/$metadata.json/datasets"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1117,7 +1118,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_next_page(
+    async def get_next_page(
         self,
         next_link: str,
         *,
@@ -1151,7 +1152,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/nextLink/{quote(str(next_link), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1173,7 +1174,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def associate_records_patch_item(
+    async def associate_records_patch_item(
         self,
         input: AssociateRecordsPatchItemInput | Mapping[str, Any],
         dataset: str,
@@ -1224,7 +1225,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/{quote(quote(str(relationship), safe=''), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1246,7 +1247,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def create_attachment(
+    async def create_attachment(
         self,
         input: bytes,
         dataset: str,
@@ -1302,7 +1303,7 @@ class CommondataserviceClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST",
             request_url,
             body=input,
@@ -1327,7 +1328,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def delete_attachment(
+    async def delete_attachment(
         self,
         dataset: str,
         table: str,
@@ -1375,7 +1376,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/{quote(quote(str(attachment_id), safe=''), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1392,7 +1393,7 @@ class CommondataserviceClient(ConnectorClientBase):
                 response=response,
             )
 
-    def delete_item(
+    async def delete_item(
         self,
         dataset: str,
         table: str,
@@ -1436,7 +1437,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1453,7 +1454,7 @@ class CommondataserviceClient(ConnectorClientBase):
                 response=response,
             )
 
-    def disassociate_records_post_item(
+    async def disassociate_records_post_item(
         self,
         dataset: str,
         table: str,
@@ -1505,7 +1506,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/{quote(quote(str(related_id), safe=''), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1527,7 +1528,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def disassociate_single_value_record_delete_item(
+    async def disassociate_single_value_record_delete_item(
         self,
         dataset: str,
         table: str,
@@ -1575,7 +1576,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/{quote(quote(str(relationship), safe=''), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1597,7 +1598,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_attachment_content(
+    async def get_attachment_content(
         self,
         dataset: str,
         table: str,
@@ -1646,7 +1647,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/$value"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1678,14 +1679,14 @@ class CommondataserviceClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Retrieves all collection valued relationship items as an expand would
 
         Retrieves all collection valued relationship items as an expand would
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `GetCollectionRelationships_V2`.
 
@@ -1702,8 +1703,8 @@ class CommondataserviceClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1726,14 +1727,14 @@ class CommondataserviceClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -1752,19 +1753,19 @@ class CommondataserviceClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
     def list_data_sets(
         self,
@@ -1773,12 +1774,12 @@ class CommondataserviceClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         GetDataSets
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `GetDataSets_V2`.
 
@@ -1789,8 +1790,8 @@ class CommondataserviceClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1799,14 +1800,14 @@ class CommondataserviceClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -1825,21 +1826,21 @@ class CommondataserviceClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def get_item(
+    async def get_item(
         self,
         dataset: str,
         table: str,
@@ -1883,7 +1884,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1915,14 +1916,14 @@ class CommondataserviceClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Retrieves all Notes (annotations) for the provided table row Id
 
         Retrieves all Notes (annotations) for the provided table row Id.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `GetItemAttachments_V2`.
 
@@ -1936,8 +1937,8 @@ class CommondataserviceClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1956,14 +1957,14 @@ class CommondataserviceClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -1982,19 +1983,19 @@ class CommondataserviceClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
     def list_items(
         self,
@@ -2010,14 +2011,14 @@ class CommondataserviceClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List rows (legacy)
 
         This operation gets rows for a table
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `GetItems_V2`.
 
@@ -2038,8 +2039,8 @@ class CommondataserviceClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -2084,14 +2085,14 @@ class CommondataserviceClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -2110,9 +2111,9 @@ class CommondataserviceClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
@@ -2122,15 +2123,15 @@ class CommondataserviceClient(ConnectorClientBase):
                 else None
             )
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return continuation_token, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def get_metadata_for_patch_item(
+    async def get_metadata_for_patch_item(
         self,
         dataset: str,
         table: str,
@@ -2172,7 +2173,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/patchitem"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2194,7 +2195,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_metadata_for_post_item(
+    async def get_metadata_for_post_item(
         self,
         dataset: str,
         table: str,
@@ -2236,7 +2237,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/postitem"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2258,7 +2259,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_multi_select_metadata(
+    async def get_multi_select_metadata(
         self,
         dataset: str,
         table: str,
@@ -2303,7 +2304,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/MultiSelect"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2325,7 +2326,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_option_set_metadata(
+    async def get_option_set_metadata(
         self,
         dataset: str,
         table: str,
@@ -2373,7 +2374,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/{quote(str(type_), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2395,7 +2396,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_table(
+    async def get_table(
         self,
         dataset: str,
         table: str,
@@ -2436,7 +2437,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/{quote(quote(str(table), safe=''), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2466,12 +2467,12 @@ class CommondataserviceClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         GetTables
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `GetTables_V2`.
 
@@ -2483,8 +2484,8 @@ class CommondataserviceClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -2499,14 +2500,14 @@ class CommondataserviceClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -2525,21 +2526,21 @@ class CommondataserviceClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def patch_item(
+    async def patch_item(
         self,
         input: PatchItemInput | Mapping[str, Any],
         dataset: str,
@@ -2586,7 +2587,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2608,7 +2609,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def post_item(
+    async def post_item(
         self,
         input: PostItemInput | Mapping[str, Any],
         dataset: str,
@@ -2652,7 +2653,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/items"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,

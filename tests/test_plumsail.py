@@ -8,7 +8,7 @@ import pytest
 
 from azure.core.credentials import AzureKeyCredential
 from azure.core.polling import AsyncLROPoller
-from azure.connectors.aio.plumsail import PlumsailClient
+from azure.connectors.plumsail import PlumsailClient
 from azure.connectors.plumsail import (
     Pdf2TextRequest,
     TRIGGER_OPERATIONS,

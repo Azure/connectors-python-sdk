@@ -84,6 +84,8 @@ async def resolve_generated_result(result: Any) -> Any:
     """Resolve an asynchronous generated result, consuming a pager or poller."""
     if isinstance(result, AsyncItemPaged):
         return [item async for item in result]
+    if isinstance(result, AsyncLROPoller):
+        return await result.result()
 
     awaited_result = await result
     if isinstance(awaited_result, AsyncLROPoller):
@@ -201,7 +203,7 @@ class GeneratedConnectorContractTests:
             ) as client:
                 assert isinstance(client, self.client_type)
 
-        mock_close.assert_called_once()
+        mock_close.assert_awaited_once()
 
     def test_all_generated_operations_are_covered(self) -> None:
         """Test the expected generated operation surface."""
@@ -257,6 +259,11 @@ class GeneratedConnectorContractTests:
                 self.connector_module,
             )["return"]
             is_pageable = get_origin(return_type) is AsyncItemPaged
+            result_type = (
+                get_args(return_type)[0]
+                if get_origin(return_type) is AsyncLROPoller
+                else return_type
+            )
             response_text = (
                 generated_pager_response_text(generated_method)
                 if is_pageable
@@ -286,11 +293,11 @@ class GeneratedConnectorContractTests:
             if expects_body:
                 assert to_wire(body) is not None, operation
 
-            if return_type is type(None):
+            if result_type is type(None):
                 assert result is None, operation
             elif is_pageable:
                 assert result == [{"ok": True}], operation
-            elif return_type is bytes:
+            elif result_type is bytes:
                 assert result == b'{"ok": true}', operation
             else:
                 assert result == {"ok": True}, operation

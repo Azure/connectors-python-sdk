@@ -20,11 +20,13 @@ Usage:
 
     python sample_connector_usage_microsoftbookings.py
 """
+
+import asyncio
 import os
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.microsoftbookings import MicrosoftbookingsClient
 from azure.connectors.microsoftbookings import (
-    MicrosoftbookingsClient,
     CreateAppointmentInput,
     UpdateAppointmentInput,
     CancelAppointmentInput,
@@ -50,17 +52,18 @@ WEBHOOK_CALLBACK_URL = os.environ.get(
 )
 
 
-def example_1_list_booking_businesses():
+async def example_1_list_booking_businesses():
     """Example 1: List booking businesses where user is an admin."""
     print("\n=== Example 1: List Booking Businesses ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with MicrosoftbookingsClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with MicrosoftbookingsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                mailboxes = list(client.list_bookings_business_user_as_admin())
+                items = [item async for item in client.list_bookings_business_user_as_admin()]
 
-                if mailboxes:
+                if items:
+                    mailboxes = items
                     print(f"Found {len(mailboxes)} booking business(es):")
                     for mailbox in mailboxes:
                         print(f"  - {mailbox.get('display_name')}")
@@ -74,7 +77,7 @@ def example_1_list_booking_businesses():
                 print(f"Error: {ex}")
 
 
-def example_2_build_create_webhook():
+async def example_2_build_create_webhook():
     """Example 2: Build an appointment-created webhook payload."""
     print("\n=== Example 2: Build Create Appointment Webhook ===")
 
@@ -85,7 +88,7 @@ def example_2_build_create_webhook():
     print(f"Create webhook payload: {webhook_input.webhook}")
 
 
-def example_3_build_update_webhook():
+async def example_3_build_update_webhook():
     """Example 3: Build an appointment-updated webhook payload."""
     print("\n=== Example 3: Build Update Appointment Webhook ===")
 
@@ -95,7 +98,7 @@ def example_3_build_update_webhook():
     print(f"Update webhook payload: {webhook_input.webhook}")
 
 
-def example_4_build_cancel_webhook():
+async def example_4_build_cancel_webhook():
     """Example 4: Build an appointment-cancelled webhook payload."""
     print("\n=== Example 4: Build Cancel Appointment Webhook ===")
 
@@ -105,7 +108,7 @@ def example_4_build_cancel_webhook():
     print(f"Cancel webhook payload: {webhook_input.webhook}")
 
 
-def main():
+async def main():
     """Run all examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: MICROSOFTBOOKINGS_CONNECTION_URL environment variable not set.")
@@ -115,16 +118,16 @@ def main():
     print(f"Using connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
 
     # Run read-only example by default
-    example_1_list_booking_businesses()
+    await example_1_list_booking_businesses()
 
     # The current generated action client exposes payload models but not the
     # webhook registration trigger operations.
-    example_2_build_create_webhook()
-    example_3_build_update_webhook()
-    example_4_build_cancel_webhook()
+    await example_2_build_create_webhook()
+    await example_3_build_update_webhook()
+    await example_4_build_cancel_webhook()
 
     print("\n=== All examples completed ===")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

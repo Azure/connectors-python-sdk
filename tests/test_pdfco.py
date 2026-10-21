@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.pdfco import PdfcoClient
+from azure.connectors.pdfco import PdfcoClient
 from azure.connectors.pdfco import (
     HtmlToPdfInput,
     UrlToPdfInput,

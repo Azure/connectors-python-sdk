@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 
-from azure.connectors.aio.teams import TeamsClient
+from azure.connectors.teams import TeamsClient
 from azure.connectors.teams import (
     CallEventWebhookResponseSchema,
     NewMeeting,

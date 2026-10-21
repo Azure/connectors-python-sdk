@@ -10,8 +10,9 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential, TokenCredential
-from azure.core.pipeline.transport import HttpTransport
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
@@ -254,7 +255,7 @@ class ZeptomailClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: TokenCredential | AzureKeyCredential,
+        credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout: float = 30.0,
@@ -263,7 +264,7 @@ class ZeptomailClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[HttpTransport] = None,
+        transport: Optional[AsyncHttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -283,8 +284,8 @@ class ZeptomailClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core HTTP transport closed by
-                the client through its synchronous lifecycle.
+            transport: Optional Azure Core async HTTP transport closed by
+                the client through its asynchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -311,7 +312,7 @@ class ZeptomailClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "zeptomail"
 
-    def get_mail_agent(
+    async def get_mail_agent(
         self,
         *,
         timeout: Optional[float] = None,
@@ -347,7 +348,7 @@ class ZeptomailClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/portal/v1.0/mailagents"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -369,7 +370,7 @@ class ZeptomailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_processed_emails(
+    async def get_processed_emails(
         self,
         mailagent_key: str,
         *,
@@ -469,7 +470,7 @@ class ZeptomailClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -491,7 +492,7 @@ class ZeptomailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def send_mail(
+    async def send_mail(
         self,
         input: SendMailInput | Mapping[str, Any],
         *,
@@ -523,7 +524,7 @@ class ZeptomailClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1.0/email"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -545,7 +546,7 @@ class ZeptomailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def send_template_mail(
+    async def send_template_mail(
         self,
         input: SendTemplateMailInput | Mapping[str, Any],
         *,
@@ -577,7 +578,7 @@ class ZeptomailClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1.0/email/template"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -599,7 +600,7 @@ class ZeptomailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def processed_mail_stats(
+    async def processed_mail_stats(
         self,
         mailagent: str,
         *,
@@ -657,7 +658,7 @@ class ZeptomailClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

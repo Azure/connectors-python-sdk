@@ -10,7 +10,7 @@ from azure.core.credentials import AzureKeyCredential
 from azure.connectors.sdk import (
     ConnectorException,
 )
-from azure.connectors.aio.trello import TrelloClient
+from azure.connectors.trello import TrelloClient
 from azure.connectors.trello import (
     Card,
     CommentPost,

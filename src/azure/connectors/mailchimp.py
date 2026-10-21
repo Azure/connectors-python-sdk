@@ -6,13 +6,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
-from typing import Optional, Iterator, Dict, List, Any, Mapping
+from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
 from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.paging import ItemPaged
-from azure.core.credentials import AzureKeyCredential, TokenCredential
-from azure.core.pipeline.transport import HttpTransport
+from azure.core.async_paging import AsyncItemPaged
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
@@ -1119,7 +1120,7 @@ class MailchimpClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: TokenCredential | AzureKeyCredential,
+        credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout: float = 30.0,
@@ -1128,7 +1129,7 @@ class MailchimpClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[HttpTransport] = None,
+        transport: Optional[AsyncHttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -1148,8 +1149,8 @@ class MailchimpClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core HTTP transport closed by
-                the client through its synchronous lifecycle.
+            transport: Optional Azure Core async HTTP transport closed by
+                the client through its asynchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -1260,14 +1261,14 @@ class MailchimpClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List campaigns
 
         This operation retrieves a list of campaigns in an account
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `GetCampaigns`.
 
@@ -1278,8 +1279,8 @@ class MailchimpClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1288,14 +1289,14 @@ class MailchimpClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -1314,21 +1315,21 @@ class MailchimpClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("campaigns", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def sendcampaign(
+    async def sendcampaign(
         self,
         campaign_id: str,
         *,
@@ -1362,7 +1363,7 @@ class MailchimpClient(ConnectorClientBase):
             f"/campaigns/{quote(str(campaign_id), safe='')}/actions/send"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1379,7 +1380,7 @@ class MailchimpClient(ConnectorClientBase):
                 response=response,
             )
 
-    def get_lists(
+    async def get_lists(
         self,
         *,
         count: Optional[int] = None,
@@ -1427,7 +1428,7 @@ class MailchimpClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1449,7 +1450,7 @@ class MailchimpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def newlist(
+    async def newlist(
         self,
         input: NewListRequest | Mapping[str, Any],
         *,
@@ -1481,7 +1482,7 @@ class MailchimpClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/lists"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1503,7 +1504,7 @@ class MailchimpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def add_members(
+    async def add_members(
         self,
         input: NewMembersInListRequest | Mapping[str, Any],
         list_id: str,
@@ -1558,7 +1559,7 @@ class MailchimpClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1580,7 +1581,7 @@ class MailchimpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_list_members(
+    async def get_list_members(
         self,
         list_id: str,
         *,
@@ -1633,7 +1634,7 @@ class MailchimpClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1655,7 +1656,7 @@ class MailchimpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def addmember(
+    async def addmember(
         self,
         input: NewMemberInListRequest | Mapping[str, Any],
         list_id: str,
@@ -1692,7 +1693,7 @@ class MailchimpClient(ConnectorClientBase):
             f"/lists/{quote(str(list_id), safe='')}/members"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1714,7 +1715,7 @@ class MailchimpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def newcampaign(
+    async def newcampaign(
         self,
         input: NewCampaignRequest | Mapping[str, Any],
         *,
@@ -1747,7 +1748,7 @@ class MailchimpClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v2/campaigns"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1769,7 +1770,7 @@ class MailchimpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def removemember(
+    async def removemember(
         self,
         list_id: str,
         *,
@@ -1806,7 +1807,7 @@ class MailchimpClient(ConnectorClientBase):
             f"/members"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1823,7 +1824,7 @@ class MailchimpClient(ConnectorClientBase):
                 response=response,
             )
 
-    def updatemember(
+    async def updatemember(
         self,
         input: UpdateMemberInListRequest | Mapping[str, Any],
         list_id: str,
@@ -1863,7 +1864,7 @@ class MailchimpClient(ConnectorClientBase):
             f"/members"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,

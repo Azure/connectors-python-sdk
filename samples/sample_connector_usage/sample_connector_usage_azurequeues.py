@@ -23,8 +23,10 @@ Usage:
 
     python sample_connector_usage_azurequeues.py
 """
+
+import asyncio
 import os
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.azurequeues import AzurequeuesClient
 
@@ -42,7 +44,7 @@ STORAGE_ACCOUNT = os.environ.get("AZUREQUEUES_STORAGE_ACCOUNT", "")
 QUEUE_NAME = os.environ.get("AZUREQUEUES_QUEUE_NAME", "")
 
 
-def example_1_list_queues():
+async def example_1_list_queues():
     """Example 1: List all queues in a storage account."""
     print("\n=== Example 1: List Queues ===")
 
@@ -51,17 +53,17 @@ def example_1_list_queues():
         print("Example: $env:AZUREQUEUES_STORAGE_ACCOUNT = 'mystorageaccount'")
         return
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with AzurequeuesClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with AzurequeuesClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                queues = list(client.list_queues(
+                items = [item async for item in client.list_queues(
                     storage_account_name=STORAGE_ACCOUNT
-                ))
+                )]
 
-                if queues:
+                if items:
                     print(f"Queues in storage account '{STORAGE_ACCOUNT}':")
-                    for queue in queues:
+                    for queue in items:
                         if isinstance(queue, dict):
                             print(f"  - {queue.get('name', queue)}")
                         else:
@@ -75,7 +77,7 @@ def example_1_list_queues():
                 print(f"Error: {ex}")
 
 
-def example_2_create_queue():
+async def example_2_create_queue():
     """Example 2: Create a new queue."""
     print("\n=== Example 2: Create Queue ===")
 
@@ -86,11 +88,11 @@ def example_2_create_queue():
         print("  $env:AZUREQUEUES_NEW_QUEUE_NAME = 'my-new-queue'")
         return
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with AzurequeuesClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with AzurequeuesClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.put_queue(
+                result = await client.put_queue(
                     storage_account_name=STORAGE_ACCOUNT,
                     queue_name=new_queue_name
                 )
@@ -105,7 +107,7 @@ def example_2_create_queue():
                 print(f"Error: {ex}")
 
 
-def example_3_put_message():
+async def example_3_put_message():
     """Example 3: Put a message on a queue."""
     print("\n=== Example 3: Put Message ===")
 
@@ -115,13 +117,13 @@ def example_3_put_message():
         print("  $env:AZUREQUEUES_QUEUE_NAME = '<queue-name>'")
         return
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with AzurequeuesClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with AzurequeuesClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 message_input = "Hello from Azure Connectors SDK for Python!"
 
-                client.put_message(
+                await client.put_message(
                     input=message_input,
                     storage_account_name=STORAGE_ACCOUNT,
                     queue_name=QUEUE_NAME
@@ -136,7 +138,7 @@ def example_3_put_message():
                 print(f"Error: {ex}")
 
 
-def example_4_get_messages():
+async def example_4_get_messages():
     """Example 4: Get messages from a queue."""
     print("\n=== Example 4: Get Messages ===")
 
@@ -146,11 +148,11 @@ def example_4_get_messages():
         print("  $env:AZUREQUEUES_QUEUE_NAME = '<queue-name>'")
         return
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with AzurequeuesClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with AzurequeuesClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.get_messages(
+                result = await client.get_messages(
                     storage_account_name=STORAGE_ACCOUNT,
                     queue_name=QUEUE_NAME,
                     numofmessages="5",  # Get up to 5 messages
@@ -180,7 +182,7 @@ def example_4_get_messages():
                 print(f"Error: {ex}")
 
 
-def example_5_delete_message():
+async def example_5_delete_message():
     """Example 5: Delete a message from a queue."""
     print("\n=== Example 5: Delete Message ===")
 
@@ -196,11 +198,11 @@ def example_5_delete_message():
         print("\nNote: Get message ID and pop receipt from Example 4.")
         return
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with AzurequeuesClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with AzurequeuesClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                client.delete_message(
+                await client.delete_message(
                     storage_account_name=STORAGE_ACCOUNT,
                     queue_name=QUEUE_NAME,
                     message_id=message_id,
@@ -215,7 +217,7 @@ def example_5_delete_message():
                 print(f"Error: {ex}")
 
 
-def main():
+async def main():
     """Run all examples."""
     print("Azure Storage Queues sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
@@ -226,15 +228,15 @@ def main():
         print("Format: https://[region].azure-apihub.net/apim/azurequeues/[id]")
         return
 
-    example_1_list_queues()
-    example_2_create_queue()
-    example_3_put_message()
-    example_4_get_messages()
-    example_5_delete_message()
+    await example_1_list_queues()
+    await example_2_create_queue()
+    await example_3_put_message()
+    await example_4_get_messages()
+    await example_5_delete_message()
 
     print("\n" + "=" * 60)
     print("Sample completed!")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

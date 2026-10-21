@@ -5,7 +5,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.azurequeues import AzurequeuesClient
+from azure.connectors.azurequeues import AzurequeuesClient
 from azure.connectors.azurequeues import (
     Messages,
     QueueArray,

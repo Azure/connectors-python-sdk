@@ -2,7 +2,7 @@
 
 ## Overview
 
-This repository contains the Python SDK for Azure Connectors. Code must follow Python best practices (PEP 8, PEP 484) and the team's conventions for synchronous and asynchronous APIs, type safety, and API design.
+This repository contains the Python SDK for Azure Connectors. Code must follow Python best practices (PEP 8, PEP 484) and the team's conventions for async-only APIs, type safety, and API design.
 
 ## Client Refresh and Review
 
@@ -13,9 +13,9 @@ This repository contains the Python SDK for Azure Connectors. Code must follow P
 - Capture known response data directly in semantic variables, without redundant `result` aliases or duplicated conditions. Check the actual returned shape after regeneration; an item list is not a response dictionary.
 - Preserve nullable-response guards such as `response and response.get(...)`; they are not duplicate conditions. Test non-pageable consumers with `None`, empty dictionaries, and populated responses separately. Do not simplify conditions by matching text prefixes.
 - Execute changed samples with empty and nonempty mocked results and assert their output, including absence of caught-and-printed errors. Pagination tests must exercise continuation requests, later-page items, and termination, including an empty initial page with a next link.
-- Generate clients as atomic pairs: synchronous clients and shared declarations in `azure.connectors.<connector>`, and asynchronous clients in `azure.connectors.aio.<connector>`.
-- Keep operation names and signatures aligned across modes without `_async` suffixes. Pageable operations return `ItemPaged` or `AsyncItemPaged`; long-running operation support remains deferred.
-- Import generated clients from their connector modules. Do not add generated-client barrel exports to package `__init__.py` files.
+- Generate one async-only client and its models in `azure.connectors.<connector>`. Do not add synchronous mirrors or a duplicate `.aio` catalog.
+- Use unsuffixed operation names. Pageable operations return `AsyncItemPaged`; retained Location-backed long-running operations return `AsyncLROPoller` after awaiting `begin_*`.
+- Keep direct connector imports and lazy package-root client exports. Do not eagerly import every generated module from package `__init__.py`.
 
 ## Quick Reference: Coding Style Rules
 

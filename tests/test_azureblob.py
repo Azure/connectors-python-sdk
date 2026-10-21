@@ -5,7 +5,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.azureblob import AzureblobClient
+from azure.connectors.azureblob import AzureblobClient
 from azure.connectors.azureblob import (
     SharedAccessSignatureBlobPolicy,
 )

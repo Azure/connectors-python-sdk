@@ -8,7 +8,7 @@ import pytest
 
 import azure.connectors.starrezrestv1 as starrezrestv1_module
 from azure.connectors.sdk.serialization import to_wire
-from azure.connectors.aio.starrezrestv1 import Starrezrestv1Client
+from azure.connectors.starrezrestv1 import Starrezrestv1Client
 from azure.connectors.starrezrestv1 import SelectBookingInput
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import (

@@ -295,14 +295,14 @@ az functionapp log tail -g $resourceGroup -n $functionAppName
 
 ## Using the SDK for Actions (Beyond Triggers)
 
-The `azure-connectors` package provides matching synchronous and asynchronous clients for calling connector actions directly from Python applications. Root clients use synchronous Azure Identity credentials; aio clients use asynchronous credentials. Both modes also accept `AzureKeyCredential`.
+The `azure-connectors` package provides async-only root clients for calling connector actions directly from Python applications. Clients accept caller-owned `AsyncTokenCredential` or `AzureKeyCredential` credentials; no synchronous mirror is provided.
 
 ### Example: Send an email
 
 ```python
 from azure.identity.aio import DefaultAzureCredential
 
-from azure.connectors.aio.office365 import Office365Client
+from azure.connectors.office365 import Office365Client
 from azure.connectors.office365 import SendEmailInput
 
 
@@ -323,7 +323,7 @@ async def main(connection_url: str):
 ```python
 from azure.identity.aio import DefaultAzureCredential
 
-from azure.connectors.aio.sharepointonline import SharepointonlineClient
+from azure.connectors.sharepointonline import SharepointonlineClient
 
 
 async def list_items(connection_url: str):
@@ -331,7 +331,7 @@ async def list_items(connection_url: str):
         async with SharepointonlineClient(connection_url, credential) as client:
             items = [
                 item
-                async for item in client.get_items(
+                async for item in client.list_items(
                     dataset="https://contoso.sharepoint.com/sites/MySite",
                     table="MyList",
                 )
@@ -343,7 +343,7 @@ async def list_items(connection_url: str):
 
 ### Authentication Options
 
-Use credentials from `azure.identity` for root clients and `azure.identity.aio` for aio clients. Use `AzureKeyCredential` from `azure.core.credentials` when the connection runtime expects an API key. The caller owns credentials and must close them through the matching lifecycle.
+Use credentials from `azure.identity.aio`. Use `AzureKeyCredential` from `azure.core.credentials` when the connection runtime expects an API key. The caller owns async credentials and must close them with `async with` or `await credential.close()`.
 
 ### E2E Validated Connectors
 

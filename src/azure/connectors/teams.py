@@ -6,14 +6,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
-from typing import Optional, Iterator, Dict, List, Literal, Any, Mapping
+from typing import Optional, AsyncIterator, Dict, List, Literal, Any, Mapping
 from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
 from azure.core import MatchConditions
-from azure.core.paging import ItemPaged
-from azure.core.credentials import AzureKeyCredential, TokenCredential
-from azure.core.pipeline.transport import HttpTransport
+from azure.core.async_paging import AsyncItemPaged
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
@@ -3882,7 +3883,7 @@ class TeamsClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: TokenCredential | AzureKeyCredential,
+        credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout: float = 30.0,
@@ -3891,7 +3892,7 @@ class TeamsClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[HttpTransport] = None,
+        transport: Optional[AsyncHttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -3911,8 +3912,8 @@ class TeamsClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core HTTP transport closed by
-                the client through its synchronous lifecycle.
+            transport: Optional Azure Core async HTTP transport closed by
+                the client through its asynchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -4058,7 +4059,7 @@ class TeamsClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    def create_teams_meeting(
+    async def create_teams_meeting(
         self,
         input: NewMeeting | Mapping[str, Any],
         calendarid: str,
@@ -4096,7 +4097,7 @@ class TeamsClient(ConnectorClientBase):
             f"/v1.0/me/calendars/{quote(str(calendarid), safe='')}/events"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4125,14 +4126,14 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List joined teams
 
         Lists all the teams in Microsoft Teams that you are a member of
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `GetAllTeams`.
 
@@ -4143,8 +4144,8 @@ class TeamsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -4153,14 +4154,14 @@ class TeamsClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -4179,19 +4180,19 @@ class TeamsClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
     def list_all_associated_teams(
         self,
@@ -4200,15 +4201,15 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List associated teams
 
         Lists all the teams you are a direct member of, or are a member of a
         shared channel that is hosted inside the team.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `GetAllAssociatedTeams`.
 
@@ -4219,8 +4220,8 @@ class TeamsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -4231,14 +4232,14 @@ class TeamsClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -4257,19 +4258,19 @@ class TeamsClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
     def list_channels_for_group(
         self,
@@ -4281,14 +4282,14 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List channels
 
         Lists all the channels for a specific team
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `GetChannelsForGroup`.
 
@@ -4304,8 +4305,8 @@ class TeamsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -4330,14 +4331,14 @@ class TeamsClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -4356,21 +4357,21 @@ class TeamsClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def create_channel(
+    async def create_channel(
         self,
         input: CreateChannelInput | Mapping[str, Any],
         group_id: str,
@@ -4407,7 +4408,7 @@ class TeamsClient(ConnectorClientBase):
             f"/beta/groups/{quote(str(group_id), safe='')}/channels"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4429,7 +4430,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_channel(
+    async def get_channel(
         self,
         group_id: str,
         channel_id: str,
@@ -4469,7 +4470,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(channel_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4491,7 +4492,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def update_channel_properties(
+    async def update_channel_properties(
         self,
         input: UpdateChannelPropertiesInput | Mapping[str, Any],
         group_id: str,
@@ -4537,7 +4538,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(channel_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4554,7 +4555,7 @@ class TeamsClient(ConnectorClientBase):
                 response=response,
             )
 
-    def archive_channel(
+    async def archive_channel(
         self,
         input: ArchiveChannelInput | Mapping[str, Any],
         group_id: str,
@@ -4601,7 +4602,7 @@ class TeamsClient(ConnectorClientBase):
             f"/archive"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4633,15 +4634,15 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List all channels
 
         Lists all the channels for a specific team, including channels that are
         shared with the team
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `GetAllChannelsForTeam`.
 
@@ -4657,8 +4658,8 @@ class TeamsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -4683,14 +4684,14 @@ class TeamsClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -4709,19 +4710,19 @@ class TeamsClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
     def list_chats(
         self,
@@ -4732,14 +4733,14 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List chats
 
         Lists recent chats you are a part of
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `GetChats`.
 
@@ -4752,8 +4753,8 @@ class TeamsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -4773,14 +4774,14 @@ class TeamsClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -4799,21 +4800,21 @@ class TeamsClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def post_feed_notification(
+    async def post_feed_notification(
         self,
         input: DynamicPostFeedNotificationRequest | Mapping[str, Any],
         poster: str,
@@ -4858,7 +4859,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(notification_type), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4875,7 +4876,7 @@ class TeamsClient(ConnectorClientBase):
                 response=response,
             )
 
-    def at_mention_tag(
+    async def at_mention_tag(
         self,
         group_id: str,
         tag_id: str,
@@ -4916,7 +4917,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(tag_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4947,7 +4948,7 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get messages in a channel
 
@@ -4955,8 +4956,8 @@ class TeamsClient(ConnectorClientBase):
         the team ID must refer to the host team, which is the team that owns
         the shared channel.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `GetMessagesFromChannel`.
 
@@ -4969,8 +4970,8 @@ class TeamsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -4987,14 +4988,14 @@ class TeamsClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -5013,9 +5014,9 @@ class TeamsClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
@@ -5025,15 +5026,15 @@ class TeamsClient(ConnectorClientBase):
                 else None
             )
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return continuation_token, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def get_message_details(
+    async def get_message_details(
         self,
         input: DynamicGetMessageDetailsSchema | Mapping[str, Any],
         message_id: str,
@@ -5077,7 +5078,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(thread_type), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5110,7 +5111,7 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List replies of a channel message
 
@@ -5118,8 +5119,8 @@ class TeamsClient(ConnectorClientBase):
         channels, the team ID must refer to the host team, which is the team
         that owns the shared channel.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `ListRepliesToMessage`.
 
@@ -5135,8 +5136,8 @@ class TeamsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -5163,14 +5164,14 @@ class TeamsClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -5189,19 +5190,19 @@ class TeamsClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
     def list_members(
         self,
@@ -5213,14 +5214,14 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List chat or channel members
 
         List direct members of a group chat or a channel
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `ListMembers`.
 
@@ -5236,8 +5237,8 @@ class TeamsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -5261,14 +5262,14 @@ class TeamsClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = input
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "POST", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -5287,21 +5288,21 @@ class TeamsClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def subscribe_user_message_with_options(
+    async def subscribe_user_message_with_options(
         self,
         input: DynamicUserMessageWithOptionsSubscriptionRequest | Mapping[str, Any],
         *,
@@ -5343,7 +5344,7 @@ class TeamsClient(ConnectorClientBase):
             f"/$subscriptions"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5360,7 +5361,7 @@ class TeamsClient(ConnectorClientBase):
                 response=response,
             )
 
-    def get_team(
+    async def get_team(
         self,
         team_id: str,
         *,
@@ -5394,7 +5395,7 @@ class TeamsClient(ConnectorClientBase):
             f"/beta/teams/{quote(str(team_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5416,7 +5417,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def at_mention_user(
+    async def at_mention_user(
         self,
         user_id: str,
         *,
@@ -5451,7 +5452,7 @@ class TeamsClient(ConnectorClientBase):
             f"/v1.0/users/{quote(str(user_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5473,7 +5474,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def create_chat(
+    async def create_chat(
         self,
         input: NewChat | Mapping[str, Any],
         *,
@@ -5505,7 +5506,7 @@ class TeamsClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/beta/chats"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5538,14 +5539,14 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get messages in a chat
 
         Retrieves messages from a one on one or group chat
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `GetMessagesFromChat`.
 
@@ -5563,8 +5564,8 @@ class TeamsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -5594,14 +5595,14 @@ class TeamsClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -5620,9 +5621,9 @@ class TeamsClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
@@ -5632,15 +5633,15 @@ class TeamsClient(ConnectorClientBase):
                 else None
             )
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return continuation_token, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def post_message_to_self(
+    async def post_message_to_self(
         self,
         input: PostMessageToSelfRequest | Mapping[str, Any],
         *,
@@ -5675,7 +5676,7 @@ class TeamsClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/v1.0/chats/48:notes/messages"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5697,7 +5698,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def create_a_team(
+    async def create_a_team(
         self,
         input: CreateATeamInput | Mapping[str, Any],
         *,
@@ -5729,7 +5730,7 @@ class TeamsClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/beta/teams"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5761,14 +5762,14 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List team members
 
         Lists the members of a team in Microsoft Teams
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `ListTeamMembers`.
 
@@ -5784,8 +5785,8 @@ class TeamsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -5810,14 +5811,14 @@ class TeamsClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -5836,21 +5837,21 @@ class TeamsClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def add_member_to_team(
+    async def add_member_to_team(
         self,
         input: AddMemberToTeamInput | Mapping[str, Any],
         team_id: str,
@@ -5887,7 +5888,7 @@ class TeamsClient(ConnectorClientBase):
             f"/v1.0/teams/{quote(str(team_id), safe='')}/members"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5904,7 +5905,7 @@ class TeamsClient(ConnectorClientBase):
                 response=response,
             )
 
-    def remove_member_from_team(
+    async def remove_member_from_team(
         self,
         team_id: str,
         membership_id: str,
@@ -5946,7 +5947,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(membership_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5963,7 +5964,7 @@ class TeamsClient(ConnectorClientBase):
                 response=response,
             )
 
-    def add_member_to_channel(
+    async def add_member_to_channel(
         self,
         input: AddMemberToChannelInput | Mapping[str, Any],
         group_id: str,
@@ -6008,7 +6009,7 @@ class TeamsClient(ConnectorClientBase):
             f"/members"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6025,7 +6026,7 @@ class TeamsClient(ConnectorClientBase):
                 response=response,
             )
 
-    def remove_member_from_channel(
+    async def remove_member_from_channel(
         self,
         group_id: str,
         channel_id: str,
@@ -6073,7 +6074,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(membership_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6090,7 +6091,7 @@ class TeamsClient(ConnectorClientBase):
                 response=response,
             )
 
-    def post_message_to_conversation(
+    async def post_message_to_conversation(
         self,
         input: DynamicPostMessageRequest | Mapping[str, Any],
         poster: str,
@@ -6136,7 +6137,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(location), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6158,7 +6159,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def reply_with_message_to_conversation(
+    async def reply_with_message_to_conversation(
         self,
         input: DynamicReplyMessageRequest | Mapping[str, Any],
         poster: str,
@@ -6204,7 +6205,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(location), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6226,7 +6227,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def post_card_to_conversation(
+    async def post_card_to_conversation(
         self,
         input: DynamicPostCardRequest | Mapping[str, Any],
         poster: str,
@@ -6272,7 +6273,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(location), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6294,7 +6295,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def post_card_and_wait_for_response(
+    async def post_card_and_wait_for_response(
         self,
         input: PostCardAndWaitForResponseInput | Mapping[str, Any],
         poster: str,
@@ -6342,7 +6343,7 @@ class TeamsClient(ConnectorClientBase):
             f"/$subscriptions"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6364,7 +6365,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def reply_with_card_to_conversation(
+    async def reply_with_card_to_conversation(
         self,
         input: DynamicReplyCardRequest | Mapping[str, Any],
         poster: str,
@@ -6410,7 +6411,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(location), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6432,7 +6433,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def update_card_in_conversation(
+    async def update_card_in_conversation(
         self,
         input: DynamicUpdateCardRequest | Mapping[str, Any],
         poster: str,
@@ -6478,7 +6479,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(location), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6500,7 +6501,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def http_request(
+    async def http_request(
         self,
         input: bytes,
         *,
@@ -6535,7 +6536,7 @@ class TeamsClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/httprequest"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST",
             request_url,
             body=input,
@@ -6560,7 +6561,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def add_member_to_chat(
+    async def add_member_to_chat(
         self,
         input: AddMemberToChatInput | Mapping[str, Any],
         chat_id: str,
@@ -6597,7 +6598,7 @@ class TeamsClient(ConnectorClientBase):
             f"/v1.0/chats/{quote(str(chat_id), safe='')}/members"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6614,7 +6615,7 @@ class TeamsClient(ConnectorClientBase):
                 response=response,
             )
 
-    def remove_member_from_chat(
+    async def remove_member_from_chat(
         self,
         chat_id: str,
         membership_id: str,
@@ -6657,7 +6658,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(membership_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6674,7 +6675,7 @@ class TeamsClient(ConnectorClientBase):
                 response=response,
             )
 
-    def get_online_meeting(
+    async def get_online_meeting(
         self,
         lookup_type: str,
         lookup_value: str,
@@ -6722,7 +6723,7 @@ class TeamsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6752,14 +6753,14 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List meeting transcripts
 
         Lists all transcripts for an online meeting
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `ListMeetingTranscripts`.
 
@@ -6771,8 +6772,8 @@ class TeamsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -6788,14 +6789,14 @@ class TeamsClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -6814,21 +6815,21 @@ class TeamsClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def get_meeting_transcript(
+    async def get_meeting_transcript(
         self,
         meeting_id: str,
         transcript_id: str,
@@ -6869,7 +6870,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(transcript_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6891,7 +6892,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_meeting_transcript_content(
+    async def get_meeting_transcript_content(
         self,
         meeting_id: str,
         transcript_id: str,
@@ -6933,7 +6934,7 @@ class TeamsClient(ConnectorClientBase):
             f"/content"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6963,14 +6964,14 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List meeting recordings
 
         Lists all recordings for an online meeting
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `ListMeetingRecordings`.
 
@@ -6982,8 +6983,8 @@ class TeamsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -6999,14 +7000,14 @@ class TeamsClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -7025,21 +7026,21 @@ class TeamsClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def get_meeting_recording(
+    async def get_meeting_recording(
         self,
         meeting_id: str,
         recording_id: str,
@@ -7080,7 +7081,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(recording_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7102,7 +7103,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_meeting_recording_content(
+    async def get_meeting_recording_content(
         self,
         meeting_id: str,
         recording_id: str,
@@ -7144,7 +7145,7 @@ class TeamsClient(ConnectorClientBase):
             f"/content"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7170,14 +7171,14 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List sections
 
         Lists the current user's teamwork sections
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `ListSections`.
 
@@ -7188,8 +7189,8 @@ class TeamsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -7200,14 +7201,14 @@ class TeamsClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -7226,21 +7227,21 @@ class TeamsClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def create_section(
+    async def create_section(
         self,
         input: CreateSectionInput | Mapping[str, Any],
         *,
@@ -7286,7 +7287,7 @@ class TeamsClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/beta/me/teamwork/sections"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7308,7 +7309,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_section(
+    async def get_section(
         self,
         section_id: str,
         *,
@@ -7342,7 +7343,7 @@ class TeamsClient(ConnectorClientBase):
             f"/beta/me/teamwork/sections/{quote(str(section_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7364,7 +7365,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def update_section(
+    async def update_section(
         self,
         input: UpdateSectionInput | Mapping[str, Any],
         section_id: str,
@@ -7413,7 +7414,7 @@ class TeamsClient(ConnectorClientBase):
             f"/beta/me/teamwork/sections/{quote(str(section_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7435,7 +7436,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def delete_section(
+    async def delete_section(
         self,
         section_id: str,
         *,
@@ -7481,7 +7482,7 @@ class TeamsClient(ConnectorClientBase):
             f"/beta/me/teamwork/sections/{quote(str(section_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7506,15 +7507,15 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List section items
 
         Lists the items (chats, channels, meetings, communities) in a teamwork
         section. Each item belongs to exactly one section at a time.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `ListSectionItems`.
 
@@ -7526,8 +7527,8 @@ class TeamsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -7544,14 +7545,14 @@ class TeamsClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -7570,21 +7571,21 @@ class TeamsClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def add_section_item(
+    async def add_section_item(
         self,
         input: AddSectionItemInput | Mapping[str, Any],
         section_id: str,
@@ -7640,7 +7641,7 @@ class TeamsClient(ConnectorClientBase):
             f"/items"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7662,7 +7663,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def remove_section_item(
+    async def remove_section_item(
         self,
         section_id: str,
         section_item_id: str,
@@ -7719,7 +7720,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(section_item_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7736,7 +7737,7 @@ class TeamsClient(ConnectorClientBase):
                 response=response,
             )
 
-    def move_section_item(
+    async def move_section_item(
         self,
         input: MoveSectionItemInput | Mapping[str, Any],
         section_id: str,
@@ -7798,7 +7799,7 @@ class TeamsClient(ConnectorClientBase):
             f"/move"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7828,14 +7829,14 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List all tags for a team
 
         Lists the team's tags
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `GetTags`.
 
@@ -7847,8 +7848,8 @@ class TeamsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -7860,14 +7861,14 @@ class TeamsClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -7886,21 +7887,21 @@ class TeamsClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def create_tag(
+    async def create_tag(
         self,
         input: CreateTagInput | Mapping[str, Any],
         group_id: str,
@@ -7937,7 +7938,7 @@ class TeamsClient(ConnectorClientBase):
             f"/v1.0/teams/{quote(str(group_id), safe='')}/tags"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7959,7 +7960,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_tag(
+    async def get_tag(
         self,
         group_id: str,
         tag_id: str,
@@ -7999,7 +8000,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(tag_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8021,7 +8022,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def update_tag(
+    async def update_tag(
         self,
         input: UpdateTagInput | Mapping[str, Any],
         group_id: str,
@@ -8064,7 +8065,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(tag_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8086,7 +8087,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def delete_tag(
+    async def delete_tag(
         self,
         group_id: str,
         tag_id: str,
@@ -8126,7 +8127,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(tag_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8143,7 +8144,7 @@ class TeamsClient(ConnectorClientBase):
                 response=response,
             )
 
-    def add_member_to_tag(
+    async def add_member_to_tag(
         self,
         input: AddMemberToTagInput | Mapping[str, Any],
         group_id: str,
@@ -8187,7 +8188,7 @@ class TeamsClient(ConnectorClientBase):
             f"/members"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8218,14 +8219,14 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List the members of a team tag
 
         Lists the members of a team tag
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `GetTagMembers`.
 
@@ -8238,8 +8239,8 @@ class TeamsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -8256,14 +8257,14 @@ class TeamsClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -8282,21 +8283,21 @@ class TeamsClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def delete_tag_member(
+    async def delete_tag_member(
         self,
         group_id: str,
         tag_id: str,
@@ -8340,7 +8341,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(tag_member_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8365,14 +8366,14 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List call recordings
 
         Lists all recordings for an ad-hoc call
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `ListCallRecordings`.
 
@@ -8384,8 +8385,8 @@ class TeamsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -8397,14 +8398,14 @@ class TeamsClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -8423,21 +8424,21 @@ class TeamsClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def get_call_recording(
+    async def get_call_recording(
         self,
         call_id: str,
         recording_id: str,
@@ -8478,7 +8479,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(recording_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8500,7 +8501,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_call_recording_content(
+    async def get_call_recording_content(
         self,
         call_id: str,
         recording_id: str,
@@ -8542,7 +8543,7 @@ class TeamsClient(ConnectorClientBase):
             f"/content"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8569,14 +8570,14 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List call transcripts
 
         Lists all transcripts for an ad-hoc call
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `ListCallTranscripts`.
 
@@ -8588,8 +8589,8 @@ class TeamsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -8601,14 +8602,14 @@ class TeamsClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -8627,21 +8628,21 @@ class TeamsClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def get_call_transcript(
+    async def get_call_transcript(
         self,
         call_id: str,
         transcript_id: str,
@@ -8682,7 +8683,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(transcript_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8704,7 +8705,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_call_transcript_content(
+    async def get_call_transcript_content(
         self,
         call_id: str,
         transcript_id: str,
@@ -8746,7 +8747,7 @@ class TeamsClient(ConnectorClientBase):
             f"/content"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8780,14 +8781,14 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get all ad-hoc call recordings
 
         Gets all recordings from ad-hoc calls for the signed-in user
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `GetAllAdhocCallRecordings`.
 
@@ -8803,8 +8804,8 @@ class TeamsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -8844,14 +8845,14 @@ class TeamsClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -8870,19 +8871,19 @@ class TeamsClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
     def list_all_adhoc_call_transcripts(
         self,
@@ -8896,14 +8897,14 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get all ad-hoc call transcripts
 
         Gets all transcripts from ad-hoc calls for the signed-in user
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `GetAllAdhocCallTranscripts`.
 
@@ -8919,8 +8920,8 @@ class TeamsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -8960,14 +8961,14 @@ class TeamsClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -8986,19 +8987,19 @@ class TeamsClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
     def list_ai_insights(
         self,
@@ -9008,15 +9009,15 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List AI insights
 
         Lists AI-generated insights for an online meeting. Requires Microsoft
         365 Copilot license.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `ListAiInsights`.
 
@@ -9028,8 +9029,8 @@ class TeamsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -9046,14 +9047,14 @@ class TeamsClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -9072,21 +9073,21 @@ class TeamsClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def get_ai_insight(
+    async def get_ai_insight(
         self,
         meeting_id: str,
         ai_insight_id: str,
@@ -9129,7 +9130,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(ai_insight_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -9160,15 +9161,15 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Conversation location for where to post
 
         Returns a list of locations to post a message or reply based on who the
         user is posting as
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `GetMessageLocations`.
 
@@ -9181,8 +9182,8 @@ class TeamsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -9198,14 +9199,14 @@ class TeamsClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -9224,21 +9225,21 @@ class TeamsClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("locations", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def get_message_details_input_schema(
+    async def get_message_details_input_schema(
         self,
         thread_type: str,
         *,
@@ -9275,7 +9276,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(thread_type), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -9297,7 +9298,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_message_details_response_schema(
+    async def get_message_details_response_schema(
         self,
         thread_type: str,
         *,
@@ -9334,7 +9335,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(thread_type), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -9356,7 +9357,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def list_members_input_schema(
+    async def list_members_input_schema(
         self,
         thread_type: str,
         *,
@@ -9393,7 +9394,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(thread_type), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -9415,7 +9416,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_feed_notification_input_schema(
+    async def get_feed_notification_input_schema(
         self,
         poster: str,
         notification_type: str,
@@ -9456,7 +9457,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(notification_type), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -9478,7 +9479,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_unified_action_schema(
+    async def get_unified_action_schema(
         self,
         action_type: str,
         poster: str,
@@ -9523,7 +9524,7 @@ class TeamsClient(ConnectorClientBase):
             f"/schema"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -9545,7 +9546,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_message_with_options_subscription_input_metadata(
+    async def get_message_with_options_subscription_input_metadata(
         self,
         recipient_type: str,
         *,
@@ -9586,7 +9587,7 @@ class TeamsClient(ConnectorClientBase):
             f"/subscriptioninputs"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -9608,7 +9609,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_message_with_options_subscription_output_metadata(
+    async def get_message_with_options_subscription_output_metadata(
         self,
         recipient_type: str,
         *,
@@ -9650,7 +9651,7 @@ class TeamsClient(ConnectorClientBase):
             f"/subscriptionoutputs"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -9672,7 +9673,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_webhook_trigger_request_schema(
+    async def get_webhook_trigger_request_schema(
         self,
         thread_type: str,
         *,
@@ -9710,7 +9711,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(thread_type), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -9732,7 +9733,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_webhook_trigger_response_schema(
+    async def get_webhook_trigger_response_schema(
         self,
         trigger_type: str,
         thread_type: str,
@@ -9774,7 +9775,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(thread_type), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -9796,7 +9797,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_post_to_conversation_response_schema(
+    async def get_post_to_conversation_response_schema(
         self,
         action_type: str,
         poster: str,
@@ -9842,7 +9843,7 @@ class TeamsClient(ConnectorClientBase):
             f"/schema"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -9864,7 +9865,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_flow_continuation_subscription_with_poster_output_metadata(
+    async def get_flow_continuation_subscription_with_poster_output_metadata(
         self,
         input: GetFlowContinuationSubscriptionWithPosterOutputMetadataInput,
         poster: str,
@@ -9912,7 +9913,7 @@ class TeamsClient(ConnectorClientBase):
             f"/subscriptionoutputs"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -9934,7 +9935,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_subscription_scope_schema(
+    async def get_subscription_scope_schema(
         self,
         scope_type: str,
         *,
@@ -9973,7 +9974,7 @@ class TeamsClient(ConnectorClientBase):
             f"/schema"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

@@ -20,11 +20,13 @@ Usage:
 
     python sample_connector_usage_yammer.py
 """
+
+import asyncio
 import os
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.yammer import YammerClient
 from azure.connectors.yammer import (
-    YammerClient,
     PostOperationRequest,
 )
 
@@ -36,15 +38,15 @@ CONNECTION_RUNTIME_URL = os.environ.get(
 )
 
 
-def example_1_get_networks():
+async def example_1_get_networks():
     """Example 1: Get all networks the user belongs to."""
     print("\n=== Example 1: Get Networks ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                networks = list(client.list_networks())
+                networks = [item async for item in client.list_networks()]
 
                 if networks:
                     print(f"Found {len(networks)} network(s):")
@@ -59,16 +61,16 @@ def example_1_get_networks():
                 print(f"Error: {ex}")
 
 
-def example_2_get_groups():
+async def example_2_get_groups():
     """Example 2: Get groups in the network."""
     print("\n=== Example 2: Get Groups ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Get only groups the user belongs to
-                groups = list(client.list_groups(mine=1))
+                groups = [item async for item in client.list_groups(mine=1)]
 
                 if groups:
                     print(f"Found {len(groups)} group(s):")
@@ -83,17 +85,17 @@ def example_2_get_groups():
                 print(f"Error: {ex}")
 
 
-def example_3_get_messages():
+async def example_3_get_messages():
     """Example 3: Get messages from the network."""
     print("\n=== Example 3: Get All Messages ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Get recent messages (limit to 10)
                 messages = [
-                    item for item in client.list_all_messages(limit=10)
+                    item async for item in client.list_all_messages(limit=10)
                 ]
 
                 if messages:
@@ -110,16 +112,16 @@ def example_3_get_messages():
                 print(f"Error: {ex}")
 
 
-def example_4_get_following_feed():
+async def example_4_get_following_feed():
     """Example 4: Get messages from the Following feed."""
     print("\n=== Example 4: Get Following Feed ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 messages = [
-                    item for item in client.list_messages_following(
+                    item async for item in client.list_messages_following(
                         limit=5
                     )
                 ]
@@ -139,13 +141,13 @@ def example_4_get_following_feed():
                 print(f"Error: {ex}")
 
 
-def example_5_post_message():
+async def example_5_post_message():
     """Example 5: Post a message to All Company feed."""
     print("\n=== Example 5: Post Message ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Create message request (group_id=0 posts to All Company)
                 message = PostOperationRequest(
@@ -154,7 +156,7 @@ def example_5_post_message():
                     title="SDK Test Message"
                 )
 
-                result = client.post_message(input=message)
+                result = await client.post_message(input=message)
 
                 if result:
                     print("Message posted successfully!")
@@ -169,17 +171,17 @@ def example_5_post_message():
                 print(f"Error: {ex}")
 
 
-def example_6_get_user_details():
+async def example_6_get_user_details():
     """Example 6: Get user profile details."""
     print("\n=== Example 6: Get User Details ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Replace with an actual user ID
                 user_id = 123456789
-                user = client.get_user_details_by_id(user_id=user_id)
+                user = await client.get_user_details_by_id(user_id=user_id)
 
                 if user:
                     print("User details:")
@@ -196,7 +198,7 @@ def example_6_get_user_details():
                 print(f"Error: {ex}")
 
 
-def main():
+async def main():
     """Run all examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: YAMMER_CONNECTION_URL environment variable not set.")
@@ -205,16 +207,16 @@ def main():
 
     print(f"Using connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
 
-    example_1_get_networks()
-    example_2_get_groups()
-    example_3_get_messages()
-    example_4_get_following_feed()
+    await example_1_get_networks()
+    await example_2_get_groups()
+    await example_3_get_messages()
+    await example_4_get_following_feed()
     # Uncomment to test posting (be careful in production!)
     # await example_5_post_message()
-    example_6_get_user_details()
+    await example_6_get_user_details()
 
     print("\n=== All examples completed ===")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

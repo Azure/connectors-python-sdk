@@ -20,11 +20,13 @@ Usage:
 
     python sample_connector_usage_office365groups.py
 """
+
+import asyncio
 import os
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.office365groups import Office365groupsClient
 from azure.connectors.office365groups import (
-    Office365groupsClient,
     UpdateCalendarEventHTMLRequest,
 )
 
@@ -36,15 +38,15 @@ CONNECTION_RUNTIME_URL = os.environ.get(
 )
 
 
-def example_1_list_groups():
+async def example_1_list_groups():
     """Example 1: List all groups in the organization."""
     print("\n=== Example 1: List Groups ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with Office365groupsClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with Office365groupsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                groups = [item for item in client.list_groups(top=10)]
+                groups = [item async for item in client.list_groups(top=10)]
 
                 if groups:
                     print(f"Found {len(groups)} groups:")
@@ -59,19 +61,19 @@ def example_1_list_groups():
                 print(f"Error: {ex}")
 
 
-def example_2_list_group_members():
+async def example_2_list_group_members():
     """Example 2: List members of a specific group."""
     print("\n=== Example 2: List Group Members ===")
 
     # Replace with your actual group ID
     GROUP_ID = "your-group-id-here"
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with Office365groupsClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with Office365groupsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 members = [
-                    item for item in client.list_group_members(
+                    item async for item in client.list_group_members(
                         group_id=GROUP_ID
                     )
                 ]
@@ -89,15 +91,15 @@ def example_2_list_group_members():
                 print(f"Error: {ex}")
 
 
-def example_3_list_owned_groups():
+async def example_3_list_owned_groups():
     """Example 3: List groups that I own and belong to."""
     print("\n=== Example 3: List My Groups ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with Office365groupsClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with Office365groupsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                groups = list(client.list_owned_groups())
+                groups = [group async for group in client.list_owned_groups()]
 
                 if groups:
                     print(f"You own or belong to {len(groups)} groups:")
@@ -112,16 +114,16 @@ def example_3_list_owned_groups():
                 print(f"Error: {ex}")
 
 
-def example_4_create_group_event():
+async def example_4_create_group_event():
     """Example 4: Create a calendar event in a group."""
     print("\n=== Example 4: Create Group Event ===")
 
     # Replace with your actual group ID
     GROUP_ID = "your-group-id-here"
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with Office365groupsClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with Office365groupsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 event_input = UpdateCalendarEventHTMLRequest(
                     subject="Team Standup",
@@ -143,7 +145,7 @@ def example_4_create_group_event():
                     }
                 )
 
-                result = client.create_calendar_event(
+                result = await client.create_calendar_event(
                     input=event_input,
                     group_id=GROUP_ID
                 )
@@ -161,7 +163,7 @@ def example_4_create_group_event():
                 print(f"Error: {ex}")
 
 
-def example_5_add_member_to_group():
+async def example_5_add_member_to_group():
     """Example 5: Add a member to a group."""
     print("\n=== Example 5: Add Member to Group ===")
 
@@ -169,11 +171,11 @@ def example_5_add_member_to_group():
     GROUP_ID = "your-group-id-here"
     USER_UPN = "user@contoso.com"
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with Office365groupsClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with Office365groupsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                client.add_member_to_group(
+                await client.add_member_to_group(
                     group_id=GROUP_ID,
                     user_upn=USER_UPN
                 )
@@ -186,16 +188,16 @@ def example_5_add_member_to_group():
                 print(f"Error: {ex}")
 
 
-def example_6_list_deleted_groups():
+async def example_6_list_deleted_groups():
     """Example 6: List deleted groups that can be restored."""
     print("\n=== Example 6: List Deleted Groups ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with Office365groupsClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with Office365groupsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 groups = [
-                    item for item in client.list_deleted_groups()
+                    item async for item in client.list_deleted_groups()
                 ]
 
                 if groups:
@@ -211,7 +213,7 @@ def example_6_list_deleted_groups():
                 print(f"Error: {ex}")
 
 
-def main():
+async def main():
     """Run all examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: OFFICE365GROUPS_CONNECTION_URL environment variable not set.")
@@ -220,9 +222,9 @@ def main():
 
     print(f"Using connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
 
-    example_1_list_groups()
-    example_3_list_owned_groups()
-    example_6_list_deleted_groups()
+    await example_1_list_groups()
+    await example_3_list_owned_groups()
+    await example_6_list_deleted_groups()
 
     # The following examples require valid IDs:
     # await example_2_list_group_members()
@@ -233,4 +235,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

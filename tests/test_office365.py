@@ -6,7 +6,7 @@ import json
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.office365 import Office365Client
+from azure.connectors.office365 import Office365Client
 from azure.connectors.office365 import (
     DraftEmailInput,
     ClientReceiveFileAttachment,

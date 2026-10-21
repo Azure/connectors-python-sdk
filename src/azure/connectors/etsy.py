@@ -10,8 +10,9 @@ from typing import Optional, List, Literal, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential, TokenCredential
-from azure.core.pipeline.transport import HttpTransport
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
@@ -2862,7 +2863,7 @@ class EtsyClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: TokenCredential | AzureKeyCredential,
+        credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout: float = 30.0,
@@ -2871,7 +2872,7 @@ class EtsyClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[HttpTransport] = None,
+        transport: Optional[AsyncHttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -2891,8 +2892,8 @@ class EtsyClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core HTTP transport closed by
-                the client through its synchronous lifecycle.
+            transport: Optional Azure Core async HTTP transport closed by
+                the client through its asynchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -2919,7 +2920,7 @@ class EtsyClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "etsy"
 
-    def ping(
+    async def ping(
         self,
         *,
         timeout: Optional[float] = None,
@@ -2948,7 +2949,7 @@ class EtsyClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/openapi-ping"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2970,7 +2971,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def payment_ledger_entries(
+    async def payment_ledger_entries(
         self,
         shop_id: int,
         min_created: int,
@@ -3039,7 +3040,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3061,7 +3062,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def payment_get_entry_id(
+    async def payment_get_entry_id(
         self,
         shop_id: int,
         ledger_entry_ids: str,
@@ -3108,7 +3109,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3130,7 +3131,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def payment_get_receipt(
+    async def payment_get_receipt(
         self,
         shop_id: int,
         receipt_id: str,
@@ -3172,7 +3173,7 @@ class EtsyClient(ConnectorClientBase):
             f"/payments"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3194,7 +3195,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def payments_get(
+    async def payments_get(
         self,
         shop_id: int,
         payment_ids: str,
@@ -3238,7 +3239,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3260,7 +3261,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def receipt_get(
+    async def receipt_get(
         self,
         shop_id: int,
         receipt_id: int,
@@ -3300,7 +3301,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(receipt_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3322,7 +3323,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def receipts_get(
+    async def receipts_get(
         self,
         shop_id: int,
         *,
@@ -3423,7 +3424,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3445,7 +3446,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def receipt_create_shipment(
+    async def receipt_create_shipment(
         self,
         input: ReceiptCreateShipmentInput | Mapping[str, Any],
         shop_id: int,
@@ -3493,7 +3494,7 @@ class EtsyClient(ConnectorClientBase):
             f"/tracking"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3515,7 +3516,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def transactions_listing(
+    async def transactions_listing(
         self,
         shop_id: int,
         listing_id: int,
@@ -3574,7 +3575,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3596,7 +3597,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def transaction_receipt(
+    async def transaction_receipt(
         self,
         shop_id: int,
         receipt_id: int,
@@ -3637,7 +3638,7 @@ class EtsyClient(ConnectorClientBase):
             f"/transactions"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3659,7 +3660,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def transaction_get(
+    async def transaction_get(
         self,
         shop_id: int,
         transaction_id: int,
@@ -3698,7 +3699,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(transaction_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3720,7 +3721,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def transaction_get_shop(
+    async def transaction_get_shop(
         self,
         shop_id: int,
         *,
@@ -3772,7 +3773,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3794,7 +3795,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def reviews_get(
+    async def reviews_get(
         self,
         shop_id: int,
         *,
@@ -3846,7 +3847,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3868,7 +3869,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def shipping_carriers(
+    async def shipping_carriers(
         self,
         origin_country_iso: str,
         *,
@@ -3908,7 +3909,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3930,7 +3931,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def shipping_profiles(
+    async def shipping_profiles(
         self,
         shop_id: int,
         *,
@@ -3965,7 +3966,7 @@ class EtsyClient(ConnectorClientBase):
             f"/shops/{quote(str(shop_id), safe='')}/shipping-profiles"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3987,7 +3988,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def shipping_create_profile(
+    async def shipping_create_profile(
         self,
         input: ShippingCreateProfileInput | Mapping[str, Any],
         shop_id: int,
@@ -4027,7 +4028,7 @@ class EtsyClient(ConnectorClientBase):
             f"/shops/{quote(str(shop_id), safe='')}/shipping-profiles"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4049,7 +4050,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def shipping_get_profile(
+    async def shipping_get_profile(
         self,
         shop_id: int,
         shipping_profile_id: int,
@@ -4089,7 +4090,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(shipping_profile_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4106,7 +4107,7 @@ class EtsyClient(ConnectorClientBase):
                 response=response,
             )
 
-    def shipping_delete_profile(
+    async def shipping_delete_profile(
         self,
         shop_id: int,
         shipping_profile_id: int,
@@ -4146,7 +4147,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(shipping_profile_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4168,7 +4169,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def shipping_update_profile(
+    async def shipping_update_profile(
         self,
         input: ShippingUpdateProfileInput | Mapping[str, Any],
         shop_id: int,
@@ -4211,7 +4212,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(shipping_profile_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4233,7 +4234,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def shipping_get_destinations(
+    async def shipping_get_destinations(
         self,
         shop_id: int,
         shipping_profile_id: int,
@@ -4293,7 +4294,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4315,7 +4316,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def shipping_create_destination(
+    async def shipping_create_destination(
         self,
         input: ShippingCreateDestinationInput | Mapping[str, Any],
         shop_id: int,
@@ -4368,7 +4369,7 @@ class EtsyClient(ConnectorClientBase):
             f"/destinations"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4390,7 +4391,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def shipping_delete_profile_destination(
+    async def shipping_delete_profile_destination(
         self,
         shop_id: int,
         shipping_profile_id: int,
@@ -4441,7 +4442,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(shipping_profile_destination_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4458,7 +4459,7 @@ class EtsyClient(ConnectorClientBase):
                 response=response,
             )
 
-    def shipping_update_profile_destination(
+    async def shipping_update_profile_destination(
         self,
         input: ShippingUpdateProfileDestinationInput | Mapping[str, Any],
         shop_id: int,
@@ -4507,7 +4508,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(shipping_profile_destination_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4529,7 +4530,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def shipping_get_profile_upgrades(
+    async def shipping_get_profile_upgrades(
         self,
         shop_id: int,
         shipping_profile_id: int,
@@ -4571,7 +4572,7 @@ class EtsyClient(ConnectorClientBase):
             f"/upgrades"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4593,7 +4594,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def shipping_create_upgrade(
+    async def shipping_create_upgrade(
         self,
         input: ShippingCreateUpgradeInput | Mapping[str, Any],
         shop_id: int,
@@ -4638,7 +4639,7 @@ class EtsyClient(ConnectorClientBase):
             f"/upgrades"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4660,7 +4661,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def shipping_delete_profile_upgrade(
+    async def shipping_delete_profile_upgrade(
         self,
         shop_id: int,
         shipping_profile_id: int,
@@ -4705,7 +4706,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(upgrade_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4722,7 +4723,7 @@ class EtsyClient(ConnectorClientBase):
                 response=response,
             )
 
-    def shipping_update_profile_upgrade(
+    async def shipping_update_profile_upgrade(
         self,
         input: ShippingUpdateProfileUpgradeInput | Mapping[str, Any],
         shop_id: int,
@@ -4771,7 +4772,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(upgrade_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4793,7 +4794,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def shop_update(
+    async def shop_update(
         self,
         input: ShopUpdateInput | Mapping[str, Any],
         shop_id: int,
@@ -4831,7 +4832,7 @@ class EtsyClient(ConnectorClientBase):
             f"/shops/{quote(str(shop_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4853,7 +4854,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def shop_get_by_owner_id(
+    async def shop_get_by_owner_id(
         self,
         user_id: str,
         *,
@@ -4887,7 +4888,7 @@ class EtsyClient(ConnectorClientBase):
             f"/users/{quote(str(user_id), safe='')}/shops"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4909,7 +4910,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def shop_search(
+    async def shop_search(
         self,
         shop_name: str,
         *,
@@ -4962,7 +4963,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4984,7 +4985,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def shop_get_sections(
+    async def shop_get_sections(
         self,
         shop_id: int,
         *,
@@ -5019,7 +5020,7 @@ class EtsyClient(ConnectorClientBase):
             f"/shops/{quote(str(shop_id), safe='')}/sections"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5041,7 +5042,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def shop_create_section(
+    async def shop_create_section(
         self,
         input: ShopCreateSectionInput | Mapping[str, Any],
         shop_id: int,
@@ -5078,7 +5079,7 @@ class EtsyClient(ConnectorClientBase):
             f"/shops/{quote(str(shop_id), safe='')}/sections"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5100,7 +5101,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def user_get(
+    async def user_get(
         self,
         user_id: int,
         *,
@@ -5134,7 +5135,7 @@ class EtsyClient(ConnectorClientBase):
             f"/users/{quote(str(user_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5156,7 +5157,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def shop_get_section(
+    async def shop_get_section(
         self,
         shop_id: int,
         shop_section_id: int,
@@ -5196,7 +5197,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(shop_section_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5218,7 +5219,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def user_get_address(
+    async def user_get_address(
         self,
         user_address_id: int,
         *,
@@ -5253,7 +5254,7 @@ class EtsyClient(ConnectorClientBase):
             f"/user/addresses/{quote(str(user_address_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5275,7 +5276,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def user_get_addresses(
+    async def user_get_addresses(
         self,
         *,
         limit: Optional[int] = None,
@@ -5322,7 +5323,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5344,7 +5345,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_get_taxonomy_nodes(
+    async def listing_get_taxonomy_nodes(
         self,
         *,
         timeout: Optional[float] = None,
@@ -5373,7 +5374,7 @@ class EtsyClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/seller-taxonomy/nodes"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5395,7 +5396,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_get_properties_by_taxonomy(
+    async def listing_get_properties_by_taxonomy(
         self,
         taxonomy_id: str,
         *,
@@ -5435,7 +5436,7 @@ class EtsyClient(ConnectorClientBase):
             f"/properties"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5457,7 +5458,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_get_shop(
+    async def listing_get_shop(
         self,
         shop_id: int,
         *,
@@ -5532,7 +5533,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5554,7 +5555,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_create(
+    async def listing_create(
         self,
         input: ListingCreateInput | Mapping[str, Any],
         shop_id: int,
@@ -5591,7 +5592,7 @@ class EtsyClient(ConnectorClientBase):
             f"/shops/{quote(str(shop_id), safe='')}/listings"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5613,7 +5614,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_get(
+    async def listing_get(
         self,
         listing_id: int,
         *,
@@ -5659,7 +5660,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5676,7 +5677,7 @@ class EtsyClient(ConnectorClientBase):
                 response=response,
             )
 
-    def listing_delete(
+    async def listing_delete(
         self,
         listing_id: int,
         *,
@@ -5714,7 +5715,7 @@ class EtsyClient(ConnectorClientBase):
             f"/listings/{quote(str(listing_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5731,7 +5732,7 @@ class EtsyClient(ConnectorClientBase):
                 response=response,
             )
 
-    def listing_get_active(
+    async def listing_get_active(
         self,
         *,
         limit: Optional[int] = None,
@@ -5836,7 +5837,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5858,7 +5859,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_get_active_by_shop(
+    async def listing_get_active_by_shop(
         self,
         shop_id: int,
         *,
@@ -5918,7 +5919,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5940,7 +5941,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_get_by_id(
+    async def listing_get_by_id(
         self,
         listing_ids: str,
         *,
@@ -5987,7 +5988,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6009,7 +6010,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_get_featured(
+    async def listing_get_featured(
         self,
         shop_id: int,
         *,
@@ -6061,7 +6062,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6083,7 +6084,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_delete_property(
+    async def listing_delete_property(
         self,
         shop_id: int,
         listing_id: int,
@@ -6127,7 +6128,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(property_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6144,7 +6145,7 @@ class EtsyClient(ConnectorClientBase):
                 response=response,
             )
 
-    def listing_update_property(
+    async def listing_update_property(
         self,
         input: ListingUpdatePropertyInput | Mapping[str, Any],
         shop_id: int,
@@ -6194,7 +6195,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(property_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6216,7 +6217,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_get_property(
+    async def listing_get_property(
         self,
         listing_id: int,
         property_id: int,
@@ -6257,7 +6258,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(property_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6279,7 +6280,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_get_properties(
+    async def listing_get_properties(
         self,
         shop_id: int,
         listing_id: int,
@@ -6320,7 +6321,7 @@ class EtsyClient(ConnectorClientBase):
             f"/properties"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6342,7 +6343,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_update(
+    async def listing_update(
         self,
         input: ListingUpdateInput | Mapping[str, Any],
         shop_id: int,
@@ -6386,7 +6387,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(listing_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6408,7 +6409,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_get_by_receipt(
+    async def listing_get_by_receipt(
         self,
         shop_id: int,
         receipt_id: int,
@@ -6468,7 +6469,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6490,7 +6491,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_get_by_section_id(
+    async def listing_get_by_section_id(
         self,
         shop_id: int,
         shop_section_ids: str,
@@ -6564,7 +6565,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6586,7 +6587,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_get_file(
+    async def listing_get_file(
         self,
         shop_id: int,
         listing_id: int,
@@ -6632,7 +6633,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(listing_file_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6654,7 +6655,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_delete_file(
+    async def listing_delete_file(
         self,
         shop_id: int,
         listing_id: int,
@@ -6702,7 +6703,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(listing_file_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6719,7 +6720,7 @@ class EtsyClient(ConnectorClientBase):
                 response=response,
             )
 
-    def listing_get_files(
+    async def listing_get_files(
         self,
         shop_id: int,
         listing_id: int,
@@ -6762,7 +6763,7 @@ class EtsyClient(ConnectorClientBase):
             f"/files"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6784,7 +6785,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_upload(
+    async def listing_upload(
         self,
         input: ListingUploadInput | Mapping[str, Any],
         shop_id: int,
@@ -6833,7 +6834,7 @@ class EtsyClient(ConnectorClientBase):
             f"/files"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6855,7 +6856,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_get_image(
+    async def listing_get_image(
         self,
         shop_id: int,
         listing_id: int,
@@ -6901,7 +6902,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(listing_image_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6923,7 +6924,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_delete_image(
+    async def listing_delete_image(
         self,
         shop_id: int,
         listing_id: int,
@@ -6970,7 +6971,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(listing_image_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6987,7 +6988,7 @@ class EtsyClient(ConnectorClientBase):
                 response=response,
             )
 
-    def listing_get_images(
+    async def listing_get_images(
         self,
         shop_id: int,
         listing_id: int,
@@ -7029,7 +7030,7 @@ class EtsyClient(ConnectorClientBase):
             f"/images"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7051,7 +7052,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_upload_image(
+    async def listing_upload_image(
         self,
         input: ListingUploadImageInput | Mapping[str, Any],
         shop_id: int,
@@ -7101,7 +7102,7 @@ class EtsyClient(ConnectorClientBase):
             f"/images"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7123,7 +7124,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_get_inventory(
+    async def listing_get_inventory(
         self,
         listing_id: int,
         *,
@@ -7171,7 +7172,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7193,7 +7194,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_update_inventory(
+    async def listing_update_inventory(
         self,
         input: ListingUpdateInventoryInput | Mapping[str, Any],
         listing_id: str,
@@ -7235,7 +7236,7 @@ class EtsyClient(ConnectorClientBase):
             f"/listings/{quote(str(listing_id), safe='')}/inventory"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7257,7 +7258,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_get_offering(
+    async def listing_get_offering(
         self,
         listing_id: int,
         product_id: int,
@@ -7303,7 +7304,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(product_offering_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7325,7 +7326,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_get_product(
+    async def listing_get_product(
         self,
         listing_id: int,
         product_id: int,
@@ -7366,7 +7367,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(product_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7388,7 +7389,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_get_translation(
+    async def listing_get_translation(
         self,
         shop_id: int,
         listing_id: int,
@@ -7433,7 +7434,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(language), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7455,7 +7456,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_create_translation(
+    async def listing_create_translation(
         self,
         input: ListingCreateTranslationInput | Mapping[str, Any],
         shop_id: int,
@@ -7503,7 +7504,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(language), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7525,7 +7526,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_update_translation(
+    async def listing_update_translation(
         self,
         input: ListingUpdateTranslationInput | Mapping[str, Any],
         shop_id: int,
@@ -7573,7 +7574,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(language), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7595,7 +7596,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_get_variation(
+    async def listing_get_variation(
         self,
         shop_id: int,
         listing_id: int,
@@ -7636,7 +7637,7 @@ class EtsyClient(ConnectorClientBase):
             f"/variation-images"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7658,7 +7659,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def listing_update_variation(
+    async def listing_update_variation(
         self,
         input: ListingUpdateVariationInput | Mapping[str, Any],
         shop_id: int,
@@ -7702,7 +7703,7 @@ class EtsyClient(ConnectorClientBase):
             f"/variation-images"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,

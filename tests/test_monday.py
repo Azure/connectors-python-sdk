@@ -8,7 +8,7 @@ import pytest
 
 from azure.core.credentials import AzureKeyCredential
 import azure.connectors.monday as monday_module
-from azure.connectors.aio.monday import MondayClient
+from azure.connectors.monday import MondayClient
 from azure.connectors.monday import (
     CreateBoardInput,
     CreateItemInput,

@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.powerbi import PowerbiClient
+from azure.connectors.powerbi import PowerbiClient
 from azure.connectors.powerbi import UpdateGoalRequest, QuerySpecification
 from azure.connectors.sdk import (
     ConnectorException,

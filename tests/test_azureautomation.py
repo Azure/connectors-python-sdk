@@ -5,7 +5,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.azureautomation import AzureautomationClient
+from azure.connectors.azureautomation import AzureautomationClient
 from azure.connectors.azureautomation import (
     CreateJobInput,
     CreateJobResponse,

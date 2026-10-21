@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, patch
 
 import azure.connectors.zeptomail as zeptomail_module
 import pytest
-from azure.connectors.aio.zeptomail import ZeptomailClient
+from azure.connectors.zeptomail import ZeptomailClient
 from azure.connectors.zeptomail import (
     ReplyToAddress,
     SendMailInput,

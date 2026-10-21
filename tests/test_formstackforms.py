@@ -3,7 +3,7 @@
 """Contract tests for FormstackformsClient."""
 
 import azure.connectors.formstackforms as formstackforms_module
-from azure.connectors.aio.formstackforms import FormstackformsClient
+from azure.connectors.formstackforms import FormstackformsClient
 from azure.connectors.formstackforms import TRIGGER_OPERATIONS
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 

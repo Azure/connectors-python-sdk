@@ -12,16 +12,14 @@ from urllib.parse import urljoin, urlsplit
 
 import pytest
 from azure.core.credentials import AzureKeyCredential
-from azure.core.polling import AsyncLROPoller, LROPoller
+from azure.core.polling import AsyncLROPoller
 from requests import Request
 
-from azure.connectors.aio.kusto import KustoClient as AsyncKustoClient
-from azure.connectors.kusto import KustoClient
+from azure.connectors.kusto import KustoClient as AsyncKustoClient
 from azure.connectors.sdk._polling import resolve_polling_url
-from azure.connectors.sdk.aio.polling import (
+from azure.connectors.sdk.polling import (
     ConnectorPollingMethod as AsyncConnectorPollingMethod,
 )
-from azure.connectors.sdk.polling import ConnectorPollingMethod
 from azure.connectors.sdk.response import ConnectorResponseSnapshot
 
 RUNTIME_URL = "https://runtime.example/connections/1"
@@ -82,37 +80,6 @@ def response(
     return ConnectorResponseSnapshot(status, headers, '{}', b'{}')
 
 
-@pytest.mark.parametrize("initial_location,expected_url", LOCATION_CASES)
-@pytest.mark.parametrize("subsequent_location", ["44", "../44", "?step=2"])
-def test_sync_initial_and_subsequent_relative_locations(
-    initial_location: str,
-    expected_url: str,
-    subsequent_location: str,
-) -> None:
-    """Use the initiating URI first and the actual polling URI thereafter."""
-    http_client = MagicMock()
-    http_client.send.side_effect = [
-        response(202, subsequent_location), response(200),
-    ]
-    method = ConnectorPollingMethod(
-        http_client, "Location", request_url=REQUEST_URL,
-    )
-    with patch("azure.connectors.sdk.polling.time.sleep"):
-        poller = LROPoller(
-            SimpleNamespace(_connection_runtime_url=RUNTIME_URL),
-            response(202, initial_location),
-            lambda terminal: terminal.text,
-            method,
-        )
-        assert poller.result() == '{}'
-
-    assert [call.args[1] for call in http_client.send.call_args_list] == [
-        expected_url, urljoin(expected_url, subsequent_location),
-    ]
-    for call in http_client.send.call_args_list:
-        assert_prepared_runtime_origin(call.args[1])
-
-
 @pytest.mark.asyncio
 @pytest.mark.parametrize("initial_location,expected_url", LOCATION_CASES)
 @pytest.mark.parametrize("subsequent_location", ["44", "../44", "?step=2"])
@@ -121,7 +88,7 @@ async def test_aio_initial_and_subsequent_relative_locations(
     expected_url: str,
     subsequent_location: str,
 ) -> None:
-    """Apply identical initial and later Location semantics asynchronously."""
+    """Use the initiating URI first and the actual polling URI thereafter."""
     http_client = SimpleNamespace(send=AsyncMock(side_effect=[
         response(202, subsequent_location), response(200),
     ]))
@@ -134,7 +101,7 @@ async def test_aio_initial_and_subsequent_relative_locations(
         ),
     )
     with patch(
-        "azure.connectors.sdk.aio.polling.asyncio.sleep", new_callable=AsyncMock,
+        "azure.connectors.sdk.polling.asyncio.sleep", new_callable=AsyncMock,
     ):
         assert await poller.result() == '{}'
 
@@ -146,15 +113,14 @@ async def test_aio_initial_and_subsequent_relative_locations(
 
 
 @pytest.mark.parametrize("location", UNSAFE_LOCATIONS)
-@pytest.mark.parametrize(
-    "method_type", [ConnectorPollingMethod, AsyncConnectorPollingMethod],
-)
 def test_polling_rejects_ambiguous_initial_authority_before_sending(
-    location: str, method_type: type,
+    location: str,
 ) -> None:
-    """Reject malformed initial Locations on both surfaces before authentication."""
-    http_client = MagicMock()
-    method = method_type(http_client, "Location", request_url=REQUEST_URL)
+    """Reject malformed initial Locations before authentication."""
+    http_client = SimpleNamespace(send=AsyncMock())
+    method = AsyncConnectorPollingMethod(
+        http_client, "Location", request_url=REQUEST_URL,
+    )
     with pytest.raises(ValueError):
         method.initialize(
             SimpleNamespace(_connection_runtime_url=RUNTIME_URL),
@@ -162,28 +128,6 @@ def test_polling_rejects_ambiguous_initial_authority_before_sending(
             lambda terminal: terminal.text,
         )
     http_client.send.assert_not_called()
-
-
-@pytest.mark.parametrize("location", UNSAFE_LOCATIONS)
-def test_sync_polling_rejects_ambiguous_subsequent_location(
-    location: str,
-) -> None:
-    """Never issue a follow-up sync request to an ambiguous Location."""
-    http_client = MagicMock()
-    http_client.send.return_value = response(202, location)
-    method = ConnectorPollingMethod(
-        http_client, "Location", request_url=REQUEST_URL,
-    )
-    method.initialize(
-        SimpleNamespace(_connection_runtime_url=RUNTIME_URL),
-        response(202, "43"),
-        lambda terminal: terminal.text,
-    )
-    with patch("azure.connectors.sdk.polling.time.sleep"):
-        with pytest.raises(ValueError):
-            method.run()
-    http_client.send.assert_called_once()
-    assert_prepared_runtime_origin(http_client.send.call_args.args[1])
 
 
 @pytest.mark.asyncio
@@ -202,7 +146,7 @@ async def test_aio_polling_rejects_ambiguous_subsequent_location(
         lambda terminal: terminal.text,
     )
     with patch(
-        "azure.connectors.sdk.aio.polling.asyncio.sleep", new_callable=AsyncMock,
+        "azure.connectors.sdk.polling.asyncio.sleep", new_callable=AsyncMock,
     ):
         with pytest.raises(ValueError):
             await method.run()
@@ -251,24 +195,6 @@ def test_relative_location_cannot_inherit_an_unsafe_origin(
         resolve_polling_url(location, RUNTIME_URL, request_url)
 
 
-@pytest.mark.parametrize("initial_location,expected_url", LOCATION_CASES[:2])
-def test_kusto_begin_carries_initiating_request_uri(
-    initial_location: str, expected_url: str,
-) -> None:
-    """Catch missing request_url propagation in the generated synchronous API."""
-    client = KustoClient(RUNTIME_URL, AzureKeyCredential("test-key"))
-    client._http_client = MagicMock()
-    client.http_client.send.side_effect = [
-        response(202, initial_location), response(200),
-    ]
-    with client, patch("azure.connectors.sdk.polling.time.sleep"):
-        assert client.begin_list_kusto_results(input={}).result() == {}
-
-    assert [call.args[:2] for call in client.http_client.send.call_args_list] == [
-        ("POST", REQUEST_URL), ("GET", expected_url),
-    ]
-
-
 @pytest.mark.asyncio
 @pytest.mark.parametrize("initial_location,expected_url", LOCATION_CASES[:2])
 async def test_aio_kusto_begin_carries_initiating_request_uri(
@@ -283,7 +209,7 @@ async def test_aio_kusto_begin_carries_initiating_request_uri(
     client.http_client.close = AsyncMock()
     async with client:
         with patch(
-            "azure.connectors.sdk.aio.polling.asyncio.sleep",
+            "azure.connectors.sdk.polling.asyncio.sleep",
             new_callable=AsyncMock,
         ):
             poller = await client.begin_list_kusto_results(input={})

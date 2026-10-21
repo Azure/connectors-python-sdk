@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.webex import WebexClient
+from azure.connectors.webex import WebexClient
 from azure.connectors.webex import (
     CreateSpaceInput,
     CreateSpaceMemberInput,

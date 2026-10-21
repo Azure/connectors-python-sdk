@@ -3,7 +3,7 @@
 """Contract tests for EventbriteClient."""
 
 import azure.connectors.eventbrite as eventbrite_module
-from azure.connectors.aio.eventbrite import EventbriteClient
+from azure.connectors.eventbrite import EventbriteClient
 from azure.connectors.eventbrite import TRIGGER_OPERATIONS
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 

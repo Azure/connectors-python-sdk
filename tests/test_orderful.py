@@ -5,7 +5,7 @@
 from typing import get_type_hints
 
 import azure.connectors.orderful as orderful_module
-from azure.connectors.aio.orderful import OrderfulClient
+from azure.connectors.orderful import OrderfulClient
 from azure.connectors.orderful import TRIGGER_OPERATIONS
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 

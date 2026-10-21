@@ -6,7 +6,7 @@ import json
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.wdatp import WdatpClient
+from azure.connectors.wdatp import WdatpClient
 from azure.connectors.wdatp import (
     AdvancedHuntingInput,
     PatchAlertInput,

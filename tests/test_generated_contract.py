@@ -14,7 +14,6 @@ from azure.connectors._client_registry import CLIENT_REGISTRY
 
 REPOSITORY_ROOT = Path(__file__).resolve().parent.parent
 CONNECTOR_DIRECTORY = REPOSITORY_ROOT / "src" / "azure" / "connectors"
-ASYNC_CONNECTOR_DIRECTORY = CONNECTOR_DIRECTORY / "aio"
 
 
 def generated_client_name(path: Path) -> str:
@@ -47,20 +46,17 @@ def stub_client_names(path: Path) -> set[str]:
     }
 
 
-def test_generated_sync_and_async_inventories_match() -> None:
-    """Keep synchronous and asynchronous generated module inventories aligned."""
+def test_generated_inventory_has_only_root_connectors() -> None:
+    """Keep all 99 connectors at root without duplicate client namespaces."""
     connector_names = {
         path.stem
         for path in CONNECTOR_DIRECTORY.glob("*.py")
         if not path.name.startswith("_")
     }
-    async_connector_names = {
-        path.stem
-        for path in ASYNC_CONNECTOR_DIRECTORY.glob("*.py")
-        if path.name != "__init__.py"
-    }
-
-    assert connector_names == async_connector_names
+    assert len(connector_names) == 99
+    assert connector_names == set(CLIENT_REGISTRY.values())
+    assert not (CONNECTOR_DIRECTORY / "aio").exists()
+    assert not (CONNECTOR_DIRECTORY / "sync").exists()
 
 
 def test_generated_registry_and_type_stubs_cover_every_client() -> None:
@@ -74,19 +70,13 @@ def test_generated_registry_and_type_stubs_cover_every_client() -> None:
 
     assert CLIENT_REGISTRY == expected_registry
     assert stub_client_names(CONNECTOR_DIRECTORY / "__init__.pyi") == expected_client_names
-    assert stub_client_names(
-        ASYNC_CONNECTOR_DIRECTORY / "__init__.pyi"
-    ) == expected_client_names
 
 
 def test_generated_operations_have_structured_docstrings() -> None:
-    """Require structured public API documentation in both client surfaces."""
+    """Require structured public API documentation in the async root surface."""
     operation_count = 0
     violations: list[str] = []
-    connector_paths = [
-        *CONNECTOR_DIRECTORY.glob("*.py"),
-        *ASYNC_CONNECTOR_DIRECTORY.glob("*.py"),
-    ]
+    connector_paths = sorted(CONNECTOR_DIRECTORY.glob("*.py"))
 
     for path in connector_paths:
         if path.name.startswith("_"):

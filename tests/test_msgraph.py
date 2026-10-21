@@ -4,7 +4,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.msgraphgroupsanduser import MsgraphgroupsanduserClient
+from azure.connectors.msgraphgroupsanduser import MsgraphgroupsanduserClient
 from azure.connectors.msgraphgroupsanduser import (
     ListUsersResponse,
     ListGroupsByDisplayNameSearchResponse,

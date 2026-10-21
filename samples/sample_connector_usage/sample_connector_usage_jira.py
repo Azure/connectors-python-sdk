@@ -17,12 +17,15 @@ Usage:
 
     python sample_connector_usage_jira.py
 """
+
+import asyncio
 import os
 
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.jira import JiraClient, CreateIssueInput
+from azure.connectors.jira import JiraClient
+from azure.connectors.jira import CreateIssueInput
 
 
 # Connection runtime URL format:
@@ -30,13 +33,14 @@ from azure.connectors.jira import JiraClient, CreateIssueInput
 CONNECTION_RUNTIME_URL = os.environ.get("JIRA_CONNECTION_URL", "")
 
 
-def example_1_list_resources() -> list[dict]:
+async def example_1_list_resources() -> list[dict]:
     """Example 1: List accessible Jira cloud resources."""
     print("\n=== Example 1: List Resources ===")
 
-    with DefaultAzureCredential() as credential:
-        with JiraClient(CONNECTION_RUNTIME_URL, credential) as client:
-            resources = list(client.list_resources())
+    async with DefaultAzureCredential() as credential:
+        async with JiraClient(CONNECTION_RUNTIME_URL, credential) as client:
+            resources_response = [item async for item in client.list_resources()]
+            resources = resources_response
 
             print(f"Found {len(resources)} resources")
             for resource in resources[:5]:
@@ -45,26 +49,28 @@ def example_1_list_resources() -> list[dict]:
             return resources
 
 
-def example_2_list_issues(cloud_id: str) -> None:
+async def example_2_list_issues(cloud_id: str) -> None:
     """Example 2: List issues in a Jira site."""
     print("\n=== Example 2: List Issues ===")
 
-    with DefaultAzureCredential() as credential:
-        with JiraClient(CONNECTION_RUNTIME_URL, credential) as client:
+    async with DefaultAzureCredential() as credential:
+        async with JiraClient(CONNECTION_RUNTIME_URL, credential) as client:
             del cloud_id
 
-            issues = list(client.list_issues())
+            issues_response = [item async for item in client.list_issues()]
+
+            issues = issues_response
             print(f"Found {len(issues)} issues")
             for issue in issues[:5]:
                 print(f"  - {issue.get('key')}: {issue.get('fields', {}).get('summary')}")
 
 
-def example_3_create_issue(cloud_id: str) -> None:
+async def example_3_create_issue(cloud_id: str) -> None:
     """Example 3: Create an issue (requires valid project + issue type)."""
     print("\n=== Example 3: Create Issue ===")
 
-    with DefaultAzureCredential() as credential:
-        with JiraClient(CONNECTION_RUNTIME_URL, credential) as client:
+    async with DefaultAzureCredential() as credential:
+        async with JiraClient(CONNECTION_RUNTIME_URL, credential) as client:
             del cloud_id
 
             request = CreateIssueInput(
@@ -88,7 +94,7 @@ def example_3_create_issue(cloud_id: str) -> None:
                 }
             )
 
-            created = client.create_issue(
+            created = await client.create_issue(
                 input=request,
                 project_key="PROJ",
                 issue_type_ids="10001",
@@ -96,7 +102,7 @@ def example_3_create_issue(cloud_id: str) -> None:
             print(f"Created issue: {created.get('key') if created else 'n/a'}")
 
 
-def main() -> None:
+async def main() -> None:
     """Run Jira connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: JIRA_CONNECTION_URL environment variable not set.")
@@ -107,12 +113,12 @@ def main() -> None:
     print("=" * 50)
 
     try:
-        resources = example_1_list_resources()
+        resources = await example_1_list_resources()
 
         if resources:
             cloud_id = resources[0].get("id")
             if cloud_id:
-                example_2_list_issues(cloud_id)
+                await example_2_list_issues(cloud_id)
                 # Uncomment after setting valid project/issuetype in example_3_create_issue.
                 # await example_3_create_issue(cloud_id)
             else:
@@ -127,4 +133,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

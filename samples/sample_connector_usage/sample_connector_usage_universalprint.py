@@ -19,10 +19,12 @@ Usage:
 
     python sample_connector_usage_universalprint.py
 """
+
+import asyncio
 import os
 from pathlib import Path
 
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.universalprint import UniversalprintClient
 
@@ -34,15 +36,17 @@ CONNECTION_RUNTIME_URL = os.environ.get(
 )
 
 
-def example_1_list_recent_shares():
+async def example_1_list_recent_shares():
     """Example 1: List recently used printer shares."""
     print("\n=== Example 1: List Recent Printer Shares ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with UniversalprintClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with UniversalprintClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                shares = list(client.list_recent_shares())
+                items = [item async for item in client.list_recent_shares()]
+
+                shares = items
                 print(f"Found {len(shares)} recent printer share(s).")
                 for share in shares:
                     print(f"  - {share}")
@@ -53,18 +57,18 @@ def example_1_list_recent_shares():
                 print(f"Error: {ex}")
 
 
-def example_2_print_file():
+async def example_2_print_file():
     """Example 2: Print a PDF to a printer share."""
     print("\n=== Example 2: Print File ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
         pdf_file_path = Path(
             os.environ.get("UNIVERSALPRINT_PDF_PATH", "document.pdf")
         )
 
-        with UniversalprintClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with UniversalprintClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                client.print_file(
+                await client.print_file(
                     input=pdf_file_path.read_bytes(),
                     printer="your-printer-share-id",
                     file_name=pdf_file_path.name,
@@ -81,7 +85,7 @@ def example_2_print_file():
                 print(f"Error: {ex}")
 
 
-def main():
+async def main():
     """Run all examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: UNIVERSALPRINT_CONNECTION_URL environment variable not set.")
@@ -90,11 +94,11 @@ def main():
 
     print(f"Using connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
 
-    example_1_list_recent_shares()
-    example_2_print_file()
+    await example_1_list_recent_shares()
+    await example_2_print_file()
 
     print("\n=== All examples completed ===")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

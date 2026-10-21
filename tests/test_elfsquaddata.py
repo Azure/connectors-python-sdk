@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 import azure.connectors.elfsquaddata as elfsquaddata_module
-from azure.connectors.aio.elfsquaddata import ElfsquaddataClient
+from azure.connectors.elfsquaddata import ElfsquaddataClient
 from azure.connectors.elfsquaddata import TRIGGER_OPERATIONS
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import (

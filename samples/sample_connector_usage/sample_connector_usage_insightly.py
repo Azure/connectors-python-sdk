@@ -17,12 +17,15 @@ Usage:
 
     python sample_connector_usage_insightly.py
 """
+
+import asyncio
 import os
 
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.insightly import InsightlyClient, TaskRequest
+from azure.connectors.insightly import InsightlyClient
+from azure.connectors.insightly import TaskRequest
 
 
 # Connection runtime URL format:
@@ -30,26 +33,28 @@ from azure.connectors.insightly import InsightlyClient, TaskRequest
 CONNECTION_RUNTIME_URL = os.environ.get("INSIGHTLY_CONNECTION_URL", "")
 
 
-def example_1_list_tasks() -> None:
+async def example_1_list_tasks() -> None:
     """Example 1: List tasks."""
     print("\n=== Example 1: List Tasks ===")
 
-    with DefaultAzureCredential() as credential:
-        with InsightlyClient(CONNECTION_RUNTIME_URL, credential) as client:
-            tasks = list(client.list_tasks())
+    async with DefaultAzureCredential() as credential:
+        async with InsightlyClient(CONNECTION_RUNTIME_URL, credential) as client:
+            response = [item async for item in client.list_tasks()]
+            tasks = response
 
             print(f"Found {len(tasks)} tasks")
             for task in tasks[:5]:
                 print(f"  - {task.get('TASK_ID')}: {task.get('TITLE')}")
 
 
-def example_2_list_contacts() -> None:
+async def example_2_list_contacts() -> None:
     """Example 2: List contacts."""
     print("\n=== Example 2: List Contacts ===")
 
-    with DefaultAzureCredential() as credential:
-        with InsightlyClient(CONNECTION_RUNTIME_URL, credential) as client:
-            contacts = list(client.list_contacts())
+    async with DefaultAzureCredential() as credential:
+        async with InsightlyClient(CONNECTION_RUNTIME_URL, credential) as client:
+            response = [item async for item in client.list_contacts()]
+            contacts = response
 
             print(f"Found {len(contacts)} contacts")
             for contact in contacts[:5]:
@@ -58,12 +63,12 @@ def example_2_list_contacts() -> None:
                 print(f"  - {contact.get('CONTACT_ID')}: {first} {last}".rstrip())
 
 
-def example_3_add_task() -> None:
+async def example_3_add_task() -> None:
     """Example 3: Add a task."""
     print("\n=== Example 3: Add Task ===")
 
-    with DefaultAzureCredential() as credential:
-        with InsightlyClient(CONNECTION_RUNTIME_URL, credential) as client:
+    async with DefaultAzureCredential() as credential:
+        async with InsightlyClient(CONNECTION_RUNTIME_URL, credential) as client:
             request = TaskRequest(
                 t_i_t_l_e="SDK sample task",
                 d_e_t_a_i_l_s="Created from insightly SDK sample.",
@@ -72,11 +77,11 @@ def example_3_add_task() -> None:
                 p_u_b_l_i_c_l_y_v_i_s_i_b_l_e=False,
             )
 
-            created = client.add_task(input=request)
+            created = await client.add_task(input=request)
             print(f"Created task: {created.get('TASK_ID') if created else 'n/a'}")
 
 
-def main() -> None:
+async def main() -> None:
     """Run Insightly connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: INSIGHTLY_CONNECTION_URL environment variable not set.")
@@ -87,8 +92,8 @@ def main() -> None:
     print("=" * 50)
 
     try:
-        example_1_list_tasks()
-        example_2_list_contacts()
+        await example_1_list_tasks()
+        await example_2_list_contacts()
         # Uncomment to create a task in your Insightly instance.
         # await example_3_add_task()
 
@@ -99,4 +104,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

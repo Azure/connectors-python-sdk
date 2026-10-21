@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.microsoftforms import MicrosoftformsClient
+from azure.connectors.microsoftforms import MicrosoftformsClient
 from azure.connectors.microsoftforms import TRIGGER_OPERATIONS
 from azure.connectors.sdk import (
     ConnectorException,

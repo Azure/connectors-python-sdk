@@ -10,8 +10,9 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential, TokenCredential
-from azure.core.pipeline.transport import HttpTransport
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
@@ -296,7 +297,7 @@ class FreshserviceClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: TokenCredential | AzureKeyCredential,
+        credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout: float = 30.0,
@@ -305,7 +306,7 @@ class FreshserviceClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[HttpTransport] = None,
+        transport: Optional[AsyncHttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -325,8 +326,8 @@ class FreshserviceClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core HTTP transport closed by
-                the client through its synchronous lifecycle.
+            transport: Optional Azure Core async HTTP transport closed by
+                the client through its asynchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -353,7 +354,7 @@ class FreshserviceClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "freshservice"
 
-    def add_note(
+    async def add_note(
         self,
         input: AddNoteRequest | Mapping[str, Any],
         ticket_id: int,
@@ -390,7 +391,7 @@ class FreshserviceClient(ConnectorClientBase):
             f"/api/v2/tickets/{quote(str(ticket_id), safe='')}/notes"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -412,7 +413,7 @@ class FreshserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def create_ticket(
+    async def create_ticket(
         self,
         input: CreateTicketRequest | Mapping[str, Any],
         *,
@@ -444,7 +445,7 @@ class FreshserviceClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/api/v2/tickets"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -466,7 +467,7 @@ class FreshserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def update_ticket(
+    async def update_ticket(
         self,
         input: UpdateTicketRequest | Mapping[str, Any],
         ticket_id: int,
@@ -503,7 +504,7 @@ class FreshserviceClient(ConnectorClientBase):
             f"/api/v2/tickets/{quote(str(ticket_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,

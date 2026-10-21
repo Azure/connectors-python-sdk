@@ -10,8 +10,9 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential, TokenCredential
-from azure.core.pipeline.transport import HttpTransport
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
@@ -468,7 +469,7 @@ class RepliconClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: TokenCredential | AzureKeyCredential,
+        credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout: float = 30.0,
@@ -477,7 +478,7 @@ class RepliconClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[HttpTransport] = None,
+        transport: Optional[AsyncHttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -497,8 +498,8 @@ class RepliconClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core HTTP transport closed by
-                the client through its synchronous lifecycle.
+            transport: Optional Azure Core async HTTP transport closed by
+                the client through its asynchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -525,7 +526,7 @@ class RepliconClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "replicon"
 
-    def bulk_get_project_details3(
+    async def bulk_get_project_details3(
         self,
         input: BulkGetProjectDetails3Input | Mapping[str, Any],
         host_url: str,
@@ -569,7 +570,7 @@ class RepliconClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -591,7 +592,7 @@ class RepliconClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def create_project_or_apply_modifications(
+    async def create_project_or_apply_modifications(
         self,
         input: CreateProjectOrApplyModificationsInput | Mapping[str, Any],
         host_url: str,
@@ -635,7 +636,7 @@ class RepliconClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -657,7 +658,7 @@ class RepliconClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def user_list_service_get_data(
+    async def user_list_service_get_data(
         self,
         input: UserListServiceGetDataInput | Mapping[str, Any],
         host_url: str,
@@ -701,7 +702,7 @@ class RepliconClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -723,7 +724,7 @@ class RepliconClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_descendant_task_details(
+    async def get_descendant_task_details(
         self,
         input: GetDescendantTaskDetailsInput | Mapping[str, Any],
         host_url: str,
@@ -767,7 +768,7 @@ class RepliconClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -789,7 +790,7 @@ class RepliconClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def create_task_hierarchy_or_apply_modifications(
+    async def create_task_hierarchy_or_apply_modifications(
         self,
         input: CreateTaskHierarchyOrApplyModificationsInput | Mapping[str, Any],
         host_url: str,
@@ -835,7 +836,7 @@ class RepliconClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -857,7 +858,7 @@ class RepliconClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def move_task(
+    async def move_task(
         self,
         input: MoveTaskInput | Mapping[str, Any],
         host_url: str,
@@ -901,7 +902,7 @@ class RepliconClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -918,7 +919,7 @@ class RepliconClient(ConnectorClientBase):
                 response=response,
             )
 
-    def task_list_service_get_data(
+    async def task_list_service_get_data(
         self,
         input: TaskListServiceGetDataInput | Mapping[str, Any],
         host_url: str,
@@ -962,7 +963,7 @@ class RepliconClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -984,7 +985,7 @@ class RepliconClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_timesheet_summary(
+    async def get_timesheet_summary(
         self,
         input: GetTimesheetSummaryInput | Mapping[str, Any],
         host_url: str,
@@ -1028,7 +1029,7 @@ class RepliconClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1050,7 +1051,7 @@ class RepliconClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def bulk_get_time_entered_summary(
+    async def bulk_get_time_entered_summary(
         self,
         input: BulkGetTimeEnteredSummaryInput | Mapping[str, Any],
         host_url: str,
@@ -1094,7 +1095,7 @@ class RepliconClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1116,7 +1117,7 @@ class RepliconClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def put_project_team_member_assignments(
+    async def put_project_team_member_assignments(
         self,
         input: PutProjectTeamMemberAssignmentsInput | Mapping[str, Any],
         host_url: str,
@@ -1160,7 +1161,7 @@ class RepliconClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1177,7 +1178,7 @@ class RepliconClient(ConnectorClientBase):
                 response=response,
             )
 
-    def put_resource_assignments(
+    async def put_resource_assignments(
         self,
         input: PutResourceAssignmentsInput | Mapping[str, Any],
         host_url: str,
@@ -1221,7 +1222,7 @@ class RepliconClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1238,7 +1239,7 @@ class RepliconClient(ConnectorClientBase):
                 response=response,
             )
 
-    def get_my_tenant_endpoint_details(
+    async def get_my_tenant_endpoint_details(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1270,7 +1271,7 @@ class RepliconClient(ConnectorClientBase):
             f"/DiscoveryService1.svc/GetMyTenantEndpointDetails"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,

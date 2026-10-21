@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from azure.connectors.sdk.aio.http_client import ConnectorHttpClient
+from azure.connectors.sdk.http_client import ConnectorHttpClient
 from azure.connectors.sdk.serialization import to_wire
 from azure.connectors.signinghub import HandSignature, ValidationRule
 from azure.connectors.teams import (

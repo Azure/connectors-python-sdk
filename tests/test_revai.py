@@ -8,7 +8,7 @@ import pytest
 
 from azure.core.credentials import AzureKeyCredential
 import azure.connectors.revai as revai_module
-from azure.connectors.aio.revai import RevaiClient
+from azure.connectors.revai import RevaiClient
 from azure.connectors.revai import AlignmentInput, TranscriptionInput
 from azure.connectors.sdk import ConnectorException
 from tests.conftest import MockResponse

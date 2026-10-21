@@ -1,28 +1,31 @@
 """WordPress sample for the Azure Connectors Python SDK."""
+
+import asyncio
 import os
 
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.wordpress import CreatePostModel, WordpressClient
+from azure.connectors.wordpress import WordpressClient
+from azure.connectors.wordpress import CreatePostModel
 
 
 CONNECTION_RUNTIME_URL = os.environ.get("WORDPRESS_CONNECTION_URL", "")
 
 
-def list_sites() -> None:
+async def list_sites() -> None:
     """List WordPress sites available to the connection."""
-    with DefaultAzureCredential() as credential:
-        with WordpressClient(CONNECTION_RUNTIME_URL, credential) as client:
-            sites = list(client.list_sites())
+    async with DefaultAzureCredential() as credential:
+        async with WordpressClient(CONNECTION_RUNTIME_URL, credential) as client:
+            sites = [item async for item in client.list_sites()]
             print(f"Sites: {sites}")
 
 
-def create_post() -> None:
+async def create_post() -> None:
     """Create a draft WordPress post."""
-    with DefaultAzureCredential() as credential:
-        with WordpressClient(CONNECTION_RUNTIME_URL, credential) as client:
-            post = client.create(
+    async with DefaultAzureCredential() as credential:
+        async with WordpressClient(CONNECTION_RUNTIME_URL, credential) as client:
+            post = await client.create(
                 input=CreatePostModel(
                     title="Generated connector sample",
                     content="Created with the Azure Connectors Python SDK.",
@@ -33,18 +36,18 @@ def create_post() -> None:
             print(f"Created post: {post}")
 
 
-def main() -> None:
+async def main() -> None:
     """Run WordPress connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Set WORDPRESS_CONNECTION_URL to run this sample.")
         return
 
     try:
-        list_sites()
-        create_post()
+        await list_sites()
+        await create_post()
     except ConnectorException as ex:
         print(f"Connector error: {ex}")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

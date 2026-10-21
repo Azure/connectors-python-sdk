@@ -65,7 +65,7 @@ class TestCodeQuality(unittest.TestCase):
                 f'flake8 validation failed:\n{output}') from None
 
     def test_no_unchecked_send_calls(self):
-        """Verify all sync and aio send calls capture their response.
+        """Verify all async send calls capture their response.
 
         Generated connector code must not discard send responses.
         This check catches the most egregious error: calling send
@@ -80,10 +80,7 @@ class TestCodeQuality(unittest.TestCase):
 
         violations: list[LintViolation] = []
 
-        connector_paths = [
-            *connector_dir.glob('*.py'),
-            *(connector_dir / 'aio').glob('*.py'),
-        ]
+        connector_paths = sorted(connector_dir.glob('*.py'))
         for filepath in connector_paths:
             if filepath.name in skip_files:
                 continue
@@ -102,7 +99,7 @@ class TestCodeQuality(unittest.TestCase):
 
             raise AssertionError(
                 f"Found {len(violations)} unchecked send call(s).\n"
-                f"All sync and aio send calls must capture the response.\n"
+                f"All async send calls must capture the response.\n"
                 f"Fix the generator (see GENERATION.md) and regenerate, "
                 f"or regenerate with the latest generator.\n\n"
                 f"{violation_text}"
@@ -112,13 +109,9 @@ class TestCodeQuality(unittest.TestCase):
         """Verify only explicitly idempotent resource deletes accept HTTP 404."""
         connector_dir = ROOT_PATH / 'src' / 'azure' / 'connectors'
         expected_operations = {
-            ('aio/arm.py', 'deployments_delete'),
             ('arm.py', 'deployments_delete'),
         }
-        connector_paths = [
-            *connector_dir.glob('*.py'),
-            *(connector_dir / 'aio').glob('*.py'),
-        ]
+        connector_paths = sorted(connector_dir.glob('*.py'))
         actual_operations: set[tuple[str, str]] = set()
 
         for filepath in connector_paths:
@@ -198,7 +191,7 @@ class TestCodeQuality(unittest.TestCase):
     def _find_unchecked_send(
         self, filepath: pathlib.Path
     ) -> list[LintViolation]:
-        """Find sync or aio send calls whose result is not captured.
+        """Find async send calls whose result is not captured.
 
         Detects the pattern:
             self.http_client.send(...)  # Result discarded!

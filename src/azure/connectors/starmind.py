@@ -10,8 +10,9 @@ from typing import Optional, Dict, List, Literal, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential, TokenCredential
-from azure.core.pipeline.transport import HttpTransport
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
@@ -671,7 +672,7 @@ class StarmindClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: TokenCredential | AzureKeyCredential,
+        credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout: float = 30.0,
@@ -680,7 +681,7 @@ class StarmindClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[HttpTransport] = None,
+        transport: Optional[AsyncHttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -700,8 +701,8 @@ class StarmindClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core HTTP transport closed by
-                the client through its synchronous lifecycle.
+            transport: Optional Azure Core async HTTP transport closed by
+                the client through its asynchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -728,7 +729,7 @@ class StarmindClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "starmind"
 
-    def find_experts(
+    async def find_experts(
         self,
         input: FindExpertsInput | Mapping[str, Any],
         *,
@@ -767,7 +768,7 @@ class StarmindClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/api/v3/experts"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -789,7 +790,7 @@ class StarmindClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def find_questions(
+    async def find_questions(
         self,
         *,
         query: Optional[str] = None,
@@ -853,7 +854,7 @@ class StarmindClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -875,7 +876,7 @@ class StarmindClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_user_by_id(
+    async def get_user_by_id(
         self,
         id: str,
         *,
@@ -910,7 +911,7 @@ class StarmindClient(ConnectorClientBase):
             f"/api/v3/users/{quote(str(id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -932,7 +933,7 @@ class StarmindClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def post_question_draft(
+    async def post_question_draft(
         self,
         input: PostQuestionDraftInput | Mapping[str, Any],
         *,
@@ -969,7 +970,7 @@ class StarmindClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/api/v3/questions"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -991,7 +992,7 @@ class StarmindClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def publish_question_draft(
+    async def publish_question_draft(
         self,
         question_id: int,
         *,
@@ -1027,7 +1028,7 @@ class StarmindClient(ConnectorClientBase):
             f"/api/v3/questions/{quote(str(question_id), safe='')}/publish"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,

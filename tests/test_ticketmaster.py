@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 import azure.connectors.ticketmaster as ticketmaster_module
-from azure.connectors.aio.ticketmaster import TicketmasterClient
+from azure.connectors.ticketmaster import TicketmasterClient
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 

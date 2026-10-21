@@ -6,13 +6,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
-from typing import Optional, Iterator, Dict, List, Literal, Any, Mapping
+from typing import Optional, AsyncIterator, Dict, List, Literal, Any, Mapping
 from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.paging import ItemPaged
-from azure.core.credentials import AzureKeyCredential, TokenCredential
-from azure.core.pipeline.transport import HttpTransport
+from azure.core.async_paging import AsyncItemPaged
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
@@ -5840,7 +5841,7 @@ class SigninghubClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: TokenCredential | AzureKeyCredential,
+        credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout: float = 30.0,
@@ -5849,7 +5850,7 @@ class SigninghubClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[HttpTransport] = None,
+        transport: Optional[AsyncHttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -5869,8 +5870,8 @@ class SigninghubClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core HTTP transport closed by
-                the client through its synchronous lifecycle.
+            transport: Optional Azure Core async HTTP transport closed by
+                the client through its asynchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -5974,7 +5975,7 @@ class SigninghubClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    def attachment_delete_attachment(
+    async def attachment_delete_attachment(
         self,
         package_id: int,
         document_id: int,
@@ -6020,7 +6021,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/{quote(str(attachment_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6042,7 +6043,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def attachment_download_attachment(
+    async def attachment_download_attachment(
         self,
         package_id: int,
         document_id: int,
@@ -6088,7 +6089,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/{quote(str(attachment_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6119,15 +6120,15 @@ class SigninghubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get Attachments
 
         Business applications can use this service API to get the attachments
         of a document.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `V4_Attachment_GetAttachments`.
 
@@ -6141,8 +6142,8 @@ class SigninghubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -6159,14 +6160,14 @@ class SigninghubClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -6185,21 +6186,21 @@ class SigninghubClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else []
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page:
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def attachment_upload_attachment(
+    async def attachment_upload_attachment(
         self,
         input: bytes,
         package_id: int,
@@ -6245,7 +6246,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/attachments"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST",
             request_url,
             body=input,
@@ -6270,7 +6271,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def checkbox_add_check_box(
+    async def checkbox_add_check_box(
         self,
         input: CheckBoxFieldRequest | Mapping[str, Any],
         package_id: int,
@@ -6328,7 +6329,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/checkbox"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6350,7 +6351,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def checkbox_update_check_box(
+    async def checkbox_update_check_box(
         self,
         input: UpdateCheckBoxFieldRequest | Mapping[str, Any],
         package_id: int,
@@ -6403,7 +6404,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/checkbox"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6436,7 +6437,7 @@ class SigninghubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get Contacts
 
@@ -6448,8 +6449,8 @@ class SigninghubClient(ConnectorClientBase):
         The search response information contains the user email address and
         respective user name.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `V4_Contacts_Get`.
 
@@ -6464,8 +6465,8 @@ class SigninghubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -6494,14 +6495,14 @@ class SigninghubClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -6520,21 +6521,21 @@ class SigninghubClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else []
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page:
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def documents_delete_document(
+    async def documents_delete_document(
         self,
         package_id: int,
         document_id: int,
@@ -6576,7 +6577,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/{quote(str(document_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6598,7 +6599,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def documents_download_document_bytes(
+    async def documents_download_document_bytes(
         self,
         package_id: int,
         document_id: int,
@@ -6640,7 +6641,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/{quote(str(document_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6662,7 +6663,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def documents_get_certify_policy(
+    async def documents_get_certify_policy(
         self,
         package_id: int,
         document_id: int,
@@ -6705,7 +6706,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/certify"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6727,7 +6728,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def documents_get_document_details(
+    async def documents_get_document_details(
         self,
         package_id: int,
         document_id: int,
@@ -6771,7 +6772,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/details"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6793,7 +6794,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def documents_rename_document(
+    async def documents_rename_document(
         self,
         input: RenameDocumentRequest | Mapping[str, Any],
         package_id: int,
@@ -6839,7 +6840,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/{quote(str(document_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6861,7 +6862,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def documents_update_certify_policy(
+    async def documents_update_certify_policy(
         self,
         input: UpdateCertifyPolicyRequest | Mapping[str, Any],
         package_id: int,
@@ -6908,7 +6909,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/certify"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6930,7 +6931,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def documents_upload_from_library(
+    async def documents_upload_from_library(
         self,
         package_id: int,
         document_id: int,
@@ -6977,7 +6978,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/{quote(str(document_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6999,7 +7000,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def documents_upload_stream(
+    async def documents_upload_stream(
         self,
         input: bytes,
         package_id: int,
@@ -7046,7 +7047,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/v4/packages/{quote(str(package_id), safe='')}/documents"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST",
             request_url,
             body=input,
@@ -7071,7 +7072,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def enterprise_documents_get_enterprise_workflow_access(
+    async def enterprise_documents_get_enterprise_workflow_access(
         self,
         package_id: int,
         order: int,
@@ -7123,7 +7124,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/authentication"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7145,7 +7146,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def enterprise_documents_update_enterprise_workflow_access(
+    async def enterprise_documents_update_enterprise_workflow_access(
         self,
         input: AccessUpdateRequest | Mapping[str, Any],
         package_id: int,
@@ -7197,7 +7198,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/authentication"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7219,7 +7220,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def fields_auto_assign_field(
+    async def fields_auto_assign_field(
         self,
         input: FieldsAutoAssignFieldInput,
         package_id: int,
@@ -7273,7 +7274,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/assign"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7295,7 +7296,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def fields_auto_place(
+    async def fields_auto_place(
         self,
         input: AutoPlaceFieldRequest | Mapping[str, Any],
         package_id: int,
@@ -7365,7 +7366,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/autoplace"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7387,7 +7388,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def fields_delete_document_field(
+    async def fields_delete_document_field(
         self,
         input: DeleteDocumentFieldRequest | Mapping[str, Any],
         package_id: int,
@@ -7432,7 +7433,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/fields"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7454,7 +7455,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def fields_fill_form_fields(
+    async def fields_fill_form_fields(
         self,
         input: FormFillingRequest | Mapping[str, Any],
         package_id: int,
@@ -7499,7 +7500,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/fields"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7521,7 +7522,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def fields_get_all_document_fields(
+    async def fields_get_all_document_fields(
         self,
         package_id: int,
         document_id: int,
@@ -7569,7 +7570,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/{quote(str(page_no), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7591,7 +7592,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def folder_move_package(
+    async def folder_move_package(
         self,
         input: MoveToRequest | Mapping[str, Any],
         package_id: int,
@@ -7629,7 +7630,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/v4/packages/{quote(str(package_id), safe='')}/move_to"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7651,7 +7652,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def initials_add_initial(
+    async def initials_add_initial(
         self,
         input: InitialFieldRequest | Mapping[str, Any],
         package_id: int,
@@ -7705,7 +7706,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/initials"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7727,7 +7728,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def initials_fill(
+    async def initials_fill(
         self,
         input: InitialFillingRequest | Mapping[str, Any],
         package_id: int,
@@ -7772,7 +7773,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/initial"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7794,7 +7795,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def initials_update_initial(
+    async def initials_update_initial(
         self,
         input: UpdateInitialFieldRequest | Mapping[str, Any],
         package_id: int,
@@ -7846,7 +7847,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/initials"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7868,7 +7869,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def in_person_add_in_person(
+    async def in_person_add_in_person(
         self,
         input: InPersonFieldRequest | Mapping[str, Any],
         package_id: int,
@@ -7931,7 +7932,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/in_person_signature"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7953,7 +7954,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def in_person_update_in_person(
+    async def in_person_update_in_person(
         self,
         input: UpdateInPersonFieldRequest | Mapping[str, Any],
         package_id: int,
@@ -8006,7 +8007,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/in_person_signature"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8028,7 +8029,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def package_add_package(
+    async def package_add_package(
         self,
         input: AddDocumentPackageRequest | Mapping[str, Any],
         *,
@@ -8066,7 +8067,7 @@ class SigninghubClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v4/packages"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8088,7 +8089,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def package_approve(
+    async def package_approve(
         self,
         input: ApproveRequest | Mapping[str, Any],
         package_id: int,
@@ -8126,7 +8127,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/v4/packages/{quote(str(package_id), safe='')}/approve"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8148,7 +8149,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def package_decline(
+    async def package_decline(
         self,
         input: DeclineRequest | Mapping[str, Any],
         package_id: int,
@@ -8186,7 +8187,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/v4/packages/{quote(str(package_id), safe='')}/decline"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8208,7 +8209,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def package_delete_package(
+    async def package_delete_package(
         self,
         package_id_bulk_action: int,
         *,
@@ -8248,7 +8249,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/v4/packages/{quote(str(package_id_bulk_action), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8270,7 +8271,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def package_download_package_bytes(
+    async def package_download_package_bytes(
         self,
         package_id_bulk_action: int,
         *,
@@ -8333,7 +8334,7 @@ class SigninghubClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8355,7 +8356,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def package_finish(
+    async def package_finish(
         self,
         package_id: int,
         *,
@@ -8407,7 +8408,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/v4/packages/{quote(str(package_id), safe='')}/finish"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8429,7 +8430,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def package_gatekeeper_approve(
+    async def package_gatekeeper_approve(
         self,
         input: ApproveRequest | Mapping[str, Any],
         package_id: int,
@@ -8471,7 +8472,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/approve"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8493,7 +8494,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def package_gatekeeper_decline(
+    async def package_gatekeeper_decline(
         self,
         input: DeclineRequest | Mapping[str, Any],
         package_id: int,
@@ -8535,7 +8536,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/decline"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8586,7 +8587,7 @@ class SigninghubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get Packages
 
@@ -8594,8 +8595,8 @@ class SigninghubClient(ConnectorClientBase):
         documents filtered by different statuses. Users can divide the records
         into pages by providing a number of records per page.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `V4_Package_GetAllPackages`.
 
@@ -8632,8 +8633,8 @@ class SigninghubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -8758,14 +8759,14 @@ class SigninghubClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -8784,21 +8785,21 @@ class SigninghubClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else []
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page:
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def package_get_package_details(
+    async def package_get_package_details(
         self,
         package_id: int,
         *,
@@ -8835,7 +8836,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/v4/packages/{quote(str(package_id), safe='')}/details"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8857,7 +8858,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def package_rename_package(
+    async def package_rename_package(
         self,
         input: RenameDocumentPackageRequest | Mapping[str, Any],
         package_id_bulk_action: int,
@@ -8895,7 +8896,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/v4/packages/{quote(str(package_id_bulk_action), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -8917,7 +8918,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def package_submit(
+    async def package_submit(
         self,
         package_id: int,
         *,
@@ -8959,7 +8960,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/v4/packages/{quote(str(package_id), safe='')}/submit"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -8981,7 +8982,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def qr_add_qr_code(
+    async def qr_add_qr_code(
         self,
         input: QrCodeRequest | Mapping[str, Any],
         package_id: int,
@@ -9027,7 +9028,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/qrcode"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -9049,7 +9050,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def qr_update_qr_code(
+    async def qr_update_qr_code(
         self,
         input: UpdateQrCodeRequest | Mapping[str, Any],
         package_id: int,
@@ -9095,7 +9096,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/qrcode"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -9117,7 +9118,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def radio_add_radio_box(
+    async def radio_add_radio_box(
         self,
         input: RadioBoxFieldRequest | Mapping[str, Any],
         package_id: int,
@@ -9175,7 +9176,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/radio"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -9197,7 +9198,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def radio_update_radio_box(
+    async def radio_update_radio_box(
         self,
         input: UpdateRadioBoxFieldRequest | Mapping[str, Any],
         package_id: int,
@@ -9250,7 +9251,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/radio"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -9283,7 +9284,7 @@ class SigninghubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get Templates
 
@@ -9293,8 +9294,8 @@ class SigninghubClient(ConnectorClientBase):
         to search a user's personal templates or the enterprise templates as
         allowed against their user role by their enterprise admin.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `V4_Settings_GetTemplates`.
 
@@ -9311,8 +9312,8 @@ class SigninghubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -9341,14 +9342,14 @@ class SigninghubClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -9367,21 +9368,21 @@ class SigninghubClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else []
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page:
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def signature_add_signature(
+    async def signature_add_signature(
         self,
         input: DigitalSignatureFieldRequest | Mapping[str, Any],
         package_id: int,
@@ -9437,7 +9438,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/signature"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -9459,7 +9460,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def signature_update_signature(
+    async def signature_update_signature(
         self,
         input: UpdateDigitalSignatureFieldRequest | Mapping[str, Any],
         package_id: int,
@@ -9512,7 +9513,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/signature"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -9534,7 +9535,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def signing_bulk_sign_documents(
+    async def signing_bulk_sign_documents(
         self,
         input: BulkSignRequest | Mapping[str, Any],
         package_id_bulk_action: str,
@@ -9608,7 +9609,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/v4/packages/{quote(str(package_id_bulk_action), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -9630,7 +9631,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def signing_bulk_sign_status(
+    async def signing_bulk_sign_status(
         self,
         input: BulkSignStatusRequest | Mapping[str, Any],
         bulk_action: str,
@@ -9685,7 +9686,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/v4/packages/{quote(str(bulk_action), safe='')}/status"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -9707,7 +9708,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def signing_sign_document(
+    async def signing_sign_document(
         self,
         input: SignDocumentRequest | Mapping[str, Any],
         package_id: int,
@@ -9784,7 +9785,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/sign"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -9818,7 +9819,7 @@ class SigninghubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get Enterprise Templates
 
@@ -9828,8 +9829,8 @@ class SigninghubClient(ConnectorClientBase):
         in the authentication request. It is possible to search based upon the
         criterion supplied under the \"x-search-text\" header.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `V4_Template_GetEnterpriseTemplates`.
 
@@ -9845,8 +9846,8 @@ class SigninghubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -9891,14 +9892,14 @@ class SigninghubClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -9917,21 +9918,21 @@ class SigninghubClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else []
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page:
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def text_box_add_text_box(
+    async def text_box_add_text_box(
         self,
         input: TextBoxFieldRequest | Mapping[str, Any],
         package_id: int,
@@ -9985,7 +9986,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/text"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -10007,7 +10008,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def text_box_update_text_box(
+    async def text_box_update_text_box(
         self,
         input: UpdateTextBoxFieldRequest | Mapping[str, Any],
         package_id: int,
@@ -10059,7 +10060,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/text"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -10081,7 +10082,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def workflow_apply_template(
+    async def workflow_apply_template(
         self,
         input: ApplyTemplateRequest | Mapping[str, Any],
         package_id: int,
@@ -10144,7 +10145,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/template"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -10166,7 +10167,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def workflow_evidence_report_download_bytes(
+    async def workflow_evidence_report_download_bytes(
         self,
         package_id: int,
         *,
@@ -10201,7 +10202,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/v4/packages/{quote(str(package_id), safe='')}/report"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -10223,7 +10224,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def workflow_get_workflow_detail(
+    async def workflow_get_workflow_detail(
         self,
         package_id: int,
         *,
@@ -10258,7 +10259,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/v4/packages/{quote(str(package_id), safe='')}/workflow"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -10280,7 +10281,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def workflow_get_workflow_history(
+    async def workflow_get_workflow_history(
         self,
         package_id: int,
         page_no: int,
@@ -10327,7 +10328,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/{quote(str(records_per_page), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -10349,7 +10350,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def workflow_get_workflow_reminder(
+    async def workflow_get_workflow_reminder(
         self,
         package_id: int,
         order: int,
@@ -10398,7 +10399,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/reminders"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -10428,15 +10429,15 @@ class SigninghubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get Workflow Users
 
         Business applications can use this service API to get workflow details
         for the package.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `V4_Workflow_GetWorkflowUsers`.
 
@@ -10448,8 +10449,8 @@ class SigninghubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -10461,14 +10462,14 @@ class SigninghubClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -10487,21 +10488,21 @@ class SigninghubClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else []
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page:
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def workflow_mark_workflow_completed(
+    async def workflow_mark_workflow_completed(
         self,
         package_id: int,
         *,
@@ -10543,7 +10544,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/v4/packages/{quote(str(package_id), safe='')}/complete"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -10565,7 +10566,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def workflow_permission_get_workflow_permissions(
+    async def workflow_permission_get_workflow_permissions(
         self,
         package_id: int,
         order: int,
@@ -10612,7 +10613,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/permissions"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -10634,7 +10635,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def workflow_permission_update_workflow_permissions(
+    async def workflow_permission_update_workflow_permissions(
         self,
         input: WorkflowPermissionsUpdateRequest | Mapping[str, Any],
         package_id: int,
@@ -10687,7 +10688,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/permissions"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -10709,7 +10710,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def workflow_recall_workflow(
+    async def workflow_recall_workflow(
         self,
         package_id: int,
         *,
@@ -10745,7 +10746,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/v4/packages/{quote(str(package_id), safe='')}/workflow"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -10767,7 +10768,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def workflow_start_workflow(
+    async def workflow_start_workflow(
         self,
         package_id: int,
         *,
@@ -10805,7 +10806,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/v4/packages/{quote(str(package_id), safe='')}/workflow"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -10827,7 +10828,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def workflow_update_workflow(
+    async def workflow_update_workflow(
         self,
         input: WorkflowDetailUpdateRequest | Mapping[str, Any],
         package_id: int,
@@ -10869,7 +10870,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/v4/packages/{quote(str(package_id), safe='')}/workflow"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -10891,7 +10892,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def workflow_update_workflow_post_process(
+    async def workflow_update_workflow_post_process(
         self,
         input: PostProcessUpdateRequest | Mapping[str, Any],
         package_id: int,
@@ -10934,7 +10935,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/post_process"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -10956,7 +10957,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def workflow_update_workflow_reminder(
+    async def workflow_update_workflow_reminder(
         self,
         input: UpdateReminderRequest | Mapping[str, Any],
         package_id: int,
@@ -11008,7 +11009,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/reminders"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -11030,7 +11031,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def workflow_workflow_add_group(
+    async def workflow_workflow_add_group(
         self,
         input: WorkflowWorkflowAddGroupInput,
         package_id: int,
@@ -11073,7 +11074,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/v4/packages/{quote(str(package_id), safe='')}/workflow/groups"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -11095,7 +11096,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def workflow_workflow_add_placeholder(
+    async def workflow_workflow_add_placeholder(
         self,
         input: WorkflowWorkflowAddPlaceholderInput,
         package_id: int,
@@ -11145,7 +11146,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/placeholder"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -11167,7 +11168,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def workflow_workflow_add_user(
+    async def workflow_workflow_add_user(
         self,
         input: WorkflowWorkflowAddUserInput,
         package_id: int,
@@ -11231,7 +11232,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/v4/packages/{quote(str(package_id), safe='')}/workflow/users"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -11253,7 +11254,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def workflow_workflow_delete_user(
+    async def workflow_workflow_delete_user(
         self,
         package_id: int,
         order: int,
@@ -11296,7 +11297,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/{quote(str(order), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -11318,7 +11319,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def workflow_workflow_update_placeholder(
+    async def workflow_workflow_update_placeholder(
         self,
         input: WorkflowPlaceholderUpdateRequest | Mapping[str, Any],
         package_id: int,
@@ -11370,7 +11371,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/placeholder"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -11392,7 +11393,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def workflow_workflow_user_update(
+    async def workflow_workflow_user_update(
         self,
         input: WorkflowUserUpdateRequest | Mapping[str, Any],
         package_id: int,
@@ -11445,7 +11446,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/user"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -11467,7 +11468,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def workflow_workflow_user_update_order(
+    async def workflow_workflow_user_update_order(
         self,
         input: WorkflowUserReorderRequest | Mapping[str, Any],
         package_id: int,
@@ -11513,7 +11514,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/reorder"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -11535,7 +11536,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def work_space_delete_shared_space(
+    async def work_space_delete_shared_space(
         self,
         id: int,
         *,
@@ -11572,7 +11573,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/v4/shared_spaces/{quote(str(id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -11594,7 +11595,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def work_space_get_shared_space(
+    async def work_space_get_shared_space(
         self,
         id: int,
         *,
@@ -11630,7 +11631,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/v4/shared_spaces/{quote(str(id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -11652,7 +11653,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def work_space_update_shared_space(
+    async def work_space_update_shared_space(
         self,
         input: UpdateWorkSpaceRequest | Mapping[str, Any],
         id: int,
@@ -11692,7 +11693,7 @@ class SigninghubClient(ConnectorClientBase):
             f"/v4/shared_spaces/{quote(str(id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,

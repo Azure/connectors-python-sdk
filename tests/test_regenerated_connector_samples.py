@@ -16,7 +16,6 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from azure.core.async_paging import AsyncItemPaged
-from azure.core.paging import ItemPaged
 
 from scripts.validate_connector_samples import SampleVisitor, validate_samples
 
@@ -26,11 +25,7 @@ SAMPLE_DIRECTORY = (
 )
 
 
-SYNC_SAMPLE_PATHS = sorted(SAMPLE_DIRECTORY.glob("sample_connector_usage_*.py"))
-AIO_SAMPLE_PATHS = sorted(
-    (SAMPLE_DIRECTORY / "aio").glob("sample_connector_usage_*.py")
-)
-SAMPLE_PATHS = [*SYNC_SAMPLE_PATHS, *AIO_SAMPLE_PATHS]
+SAMPLE_PATHS = sorted(SAMPLE_DIRECTORY.glob("sample_connector_usage_*.py"))
 
 
 @dataclass
@@ -40,27 +35,15 @@ class TypedInput:
     value: str
 
 
-class TypedSyncClient:
-    """Provide a typed synchronous client surface for sample validator tests."""
-
-    def __init__(self, connection_runtime_url: str) -> None:
-        """Initialize the test client."""
-
-    def list_items(self, *, top: int) -> None:
-        """Represent a generated method with an integer argument."""
-
-    def create_item(self, *, input: TypedInput) -> None:
-        """Represent a generated method with a typed request body."""
-
-    def get_items(self) -> ItemPaged[dict[str, str]]:
-        """Represent a generated synchronous pageable method."""
-
-
 class TypedAsyncClient:
     """Provide a typed asynchronous client surface for sample validator tests."""
 
     def __init__(self, connection_runtime_url: str) -> None:
         """Initialize the test client."""
+
+    async def __aenter__(self) -> TypedAsyncClient:
+        """Expose the async lifecycle used to recognize generated clients."""
+        return self
 
     async def list_items(self, *, top: int) -> None:
         """Represent a generated method with an integer argument."""
@@ -73,10 +56,10 @@ class TypedAsyncClient:
 
 
 async def invoke_sample(module: object, function_name: str, *arguments: str) -> None:
-    """Invoke either a synchronous or asynchronous sample function."""
-    result = getattr(module, function_name)(*arguments)
-    if inspect.isawaitable(result):
-        await result
+    """Require and await the async root sample entry point."""
+    function = getattr(module, function_name)
+    assert inspect.iscoroutinefunction(function), function_name
+    await function(*arguments)
 
 
 @pytest.mark.parametrize(
@@ -106,9 +89,10 @@ def test_all_connector_samples_match_generated_apis() -> None:
 
     sample_paths, issues = validate_samples(repo_root)
 
-    assert len(SYNC_SAMPLE_PATHS) == 99
-    assert len(AIO_SAMPLE_PATHS) == 99
-    assert len(sample_paths) == 198
+    assert len(SAMPLE_PATHS) == 99
+    assert set(sample_paths) == set(SAMPLE_PATHS)
+    assert not (SAMPLE_DIRECTORY / "aio").exists()
+    assert not (SAMPLE_DIRECTORY / "sync").exists()
     assert issues == []
 
 
@@ -150,18 +134,33 @@ def test_sample_validator_rejects_unscoped_async_credential() -> None:
     ]
 
 
-def test_sample_validator_rejects_unscoped_sync_credential() -> None:
-    """Test synchronous credentials must use a context manager."""
+def test_sample_validator_rejects_sync_credential() -> None:
+    """Reject synchronous credentials even when their lifecycle is scoped."""
     tree = ast.parse(
         "from azure.identity import DefaultAzureCredential\n"
-        "credential = DefaultAzureCredential()\n"
+        "with DefaultAzureCredential() as credential:\n"
+        "    pass\n"
     )
     visitor = SampleVisitor(Path("sample.py"), modules={})
 
     visitor.visit(tree)
 
     assert [issue.message for issue in visitor.issues] == [
-        "synchronous DefaultAzureCredential must use a context manager",
+        "connector samples require azure.identity.aio credentials",
+    ]
+
+
+@pytest.mark.parametrize(
+    "module_name", ["azure.connectors.aio.office365", "azure.connectors.sdk.aio"],
+)
+def test_sample_validator_rejects_aio_connector_namespace(module_name: str) -> None:
+    """Reject stale aio connector imports rather than accepting a second surface."""
+    visitor = SampleVisitor(Path("sample.py"), modules={})
+
+    visitor.visit(ast.parse(f"from {module_name} import Office365Client\n"))
+
+    assert [issue.message for issue in visitor.issues] == [
+        "import async clients from root connector modules, not aio",
     ]
 
 
@@ -217,11 +216,11 @@ def test_sample_validator_parameters_shadow_outer_facts(
 ) -> None:
     """Test parameters shadow outer container and client facts without losing outer checks."""
     visitor = SampleVisitor(Path("sample.py"), modules={})
-    visitor.imported_symbols["TypedSyncClient"] = TypedSyncClient
+    visitor.imported_symbols["TypedAsyncClient"] = TypedAsyncClient
 
     visitor.visit(ast.parse(
         "items = []\n"
-        "client = TypedSyncClient('https://example.com')\n"
+        "client = TypedAsyncClient('https://example.com')\n"
         f"{function_kind} consume({parameters}):\n"
         "    items.get('value', [])\n"
         "    client.unrelated_method()\n"
@@ -235,16 +234,16 @@ def test_sample_validator_parameters_shadow_outer_facts(
 def test_sample_validator_function_defaults_use_outer_facts() -> None:
     """Test default expressions are validated before a parameter shadows its outer name."""
     visitor = SampleVisitor(Path("sample.py"), modules={})
-    visitor.imported_symbols["TypedSyncClient"] = TypedSyncClient
+    visitor.imported_symbols["TypedAsyncClient"] = TypedAsyncClient
 
     visitor.visit(ast.parse(
-        "client = TypedSyncClient('https://example.com')\n"
+        "client = TypedAsyncClient('https://example.com')\n"
         "async def consume(client=client.missing_method()):\n"
         "    pass\n"
     ))
 
     assert [issue.message for issue in visitor.issues] == [
-        "'TypedSyncClient' has no method 'missing_method'",
+        "'TypedAsyncClient' has no method 'missing_method'",
     ]
 
 
@@ -270,15 +269,15 @@ def test_sample_validator_comprehension_targets_shadow_outer_facts(expression: s
 def test_sample_validator_comprehension_clears_client_target_facts() -> None:
     """Test comprehension-local receivers do not retain an outer generated client type."""
     visitor = SampleVisitor(Path("sample.py"), modules={})
-    visitor.imported_symbols["TypedSyncClient"] = TypedSyncClient
+    visitor.imported_symbols["TypedAsyncClient"] = TypedAsyncClient
 
     visitor.visit(ast.parse(
-        "client = TypedSyncClient('https://example.com')\n"
+        "client = TypedAsyncClient('https://example.com')\n"
         "identifiers = [client.get('id') for client in [{'id': 'entry-1'}]]\n"
     ))
 
     assert visitor.issues == []
-    assert visitor.client_variables["client"] is TypedSyncClient
+    assert visitor.client_variables["client"] is TypedAsyncClient
 
 
 def test_sample_validator_comprehension_iterable_uses_outer_facts() -> None:
@@ -324,7 +323,6 @@ def test_sample_validator_checks_consumer_principles(
 
 
 @pytest.mark.parametrize("item_count", [0, 2])
-@pytest.mark.parametrize("surface", ["sync", "aio"])
 @pytest.mark.parametrize(
     "connector,function_name,client_name,operation_name,expected_noun",
     [
@@ -342,8 +340,8 @@ def test_sample_validator_checks_consumer_principles(
          "list_entities", "entity(s)"),
     ],
 )
+@pytest.mark.asyncio
 async def test_pageable_samples_report_collected_items(
-    surface: str,
     connector: str,
     function_name: str,
     client_name: str,
@@ -354,11 +352,8 @@ async def test_pageable_samples_report_collected_items(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     """Execute empty and nonempty samples so caught errors and discarded items fail."""
-    package_name = "samples.sample_connector_usage"
-    if surface == "aio":
-        package_name += ".aio"
     module = importlib.import_module(
-        f"{package_name}.sample_connector_usage_{connector}"
+        f"samples.sample_connector_usage.sample_connector_usage_{connector}"
     )
 
     async def async_items():
@@ -370,20 +365,10 @@ async def test_pageable_samples_report_collected_items(
                 "RowKey": f"row-{index}",
             }
 
-    items = [
-        {
-            "id": f"document-{index}",
-            "PartitionKey": "sample-partition",
-            "RowKey": f"row-{index}",
-        }
-        for index in range(item_count)
-    ]
     client = MagicMock()
-    getattr(client, operation_name).return_value = (
-        async_items() if surface == "aio" else items
-    )
-    client.list_groups.return_value = async_items() if surface == "aio" else []
-    client.__enter__.return_value = client
+    operation = getattr(client, operation_name)
+    operation.return_value = async_items()
+    client.list_groups.return_value = async_items()
     client.__aenter__.return_value = client
     monkeypatch.setattr(module, client_name, MagicMock(return_value=client))
     if hasattr(module, "DefaultAzureCredential"):
@@ -399,6 +384,7 @@ async def test_pageable_samples_report_collected_items(
     arguments = ["sample-group"] if connector == "planner" else []
     await invoke_sample(module, function_name, *arguments)
 
+    operation.assert_called_once()
     output = capsys.readouterr().out
     assert "Error:" not in output
     assert "Connector error" not in output
@@ -420,7 +406,6 @@ async def test_pageable_samples_report_collected_items(
 
 
 @pytest.mark.parametrize("response_kind", ["none", "empty", "populated"])
-@pytest.mark.parametrize("surface", ["sync", "aio"])
 @pytest.mark.parametrize(
     "connector,function_name,client_name,operation_name,item_key,empty_message",
     [
@@ -430,8 +415,8 @@ async def test_pageable_samples_report_collected_items(
          "advanced_hunting", "results", "No results from query."),
     ],
 )
+@pytest.mark.asyncio
 async def test_nonpageable_samples_preserve_nullable_responses(
-    surface: str,
     connector: str,
     function_name: str,
     client_name: str,
@@ -443,29 +428,22 @@ async def test_nonpageable_samples_preserve_nullable_responses(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     """Execute null, empty, and populated nullable APIs without weakening list checks."""
-    package_name = "samples.sample_connector_usage"
-    if surface == "aio":
-        package_name += ".aio"
     module = importlib.import_module(
-        f"{package_name}.sample_connector_usage_{connector}"
+        f"samples.sample_connector_usage.sample_connector_usage_{connector}"
     )
     response = None if response_kind == "none" else {}
     if response_kind == "populated":
         response = {item_key: [{"id": "matched-item", "title": "matched-plan"}]}
     client = MagicMock()
-    operation = (
-        AsyncMock(return_value=response)
-        if surface == "aio"
-        else MagicMock(return_value=response)
-    )
+    operation = AsyncMock(return_value=response)
     setattr(client, operation_name, operation)
-    client.__enter__.return_value = client
     client.__aenter__.return_value = client
     monkeypatch.setattr(module, client_name, MagicMock(return_value=client))
     monkeypatch.setattr(module, "DefaultAzureCredential", MagicMock())
 
     await invoke_sample(module, function_name)
 
+    operation.assert_awaited_once()
     output = capsys.readouterr().out
     assert "Error:" not in output
     assert "Connector error" not in output
@@ -498,7 +476,7 @@ async def test_nonpageable_samples_preserve_nullable_responses(
     ],
 )
 @pytest.mark.asyncio
-async def test_aio_eager_list_samples_unwrap_nullable_envelopes(
+async def test_eager_list_samples_unwrap_nullable_envelopes(
     connector: str,
     function_name: str,
     client_name: str,
@@ -509,9 +487,9 @@ async def test_aio_eager_list_samples_unwrap_nullable_envelopes(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """Execute eager aio samples so dictionaries are not sliced as collected lists."""
+    """Execute eager async samples without treating response envelopes as lists."""
     module = importlib.import_module(
-        f"samples.sample_connector_usage.aio.sample_connector_usage_{connector}"
+        f"samples.sample_connector_usage.sample_connector_usage_{connector}"
     )
     response = None if response_kind == "none" else {}
     if response_kind == "populated":
@@ -544,24 +522,18 @@ async def test_aio_eager_list_samples_unwrap_nullable_envelopes(
         assert "0" in output
 
 
-@pytest.mark.parametrize("surface", ["sync", "aio"])
 @pytest.mark.asyncio
 async def test_eventhubs_batch_sample_passes_send_event_list(
-    surface: str,
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     """Execute the batch sample and verify its list alias is passed directly."""
-    package_name = "samples.sample_connector_usage"
-    if surface == "aio":
-        package_name += ".aio"
     module = importlib.import_module(
-        f"{package_name}.sample_connector_usage_eventhubs"
+        "samples.sample_connector_usage.sample_connector_usage_eventhubs"
     )
     client = MagicMock()
-    operation = AsyncMock(return_value=None) if surface == "aio" else MagicMock(return_value=None)
+    operation = AsyncMock(return_value=None)
     client.send_events = operation
-    client.__enter__.return_value = client
     client.__aenter__.return_value = client
     monkeypatch.setattr(module, "EventhubsClient", MagicMock(return_value=client))
     monkeypatch.setattr(module, "DefaultAzureCredential", MagicMock())
@@ -572,10 +544,7 @@ async def test_eventhubs_batch_sample_passes_send_event_list(
     output = capsys.readouterr().out
     assert "Error:" not in output
     assert "Connector error" not in output
-    if surface == "aio":
-        operation.assert_awaited_once()
-    else:
-        operation.assert_called_once()
+    operation.assert_awaited_once()
     batch_input = operation.call_args.kwargs["input"]
     assert isinstance(batch_input, list)
     assert len(batch_input) == 3
@@ -583,24 +552,18 @@ async def test_eventhubs_batch_sample_passes_send_event_list(
     assert "Batch of 3 events" in output
 
 
-@pytest.mark.parametrize("surface", ["sync", "aio"])
 @pytest.mark.asyncio
 async def test_azuretables_create_sample_passes_scalar_table_name(
-    surface: str,
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     """Execute the create-table sample and verify its string alias is passed directly."""
-    package_name = "samples.sample_connector_usage"
-    if surface == "aio":
-        package_name += ".aio"
     module = importlib.import_module(
-        f"{package_name}.sample_connector_usage_azuretables"
+        "samples.sample_connector_usage.sample_connector_usage_azuretables"
     )
     client = MagicMock()
-    operation = AsyncMock(return_value={}) if surface == "aio" else MagicMock(return_value={})
+    operation = AsyncMock(return_value={})
     client.create_table = operation
-    client.__enter__.return_value = client
     client.__aenter__.return_value = client
     monkeypatch.setattr(module, "AzuretablesClient", MagicMock(return_value=client))
     monkeypatch.setattr(module, "DefaultAzureCredential", MagicMock())
@@ -612,10 +575,7 @@ async def test_azuretables_create_sample_passes_scalar_table_name(
     output = capsys.readouterr().out
     assert "Error:" not in output
     assert "Connector error" not in output
-    if surface == "aio":
-        operation.assert_awaited_once()
-    else:
-        operation.assert_called_once()
+    operation.assert_awaited_once()
     assert operation.call_args.kwargs["input"] == "SampleTable"
     assert "Table 'SampleTable' created successfully." in output
 
@@ -623,11 +583,11 @@ async def test_azuretables_create_sample_passes_scalar_table_name(
 def test_sample_validator_rejects_incompatible_literal_type() -> None:
     """Test a string literal is rejected for an integer parameter."""
     tree = ast.parse(
-        "client = TypedSyncClient('https://example.azure.com/connections/test')\n"
-        "client.list_items(top='10')\n"
+        "client = TypedAsyncClient('https://example.azure.com/connections/test')\n"
+        "await client.list_items(top='10')\n"
     )
     visitor = SampleVisitor(Path("sample.py"), modules={})
-    visitor.imported_symbols["TypedSyncClient"] = TypedSyncClient
+    visitor.imported_symbols["TypedAsyncClient"] = TypedAsyncClient
 
     visitor.visit(tree)
 
@@ -639,12 +599,12 @@ def test_sample_validator_rejects_incompatible_literal_type() -> None:
 def test_sample_validator_rejects_environment_string_for_integer() -> None:
     """Test an environment string is rejected for an integer parameter."""
     tree = ast.parse(
-        "client = TypedSyncClient('https://example.azure.com/connections/test')\n"
+        "client = TypedAsyncClient('https://example.azure.com/connections/test')\n"
         "top = os.environ.get('TOP', '')\n"
-        "client.list_items(top=top)\n"
+        "await client.list_items(top=top)\n"
     )
     visitor = SampleVisitor(Path("sample.py"), modules={})
-    visitor.imported_symbols["TypedSyncClient"] = TypedSyncClient
+    visitor.imported_symbols["TypedAsyncClient"] = TypedAsyncClient
 
     visitor.visit(tree)
 
@@ -656,12 +616,12 @@ def test_sample_validator_rejects_environment_string_for_integer() -> None:
 def test_sample_validator_accepts_cast_environment_value() -> None:
     """Test casting an environment value satisfies an integer parameter."""
     tree = ast.parse(
-        "client = TypedSyncClient('https://example.azure.com/connections/test')\n"
+        "client = TypedAsyncClient('https://example.azure.com/connections/test')\n"
         "top = int(os.environ.get('TOP', '0'))\n"
-        "client.list_items(top=top)\n"
+        "await client.list_items(top=top)\n"
     )
     visitor = SampleVisitor(Path("sample.py"), modules={})
-    visitor.imported_symbols["TypedSyncClient"] = TypedSyncClient
+    visitor.imported_symbols["TypedAsyncClient"] = TypedAsyncClient
 
     visitor.visit(tree)
 
@@ -671,12 +631,12 @@ def test_sample_validator_accepts_cast_environment_value() -> None:
 def test_sample_validator_rejects_dynamic_dict_for_typed_input() -> None:
     """Test a dictionary with a dynamic value is rejected for a typed input."""
     tree = ast.parse(
-        "client = TypedSyncClient('https://example.azure.com/connections/test')\n"
+        "client = TypedAsyncClient('https://example.azure.com/connections/test')\n"
         "index = 0\n"
-        "client.create_item(input={'value': f'Item {index + 1}'})\n"
+        "await client.create_item(input={'value': f'Item {index + 1}'})\n"
     )
     visitor = SampleVisitor(Path("sample.py"), modules={})
-    visitor.imported_symbols["TypedSyncClient"] = TypedSyncClient
+    visitor.imported_symbols["TypedAsyncClient"] = TypedAsyncClient
 
     visitor.visit(tree)
 

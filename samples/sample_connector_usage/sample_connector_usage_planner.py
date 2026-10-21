@@ -17,10 +17,12 @@ Usage:
 
     python sample_connector_usage_planner.py
 """
+
+import asyncio
 import os
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
+from azure.connectors.planner import PlannerClient
 from azure.connectors.planner import (
-    PlannerClient,
     CreateTaskRequest,
     CreateBucketInput,
     UpdateTaskRequest,
@@ -34,16 +36,16 @@ CONNECTION_RUNTIME_URL = os.environ.get(
 )
 
 
-def example_1_list_my_tasks():
+async def example_1_list_my_tasks():
     """Example 1: List all tasks assigned to me"""
     print("\n=== Example 1: List My Tasks ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
         client = PlannerClient(CONNECTION_RUNTIME_URL, credential)
 
         try:
             tasks = [
-                task for task in client.list_my_tasks()
+                task async for task in client.list_my_tasks()
             ]
 
             if tasks:
@@ -57,15 +59,15 @@ def example_1_list_my_tasks():
             print(f"Error: {ex}")
 
 
-def example_2_list_group_plans(group_id: str):
+async def example_2_list_group_plans(group_id: str):
     """Example 2: List all plans in a group"""
     print("\n=== Example 2: List Group Plans ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
         client = PlannerClient(CONNECTION_RUNTIME_URL, credential)
 
         try:
-            plans = list(client.list_group_plans(group_id=group_id))
+            plans = [plan async for plan in client.list_group_plans(group_id=group_id)]
 
             if plans:
                 print(f"Found {len(plans)} plans in group")
@@ -78,23 +80,23 @@ def example_2_list_group_plans(group_id: str):
             print(f"Error: {ex}")
 
 
-def example_3_get_task_details(task_id: str):
+async def example_3_get_task_details(task_id: str):
     """Example 3: Get task and task details"""
     print("\n=== Example 3: Get Task Details ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
         client = PlannerClient(CONNECTION_RUNTIME_URL, credential)
 
         try:
             # Get basic task info
-            task = client.get_task(id=task_id)
+            task = await client.get_task(id=task_id)
             if task:
                 print(f"Task: {task.get('title')}")
                 print(f"  - Percent Complete: {task.get('percentComplete')}%")
                 print(f"  - Created: {task.get('createdDateTime')}")
 
             # Get detailed task info
-            details = client.get_task_details(id=task_id)
+            details = await client.get_task_details(id=task_id)
             if details:
                 print(f"  - Description: {details.get('description', 'No description')}")
 
@@ -102,11 +104,11 @@ def example_3_get_task_details(task_id: str):
             print(f"Error: {ex}")
 
 
-def example_4_create_bucket(group_id: str, plan_id: str):
+async def example_4_create_bucket(group_id: str, plan_id: str):
     """Example 4: Create a new bucket in a plan"""
     print("\n=== Example 4: Create Bucket ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
         client = PlannerClient(CONNECTION_RUNTIME_URL, credential)
 
         try:
@@ -116,7 +118,7 @@ def example_4_create_bucket(group_id: str, plan_id: str):
                 plan_id=plan_id
             )
 
-            bucket = client.create_bucket(input=bucket_input)
+            bucket = await client.create_bucket(input=bucket_input)
 
             if bucket:
                 print(f"Created bucket: {bucket.get('name')} ({bucket.get('id')})")
@@ -125,11 +127,11 @@ def example_4_create_bucket(group_id: str, plan_id: str):
             print(f"Error: {ex}")
 
 
-def example_5_create_and_update_task(group_id: str, plan_id: str, bucket_id: str):
+async def example_5_create_and_update_task(group_id: str, plan_id: str, bucket_id: str):
     """Example 5: Create and update a task"""
     print("\n=== Example 5: Create and Update Task ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
         client = PlannerClient(CONNECTION_RUNTIME_URL, credential)
 
         try:
@@ -142,7 +144,7 @@ def example_5_create_and_update_task(group_id: str, plan_id: str, bucket_id: str
                 priority=5,  # Medium priority
             )
 
-            task = client.create_task(input=task_input)
+            task = await client.create_task(input=task_input)
 
             if task:
                 task_id = task.get('id')
@@ -154,28 +156,28 @@ def example_5_create_and_update_task(group_id: str, plan_id: str, bucket_id: str
                     percent_complete=50,
                 )
 
-                updated = client.update_task(input=update_input, id=task_id)
+                updated = await client.update_task(input=update_input, id=task_id)
 
                 if updated:
                     print("Updated task to 50% complete")
 
                 # Clean up - delete the task
-                client.delete_task(id=task_id)
+                await client.delete_task(id=task_id)
                 print("Deleted task")
 
         except Exception as ex:
             print(f"Error: {ex}")
 
 
-def example_6_get_plan_details(plan_id: str):
+async def example_6_get_plan_details(plan_id: str):
     """Example 6: Get plan details"""
     print("\n=== Example 6: Get Plan Details ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
         client = PlannerClient(CONNECTION_RUNTIME_URL, credential)
 
         try:
-            details = client.get_plan_details(id=plan_id)
+            details = await client.get_plan_details(id=plan_id)
 
             if details:
                 print(f"Plan ID: {details.get('id')}")
@@ -190,14 +192,14 @@ def example_6_get_plan_details(plan_id: str):
             print(f"Error: {ex}")
 
 
-def main():
+async def main():
     """Run all examples"""
     print("Planner sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
     print()
 
     # Example 1: List my tasks (no parameters needed)
-    example_1_list_my_tasks()
+    await example_1_list_my_tasks()
 
     # Examples 2-6 require IDs from your Planner
     # Replace these with actual values from your environment
@@ -206,13 +208,13 @@ def main():
     task_id = ""  # Task ID
 
     if group_id:
-        example_2_list_group_plans(group_id)
+        await example_2_list_group_plans(group_id)
 
     if task_id:
-        example_3_get_task_details(task_id)
+        await example_3_get_task_details(task_id)
 
     if plan_id:
-        example_6_get_plan_details(plan_id)
+        await example_6_get_plan_details(plan_id)
 
     # NOTE: Examples 4 and 5 create resources
     # Uncomment to run them with valid IDs:
@@ -227,8 +229,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

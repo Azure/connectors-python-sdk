@@ -3,7 +3,7 @@
 """Contract tests for MeetingroommapClient."""
 
 import azure.connectors.meetingroommap as meetingroommap_module
-from azure.connectors.aio.meetingroommap import MeetingroommapClient
+from azure.connectors.meetingroommap import MeetingroommapClient
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 
 

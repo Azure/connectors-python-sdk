@@ -6,7 +6,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.googletasks import GoogletasksClient
+from azure.connectors.googletasks import GoogletasksClient
 from azure.connectors.googletasks import (
     TRIGGER_OPERATIONS,
     TaskCreate,

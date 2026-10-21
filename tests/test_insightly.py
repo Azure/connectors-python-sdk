@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.insightly import InsightlyClient
+from azure.connectors.insightly import InsightlyClient
 from azure.connectors.insightly import (
     ContactRequest,
     LeadRequest,

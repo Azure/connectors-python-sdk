@@ -6,7 +6,7 @@ import json
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.servicebus import ServicebusClient
+from azure.connectors.servicebus import ServicebusClient
 from azure.connectors.servicebus import (
     ServiceBusMessage,
     SendMessagesInput,

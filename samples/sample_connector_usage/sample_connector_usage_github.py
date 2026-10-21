@@ -17,12 +17,15 @@ Usage:
 
     python sample_connector_usage_github.py
 """
+
+import asyncio
 import os
 
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.github import GithubClient, IssueBasicDetailsModel
+from azure.connectors.github import GithubClient
+from azure.connectors.github import IssueBasicDetailsModel
 
 
 # Connection runtime URL format:
@@ -30,45 +33,46 @@ from azure.connectors.github import GithubClient, IssueBasicDetailsModel
 CONNECTION_RUNTIME_URL = os.environ.get("GITHUB_CONNECTION_URL", "")
 
 
-def example_1_get_authenticated_user() -> None:
+async def example_1_get_authenticated_user() -> None:
     """Example 1: Get authenticated GitHub user."""
     print("\n=== Example 1: Get Authenticated User ===")
 
-    with DefaultAzureCredential() as credential:
-        with GithubClient(CONNECTION_RUNTIME_URL, credential) as client:
-            user = client.get_user()
+    async with DefaultAzureCredential() as credential:
+        async with GithubClient(CONNECTION_RUNTIME_URL, credential) as client:
+            user = await client.get_user()
             print(f"Authenticated as: {user.get('login') if user else 'unknown'}")
 
 
-def example_2_list_issues(repository_owner: str, repository_name: str) -> None:
+async def example_2_list_issues(repository_owner: str, repository_name: str) -> None:
     """Example 2: List open issues in a repository."""
     print("\n=== Example 2: List Issues ===")
 
-    with DefaultAzureCredential() as credential:
-        with GithubClient(CONNECTION_RUNTIME_URL, credential) as client:
-            issue_list = list(client.list_issues(
+    async with DefaultAzureCredential() as credential:
+        async with GithubClient(CONNECTION_RUNTIME_URL, credential) as client:
+            issues = [item async for item in client.list_issues(
                 repository_owner=repository_owner,
                 repository_name=repository_name,
                 state="open",
                 per_page=5,
-            ))
+            )]
 
+            issue_list = issues
             print(f"Found {len(issue_list)} issues")
             for issue in issue_list[:5]:
                 print(f"  - #{issue.get('number')}: {issue.get('title')}")
 
 
-def example_3_create_issue(repository_owner: str, repository_name: str) -> None:
+async def example_3_create_issue(repository_owner: str, repository_name: str) -> None:
     """Example 3: Create a new issue in a repository."""
     print("\n=== Example 3: Create Issue ===")
 
-    with DefaultAzureCredential() as credential:
-        with GithubClient(CONNECTION_RUNTIME_URL, credential) as client:
+    async with DefaultAzureCredential() as credential:
+        async with GithubClient(CONNECTION_RUNTIME_URL, credential) as client:
             request = IssueBasicDetailsModel(
                 title="SDK sample issue",
                 body="Created from github Python SDK sample.",
             )
-            created = client.create_issue(
+            created = await client.create_issue(
                 input=request,
                 repository_owner=repository_owner,
                 repository_name=repository_name,
@@ -77,7 +81,7 @@ def example_3_create_issue(repository_owner: str, repository_name: str) -> None:
             print(f"Created issue: #{created.get('number') if created else 'n/a'}")
 
 
-def main() -> None:
+async def main() -> None:
     """Run GitHub connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: GITHUB_CONNECTION_URL environment variable not set.")
@@ -92,8 +96,8 @@ def main() -> None:
     print("=" * 50)
 
     try:
-        example_1_get_authenticated_user()
-        example_2_list_issues(repository_owner, repository_name)
+        await example_1_get_authenticated_user()
+        await example_2_list_issues(repository_owner, repository_name)
         # Uncomment after confirming write permissions.
         # await example_3_create_issue(repository_owner, repository_name)
 
@@ -104,4 +108,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

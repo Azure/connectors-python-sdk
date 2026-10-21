@@ -4,21 +4,12 @@ Kusto and Plumsail operations that declare an HTTP 202 `Location` polling
 contract use Azure Core pollers. Their generated method names begin with
 `begin_`.
 
-## Synchronous clients
-
-```python
-with KustoClient(connection_url, credential) as client:
-    poller = client.begin_list_kusto_results(input=query)
-    result = poller.result()
-```
-
-`LROPoller` begins polling in a background thread. `result()` waits for the
-terminal response and returns its deserialized payload. `wait(timeout=...)`
-limits how long that call waits; it does not cancel the connector operation.
-
 ## Asynchronous clients
 
 ```python
+from azure.connectors.kusto import KustoClient
+
+
 async with KustoClient(connection_url, credential) as client:
     poller = await client.begin_list_kusto_results(input=query)
     result = await poller.result()

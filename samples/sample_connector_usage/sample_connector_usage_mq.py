@@ -22,11 +22,13 @@ Usage:
 
     python sample_connector_usage_mq.py
 """
+
+import asyncio
 import os
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.mq import MqClient
 from azure.connectors.mq import (
-    MqClient,
     SendValidDataOptions,
     SingleGetValidOptions,
     MultipleGetValidOptions,
@@ -43,7 +45,7 @@ CONNECTION_RUNTIME_URL = os.environ.get(
 DEFAULT_QUEUE = os.environ.get("TEST_MQ_QUEUE", None)
 
 
-def example_1_send_message():
+async def example_1_send_message():
     """Example 1: Send a message to an IBM MQ queue."""
     print("\n=== Example 1: Send Message ===")
 
@@ -52,16 +54,16 @@ def example_1_send_message():
         "Hello from Azure Connectors SDK for Python!"
     )
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with MqClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with MqClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 options = SendValidDataOptions(
                     message=message_content,
                     queue=DEFAULT_QUEUE,
                 )
 
-                result = client.send(input=options)
+                result = await client.send(input=options)
 
                 if result:
                     print("Message sent successfully:")
@@ -76,20 +78,20 @@ def example_1_send_message():
                 print(f"Error: {ex}")
 
 
-def example_2_browse_message():
+async def example_2_browse_message():
     """Example 2: Browse (peek) a single message without removing it."""
     print("\n=== Example 2: Browse Message ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with MqClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with MqClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 options = SingleGetValidOptions(
                     queue=DEFAULT_QUEUE,
                     include_info="true",
                 )
 
-                result = client.read(input=options)
+                result = await client.read(input=options)
 
                 if result:
                     print("Browsed message:")
@@ -107,15 +109,15 @@ def example_2_browse_message():
                 print(f"Error: {ex}")
 
 
-def example_3_browse_messages_batch():
+async def example_3_browse_messages_batch():
     """Example 3: Browse multiple messages without removing them."""
     print("\n=== Example 3: Browse Messages (Batch) ===")
 
     batch_size = int(os.environ.get("TEST_MQ_BATCH_SIZE", "10"))
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with MqClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with MqClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 options = MultipleGetValidOptions(
                     queue=DEFAULT_QUEUE,
@@ -123,12 +125,12 @@ def example_3_browse_messages_batch():
                     include_info="true",
                 )
 
-                result = client.read_all(input=options)
-                messages = result.get("value", []) if result else []
+                result = await client.read_all(input=options)
+                items = result.get("value", []) if result else []
 
-                if messages:
-                    print(f"Browsed {len(messages)} messages:")
-                    for i, msg in enumerate(messages[:5]):  # Show first 5
+                if items:
+                    print(f"Browsed {len(items)} messages:")
+                    for i, msg in enumerate(items[:5]):  # Show first 5
                         msg_id = msg.get("messageId", "N/A")
                         data = msg.get("messageData", "")
                         preview = data[:50] if data else "(empty)"
@@ -142,20 +144,20 @@ def example_3_browse_messages_batch():
                 print(f"Error: {ex}")
 
 
-def example_4_receive_message():
+async def example_4_receive_message():
     """Example 4: Receive (destructive get) a single message from the queue."""
     print("\n=== Example 4: Receive Message (Destructive) ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with MqClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with MqClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 options = SingleGetValidOptions(
                     queue=DEFAULT_QUEUE,
                     include_info="true",
                 )
 
-                result = client.receive(input=options)
+                result = await client.receive(input=options)
 
                 if result:
                     print("Received message (removed from queue):")
@@ -173,19 +175,19 @@ def example_4_receive_message():
                 print(f"Error: {ex}")
 
 
-def example_5_delete_message():
+async def example_5_delete_message():
     """Example 5: Delete a single message from the queue."""
     print("\n=== Example 5: Delete Message ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with MqClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with MqClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 options = SingleGetValidOptions(
                     queue=DEFAULT_QUEUE,
                 )
 
-                result = client.delete(input=options)
+                result = await client.delete(input=options)
 
                 if result:
                     print("Deleted message:")
@@ -200,7 +202,7 @@ def example_5_delete_message():
                 print(f"Error: {ex}")
 
 
-def main():
+async def main():
     """Run all examples."""
     print("IBM MQ sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
@@ -211,15 +213,15 @@ def main():
         print("Format: https://[region].azure-apihub.net/apim/mq/[connection-id]")
         return
 
-    example_1_send_message()
-    example_2_browse_message()
-    example_3_browse_messages_batch()
-    example_4_receive_message()
-    example_5_delete_message()
+    await example_1_send_message()
+    await example_2_browse_message()
+    await example_3_browse_messages_batch()
+    await example_4_receive_message()
+    await example_5_delete_message()
 
     print("\n" + "=" * 60)
     print("Sample completed!")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

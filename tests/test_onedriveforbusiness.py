@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.onedriveforbusiness import OnedriveforbusinessClient
+from azure.connectors.onedriveforbusiness import OnedriveforbusinessClient
 from azure.connectors.onedriveforbusiness import (
     BlobMetadata,
     BlobMetadataPage,

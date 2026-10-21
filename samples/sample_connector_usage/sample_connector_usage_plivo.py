@@ -1,20 +1,23 @@
 """Plivo sample for the Azure Connectors Python SDK."""
+
+import asyncio
 import os
 
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.plivo import PlivoClient, SMS
+from azure.connectors.plivo import PlivoClient
+from azure.connectors.plivo import SMS
 
 
 CONNECTION_RUNTIME_URL = os.environ.get("PLIVO_CONNECTION_URL", "")
 
 
-def send_sms() -> None:
+async def send_sms() -> None:
     """Send an SMS message."""
-    with DefaultAzureCredential() as credential:
-        with PlivoClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = client.send_sms(
+    async with DefaultAzureCredential() as credential:
+        async with PlivoClient(CONNECTION_RUNTIME_URL, credential) as client:
+            result = await client.send_sms(
                 input=SMS(
                     src="15550000000",
                     dst="15551111111",
@@ -25,26 +28,29 @@ def send_sms() -> None:
             print(f"Send result: {result}")
 
 
-def list_messages() -> None:
+async def list_messages() -> None:
     """List messages for an account."""
-    with DefaultAzureCredential() as credential:
-        with PlivoClient(CONNECTION_RUNTIME_URL, credential) as client:
-            messages = list(client.list_messages(auth_id="PLIVO_AUTH_ID"))
+    async with DefaultAzureCredential() as credential:
+        async with PlivoClient(CONNECTION_RUNTIME_URL, credential) as client:
+            messages = [
+                message
+                async for message in client.list_messages(auth_id="PLIVO_AUTH_ID")
+            ]
             print(f"Messages: {messages}")
 
 
-def main() -> None:
+async def main() -> None:
     """Run Plivo connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Set PLIVO_CONNECTION_URL to run this sample.")
         return
 
     try:
-        list_messages()
-        send_sms()
+        await list_messages()
+        await send_sms()
     except ConnectorException as ex:
         print(f"Connector error: {ex}")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

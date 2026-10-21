@@ -17,12 +17,15 @@ Usage:
 
     python sample_connector_usage_trello.py
 """
+
+import asyncio
 import os
 
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.trello import CreateBoard, CreateCard, CreateList, TrelloClient
+from azure.connectors.trello import TrelloClient
+from azure.connectors.trello import CreateBoard, CreateCard, CreateList
 
 
 # Connection runtime URL format:
@@ -30,23 +33,23 @@ from azure.connectors.trello import CreateBoard, CreateCard, CreateList, TrelloC
 CONNECTION_RUNTIME_URL = os.environ.get("TRELLO_CONNECTION_URL", "")
 
 
-def example_1_list_boards() -> None:
+async def example_1_list_boards() -> None:
     """Example 1: List boards available to the current member."""
     print("\n=== Example 1: List Boards ===")
 
-    with DefaultAzureCredential() as credential:
-        with TrelloClient(CONNECTION_RUNTIME_URL, credential) as client:
-            boards = list(client.list_boards_simple())
+    async with DefaultAzureCredential() as credential:
+        async with TrelloClient(CONNECTION_RUNTIME_URL, credential) as client:
+            boards = [item async for item in client.list_boards_simple()]
             print(f"Boards: {boards}")
 
 
-def example_2_create_board() -> None:
+async def example_2_create_board() -> None:
     """Example 2: Create a board."""
     print("\n=== Example 2: Create Board ===")
 
-    with DefaultAzureCredential() as credential:
-        with TrelloClient(CONNECTION_RUNTIME_URL, credential) as client:
-            board = client.create_board(
+    async with DefaultAzureCredential() as credential:
+        async with TrelloClient(CONNECTION_RUNTIME_URL, credential) as client:
+            board = await client.create_board(
                 input=CreateBoard(
                     name="SDK sample board",
                     desc="Created by the Trello client in the Azure Connectors Python SDK.",
@@ -56,13 +59,13 @@ def example_2_create_board() -> None:
             print(f"Created board: {board}")
 
 
-def example_3_create_list() -> None:
+async def example_3_create_list() -> None:
     """Example 3: Create a list on an existing board."""
     print("\n=== Example 3: Create List ===")
 
-    with DefaultAzureCredential() as credential:
-        with TrelloClient(CONNECTION_RUNTIME_URL, credential) as client:
-            created_list = client.create_list(
+    async with DefaultAzureCredential() as credential:
+        async with TrelloClient(CONNECTION_RUNTIME_URL, credential) as client:
+            created_list = await client.create_list(
                 input=CreateList(
                     name="SDK sample list",
                     id_board="board-id",
@@ -72,13 +75,13 @@ def example_3_create_list() -> None:
             print(f"Created list: {created_list}")
 
 
-def example_4_create_card() -> None:
+async def example_4_create_card() -> None:
     """Example 4: Create a card in an existing list."""
     print("\n=== Example 4: Create Card ===")
 
-    with DefaultAzureCredential() as credential:
-        with TrelloClient(CONNECTION_RUNTIME_URL, credential) as client:
-            card = client.create_card(
+    async with DefaultAzureCredential() as credential:
+        async with TrelloClient(CONNECTION_RUNTIME_URL, credential) as client:
+            card = await client.create_card(
                 input=CreateCard(
                     id_list="list-id",
                     name="SDK sample card",
@@ -89,7 +92,7 @@ def example_4_create_card() -> None:
             print(f"Created card: {card}")
 
 
-def main() -> None:
+async def main() -> None:
     """Run Trello connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: TRELLO_CONNECTION_URL environment variable not set.")
@@ -114,4 +117,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

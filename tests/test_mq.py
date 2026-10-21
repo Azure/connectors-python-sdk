@@ -5,7 +5,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.mq import MqClient
+from azure.connectors.mq import MqClient
 from azure.connectors.mq import (
     SingleGetValidOptions,
     MultipleGetValidOptions,

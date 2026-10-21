@@ -17,9 +17,11 @@ Usage:
 
     python sample_connector_usage_campfire.py
 """
+
+import asyncio
 import os
 
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
 from azure.connectors.campfire import CampfireClient
@@ -30,33 +32,33 @@ from azure.connectors.campfire import CampfireClient
 CONNECTION_RUNTIME_URL = os.environ.get("CAMPFIRE_CONNECTION_URL", "")
 
 
-def example_1_list_accounts() -> None:
+async def example_1_list_accounts() -> None:
     """Example 1: List accounts this user has access to."""
     print("\n=== Example 1: List Accounts ===")
 
-    with DefaultAzureCredential() as credential:
-        with CampfireClient(CONNECTION_RUNTIME_URL, credential) as client:
-            accounts = list(client.list_accounts())
+    async with DefaultAzureCredential() as credential:
+        async with CampfireClient(CONNECTION_RUNTIME_URL, credential) as client:
+            accounts = [item async for item in client.list_accounts()]
             print(f"Accounts: {accounts}")
 
 
-def example_2_list_rooms() -> None:
+async def example_2_list_rooms() -> None:
     """Example 2: List the rooms in an account."""
     print("\n=== Example 2: List Rooms ===")
 
-    with DefaultAzureCredential() as credential:
-        with CampfireClient(CONNECTION_RUNTIME_URL, credential) as client:
-            rooms = list(client.list_rooms(account="ACCOUNT_ID"))
+    async with DefaultAzureCredential() as credential:
+        async with CampfireClient(CONNECTION_RUNTIME_URL, credential) as client:
+            rooms = [item async for item in client.list_rooms(account="ACCOUNT_ID")]
             print(f"Rooms: {rooms}")
 
 
-def example_3_create_message() -> None:
+async def example_3_create_message() -> None:
     """Example 3: Send a message to a room."""
     print("\n=== Example 3: Create Message ===")
 
-    with DefaultAzureCredential() as credential:
-        with CampfireClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = client.create_message(
+    async with DefaultAzureCredential() as credential:
+        async with CampfireClient(CONNECTION_RUNTIME_URL, credential) as client:
+            result = await client.create_message(
                 room_id="ROOM_ID",
                 account="ACCOUNT_ID",
                 message="Hello from the Campfire client in the Azure Connectors Python SDK.",
@@ -64,17 +66,17 @@ def example_3_create_message() -> None:
             print(f"Create message result: {result}")
 
 
-def example_4_get_user() -> None:
+async def example_4_get_user() -> None:
     """Example 4: Get information about a user by ID."""
     print("\n=== Example 4: Get User ===")
 
-    with DefaultAzureCredential() as credential:
-        with CampfireClient(CONNECTION_RUNTIME_URL, credential) as client:
-            user = client.get_user(user_id=12345, account="ACCOUNT_ID")
+    async with DefaultAzureCredential() as credential:
+        async with CampfireClient(CONNECTION_RUNTIME_URL, credential) as client:
+            user = await client.get_user(user_id=12345, account="ACCOUNT_ID")
             print(f"User: {user}")
 
 
-def main() -> None:
+async def main() -> None:
     """Run Campfire connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: CAMPFIRE_CONNECTION_URL environment variable not set.")
@@ -99,4 +101,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

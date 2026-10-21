@@ -21,11 +21,13 @@ Usage:
 
     python sample_connector_usage_azureeventgrid.py
 """
+
+import asyncio
 import os
 
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
+from azure.connectors.azureeventgrid import AzureeventgridClient
 from azure.connectors.azureeventgrid import (
-    AzureeventgridClient,
     EventRequest,
 )
 
@@ -37,14 +39,15 @@ CONNECTION_RUNTIME_URL = os.environ.get(
 )
 
 
-def example_1_list_subscriptions():
+async def example_1_list_subscriptions():
     """Example 1: List Azure subscriptions available to the principal."""
     print("\n=== Example 1: List Subscriptions ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with AzureeventgridClient(CONNECTION_RUNTIME_URL, credential) as client:
-            subscriptions = list(client.list_subscriptions())
+        async with AzureeventgridClient(CONNECTION_RUNTIME_URL, credential) as client:
+            items = [item async for item in client.list_subscriptions()]
+            subscriptions = items
 
             print(f"Found {len(subscriptions)} subscription(s).")
             for subscription in subscriptions[:10]:
@@ -53,21 +56,22 @@ def example_1_list_subscriptions():
                 print(f"  - {display_name} ({subscription_id})")
 
 
-def example_2_list_topic_types():
+async def example_2_list_topic_types():
     """Example 2: List Event Grid topic types."""
     print("\n=== Example 2: List Topic Types ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with AzureeventgridClient(CONNECTION_RUNTIME_URL, credential) as client:
-            topic_types = list(client.list_topic_types())
+        async with AzureeventgridClient(CONNECTION_RUNTIME_URL, credential) as client:
+            items = [item async for item in client.list_topic_types()]
+            topic_types = items
 
             print(f"Found {len(topic_types)} topic type(s).")
             for topic_type in topic_types[:10]:
                 print(f"  - {topic_type.get('name', 'N/A')}")
 
 
-def example_3_build_event_request():
+async def example_3_build_event_request():
     """Example 3: Build an Event Grid request payload."""
     print("\n=== Example 3: Build Event Request ===")
 
@@ -90,7 +94,7 @@ def example_3_build_event_request():
     print("The generated client exposes discovery operations, not subscription creation.")
 
 
-def main():
+async def main():
     """Run all Azure Event Grid connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: AZUREEVENTGRID_CONNECTION_URL environment variable is not set.")
@@ -99,12 +103,12 @@ def main():
 
     print(f"Using connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
 
-    example_1_list_subscriptions()
-    example_2_list_topic_types()
-    example_3_build_event_request()
+    await example_1_list_subscriptions()
+    await example_2_list_topic_types()
+    await example_3_build_event_request()
 
     print("\n=== Azure Event Grid sample completed ===")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

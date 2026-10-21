@@ -9,7 +9,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.docuware import DocuwareClient
+from azure.connectors.docuware import DocuwareClient
 from azure.connectors.docuware import (
     SearchForDocumentsInFileCabinetInput,
     UpdateIndexFieldsInput,

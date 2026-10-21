@@ -10,12 +10,18 @@ import inspect
 from pathlib import Path
 from types import ModuleType
 from typing import Any, get_args, get_origin, get_type_hints
+from unittest.mock import AsyncMock, MagicMock, patch
 
-from azure.core.polling import AsyncLROPoller, LROPoller
+import pytest
+from azure.core.polling import AsyncLROPoller
 
 import azure.connectors as connectors_package
-from azure.connectors.sdk import ConnectorClientBase as SyncConnectorClientBase
-from azure.connectors.sdk.aio import ConnectorClientBase as AioConnectorClientBase
+from azure.connectors.sdk import ConnectorClientBase, ConnectorException
+from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import (
+    get_generated_operations,
+    invoke_generated_operation,
+)
 
 
 EXPECTED_LRO_OPERATIONS = {
@@ -81,15 +87,14 @@ CONNECTOR_MODULE_NAMES = sorted(
 
 def get_generated_client_type(
     module: ModuleType,
-    base_type: type[Any],
 ) -> type[Any]:
     """Return the generated client declared by a connector module."""
     client_types = [
         value
         for value in vars(module).values()
         if inspect.isclass(value)
-        and issubclass(value, base_type)
-        and value is not base_type
+        and issubclass(value, ConnectorClientBase)
+        and value is not ConnectorClientBase
         and value.__module__ == module.__name__
     ]
     assert len(client_types) == 1, module.__name__
@@ -105,43 +110,29 @@ def get_lro_operations(client_type: type[Any]) -> set[str]:
     }
 
 
-def test_generated_lro_inventory_and_sync_aio_parity() -> None:
-    """Keep the retained 44-operation LRO surface exact across all 99 pairs."""
+def test_generated_lro_inventory_uses_async_root_pollers() -> None:
+    """Keep the retained 44-operation LRO surface exact across all 99 clients."""
     assert len(CONNECTOR_MODULE_NAMES) == 99
 
     for module_name in CONNECTOR_MODULE_NAMES:
         root_module = importlib.import_module(f"azure.connectors.{module_name}")
-        aio_module = importlib.import_module(f"azure.connectors.aio.{module_name}")
-        root_client = get_generated_client_type(
-            root_module,
-            SyncConnectorClientBase,
-        )
-        aio_client = get_generated_client_type(
-            aio_module,
-            AioConnectorClientBase,
-        )
+        root_client = get_generated_client_type(root_module)
         expected_operations = EXPECTED_LRO_OPERATIONS.get(module_name, set())
 
         assert get_lro_operations(root_client) == expected_operations, module_name
-        assert get_lro_operations(aio_client) == expected_operations, module_name
 
         for operation_name in expected_operations:
             root_method = getattr(root_client, operation_name)
-            aio_method = getattr(aio_client, operation_name)
             root_return = get_type_hints(
                 root_method,
                 globalns=vars(root_module),
             )["return"]
-            aio_return = get_type_hints(
-                aio_method,
-                globalns=vars(aio_module),
-            )["return"]
-
-            assert get_origin(root_return) is LROPoller, operation_name
-            assert get_origin(aio_return) is AsyncLROPoller, operation_name
-            assert get_args(root_return) == get_args(aio_return), operation_name
-            assert not inspect.iscoroutinefunction(root_method), operation_name
-            assert inspect.iscoroutinefunction(aio_method), operation_name
+            assert get_origin(root_return) is AsyncLROPoller, operation_name
+            assert len(get_args(root_return)) == 1, operation_name
+            assert inspect.iscoroutinefunction(root_method), operation_name
+            assert operation_name.removeprefix("begin_") not in get_generated_operations(
+                root_client
+            ), operation_name
 
     assert sum(map(len, EXPECTED_LRO_OPERATIONS.values())) == 44
 
@@ -149,38 +140,108 @@ def test_generated_lro_inventory_and_sync_aio_parity() -> None:
 def test_generated_lro_operations_use_only_location_polling() -> None:
     """Require every retained poller to use the supported Location protocol."""
     for module_name, expected_operations in EXPECTED_LRO_OPERATIONS.items():
-        for package_directory in (
-            CONNECTOR_DIRECTORY,
-            CONNECTOR_DIRECTORY / "aio",
-        ):
-            tree = ast.parse(
-                (package_directory / f"{module_name}.py").read_text(
-                    encoding="utf-8"
+        tree = ast.parse(
+            (CONNECTOR_DIRECTORY / f"{module_name}.py").read_text(encoding="utf-8")
+        )
+        actual_headers = {}
+        for node in ast.walk(tree):
+            if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                continue
+            if node.name not in expected_operations:
+                continue
+            for child in ast.walk(node):
+                if not isinstance(child, ast.Call):
+                    continue
+                if not isinstance(child.func, ast.Name):
+                    continue
+                if child.func.id != "ConnectorPollingMethod":
+                    continue
+                header_keyword = next(
+                    keyword
+                    for keyword in child.keywords
+                    if keyword.arg == "polling_header_name"
                 )
-            )
-            actual_headers = {}
-            for node in ast.walk(tree):
-                if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                    continue
-                if node.name not in expected_operations:
-                    continue
-                for child in ast.walk(node):
-                    if not isinstance(child, ast.Call):
-                        continue
-                    if not isinstance(child.func, ast.Name):
-                        continue
-                    if child.func.id != "ConnectorPollingMethod":
-                        continue
-                    header_keyword = next(
-                        keyword
-                        for keyword in child.keywords
-                        if keyword.arg == "polling_header_name"
-                    )
-                    assert isinstance(header_keyword.value, ast.Constant)
-                    actual_headers[node.name] = header_keyword.value.value
+                assert isinstance(header_keyword.value, ast.Constant)
+                actual_headers[node.name] = header_keyword.value.value
 
-            assert set(actual_headers) == expected_operations
-            assert all(
-                isinstance(header, str) and header.casefold() == "location"
-                for header in actual_headers.values()
-            )
+        assert set(actual_headers) == expected_operations
+        assert all(
+            isinstance(header, str) and header.casefold() == "location"
+            for header in actual_headers.values()
+        )
+
+
+@pytest.mark.parametrize("terminal_status", [200, 400])
+@pytest.mark.parametrize(
+    "module_name,operation_name",
+    [
+        (module_name, operation_name)
+        for module_name, operations in EXPECTED_LRO_OPERATIONS.items()
+        for operation_name in sorted(operations)
+    ],
+)
+@pytest.mark.asyncio
+async def test_generated_lro_follows_location_and_preserves_controls(
+    module_name: str,
+    operation_name: str,
+    terminal_status: int,
+    mock_credential: Any,
+) -> None:
+    """Await each root LRO through polling, deserialization, and terminal errors."""
+    module = importlib.import_module(f"azure.connectors.{module_name}")
+    client_type = get_generated_client_type(module)
+    response_hook = MagicMock()
+    controls = {
+        "timeout": 5.0,
+        "headers": {"x-test": "value"},
+        "client_request_id": "request-id",
+        "response_hook": response_hook,
+    }
+    async with client_type(
+        "https://example.azure.com/connections/test",
+        credential=mock_credential,
+    ) as client:
+        with patch.object(
+            client._http_client,
+            "send",
+            new_callable=AsyncMock,
+            side_effect=[
+                MockResponse(
+                    status=202,
+                    headers={
+                        "Location": "https://backend.example/jobs/42",
+                        "Retry-After": "0",
+                    },
+                ),
+                MockResponse(status=terminal_status, text='{"ok": true}'),
+            ],
+        ) as send, patch(
+            "azure.connectors.sdk.polling.asyncio.sleep",
+            new_callable=AsyncMock,
+        ):
+            if terminal_status == 400:
+                with pytest.raises(ConnectorException):
+                    await invoke_generated_operation(
+                        client, operation_name, module, request_controls=controls,
+                    )
+            else:
+                result = await invoke_generated_operation(
+                    client, operation_name, module, request_controls=controls,
+                )
+                return_type = get_type_hints(getattr(client_type, operation_name))["return"]
+                result_type = get_args(return_type)[0]
+                if result_type is bytes:
+                    assert result == b'{"ok": true}'
+                elif result_type is type(None):
+                    assert result is None
+                else:
+                    assert result == {"ok": True}
+
+        assert send.await_count == send.call_count == 2
+        assert send.await_args_list[1].args == (
+            "GET", "https://example.azure.com/connections/test/jobs/42",
+        )
+        assert send.await_args_list[1].kwargs["body"] is None
+        for call in send.await_args_list:
+            for name, value in controls.items():
+                assert call.kwargs[name] == value, (operation_name, name)

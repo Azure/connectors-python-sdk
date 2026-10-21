@@ -11,7 +11,7 @@ import azure.connectors.twitter as twitter_module
 from azure.connectors.sdk import (
     ConnectorException,
 )
-from azure.connectors.aio.twitter import TwitterClient
+from azure.connectors.twitter import TwitterClient
 from azure.connectors.twitter import TRIGGER_OPERATIONS
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import (

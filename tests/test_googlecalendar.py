@@ -8,7 +8,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.googlecalendar import GooglecalendarClient
+from azure.connectors.googlecalendar import GooglecalendarClient
 from azure.connectors.googlecalendar import (
     CalendarEventChangedList,
     CalendarEventList,

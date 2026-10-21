@@ -9,7 +9,7 @@ import pytest
 from azure.core.credentials import AzureKeyCredential
 import azure.connectors.wordpress as wordpress_module
 from azure.connectors.sdk import ConnectorException
-from azure.connectors.aio.wordpress import WordpressClient
+from azure.connectors.wordpress import WordpressClient
 from azure.connectors.wordpress import (
     CreatePostModel,
     TRIGGER_OPERATIONS,

@@ -20,11 +20,13 @@ Usage:
 
     python sample_connector_usage_keyvault.py
 """
+
+import asyncio
 import os
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.keyvault import KeyvaultClient
 from azure.connectors.keyvault import (
-    KeyvaultClient,
     KeyEncryptInput,
     KeyDecryptInput,
 )
@@ -41,15 +43,15 @@ KEY_NAME = os.environ.get("KEYVAULT_KEY_NAME", "my-encryption-key")
 SECRET_NAME = os.environ.get("KEYVAULT_SECRET_NAME", "my-secret")
 
 
-def example_1_list_keys():
+async def example_1_list_keys():
     """Example 1: List all keys in the vault."""
     print("\n=== Example 1: List Keys ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with KeyvaultClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with KeyvaultClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                keys = list(client.list_keys())
+                keys = [key async for key in client.list_keys()]
 
                 if keys:
                     print(f"Found {len(keys)} keys:")
@@ -64,15 +66,15 @@ def example_1_list_keys():
                 print(f"Error: {ex}")
 
 
-def example_2_get_key_metadata():
+async def example_2_get_key_metadata():
     """Example 2: Get metadata for a specific key."""
     print("\n=== Example 2: Get Key Metadata ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with KeyvaultClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with KeyvaultClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.get_key_metadata(key_name=KEY_NAME)
+                result = await client.get_key_metadata(key_name=KEY_NAME)
 
                 if result:
                     print(f"Key Name: {result.get('name')}")
@@ -91,13 +93,13 @@ def example_2_get_key_metadata():
                 print(f"Error: {ex}")
 
 
-def example_3_encrypt_decrypt():
+async def example_3_encrypt_decrypt():
     """Example 3: Encrypt and decrypt data using a key."""
     print("\n=== Example 3: Encrypt and Decrypt Data ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with KeyvaultClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with KeyvaultClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Encrypt data
                 plaintext = "Hello, Azure Key Vault!"
@@ -107,7 +109,7 @@ def example_3_encrypt_decrypt():
                     algorithm="RSA-OAEP",
                     raw_data=plaintext
                 )
-                encrypt_result = client.encrypt_data(
+                encrypt_result = await client.encrypt_data(
                     input=encrypt_input,
                     key_name=KEY_NAME
                 )
@@ -121,7 +123,7 @@ def example_3_encrypt_decrypt():
                         algorithm="RSA-OAEP",
                         encrypted_data=encrypted
                     )
-                    decrypt_result = client.decrypt_data(
+                    decrypt_result = await client.decrypt_data(
                         input=decrypt_input,
                         key_name=KEY_NAME
                     )
@@ -136,15 +138,15 @@ def example_3_encrypt_decrypt():
                 print(f"Error: {ex}")
 
 
-def example_4_list_secrets():
+async def example_4_list_secrets():
     """Example 4: List all secrets in the vault."""
     print("\n=== Example 4: List Secrets ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with KeyvaultClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with KeyvaultClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                secrets = list(client.list_secrets())
+                secrets = [secret async for secret in client.list_secrets()]
 
                 if secrets:
                     print(f"Found {len(secrets)} secrets:")
@@ -159,15 +161,15 @@ def example_4_list_secrets():
                 print(f"Error: {ex}")
 
 
-def example_5_get_secret():
+async def example_5_get_secret():
     """Example 5: Get a secret value."""
     print("\n=== Example 5: Get Secret ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with KeyvaultClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with KeyvaultClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.get_secret(secret_name=SECRET_NAME)
+                result = await client.get_secret(secret_name=SECRET_NAME)
 
                 if result:
                     print(f"Secret Name: {result.get('name')}")
@@ -185,15 +187,15 @@ def example_5_get_secret():
                 print(f"Error: {ex}")
 
 
-def example_6_get_secret_metadata():
+async def example_6_get_secret_metadata():
     """Example 6: Get secret metadata without the value."""
     print("\n=== Example 6: Get Secret Metadata ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with KeyvaultClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with KeyvaultClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.get_secret_metadata(
+                result = await client.get_secret_metadata(
                     secret_name=SECRET_NAME
                 )
 
@@ -213,7 +215,7 @@ def example_6_get_secret_metadata():
                 print(f"Error: {ex}")
 
 
-def main():
+async def main():
     """Run all examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: KEYVAULT_CONNECTION_URL environment variable not set.")
@@ -223,11 +225,11 @@ def main():
     print(f"Using connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
 
     # Run read-only examples by default
-    example_1_list_keys()
-    example_2_get_key_metadata()
-    example_4_list_secrets()
-    example_5_get_secret()
-    example_6_get_secret_metadata()
+    await example_1_list_keys()
+    await example_2_get_key_metadata()
+    await example_4_list_secrets()
+    await example_5_get_secret()
+    await example_6_get_secret_metadata()
 
     # Uncomment to run encryption/decryption example:
     # await example_3_encrypt_decrypt()
@@ -236,4 +238,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

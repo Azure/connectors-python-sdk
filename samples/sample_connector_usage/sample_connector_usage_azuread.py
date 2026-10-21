@@ -19,11 +19,13 @@ Usage:
 
     python sample_connector_usage_azuread.py
 """
+
+import asyncio
 import os
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.azuread import AzureadClient
 from azure.connectors.azuread import (
-    AzureadClient,
     CreateOffice365GroupInput,
     CreateSecurityGroupInput,
     CreateGroupInput,
@@ -38,7 +40,7 @@ CONNECTION_RUNTIME_URL = os.environ.get(
 )
 
 
-def example_1_create_office365_group():
+async def example_1_create_office365_group():
     """Example 1: Create an Office 365 group."""
     print("\n=== Example 1: Create Office 365 Group ===")
 
@@ -48,9 +50,9 @@ def example_1_create_office365_group():
         print("Example: $env:TEST_O365_GROUP_NAME = 'SDK Test Group'")
         return
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with AzureadClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with AzureadClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 input_data = CreateOffice365GroupInput(
                     display_name=group_name,
@@ -61,7 +63,7 @@ def example_1_create_office365_group():
                     mail_enabled=True,
                 )
 
-                result = client.create_office365_group(input=input_data)
+                result = await client.create_office365_group(input=input_data)
 
                 if result:
                     print("Office 365 group created:")
@@ -78,7 +80,7 @@ def example_1_create_office365_group():
                 print(f"Error: {ex}")
 
 
-def example_2_create_security_group():
+async def example_2_create_security_group():
     """Example 2: Create a security group."""
     print("\n=== Example 2: Create Security Group ===")
 
@@ -88,9 +90,9 @@ def example_2_create_security_group():
         print("Example: $env:TEST_SECURITY_GROUP_NAME = 'SDK Security Group'")
         return
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with AzureadClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with AzureadClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 input_data = CreateSecurityGroupInput(
                     display_name=group_name,
@@ -100,7 +102,7 @@ def example_2_create_security_group():
                     mail_enabled=False,
                 )
 
-                result = client.create_security_group(input=input_data)
+                result = await client.create_security_group(input=input_data)
 
                 if result:
                     print("Security group created:")
@@ -116,7 +118,7 @@ def example_2_create_security_group():
                 print(f"Error: {ex}")
 
 
-def example_3_create_group():
+async def example_3_create_group():
     """Example 3: Create a generic group."""
     print("\n=== Example 3: Create Group ===")
 
@@ -130,9 +132,9 @@ def example_3_create_group():
     group_type = os.environ.get("TEST_GROUP_TYPE", "Unified")
     group_types = [group_type] if group_type else []
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with AzureadClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with AzureadClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 input_data = CreateGroupInput(
                     display_name=group_name,
@@ -143,7 +145,7 @@ def example_3_create_group():
                     mail_enabled=bool(group_types),
                 )
 
-                result = client.create_group(input=input_data)
+                result = await client.create_group(input=input_data)
 
                 if result:
                     print("Group created:")
@@ -161,7 +163,7 @@ def example_3_create_group():
                 print(f"Error: {ex}")
 
 
-def example_4_create_user():
+async def example_4_create_user():
     """Example 4: Create a new user."""
     print("\n=== Example 4: Create User ===")
 
@@ -176,9 +178,9 @@ def example_4_create_user():
         print("  $env:TEST_USER_PASSWORD = 'TempPassword123!'")
         return
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with AzureadClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with AzureadClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 input_data = CreateUserRequest(
                     account_enabled=True,
@@ -191,7 +193,7 @@ def example_4_create_user():
                     },
                 )
 
-                result = client.create_user(input=input_data)
+                result = await client.create_user(input=input_data)
 
                 if result:
                     print("User created:")
@@ -208,7 +210,7 @@ def example_4_create_user():
                 print(f"Error: {ex}")
 
 
-def example_5_remove_member_from_group():
+async def example_5_remove_member_from_group():
     """Example 5: Remove a member from a group."""
     print("\n=== Example 5: Remove Member From Group ===")
 
@@ -221,11 +223,11 @@ def example_5_remove_member_from_group():
         print("  $env:TEST_MEMBER_ID = '<user-object-id>'")
         return
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with AzureadClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with AzureadClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                client.remove_member_from_group(
+                await client.remove_member_from_group(
                     group_id=group_id,
                     member_id=member_id,
                 )
@@ -240,7 +242,7 @@ def example_5_remove_member_from_group():
                 print(f"Error: {ex}")
 
 
-def main():
+async def main():
     """Run all examples."""
     print("Azure AD (Microsoft Entra ID) sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
@@ -251,15 +253,15 @@ def main():
         print("Format: https://[region].azure-apihub.net/apim/azuread/[connection-id]")
         return
 
-    example_1_create_office365_group()
-    example_2_create_security_group()
-    example_3_create_group()
-    example_4_create_user()
-    example_5_remove_member_from_group()
+    await example_1_create_office365_group()
+    await example_2_create_security_group()
+    await example_3_create_group()
+    await example_4_create_user()
+    await example_5_remove_member_from_group()
 
     print("\n" + "=" * 60)
     print("Sample completed!")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

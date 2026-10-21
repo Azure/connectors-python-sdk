@@ -8,7 +8,7 @@ import pytest
 
 from azure.core.credentials import AzureKeyCredential
 import azure.connectors.plivo as plivo_module
-from azure.connectors.aio.plivo import PlivoClient
+from azure.connectors.plivo import PlivoClient
 from azure.connectors.plivo import Call, SMS
 from azure.connectors.sdk import ConnectorException
 from tests.conftest import MockResponse

@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.projectplace import ProjectplaceClient
+from azure.connectors.projectplace import ProjectplaceClient
 from azure.connectors.projectplace import (
     CreateCardInput,
     MoveCardInput,

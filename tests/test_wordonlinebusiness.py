@@ -5,7 +5,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.wordonlinebusiness import WordonlinebusinessClient
+from azure.connectors.wordonlinebusiness import WordonlinebusinessClient
 from azure.connectors.wordonlinebusiness import (
     CreateFileItemInput,
     ContentBody,

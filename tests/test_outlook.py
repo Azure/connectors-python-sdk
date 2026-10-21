@@ -7,7 +7,7 @@ import inspect
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.outlook import OutlookClient
+from azure.connectors.outlook import OutlookClient
 from azure.connectors.outlook import (
     ClientReceiveMessage,
     ContactResponse,

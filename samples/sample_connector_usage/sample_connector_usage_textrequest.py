@@ -17,16 +17,18 @@ Usage:
 
     python sample_connector_usage_textrequest.py
 """
+
+import asyncio
 import os
 
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
+from azure.connectors.textrequest import TextrequestClient
 from azure.connectors.textrequest import (
     CreateContactInput,
     SendMessageByPhoneNumberInput,
-    TextrequestClient,
-)
+    )
 
 
 # Connection runtime URL format:
@@ -37,13 +39,13 @@ CONNECTION_RUNTIME_URL = os.environ.get("TEXTREQUEST_CONNECTION_URL", "")
 DASHBOARD_ID = int(os.environ.get("TEXTREQUEST_DASHBOARD_ID", "0"))
 
 
-def example_1_send_message() -> None:
+async def example_1_send_message() -> None:
     """Example 1: Send a message to a contact by phone number."""
     print("\n=== Example 1: Send Message ===")
 
-    with DefaultAzureCredential() as credential:
-        with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = client.send_message_by_phone_number(
+    async with DefaultAzureCredential() as credential:
+        async with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
+            result = await client.send_message_by_phone_number(
                 input=SendMessageByPhoneNumberInput(
                     body="Hello from the TextRequest client in the Azure Connectors Python SDK.",
                     sender_name="Support Team",
@@ -54,29 +56,30 @@ def example_1_send_message() -> None:
             print(f"Send result: {result}")
 
 
-def example_2_get_conversations() -> None:
+async def example_2_get_conversations() -> None:
     """Example 2: List all conversations for the dashboard."""
     print("\n=== Example 2: Get Conversations ===")
 
-    with DefaultAzureCredential() as credential:
-        with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
-            conversations = list(
-                client.list_conversations(
+    async with DefaultAzureCredential() as credential:
+        async with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
+            conversations = [
+                conversation
+                async for conversation in client.list_conversations(
                     dashboard_id=DASHBOARD_ID,
                     page=1,
                     page_size=20,
                 )
-            )
+            ]
             print(f"Conversations: {conversations}")
 
 
-def example_3_create_contact() -> None:
+async def example_3_create_contact() -> None:
     """Example 3: Create or update a contact."""
     print("\n=== Example 3: Create Contact ===")
 
-    with DefaultAzureCredential() as credential:
-        with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = client.create_contact(
+    async with DefaultAzureCredential() as credential:
+        async with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
+            result = await client.create_contact(
                 input=CreateContactInput(
                     first_name="Ada",
                     last_name="Lovelace",
@@ -88,17 +91,23 @@ def example_3_create_contact() -> None:
             print(f"Contact result: {result}")
 
 
-def example_4_get_dashboards() -> None:
+async def example_4_get_dashboards() -> None:
     """Example 4: Get all dashboards in the account."""
     print("\n=== Example 4: Get Dashboards ===")
 
-    with DefaultAzureCredential() as credential:
-        with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
-            dashboards = list(client.list_dashboards(page=1, page_size=20))
+    async with DefaultAzureCredential() as credential:
+        async with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
+            dashboards = [
+                dashboard
+                async for dashboard in client.list_dashboards(
+                    page=1,
+                    page_size=20,
+                )
+            ]
             print(f"Dashboards: {dashboards}")
 
 
-def main() -> None:
+async def main() -> None:
     """Run TextRequest connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: TEXTREQUEST_CONNECTION_URL environment variable not set.")
@@ -124,4 +133,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

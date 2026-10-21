@@ -5,7 +5,7 @@
 from typing import get_type_hints
 
 import azure.connectors.zohosign as zohosign_module
-from azure.connectors.aio.zohosign import ZohosignClient
+from azure.connectors.zohosign import ZohosignClient
 from azure.connectors.zohosign import TRIGGER_OPERATIONS
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 

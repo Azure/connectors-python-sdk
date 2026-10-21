@@ -8,7 +8,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.rss import RssClient
+from azure.connectors.rss import RssClient
 from azure.connectors.rss import (
     FeedItem,
     TRIGGER_OPERATIONS,

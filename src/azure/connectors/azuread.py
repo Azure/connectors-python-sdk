@@ -6,13 +6,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
-from typing import Optional, Iterator, Dict, List, Any, Mapping
+from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
 from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
-from azure.core.paging import ItemPaged
-from azure.core.credentials import AzureKeyCredential, TokenCredential
-from azure.core.pipeline.transport import HttpTransport
+from azure.core.async_paging import AsyncItemPaged
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
@@ -591,7 +592,7 @@ class AzureadClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: TokenCredential | AzureKeyCredential,
+        credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout: float = 30.0,
@@ -600,7 +601,7 @@ class AzureadClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[HttpTransport] = None,
+        transport: Optional[AsyncHttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -620,8 +621,8 @@ class AzureadClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core HTTP transport closed by
-                the client through its synchronous lifecycle.
+            transport: Optional Azure Core async HTTP transport closed by
+                the client through its asynchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -725,7 +726,7 @@ class AzureadClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    def create_office365_group(
+    async def create_office365_group(
         self,
         input: CreateOffice365GroupInput | Mapping[str, Any],
         *,
@@ -757,7 +758,7 @@ class AzureadClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1.0/groups/office365"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -779,7 +780,7 @@ class AzureadClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def create_security_group(
+    async def create_security_group(
         self,
         input: CreateSecurityGroupInput | Mapping[str, Any],
         *,
@@ -813,7 +814,7 @@ class AzureadClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/v1.0/groups/securityGroup"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -835,7 +836,7 @@ class AzureadClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_group(
+    async def get_group(
         self,
         id: str,
         *,
@@ -870,7 +871,7 @@ class AzureadClient(ConnectorClientBase):
             f"/v1.0/groups/{quote(str(id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -892,7 +893,7 @@ class AzureadClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_user(
+    async def get_user(
         self,
         id: str,
         *,
@@ -927,7 +928,7 @@ class AzureadClient(ConnectorClientBase):
             f"/v1.0/users/{quote(str(id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -949,7 +950,7 @@ class AzureadClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def update_user(
+    async def update_user(
         self,
         input: UpdateUserRequest | Mapping[str, Any],
         id: str,
@@ -987,7 +988,7 @@ class AzureadClient(ConnectorClientBase):
             f"/v1.0/users/{quote(str(id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1004,7 +1005,7 @@ class AzureadClient(ConnectorClientBase):
                 response=response,
             )
 
-    def refresh_tokens(
+    async def refresh_tokens(
         self,
         id: str,
         *,
@@ -1039,7 +1040,7 @@ class AzureadClient(ConnectorClientBase):
             f"/v1.0/users/{quote(str(id), safe='')}/revokeSignInSessions"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1056,7 +1057,7 @@ class AzureadClient(ConnectorClientBase):
                 response=response,
             )
 
-    def create_user(
+    async def create_user(
         self,
         input: CreateUserRequest | Mapping[str, Any],
         *,
@@ -1088,7 +1089,7 @@ class AzureadClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1.0/users"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1119,7 +1120,7 @@ class AzureadClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get group members
 
@@ -1128,8 +1129,8 @@ class AzureadClient(ConnectorClientBase):
         values, please turn on the Settings->Pagination feature and provide a
         Threshold limit.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `GetGroupMembers`.
 
@@ -1144,8 +1145,8 @@ class AzureadClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1165,14 +1166,14 @@ class AzureadClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = None
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -1191,9 +1192,9 @@ class AzureadClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
@@ -1203,15 +1204,15 @@ class AzureadClient(ConnectorClientBase):
                 else None
             )
 
-            def items() -> Iterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[dict[str, Any]]:
                 for item in page.get("value", []):
                     yield item
 
             return continuation_token, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)
 
-    def remove_member_from_group(
+    async def remove_member_from_group(
         self,
         group_id: str,
         member_id: str,
@@ -1252,7 +1253,7 @@ class AzureadClient(ConnectorClientBase):
             f"/$ref"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1269,7 +1270,7 @@ class AzureadClient(ConnectorClientBase):
                 response=response,
             )
 
-    def add_user_to_group(
+    async def add_user_to_group(
         self,
         input: GetGroupRequest | Mapping[str, Any],
         id: str,
@@ -1307,7 +1308,7 @@ class AzureadClient(ConnectorClientBase):
             f"/v1.0/groups/{quote(str(id), safe='')}/members/$ref"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1324,7 +1325,7 @@ class AzureadClient(ConnectorClientBase):
                 response=response,
             )
 
-    def assign_manager(
+    async def assign_manager(
         self,
         input: AssignManagerRequest | Mapping[str, Any],
         id: str,
@@ -1362,7 +1363,7 @@ class AzureadClient(ConnectorClientBase):
             f"/v1.0/users/{quote(str(id), safe='')}/manager/$ref"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1379,7 +1380,7 @@ class AzureadClient(ConnectorClientBase):
                 response=response,
             )
 
-    def create_group(
+    async def create_group(
         self,
         input: CreateGroupInput | Mapping[str, Any],
         *,
@@ -1411,7 +1412,7 @@ class AzureadClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1.0/groups"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1433,7 +1434,7 @@ class AzureadClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def check_member_groups(
+    async def check_member_groups(
         self,
         input: CheckMemberGroupsRequest | Mapping[str, Any],
         id: str,
@@ -1472,7 +1473,7 @@ class AzureadClient(ConnectorClientBase):
             f"/v2/v1.0/users/{quote(str(id), safe='')}/checkMemberGroups"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1503,14 +1504,14 @@ class AzureadClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[str]:
+    ) -> AsyncItemPaged[str]:
         """
         Get groups of a user
 
         Get the groups a user is a member of.
 
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
 
         Swagger operation ID: `GetMemberGroupsV2`.
 
@@ -1525,8 +1526,8 @@ class AzureadClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[str]: An Azure Core pager over connector results. Consume
-                it with `for`.
+            AsyncItemPaged[str]: An Azure Core pager over connector results.
+                Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1538,14 +1539,14 @@ class AzureadClient(ConnectorClientBase):
         initial_request_url = request_url
         request_body = input
 
-        def get_next(
+        async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
             request_url = initial_request_url
             if continuation_token is not None:
                 request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
-            response = self.http_client.send(
+            response = await self.http_client.send(
                 "POST", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
@@ -1564,16 +1565,16 @@ class AzureadClient(ConnectorClientBase):
 
             return response, request_url
 
-        def extract_data(
+        async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[str]]:
+        ) -> tuple[Optional[str], AsyncIterator[str]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[str]:
+            async def items() -> AsyncIterator[str]:
                 for item in page.get("value", []):
                     yield item
 
             return None, items()
 
-        return ItemPaged(get_next, extract_data)
+        return AsyncItemPaged(get_next, extract_data)

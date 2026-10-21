@@ -10,9 +10,10 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.polling import LROPoller
-from azure.core.credentials import AzureKeyCredential, TokenCredential
-from azure.core.pipeline.transport import HttpTransport
+from azure.core.polling import AsyncLROPoller
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
@@ -1242,7 +1243,7 @@ class PlumsailClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: TokenCredential | AzureKeyCredential,
+        credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout: float = 30.0,
@@ -1251,7 +1252,7 @@ class PlumsailClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[HttpTransport] = None,
+        transport: Optional[AsyncHttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -1271,8 +1272,8 @@ class PlumsailClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core HTTP transport closed by
-                the client through its synchronous lifecycle.
+            transport: Optional Azure Core async HTTP transport closed by
+                the client through its asynchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -1299,7 +1300,7 @@ class PlumsailClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "plumsail"
 
-    def profiles_me_get(
+    async def profiles_me_get(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1328,7 +1329,7 @@ class PlumsailClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/profiles/me"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1350,7 +1351,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def begin_flow_v1_documents_jobs_apply_docx_template(
+    async def begin_flow_v1_documents_jobs_apply_docx_template(
         self,
         input: ApplyDocxTemplateRequest | Mapping[str, Any],
         *,
@@ -1358,14 +1359,14 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[bytes]:
+    ) -> AsyncLROPoller[bytes]:
         """
         Create document from DOCX template
 
         Create document from DOCX template. More information:
         https://plumsail.com/docs/documents/v1.x/document-generation/docx/index.html
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsApplyDocxTemplatePost`.
 
@@ -1378,7 +1379,8 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[bytes]: An Azure Core poller for the connector operation.
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1388,7 +1390,7 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/Documents/jobs/ApplyDocxTemplate"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1405,7 +1407,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: polling_response.content,
@@ -1420,7 +1422,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_apply_xlsx_template(
+    async def begin_flow_v1_documents_jobs_apply_xlsx_template(
         self,
         input: ApplyXlsxTemplateRequest | Mapping[str, Any],
         *,
@@ -1428,14 +1430,14 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[bytes]:
+    ) -> AsyncLROPoller[bytes]:
         """
         Create document from XLSX template
 
         Create document from XLSX template. More information:
         https://plumsail.com/docs/documents/v1.x/document-generation/xlsx/index.html
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsApplyXlsxTemplatePost`.
 
@@ -1448,7 +1450,8 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[bytes]: An Azure Core poller for the connector operation.
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1458,7 +1461,7 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/Documents/jobs/ApplyXlsxTemplate"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1475,7 +1478,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: polling_response.content,
@@ -1490,7 +1493,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_apply_pptx(
+    async def begin_flow_v1_documents_jobs_apply_pptx(
         self,
         input: ApplyPptxTemplateRequest | Mapping[str, Any],
         *,
@@ -1498,14 +1501,14 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[dict[str, Any] | None]:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Create document from PPTX template
 
         Create document from PPTX template. More information:
         https://plumsail.com/docs/documents/v1.x/document-generation/pptx/index.html
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsApplyPptxPost`.
 
@@ -1518,7 +1521,7 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[dict[str, Any] | None]: An Azure Core poller for the
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
                 connector operation.
 
         Raises:
@@ -1528,7 +1531,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/ApplyPptx"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1545,7 +1548,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: (
@@ -1564,7 +1567,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_apply_docx(
+    async def begin_flow_v1_documents_jobs_apply_docx(
         self,
         input: MergeFieldsTemplateRequest | Mapping[str, Any],
         *,
@@ -1572,7 +1575,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[dict[str, Any] | None]:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Fill merge fields in DOCX document
 
@@ -1582,7 +1585,7 @@ class PlumsailClient(ConnectorClientBase):
         Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#fill-merge-fields-in-docx-document
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsApplyDocxPost`.
 
@@ -1595,7 +1598,7 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[dict[str, Any] | None]: An Azure Core poller for the
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
                 connector operation.
 
         Raises:
@@ -1605,7 +1608,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/ApplyDocx"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1622,7 +1625,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: (
@@ -1641,7 +1644,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_apply_html(
+    async def begin_flow_v1_documents_jobs_apply_html(
         self,
         input: ApplyHtmlFlowTemplateRequest | Mapping[str, Any],
         *,
@@ -1649,7 +1652,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[dict[str, Any] | None]:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Create HTML from template
 
@@ -1659,7 +1662,7 @@ class PlumsailClient(ConnectorClientBase):
         docs: http://mustache.github.io/mustache.5.html. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#create-html-from-template
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsApplyHtmlPost`.
 
@@ -1672,7 +1675,7 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[dict[str, Any] | None]: An Azure Core poller for the
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
                 connector operation.
 
         Raises:
@@ -1682,7 +1685,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/ApplyHtml"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1699,7 +1702,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: (
@@ -1718,7 +1721,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_html2_pdf(
+    async def begin_flow_v1_documents_jobs_html2_pdf(
         self,
         input: Html2PdfFlowRequest | Mapping[str, Any],
         *,
@@ -1726,7 +1729,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[dict[str, Any] | None]:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Convert HTML to PDF
 
@@ -1734,7 +1737,7 @@ class PlumsailClient(ConnectorClientBase):
         converts to PDF document. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-html-to-pdf
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsHtml2PdfPost`.
 
@@ -1747,7 +1750,7 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[dict[str, Any] | None]: An Azure Core poller for the
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
                 connector operation.
 
         Raises:
@@ -1757,7 +1760,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Html2Pdf"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1774,7 +1777,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: (
@@ -1793,7 +1796,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_html2_docx(
+    async def begin_flow_v1_documents_jobs_html2_docx(
         self,
         input: Html2DocxFlowRequest | Mapping[str, Any],
         *,
@@ -1801,7 +1804,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[dict[str, Any] | None]:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Convert HTML to DOCX
 
@@ -1809,7 +1812,7 @@ class PlumsailClient(ConnectorClientBase):
         it and converts to DOCX document. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-html-to-docx
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsHtml2DocxPost`.
 
@@ -1822,7 +1825,7 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[dict[str, Any] | None]: An Azure Core poller for the
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
                 connector operation.
 
         Raises:
@@ -1832,7 +1835,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Html2Docx"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1849,7 +1852,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: (
@@ -1868,7 +1871,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_docx2_pdf(
+    async def begin_flow_v1_documents_jobs_docx2_pdf(
         self,
         input: Docx2PdfRequest | Mapping[str, Any],
         *,
@@ -1876,7 +1879,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[dict[str, Any] | None]:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Convert DOCX to PDF
 
@@ -1884,7 +1887,7 @@ class PlumsailClient(ConnectorClientBase):
         it to PDF. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-docx-to-pdf
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsDocx2PdfPost`.
 
@@ -1897,7 +1900,7 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[dict[str, Any] | None]: An Azure Core poller for the
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
                 connector operation.
 
         Raises:
@@ -1907,7 +1910,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Docx2Pdf"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1924,7 +1927,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: (
@@ -1943,7 +1946,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_xslx2_pdf(
+    async def begin_flow_v1_documents_jobs_xslx2_pdf(
         self,
         input: Xlsx2PdfRequest | Mapping[str, Any],
         *,
@@ -1951,7 +1954,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[bytes]:
+    ) -> AsyncLROPoller[bytes]:
         """
         Convert XLSX to PDF
 
@@ -1959,7 +1962,7 @@ class PlumsailClient(ConnectorClientBase):
         it to PDF. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-xlsx-to-pdf
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsXslx2PdfPost`.
 
@@ -1972,7 +1975,8 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[bytes]: An Azure Core poller for the connector operation.
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1981,7 +1985,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Xslx2Pdf"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1998,7 +2002,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: polling_response.content,
@@ -2013,7 +2017,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_pptx2_pdf(
+    async def begin_flow_v1_documents_jobs_pptx2_pdf(
         self,
         input: Pptx2PdfRequest | Mapping[str, Any],
         *,
@@ -2021,7 +2025,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[bytes]:
+    ) -> AsyncLROPoller[bytes]:
         """
         Convert PPTX to PDF
 
@@ -2029,7 +2033,7 @@ class PlumsailClient(ConnectorClientBase):
         it to PDF. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-pptx-to-pdf
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsPptx2PdfPost`.
 
@@ -2042,7 +2046,8 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[bytes]: An Azure Core poller for the connector operation.
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -2051,7 +2056,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Pptx2Pdf"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2068,7 +2073,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: polling_response.content,
@@ -2083,7 +2088,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_any2_pdf_v2(
+    async def begin_flow_v1_documents_jobs_any2_pdf_v2(
         self,
         input: Any2PdfRequest | Mapping[str, Any],
         *,
@@ -2091,14 +2096,14 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[bytes]:
+    ) -> AsyncLROPoller[bytes]:
         """
         Convert to PDF
 
         Convert provided file to PDF file. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-to-pdf
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsAny2PdfV2Post`.
 
@@ -2111,7 +2116,8 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[bytes]: An Azure Core poller for the connector operation.
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -2120,7 +2126,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Any2PdfV2"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2137,7 +2143,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: polling_response.content,
@@ -2152,7 +2158,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_email2_pdf(
+    async def begin_flow_v1_documents_jobs_email2_pdf(
         self,
         input: Email2PdfRequest | Mapping[str, Any],
         *,
@@ -2160,14 +2166,14 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[bytes]:
+    ) -> AsyncLROPoller[bytes]:
         """
         Convert Email to PDF
 
         Convert provided Email to PDF file. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-email-to-pdf
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsEmail2PdfPost`.
 
@@ -2180,7 +2186,8 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[bytes]: An Azure Core poller for the connector operation.
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -2189,7 +2196,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Email2Pdf"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2206,7 +2213,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: polling_response.content,
@@ -2221,7 +2228,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_doc2_docx(
+    async def begin_flow_v1_documents_jobs_doc2_docx(
         self,
         input: Doc2DocxRequest | Mapping[str, Any],
         *,
@@ -2229,7 +2236,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[bytes]:
+    ) -> AsyncLROPoller[bytes]:
         """
         Convert DOC to DOCX
 
@@ -2237,7 +2244,7 @@ class PlumsailClient(ConnectorClientBase):
         it to DOCX. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-doc-to-docx
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsDoc2DocxPost`.
 
@@ -2250,7 +2257,8 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[bytes]: An Azure Core poller for the connector operation.
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -2259,7 +2267,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Doc2Docx"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2276,7 +2284,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: polling_response.content,
@@ -2291,7 +2299,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_xls2_xlsx(
+    async def begin_flow_v1_documents_jobs_xls2_xlsx(
         self,
         input: Xls2XlsxRequest | Mapping[str, Any],
         *,
@@ -2299,7 +2307,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[bytes]:
+    ) -> AsyncLROPoller[bytes]:
         """
         Convert XLS to XLSX
 
@@ -2307,7 +2315,7 @@ class PlumsailClient(ConnectorClientBase):
         it to XLSX. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-xls-to-xlsx
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsXls2XlsxPost`.
 
@@ -2320,7 +2328,8 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[bytes]: An Azure Core poller for the connector operation.
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -2329,7 +2338,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Xls2Xlsx"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2346,7 +2355,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: polling_response.content,
@@ -2361,7 +2370,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_ppt2_pptx(
+    async def begin_flow_v1_documents_jobs_ppt2_pptx(
         self,
         input: Ppt2PptxRequest | Mapping[str, Any],
         *,
@@ -2369,7 +2378,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[bytes]:
+    ) -> AsyncLROPoller[bytes]:
         """
         Convert PPT to PPTX
 
@@ -2377,7 +2386,7 @@ class PlumsailClient(ConnectorClientBase):
         it to PPTX. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-ppt-to-pptx
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsPpt2PptxPost`.
 
@@ -2390,7 +2399,8 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[bytes]: An Azure Core poller for the connector operation.
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -2399,7 +2409,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Ppt2Pptx"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2416,7 +2426,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: polling_response.content,
@@ -2431,7 +2441,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_split_pdf_v2(
+    async def begin_flow_v1_documents_jobs_split_pdf_v2(
         self,
         input: FlowDocumentsJobsSplitPdfInput | Mapping[str, Any],
         type_: str,
@@ -2440,14 +2450,14 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[dict[str, Any] | None]:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Split PDF
 
         Split PDF takes PDF document and splits it. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#split-pdf
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsSplitPdfV2Post`.
 
@@ -2461,7 +2471,7 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[dict[str, Any] | None]: An Azure Core poller for the
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
                 connector operation.
 
         Raises:
@@ -2478,7 +2488,7 @@ class PlumsailClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2495,7 +2505,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: (
@@ -2514,7 +2524,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_merge_any_to_pdf_v2(
+    async def begin_flow_v1_documents_jobs_merge_any_to_pdf_v2(
         self,
         input: MergeAny2PdfRequest | Mapping[str, Any],
         *,
@@ -2522,7 +2532,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[bytes]:
+    ) -> AsyncLROPoller[bytes]:
         """
         Merge any files into PDF
 
@@ -2530,7 +2540,7 @@ class PlumsailClient(ConnectorClientBase):
         Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#merge-any-files-into-pdf
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsMergeAnyToPdfV2Post`.
 
@@ -2543,7 +2553,8 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[bytes]: An Azure Core poller for the connector operation.
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -2553,7 +2564,7 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/Documents/jobs/MergeAnyToPdfV2"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2570,7 +2581,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: polling_response.content,
@@ -2585,7 +2596,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_extract_text_from_pdf(
+    async def begin_flow_v1_documents_jobs_extract_text_from_pdf(
         self,
         input: Pdf2TextRequest | Mapping[str, Any],
         *,
@@ -2593,7 +2604,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[dict[str, Any] | None]:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Extract text from PDF document
 
@@ -2601,7 +2612,7 @@ class PlumsailClient(ConnectorClientBase):
         HTML format. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#extract-text-from-pdf-document
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsExtractTextFromPdfPost`.
 
@@ -2614,7 +2625,7 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[dict[str, Any] | None]: An Azure Core poller for the
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
                 connector operation.
 
         Raises:
@@ -2625,7 +2636,7 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/Documents/jobs/ExtractTextFromPdf"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2642,7 +2653,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: (
@@ -2661,7 +2672,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_pdf2_image_v2(
+    async def begin_flow_v1_documents_jobs_pdf2_image_v2(
         self,
         input: Pdf2ImageRequest | Mapping[str, Any],
         *,
@@ -2669,7 +2680,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[dict[str, Any] | None]:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Convert PDF to Image
 
@@ -2677,7 +2688,7 @@ class PlumsailClient(ConnectorClientBase):
         Image (jpeg, png, gif, bmp, etc). Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-pdf-to-image
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsPdf2ImageV2Post`.
 
@@ -2690,7 +2701,7 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[dict[str, Any] | None]: An Azure Core poller for the
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
                 connector operation.
 
         Raises:
@@ -2701,7 +2712,7 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/Documents/jobs/Pdf2ImageV2"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2718,7 +2729,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: (
@@ -2737,7 +2748,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_image2_pdf(
+    async def begin_flow_v1_documents_jobs_image2_pdf(
         self,
         input: Image2PdfRequest | Mapping[str, Any],
         *,
@@ -2745,13 +2756,13 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[bytes]:
+    ) -> AsyncLROPoller[bytes]:
         """
         Convert Images to PDF
 
         It takes images and converts them to a PDF document
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsImage2PdfPost`.
 
@@ -2764,7 +2775,8 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[bytes]: An Azure Core poller for the connector operation.
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -2773,7 +2785,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Image2Pdf"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2790,7 +2802,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: polling_response.content,
@@ -2805,7 +2817,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_fill_in_pdf_form(
+    async def begin_flow_v1_documents_jobs_fill_in_pdf_form(
         self,
         input: FillInPdfFormRequest | Mapping[str, Any],
         *,
@@ -2813,14 +2825,14 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[dict[str, Any] | None]:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Fill in PDF Form
 
         Fill in PDF Form fills out PDF from by provided data. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#fill-in-pdf-form
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsFillInPdfFormPost`.
 
@@ -2833,7 +2845,7 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[dict[str, Any] | None]: An Azure Core poller for the
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
                 connector operation.
 
         Raises:
@@ -2844,7 +2856,7 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/Documents/jobs/FillInPdfForm"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2861,7 +2873,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: (
@@ -2880,7 +2892,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_get_pdf_form(
+    async def begin_flow_v1_documents_jobs_get_pdf_form(
         self,
         input: GetPdfFormRequest | Mapping[str, Any],
         *,
@@ -2888,7 +2900,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[dict[str, Any] | None]:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Get Form from PDF
 
@@ -2896,7 +2908,7 @@ class PlumsailClient(ConnectorClientBase):
         Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#get-form-from-pdf
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsGetPdfFormPost`.
 
@@ -2909,7 +2921,7 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[dict[str, Any] | None]: An Azure Core poller for the
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
                 connector operation.
 
         Raises:
@@ -2919,7 +2931,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/GetPdfForm"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2936,7 +2948,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: (
@@ -2955,7 +2967,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_protect_pdf(
+    async def begin_flow_v1_documents_jobs_protect_pdf(
         self,
         input: ProtectPdfRequest | Mapping[str, Any],
         *,
@@ -2963,7 +2975,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[dict[str, Any] | None]:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Protect PDF document
 
@@ -2971,7 +2983,7 @@ class PlumsailClient(ConnectorClientBase):
         protections to PDF files. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#protect-pdf-document
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsProtectPdfPost`.
 
@@ -2984,7 +2996,7 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[dict[str, Any] | None]: An Azure Core poller for the
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
                 connector operation.
 
         Raises:
@@ -2994,7 +3006,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/ProtectPdf"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3011,7 +3023,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: (
@@ -3030,7 +3042,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_get_pdf_protection_info(
+    async def begin_flow_v1_documents_jobs_get_pdf_protection_info(
         self,
         input: PdfProtectionInfoRequest | Mapping[str, Any],
         *,
@@ -3038,7 +3050,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[dict[str, Any] | None]:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Get information about PDF protection
 
@@ -3046,7 +3058,7 @@ class PlumsailClient(ConnectorClientBase):
         document is password protected. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#get-pdf-protection-information
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsGetPdfProtectionInfoPost`.
 
@@ -3059,7 +3071,7 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[dict[str, Any] | None]: An Azure Core poller for the
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
                 connector operation.
 
         Raises:
@@ -3070,7 +3082,7 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/Documents/jobs/GetPdfProtectionInfo"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3087,7 +3099,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: (
@@ -3106,7 +3118,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_compress_pdf(
+    async def begin_flow_v1_documents_jobs_compress_pdf(
         self,
         input: CompressPdfRequest | Mapping[str, Any],
         *,
@@ -3114,14 +3126,14 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[bytes]:
+    ) -> AsyncLROPoller[bytes]:
         """
         Compress PDF document
 
         Compress PDF document size if possible and optimize it. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#compress-pdf-document
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsCompressPdfPost`.
 
@@ -3134,7 +3146,8 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[bytes]: An Azure Core poller for the connector operation.
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -3144,7 +3157,7 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/Documents/jobs/CompressPdf"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3161,7 +3174,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: polling_response.content,
@@ -3176,7 +3189,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_add_watermark_to_pdf(
+    async def begin_flow_v1_documents_jobs_add_watermark_to_pdf(
         self,
         input: FlowDocumentsJobsAddWatermarkToPdfInput | Mapping[str, Any],
         type_: str,
@@ -3185,14 +3198,14 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[dict[str, Any] | None]:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Add a watermark to PDF
 
         Add a watermark to PDF as text, an image, HTML, or PDF. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#add-watermark-to-pdf
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsAddWatermarkToPdfPost`.
 
@@ -3206,7 +3219,7 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[dict[str, Any] | None]: An Azure Core poller for the
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
                 connector operation.
 
         Raises:
@@ -3224,7 +3237,7 @@ class PlumsailClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3241,7 +3254,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: (
@@ -3260,7 +3273,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_merge_docx(
+    async def begin_flow_v1_documents_jobs_merge_docx(
         self,
         input: MergeDocxRequest | Mapping[str, Any],
         *,
@@ -3268,7 +3281,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[dict[str, Any] | None]:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Merge DOCX files
 
@@ -3276,7 +3289,7 @@ class PlumsailClient(ConnectorClientBase):
         single file. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#merge-docx-files
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsMergeDocxPost`.
 
@@ -3289,7 +3302,7 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[dict[str, Any] | None]: An Azure Core poller for the
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
                 connector operation.
 
         Raises:
@@ -3299,7 +3312,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/MergeDocx"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3316,7 +3329,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: (
@@ -3335,7 +3348,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_parse_csv(
+    async def begin_flow_v1_documents_jobs_parse_csv(
         self,
         input: ParseCsvFlowRequest | Mapping[str, Any],
         *,
@@ -3343,14 +3356,14 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[dict[str, Any] | None]:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Parse CSV
 
         Parse CSV works like Parse JSON but for CSV files. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#parse-csv
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsParseCsvPost`.
 
@@ -3363,7 +3376,7 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[dict[str, Any] | None]: An Azure Core poller for the
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
                 connector operation.
 
         Raises:
@@ -3373,7 +3386,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/ParseCsv"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3390,7 +3403,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: (
@@ -3409,7 +3422,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_csv2_xlsx(
+    async def begin_flow_v1_documents_jobs_csv2_xlsx(
         self,
         input: Csv2XlsxRequest | Mapping[str, Any],
         *,
@@ -3417,14 +3430,14 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[bytes]:
+    ) -> AsyncLROPoller[bytes]:
         """
         Convert CSV to Excel
 
         Convert CSV to Excel file (XLSX). Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#csv-to-excel
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsCsv2XlsxPost`.
 
@@ -3437,7 +3450,8 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[bytes]: An Azure Core poller for the connector operation.
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -3446,7 +3460,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Csv2Xlsx"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3463,7 +3477,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: polling_response.content,
@@ -3478,7 +3492,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_json2_xlsx(
+    async def begin_flow_v1_documents_jobs_json2_xlsx(
         self,
         input: Json2XlsxRequest | Mapping[str, Any],
         *,
@@ -3486,14 +3500,14 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[bytes]:
+    ) -> AsyncLROPoller[bytes]:
         """
         Convert JSON to Excel
 
         Convert JSON to Excel file (XLSX). Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#json-to-excel
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsJson2XlsxPost`.
 
@@ -3506,7 +3520,8 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[bytes]: An Azure Core poller for the connector operation.
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -3515,7 +3530,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Json2Xlsx"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3532,7 +3547,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: polling_response.content,
@@ -3547,7 +3562,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_json2_csv(
+    async def begin_flow_v1_documents_jobs_json2_csv(
         self,
         input: Json2CsvRequest | Mapping[str, Any],
         *,
@@ -3555,14 +3570,14 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[bytes]:
+    ) -> AsyncLROPoller[bytes]:
         """
         Convert JSON to CSV
 
         Convert JSON to CSV file. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#json-to-csv
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsJson2CsvPost`.
 
@@ -3575,7 +3590,8 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[bytes]: An Azure Core poller for the connector operation.
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -3584,7 +3600,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Json2Csv"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3601,7 +3617,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: polling_response.content,
@@ -3616,7 +3632,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_reg_exp_match(
+    async def begin_flow_v1_documents_jobs_reg_exp_match(
         self,
         input: RegExpMatchRequest | Mapping[str, Any],
         *,
@@ -3624,7 +3640,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[dict[str, Any] | None]:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Regular Expression Match
 
@@ -3634,7 +3650,7 @@ class PlumsailClient(ConnectorClientBase):
         the same syntax as actions. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#regular-expression-match
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsRegExpMatchPost`.
 
@@ -3647,7 +3663,7 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[dict[str, Any] | None]: An Azure Core poller for the
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
                 connector operation.
 
         Raises:
@@ -3658,7 +3674,7 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/Documents/jobs/RegExpMatch"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3675,7 +3691,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: (
@@ -3694,7 +3710,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_reg_exp_replace(
+    async def begin_flow_v1_documents_jobs_reg_exp_replace(
         self,
         input: RegExpReplaceRequest | Mapping[str, Any],
         *,
@@ -3702,7 +3718,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[dict[str, Any] | None]:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Regular Expression Replace
 
@@ -3712,7 +3728,7 @@ class PlumsailClient(ConnectorClientBase):
         expressions. It supports the same syntax as actions. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#regular-expression-replace
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsRegExpReplacePost`.
 
@@ -3725,7 +3741,7 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[dict[str, Any] | None]: An Azure Core poller for the
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
                 connector operation.
 
         Raises:
@@ -3736,7 +3752,7 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/Documents/jobs/RegExpReplace"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3753,7 +3769,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: (
@@ -3772,7 +3788,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_reg_exp_test(
+    async def begin_flow_v1_documents_jobs_reg_exp_test(
         self,
         input: RegExpTestRequest | Mapping[str, Any],
         *,
@@ -3780,7 +3796,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[dict[str, Any] | None]:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Regular Expression Test
 
@@ -3790,7 +3806,7 @@ class PlumsailClient(ConnectorClientBase):
         It supports the same syntax as actions. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#regular-expression-test
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsRegExpTestPost`.
 
@@ -3803,7 +3819,7 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[dict[str, Any] | None]: An Azure Core poller for the
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
                 connector operation.
 
         Raises:
@@ -3813,7 +3829,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/RegExpTest"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3830,7 +3846,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: (
@@ -3849,7 +3865,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_create_archive(
+    async def begin_flow_v1_documents_jobs_create_archive(
         self,
         input: CreateArchiveRequest | Mapping[str, Any],
         *,
@@ -3857,13 +3873,13 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[dict[str, Any] | None]:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Create Archive
 
         Compresses and adds files to a ZIP archive.
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsCreateArchivePost`.
 
@@ -3876,7 +3892,7 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[dict[str, Any] | None]: An Azure Core poller for the
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
                 connector operation.
 
         Raises:
@@ -3887,7 +3903,7 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/Documents/jobs/CreateArchive"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3904,7 +3920,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: (
@@ -3923,7 +3939,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_extract_archive(
+    async def begin_flow_v1_documents_jobs_extract_archive(
         self,
         input: ExtractArchiveRequest | Mapping[str, Any],
         *,
@@ -3931,13 +3947,13 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[dict[str, Any] | None]:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Extract Archive
 
         Extract files from archive.
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsExtractArchivePost`.
 
@@ -3950,7 +3966,7 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[dict[str, Any] | None]: An Azure Core poller for the
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
                 connector operation.
 
         Raises:
@@ -3961,7 +3977,7 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/Documents/jobs/ExtractArchive"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3978,7 +3994,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: (
@@ -3997,7 +4013,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_documents_jobs_merge_xlsx(
+    async def begin_flow_v1_documents_jobs_merge_xlsx(
         self,
         input: MergeXlsxRequest | Mapping[str, Any],
         *,
@@ -4005,7 +4021,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[dict[str, Any] | None]:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Merge XLSX files
 
@@ -4013,7 +4029,7 @@ class PlumsailClient(ConnectorClientBase):
         single file. Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#merge-xlsx-files
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1DocumentsJobsMergeXlsxPost`.
 
@@ -4026,7 +4042,7 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[dict[str, Any] | None]: An Azure Core poller for the
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
                 connector operation.
 
         Raises:
@@ -4036,7 +4052,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/MergeXlsx"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4053,7 +4069,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: (
@@ -4072,7 +4088,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_processes_flow_jobs_execute_process(
+    async def begin_flow_v1_processes_flow_jobs_execute_process(
         self,
         input: FlowProcessesFlowJobsExecuteProcessInput | Mapping[str, Any],
         process_id: str,
@@ -4081,7 +4097,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[bytes]:
+    ) -> AsyncLROPoller[bytes]:
         """
         Start document generation process with json
 
@@ -4090,7 +4106,7 @@ class PlumsailClient(ConnectorClientBase):
         Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html##start-process-json
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID: `FlowV1ProcessesFlowJobsExecuteProcessPost`.
 
@@ -4104,7 +4120,8 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[bytes]: An Azure Core poller for the connector operation.
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -4121,7 +4138,7 @@ class PlumsailClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4138,7 +4155,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: polling_response.content,
@@ -4153,7 +4170,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def begin_flow_v1_processes_flow_jobs_execute_process_with_generated_data(
+    async def begin_flow_v1_processes_flow_jobs_execute_process_with_generated_data(
         self,
         input: ProcessJsonData | Mapping[str, Any],
         process_id: str,
@@ -4162,7 +4179,7 @@ class PlumsailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> LROPoller[bytes]:
+    ) -> AsyncLROPoller[bytes]:
         """
         Start document generation process
 
@@ -4171,7 +4188,7 @@ class PlumsailClient(ConnectorClientBase):
         Documentation -
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#start-document-generation-process
 
-        Returns an Azure Core poller for the connector operation.
+        Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID:
         `FlowV1ProcessesFlowJobsExecuteProcessWithGeneratedDataPost`.
@@ -4186,7 +4203,8 @@ class PlumsailClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            LROPoller[bytes]: An Azure Core poller for the connector operation.
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -4203,7 +4221,7 @@ class PlumsailClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4220,7 +4238,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-        return LROPoller(
+        return AsyncLROPoller(
             client=self,
             initial_response=response,
             deserialization_callback=lambda polling_response: polling_response.content,
@@ -4235,7 +4253,7 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    def flow_v1_documents_flow_schema_split_pdf(
+    async def flow_v1_documents_flow_schema_split_pdf(
         self,
         type_: str,
         *,
@@ -4276,7 +4294,7 @@ class PlumsailClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4293,7 +4311,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-    def flow_v1_documents_flow_schema_add_watermark_to_pdf(
+    async def flow_v1_documents_flow_schema_add_watermark_to_pdf(
         self,
         type_: str,
         *,
@@ -4334,7 +4352,7 @@ class PlumsailClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4351,7 +4369,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-    def flow_v1_processes_flow_schema_get_processes(
+    async def flow_v1_processes_flow_schema_get_processes(
         self,
         *,
         timeout: Optional[float] = None,
@@ -4383,7 +4401,7 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/ProcessesFlow/Schema/GetProcesses"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4400,7 +4418,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-    def flow_v1_documents_flow_schema_parse_csv(
+    async def flow_v1_documents_flow_schema_parse_csv(
         self,
         headers_parameter: str,
         *,
@@ -4441,7 +4459,7 @@ class PlumsailClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4458,7 +4476,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-    def flow_v1_processes_flow_schema_get_json_data(
+    async def flow_v1_processes_flow_schema_get_json_data(
         self,
         process_id: str,
         *,
@@ -4499,7 +4517,7 @@ class PlumsailClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4516,7 +4534,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-    def flow_v1_processes_flow_triggers_by_process_id_schema_get(
+    async def flow_v1_processes_flow_triggers_by_process_id_schema_get(
         self,
         process_id: str,
         *,
@@ -4556,7 +4574,7 @@ class PlumsailClient(ConnectorClientBase):
             f"/schema"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4573,7 +4591,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-    def flow_v1_documents_flow_schema_reg_exp_match(
+    async def flow_v1_documents_flow_schema_reg_exp_match(
         self,
         pattern: str,
         *,
@@ -4614,7 +4632,7 @@ class PlumsailClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,

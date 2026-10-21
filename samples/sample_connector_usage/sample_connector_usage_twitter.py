@@ -1,7 +1,9 @@
 """Twitter sample for the Azure Connectors Python SDK."""
+
+import asyncio
 import os
 
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
 from azure.connectors.twitter import TwitterClient
@@ -10,40 +12,40 @@ from azure.connectors.twitter import TwitterClient
 CONNECTION_RUNTIME_URL = os.environ.get("TWITTER_CONNECTION_URL", "")
 
 
-def list_user_timeline() -> None:
+async def list_user_timeline() -> None:
     """List recent posts from a user's timeline."""
-    with DefaultAzureCredential() as credential:
-        with TwitterClient(CONNECTION_RUNTIME_URL, credential) as client:
-            timeline = list(client.list_user_timeline(
+    async with DefaultAzureCredential() as credential:
+        async with TwitterClient(CONNECTION_RUNTIME_URL, credential) as client:
+            timeline = [item async for item in client.list_user_timeline(
                 user_name="Azure",
                 max_results=10,
-            ))
+            )]
             print(f"Timeline: {timeline}")
 
 
-def search_posts() -> None:
+async def search_posts() -> None:
     """Search recent posts."""
-    with DefaultAzureCredential() as credential:
-        with TwitterClient(CONNECTION_RUNTIME_URL, credential) as client:
-            results = list(client.list_search_tweet(
+    async with DefaultAzureCredential() as credential:
+        async with TwitterClient(CONNECTION_RUNTIME_URL, credential) as client:
+            results = [item async for item in client.list_search_tweet(
                 search_query="Azure Logic Apps",
                 max_results=10,
-            ))
+            )]
             print(f"Search results: {results}")
 
 
-def main() -> None:
+async def main() -> None:
     """Run Twitter connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Set TWITTER_CONNECTION_URL to run this sample.")
         return
 
     try:
-        list_user_timeline()
-        search_posts()
+        await list_user_timeline()
+        await search_posts()
     except ConnectorException as ex:
         print(f"Connector error: {ex}")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

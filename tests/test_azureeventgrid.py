@@ -6,7 +6,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.azureeventgrid import AzureeventgridClient
+from azure.connectors.azureeventgrid import AzureeventgridClient
 from azure.connectors.azureeventgrid import (
     EventRequest,
     EventSchema,

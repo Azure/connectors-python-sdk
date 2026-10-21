@@ -10,7 +10,7 @@ import pytest
 from azure.core.pipeline.transport import AioHttpTransport, AsyncHttpTransport
 
 from azure.connectors.sdk.exceptions import ConnectorException
-from azure.connectors.sdk.aio.http_client import ConnectorHttpClient, ConnectorResponse
+from azure.connectors.sdk.http_client import ConnectorHttpClient, ConnectorResponse
 from azure.connectors.sdk.response import ConnectorResponseSnapshot
 
 

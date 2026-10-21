@@ -6,7 +6,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.azureiotcentral import AzureiotcentralClient
+from azure.connectors.azureiotcentral import AzureiotcentralClient
 from azure.connectors.azureiotcentral import (
     Device,
     DeviceCloudProperties,

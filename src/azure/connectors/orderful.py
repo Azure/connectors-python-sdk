@@ -10,8 +10,9 @@ from typing import Optional, Dict, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential, TokenCredential
-from azure.core.pipeline.transport import HttpTransport
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
@@ -106,7 +107,7 @@ class OrderfulClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: TokenCredential | AzureKeyCredential,
+        credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout: float = 30.0,
@@ -115,7 +116,7 @@ class OrderfulClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[HttpTransport] = None,
+        transport: Optional[AsyncHttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -135,8 +136,8 @@ class OrderfulClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core HTTP transport closed by
-                the client through its synchronous lifecycle.
+            transport: Optional Azure Core async HTTP transport closed by
+                the client through its asynchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -163,7 +164,7 @@ class OrderfulClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "orderful"
 
-    def list_transactions(
+    async def list_transactions(
         self,
         *,
         timeout: Optional[float] = None,
@@ -193,7 +194,7 @@ class OrderfulClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v2/transactions"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -215,7 +216,7 @@ class OrderfulClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def create_transaction(
+    async def create_transaction(
         self,
         input: CreateTransactionInput | Mapping[str, Any],
         *,
@@ -247,7 +248,7 @@ class OrderfulClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v2/transactions"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -264,7 +265,7 @@ class OrderfulClient(ConnectorClientBase):
                 response=response,
             )
 
-    def get_transaction_by_id(
+    async def get_transaction_by_id(
         self,
         transaction_id: int,
         *,
@@ -298,7 +299,7 @@ class OrderfulClient(ConnectorClientBase):
             f"/v2/transactions/{quote(str(transaction_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

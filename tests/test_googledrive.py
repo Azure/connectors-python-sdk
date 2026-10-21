@@ -6,7 +6,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.googledrive import GoogledriveClient
+from azure.connectors.googledrive import GoogledriveClient
 from azure.connectors.googledrive import (
     BlobMetadata,
     Table,

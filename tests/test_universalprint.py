@@ -8,7 +8,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.universalprint import UniversalprintClient
+from azure.connectors.universalprint import UniversalprintClient
 from azure.connectors.sdk import (
     ConnectorException,
 )

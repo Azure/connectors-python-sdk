@@ -5,7 +5,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.azuredigitaltwins import AzuredigitaltwinsClient
+from azure.connectors.azuredigitaltwins import AzuredigitaltwinsClient
 from azure.connectors.azuredigitaltwins import (
     AddTwinInput,
     AddRelationshipInput,

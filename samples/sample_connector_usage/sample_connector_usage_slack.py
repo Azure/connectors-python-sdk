@@ -17,12 +17,15 @@ Usage:
 
     python sample_connector_usage_slack.py
 """
+
+import asyncio
 import os
 
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.slack import PostMessageRequest, SlackClient
+from azure.connectors.slack import SlackClient
+from azure.connectors.slack import PostMessageRequest
 
 
 # Connection runtime URL format:
@@ -30,13 +33,13 @@ from azure.connectors.slack import PostMessageRequest, SlackClient
 CONNECTION_RUNTIME_URL = os.environ.get("SLACK_CONNECTION_URL", "")
 
 
-def example_1_list_channels() -> None:
+async def example_1_list_channels() -> None:
     """Example 1: List channels."""
     print("\n=== Example 1: List Channels ===")
 
-    with DefaultAzureCredential() as credential:
-        with SlackClient(CONNECTION_RUNTIME_URL, credential) as client:
-            channels_response = [item for item in client.list_channels()]
+    async with DefaultAzureCredential() as credential:
+        async with SlackClient(CONNECTION_RUNTIME_URL, credential) as client:
+            channels_response = [item async for item in client.list_channels()]
             channels = channels_response if channels_response else []
 
             print(f"Found {len(channels)} channels")
@@ -44,13 +47,13 @@ def example_1_list_channels() -> None:
                 print(f"  - {channel.get('name')} ({channel.get('id')})")
 
 
-def example_2_create_channel() -> None:
+async def example_2_create_channel() -> None:
     """Example 2: Create a channel."""
     print("\n=== Example 2: Create Channel ===")
 
-    with DefaultAzureCredential() as credential:
-        with SlackClient(CONNECTION_RUNTIME_URL, credential) as client:
-            created = client.create_channel(
+    async with DefaultAzureCredential() as credential:
+        async with SlackClient(CONNECTION_RUNTIME_URL, credential) as client:
+            created = await client.create_channel(
                 name="sdk-sample-channel",
                 is_private=False,
             )
@@ -58,24 +61,24 @@ def example_2_create_channel() -> None:
             print(f"Created channel: {channel.get('name')} ({channel.get('id')})")
 
 
-def example_3_post_message() -> None:
+async def example_3_post_message() -> None:
     """Example 3: Post a message to a channel."""
     print("\n=== Example 3: Post Message ===")
 
-    with DefaultAzureCredential() as credential:
-        with SlackClient(CONNECTION_RUNTIME_URL, credential) as client:
+    async with DefaultAzureCredential() as credential:
+        async with SlackClient(CONNECTION_RUNTIME_URL, credential) as client:
             payload = PostMessageRequest(
                 channel="#general",
                 text="Hello from Slack Python SDK sample",
             )
-            posted = client.post_message(input=payload)
+            posted = await client.post_message(input=payload)
             print(
-                f"Posted: ok={posted.get('ok') if posted else None}, "
+                f"Posted result: {posted}; "
                 f"ts={posted.get('ts') if posted else None}"
             )
 
 
-def main() -> None:
+async def main() -> None:
     """Run Slack connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: SLACK_CONNECTION_URL environment variable not set.")
@@ -86,10 +89,10 @@ def main() -> None:
     print("=" * 50)
 
     try:
-        example_1_list_channels()
+        await example_1_list_channels()
         # Uncomment after confirming your app has channel-create permission.
         # await example_2_create_channel()
-        example_3_post_message()
+        await example_3_post_message()
 
     except ConnectorException as ex:
         print(f"Connector error: {ex}")
@@ -98,4 +101,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

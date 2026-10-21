@@ -1,11 +1,11 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Synchronous Azure Core polling for connector operations."""
+"""Asynchronous Azure Core polling for connector operations."""
 
-import time
+import asyncio
 from typing import Any, Callable, Generic, Mapping, Optional, TypeVar
 
-from azure.core.polling import PollingMethod
+from azure.core.polling import AsyncPollingMethod
 
 from ._polling import (
     get_location,
@@ -19,7 +19,9 @@ from .response import ConnectorResponseHook, ConnectorResponseSnapshot
 PollingResultT = TypeVar("PollingResultT")
 
 
-class ConnectorPollingMethod(PollingMethod[PollingResultT], Generic[PollingResultT]):
+class ConnectorPollingMethod(
+    AsyncPollingMethod[PollingResultT], Generic[PollingResultT]
+):
     """Poll a connector operation until it returns a terminal HTTP response."""
 
     def __init__(
@@ -76,14 +78,14 @@ class ConnectorPollingMethod(PollingMethod[PollingResultT], Generic[PollingResul
         if initial_response.status == 202:
             self._update_polling_url(require_url=True)
 
-    def run(self) -> None:
+    async def run(self) -> None:
         """Poll until the connector returns a terminal response."""
         while not self.finished():
             if self._response is None or self._polling_url is None:
                 raise RuntimeError("Connector polling was not initialized.")
-            time.sleep(get_retry_after_seconds(self._response))
+            await asyncio.sleep(get_retry_after_seconds(self._response))
             request_url = self._polling_url
-            self._response = self._http_client.send(
+            self._response = await self._http_client.send(
                 "GET",
                 request_url,
                 body=None,

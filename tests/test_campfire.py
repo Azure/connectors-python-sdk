@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.campfire import CampfireClient
+from azure.connectors.campfire import CampfireClient
 from azure.connectors.campfire import (
     Account,
     Room,

@@ -17,16 +17,18 @@ Usage:
 
     python sample_connector_usage_monday.py
 """
+
+import asyncio
 import os
 
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
+from azure.connectors.monday import MondayClient
 from azure.connectors.monday import (
     CreateBoardInput,
     CreateItemInput,
     DynamicResponseGetSingleColumnSchema,
-    MondayClient,
     UpdateItemColumnInput,
 )
 
@@ -36,13 +38,13 @@ from azure.connectors.monday import (
 CONNECTION_RUNTIME_URL = os.environ.get("MONDAY_CONNECTION_URL", "")
 
 
-def example_1_create_board() -> None:
+async def example_1_create_board() -> None:
     """Example 1: Create a board."""
     print("\n=== Example 1: Create Board ===")
 
-    with DefaultAzureCredential() as credential:
-        with MondayClient(CONNECTION_RUNTIME_URL, credential) as client:
-            board = client.create_board(
+    async with DefaultAzureCredential() as credential:
+        async with MondayClient(CONNECTION_RUNTIME_URL, credential) as client:
+            board = await client.create_board(
                 input=CreateBoardInput(
                     workspace_id="123456",
                     board_name="SDK sample board",
@@ -52,13 +54,13 @@ def example_1_create_board() -> None:
             print(f"Created board: {data}")
 
 
-def example_2_create_item() -> None:
+async def example_2_create_item() -> None:
     """Example 2: Create an item in a board and group."""
     print("\n=== Example 2: Create Item ===")
 
-    with DefaultAzureCredential() as credential:
-        with MondayClient(CONNECTION_RUNTIME_URL, credential) as client:
-            item = client.create_item(
+    async with DefaultAzureCredential() as credential:
+        async with MondayClient(CONNECTION_RUNTIME_URL, credential) as client:
+            item = await client.create_item(
                 input=CreateItemInput(
                     workspace_id="123456",
                     board_id="789012",
@@ -70,13 +72,13 @@ def example_2_create_item() -> None:
             print(f"Created item: {data}")
 
 
-def example_3_update_item_column() -> None:
+async def example_3_update_item_column() -> None:
     """Example 3: Update a column value on an item."""
     print("\n=== Example 3: Update Item Column ===")
 
-    with DefaultAzureCredential() as credential:
-        with MondayClient(CONNECTION_RUNTIME_URL, credential) as client:
-            updated = client.update_item_column(
+    async with DefaultAzureCredential() as credential:
+        async with MondayClient(CONNECTION_RUNTIME_URL, credential) as client:
+            updated = await client.update_item_column(
                 input=UpdateItemColumnInput(
                     workspace_id="123456",
                     board_id="789012",
@@ -91,17 +93,17 @@ def example_3_update_item_column() -> None:
             print(f"Updated item column: {data}")
 
 
-def example_4_list_workspaces() -> None:
+async def example_4_list_workspaces() -> None:
     """Example 4: List the available workspaces."""
     print("\n=== Example 4: List Workspaces ===")
 
-    with DefaultAzureCredential() as credential:
-        with MondayClient(CONNECTION_RUNTIME_URL, credential) as client:
-            workspaces = client.get_workspaces()
+    async with DefaultAzureCredential() as credential:
+        async with MondayClient(CONNECTION_RUNTIME_URL, credential) as client:
+            workspaces = await client.get_workspaces()
             print(f"Workspaces: {workspaces}")
 
 
-def main() -> None:
+async def main() -> None:
     """Run Monday.com connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: MONDAY_CONNECTION_URL environment variable not set.")
@@ -126,4 +128,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

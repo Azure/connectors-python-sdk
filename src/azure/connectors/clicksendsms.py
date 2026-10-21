@@ -10,8 +10,9 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential, TokenCredential
-from azure.core.pipeline.transport import HttpTransport
+from azure.core.credentials import AzureKeyCredential
+from azure.core.credentials_async import AsyncTokenCredential
+from azure.core.pipeline.transport import AsyncHttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
@@ -485,7 +486,7 @@ class ClicksendsmsClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: TokenCredential | AzureKeyCredential,
+        credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout: float = 30.0,
@@ -494,7 +495,7 @@ class ClicksendsmsClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[HttpTransport] = None,
+        transport: Optional[AsyncHttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -514,8 +515,8 @@ class ClicksendsmsClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core HTTP transport closed by
-                the client through its synchronous lifecycle.
+            transport: Optional Azure Core async HTTP transport closed by
+                the client through its asynchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -542,7 +543,7 @@ class ClicksendsmsClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "clicksendsms"
 
-    def sms_send(
+    async def sms_send(
         self,
         input: SmsSendInput | Mapping[str, Any],
         *,
@@ -574,7 +575,7 @@ class ClicksendsmsClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/sms/send"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -596,7 +597,7 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def create_list(
+    async def create_list(
         self,
         input: CreateListInput | Mapping[str, Any],
         *,
@@ -628,7 +629,7 @@ class ClicksendsmsClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/lists"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -650,7 +651,7 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_contact_lists(
+    async def get_contact_lists(
         self,
         *,
         page: Optional[int] = None,
@@ -696,7 +697,7 @@ class ClicksendsmsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -718,7 +719,7 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def send_voice(
+    async def send_voice(
         self,
         input: SendVoiceInput | Mapping[str, Any],
         *,
@@ -751,7 +752,7 @@ class ClicksendsmsClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/voice/send"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -773,7 +774,7 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def delete_list(
+    async def delete_list(
         self,
         list_id: int,
         *,
@@ -808,7 +809,7 @@ class ClicksendsmsClient(ConnectorClientBase):
             f"/lists/{quote(str(list_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -830,7 +831,7 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def create_list_contact(
+    async def create_list_contact(
         self,
         input: CreateListContactInput | Mapping[str, Any],
         list_id: int,
@@ -868,7 +869,7 @@ class ClicksendsmsClient(ConnectorClientBase):
             f"/lists/{quote(str(list_id), safe='')}/contacts"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -890,7 +891,7 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def view_list_contacts(
+    async def view_list_contacts(
         self,
         list_id: int,
         *,
@@ -925,7 +926,7 @@ class ClicksendsmsClient(ConnectorClientBase):
             f"/lists/{quote(str(list_id), safe='')}/contacts"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -947,7 +948,7 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def delete_list_contact(
+    async def delete_list_contact(
         self,
         list_id: int,
         contact_id: int,
@@ -987,7 +988,7 @@ class ClicksendsmsClient(ConnectorClientBase):
             f"/{quote(str(contact_id), safe='')}"
         )
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1009,7 +1010,7 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def send_mms(
+    async def send_mms(
         self,
         input: SendMmsInput | Mapping[str, Any],
         *,
@@ -1041,7 +1042,7 @@ class ClicksendsmsClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/mms/send"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1063,7 +1064,7 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def send_fax(
+    async def send_fax(
         self,
         input: SendFaxInput | Mapping[str, Any],
         *,
@@ -1095,7 +1096,7 @@ class ClicksendsmsClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/fax/send"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1117,7 +1118,7 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def upload_media(
+    async def upload_media(
         self,
         input: UploadMediaInput | Mapping[str, Any],
         convert: str,
@@ -1158,7 +1159,7 @@ class ClicksendsmsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1180,7 +1181,7 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def search_contact_list(
+    async def search_contact_list(
         self,
         q: str,
         *,
@@ -1218,7 +1219,7 @@ class ClicksendsmsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1240,7 +1241,7 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def send_letter(
+    async def send_letter(
         self,
         input: SendLetterInput | Mapping[str, Any],
         *,
@@ -1272,7 +1273,7 @@ class ClicksendsmsClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/post/letters/send"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1294,7 +1295,7 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def send_postcard(
+    async def send_postcard(
         self,
         input: SendPostcardInput | Mapping[str, Any],
         *,
@@ -1326,7 +1327,7 @@ class ClicksendsmsClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/post/postcards/send"
 
-        response = self.http_client.send(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,

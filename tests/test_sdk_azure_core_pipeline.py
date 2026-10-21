@@ -23,8 +23,8 @@ from azure.core.pipeline.transport import (
     AsyncioRequestsTransport,
 )
 
-from azure.connectors.sdk.aio import ConnectorClientBase, ConnectorHttpClient
-from azure.connectors.sdk.aio.http_client import _JitterRetryPolicy
+from azure.connectors.sdk import ConnectorClientBase, ConnectorHttpClient
+from azure.connectors.sdk.http_client import _JitterRetryPolicy
 from azure.connectors.sdk.exceptions import ConnectorException
 
 
@@ -534,7 +534,7 @@ def test_jitter_retry_policy_adds_bounded_positive_jitter(
     }
 
     with patch(
-        "azure.connectors.sdk.aio.http_client.random.uniform",
+        "azure.connectors.sdk.http_client.random.uniform",
         return_value=jitter,
     ) as mock_uniform:
         backoff = policy.get_backoff_time(settings)
@@ -556,7 +556,7 @@ def test_jitter_retry_policy_caps_backoff_after_jitter() -> None:
     }
 
     with patch(
-        "azure.connectors.sdk.aio.http_client.random.uniform",
+        "azure.connectors.sdk.http_client.random.uniform",
         return_value=0.5,
     ):
         backoff = policy.get_backoff_time(settings)

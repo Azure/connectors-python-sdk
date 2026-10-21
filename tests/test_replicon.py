@@ -3,7 +3,7 @@
 """Contract tests for RepliconClient."""
 
 import azure.connectors.replicon as replicon_module
-from azure.connectors.aio.replicon import RepliconClient
+from azure.connectors.replicon import RepliconClient
 from azure.connectors.replicon import TRIGGER_OPERATIONS
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 

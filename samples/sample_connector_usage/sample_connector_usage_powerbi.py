@@ -17,9 +17,11 @@ Usage:
 
     python sample_connector_usage_powerbi.py
 """
+
+import asyncio
 import os
 
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
 from azure.connectors.powerbi import PowerbiClient
@@ -30,13 +32,14 @@ from azure.connectors.powerbi import PowerbiClient
 CONNECTION_RUNTIME_URL = os.environ.get("POWERBI_CONNECTION_URL", "")
 
 
-def example_1_list_groups() -> list[dict]:
+async def example_1_list_groups() -> list[dict]:
     """Example 1: List Power BI workspaces (groups)."""
     print("\n=== Example 1: List Groups ===")
 
-    with DefaultAzureCredential() as credential:
-        with PowerbiClient(CONNECTION_RUNTIME_URL, credential) as client:
-            groups = list(client.list_groups())
+    async with DefaultAzureCredential() as credential:
+        async with PowerbiClient(CONNECTION_RUNTIME_URL, credential) as client:
+            groups_response = [item async for item in client.list_groups()]
+            groups = groups_response
 
             print(f"Found {len(groups)} groups")
             for group in groups[:5]:
@@ -45,13 +48,14 @@ def example_1_list_groups() -> list[dict]:
             return groups
 
 
-def example_2_list_datasets(group_id: str) -> list[dict]:
+async def example_2_list_datasets(group_id: str) -> list[dict]:
     """Example 2: List datasets in a specific workspace."""
     print("\n=== Example 2: List Datasets ===")
 
-    with DefaultAzureCredential() as credential:
-        with PowerbiClient(CONNECTION_RUNTIME_URL, credential) as client:
-            datasets = list(client.list_datasets(groupid=group_id))
+    async with DefaultAzureCredential() as credential:
+        async with PowerbiClient(CONNECTION_RUNTIME_URL, credential) as client:
+            datasets_response = [item async for item in client.list_datasets(groupid=group_id)]
+            datasets = datasets_response
 
             print(f"Found {len(datasets)} datasets in group '{group_id}'")
             for dataset in datasets[:5]:
@@ -60,17 +64,17 @@ def example_2_list_datasets(group_id: str) -> list[dict]:
             return datasets
 
 
-def example_3_refresh_dataset(group_id: str, dataset_id: str) -> None:
+async def example_3_refresh_dataset(group_id: str, dataset_id: str) -> None:
     """Example 3: Trigger dataset refresh."""
     print("\n=== Example 3: Refresh Dataset ===")
 
-    with DefaultAzureCredential() as credential:
-        with PowerbiClient(CONNECTION_RUNTIME_URL, credential) as client:
-            client.refresh_dataset(groupid=group_id, datasetid=dataset_id)
+    async with DefaultAzureCredential() as credential:
+        async with PowerbiClient(CONNECTION_RUNTIME_URL, credential) as client:
+            await client.refresh_dataset(groupid=group_id, datasetid=dataset_id)
             print(f"Refresh requested for dataset '{dataset_id}'")
 
 
-def main() -> None:
+async def main() -> None:
     """Run all examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: POWERBI_CONNECTION_URL environment variable not set.")
@@ -81,18 +85,18 @@ def main() -> None:
     print("=" * 50)
 
     try:
-        groups = example_1_list_groups()
+        groups = await example_1_list_groups()
 
         if groups:
             first_group_id = groups[0].get("id")
             if first_group_id:
-                datasets = example_2_list_datasets(first_group_id)
+                datasets = await example_2_list_datasets(first_group_id)
 
                 # Optional: trigger a refresh if at least one dataset exists.
                 if datasets:
                     first_dataset_id = datasets[0].get("id")
                     if first_dataset_id:
-                        example_3_refresh_dataset(first_group_id, first_dataset_id)
+                        await example_3_refresh_dataset(first_group_id, first_dataset_id)
             else:
                 print("No group id found in first group record; skipping dataset examples.")
         else:
@@ -105,4 +109,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

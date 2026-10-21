@@ -21,10 +21,13 @@ Usage:
 
     python sample_connector_usage_salesforce.py
 """
+
+import asyncio
 import os
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
-from azure.connectors.salesforce import ExecuteSoqlQueryParameters, SalesforceClient
+from azure.connectors.salesforce import SalesforceClient
+from azure.connectors.salesforce import ExecuteSoqlQueryParameters
 
 # Connection runtime URL format:
 # https://[region].azure-apihub.net/apim/salesforce/[connection-id]
@@ -34,15 +37,15 @@ CONNECTION_RUNTIME_URL = os.environ.get(
 )
 
 
-def example_1_get_tables():
+async def example_1_get_tables():
     """Example 1: List Salesforce object types."""
     print("\n=== Example 1: Get Tables ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with SalesforceClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with SalesforceClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                tables = [item for item in client.list_tables()]
+                tables = [item async for item in client.list_tables()]
 
                 if tables:
                     print(f"Found {len(tables)} table(s):")
@@ -60,15 +63,15 @@ def example_1_get_tables():
                 print(f"Error: {ex}")
 
 
-def example_2_get_records():
+async def example_2_get_records():
     """Example 2: Read records from Account table."""
     print("\n=== Example 2: Get Account Records ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with SalesforceClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with SalesforceClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                records = [item for item in client.list_items(
+                records = [item async for item in client.list_items(
                     table="account",
                     top=5,
                     select="Id,Name,Phone",
@@ -90,18 +93,18 @@ def example_2_get_records():
                 print(f"Error: {ex}")
 
 
-def example_3_execute_soql():
+async def example_3_execute_soql():
     """Example 3: Execute a SOQL query."""
     print("\n=== Example 3: Execute SOQL Query ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with SalesforceClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with SalesforceClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 query_input = ExecuteSoqlQueryParameters(
                     query="SELECT Id, Name FROM Account LIMIT 5",
                 )
-                result = client.execute_soql_query(input=query_input)
+                result = await client.execute_soql_query(input=query_input)
 
                 if result:
                     records = result.get("records", [])
@@ -117,7 +120,7 @@ def example_3_execute_soql():
                 print(f"Error: {ex}")
 
 
-def main():
+async def main():
     """Run all examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: SALESFORCE_CONNECTION_URL environment variable not set.")
@@ -126,12 +129,12 @@ def main():
 
     print(f"Using connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
 
-    example_1_get_tables()
-    example_2_get_records()
-    example_3_execute_soql()
+    await example_1_get_tables()
+    await example_2_get_records()
+    await example_3_execute_soql()
 
     print("\n=== All examples completed ===")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

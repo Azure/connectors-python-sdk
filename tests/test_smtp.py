@@ -5,7 +5,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.smtp import SmtpClient
+from azure.connectors.smtp import SmtpClient
 from azure.connectors.smtp import (
     Email,
     Attachment,

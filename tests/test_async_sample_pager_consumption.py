@@ -19,7 +19,7 @@ import pytest
 from azure.core.async_paging import AsyncItemPaged
 
 ROOT = Path(__file__).resolve().parent.parent
-SAMPLES = ROOT / "samples" / "sample_connector_usage" / "aio"
+SAMPLES = ROOT / "samples" / "sample_connector_usage"
 
 
 def top_level_imports(tree: ast.Module) -> list[ast.ImportFrom]:
@@ -45,7 +45,9 @@ def pageable_methods(sample_path: Path) -> dict[str, set[str]]:
     for node in top_level_imports(tree):
         if not node.module:
             continue
-        if not node.module.startswith("azure.connectors.aio."):
+        if not node.module.startswith("azure.connectors."):
+            continue
+        if node.module.startswith("azure.connectors.sdk"):
             continue
         source_path = ROOT / "src" / Path(*node.module.split(".")).with_suffix(".py")
         source = ast.parse(source_path.read_text(encoding="utf-8-sig"))

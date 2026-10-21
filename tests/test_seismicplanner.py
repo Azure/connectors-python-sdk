@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 import azure.connectors.seismicplanner as seismicplanner_module
-from azure.connectors.aio.seismicplanner import SeismicplannerClient
+from azure.connectors.seismicplanner import SeismicplannerClient
 from azure.connectors.seismicplanner import (
     CustomPropertyDataDisplay,
     CustomPropertyValues,

@@ -25,8 +25,10 @@ Usage:
 
     python sample_connector_usage_azureblob.py
 """
+
+import asyncio
 import os
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.azureblob import AzureblobClient
 
@@ -44,7 +46,7 @@ STORAGE_ACCOUNT = os.environ.get(
 )
 
 
-def example_1_get_blob_metadata():
+async def example_1_get_blob_metadata():
     """Example 1: Get blob metadata by path."""
     print("\n=== Example 1: Get Blob Metadata ===")
 
@@ -54,11 +56,11 @@ def example_1_get_blob_metadata():
         print("Example: $env:TEST_BLOB_PATH = 'container/folder/file.txt'")
         return
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
 
-            metadata = client.get_file_metadata_by_path(
+            metadata = await client.get_file_metadata_by_path(
                 dataset=STORAGE_ACCOUNT,
                 path=blob_path,
             )
@@ -75,7 +77,7 @@ def example_1_get_blob_metadata():
                 print(f"No metadata returned for: {blob_path}")
 
 
-def example_2_download_blob():
+async def example_2_download_blob():
     """Example 2: Download blob content."""
     print("\n=== Example 2: Download Blob Content ===")
 
@@ -85,10 +87,10 @@ def example_2_download_blob():
         print("Example: $env:TEST_BLOB_PATH = 'container/folder/file.txt'")
         return
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
-            content = client.get_file_content_by_path(
+        async with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
+            content = await client.get_file_content_by_path(
                 dataset=STORAGE_ACCOUNT,
                 path=blob_path,
             )
@@ -108,7 +110,7 @@ def example_2_download_blob():
                 print(f"No content returned for: {blob_path}")
 
 
-def example_3_upload_blob():
+async def example_3_upload_blob():
     """Example 3: Upload a blob."""
     print("\n=== Example 3: Upload Blob ===")
 
@@ -119,13 +121,14 @@ def example_3_upload_blob():
         return
 
     blob_name = "sample-upload.txt"
-    blob_content = "Hello from Azure Connectors SDK for Python!"
+    blob_content = "Hello from Azure Connectors SDK for Python!\nUploaded at: " + \
+                   asyncio.get_event_loop().time().__str__()
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                metadata = client.create_file(
+                metadata = await client.create_file(
                     input=blob_content.encode("utf-8"),
                     dataset=STORAGE_ACCOUNT,
                     folder_path=folder_path,
@@ -146,7 +149,7 @@ def example_3_upload_blob():
                 print(f"Error: {ex}")
 
 
-def example_4_list_blobs():
+async def example_4_list_blobs():
     """Example 4: List blobs in a container/folder."""
     print("\n=== Example 4: List Blobs ===")
 
@@ -158,11 +161,11 @@ def example_4_list_blobs():
 
         # Try listing root folder instead
         print("\nListing root folder blobs instead...")
-        with DefaultAzureCredential() as credential:
+        async with DefaultAzureCredential() as credential:
 
-            with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
+            async with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
                 try:
-                    blobs = [item for item in client.list_root_folder(
+                    blobs = [item async for item in client.list_root_folder(
                         dataset=STORAGE_ACCOUNT,
                     )]
 
@@ -183,11 +186,11 @@ def example_4_list_blobs():
                     print(f"Error: {ex}")
             return
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                blobs = [item for item in client.list_folder(
+                blobs = [item async for item in client.list_folder(
                     dataset=STORAGE_ACCOUNT,
                     id=folder_id,
                 )]
@@ -209,7 +212,7 @@ def example_4_list_blobs():
                 print(f"Error: {ex}")
 
 
-def example_5_delete_blob():
+async def example_5_delete_blob():
     """Example 5: Delete a blob."""
     print("\n=== Example 5: Delete Blob ===")
 
@@ -220,11 +223,11 @@ def example_5_delete_blob():
         print("You can get blob IDs from the list_folder response.")
         return
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with AzureblobClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                client.delete_file(
+                await client.delete_file(
                     dataset=STORAGE_ACCOUNT,
                     id=blob_id,
                 )
@@ -237,7 +240,7 @@ def example_5_delete_blob():
                 print(f"Error: {ex}")
 
 
-def main():
+async def main():
     """Run all examples."""
     print("Azure Blob Storage sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
@@ -253,15 +256,15 @@ def main():
         print("Set it to your storage account name.")
         return
 
-    example_1_get_blob_metadata()
-    example_2_download_blob()
-    example_3_upload_blob()
-    example_4_list_blobs()
-    example_5_delete_blob()
+    await example_1_get_blob_metadata()
+    await example_2_download_blob()
+    await example_3_upload_blob()
+    await example_4_list_blobs()
+    await example_5_delete_blob()
 
     print("\n" + "=" * 60)
     print("Sample completed!")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

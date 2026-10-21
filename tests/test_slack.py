@@ -11,7 +11,7 @@ from azure.core.credentials import AzureKeyCredential
 from azure.connectors.sdk import (
     ConnectorException,
 )
-from azure.connectors.aio.slack import SlackClient
+from azure.connectors.slack import SlackClient
 from azure.connectors.slack import PostMessageRequest, TRIGGER_OPERATIONS
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import resolve_generated_result

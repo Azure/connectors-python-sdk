@@ -8,7 +8,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.zendesk import ZendeskClient
+from azure.connectors.zendesk import ZendeskClient
 from azure.connectors.zendesk import (
     Item,
     TRIGGER_OPERATIONS,

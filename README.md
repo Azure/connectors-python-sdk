@@ -23,9 +23,9 @@ Type-safe Python clients for [Azure connectors](https://learn.microsoft.com/conn
 
 Azure provides a rich ecosystem of [managed connectors](https://learn.microsoft.com/connectors/connector-reference/) that bridge your code to SaaS services, PaaS resources, and on-premises systems. Originally powering Azure Logic Apps and Power Automate, these connectors are now available as **standalone, strongly-typed Python clients** for any Python application — no workflow service required.
 
-- **Sync and async clients** — Use synchronous clients at the package root or matching asynchronous clients under `.aio`
-- **Type-safe operations** — Both modes expose identical unsuffixed methods with type hints and comprehensive docstrings
-- **Built-in authentication** — Managed identity, Azure Identity, and API key token providers
+- **Async-only clients** — Import clients from `azure.connectors.<connector>`; there is no synchronous mirror
+- **Type-safe operations** — Unsuffixed async operations expose type hints and comprehensive docstrings
+- **Built-in authentication** — Async Azure Identity credentials, managed identity, and Azure Core API keys
 - **Resilient HTTP** — Configurable retries with exponential backoff for safe HTTP methods; unsafe methods make one attempt by default
 - **1,000+ connectors** — Any Azure managed connector available via API Hub can be generated
 
@@ -37,14 +37,14 @@ Azure provides a rich ecosystem of [managed connectors](https://learn.microsoft.
 ┌─────────────────────────────────────┐
 │  Your Azure Function / Python App   │
 │                                     │
-│  with Office365Client(...):         │
-│      client.send_email(...)         │
+│  async with Office365Client(...):   │
+│      await client.send_email(...)   │
 └──────────────┬──────────────────────┘
                │
                ▼
 ┌─────────────────────────────────────┐
 │   Generated Connector Clients       │
-│   (root sync + aio async modules)   │
+│   (async clients in root modules)  │
 │                                     │
 │  • Matching unsuffixed operations   │
 │  • Shared models from Swagger       │
@@ -78,20 +78,20 @@ pip install azure-connectors[dev]
 
 ## Quick Start
 
-### Example: Send an email synchronously
+### Example: Send an email
 
 ```python
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors.office365 import Office365Client, SendEmailInput
 
 
-def send_email_example():
+async def send_email_example():
     connection_url = "https://example.azure.com/connections/office365"
 
-    with DefaultAzureCredential() as credential:
-        with Office365Client(connection_url, credential) as client:
-            client.send_email(
+    async with DefaultAzureCredential() as credential:
+        async with Office365Client(connection_url, credential) as client:
+            await client.send_email(
                 input=SendEmailInput(
                     to="recipient@example.com",
                     subject="Hello from Python SDK",
@@ -105,7 +105,7 @@ def send_email_example():
 ```python
 from azure.identity.aio import DefaultAzureCredential
 
-from azure.connectors.aio.sharepointonline import SharepointonlineClient
+from azure.connectors.sharepointonline import SharepointonlineClient
 
 
 async def list_sharepoint_items():
@@ -130,7 +130,7 @@ async def list_sharepoint_items():
 ```python
 from azure.identity.aio import DefaultAzureCredential
 
-from azure.connectors.aio.teams import TeamsClient
+from azure.connectors.teams import TeamsClient
 from azure.connectors.teams import DynamicPostMessageRequest
 
 
@@ -159,27 +159,27 @@ Long-running operations use an Azure SDK-style `begin_*` method. Keep the
 client open until the poller reaches its terminal response:
 
 ```python
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors.kusto import KustoClient, QueryAndListSchema
 
 
-def run_kusto_query():
+async def run_kusto_query():
     connection_url = "https://example.azure.com/connections/kusto"
 
-    with DefaultAzureCredential() as credential:
-        with KustoClient(connection_url, credential) as client:
-            poller = client.begin_list_kusto_results(
+    async with DefaultAzureCredential() as credential:
+        async with KustoClient(connection_url, credential) as client:
+            poller = await client.begin_list_kusto_results(
                 input=QueryAndListSchema(
                     cluster="https://contoso.kusto.windows.net",
                     db="Samples",
                     csl="StormEvents | take 5",
                 )
             )
-            return poller.result()
+            return await poller.result()
 ```
 
-The matching aio method is awaited to create the poller, then
+Await the `begin_*` method to create an `AsyncLROPoller`, then
 `await poller.result()` waits for completion. See the
 [long-running operations guide](docs/long-running-operations.md).
 
@@ -190,14 +190,14 @@ By default, `GET`, `HEAD`, `OPTIONS`, and `TRACE` use the configured retry setti
 Only opt in when the connector operation can tolerate replay, preferably with a service-supported idempotency key or deduplication:
 
 ```python
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors.teams import TeamsClient
 
 
-def use_teams_client(connection_url: str):
-    with DefaultAzureCredential() as credential:
-        with TeamsClient(
+async def use_teams_client(connection_url: str):
+    async with DefaultAzureCredential() as credential:
+        async with TeamsClient(
             connection_url,
             credential,
             max_retry_attempts=3,
@@ -325,14 +325,14 @@ Generated clients require a caller-owned Azure Core credential.
 ### Managed Identity
 
 ```python
-from azure.identity import ManagedIdentityCredential
+from azure.identity.aio import ManagedIdentityCredential
 
 from azure.connectors.office365 import Office365Client
 
 
-def use_managed_identity(connection_url: str):
-    with ManagedIdentityCredential() as credential:
-        with Office365Client(connection_url, credential) as client:
+async def use_managed_identity(connection_url: str):
+    async with ManagedIdentityCredential() as credential:
+        async with Office365Client(connection_url, credential) as client:
             print(client.connector_name)
 ```
 
@@ -340,10 +340,10 @@ Pass `client_id="your-client-id"` to `ManagedIdentityCredential` for a user-assi
 
 ### Azure Identity Credentials
 
-Root clients accept synchronous Azure Identity credentials:
+Clients accept caller-owned `AsyncTokenCredential` implementations:
 
 ```python
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors.office365 import Office365Client
 
@@ -351,16 +351,8 @@ credential = DefaultAzureCredential()
 client = Office365Client(connection_url, credential)
 ```
 
-Asynchronous clients use the matching credential and client modules:
-
-```python
-from azure.identity.aio import DefaultAzureCredential
-
-from azure.connectors.aio.office365 import Office365Client
-```
-
-The caller owns the credential and must close it. Prefer `with` for synchronous
-credentials and `async with` for asynchronous credentials.
+The caller owns the credential and must close it. Prefer `async with` for both
+the credential and client, as shown in the quick start.
 
 ### API Key
 
@@ -395,17 +387,12 @@ request controls; the operation-level `timeout` overrides that total budget for
 one operation. Set either timeout to zero or a negative value to disable SDK and transport
 deadlines for the selected requests.
 
-Root clients accept Azure Core `HttpTransport` implementations and aio clients
-accept `AsyncHttpTransport` implementations. Clients close injected transports
-through the matching lifecycle; callers retain ownership of credentials. The
-SDK applies transport-specific timeout options only when supported. For sync
-clients, the default owned Requests transport enforces network receive deadlines
-across status lines, headers, and response bodies, even when data arrives in small
-chunks. Caller-provided transports and sessions are responsible for enforcing
-their own network deadlines. Blocking credentials, policies, and callbacks must
-bound their own execution; the SDK cannot interrupt them. `per_call_policies` and
-`per_retry_policies` compose with the default or an explicit `policies` chain.
-Per-retry extensions require the matching sync or async retry policy.
+Clients accept Azure Core `AsyncHttpTransport` implementations and close injected
+transports asynchronously; callers retain ownership of credentials. The SDK
+applies transport-specific timeout options only when supported. Blocking callbacks
+must bound their own execution; the SDK cannot interrupt them. `per_call_policies`
+and `per_retry_policies` compose with the default or an explicit `policies` chain.
+Per-retry extensions require `AsyncRetryPolicy`.
 
 ## Project Structure
 
@@ -414,12 +401,10 @@ azure-connectors/
 ├── src/azure/connectors/
 │   ├── sdk/                    # Azure Core runtime infrastructure
 │   │   ├── client_base.py      # Base connector client
-│   │   ├── http_client.py      # Sync pipeline and retry policies
-│   │   ├── aio/                # Async runtime counterparts
+│   │   ├── http_client.py      # Async pipeline and retry policies
 │   │   ├── response.py         # Immutable response hook contracts
 │   │   └── exceptions.py       # Exception types
-│   ├── aio/                     # Async generated clients
-│   ├── office365.py            # Sync client and shared models
+│   ├── office365.py            # Async client and models
 │   ├── sharepointonline.py     # SharePoint generated client
 │   └── teams.py                # Teams generated client
 ├── tests/                      # Comprehensive test suite
@@ -427,8 +412,11 @@ azure-connectors/
 └── docs/                       # Additional documentation
 ```
 
-See [Migrate to sync and aio clients](docs/migration-sync-aio.md) for the
-breaking changes from the asynchronous-only preview.
+See [Migrate to unsuffixed async operations](docs/migration-sync-aio.md) for the
+breaking changes from the earlier preview. Async-only is an intentional
+divergence from the Azure SDK synchronous-client guideline, aligned with the
+.NET connector SDK. This does not restore the old API: keyword-only options,
+Azure Core errors, `AsyncItemPaged`, and `AsyncLROPoller` remain.
 
 ## SDK-Type Bindings for Azure Functions
 

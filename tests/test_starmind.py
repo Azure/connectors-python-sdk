@@ -9,7 +9,7 @@ import pytest
 from azure.core.credentials import AzureKeyCredential
 import azure.connectors.starmind as starmind_module
 from azure.connectors.sdk import ConnectorException
-from azure.connectors.aio.starmind import StarmindClient
+from azure.connectors.starmind import StarmindClient
 from azure.connectors.starmind import (
     FindExpertsInput,
     PostQuestionDraftInput,

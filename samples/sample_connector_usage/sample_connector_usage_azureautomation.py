@@ -29,11 +29,13 @@ Available operations:
 - Get job status
 - Get job output
 """
+
+import asyncio
 import os
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.azureautomation import AzureautomationClient
 from azure.connectors.azureautomation import (
-    AzureautomationClient,
     CreateJobInput,
     CreateJobResponse,
     Subscription,
@@ -66,13 +68,13 @@ JOB_ID = os.environ.get(
 )
 
 
-def example_1_client_initialization():
+async def example_1_client_initialization():
     """Example 1: Initialize and verify the client."""
     print("\n=== Example 1: Client Initialization ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with AzureautomationClient(
+        async with AzureautomationClient(
             CONNECTION_RUNTIME_URL, credential
         ) as client:
             try:
@@ -86,18 +88,18 @@ def example_1_client_initialization():
                 print(f"Error: {ex}")
 
 
-def example_2_create_job():
+async def example_2_create_job():
     """Example 2: Create an automation job."""
     print("\n=== Example 2: Create Automation Job ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with AzureautomationClient(
+        async with AzureautomationClient(
             CONNECTION_RUNTIME_URL, credential
         ) as client:
             try:
                 # Create a new automation job
-                result = client.create_job(
+                result = await client.create_job(
                     input=CreateJobInput(properties={}),
                     subscription_id=SUBSCRIPTION_ID,
                     resource_group_name=RESOURCE_GROUP_NAME,
@@ -117,18 +119,18 @@ def example_2_create_job():
                 print(f"Error: {ex}")
 
 
-def example_3_create_job_and_wait():
+async def example_3_create_job_and_wait():
     """Example 3: Create a job and wait for completion."""
     print("\n=== Example 3: Create Job and Wait ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with AzureautomationClient(
+        async with AzureautomationClient(
             CONNECTION_RUNTIME_URL, credential
         ) as client:
             try:
                 # Create job with wait parameter to wait for completion
-                result = client.create_job(
+                result = await client.create_job(
                     input=CreateJobInput(properties={}),
                     subscription_id=SUBSCRIPTION_ID,
                     resource_group_name=RESOURCE_GROUP_NAME,
@@ -148,18 +150,18 @@ def example_3_create_job_and_wait():
                 print(f"Error: {ex}")
 
 
-def example_4_get_job_status():
+async def example_4_get_job_status():
     """Example 4: Get the status of a job."""
     print("\n=== Example 4: Get Job Status ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with AzureautomationClient(
+        async with AzureautomationClient(
             CONNECTION_RUNTIME_URL, credential
         ) as client:
             try:
                 # Get status of a job
-                result = client.get_status_of_job(
+                result = await client.get_status_of_job(
                     subscription_id=SUBSCRIPTION_ID,
                     resource_group_name=RESOURCE_GROUP_NAME,
                     automation_account=AUTOMATION_ACCOUNT,
@@ -181,18 +183,18 @@ def example_4_get_job_status():
                 print(f"Error: {ex}")
 
 
-def example_5_get_job_output():
+async def example_5_get_job_output():
     """Example 5: Get the output of a job."""
     print("\n=== Example 5: Get Job Output ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with AzureautomationClient(
+        async with AzureautomationClient(
             CONNECTION_RUNTIME_URL, credential
         ) as client:
             try:
                 # Get output from a completed job
-                output = client.get_job_output(
+                output = await client.get_job_output(
                     subscription_id=SUBSCRIPTION_ID,
                     resource_group_name=RESOURCE_GROUP_NAME,
                     automation_account=AUTOMATION_ACCOUNT,
@@ -215,7 +217,7 @@ def example_5_get_job_output():
                 print(f"Error: {ex}")
 
 
-def example_6_dataclass_usage():
+async def example_6_dataclass_usage():
     """Example 6: Working with Azure Automation data types."""
     print("\n=== Example 6: Data Types ===")
 
@@ -248,14 +250,14 @@ def example_6_dataclass_usage():
     print(f"Resource Group: {rg.name}")
 
 
-def main():
+async def main():
     """Run all examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: AZUREAUTOMATION_CONNECTION_URL environment variable "
               "not set.")
         print("Set it to your connection runtime URL from Azure Portal.")
         print("\nRunning data type examples without connection...\n")
-        example_6_dataclass_usage()
+        await example_6_dataclass_usage()
         return
 
     if not all([SUBSCRIPTION_ID, RESOURCE_GROUP_NAME, AUTOMATION_ACCOUNT]):
@@ -263,20 +265,20 @@ def main():
         print("Required: AZUREAUTOMATION_SUBSCRIPTION_ID, "
               "AZUREAUTOMATION_RESOURCE_GROUP, AZUREAUTOMATION_ACCOUNT")
         print("\nRunning data type examples without connection...\n")
-        example_6_dataclass_usage()
+        await example_6_dataclass_usage()
         return
 
     print(f"Using connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
 
-    example_1_client_initialization()
-    example_2_create_job()
-    example_3_create_job_and_wait()
-    example_4_get_job_status()
-    example_5_get_job_output()
-    example_6_dataclass_usage()
+    await example_1_client_initialization()
+    await example_2_create_job()
+    await example_3_create_job_and_wait()
+    await example_4_get_job_status()
+    await example_5_get_job_output()
+    await example_6_dataclass_usage()
 
     print("\n=== All examples completed ===")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

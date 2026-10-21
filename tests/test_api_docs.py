@@ -71,21 +71,9 @@ def test_defined_public_names_handles_empty_module(tmp_path: Path) -> None:
 def _create_source_tree(package_root: Path) -> None:
     """Create a minimal connector package for validator tests."""
     sdk_root = package_root / "sdk"
-    aio_sdk_root = sdk_root / "aio"
-    aio_connector_root = package_root / "aio"
     sdk_root.mkdir(parents=True)
-    aio_sdk_root.mkdir()
-    aio_connector_root.mkdir()
     (package_root / "connector.py").write_text("PUBLIC_VALUE = 1\n", encoding="utf-8")
-    (aio_connector_root / "connector.py").write_text(
-        "PUBLIC_VALUE = 1\n",
-        encoding="utf-8",
-    )
     (sdk_root / "core.py").write_text("PUBLIC_VALUE = 1\n", encoding="utf-8")
-    (aio_sdk_root / "core.py").write_text(
-        "PUBLIC_VALUE = 1\n",
-        encoding="utf-8",
-    )
 
 
 def _write_api_page(
@@ -109,9 +97,7 @@ def documentation_tree(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     _create_source_tree(package_root)
     monkeypatch.setattr(validate_api_docs, "PACKAGE_ROOT", package_root)
     _write_api_page(site_root, "core", "core")
-    _write_api_page(site_root, "core-aio", "core")
     _write_api_page(site_root, "connectors", "connector")
-    _write_api_page(site_root, "connectors-aio", "connector")
     api_landing_page = site_root / "api" / "index.html"
     api_landing_page.parent.mkdir(parents=True, exist_ok=True)
     api_landing_page.write_text("<html>API reference</html>", encoding="utf-8")
@@ -132,20 +118,33 @@ def test_validate_api_docs_reports_missing_page(documentation_tree: Path) -> Non
     ]
 
 
-def test_validate_api_docs_reports_missing_aio_page(
+def test_validate_api_docs_reports_missing_core_page(
     documentation_tree: Path,
 ) -> None:
-    """Report a missing asynchronous connector API page."""
+    """Report a missing async runtime API page at its root location."""
     (
         documentation_tree
         / "api"
-        / "connectors-aio"
-        / "connector"
+        / "core"
+        / "core"
         / "index.html"
     ).unlink()
 
     assert validate_api_docs.validate_api_docs(documentation_tree) == [
-        "Missing connectors-aio API pages: connector",
+        "Missing core API pages: core",
+    ]
+
+
+@pytest.mark.parametrize("section", ["core-aio", "connectors-aio"])
+def test_validate_api_docs_rejects_obsolete_dual_mode_pages(
+    documentation_tree: Path,
+    section: str,
+) -> None:
+    """Reject stale duplicate namespace pages rather than treating them as async API."""
+    _write_api_page(documentation_tree, section, "obsolete")
+
+    assert validate_api_docs.validate_api_docs(documentation_tree) == [
+        f"Obsolete dual-mode API section: '{section}'. Build a clean site.",
     ]
 
 

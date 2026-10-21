@@ -8,7 +8,7 @@ import pytest
 
 from azure.core.credentials import AzureKeyCredential
 import azure.connectors.textrequest as textrequest_module
-from azure.connectors.aio.textrequest import TextrequestClient
+from azure.connectors.textrequest import TextrequestClient
 from azure.connectors.textrequest import (
     CreateContactInput,
     CreateDashboardInput,

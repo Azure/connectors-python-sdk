@@ -21,12 +21,14 @@ Usage:
 
     python sample_connector_usage_office365.py
 """
+
+import asyncio
 import os
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.office365 import Office365Client
 from azure.connectors.office365 import (
     DraftEmailInput,
-    Office365Client,
     SendEmailInput,
 )
 
@@ -38,15 +40,15 @@ CONNECTION_RUNTIME_URL = os.environ.get(
 )
 
 
-def example_1_get_outlook_categories():
+async def example_1_get_outlook_categories():
     """Example 1: Get Outlook category names."""
     print("\n=== Example 1: Get Outlook Category Names ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with Office365Client(CONNECTION_RUNTIME_URL, credential) as client:
+        async with Office365Client(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                categories = list(client.list_outlook_category_names())
+                categories = [item async for item in client.list_outlook_category_names()]
 
                 if categories:
                     print(f"Found {len(categories)} Outlook categories:")
@@ -55,7 +57,7 @@ def example_1_get_outlook_categories():
                         color = category.get('Color', 'N/A')
                         print(f"  - {display_name} (Color: {color})")
                 else:
-                    print("No categories found or unexpected response format.")
+                    print("No categories found.")
 
             except ConnectorException as ex:
                 print(f"Connector error: {ex}")
@@ -63,15 +65,15 @@ def example_1_get_outlook_categories():
                 print(f"Error: {ex}")
 
 
-def example_2_send_email():
+async def example_2_send_email():
     """Example 2: Send an HTML email."""
     print("\n=== Example 2: Send Email ===")
 
     to_address = os.environ.get("TEST_EMAIL_TO", "<YOUR-EMAIL>@microsoft.com")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with Office365Client(CONNECTION_RUNTIME_URL, credential) as client:
+        async with Office365Client(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 email = SendEmailInput(
                     to=to_address,
@@ -82,7 +84,7 @@ def example_2_send_email():
                     ),
                 )
 
-                client.send_email(email)
+                await client.send_email(email)
                 print(f"Email sent successfully to {to_address}")
                 print("Note: Set TEST_EMAIL_TO environment variable to send to a real address")
 
@@ -92,15 +94,15 @@ def example_2_send_email():
                 print(f"Error: {ex}")
 
 
-def example_3_get_emails():
+async def example_3_get_emails():
     """Example 3: Get emails from inbox."""
     print("\n=== Example 3: Get Emails from Inbox ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with Office365Client(CONNECTION_RUNTIME_URL, credential) as client:
+        async with Office365Client(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                emails = list(client.list_emails())
+                emails = [item async for item in client.list_emails()]
 
                 if emails:
                     print(f"Found {len(emails)} emails:")
@@ -112,7 +114,7 @@ def example_3_get_emails():
                         print(f"    From: {from_addr}")
                         print(f"    Received: {received}")
                 else:
-                    print("No emails found or unexpected response format.")
+                    print("No emails found.")
 
             except ConnectorException as ex:
                 print(f"Connector error: {ex}")
@@ -120,15 +122,15 @@ def example_3_get_emails():
                 print(f"Error: {ex}")
 
 
-def example_4_draft_and_send_email():
+async def example_4_draft_and_send_email():
     """Example 4: Draft an email and then send it."""
     print("\n=== Example 4: Draft and Send Email ===")
 
     to_address = os.environ.get("TEST_EMAIL_TO", "<YOUR-EMAIL>@microsoft.com")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with Office365Client(CONNECTION_RUNTIME_URL, credential) as client:
+        async with Office365Client(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 draft = DraftEmailInput(
                     to=to_address,
@@ -136,14 +138,14 @@ def example_4_draft_and_send_email():
                     body="<p>This email was created as a draft first.</p>",
                 )
 
-                draft_response = client.draft_email(draft)
+                draft_response = await client.draft_email(draft)
                 print("Draft created successfully")
 
                 if draft_response and 'Id' in draft_response:
                     message_id = draft_response['Id']
                     print(f"Draft message ID: {message_id}")
 
-                    client.send_draft_email(message_id=message_id)
+                    await client.send_draft_email(message_id=message_id)
                     print(f"Draft email sent successfully to {to_address}")
                 else:
                     print("Draft created but no ID returned.")
@@ -154,17 +156,17 @@ def example_4_draft_and_send_email():
                 print(f"Error: {ex}")
 
 
-def example_5_error_handling():
+async def example_5_error_handling():
     """Example 5: Demonstrate error handling."""
     print("\n=== Example 5: Error Handling ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with Office365Client(CONNECTION_RUNTIME_URL, credential) as client:
+        async with Office365Client(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Attempt to get an email with an invalid ID
                 invalid_message_id = "invalid-message-id-12345"
-                email = client.get_email(message_id=invalid_message_id)
+                email = await client.get_email(message_id=invalid_message_id)
                 print(f"Unexpected success: {email}")
 
             except ConnectorException as ex:
@@ -175,21 +177,21 @@ def example_5_error_handling():
                 print(f"  Message: {ex}")
 
 
-def main():
+async def main():
     """Run all examples."""
     print("Office365 sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
     print()
 
-    example_1_get_outlook_categories()
-    example_2_send_email()
-    example_3_get_emails()
-    example_4_draft_and_send_email()
-    example_5_error_handling()
+    await example_1_get_outlook_categories()
+    await example_2_send_email()
+    await example_3_get_emails()
+    await example_4_draft_and_send_email()
+    await example_5_error_handling()
 
     print("\n" + "=" * 50)
     print("Sample completed!")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

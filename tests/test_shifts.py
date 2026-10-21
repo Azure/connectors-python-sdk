@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.shifts import ShiftsClient
+from azure.connectors.shifts import ShiftsClient
 from azure.connectors.shifts import (
     TRIGGER_OPERATIONS,
     CreateShiftRequest,

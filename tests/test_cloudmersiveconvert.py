@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.cloudmersiveconvert import CloudmersiveconvertClient
+from azure.connectors.cloudmersiveconvert import CloudmersiveconvertClient
 from azure.connectors.cloudmersiveconvert import (
     GetDocxBodyRequest,
     GetDocxGetCommentsHierarchicalRequest,

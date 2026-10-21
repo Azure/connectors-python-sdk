@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.infusionsoft import InfusionsoftClient
+from azure.connectors.infusionsoft import InfusionsoftClient
 from azure.connectors.infusionsoft import (
     CreateTaskRequest,
     ListOrdersResponse,

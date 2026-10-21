@@ -10,9 +10,8 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.jira import JiraClient
+from azure.connectors.jira import JiraClient
 from azure.connectors.jira import CreateIssueInput, EditIssueInput
-from azure.connectors.jira import JiraClient as SyncJiraClient
 from azure.connectors.sdk import (
     ConnectorException,
 )
@@ -29,7 +28,7 @@ from tests.generated_connector_test_utils import resolve_generated_result
     pytest.param("stale_token", id="is-last-overrides-stale-token"),
 ])
 def jira_issue_token_pages(request):
-    """Provide opaque-token pages shared by actual sync and async client tests."""
+    """Provide opaque-token pages for the generated async client tests."""
     first_page = {
         "issues": [{"id": "first"}],
         "isLast": False,
@@ -60,48 +59,52 @@ def jira_issue_token_pages(request):
     )
 
 
-class TestListIssuesSync:
-    """Behavioral paging tests for the generated synchronous Jira client."""
+class TestListIssuesKeyCredential:
+    """Behavioral paging tests for the async Jira client with a key credential."""
 
-    def test_opaque_token_paging(self, jira_issue_token_pages):
+    @pytest.mark.asyncio
+    async def test_opaque_token_paging(self, jira_issue_token_pages):
         """Test later items, encoded query binding, empty pages, and termination."""
         responses, expected_tokens = jira_issue_token_pages
-        with SyncJiraClient(
+        async with JiraClient(
             "https://example.azure.com/connections/test",
             credential=AzureKeyCredential("test-key"),
         ) as client:
             with patch.object(
                 client._http_client,
                 "send",
+                new_callable=AsyncMock,
                 side_effect=responses,
             ) as transport:
-                issues = list(client.list_issues(
+                issues = [issue async for issue in client.list_issues(
                     jql="project = DEMO",
                     fields="summary,status",
-                ))
+                )]
 
         assert issues == [{"id": "first"}, {"id": "second"}]
-        assert transport.call_count == len(expected_tokens)
+        assert transport.await_count == len(expected_tokens)
         initial_url = (
             "https://example.azure.com/connections/test/2/search"
             "?expand=%2A&jql=project%20%3D%20DEMO&fields=summary%2Cstatus"
         )
-        assert [request.args for request in transport.call_args_list] == [
+        assert [request.args for request in transport.await_args_list] == [
             ("GET", initial_url if token is None else (
                 f"{initial_url}&nextPageToken={token}"
             ))
             for token in expected_tokens
         ]
 
-    def test_named_continuation_token_keeps_its_query_binding(self):
+    @pytest.mark.asyncio
+    async def test_named_continuation_token_keeps_its_query_binding(self):
         """Test by_page resumes with a raw opaque token and stops at exhaustion."""
-        with SyncJiraClient(
+        async with JiraClient(
             "https://example.azure.com/connections/test",
             credential=AzureKeyCredential("test-key"),
         ) as client:
             with patch.object(
                 client._http_client,
                 "send",
+                new_callable=AsyncMock,
                 side_effect=[MockResponse(
                     status=200,
                     text='{"issues": [{"id": "resumed"}], "isLast": false}',
@@ -110,13 +113,14 @@ class TestListIssuesSync:
                 pages = client.list_issues(jql="project = DEMO").by_page(
                     continuation_token="page/2",
                 )
-                assert list(next(pages)) == [{"id": "resumed"}]
+                page = await anext(pages)
+                assert [issue async for issue in page] == [{"id": "resumed"}]
                 assert pages.continuation_token is None
-                with pytest.raises(StopIteration):
-                    next(pages)
+                with pytest.raises(StopAsyncIteration):
+                    await anext(pages)
 
-        transport.assert_called_once()
-        assert transport.call_args.args == (
+        transport.assert_awaited_once()
+        assert transport.await_args.args == (
             "GET",
             "https://example.azure.com/connections/test/2/search"
             "?expand=%2A&jql=project%20%3D%20DEMO&nextPageToken=page%2F2",

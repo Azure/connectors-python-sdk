@@ -19,8 +19,10 @@ Usage:
 
     python sample_connector_usage_onedrive.py
 """
+
+import asyncio
 import os
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.onedrive import OnedriveClient
 
@@ -32,14 +34,14 @@ CONNECTION_RUNTIME_URL = os.environ.get(
 )
 
 
-def example_1_list_root_folder():
+async def example_1_list_root_folder():
     """Example 1: List files in root folder."""
     print("\n=== Example 1: List Root Folder ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
-            items = list(client.list_root_folder())
+        async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+            items = [item async for item in client.list_root_folder()]
 
             if items:
                 print(f"Found {len(items)} items in root folder:")
@@ -50,7 +52,7 @@ def example_1_list_root_folder():
                 print("No items found in root folder.")
 
 
-def example_2_get_file_metadata():
+async def example_2_get_file_metadata():
     """Example 2: Get file metadata by path."""
     print("\n=== Example 2: Get File Metadata ===")
 
@@ -60,11 +62,11 @@ def example_2_get_file_metadata():
         print("Example: $env:TEST_FILE_PATH = '/Documents/report.docx'")
         return
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                metadata = client.get_file_metadata_by_path(path=file_path)
+                metadata = await client.get_file_metadata_by_path(path=file_path)
 
                 if metadata:
                     print(f"File Metadata for '{file_path}':")
@@ -79,7 +81,7 @@ def example_2_get_file_metadata():
                 print(f"Error getting file metadata: {e}")
 
 
-def example_3_download_file():
+async def example_3_download_file():
     """Example 3: Download file content."""
     print("\n=== Example 3: Download File Content ===")
 
@@ -88,11 +90,11 @@ def example_3_download_file():
         print("Set TEST_FILE_PATH environment variable to a file path.")
         return
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                content = client.get_file_content_by_path(path=file_path)
+                content = await client.get_file_content_by_path(path=file_path)
 
                 if content:
                     print(f"Downloaded {len(content)} bytes")
@@ -108,7 +110,7 @@ def example_3_download_file():
                 print(f"Error downloading file: {e}")
 
 
-def example_4_list_folder():
+async def example_4_list_folder():
     """Example 4: List files in a specific folder."""
     print("\n=== Example 4: List Folder Contents ===")
 
@@ -118,12 +120,12 @@ def example_4_list_folder():
         print("You can get folder IDs from list_root_folder results.")
         return
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 entries = [
-                    item for item in client.list_folder(id=folder_id)
+                    item async for item in client.list_folder(id=folder_id)
                 ]
 
                 if entries:
@@ -138,7 +140,7 @@ def example_4_list_folder():
                 print(f"Error listing folder: {e}")
 
 
-def example_5_search_files():
+async def example_5_search_files():
     """Example 5: Search for files in a folder."""
     print("\n=== Example 5: Search Files ===")
 
@@ -149,19 +151,19 @@ def example_5_search_files():
         print("Set TEST_FOLDER_ID environment variable to search in a folder.")
         return
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                files = list(client.list_find_files(
+                items = [item async for item in client.list_find_files(
                     id=folder_id,
                     query=search_query,
                     find_mode="search"
-                ))
+                )]
 
-                if files:
-                    print(f"Found {len(files)} files matching '{search_query}':")
-                    for item in files:
+                if items:
+                    print(f"Found {len(items)} files matching '{search_query}':")
+                    for item in items:
                         print(f"  📄 {item.get('Name', 'N/A')}")
                 else:
                     print(f"No files found matching '{search_query}'.")
@@ -169,7 +171,7 @@ def example_5_search_files():
                 print(f"Error searching files: {e}")
 
 
-def example_6_create_share_link():
+async def example_6_create_share_link():
     """Example 6: Create a share link for a file."""
     print("\n=== Example 6: Create Share Link ===")
 
@@ -178,11 +180,11 @@ def example_6_create_share_link():
         print("Set TEST_FILE_ID environment variable to create a share link.")
         return
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.create_share_link(
+                result = await client.create_share_link(
                     id=file_id,
                     type_="view"  # "view" or "edit"
                 )
@@ -196,7 +198,7 @@ def example_6_create_share_link():
                 print(f"Error creating share link: {e}")
 
 
-def example_7_file_tags():
+async def example_7_file_tags():
     """Example 7: Manage file tags."""
     print("\n=== Example 7: Manage File Tags ===")
 
@@ -205,31 +207,33 @@ def example_7_file_tags():
         print("Set TEST_FILE_ID environment variable to manage tags.")
         return
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Get existing tags
-                tags = list(client.list_file_tags(id=file_id))
+                tags_items = [item async for item in client.list_file_tags(id=file_id)]
 
-                if tags:
-                    print(f"Current tags: {', '.join(tags)}")
+                if tags_items:
+                    print(f"Current tags: {tags_items}")
                 else:
                     print("No tags found on file.")
 
                 # Add a new tag
                 print("Adding tag 'sdk-sample'...")
-                client.add_file_tag(id=file_id, tag="sdk-sample")
+                added_tags = await client.add_file_tag(id=file_id, tag="sdk-sample")
+                if added_tags:
+                    print(f"Add tag result: {added_tags}")
 
                 # Get updated tags
-                tags = list(client.list_file_tags(id=file_id))
-                if tags:
-                    print(f"Updated tags: {', '.join(tags)}")
+                tags_items = [item async for item in client.list_file_tags(id=file_id)]
+                if tags_items:
+                    print(f"Updated tags: {tags_items}")
             except ConnectorException as e:
                 print(f"Error managing tags: {e}")
 
 
-def example_8_copy_file():
+async def example_8_copy_file():
     """Example 8: Copy a file within OneDrive."""
     print("\n=== Example 8: Copy File ===")
 
@@ -240,11 +244,11 @@ def example_8_copy_file():
         print("Set TEST_FILE_ID environment variable to copy a file.")
         return
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.copy_drive_file(
+                result = await client.copy_drive_file(
                     id=file_id,
                     destination=dest_folder,
                     overwrite=False
@@ -260,7 +264,7 @@ def example_8_copy_file():
                 print(f"Error copying file: {e}")
 
 
-def main():
+async def main():
     """Run all examples."""
     if not CONNECTION_RUNTIME_URL:
         print("ERROR: ONEDRIVE_CONNECTION_URL environment variable not set.")
@@ -278,14 +282,14 @@ def main():
     print(f"Connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
 
     try:
-        example_1_list_root_folder()
-        example_2_get_file_metadata()
-        example_3_download_file()
-        example_4_list_folder()
-        example_5_search_files()
-        example_6_create_share_link()
-        example_7_file_tags()
-        example_8_copy_file()
+        await example_1_list_root_folder()
+        await example_2_get_file_metadata()
+        await example_3_download_file()
+        await example_4_list_folder()
+        await example_5_search_files()
+        await example_6_create_share_link()
+        await example_7_file_tags()
+        await example_8_copy_file()
     except Exception as e:
         print(f"\nUnexpected error: {e}")
         raise
@@ -295,4 +299,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

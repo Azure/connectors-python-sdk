@@ -25,11 +25,13 @@ Available operations:
 - Get pipeline run status
 - Cancel pipeline runs
 """
+
+import asyncio
 import os
-from azure.identity import DefaultAzureCredential
+from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.azuredatafactory import AzuredatafactoryClient
 from azure.connectors.azuredatafactory import (
-    AzuredatafactoryClient,
     ParameterValueSpecification,
     CreatePipelineRunResponse,
     PipelineRun,
@@ -49,13 +51,13 @@ DATA_FACTORY_NAME = os.environ.get("ADF_NAME", "your-data-factory")
 PIPELINE_NAME = os.environ.get("ADF_PIPELINE_NAME", "your-pipeline")
 
 
-def example_1_create_pipeline_run():
+async def example_1_create_pipeline_run():
     """Example 1: Create a new pipeline run."""
     print("\n=== Example 1: Create Pipeline Run ===")
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with AzuredatafactoryClient(
+        async with AzuredatafactoryClient(
             CONNECTION_RUNTIME_URL, credential
         ) as client:
             try:
@@ -69,7 +71,7 @@ def example_1_create_pipeline_run():
                 )
 
                 # Create the pipeline run
-                result = client.create_pipeline_run(
+                result = await client.create_pipeline_run(
                     input=parameters,
                     subscription_id=SUBSCRIPTION_ID,
                     resource_group_name=RESOURCE_GROUP,
@@ -94,7 +96,7 @@ def example_1_create_pipeline_run():
                 return None
 
 
-def example_2_get_pipeline_run_status(run_id: str):
+async def example_2_get_pipeline_run_status(run_id: str):
     """Example 2: Get the status of a pipeline run."""
     print("\n=== Example 2: Get Pipeline Run Status ===")
 
@@ -102,14 +104,14 @@ def example_2_get_pipeline_run_status(run_id: str):
         print("No run ID provided, skipping...")
         return
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with AzuredatafactoryClient(
+        async with AzuredatafactoryClient(
             CONNECTION_RUNTIME_URL, credential
         ) as client:
             try:
                 # Get the pipeline run status
-                result = client.get_pipeline_run(
+                result = await client.get_pipeline_run(
                     subscription_id=SUBSCRIPTION_ID,
                     resource_group_name=RESOURCE_GROUP,
                     data_factory_name=DATA_FACTORY_NAME,
@@ -137,7 +139,7 @@ def example_2_get_pipeline_run_status(run_id: str):
                 print(f"Error: {ex}")
 
 
-def example_3_cancel_pipeline_run(run_id: str):
+async def example_3_cancel_pipeline_run(run_id: str):
     """Example 3: Cancel a running pipeline."""
     print("\n=== Example 3: Cancel Pipeline Run ===")
 
@@ -145,14 +147,14 @@ def example_3_cancel_pipeline_run(run_id: str):
         print("No run ID provided, skipping...")
         return
 
-    with DefaultAzureCredential() as credential:
+    async with DefaultAzureCredential() as credential:
 
-        with AzuredatafactoryClient(
+        async with AzuredatafactoryClient(
             CONNECTION_RUNTIME_URL, credential
         ) as client:
             try:
                 # Cancel the pipeline run
-                client.cancel_pipeline_run(
+                await client.cancel_pipeline_run(
                     subscription_id=SUBSCRIPTION_ID,
                     resource_group_name=RESOURCE_GROUP,
                     data_factory_name=DATA_FACTORY_NAME,
@@ -167,7 +169,7 @@ def example_3_cancel_pipeline_run(run_id: str):
                 print(f"Error: {ex}")
 
 
-def example_4_dataclass_usage():
+async def example_4_dataclass_usage():
     """Example 4: Working with Azure Data Factory data types."""
     print("\n=== Example 4: Data Types ===")
 
@@ -202,14 +204,14 @@ def example_4_dataclass_usage():
     print(f"Parameters: {params.additional_properties}")
 
 
-def main():
+async def main():
     """Run all examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: AZUREDATAFACTORY_CONNECTION_URL environment variable "
               "not set.")
         print("Set it to your connection runtime URL from Azure Portal.")
         print("\nRunning data type examples without connection...\n")
-        example_4_dataclass_usage()
+        await example_4_dataclass_usage()
         return
 
     print(f"Using connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
@@ -219,21 +221,21 @@ def main():
     print(f"Pipeline: {PIPELINE_NAME}")
 
     # Create a pipeline run
-    run_id = example_1_create_pipeline_run()
+    run_id = await example_1_create_pipeline_run()
 
     # Get the status of the run
     if run_id:
-        example_2_get_pipeline_run_status(run_id)
+        await example_2_get_pipeline_run_status(run_id)
 
     # Uncomment to cancel the run (be careful with this!)
     # if run_id:
     #     await example_3_cancel_pipeline_run(run_id)
 
     # Show data type usage
-    example_4_dataclass_usage()
+    await example_4_dataclass_usage()
 
     print("\n=== All examples completed ===")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

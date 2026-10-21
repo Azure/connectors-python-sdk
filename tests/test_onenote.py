@@ -6,7 +6,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.onenote import OnenoteClient
+from azure.connectors.onenote import OnenoteClient
 from azure.connectors.onenote import (
     CreateSectionInNotebookResponse,
     CreatePageInSectionInput,

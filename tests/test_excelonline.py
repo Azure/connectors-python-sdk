@@ -6,7 +6,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.excelonline import ExcelonlineClient
+from azure.connectors.excelonline import ExcelonlineClient
 from azure.connectors.excelonline import (
     CreateWorksheetInput,
     GetAllWorksheetsResponse,

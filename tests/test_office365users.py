@@ -5,7 +5,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.office365users import Office365usersClient
+from azure.connectors.office365users import Office365usersClient
 from azure.connectors.office365users import (
     GraphUserUpdateable,
 )

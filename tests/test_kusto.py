@@ -6,7 +6,7 @@ import json
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.kusto import KustoClient
+from azure.connectors.kusto import KustoClient
 from azure.connectors.kusto import (
     QueryAndListSchema,
     ControlCommandAndListSchema,

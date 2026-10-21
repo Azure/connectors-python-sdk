@@ -9,7 +9,7 @@ import pytest
 from azure.core.credentials import AzureKeyCredential
 import azure.connectors.tallyfy as tallyfy_module
 from azure.connectors.sdk import ConnectorException
-from azure.connectors.aio.tallyfy import TallyfyClient
+from azure.connectors.tallyfy import TallyfyClient
 from azure.connectors.tallyfy import CreateRunInput, CreateTaskInput
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import (

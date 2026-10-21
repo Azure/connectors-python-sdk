@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.aio.todo import TodoClient
+from azure.connectors.todo import TodoClient
 from azure.connectors.todo import (
     CreateToDo,
     CreateToDoList,
