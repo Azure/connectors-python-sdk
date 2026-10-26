@@ -1,0 +1,117 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Scalar Union Fixture",
+    "version": "1.0"
+  },
+  "host": "example.test",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "paths": {
+    "/items": {
+      "post": {
+        "operationId": "CreateItem",
+        "summary": "Create an item",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ScalarMaps"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/ScalarMaps"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ScalarMaps": {
+      "type": "object",
+      "required": [
+        "Properties"
+      ],
+      "properties": {
+        "Properties": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "string",
+              "number",
+              "boolean"
+            ]
+          }
+        },
+        "otherValues": {
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "nullableValues": {
+          "type": "object",
+          "additionalProperties": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "dynamicValues": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "structured": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/Inner"
+          }
+        },
+        "scalarRefValues": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/ScalarItem"
+          }
+        },
+        "scalarRefValue": {
+          "$ref": "#/definitions/ScalarItem"
+        }
+      }
+    },
+    "Inner": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "ScalarItem": {
+      "type": [
+        "integer",
+        "boolean"
+      ]
+    }
+  }
+}

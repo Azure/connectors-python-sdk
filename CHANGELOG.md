@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Explicit scalar-union property maps** — generated models preserve declared string, number (including integer), and Boolean map values without inferring scalar support from empty schemas. A pinned synthetic generated client tests nullable and non-nullable values; no shipped connector client changed because the fresh live definitions contain no explicit scalar-only map union. ([#104](https://github.com/Azure/connectors-python-sdk/issues/104))
+
 - **Generated API documentation site** — adds a MkDocs Material reference for the core SDK and every shipped connector module, strict source-to-site coverage validation, and a GitHub Pages deployment workflow for `main`.
 - **Zoho ZeptoMail generated client** — adds five public mail-agent, send-mail, template-mail, and analytics actions. `SendTemplateMailInput.merge_key_detail` remains `List[Dict[str, Any]]` so fixed string fields and arbitrary non-string merge values stay representable. The malformed Swagger type `ReplyToAddresss` is exposed as `ReplyToAddress` without changing the `reply_to` wire field.
 
@@ -41,6 +43,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Clarified that Azure Functions SDK-type deserialization is owned by the Azure Functions connector extension rather than generated connector clients.
 
 ### Fixed
+
+- **Scalar-map wire validation** — generated model fields reject nested objects, arrays, and undeclared nulls at construction and again during SDK serialization; declared null map entries stay in the JSON payload. This change does not validate untyped raw mapping inputs or exercise generated HTTP methods, which still need the separate #103 compatibility work.
 
 - **Request timeout enforcement**: `timeout_seconds` and per-operation `timeout`
   now bound the complete network operation, including retries, response loading,
