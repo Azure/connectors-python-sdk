@@ -89,7 +89,7 @@ def test_all_connector_samples_match_generated_apis() -> None:
 
     sample_paths, issues = validate_samples(repo_root)
 
-    assert len(SAMPLE_PATHS) == 99
+    assert len(SAMPLE_PATHS) == 101
     assert set(sample_paths) == set(SAMPLE_PATHS)
     assert not (SAMPLE_DIRECTORY / "aio").exists()
     assert not (SAMPLE_DIRECTORY / "sync").exists()

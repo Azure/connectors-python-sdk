@@ -221,6 +221,7 @@ The following connectors have been generated and validated with comprehensive te
 | **Azure Cosmos DB** | `azure.connectors.documentdb` | ✅ Complete | 🔄 SDK Generated |
 | **Azure Data Explorer** | `azure.connectors.kusto` | ✅ Complete | ✅ E2E Validated |
 | **Azure Data Factory** | `azure.connectors.azuredatafactory` | ✅ Complete | 🔄 SDK Generated |
+| **Azure DevOps (VSTS)** | `azure.connectors.visualstudioteamservices` | ✅ Complete | 🔄 SDK Generated |
 | **Azure Digital Twins** | `azure.connectors.azuredigitaltwins` | ✅ Complete | 🔄 SDK Generated |
 | **Azure Event Grid** | `azure.connectors.azureeventgrid` | ✅ Complete | 🔄 SDK Generated |
 | **Azure Event Hubs** | `azure.connectors.eventhubs` | ✅ Complete | 🔄 SDK Generated |
@@ -235,6 +236,7 @@ The following connectors have been generated and validated with comprehensive te
 | **ClickSend SMS** | `azure.connectors.clicksendsms` | ✅ Complete | 🔄 SDK Generated |
 | **CloudConvert** | `azure.connectors.cloudconvert` | ✅ Complete | 🔄 SDK Generated |
 | **Cloudmersive Document Conversion** | `azure.connectors.cloudmersiveconvert` | ✅ Complete | 🔄 SDK Generated |
+| **Dataflows (Power Query)** | `azure.connectors.dataflows` | ✅ Complete | 🔄 SDK Generated |
 | **DocuSign** | `azure.connectors.docusign` | ✅ Complete | 🔄 SDK Generated |
 | **DocuWare** | `azure.connectors.docuware` | ✅ Complete | 🔄 SDK Generated |
 | **Dropbox** | `azure.connectors.dropbox` | ✅ Complete | 🔄 SDK Generated |
@@ -314,7 +316,7 @@ The following connectors have been generated and validated with comprehensive te
 | **Zoho Sign** | `azure.connectors.zohosign` | ✅ Complete | 🔄 SDK Generated |
 | **Zoho ZeptoMail** | `azure.connectors.zeptomail` | ✅ Complete | 🔄 SDK Generated |
 
-**Total:** 99 connectors supported
+**Total:** 101 connectors supported
 
 See [ROADMAP.md](ROADMAP.md) for planned connector additions and [tests/README.md](tests/README.md) for detailed test coverage.
 

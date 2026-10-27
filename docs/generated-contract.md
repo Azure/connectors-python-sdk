@@ -53,9 +53,9 @@ remain filtered by the existing operation-retention rules.
 Source Swagger files used during generation are not committed to this
 repository. Record the exact generator commit and source metadata in the pull
 request, then use the live-metadata workflow in `GENERATION.md` to refresh the
-complete 99-connector async catalog. Review source metadata changes and generated output
+complete 101-connector async catalog. Review source metadata changes and generated output
 together before committing regenerated clients.
 
 Before submission, verify the root catalog inventory, compile every generated
-module, run connector and runtime tests, validate all 99 async samples, build
+module, run connector and runtime tests, validate all 101 async samples, build
 the documentation, and inspect the wheel and source distribution inventories.

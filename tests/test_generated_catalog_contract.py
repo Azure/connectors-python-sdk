@@ -109,7 +109,7 @@ def get_generated_client_type(connector_module: ModuleType) -> type[Any]:
 def test_package_exports_use_only_the_async_root_runtime() -> None:
     """Expose one async runtime without sync or aio namespace duplicates."""
     connector_directory = Path(connectors_package.__file__).parent
-    assert len(CONNECTOR_MODULE_NAMES) == 99
+    assert len(CONNECTOR_MODULE_NAMES) == 101
     for directory in (
         connector_directory,
         connector_directory / "sdk",
