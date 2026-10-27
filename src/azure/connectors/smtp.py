@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, List, Any, Mapping
 
 from azure.core.credentials import AzureKeyCredential
@@ -18,6 +18,12 @@ from azure.connectors.sdk import (
     ConnectorResponseHook,
 )
 
+__all__ = [
+    "SmtpClient",
+    "Attachment",
+    "Email",
+]
+
 
 # Type Definitions
 
@@ -27,23 +33,19 @@ class Attachment:
     Definition: Attachment
     """
 
-    content_data: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "ContentData"},
-    )
+    content_data: str = dataclass_field(metadata={"wire_name": "ContentData"})
     """Content data"""
-    content_type: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "ContentType"},
-    )
+    content_type: str = dataclass_field(metadata={"wire_name": "ContentType"})
     """Content type"""
-    file_name: Optional[str] = field(
+    file_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FileName"},
     )
     """File name"""
-    content_id: Optional[str] = field(
+    content_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContentId"},
     )
     """Content id"""
@@ -55,47 +57,72 @@ class Email:
     Definition: Email
     """
 
-    from_: Optional[str] = field(default=None, metadata={"wire_name": "From"})
-    """Email address of sender like sender@domain.com"""
-    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
-    """
-    Specify email addresses separated by semicolons like
-    recipient1@domain.com;recipient2@domain.com
-    """
-    c_c: Optional[str] = field(default=None, metadata={"wire_name": "CC"})
-    """
-    Specify email addresses separated by semicolons like
-    recipient1@domain.com;recipient2@domain.com
-    """
-    subject: Optional[str] = field(
+    from_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "From"},
+    )
+    """Email address of sender like sender@domain.com"""
+    to: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "To"},
+    )
+    """
+    Specify email addresses separated by semicolons like
+    recipient1@domain.com;recipient2@domain.com
+    """
+    c_c: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "CC"},
+    )
+    """
+    Specify email addresses separated by semicolons like
+    recipient1@domain.com;recipient2@domain.com
+    """
+    subject: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Subject"},
     )
     """Email subject"""
-    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
+    body: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Body"},
+    )
     """Email body"""
-    bcc: Optional[str] = field(default=None, metadata={"wire_name": "Bcc"})
+    bcc: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Bcc"},
+    )
     """
     Specify email addresses separated by semicolons like
     recipient1@domain.com;recipient2@domain.com.
     """
-    importance: Optional[str] = field(
+    importance: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Importance"},
     )
     """Importance of the email (High, Normal, or Low)"""
-    read_receipt: Optional[str] = field(
+    read_receipt: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReadReceipt"},
     )
     """Specify email address for Read receipt"""
-    delivery_receipt: Optional[str] = field(
+    delivery_receipt: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DeliveryReceipt"},
     )
     """Specify email address for Delivery receipt"""
-    attachments: Optional[List[Attachment]] = field(
+    attachments: Optional[List[Attachment | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Attachments"},
     )
     """Attachments to be sent along with the email"""
@@ -112,7 +139,7 @@ class SmtpClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -129,8 +156,8 @@ class SmtpClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -151,7 +178,7 @@ class SmtpClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -166,9 +193,9 @@ class SmtpClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "smtp"
 
-    async def send_email_async(
+    async def send_email(
         self,
-        input: Email,
+        input: Email | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -179,10 +206,26 @@ class SmtpClient(ConnectorClientBase):
         Send Email
 
         This operation sends an email to one or more recipients.
+
+        Swagger operation ID: `SendEmailV3`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/SendEmailV3"
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -196,4 +239,5 @@ class SmtpClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )

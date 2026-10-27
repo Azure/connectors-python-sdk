@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Google Calendar Connector SDK Sample
+Google Calendar sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Google Calendar connector SDK.
+This sample demonstrates how to use the Google Calendar client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Google Calendar connection
@@ -27,8 +27,8 @@ import os
 
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.googlecalendar import GooglecalendarClient
 from azure.connectors.googlecalendar import (
-    GooglecalendarClient,
     RequestEvent,
 )
 
@@ -47,9 +47,8 @@ async def example_1_list_calendars():
     async with DefaultAzureCredential() as credential:
 
         async with GooglecalendarClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.list_calendars_async(min_access_role="reader")
+            items = [item async for item in client.list_calendars(min_access_role="reader")]
 
-            items = result.get("items", []) if result else []
             print(f"Found {len(items)} calendar(s).")
             for calendar in items[:10]:
                 print(f"  - {calendar.get('summary', 'N/A')} ({calendar.get('id', 'N/A')})")
@@ -67,9 +66,9 @@ async def example_2_list_events():
     async with DefaultAzureCredential() as credential:
 
         async with GooglecalendarClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.list_events_async(calendar_id=calendar_id)
+            items = [item async for item in client.list_events(calendar_id=calendar_id)]
 
-            events = result.get("items", []) if result else []
+            events = items
             print(f"Found {len(events)} event(s) in calendar '{calendar_id}'.")
             for event in events[:10]:
                 print(f"  - {event.get('summary', 'N/A')} ({event.get('id', 'N/A')})")
@@ -97,7 +96,7 @@ async def example_3_create_event():
                     status="confirmed",
                 )
 
-                created = await client.create_event_async(input=payload, calendar_id=calendar_id)
+                created = await client.create_event(input=payload, calendar_id=calendar_id)
                 if created:
                     print(f"Created event id: {created.get('id', 'N/A')}")
                 else:
@@ -119,13 +118,12 @@ async def example_4_list_events_for_polling():
 
         async with GooglecalendarClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.list_events_async(
+                items = [item async for item in client.list_events(
                     calendar_id=calendar_id,
                     time_min="2026-07-09T00:00:00Z",
                     time_max="2026-07-10T00:00:00Z",
-                )
-                events = result.get("items", []) if result else []
-                print(f"Time-window query returned {len(events)} event(s).")
+                )]
+                print(f"Time-window query returned {len(items)} event(s).")
                 print("Persist event IDs and update times to implement change polling.")
             except ConnectorException as ex:
                 print(f"Connector error: {ex}")

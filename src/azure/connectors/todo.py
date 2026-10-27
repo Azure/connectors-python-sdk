@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
+from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
 from azure.core.credentials_async import AsyncTokenCredential
 from azure.core.pipeline.transport import AsyncHttpTransport
@@ -18,7 +19,23 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "TodoClient",
+    "CreateToDo",
+    "CreateToDoBody",
+    "CreateToDoHtmlBody",
+    "CreateToDoList",
+    "CreateToDoListBody",
+    "ToDo",
+    "ToDoHtml",
+    "TodoList",
+    "UpdateToDo",
+    "UpdateToDoBody",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -29,19 +46,22 @@ class TodoList:
     Response for Update a to-do list
     """
 
-    etag: Optional[str] = field(
+    etag: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.etag"},
     )
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the to-do list."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Name of the to-do list."""
-    wellknown_list_name: Optional[str] = field(
+    wellknown_list_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "wellknownListName"},
     )
     """
@@ -49,13 +69,15 @@ class TodoList:
     well-known list. Possible values are: none, defaultList, flaggedEmails,
     unknownFutureValue.
     """
-    is_owner: Optional[bool] = field(
+    is_owner: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isOwner"},
     )
     """True if the user is owner of the given task list."""
-    is_shared: Optional[bool] = field(
+    is_shared: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isShared"},
     )
     """True if the task list is shared with other users."""
@@ -67,61 +89,70 @@ class ToDo:
     Response for Add a to-do
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    etag: Optional[str] = field(
+    etag: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.etag"},
     )
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the to-do."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """YYYY-MM-DDThh:mm:ssZ (UTC format)"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """YYYY-MM-DDThh:mm:ssZ (UTC format)"""
-    body: Optional[Dict[str, Any]] = None
+    body: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """To-do body that typically contains information about the to-do."""
-    body_last_modified_date_time: Optional[str] = field(
+    body_last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "bodyLastModifiedDateTime"},
     )
     """YYYY-MM-DDThh:mm:ssZ (UTC format)"""
-    completed_date_time: Optional[Dict[str, Any]] = field(
+    completed_date_time: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "completedDateTime"},
     )
     """The date in the specified time zone that the task was finished."""
-    due_date_time: Optional[Dict[str, Any]] = field(
+    due_date_time: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dueDateTime"},
     )
     """The date in the specified time zone that the task is to be finished."""
-    importance: Optional[str] = None
+    importance: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Low, normal or high."""
-    is_reminder_on: Optional[bool] = field(
+    is_reminder_on: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isReminderOn"},
     )
     """True if an alert is set to remind the user of the to-do."""
-    reminder_date_time: Optional[Dict[str, Any]] = field(
+    reminder_date_time: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "reminderDateTime"},
     )
     """The date and time for a reminder alert of the task to occur."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Indicates state or progress of the to-do - not started, in progress,
     completed, waiting on others or deferred.
     """
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Brief description or title of the to-do."""
 
 
@@ -131,81 +162,93 @@ class ToDoHtml:
     Definition: ToDoHtml
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    id_2: Optional[str] = field(
+    id_2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.id"},
     )
-    etag: Optional[str] = field(
+    etag: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.etag"},
     )
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the to-do."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """YYYY-MM-DDThh:mm:ssZ (UTC format)"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """YYYY-MM-DDThh:mm:ssZ (UTC format)"""
-    categories: Optional[List[str]] = None
+    categories: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Collection of category names associated with the to-do."""
-    assigned_to: Optional[str] = field(
+    assigned_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assignedTo"},
     )
     """Name of the person who has been assigned the to-do."""
-    body: Optional[Dict[str, Any]] = None
+    body: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """To-do body that typically contains information about the to-do."""
-    completed_date_time: Optional[Dict[str, Any]] = field(
+    completed_date_time: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "completedDateTime"},
     )
     """Date-time in the UTC time zone when the to-do was finished."""
-    due_date_time: Optional[Dict[str, Any]] = field(
+    due_date_time: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dueDateTime"},
     )
     """Date in the UTC time zone when the to-do is to be finished."""
-    importance: Optional[str] = None
+    importance: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Low, normal or high."""
-    is_reminder_on: Optional[bool] = field(
+    is_reminder_on: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isReminderOn"},
     )
     """True if an alert is set to remind the user of the to-do."""
-    owner: Optional[str] = None
+    owner: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the person who created the to-do."""
-    parent_folder_id: Optional[str] = field(
+    parent_folder_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parentFolderId"},
     )
     """Unique identifier of the parent folder."""
-    reminder_date_time: Optional[Dict[str, Any]] = field(
+    reminder_date_time: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "reminderDateTime"},
     )
     """
     Date-time in the UTC time zone for a reminder alert of the to-do to occur.
     """
-    start_date_time: Optional[Dict[str, Any]] = field(
+    start_date_time: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """Date in the UTC time zone when the to-do is to begin."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Indicates state or progress of the to-do - not started, in progress,
     completed, waiting on others or deferred.
     """
-    subject: Optional[str] = None
+    subject: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Brief description or title of the to-do."""
 
 
@@ -215,58 +258,64 @@ class CreateToDoBody:
     Definition: CreateToDoBody
     """
 
-    due_date_time: Optional[Dict[str, Any]] = field(
+    due_date_time: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DueDateTime"},
     )
     """Date in the UTC time zone when the to-do is to be finished."""
-    reminder_date_time: Optional[Dict[str, Any]] = field(
+    reminder_date_time: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReminderDateTime"},
     )
     """
     Date-time in UTC time zone for a reminder alert of the to-do to occur.
     """
-    start_date_time: Optional[Dict[str, Any]] = field(
+    start_date_time: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StartDateTime"},
     )
     """Date in the UTC time zone when the to-do is to begin."""
-    importance: Optional[str] = field(
+    importance: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Importance"},
     )
     """Low, normal or high."""
-    subject: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Subject"},
-    )
+    subject: str = dataclass_field(metadata={"wire_name": "Subject"})
     """Brief description or title of the to-do."""
-    status: Optional[str] = field(
+    status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Status"},
     )
     """
     Indicates state or progress of the to-do - not started, in progress,
     completed, waiting on others or deferred.
     """
-    sensitivity: Optional[str] = field(
+    sensitivity: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Sensitivity"},
     )
     """Indicates the level of privacy for the event."""
-    body: Optional[Dict[str, Any]] = field(
+    body: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Body"},
     )
     """To-do body that typically contains information about the to-do."""
-    categories: Optional[List[str]] = field(
+    categories: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Categories"},
     )
     """Collection of category names associated with the to-do."""
-    is_reminder_on: Optional[bool] = field(
+    is_reminder_on: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsReminderOn"},
     )
     """True if an alert is set to remind the user of the to-do."""
@@ -278,58 +327,64 @@ class CreateToDoHtmlBody:
     Definition: CreateToDoHtmlBody
     """
 
-    due_date_time: Optional[Dict[str, Any]] = field(
+    due_date_time: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DueDateTime"},
     )
     """Date in the UTC time zone when the to-do is to be finished."""
-    reminder_date_time: Optional[Dict[str, Any]] = field(
+    reminder_date_time: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReminderDateTime"},
     )
     """
     Date-time in UTC time zone for a reminder alert of the to-do to occur.
     """
-    start_date_time: Optional[Dict[str, Any]] = field(
+    start_date_time: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StartDateTime"},
     )
     """Date in the UTC time zone when the to-do is to begin."""
-    importance: Optional[str] = field(
+    importance: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Importance"},
     )
     """Low, normal or high."""
-    subject: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Subject"},
-    )
+    subject: str = dataclass_field(metadata={"wire_name": "Subject"})
     """Brief description or title of the to-do."""
-    status: Optional[str] = field(
+    status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Status"},
     )
     """
     Indicates state or progress of the to-do - not started, in progress,
     completed, waiting on others or deferred.
     """
-    sensitivity: Optional[str] = field(
+    sensitivity: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Sensitivity"},
     )
     """Indicates the level of privacy for the event."""
-    body: Optional[Dict[str, Any]] = field(
+    body: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Body"},
     )
     """To-do body that typically contains information about the to-do."""
-    categories: Optional[List[str]] = field(
+    categories: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Categories"},
     )
     """Collection of category names associated with the to-do."""
-    is_reminder_on: Optional[bool] = field(
+    is_reminder_on: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsReminderOn"},
     )
     """True if an alert is set to remind the user of the to-do."""
@@ -341,58 +396,68 @@ class UpdateToDoBody:
     Definition: UpdateToDoBody
     """
 
-    due_date_time: Optional[Dict[str, Any]] = field(
+    due_date_time: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DueDateTime"},
     )
     """Date in the UTC time zone when the to-do is to be finished."""
-    reminder_date_time: Optional[Dict[str, Any]] = field(
+    reminder_date_time: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReminderDateTime"},
     )
     """
     Date-time in UTC time zone for a reminder alert of the to-do to occur.
     """
-    start_date_time: Optional[Dict[str, Any]] = field(
+    start_date_time: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StartDateTime"},
     )
     """Date in the UTC time zone when the to-do is to begin."""
-    importance: Optional[str] = field(
+    importance: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Importance"},
     )
     """Low, normal or high."""
-    subject: Optional[str] = field(
+    subject: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Subject"},
     )
     """Brief description or title of the to-do."""
-    status: Optional[str] = field(
+    status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Status"},
     )
     """
     Indicates state or progress of the to-do - not started, in progress,
     completed, waiting on others or deferred.
     """
-    sensitivity: Optional[str] = field(
+    sensitivity: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Sensitivity"},
     )
     """Indicates the level of privacy for the event."""
-    body: Optional[Dict[str, Any]] = field(
+    body: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Body"},
     )
     """To-do body that typically contains information about the to-do."""
-    categories: Optional[List[str]] = field(
+    categories: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Categories"},
     )
     """Collection of category names associated with the to-do."""
-    is_reminder_on: Optional[bool] = field(
+    is_reminder_on: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsReminderOn"},
     )
     """True if an alert is set to remind the user of the to-do."""
@@ -404,7 +469,7 @@ class CreateToDoListBody:
     Definition: CreateToDoListBody
     """
 
-    name: Optional[str] = None
+    name: str
     """List name"""
 
 
@@ -414,34 +479,37 @@ class CreateToDo:
     Definition: CreateToDo
     """
 
-    due_date_time: Optional[Dict[str, Any]] = field(
+    due_date_time: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dueDateTime"},
     )
     """
     Date in the UTC time zone when the to-do is to be finished (note the time
     portion will be ignored).
     """
-    reminder_date_time: Optional[Dict[str, Any]] = field(
+    reminder_date_time: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "reminderDateTime"},
     )
     """
     Date-time in UTC time zone for a reminder alert of the to-do to occur.
     """
-    importance: Optional[str] = None
+    importance: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Low, normal or high."""
-    title: Optional[str] = None
+    title: str
     """Brief description or title of the to-do."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Indicates state or progress of the to-do - not started, in progress,
     completed, waiting on others or deferred.
     """
-    body: Optional[Dict[str, Any]] = None
+    body: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """To-do body that typically contains information about the to-do."""
-    is_reminder_on: Optional[bool] = field(
+    is_reminder_on: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isReminderOn"},
     )
     """True if an alert is set to remind the user of the to-do."""
@@ -453,34 +521,37 @@ class UpdateToDo:
     Definition: UpdateToDo
     """
 
-    due_date_time: Optional[Dict[str, Any]] = field(
+    due_date_time: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dueDateTime"},
     )
     """
     Date in the UTC time zone when the to-do is to be finished (note the time
     portion will be ignored).
     """
-    reminder_date_time: Optional[Dict[str, Any]] = field(
+    reminder_date_time: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "reminderDateTime"},
     )
     """
     Date-time in UTC time zone for a reminder alert of the to-do to occur.
     """
-    importance: Optional[str] = None
+    importance: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Low, normal or high."""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Brief description or title of the to-do."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Indicates state or progress of the to-do - not started, in progress,
     completed, waiting on others or deferred.
     """
-    body: Optional[Dict[str, Any]] = None
+    body: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """To-do body that typically contains information about the to-do."""
-    is_reminder_on: Optional[bool] = field(
+    is_reminder_on: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isReminderOn"},
     )
     """True if an alert is set to remind the user of the to-do."""
@@ -492,10 +563,7 @@ class CreateToDoList:
     Definition: CreateToDoList
     """
 
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """List name"""
 
 
@@ -510,7 +578,7 @@ class TodoClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -527,8 +595,8 @@ class TodoClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -549,7 +617,7 @@ class TodoClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -564,9 +632,86 @@ class TodoClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "todo"
 
-    async def update_to_do_list_async(
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
+            if next_link.startswith("?"):
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
+
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
+    async def update_to_do_list(
         self,
-        input: CreateToDoList,
+        input: CreateToDoList | Mapping[str, Any],
         folder_id: str,
         *,
         timeout: Optional[float] = None,
@@ -578,13 +723,30 @@ class TodoClient(ConnectorClientBase):
         Update a to-do list
 
         This operation is used to update a specific to-do list.
+
+        Swagger operation ID: `UpdateToDoList`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            folder_id: To-do list.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/lists/{quote(str(folder_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -598,6 +760,7 @@ class TodoClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -605,7 +768,7 @@ class TodoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_to_do_list_async(
+    async def delete_to_do_list(
         self,
         folder_id: str,
         *,
@@ -618,13 +781,28 @@ class TodoClient(ConnectorClientBase):
         Delete a to-do list
 
         This operation is used to delete a specific to-do list.
+
+        Swagger operation ID: `DeleteToDoList`.
+
+        Args:
+            folder_id: To-do list.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/lists/{quote(str(folder_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -638,11 +816,12 @@ class TodoClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def create_to_do_async(
+    async def create_to_do(
         self,
-        input: CreateToDo,
+        input: CreateToDo | Mapping[str, Any],
         folder_id: str,
         *,
         timeout: Optional[float] = None,
@@ -654,13 +833,30 @@ class TodoClient(ConnectorClientBase):
         Add a to-do
 
         This operation is used to create a to-do in the specified to-do list.
+
+        Swagger operation ID: `CreateToDoV3`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            folder_id: To-do list.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/lists/{quote(str(folder_id), safe='')}/tasks"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -674,6 +870,7 @@ class TodoClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -681,9 +878,9 @@ class TodoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_to_do_list_async(
+    async def create_to_do_list(
         self,
-        input: CreateToDoList,
+        input: CreateToDoList | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -694,10 +891,26 @@ class TodoClient(ConnectorClientBase):
         Create a to-do list
 
         This operation is used to create a new to-do list.
+
+        Swagger operation ID: `CreateToDoListV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/lists"
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -711,6 +924,7 @@ class TodoClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -718,7 +932,7 @@ class TodoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_to_do_async(
+    async def delete_to_do(
         self,
         folder_id: str,
         id: str,
@@ -732,6 +946,22 @@ class TodoClient(ConnectorClientBase):
         Delete to-do
 
         This operation is used to delete a task.
+
+        Swagger operation ID: `DeleteToDoV2`.
+
+        Args:
+            folder_id: To-do list.
+            id: To-do task.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -741,7 +971,7 @@ class TodoClient(ConnectorClientBase):
             f"/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -755,45 +985,84 @@ class TodoClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_all_todo_lists_async(
+    def list_all_todo_lists(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List all to-do lists
 
         Returns a list of all the to-do lists.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetAllTodoListsV2`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/lists"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_to_do_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def get_to_do(
         self,
         folder_id: str,
         id: str,
@@ -807,6 +1076,22 @@ class TodoClient(ConnectorClientBase):
         Get a to-do
 
         This operation is used to get the to-do with the given Id.
+
+        Swagger operation ID: `GetToDoV3`.
+
+        Args:
+            folder_id: To-do list.
+            id: To-do task.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -816,7 +1101,7 @@ class TodoClient(ConnectorClientBase):
             f"/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -830,6 +1115,7 @@ class TodoClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -837,7 +1123,7 @@ class TodoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_to_do_list_async(
+    async def get_to_do_list(
         self,
         folder_id: str,
         *,
@@ -850,13 +1136,28 @@ class TodoClient(ConnectorClientBase):
         Get a to-do list
 
         This operation is used to get a specific to-do list.
+
+        Swagger operation ID: `GetToDoListV2`.
+
+        Args:
+            folder_id: To-do list.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/lists/{quote(str(folder_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -870,6 +1171,7 @@ class TodoClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -877,20 +1179,40 @@ class TodoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_to_dos_by_folder_async(
+    def list_to_dos_by_folder(
         self,
         folder_id: str,
-        top: Optional[int] = None,
         *,
+        top: Optional[int] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List to-dos by folder
 
         This operation is used to retrieve all to-dos from a specific list.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `ListToDosByFolderV2`.
+
+        Args:
+            folder_id: To-do list.
+            top: Total number of entries to retrieve (default = 10, maximum =
+                999).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -904,31 +1226,52 @@ class TodoClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def update_to_do_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def update_to_do(
         self,
-        input: UpdateToDo,
+        input: UpdateToDo | Mapping[str, Any],
         folder_id: str,
         id: str,
         *,
@@ -941,6 +1284,24 @@ class TodoClient(ConnectorClientBase):
         Update to-do
 
         This operation is used to update a specific to-do.
+
+        Swagger operation ID: `UpdateToDoV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            folder_id: To-do list.
+            id: To-do task.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -950,7 +1311,7 @@ class TodoClient(ConnectorClientBase):
             f"/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -964,6 +1325,7 @@ class TodoClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

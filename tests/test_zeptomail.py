@@ -2,19 +2,22 @@
 
 """Contract tests for ZeptomailClient."""
 
-from typing import Any, Dict, List, Optional, get_type_hints
+from typing import Any, Dict, List, Mapping, Optional, get_type_hints
 from unittest.mock import AsyncMock, patch
 
 import azure.connectors.zeptomail as zeptomail_module
 import pytest
+from azure.connectors.zeptomail import ZeptomailClient
 from azure.connectors.zeptomail import (
     ReplyToAddress,
     SendMailInput,
     SendTemplateMailInput,
-    ZeptomailClient,
 )
 from azure.connectors.sdk.serialization import to_wire
-from tests.generated_connector_test_utils import GeneratedConnectorContractTests
+from tests.generated_connector_test_utils import (
+    GeneratedConnectorContractTests,
+    model_instance,
+)
 from tests.conftest import MockResponse
 
 
@@ -42,7 +45,8 @@ async def test_send_template_mail_preserves_mixed_values(
 ) -> None:
     """Test the template-mail request serializes mixed merge values unchanged."""
     type_hints = get_type_hints(SendTemplateMailInput)
-    model = SendTemplateMailInput(
+    model = model_instance(
+        SendTemplateMailInput,
         merge_key_detail=[{"key": "customer", "value": "Ada", "rank": 2}]
     )
     client = ZeptomailClient(
@@ -52,11 +56,11 @@ async def test_send_template_mail_preserves_mixed_values(
 
     with patch.object(
         client._http_client,
-        "send_async",
+        "send",
         new_callable=AsyncMock,
         return_value=MockResponse(status=200, text='{"ok": true}'),
     ) as mock_send:
-        result = await client.send_template_mail_async(model)
+        result = await client.send_template_mail(model)
 
     assert type_hints["merge_key_detail"] == Optional[List[Dict[str, Any]]]
     mock_send.assert_awaited_once_with(
@@ -77,7 +81,7 @@ async def test_send_template_mail_preserves_mixed_values(
 
 def test_reply_to_uses_corrected_model_in_both_requests() -> None:
     """Test the corrected public type preserves both reply-to annotations."""
-    expected_type = Optional[List[ReplyToAddress]]
+    expected_type = Optional[List[ReplyToAddress | Mapping[str, Any]]]
 
     assert get_type_hints(SendMailInput)["reply_to"] == expected_type
     assert get_type_hints(SendTemplateMailInput)["reply_to"] == expected_type
@@ -105,11 +109,11 @@ async def test_get_processed_emails_uses_exact_encoded_query(
 
     with patch.object(
         client._http_client,
-        "send_async",
+        "send",
         new_callable=AsyncMock,
         return_value=MockResponse(status=200, text='{"data": []}'),
     ) as mock_send:
-        result = await client.get_processed_emails_async(
+        result = await client.get_processed_emails(
             mailagent_key="agent+key",
             subject="Quarterly report",
             from_="sender+alias@example.com",

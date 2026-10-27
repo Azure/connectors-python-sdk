@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Dict, Any, Mapping
 from urllib.parse import quote
 import json
@@ -20,6 +20,19 @@ from azure.connectors.sdk import (
     ConnectorResponseHook,
 )
 
+__all__ = [
+    "CloudconvertClient",
+    "CaptureWebsiteInput",
+    "ConvertFileInput",
+    "GetCaptureWebsiteOptionsResponse",
+    "GetConvertOptionsResponse",
+    "GetMergeInputsResponse",
+    "GetMergeOptionsResponse",
+    "GetOptimizeOptionsResponse",
+    "MergeFilesInput",
+    "OptimizeFileInput",
+]
+
 
 # Type Definitions
 
@@ -29,7 +42,7 @@ class ConvertFileInput:
     Convert File
     """
 
-    tasks: Optional[Dict[str, Any]] = None
+    tasks: Dict[str, Any]
     """tasks"""
 
 
@@ -39,7 +52,7 @@ class OptimizeFileInput:
     Compress File
     """
 
-    tasks: Optional[Dict[str, Any]] = None
+    tasks: Dict[str, Any]
     """tasks"""
 
 
@@ -49,7 +62,7 @@ class CaptureWebsiteInput:
     Create Website Screenshot
     """
 
-    tasks: Optional[Dict[str, Any]] = None
+    tasks: Dict[str, Any]
     """tasks"""
 
 
@@ -59,10 +72,10 @@ class MergeFilesInput:
     Merge Files
     """
 
-    number_of_inputs: Optional[int] = None
+    number_of_inputs: int
     """Number of input files to merge."""
-    additional_inputs: Optional[Dict[str, Any]] = None
-    tasks: Optional[Dict[str, Any]] = None
+    additional_inputs: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    tasks: Dict[str, Any]
     """tasks"""
 
 
@@ -72,7 +85,7 @@ class GetConvertOptionsResponse:
     Response for Get Convert Options
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -81,7 +94,7 @@ class GetOptimizeOptionsResponse:
     Response for Get Optimize Options
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -90,7 +103,7 @@ class GetCaptureWebsiteOptionsResponse:
     Response for Get Capture Website Options
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -99,7 +112,7 @@ class GetMergeInputsResponse:
     Response for Get Merge Inputs
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -108,7 +121,7 @@ class GetMergeOptionsResponse:
     Response for Get Merge Options
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 # Client Class
@@ -122,7 +135,7 @@ class CloudconvertClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -139,8 +152,8 @@ class CloudconvertClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -161,7 +174,7 @@ class CloudconvertClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -176,9 +189,9 @@ class CloudconvertClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "cloudconvert"
 
-    async def convert_file_async(
+    async def convert_file(
         self,
-        input: ConvertFileInput,
+        input: ConvertFileInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -189,10 +202,26 @@ class CloudconvertClient(ConnectorClientBase):
         Convert File
 
         Convert a file to another format
+
+        Swagger operation ID: `ConvertFile`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/flow/jobs/convertfile"
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -206,13 +235,14 @@ class CloudconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
 
-    async def optimize_file_async(
+    async def optimize_file(
         self,
-        input: OptimizeFileInput,
+        input: OptimizeFileInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -223,10 +253,26 @@ class CloudconvertClient(ConnectorClientBase):
         Compress File
 
         Compress a PDF, PNG or JPG file
+
+        Swagger operation ID: `OptimizeFile`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/flow/jobs/optimize"
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -240,13 +286,14 @@ class CloudconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
 
-    async def capture_website_async(
+    async def capture_website(
         self,
-        input: CaptureWebsiteInput,
+        input: CaptureWebsiteInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -257,12 +304,28 @@ class CloudconvertClient(ConnectorClientBase):
         Create Website Screenshot
 
         Create a website screenshot as PDF, PNG or JPG
+
+        Swagger operation ID: `CaptureWebsite`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/jobs/capture-website"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -276,13 +339,14 @@ class CloudconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
 
-    async def merge_files_async(
+    async def merge_files(
         self,
-        input: MergeFilesInput,
+        input: MergeFilesInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -293,10 +357,26 @@ class CloudconvertClient(ConnectorClientBase):
         Merge Files
 
         Merge multiple files in one PDF
+
+        Swagger operation ID: `MergeFiles`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/flow/jobs/merge"
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -310,15 +390,16 @@ class CloudconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
 
-    async def get_convert_options_async(
+    async def get_convert_options(
         self,
+        *,
         input_format: Optional[str] = None,
         output_format: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -326,6 +407,22 @@ class CloudconvertClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         Get Convert Options
+
+        Swagger operation ID: `GetConvertOptions`.
+
+        Args:
+            input_format: input_format.
+            output_format: output_format.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/flow/options/convert"
         query_params = []
@@ -342,7 +439,7 @@ class CloudconvertClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -356,6 +453,7 @@ class CloudconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -363,10 +461,10 @@ class CloudconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_optimize_options_async(
+    async def get_optimize_options(
         self,
-        input_format: Optional[str] = None,
         *,
+        input_format: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -374,6 +472,21 @@ class CloudconvertClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         Get Optimize Options
+
+        Swagger operation ID: `GetOptimizeOptions`.
+
+        Args:
+            input_format: input_format.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/flow/options/optimize"
         query_params = []
@@ -385,7 +498,7 @@ class CloudconvertClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -399,6 +512,7 @@ class CloudconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -406,10 +520,10 @@ class CloudconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_capture_website_options_async(
+    async def get_capture_website_options(
         self,
-        output_format: Optional[str] = None,
         *,
+        output_format: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -417,6 +531,21 @@ class CloudconvertClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         Get Capture Website Options
+
+        Swagger operation ID: `GetCaptureWebsiteOptions`.
+
+        Args:
+            output_format: output_format.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/options/capture-website"
@@ -430,7 +559,7 @@ class CloudconvertClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -444,6 +573,7 @@ class CloudconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -451,10 +581,10 @@ class CloudconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_merge_inputs_async(
+    async def get_merge_inputs(
         self,
-        number_of_inputs: Optional[int] = None,
         *,
+        number_of_inputs: Optional[int] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -462,6 +592,21 @@ class CloudconvertClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         Get Merge Inputs
+
+        Swagger operation ID: `GetMergeInputs`.
+
+        Args:
+            number_of_inputs: number_of_inputs.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/flow/inputs/merge"
         query_params = []
@@ -473,7 +618,7 @@ class CloudconvertClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -487,6 +632,7 @@ class CloudconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -494,10 +640,10 @@ class CloudconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_merge_options_async(
+    async def get_merge_options(
         self,
-        output_format: Optional[str] = None,
         *,
+        output_format: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -505,6 +651,21 @@ class CloudconvertClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         Get Merge Options
+
+        Swagger operation ID: `GetMergeOptions`.
+
+        Args:
+            output_format: output_format.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/flow/options/merge"
         query_params = []
@@ -516,7 +677,7 @@ class CloudconvertClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -530,6 +691,7 @@ class CloudconvertClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

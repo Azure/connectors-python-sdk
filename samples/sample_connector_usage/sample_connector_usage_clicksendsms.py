@@ -1,7 +1,7 @@
 """
-ClickSend SMS Connector SDK Sample
+ClickSend SMS sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the ClickSend SMS connector SDK.
+This sample demonstrates how to use the ClickSend SMS client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a ClickSend SMS connection
@@ -24,8 +24,8 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
+from azure.connectors.clicksendsms import ClicksendsmsClient
 from azure.connectors.clicksendsms import (
-    ClicksendsmsClient,
     CreateListInput,
     SmsSendInput,
 )
@@ -42,12 +42,12 @@ async def example_1_send_sms() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with ClicksendsmsClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.sms_send_async(
+            result = await client.sms_send(
                 input=SmsSendInput(
                     messages=[
                         {
                             "to": "+61411111111",
-                            "body": "Hello from the ClickSend SMS connector SDK.",
+                            "body": "Hello from the ClickSend SMS client in the Azure Connectors Python SDK.",
                         }
                     ],
                 ),
@@ -61,7 +61,7 @@ async def example_2_get_contact_lists() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with ClicksendsmsClient(CONNECTION_RUNTIME_URL, credential) as client:
-            lists = await client.get_contact_lists_async(page=1, limit=10)
+            lists = await client.get_contact_lists(page=1, limit=10)
             print(f"Contact lists: {lists}")
 
 
@@ -71,7 +71,7 @@ async def example_3_create_list() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with ClicksendsmsClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.create_list_async(
+            result = await client.create_list(
                 input=CreateListInput(list_name="My New List"),
             )
             print(f"Created list: {result}")
@@ -83,7 +83,7 @@ async def example_4_search_contact_lists() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with ClicksendsmsClient(CONNECTION_RUNTIME_URL, credential) as client:
-            results = await client.search_contact_list_async(q="friends")
+            results = await client.search_contact_list(q="friends")
             print(f"Search results: {results}")
 
 
@@ -94,7 +94,7 @@ async def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("ClickSend SMS Connector SDK - Sample Usage")
+    print("ClickSend SMS sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

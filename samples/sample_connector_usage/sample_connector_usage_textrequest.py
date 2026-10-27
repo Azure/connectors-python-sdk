@@ -1,7 +1,7 @@
 """
-TextRequest Connector SDK Sample
+TextRequest sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the TextRequest connector SDK.
+This sample demonstrates how to use the TextRequest client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a TextRequest connection
@@ -24,11 +24,11 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
+from azure.connectors.textrequest import TextrequestClient
 from azure.connectors.textrequest import (
     CreateContactInput,
     SendMessageByPhoneNumberInput,
-    TextrequestClient,
-)
+    )
 
 
 # Connection runtime URL format:
@@ -45,9 +45,9 @@ async def example_1_send_message() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.send_message_by_phone_number_async(
+            result = await client.send_message_by_phone_number(
                 input=SendMessageByPhoneNumberInput(
-                    body="Hello from the TextRequest connector SDK.",
+                    body="Hello from the TextRequest client in the Azure Connectors Python SDK.",
                     sender_name="Support Team",
                 ),
                 dashboard_id=DASHBOARD_ID,
@@ -62,11 +62,14 @@ async def example_2_get_conversations() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
-            conversations = await client.get_conversations_async(
-                dashboard_id=DASHBOARD_ID,
-                page=1,
-                page_size=20,
-            )
+            conversations = [
+                conversation
+                async for conversation in client.list_conversations(
+                    dashboard_id=DASHBOARD_ID,
+                    page=1,
+                    page_size=20,
+                )
+            ]
             print(f"Conversations: {conversations}")
 
 
@@ -76,7 +79,7 @@ async def example_3_create_contact() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.create_contact_async(
+            result = await client.create_contact(
                 input=CreateContactInput(
                     first_name="Ada",
                     last_name="Lovelace",
@@ -94,7 +97,13 @@ async def example_4_get_dashboards() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
-            dashboards = await client.get_dashboards_async(page=1, page_size=20)
+            dashboards = [
+                dashboard
+                async for dashboard in client.list_dashboards(
+                    page=1,
+                    page_size=20,
+                )
+            ]
             print(f"Dashboards: {dashboards}")
 
 
@@ -105,7 +114,7 @@ async def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("TextRequest Connector SDK - Sample Usage")
+    print("TextRequest sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

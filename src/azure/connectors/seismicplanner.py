@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
+from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
 from azure.core.credentials_async import AsyncTokenCredential
 from azure.core.pipeline.transport import AsyncHttpTransport
@@ -18,7 +19,50 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "SeismicplannerClient",
+    "Association",
+    "AssociationReq",
+    "AsyncOperationResponse",
+    "Comment",
+    "CommentQueryResponse",
+    "ContentRef",
+    "CreateCommentModel",
+    "CreateProject",
+    "CreateRequest",
+    "CreateTask",
+    "CustomProperty",
+    "CustomPropertyDataDisplay",
+    "CustomPropertyValues",
+    "CustomPropertyValuesInput",
+    "CustomPropertyValuesValues",
+    "DeleteRequest",
+    "Follower",
+    "Meta",
+    "MetaQueryInfo",
+    "PlannerProject",
+    "PlannerProjectQueryResponse",
+    "PlannerRequest",
+    "PlannerRequestQueryResponse",
+    "PlannerSubTask",
+    "PlannerTask",
+    "PlannerTaskQueryResponse",
+    "PossibleValuesItem",
+    "ProblemDetails",
+    "ProjectAssociatedNodes",
+    "RequestFormCustomProperties",
+    "ScopeSettingsItemDefinition",
+    "StatusSchema",
+    "StatusSchemaQueryResponse",
+    "UpdateCommentModel",
+    "UpdateProject",
+    "UpdateRequest",
+    "UpdateTask",
+    "ValueSchemaPropertyDefinition",
+]
 
 
 # Type Definitions
@@ -29,15 +73,20 @@ class CommentQueryResponse:
     Response for Get comments
     """
 
-    count: Optional[int] = None
+    count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of records returned"""
-    cursor: Optional[str] = None
+    cursor: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Cursor used for pagination"""
-    items: Optional[List[Comment]] = None
+    items: Optional[
+        List[Comment | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of items in the response"""
-    limit: Optional[int] = None
+    limit: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number to limit records"""
-    meta: Optional[Meta] = None
+    meta: Optional[Meta | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -46,67 +95,80 @@ class Comment:
     Response for Create comment
     """
 
-    annotation_payload: Optional[str] = field(
+    annotation_payload: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "annotationPayload"},
     )
-    annotation_type: Optional[str] = field(
+    annotation_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "annotationType"},
     )
-    comment_content: Optional[str] = field(
+    comment_content: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "commentContent"},
     )
-    created_at: Optional[str] = field(
+    created_at: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdAt"},
     )
     """Date string of date created"""
-    creator_id: Optional[str] = field(
+    creator_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "creatorId"},
     )
     """User ID of the creator"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Comment ID"""
-    is_resolved: Optional[bool] = field(
+    is_resolved: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isResolved"},
     )
     """True/false on whether the comment is resolved"""
-    node_id: Optional[str] = field(
+    node_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nodeId"},
     )
     """Node ID"""
-    node_type: Optional[str] = field(
+    node_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nodeType"},
     )
     """Node type of the comment"""
-    page_index: Optional[str] = field(
+    page_index: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageIndex"},
     )
     """Number page index"""
-    parent_id: Optional[str] = field(
+    parent_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parentId"},
     )
     """Parent comment ID"""
-    reply_count: Optional[int] = field(
+    reply_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "replyCount"},
     )
     """Number of replies"""
-    space_id: Optional[str] = field(
+    space_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "spaceId"},
     )
     """Space ID"""
-    updated_at: Optional[str] = field(
+    updated_at: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "updatedAt"},
     )
     """Date string of updated date"""
@@ -118,15 +180,20 @@ class PlannerProjectQueryResponse:
     Response for Get projects
     """
 
-    count: Optional[int] = None
+    count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of records returned"""
-    cursor: Optional[str] = None
+    cursor: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Cursor used for pagination"""
-    items: Optional[List[PlannerProject]] = None
+    items: Optional[
+        List[PlannerProject | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of project items in the response"""
-    limit: Optional[int] = None
+    limit: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number to limit records"""
-    meta: Optional[Meta] = None
+    meta: Optional[Meta | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -135,8 +202,9 @@ class AsyncOperationResponse:
     Response for Delete projects
     """
 
-    async_operation_ids: Optional[List[str]] = field(
+    async_operation_ids: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "asyncOperationIds"},
     )
     """List of async action IDs"""
@@ -148,110 +216,148 @@ class PlannerProject:
     Response for Create project
     """
 
-    actual_duration: Optional[int] = field(
+    actual_duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "actualDuration"},
     )
     """Calculated actual duration in days"""
-    actual_end_date: Optional[str] = field(
+    actual_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "actualEndDate"},
     )
     """Calculated end date from when the project actually ended"""
-    actual_start_date: Optional[str] = field(
+    actual_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "actualStartDate"},
     )
     """Calculated start date from when the project actually started"""
-    associated_nodes: Optional[List[ProjectAssociatedNodes]] = field(
+    associated_nodes: Optional[
+        List[ProjectAssociatedNodes | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "associatedNodes"},
     )
     """List of association data"""
-    associations: Optional[List[Association]] = None
-    """List of associations (Library content)"""
-    copy_from: Optional[str] = field(
+    associations: Optional[
+        List[Association | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of associations (Library content)"""
+    copy_from: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "copyFrom"},
     )
     """Project ID the project is copied from"""
-    created_at: Optional[str] = field(
+    created_at: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdAt"},
     )
     """Date string of created date"""
-    creator_id: Optional[str] = field(
+    creator_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "creatorId"},
     )
     """User ID of creator"""
-    custom_properties: Optional[List[CustomPropertyValues]] = field(
+    custom_properties: Optional[
+        List[CustomPropertyValues | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customProperties"},
     )
     """List of custom properties"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of project"""
-    followers: Optional[List[Follower]] = None
-    """List of followers"""
-    id: Optional[str] = None
-    is_active: Optional[bool] = field(
+    followers: Optional[
+        List[Follower | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of followers"""
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    is_active: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "isActive"},
     )
     """Indicator on if a project is active or not"""
-    is_template: Optional[bool] = field(
+    is_template: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isTemplate"},
     )
     """Indicator on if the project is a template or not"""
-    manager_id: Optional[str] = field(
+    manager_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerId"},
     )
     """User ID of project manager"""
-    max_rank: Optional[str] = field(
+    max_rank: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "maxRank"},
     )
     """Maximum rank number"""
-    min_rank: Optional[str] = field(
+    min_rank: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "minRank"},
     )
     """Minimum rank number"""
-    planned_duration: Optional[int] = field(
+    planned_duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedDuration"},
     )
     """Planned duration in days"""
-    planned_end_date: Optional[str] = field(
+    planned_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedEndDate"},
     )
     """Date string of planned end date"""
-    planned_start_date: Optional[str] = field(
+    planned_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedStartDate"},
     )
     """Date string of planned start date"""
-    space_id: Optional[str] = field(
+    space_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "spaceId"},
     )
-    template_id: Optional[str] = field(
+    template_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "templateId"},
     )
     """Template ID the the project was created from"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of project"""
-    updated_at: Optional[str] = field(
+    updated_at: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "updatedAt"},
     )
     """Date project was last updated"""
-    works: Optional[List[PlannerTask]] = None
+    works: Optional[
+        List[PlannerTask | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of tasks and requests"""
 
 
@@ -261,15 +367,20 @@ class PlannerRequestQueryResponse:
     Response for Get requests
     """
 
-    count: Optional[int] = None
+    count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of records returned"""
-    cursor: Optional[str] = None
+    cursor: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Cursor used for pagination"""
-    items: Optional[List[PlannerRequest]] = None
+    items: Optional[
+        List[PlannerRequest | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of request objects in the response"""
-    limit: Optional[int] = None
+    limit: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number to limit records"""
-    meta: Optional[Meta] = None
+    meta: Optional[Meta | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -278,93 +389,123 @@ class PlannerRequest:
     Response for Create request
     """
 
-    assignee_id: Optional[str] = field(
+    assignee_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assigneeId"},
     )
     """User ID of the assignee"""
-    assigner_id: Optional[str] = field(
+    assigner_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assignerId"},
     )
     """User ID of the assigner"""
-    associations: Optional[List[Association]] = None
-    """List of associations (Library content)"""
-    content_refs: Optional[List[ContentRef]] = field(
+    associations: Optional[
+        List[Association | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of associations (Library content)"""
+    content_refs: Optional[List[ContentRef | Mapping[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "contentRefs"},
     )
     """List of content references (WorkSpace and DocCenter content)"""
-    created_at: Optional[str] = field(
+    created_at: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdAt"},
     )
     """Date string for created date"""
-    creator_id: Optional[str] = field(
+    creator_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "creatorId"},
     )
     """User ID of the creator"""
-    custom_properties: Optional[List[CustomPropertyValues]] = field(
+    custom_properties: Optional[
+        List[CustomPropertyValues | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customProperties"},
     )
     """List of custom properties"""
-    followers: Optional[List[Follower]] = None
-    """List of followers"""
-    form_ref: Optional[Any] = field(
+    followers: Optional[
+        List[Follower | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of followers"""
+    form_ref: Optional[Any] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "formRef"},
     )
     """Form reference object"""
-    id: Optional[str] = None
-    note: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    note: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Note for notifications on status changes"""
-    planned_duration: Optional[int] = field(
+    planned_duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedDuration"},
     )
     """Planned duration in days"""
-    planned_end_date: Optional[str] = field(
+    planned_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedEndDate"},
     )
     """Date string of planned end date"""
-    planned_start_date: Optional[str] = field(
+    planned_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedStartDate"},
     )
     """Date string of planned start date"""
-    priority: Optional[str] = None
+    priority: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Priority value"""
-    project_id: Optional[str] = field(
+    project_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "projectId"},
     )
     """Project ID of the project the request is associated with"""
-    rank: Optional[str] = None
+    rank: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Rank of request in request list"""
-    request_form_custom_property_option: Optional[RequestFormCustomProperties] = field(
+    request_form_custom_property_option: Optional[
+        RequestFormCustomProperties | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "requestFormCustomPropertyOption"},
     )
-    space_id: Optional[str] = field(
+    space_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "spaceId"},
     )
-    status_schema_id: Optional[str] = field(
+    status_schema_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "statusSchemaId"},
     )
-    step_id: Optional[int] = field(
+    step_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "stepId"},
     )
     """Step ID indicating the status value"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of the request"""
-    updated_at: Optional[str] = field(
+    updated_at: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "updatedAt"},
     )
     """Date the request was last updated"""
@@ -376,15 +517,20 @@ class StatusSchemaQueryResponse:
     Response for Get status schemas
     """
 
-    count: Optional[int] = None
+    count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of records returned"""
-    cursor: Optional[str] = None
+    cursor: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Cursor used for pagination"""
-    items: Optional[List[StatusSchema]] = None
+    items: Optional[
+        List[StatusSchema | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of status schema objects in the response"""
-    limit: Optional[int] = None
+    limit: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number to limit records"""
-    meta: Optional[Meta] = None
+    meta: Optional[Meta | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -393,36 +539,45 @@ class StatusSchema:
     Response for Get status schema
     """
 
-    created_at: Optional[str] = field(
+    created_at: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdAt"},
     )
     """Date string of created date"""
-    creator_id: Optional[str] = field(
+    creator_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "creatorId"},
     )
     """User ID of creator"""
-    id: Optional[str] = None
-    is_default: Optional[bool] = field(
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    is_default: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isDefault"},
     )
     """Indicator on if the status schema is the default schema"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of status schema"""
-    space_id: Optional[str] = field(
+    space_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "spaceId"},
     )
-    steps: Optional[List[str]] = None
+    steps: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """List of steps and their values"""
-    transitions: Optional[List[List[int]]] = None
+    transitions: Optional[List[List[int]]] = dataclass_field(default=None, kw_only=True)
     """List of transition rules"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    """Node type the status schema can be used for"""
-    updated_at: Optional[str] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    """Node type the status schema can be used for"""
+    updated_at: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "updatedAt"},
     )
     """Date the status schema was last updated"""
@@ -434,15 +589,20 @@ class PlannerTaskQueryResponse:
     Response for Get tasks
     """
 
-    count: Optional[int] = None
+    count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of records returned"""
-    cursor: Optional[str] = None
+    cursor: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Cursor used for pagination"""
-    items: Optional[List[PlannerTask]] = None
+    items: Optional[
+        List[PlannerTask | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of task objects in the response"""
-    limit: Optional[int] = None
+    limit: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number to limit records"""
-    meta: Optional[Meta] = None
+    meta: Optional[Meta | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -451,136 +611,176 @@ class PlannerTask:
     Response for Create task
     """
 
-    actual_duration: Optional[int] = field(
+    actual_duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "actualDuration"},
     )
     """Calculated actual duration in days"""
-    actual_end_date: Optional[str] = field(
+    actual_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "actualEndDate"},
     )
     """Date when work on the task was completed"""
-    actual_start_date: Optional[str] = field(
+    actual_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "actualStartDate"},
     )
     """Date when work on the task started"""
-    assignee_id: Optional[str] = field(
+    assignee_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assigneeId"},
     )
     """User ID of assignee"""
-    assigner_id: Optional[str] = field(
+    assigner_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assignerId"},
     )
     """User ID of the last user to add an assignee"""
-    associations: Optional[List[Association]] = None
-    """List of associations on a task"""
-    copy_from: Optional[str] = field(
+    associations: Optional[
+        List[Association | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of associations on a task"""
+    copy_from: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "copyFrom"},
     )
     """Task ID that task was copied from"""
-    created_at: Optional[str] = field(
+    created_at: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdAt"},
     )
     """Date the task was created"""
-    creator_id: Optional[str] = field(
+    creator_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "creatorId"},
     )
     """User ID of creator"""
-    custom_properties: Optional[List[CustomPropertyValues]] = field(
+    custom_properties: Optional[
+        List[CustomPropertyValues | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customProperties"},
     )
     """List of custom properties on a task"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of task"""
-    followers: Optional[List[Follower]] = None
-    """List of followers on a task"""
-    id: Optional[str] = None
-    is_template: Optional[bool] = field(
+    followers: Optional[
+        List[Follower | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of followers on a task"""
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    is_template: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "isTemplate"},
     )
     """Indicates if a task is part of a template"""
-    max_rank: Optional[str] = field(
+    max_rank: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "maxRank"},
     )
     """Maximum rank"""
-    min_rank: Optional[str] = field(
+    min_rank: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "minRank"},
     )
     """Minimum rank"""
-    parent_id: Optional[str] = field(
+    parent_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parentId"},
     )
     """Task ID of parent if task is a subtask"""
-    planned_duration: Optional[int] = field(
+    planned_duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedDuration"},
     )
     """Planned duration in days"""
-    planned_end_date: Optional[str] = field(
+    planned_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedEndDate"},
     )
     """Date string of planned end date (due date)"""
-    planned_start_date: Optional[str] = field(
+    planned_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedStartDate"},
     )
     """Date string of planned start date"""
-    priority: Optional[str] = None
+    priority: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Priority value"""
-    project_id: Optional[str] = field(
+    project_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "projectId"},
     )
     """Project ID the task belongs to"""
-    rank: Optional[str] = None
+    rank: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Rank of task in a task list"""
-    space_id: Optional[str] = field(
+    space_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "spaceId"},
     )
-    status_schema_id: Optional[str] = field(
+    status_schema_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "statusSchemaId"},
     )
-    step_id: Optional[int] = field(
+    step_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "stepId"},
     )
     """Id of step in status schema"""
-    sub_task_ids: Optional[List[str]] = field(
+    sub_task_ids: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "subTaskIds"},
     )
     """List of subtask IDs"""
-    sub_tasks: Optional[List[PlannerSubTask]] = field(
+    sub_tasks: Optional[List[PlannerSubTask | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "subTasks"},
     )
     """List of subtasks on the task"""
-    template_id: Optional[str] = field(
+    template_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "templateId"},
     )
     """Template ID of the template the task belongs to"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of task"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    """Type of task"""
-    updated_at: Optional[str] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    """Type of task"""
+    updated_at: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "updatedAt"},
     )
     """Date the task was last updated"""
@@ -592,32 +792,37 @@ class Association:
     Definition: Association
     """
 
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of association"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of association"""
-    node_guid: Optional[str] = field(
+    node_guid: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nodeGuid"},
     )
     """Longer GUID format"""
-    node_id: Optional[str] = field(
+    node_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nodeId"},
     )
     """Node ID"""
-    node_type: Optional[str] = field(
+    node_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nodeType"},
     )
     """Node type of the association"""
-    space_guid: Optional[str] = field(
+    space_guid: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "spaceGuid"},
     )
     """Longer GUID format"""
-    space_id: Optional[str] = field(
+    space_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "spaceId"},
     )
     """Space ID"""
@@ -629,18 +834,21 @@ class AssociationReq:
     Definition: AssociationReq
     """
 
-    node_id: Optional[str] = field(
+    node_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nodeId"},
     )
     """Node ID"""
-    node_type: Optional[str] = field(
+    node_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nodeType"},
     )
     """Node type of the association"""
-    space_id: Optional[str] = field(
+    space_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "spaceId"},
     )
     """Space ID"""
@@ -652,60 +860,71 @@ class ContentRef:
     Definition: ContentRef
     """
 
-    content_id: Optional[str] = field(
+    content_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentId"},
     )
     """Content ID"""
-    doc_center_full_path: Optional[str] = field(
+    doc_center_full_path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "docCenterFullPath"},
     )
     """Full location path of where content exists in DocCenter"""
-    major_version: Optional[int] = field(
+    major_version: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "majorVersion"},
     )
     """Number of major version"""
-    minor_version: Optional[int] = field(
+    minor_version: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "minorVersion"},
     )
     """Number of minor version"""
-    modified_date: Optional[str] = field(
+    modified_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "modifiedDate"},
     )
     """Date the content reference was last updated"""
-    order_no: Optional[int] = field(
+    order_no: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "orderNo"},
     )
     """Number to indicate order"""
-    profile_id: Optional[str] = field(
+    profile_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "profileId"},
     )
     """Profile ID"""
-    profile_version_id: Optional[str] = field(
+    profile_version_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "profileVersionId"},
     )
     """Version ID of profile"""
-    source: Optional[str] = None
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Source of content"""
-    team_site_id: Optional[str] = field(
+    team_site_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "teamSiteId"},
     )
     """TeamSite ID"""
-    thumbnail_id: Optional[str] = field(
+    thumbnail_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "thumbnailId"},
     )
     """ID for image thumbnail"""
-    version_id: Optional[str] = field(
+    version_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "versionId"},
     )
     """Version ID of content"""
@@ -717,22 +936,26 @@ class CreateCommentModel:
     Definition: CreateCommentModel
     """
 
-    annotation_payload: Optional[str] = field(
+    annotation_payload: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "annotationPayload"},
     )
-    annotation_type: Optional[str] = field(
+    annotation_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "annotationType"},
     )
     """Annotation type"""
-    comment_content: Optional[str] = field(
+    comment_content: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "commentContent"},
     )
     """Content of the comment"""
-    is_resolved: Optional[bool] = field(
+    is_resolved: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isResolved"},
     )
     """True/false on whether the comment is resolved"""
@@ -744,36 +967,48 @@ class CreateProject:
     Definition: CreateProject
     """
 
-    associations: Optional[List[AssociationReq]] = None
-    """List of association objects"""
-    custom_properties: Optional[List[CustomPropertyValuesInput]] = field(
+    associations: Optional[
+        List[AssociationReq | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of association objects"""
+    custom_properties: Optional[
+        List[CustomPropertyValuesInput | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "customProperties"},
     )
     """List of custom properties"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of description"""
-    manager_id: Optional[str] = field(
+    manager_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerId"},
     )
     """User ID of manager"""
-    planned_duration: Optional[int] = field(
+    planned_duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedDuration"},
     )
     """Planned duration in days"""
-    planned_end_date: Optional[str] = field(
+    planned_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedEndDate"},
     )
     """Date string of end date"""
-    planned_start_date: Optional[str] = field(
+    planned_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedStartDate"},
     )
     """Date string of start date"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of project"""
 
 
@@ -783,55 +1018,71 @@ class CreateRequest:
     Definition: CreateRequest
     """
 
-    assignee_id: Optional[str] = field(
+    assignee_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assigneeId"},
     )
     """User ID of assignee"""
-    associations: Optional[List[AssociationReq]] = None
-    """List of associations (Library content)"""
-    content_refs: Optional[List[ContentRef]] = field(
+    associations: Optional[
+        List[AssociationReq | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of associations (Library content)"""
+    content_refs: Optional[List[ContentRef | Mapping[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "contentRefs"},
     )
     """List of content references (DocCenter and Workspace associations)"""
-    custom_properties: Optional[List[CustomPropertyValuesInput]] = field(
+    custom_properties: Optional[
+        List[CustomPropertyValuesInput | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customProperties"},
     )
     """List of custom properties"""
-    form_ref: Optional[Any] = field(
+    form_ref: Optional[Any] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "formRef"},
     )
     """Form reference object"""
-    planned_duration: Optional[int] = field(
+    planned_duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedDuration"},
     )
     """Planned duration in days"""
-    planned_end_date: Optional[str] = field(
+    planned_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedEndDate"},
     )
     """Date string of end date"""
-    planned_start_date: Optional[str] = field(
+    planned_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedStartDate"},
     )
     """Date string of start date"""
-    priority: Optional[str] = None
+    priority: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Priority value"""
-    project_id: Optional[str] = field(
+    project_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "projectId"},
     )
     """ID of project the request belongs to"""
-    status_schema_id: Optional[str] = field(
+    status_schema_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "statusSchemaId"},
     )
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of request"""
 
 
@@ -841,48 +1092,62 @@ class CreateTask:
     Definition: CreateTask
     """
 
-    assignee_id: Optional[str] = field(
+    assignee_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assigneeId"},
     )
     """User ID of assignee"""
-    associations: Optional[List[AssociationReq]] = None
-    """List of associations (Library content)"""
-    custom_properties: Optional[List[CustomPropertyValuesInput]] = field(
+    associations: Optional[
+        List[AssociationReq | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of associations (Library content)"""
+    custom_properties: Optional[
+        List[CustomPropertyValuesInput | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "customProperties"},
     )
     """List of custom properties"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of task"""
-    parent_id: Optional[str] = field(
+    parent_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parentId"},
     )
     """Task ID of parent"""
-    planned_duration: Optional[int] = field(
+    planned_duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedDuration"},
     )
     """Planned duration in days"""
-    planned_end_date: Optional[str] = field(
+    planned_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedEndDate"},
     )
     """Date string of end date"""
-    planned_start_date: Optional[str] = field(
+    planned_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedStartDate"},
     )
     """Date string of start date"""
-    priority: Optional[str] = None
+    priority: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Priority values"""
-    project_id: Optional[str] = field(
+    project_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "projectId"},
     )
     """ID of project the task is associated with"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of task"""
 
 
@@ -892,73 +1157,88 @@ class CustomProperty:
     Definition: CustomProperty
     """
 
-    allow_multiple_values: Optional[bool] = field(
+    allow_multiple_values: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowMultipleValues"},
     )
     """Indicates if custom property allows for multiple values"""
-    created_by_id: Optional[str] = field(
+    created_by_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdById"},
     )
     """User ID of the creator"""
-    has_domain_of_values: Optional[bool] = field(
+    has_domain_of_values: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "hasDomainOfValues"},
     )
     """Indicates if custom property has possible values"""
-    hint: Optional[str] = None
+    hint: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Value that describes the hint displayed under the custom property name
     """
-    id: Optional[str] = None
-    is_required: Optional[bool] = field(
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    is_required: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isRequired"},
     )
     """Indicates whether the custom property is required or not"""
-    last_modified_by_id: Optional[str] = field(
+    last_modified_by_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedById"},
     )
     """User ID of the user that last updated the custom property"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of custom property"""
-    operation_setting: Optional[str] = field(
+    operation_setting: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "operationSetting"},
     )
     """
     Object that describes settings for different operations on a custom
     property
     """
-    order: Optional[int] = None
+    order: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number indicating order within custom property list"""
-    possible_values: Optional[List[PossibleValuesItem]] = field(
+    possible_values: Optional[List[PossibleValuesItem | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "possibleValues"},
     )
     """List of possible values for the custom property (if applicable)"""
-    scope_settings: Optional[List[ScopeSettingsItemDefinition]] = field(
+    scope_settings: Optional[
+        List[ScopeSettingsItemDefinition | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "scopeSettings"},
     )
     """
     Object that describes settings for different scopes on a custom property
     """
-    scopes: Optional[List[str]] = None
+    scopes: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """List of scopes"""
-    value_schema_name: Optional[str] = field(
+    value_schema_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "valueSchemaName"},
     )
     """Name of custom property value schema"""
-    value_schema_property: Optional[ValueSchemaPropertyDefinition] = field(
+    value_schema_property: Optional[
+        ValueSchemaPropertyDefinition | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "valueSchemaProperty"},
     )
-    value_type: Optional[str] = field(
+    value_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "valueType"},
     )
     """Type of custom property value"""
@@ -970,7 +1250,7 @@ class CustomPropertyDataDisplay:
     Definition: CustomPropertyDataDisplay
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of custom property"""
 
 
@@ -980,17 +1260,28 @@ class CustomPropertyValues:
     Definition: CustomPropertyValues
     """
 
-    id: Optional[str] = None
-    localizations: Optional[Dict[str, CustomPropertyDataDisplay]] = None
-    """Localization object"""
-    multiple_value: Optional[bool] = field(
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    localizations: Optional[
+        Dict[str, CustomPropertyDataDisplay | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """Localization object"""
+    multiple_value: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "multipleValue"},
     )
     """Indicate if the custom property allows multiple values"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of custom property"""
-    values: Optional[List[CustomPropertyValuesValues]] = None
+    values: Optional[
+        List[CustomPropertyValuesValues | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of custom property values"""
 
 
@@ -1000,8 +1291,13 @@ class CustomPropertyValuesInput:
     Definition: CustomPropertyValuesInput
     """
 
-    id: Optional[str] = None
-    values: Optional[List[CustomPropertyValuesValues]] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    values: Optional[
+        List[CustomPropertyValuesValues | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of custom property values"""
 
 
@@ -1011,8 +1307,8 @@ class CustomPropertyValuesValues:
     Definition: CustomPropertyValuesValues
     """
 
-    id: Optional[str] = None
-    value: Optional[Any] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    value: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """Value data for custom property value"""
 
 
@@ -1022,7 +1318,7 @@ class DeleteRequest:
     Definition: DeleteRequest
     """
 
-    ids: Optional[List[str]] = None
+    ids: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """List of Request IDs to delete"""
 
 
@@ -1032,9 +1328,13 @@ class Follower:
     Definition: Follower
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User/User group ID of follower"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """Either user or user group follower type"""
 
 
@@ -1044,9 +1344,14 @@ class Meta:
     Definition: Meta
     """
 
-    count: Optional[int] = None
+    count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of records returned"""
-    query: Optional[List[MetaQueryInfo]] = None
+    query: Optional[
+        List[MetaQueryInfo | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Query object"""
 
 
@@ -1056,7 +1361,7 @@ class MetaQueryInfo:
     Definition: MetaQueryInfo
     """
 
-    sort: Optional[List[str]] = None
+    sort: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Sort query"""
 
 
@@ -1066,126 +1371,164 @@ class PlannerSubTask:
     Definition: PlannerSubTask
     """
 
-    actual_duration: Optional[int] = field(
+    actual_duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "actualDuration"},
     )
     """Calculated actual duration in days"""
-    actual_end_date: Optional[str] = field(
+    actual_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "actualEndDate"},
     )
     """Date when work on the task was completed"""
-    actual_start_date: Optional[str] = field(
+    actual_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "actualStartDate"},
     )
     """Date when work on the task started"""
-    assignee_id: Optional[str] = field(
+    assignee_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assigneeId"},
     )
     """User ID of assignee"""
-    assigner_id: Optional[str] = field(
+    assigner_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assignerId"},
     )
     """User ID of the last user to add an assignee"""
-    associations: Optional[List[Association]] = None
-    """List of associations on a task"""
-    copy_from: Optional[str] = field(
+    associations: Optional[
+        List[Association | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of associations on a task"""
+    copy_from: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "copyFrom"},
     )
     """Task ID that task was copied from"""
-    created_at: Optional[str] = field(
+    created_at: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdAt"},
     )
     """Date the task was created"""
-    creator_id: Optional[str] = field(
+    creator_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "creatorId"},
     )
     """User ID of creator"""
-    custom_properties: Optional[List[CustomPropertyValues]] = field(
+    custom_properties: Optional[
+        List[CustomPropertyValues | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customProperties"},
     )
     """List of custom properties on a task"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of task"""
-    followers: Optional[List[Follower]] = None
-    """List of followers on a task"""
-    id: Optional[str] = None
-    is_template: Optional[bool] = field(
+    followers: Optional[
+        List[Follower | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of followers on a task"""
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    is_template: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "isTemplate"},
     )
     """Indicates if a task is part of a template"""
-    max_rank: Optional[str] = field(
+    max_rank: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "maxRank"},
     )
     """Maximum rank"""
-    min_rank: Optional[str] = field(
+    min_rank: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "minRank"},
     )
     """Minimum rank"""
-    parent_id: Optional[str] = field(
+    parent_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parentId"},
     )
     """Task ID of parent if task is a subtask"""
-    planned_duration: Optional[int] = field(
+    planned_duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedDuration"},
     )
     """Planned duration in days"""
-    planned_end_date: Optional[str] = field(
+    planned_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedEndDate"},
     )
     """Date string of end date (due date)"""
-    planned_start_date: Optional[str] = field(
+    planned_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedStartDate"},
     )
     """Date string of start date"""
-    priority: Optional[str] = None
+    priority: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Priority value"""
-    project_id: Optional[str] = field(
+    project_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "projectId"},
     )
     """Project ID the task belongs to"""
-    rank: Optional[str] = None
+    rank: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Rank of task in a task list"""
-    space_id: Optional[str] = field(
+    space_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "spaceId"},
     )
-    status_schema_id: Optional[str] = field(
+    status_schema_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "statusSchemaId"},
     )
-    step_id: Optional[int] = field(
+    step_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "stepId"},
     )
     """Id of step in status schema"""
-    template_id: Optional[str] = field(
+    template_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "templateId"},
     )
     """Template ID of the template the task belongs to"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of task"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    """Type of task"""
-    updated_at: Optional[str] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    """Type of task"""
+    updated_at: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "updatedAt"},
     )
     """Date the task was last updated"""
@@ -1197,10 +1540,10 @@ class PossibleValuesItem:
     Definition: PossibleValuesItem
     """
 
-    id: Optional[str] = None
-    order: Optional[int] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    order: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number to indicate order"""
-    value: Optional[Any] = None
+    value: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """Actual value data"""
 
 
@@ -1210,11 +1553,15 @@ class ProblemDetails:
     Definition: ProblemDetails
     """
 
-    detail: Optional[str] = None
-    instance: Optional[str] = None
-    status: Optional[int] = None
-    title: Optional[str] = None
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    detail: Optional[str] = dataclass_field(default=None, kw_only=True)
+    instance: Optional[str] = dataclass_field(default=None, kw_only=True)
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
 
 
 @dataclass
@@ -1223,17 +1570,20 @@ class ProjectAssociatedNodes:
     Definition: ProjectAssociatedNodes
     """
 
-    node_id: Optional[str] = field(
+    node_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nodeId"},
     )
-    node_type: Optional[str] = field(
+    node_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nodeType"},
     )
     """Node type of the association"""
-    space_id: Optional[str] = field(
+    space_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "spaceId"},
     )
 
@@ -1244,13 +1594,15 @@ class RequestFormCustomProperties:
     Definition: RequestFormCustomProperties
     """
 
-    created_at: Optional[str] = field(
+    created_at: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdAt"},
     )
     """Date string of created date"""
-    custom_properties: Optional[List[CustomProperty]] = field(
+    custom_properties: Optional[List[CustomProperty | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customProperties"},
     )
     """List of custom properties"""
@@ -1262,12 +1614,13 @@ class ScopeSettingsItemDefinition:
     Definition: ScopeSettingsItemDefinition
     """
 
-    is_required: Optional[bool] = field(
+    is_required: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isRequired"},
     )
     """Indicator on whether a field is required or not"""
-    scope: Optional[str] = None
+    scope: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Type list of node types that the custom property definition belongs to
     """
@@ -1279,21 +1632,25 @@ class UpdateCommentModel:
     Definition: UpdateCommentModel
     """
 
-    annotation_payload: Optional[str] = field(
+    annotation_payload: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "annotationPayload"},
     )
-    annotation_type: Optional[str] = field(
+    annotation_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "annotationType"},
     )
-    comment_content: Optional[str] = field(
+    comment_content: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "commentContent"},
     )
     """Content of the comment"""
-    is_resolved: Optional[bool] = field(
+    is_resolved: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isResolved"},
     )
     """True/false on whether the comment is resolved"""
@@ -1305,49 +1662,59 @@ class UpdateProject:
     Definition: UpdateProject
     """
 
-    custom_properties: Optional[List[CustomPropertyValues]] = field(
+    custom_properties: Optional[
+        List[CustomPropertyValues | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customProperties"},
     )
     """List of custom properties"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of project"""
-    is_active: Optional[bool] = field(
+    is_active: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isActive"},
     )
     """Indicator on whether a project is active?"""
-    manager_id: Optional[str] = field(
+    manager_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerId"},
     )
     """User ID of project manager"""
-    max_rank: Optional[str] = field(
+    max_rank: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "maxRank"},
     )
     """Maximum rank number"""
-    min_rank: Optional[str] = field(
+    min_rank: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "minRank"},
     )
     """Minimum rank number"""
-    planned_duration: Optional[int] = field(
+    planned_duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedDuration"},
     )
     """Planned duration in days"""
-    planned_end_date: Optional[str] = field(
+    planned_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedEndDate"},
     )
     """Date string of planned end date"""
-    planned_start_date: Optional[str] = field(
+    planned_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedStartDate"},
     )
     """Date string of planned start date"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of project"""
 
 
@@ -1357,56 +1724,67 @@ class UpdateRequest:
     Definition: UpdateRequest
     """
 
-    assignee_id: Optional[str] = field(
+    assignee_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assigneeId"},
     )
     """User ID of the assignee"""
-    content_refs: Optional[List[ContentRef]] = field(
+    content_refs: Optional[List[ContentRef | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentRefs"},
     )
     """List of content references (WorkSpace and DocCenter content)"""
-    custom_properties: Optional[List[CustomPropertyValuesInput]] = field(
+    custom_properties: Optional[
+        List[CustomPropertyValuesInput | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customProperties"},
     )
     """List of custom properties"""
-    form_ref: Optional[Any] = field(
+    form_ref: Optional[Any] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "formRef"},
     )
     """Form reference object"""
-    note: Optional[str] = None
+    note: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Note used for notifications on status changes"""
-    planned_duration: Optional[int] = field(
+    planned_duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedDuration"},
     )
     """Planned duration in days"""
-    planned_end_date: Optional[str] = field(
+    planned_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedEndDate"},
     )
     """Date string of planned end date (due date)"""
-    planned_start_date: Optional[str] = field(
+    planned_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedStartDate"},
     )
     """Date string of planned start date"""
-    priority: Optional[str] = None
+    priority: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Priority value"""
-    project_id: Optional[str] = field(
+    project_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "projectId"},
     )
     """Project ID of the project the request belongs to"""
-    step_id: Optional[int] = field(
+    step_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "stepId"},
     )
     """Step ID indicating status"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of the request"""
 
 
@@ -1416,51 +1794,61 @@ class UpdateTask:
     Definition: UpdateTask
     """
 
-    assignee_id: Optional[str] = field(
+    assignee_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assigneeId"},
     )
     """User ID of the assignee"""
-    custom_properties: Optional[List[CustomPropertyValuesInput]] = field(
+    custom_properties: Optional[
+        List[CustomPropertyValuesInput | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customProperties"},
     )
     """List of custom properties"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of task"""
-    parent_id: Optional[str] = field(
+    parent_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parentId"},
     )
     """Task ID of parent task"""
-    planned_duration: Optional[int] = field(
+    planned_duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedDuration"},
     )
     """Planned duration in days"""
-    planned_end_date: Optional[str] = field(
+    planned_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedEndDate"},
     )
     """Date string of planned end date"""
-    planned_start_date: Optional[str] = field(
+    planned_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedStartDate"},
     )
     """Date string of planned start date"""
-    priority: Optional[str] = None
+    priority: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Priority value"""
-    project_id: Optional[str] = field(
+    project_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "projectId"},
     )
     """Project ID that the task belongs to"""
-    step_id: Optional[int] = field(
+    step_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "stepId"},
     )
     """Step ID indicating the task status"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of task"""
 
 
@@ -1470,8 +1858,8 @@ class ValueSchemaPropertyDefinition:
     Definition: ValueSchemaPropertyDefinition
     """
 
-    max: Optional[str] = None
-    min: Optional[str] = None
+    max: Optional[str] = dataclass_field(default=None, kw_only=True)
+    min: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 # Client Class
@@ -1485,7 +1873,7 @@ class SeismicplannerClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -1502,8 +1890,8 @@ class SeismicplannerClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -1524,7 +1912,7 @@ class SeismicplannerClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -1539,25 +1927,125 @@ class SeismicplannerClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "seismicplanner"
 
-    async def get_comments_async(
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
+            if next_link.startswith("?"):
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
+
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
+    def list_comments(
         self,
         space_id: str,
         node_id: str,
+        *,
         creator_ids: Optional[List[str]] = None,
         cursor: Optional[str] = None,
         limit: Optional[int] = None,
         sort: Optional[List[str]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get comments
 
         Get all comments for a given project, task, or request. Requires node
         (project, task, or request) ID.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetComments`.
+
+        Args:
+            space_id: Space ID.
+            node_id: Node ID.
+            creator_ids: List of user IDs to query by creator.
+            cursor: Cursor used for pagination.
+            limit: Number to limit records.
+            sort: Sort by query.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1613,31 +2101,52 @@ class SeismicplannerClient(ConnectorClientBase):
                 query_params.append(f"sort={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def create_comment_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("items", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def create_comment(
         self,
-        input: CreateCommentModel,
+        input: CreateCommentModel | Mapping[str, Any],
         space_id: str,
         node_id: str,
         *,
@@ -1651,6 +2160,24 @@ class SeismicplannerClient(ConnectorClientBase):
 
         Create a comment on a given project, task, or request. Requires node
         (project, task, or request) ID.
+
+        Swagger operation ID: `CreateComment`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            space_id: Space ID.
+            node_id: Node ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1663,7 +2190,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/comments"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1677,6 +2204,7 @@ class SeismicplannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1684,7 +2212,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_comment_async(
+    async def get_comment(
         self,
         space_id: str,
         node_id: str,
@@ -1700,6 +2228,23 @@ class SeismicplannerClient(ConnectorClientBase):
 
         Get a single comment. Requires node (project, task, or request) and
         comment ID.
+
+        Swagger operation ID: `GetComment`.
+
+        Args:
+            space_id: Space ID.
+            node_id: Node ID.
+            comment_id: Comment ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1713,7 +2258,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/{quote(str(comment_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1727,6 +2272,7 @@ class SeismicplannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1734,7 +2280,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_comment_async(
+    async def delete_comment(
         self,
         space_id: str,
         node_id: str,
@@ -1750,6 +2296,23 @@ class SeismicplannerClient(ConnectorClientBase):
 
         Delete a comment. Requires node (project, task, or request) and comment
         ID.
+
+        Swagger operation ID: `DeleteComment`.
+
+        Args:
+            space_id: Space ID.
+            node_id: Node ID.
+            comment_id: Comment ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1763,7 +2326,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/{quote(str(comment_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1777,11 +2340,12 @@ class SeismicplannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def update_comment_async(
+    async def update_comment(
         self,
-        input: UpdateCommentModel,
+        input: UpdateCommentModel | Mapping[str, Any],
         space_id: str,
         node_id: str,
         comment_id: str,
@@ -1796,6 +2360,25 @@ class SeismicplannerClient(ConnectorClientBase):
 
         Update an existing comment. Requires node (project, task, or request)
         and comment ID.
+
+        Swagger operation ID: `UpdateComment`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            space_id: Space ID.
+            node_id: Node ID.
+            comment_id: Comment ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1809,7 +2392,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/{quote(str(comment_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1823,6 +2406,7 @@ class SeismicplannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1830,9 +2414,10 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_projects_async(
+    def list_projects(
         self,
         space_id: str,
+        *,
         planned_end_date_from: Optional[str] = None,
         planned_end_date_to: Optional[str] = None,
         planned_start_date_from: Optional[str] = None,
@@ -1848,16 +2433,49 @@ class SeismicplannerClient(ConnectorClientBase):
         custom_properties: Optional[str] = None,
         follower_ids: Optional[List[str]] = None,
         include_associations: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get projects
 
         Get a list of projects with their attributes and associations.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetProjects`.
+
+        Args:
+            space_id: Space ID.
+            planned_end_date_from: Filter from a planned end date.
+            planned_end_date_to: Filter to a planned end date.
+            planned_start_date_from: Filter from a planned start date.
+            planned_start_date_to: Filter to a planned start date.
+            ids: List of project IDs to query by.
+            title: Project title to query by.
+            manager_ids: List of user IDs to query by manager.
+            creator_ids: List of user IDs to query by creator.
+            associated_node_ids: List of association IDs to query by.
+            cursor: Cursor used for pagination.
+            limit: Number to limit records returned.
+            sort: Sort query.
+            custom_properties: List of custom properties to query by.
+            follower_ids: List of user IDs to query by follower.
+            include_associations: Indicator to allow for inclusion of
+                association data.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2002,34 +2620,55 @@ class SeismicplannerClient(ConnectorClientBase):
             query_params.append(f"includeAssociations={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def delete_projects_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("items", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def delete_projects(
         self,
         space_id: str,
         ids: List[str],
-        delete_tasks: Optional[bool] = None,
         *,
+        delete_tasks: Optional[bool] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2039,6 +2678,23 @@ class SeismicplannerClient(ConnectorClientBase):
         Delete projects
 
         Delete one or more projects.
+
+        Swagger operation ID: `DeleteProjects`.
+
+        Args:
+            space_id: Space ID.
+            ids: List of project IDs.
+            delete_tasks: Also delete associated tasks.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2068,7 +2724,7 @@ class SeismicplannerClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2082,6 +2738,7 @@ class SeismicplannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2089,9 +2746,9 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_project_async(
+    async def create_project(
         self,
-        input: CreateProject,
+        input: CreateProject | Mapping[str, Any],
         space_id: str,
         *,
         timeout: Optional[float] = None,
@@ -2103,13 +2760,30 @@ class SeismicplannerClient(ConnectorClientBase):
         Create project
 
         Create a project.
+
+        Swagger operation ID: `CreateProject`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            space_id: Space ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/planner/v2/spaces/{quote(str(space_id), safe='')}/projects"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2123,6 +2797,7 @@ class SeismicplannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2130,13 +2805,13 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_project_async(
+    async def get_project(
         self,
         space_id: str,
         project_id: str,
+        *,
         associated_nodes_depth: Optional[int] = None,
         include_works: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2146,6 +2821,25 @@ class SeismicplannerClient(ConnectorClientBase):
         Get project
 
         Get a single project by ID. Return tasks if desired.
+
+        Swagger operation ID: `GetProject`.
+
+        Args:
+            space_id: Space ID.
+            project_id: Project ID.
+            associated_nodes_depth: Number to indicate depth of associated node
+                data returned.
+            include_works: Indicator to include associated tasks data.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2170,7 +2864,7 @@ class SeismicplannerClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2184,6 +2878,7 @@ class SeismicplannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2191,12 +2886,12 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_project_async(
+    async def delete_project(
         self,
         space_id: str,
         project_id: str,
-        delete_tasks: Optional[bool] = None,
         *,
+        delete_tasks: Optional[bool] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2206,6 +2901,23 @@ class SeismicplannerClient(ConnectorClientBase):
         Delete project
 
         Delete a project.
+
+        Swagger operation ID: `DeleteProject`.
+
+        Args:
+            space_id: Space ID.
+            project_id: Project ID.
+            delete_tasks: Also delete associated tasks.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2225,7 +2937,7 @@ class SeismicplannerClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2239,6 +2951,7 @@ class SeismicplannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2246,9 +2959,9 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_project_async(
+    async def update_project(
         self,
-        input: UpdateProject,
+        input: UpdateProject | Mapping[str, Any],
         space_id: str,
         project_id: str,
         *,
@@ -2261,6 +2974,24 @@ class SeismicplannerClient(ConnectorClientBase):
         Update a project
 
         Update and return a project.
+
+        Swagger operation ID: `UpdateProject`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            space_id: Space ID.
+            project_id: Project ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2272,7 +3003,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/{quote(str(project_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2286,6 +3017,7 @@ class SeismicplannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2293,9 +3025,10 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_requests_async(
+    def list_requests(
         self,
         space_id: str,
+        *,
         planned_end_date_from: Optional[str] = None,
         planned_end_date_to: Optional[str] = None,
         planned_start_date_from: Optional[str] = None,
@@ -2323,16 +3056,62 @@ class SeismicplannerClient(ConnectorClientBase):
         associated_node_ids: Optional[List[str]] = None,
         content_refs: Optional[List[str]] = None,
         include_request_form_custom_properties: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get requests
 
         Get a list of requests.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetRequests`.
+
+        Args:
+            space_id: Space ID.
+            planned_end_date_from: filter by request due date (inclusive).
+            planned_end_date_to: filter by request due date (exclusive).
+            planned_start_date_from: filter by request start date (inclusive).
+            planned_start_date_to: filter by request start date (exclusive).
+            created_at_from: filter by request created date (inclusive).
+            created_at_to: filter by request created date (exclusive).
+            updated_at_from: filter by request updated date (inclusive).
+            updated_at_to: filter by request updated date (exclusive).
+            ids: A list of request IDs.
+            title: Keyword values to search for on request titles.
+            assignee_ids: A list of assignees' user IDs to filter by.
+            priorities: A list of priority values, Available values : critical,
+                high, medium, low.
+            keywords: Keyword values to search.
+            assigner_ids: A list of assigner' user Ids to filter by.
+            creator_ids: A list of creators' user IDs to filter by.
+            step_ids: A list of step IDs to filter by.
+            status_schema_id: Status schema ID to filter by.
+            cursor: A token used to guide the next page window.
+            limit: Number of items to return per page, default: 50.
+            sort: Sort by requests.
+            project_id: The project ID a request is associated to.
+            has_project: Filter by if requests are associated with a project.
+            custom_properties: Filter by custom properties.
+            follower_ids: A list of followers' user id.
+            associated_node_ids: A list of Associated node IDs to filter by.
+            content_refs: List of content reference objects.
+            include_request_form_custom_properties: whether to include request
+                form custom properties, default false.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2577,31 +3356,52 @@ class SeismicplannerClient(ConnectorClientBase):
             query_params.append(f"includeRequestFormCustomProperties={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def delete_requests_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("items", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def delete_requests(
         self,
-        input: DeleteRequest,
+        input: DeleteRequest | Mapping[str, Any],
         space_id: str,
         *,
         timeout: Optional[float] = None,
@@ -2613,13 +3413,30 @@ class SeismicplannerClient(ConnectorClientBase):
         Delete requests
 
         Bulk delete requests.
+
+        Swagger operation ID: `DeleteRequests`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            space_id: Space ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/planner/v2/spaces/{quote(str(space_id), safe='')}/requests"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2633,6 +3450,7 @@ class SeismicplannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2640,9 +3458,9 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_request_async(
+    async def create_request(
         self,
-        input: CreateRequest,
+        input: CreateRequest | Mapping[str, Any],
         space_id: str,
         *,
         timeout: Optional[float] = None,
@@ -2654,13 +3472,30 @@ class SeismicplannerClient(ConnectorClientBase):
         Create request
 
         Create a request.
+
+        Swagger operation ID: `CreateRequest`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            space_id: Space ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/planner/v2/spaces/{quote(str(space_id), safe='')}/requests"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2674,6 +3509,7 @@ class SeismicplannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2681,7 +3517,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_request_async(
+    async def get_request(
         self,
         space_id: str,
         request_id: str,
@@ -2695,6 +3531,22 @@ class SeismicplannerClient(ConnectorClientBase):
         Get request
 
         Get a single request.
+
+        Swagger operation ID: `GetRequest`.
+
+        Args:
+            space_id: Space ID.
+            request_id: Request ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2706,7 +3558,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/{quote(str(request_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2720,6 +3572,7 @@ class SeismicplannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2727,7 +3580,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_request_async(
+    async def delete_request(
         self,
         space_id: str,
         request_id: str,
@@ -2741,6 +3594,22 @@ class SeismicplannerClient(ConnectorClientBase):
         Delete request
 
         Delete a request.
+
+        Swagger operation ID: `DeleteRequest`.
+
+        Args:
+            space_id: Space ID.
+            request_id: Request ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2752,7 +3621,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/{quote(str(request_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2766,11 +3635,12 @@ class SeismicplannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def update_request_async(
+    async def update_request(
         self,
-        input: UpdateRequest,
+        input: UpdateRequest | Mapping[str, Any],
         space_id: str,
         request_id: str,
         *,
@@ -2783,6 +3653,24 @@ class SeismicplannerClient(ConnectorClientBase):
         Update request
 
         Update a request.
+
+        Swagger operation ID: `UpdateRequest`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            space_id: Space ID.
+            request_id: Request ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2794,7 +3682,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/{quote(str(request_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2808,6 +3696,7 @@ class SeismicplannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2815,27 +3704,51 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_status_schemas_async(
+    def list_status_schemas(
         self,
         space_id: str,
+        *,
         is_default: Optional[bool] = None,
         type_: Optional[str] = None,
         ids: Optional[List[str]] = None,
         creator_ids: Optional[List[str]] = None,
         cursor: Optional[str] = None,
         limit: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get status schemas
 
         Get a list of task/request status schemas. These schemas hold the data
         for set statuses for specific work. Example: `(Not started, In
         progress, Complete)`
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetStatusSchemas`.
+
+        Args:
+            space_id: Space ID.
+            is_default: Get default status schema.
+            type_: Query by node type.
+            ids: List of status schemas IDs.
+            creator_ids: List of user IDs to query by creator.
+            cursor: Cursor used for pagination.
+            limit: Number to limit returned records.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2895,29 +3808,50 @@ class SeismicplannerClient(ConnectorClientBase):
             query_params.append(f"limit={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_status_schema_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("items", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def get_status_schema(
         self,
         space_id: str,
         status_schema_id: str,
@@ -2933,6 +3867,22 @@ class SeismicplannerClient(ConnectorClientBase):
         Get a single status schema by ID. These schemas hold the data for set
         statuses for specific work. Example: `(Not started, In progress,
         Complete)`
+
+        Swagger operation ID: `GetStatusSchema`.
+
+        Args:
+            space_id: Space ID.
+            status_schema_id: Status schema ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2944,7 +3894,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/{quote(str(status_schema_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2958,6 +3908,7 @@ class SeismicplannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2965,9 +3916,10 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_tasks_async(
+    def list_tasks(
         self,
         space_id: str,
+        *,
         planned_end_date_from: Optional[str] = None,
         planned_end_date_to: Optional[str] = None,
         planned_start_date_from: Optional[str] = None,
@@ -2997,16 +3949,63 @@ class SeismicplannerClient(ConnectorClientBase):
         creator_ids: Optional[List[str]] = None,
         include_associations: Optional[bool] = None,
         parent_id: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get tasks
 
         Get a list of tasks.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetTasks`.
+
+        Args:
+            space_id: Space ID.
+            planned_end_date_from: Filter by task due date (inclusive).
+            planned_end_date_to: Filter by task due date (exclusive).
+            planned_start_date_from: Filter by task start date (inclusive).
+            planned_start_date_to: Filter by task start date (exclusive).
+            created_at_from: Filter by task created date (inclusive).
+            created_at_to: Filter by task created date (exclusive).
+            updated_at_from: Filter by task updated date (inclusive).
+            updated_at_to: Filter by task updated date (exclusive).
+            ids: Filter by a list of task IDs.
+            title: Filter by task title.
+            description: Filter by task description.
+            assignee_ids: List of user IDs to filter by assignee.
+            priorities: Filter by list of priorities.
+            keywords: Filter by keywords.
+            assigner_ids: List of user IDs to filter by user that assigned the
+                task.
+            step_ids: Filter by status value IDs.
+            status_schema_id: Filter by status schema IDs.
+            cursor: Cursor used for pagination.
+            limit: Number to limit returned records.
+            sort: Sort by query.
+            recursive: Include subtasks within the returned list.
+            project_id: Filter by project ID.
+            has_project: Filter by tasks that are associated with a project.
+            custom_properties: Filter by custom property values.
+            follower_ids: List of user IDs to filter by followers.
+            associated_node_ids: List of association IDs to filter by.
+            creator_ids: List of user IDs to filter by creator.
+            include_associations: Include association data in the response.
+            parent_id: List of task IDs to filter by.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3251,31 +4250,52 @@ class SeismicplannerClient(ConnectorClientBase):
             query_params.append(f"parentId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def create_task_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("items", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def create_task(
         self,
-        input: CreateTask,
+        input: CreateTask | Mapping[str, Any],
         space_id: str,
         *,
         timeout: Optional[float] = None,
@@ -3287,13 +4307,30 @@ class SeismicplannerClient(ConnectorClientBase):
         Create task
 
         Create a task.
+
+        Swagger operation ID: `CreateTask`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            space_id: Space ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/planner/v2/spaces/{quote(str(space_id), safe='')}/tasks"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3307,6 +4344,7 @@ class SeismicplannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3314,7 +4352,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_task_async(
+    async def get_task(
         self,
         space_id: str,
         task_id: str,
@@ -3328,6 +4366,22 @@ class SeismicplannerClient(ConnectorClientBase):
         Get task
 
         Get a single task by ID.
+
+        Swagger operation ID: `GetTask`.
+
+        Args:
+            space_id: Space ID.
+            task_id: Task ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3339,7 +4393,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/{quote(str(task_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3353,6 +4407,7 @@ class SeismicplannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3360,7 +4415,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_task_async(
+    async def delete_task(
         self,
         space_id: str,
         task_id: str,
@@ -3374,6 +4429,22 @@ class SeismicplannerClient(ConnectorClientBase):
         Delete task
 
         Delete a task.
+
+        Swagger operation ID: `DeleteTask`.
+
+        Args:
+            space_id: Space ID.
+            task_id: Task ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3385,7 +4456,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/{quote(str(task_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3399,6 +4470,7 @@ class SeismicplannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3406,9 +4478,9 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_task_async(
+    async def update_task(
         self,
-        input: UpdateTask,
+        input: UpdateTask | Mapping[str, Any],
         space_id: str,
         task_id: str,
         *,
@@ -3421,6 +4493,24 @@ class SeismicplannerClient(ConnectorClientBase):
         Update task
 
         Update an existing task.
+
+        Swagger operation ID: `UpdateTask`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            space_id: Space ID.
+            task_id: Task ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3432,7 +4522,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/{quote(str(task_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3446,6 +4536,7 @@ class SeismicplannerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

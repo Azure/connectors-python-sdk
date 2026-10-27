@@ -1,4 +1,4 @@
-"""CloudConvert connector SDK sample."""
+"""CloudConvert sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os
@@ -21,7 +21,7 @@ async def main() -> None:
     async with DefaultAzureCredential() as credential:
         try:
             async with CloudconvertClient(CONNECTION_RUNTIME_URL, credential) as client:
-                options = await client.get_convert_options_async()
+                options = await client.get_convert_options()
                 print(f"Conversion options: {options}")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")

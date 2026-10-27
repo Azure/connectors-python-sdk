@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
+from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
 from azure.core.credentials_async import AsyncTokenCredential
 from azure.core.pipeline.transport import AsyncHttpTransport
@@ -18,7 +19,56 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "JiraClient",
+    "Assignee",
+    "CancelTaskResponse",
+    "Comment",
+    "CommentResponse",
+    "CreateIssueInput",
+    "CreateIssueRequest",
+    "CreateIssueResponse",
+    "CreateProjectCategoryInput",
+    "CreateProjectCategoryResponse",
+    "CreateProjectInput",
+    "CreateProjectResponse",
+    "Creator",
+    "EditIssueInput",
+    "EditIssueResponse",
+    "FilterArray",
+    "FullIssue",
+    "GetCurrentUserResponse",
+    "GetTaskResponse",
+    "GetUserResponse",
+    "IssueTypes",
+    "ListFiltersResponse",
+    "ListIssuesResponse",
+    "ListIssuesResponseDatacenter",
+    "ListProjectsResponse",
+    "ListTransitionsResponse",
+    "MCPQueryRequest",
+    "MCPQueryResponse",
+    "PartialIssue",
+    "PriorityList",
+    "Project",
+    "ProjectArray",
+    "Reporter",
+    "Sites",
+    "StatusList",
+    "Transition",
+    "TransitionInput",
+    "TransitionStatus",
+    "UpdateIssueRequest",
+    "UpdateProjectInput",
+    "UpdateProjectResponse",
+    "UpdateTransitionResponse",
+    "User",
+    "UserList",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -32,8 +82,9 @@ class ListIssuesResponse:
     Response for Get list of issues
     """
 
-    next_page_token: Optional[str] = field(
+    next_page_token: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextPageToken"},
     )
     """
@@ -41,12 +92,18 @@ class ListIssuesResponse:
     the 'Next page token' input of a subsequent call to fetch the next page.
     Absent on the last page.
     """
-    is_last: Optional[bool] = field(
+    is_last: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isLast"},
     )
     """Indicates whether this is the last page of results."""
-    issues: Optional[List[FullIssue]] = None
+    issues: Optional[
+        List[FullIssue | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -55,17 +112,24 @@ class ListIssuesResponseDatacenter:
     Response for Get list of issues (Datacenter)
     """
 
-    start_at: Optional[int] = field(
+    start_at: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startAt"},
     )
     """The index of the first item to return in a page of results"""
-    max_results: Optional[int] = field(
+    max_results: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "maxResults"},
     )
     """The maximum number of items to return per page"""
-    issues: Optional[List[FullIssue]] = None
+    issues: Optional[
+        List[FullIssue | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -74,7 +138,12 @@ class ListTransitionsResponse:
     Response for Get list of Transitions
     """
 
-    transitions: Optional[List[Transition]] = None
+    transitions: Optional[
+        List[Transition | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -83,7 +152,7 @@ class UpdateTransitionResponse:
     Response for Performs an issue transition
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -96,7 +165,7 @@ class GetCurrentUserResponse:
     Response for Get current user
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -109,13 +178,13 @@ class FullIssue:
     Response for When a new issue is created (Datacenter)
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique id of the issue."""
-    key: Optional[str] = None
+    key: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique key of the issue."""
-    self: Optional[str] = None
+    self: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Browse to the issue using this URL."""
-    fields: Optional[Dict[str, Any]] = None
+    fields: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -124,12 +193,12 @@ class MCPQueryResponse:
     Response for Jira MCP Server
     """
 
-    jsonrpc: Optional[str] = None
-    id: Optional[str] = None
-    method: Optional[str] = None
-    params: Optional[Dict[str, Any]] = None
-    result: Optional[Dict[str, Any]] = None
-    error: Optional[Dict[str, Any]] = None
+    jsonrpc: Optional[str] = dataclass_field(default=None, kw_only=True)
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    method: Optional[str] = dataclass_field(default=None, kw_only=True)
+    params: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    result: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    error: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -138,11 +207,11 @@ class CommentResponse:
     Response for Add comment
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique id of the comment."""
-    body: Optional[str] = None
+    body: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Body of the comment."""
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-ddTHH:mm:ss.fffZ"""
 
 
@@ -152,7 +221,7 @@ class CancelTaskResponse:
     Response for Cancel Task
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -165,7 +234,7 @@ class CreateIssueInput:
     Create a new issue
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -178,9 +247,9 @@ class CreateIssueResponse:
     Response for Create a new issue
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the issue."""
-    key: Optional[str] = None
+    key: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique key of the issue."""
 
 
@@ -190,21 +259,19 @@ class CreateProjectInput:
     Create a new project
     """
 
-    key: Optional[str] = None
+    key: str
     """The unique key, starts with a capital letter."""
-    name: Optional[str] = None
+    name: str
     """Title of the project."""
-    project_type_key: Optional[str] = field(
-        default=None,
+    project_type_key: str = dataclass_field(
         metadata={"wire_name": "projectTypeKey"},
     )
     """Project type key."""
-    lead_account_id: Optional[str] = field(
-        default=None,
+    lead_account_id: str = dataclass_field(
         metadata={"wire_name": "leadAccountId"},
     )
     """Id of Project lead."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Verbose description of the project."""
 
 
@@ -214,9 +281,9 @@ class CreateProjectResponse:
     Response for Create a new project
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Unique id of the project."""
-    key: Optional[str] = None
+    key: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique key of the project."""
 
 
@@ -226,9 +293,9 @@ class CreateProjectCategoryInput:
     Create Project Category
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description"""
 
 
@@ -238,7 +305,7 @@ class CreateProjectCategoryResponse:
     Response for Create Project Category
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -251,27 +318,28 @@ class EditIssueInput:
     Edit Issue
     """
 
-    transition: Optional[Dict[str, Any]] = None
+    transition: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Transition"""
-    fields: Optional[Dict[str, Any]] = None
+    fields: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """
     List of issue screen fields to update, specifying the sub-field to update
     and its value for each field. This field provides a straightforward option
     when setting a sub-field. When multiple sub-fields or other operations are
     required, use update. Fields included in here cannot be included in update.
     """
-    update: Optional[Dict[str, Any]] = None
+    update: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """
     A Map containing the field field name and a list of operations to perform
     on the issue screen field. Note that fields included in here cannot be
     included in fields.
     """
-    history_metadata: Optional[Dict[str, Any]] = field(
+    history_metadata: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "historyMetadata"},
     )
     """History meta data"""
-    properties: Optional[List[Dict[str, Any]]] = None
+    properties: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Properties"""
 
 
@@ -281,7 +349,7 @@ class EditIssueResponse:
     Response for Edit Issue
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -294,7 +362,7 @@ class GetTaskResponse:
     Response for Get Task
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -307,7 +375,7 @@ class GetUserResponse:
     Response for Get User
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -320,12 +388,13 @@ class ListFiltersResponse:
     Response for Get list of Filters
     """
 
-    next_page: Optional[str] = field(
+    next_page: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextPage"},
     )
     """Next page of filters"""
-    values: Optional[FilterArray] = None
+    values: Optional[FilterArray] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -334,12 +403,13 @@ class ListProjectsResponse:
     Response for Get projects
     """
 
-    next_page: Optional[str] = field(
+    next_page: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextPage"},
     )
     """Next page of projects"""
-    values: Optional[ProjectArray] = None
+    values: Optional[ProjectArray] = dataclass_field(default=None, kw_only=True)
 
 
 UserList = List[Dict[str, Any]]
@@ -351,58 +421,67 @@ class UpdateProjectInput:
     Update Project
     """
 
-    key: Optional[str] = None
+    key: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Key"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name"""
-    project_type_key: Optional[str] = field(
+    project_type_key: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "projectTypeKey"},
     )
     """Project Type Key"""
-    project_template_key: Optional[str] = field(
+    project_template_key: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "projectTemplateKey"},
     )
     """Project Template Key"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description"""
-    lead: Optional[str] = None
+    lead: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Lead"""
-    lead_account_id: Optional[str] = field(
+    lead_account_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "leadAccountId"},
     )
     """Lead Account ID"""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """URL"""
-    assignee_type: Optional[str] = field(
+    assignee_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assigneeType"},
     )
     """Assignee Type"""
-    avatar_id: Optional[str] = field(
+    avatar_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "avatarId"},
     )
     """Avatar ID"""
-    issue_security_scheme: Optional[str] = field(
+    issue_security_scheme: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "issueSecurityScheme"},
     )
     """Issue Security Scheme"""
-    permission_scheme: Optional[str] = field(
+    permission_scheme: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "permissionScheme"},
     )
     """Permission Scheme"""
-    notification_scheme: Optional[str] = field(
+    notification_scheme: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "notificationScheme"},
     )
     """Notification Scheme"""
-    category_id: Optional[str] = field(
+    category_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "categoryId"},
     )
     """Category ID"""
@@ -414,7 +493,7 @@ class UpdateProjectResponse:
     Response for Update Project
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -430,14 +509,15 @@ class Project:
     Definition: Project
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique Id of the project."""
-    key: Optional[str] = None
+    key: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique key of the project."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the project."""
-    project_type_key: Optional[str] = field(
+    project_type_key: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "projectTypeKey"},
     )
     """The unique key of the project type."""
@@ -452,11 +532,11 @@ class PartialIssue:
     Definition: PartialIssue
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique Id of the Issue."""
-    key: Optional[str] = None
+    key: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique key of the issue."""
-    fields: Optional[Dict[str, Any]] = None
+    fields: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -465,20 +545,23 @@ class Creator:
     Definition: Creator
     """
 
-    account_id: Optional[str] = field(
+    account_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "accountId"},
     )
     """Person who created the issue."""
-    key: Optional[str] = None
+    key: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique key of the person who created the issue."""
-    email_address: Optional[str] = field(
+    email_address: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "emailAddress"},
     )
     """Email of the person who created the issue."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the person who created the issue."""
@@ -490,20 +573,23 @@ class Assignee:
     Definition: Assignee
     """
 
-    account_id: Optional[str] = field(
+    account_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "accountId"},
     )
     """Person whom the issue is assigned to."""
-    key: Optional[str] = None
+    key: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique key of the person whom the issue is assigned to."""
-    email_address: Optional[str] = field(
+    email_address: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "emailAddress"},
     )
     """Email of the person whom the issue is assigned to."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the person whom the issue is assigned to."""
@@ -515,20 +601,23 @@ class User:
     Definition: User
     """
 
-    account_id: Optional[str] = field(
+    account_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "accountId"},
     )
     """Id of the Jira user."""
-    key: Optional[str] = None
+    key: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique key of the Jira user."""
-    email_address: Optional[str] = field(
+    email_address: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "emailAddress"},
     )
     """Email of the Jira user."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the Jira user."""
@@ -540,20 +629,23 @@ class Reporter:
     Definition: Reporter
     """
 
-    account_id: Optional[str] = field(
+    account_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountId"},
     )
     """Person who reported the issue."""
-    key: Optional[str] = None
+    key: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique key of the person who reported the issue."""
-    email_address: Optional[str] = field(
+    email_address: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "emailAddress"},
     )
     """Email of the person who reported the issue."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the person who reported the issue."""
@@ -568,7 +660,7 @@ class CreateIssueRequest:
     Definition: CreateIssueRequest
     """
 
-    fields: Optional[Dict[str, Any]] = None
+    fields: Dict[str, Any]
 
 
 @dataclass
@@ -577,7 +669,7 @@ class UpdateIssueRequest:
     Definition: UpdateIssueRequest
     """
 
-    fields: Optional[Dict[str, Any]] = None
+    fields: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 StatusList = List[Dict[str, Any]]
@@ -592,7 +684,7 @@ class Comment:
     Definition: Comment
     """
 
-    body: Optional[str] = None
+    body: str
     """Body of the comment."""
 
 
@@ -602,12 +694,12 @@ class Transition:
     Definition: Transition
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ID of the transition"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the transition"""
-    to: Optional[TransitionStatus] = None
-    fields: Optional[Dict[str, Any]] = None
+    to: Optional[TransitionStatus | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    fields: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Fields required for this transition"""
 
 
@@ -617,9 +709,9 @@ class TransitionStatus:
     Definition: TransitionStatus
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ID of the status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the status"""
 
 
@@ -629,13 +721,14 @@ class TransitionInput:
     Definition: TransitionInput
     """
 
-    fields: Optional[Dict[str, Any]] = None
-    history_metadata: Optional[Dict[str, Any]] = field(
+    fields: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    history_metadata: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "historyMetadata"},
     )
-    transition: Optional[Dict[str, Any]] = None
-    update: Optional[Dict[str, Any]] = None
+    transition: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    update: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -644,14 +737,15 @@ class MCPQueryRequest:
     Definition: MCPQueryRequest
     """
 
-    jsonrpc: Optional[str] = None
-    id: Optional[str] = None
-    method: Optional[str] = None
-    params: Optional[Dict[str, Any]] = None
-    result: Optional[Dict[str, Any]] = None
-    error: Optional[Dict[str, Any]] = None
-    callback_endpoint: Optional[str] = field(
+    jsonrpc: Optional[str] = dataclass_field(default=None, kw_only=True)
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    method: Optional[str] = dataclass_field(default=None, kw_only=True)
+    params: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    result: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    error: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    callback_endpoint: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "callbackEndpoint"},
     )
 
@@ -667,7 +761,7 @@ class JiraClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -684,8 +778,8 @@ class JiraClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -706,7 +800,7 @@ class JiraClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -721,59 +815,198 @@ class JiraClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "jira"
 
-    async def list_resources_async(
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
+            if next_link.startswith("?"):
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
+
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
+    def list_resources(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get list of Resources
 
         This operation returns a list of resources accessible to user.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `ListResources`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/oauth/token/accessible-resources"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_issues_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_issues(
         self,
+        *,
         jql: Optional[str] = None,
         fields: Optional[str] = None,
-        next_page_token: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get list of issues
 
         This operation returns a list of issues using JQL.
+
+        Returns an Azure Core pager that follows opaque continuation tokens.
+        Resume with by_page(continuation_token=...).
+
+        Swagger operation ID: `ListIssues`.
+
+        Args:
+            jql: The JQL query used to search for issues. If left blank,
+                returns all issues created in the last 10 years.
+            fields: Optional comma-separated list of Jira field IDs or keys to
+                return, for example summary,status,attachment. For custom
+                fields, use the field ID, such as customfield_10042. Also
+                supports *all, *navigable, and exclusions such as
+                *all,-attachment. If omitted, all fields are returned.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/2/search"
         query_params = []
@@ -788,72 +1021,133 @@ class JiraClient(ConnectorClientBase):
             if isinstance(fields, bool):
                 value = value.lower()
             query_params.append(f"fields={quote(value, safe='')}")
-        if next_page_token is not None:
-            value = str(next_page_token)
-            if isinstance(next_page_token, bool):
-                value = value.lower()
-            query_params.append(f"nextPageToken={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                separator = '&' if '?' in request_url else '?'
+                request_url += (
+                    separator + "nextPageToken="
+                    + quote(continuation_token, safe='')
+                )
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_issues_datacenter_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+            continuation_token = page.get("nextPageToken") or None
+            if page.get("isLast") is True:
+                continuation_token = None
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("issues", []):
+                    yield item
+
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_issues_datacenter(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get list of issues (Datacenter)
 
         This operation returns a list of issues using JQL.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `ListIssues_Datacenter`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/datacenter/search"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_transitions_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("issues", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_transitions(
         self,
         issue_id_or_key: str,
         *,
@@ -861,42 +1155,82 @@ class JiraClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get list of Transitions
 
         Returns a list of the transitions possible for this issue by the
         current user
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `ListTransitions`.
+
+        Args:
+            issue_id_or_key: ID or key of the issue to retrieve transitions
+                for.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/3/issue/{quote(str(issue_id_or_key), safe='')}/transitions"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def update_transition_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("transitions", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def update_transition(
         self,
-        input: TransitionInput,
+        input: TransitionInput | Mapping[str, Any],
         issue_id_or_key: str,
         *,
         timeout: Optional[float] = None,
@@ -908,13 +1242,30 @@ class JiraClient(ConnectorClientBase):
         Performs an issue transition
 
         Transitions an issue to a new status.
+
+        Swagger operation ID: `UpdateTransition`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            issue_id_or_key: ID or key of the issue to be transitioned.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/3/issue/{quote(str(issue_id_or_key), safe='')}/transitions"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -928,6 +1279,7 @@ class JiraClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -935,10 +1287,10 @@ class JiraClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_current_user_async(
+    async def get_current_user(
         self,
-        expand: Optional[str] = None,
         *,
+        expand: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -948,6 +1300,26 @@ class JiraClient(ConnectorClientBase):
         Get current user
 
         This operation returns details for the current user
+
+        Swagger operation ID: `GetCurrentUser`.
+
+        Args:
+            expand: Use expand to include additional information about users in
+                the response. This parameter accepts a comma-separated list.
+                Expand options include: * `groups` includes all groups and
+                nested groups to which the user belongs. * `applicationRoles`
+                includes details of all the applications to which the user has
+                access.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/3/myself"
         query_params = []
@@ -959,7 +1331,7 @@ class JiraClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -973,6 +1345,7 @@ class JiraClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -980,11 +1353,11 @@ class JiraClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def mcp_jira_issue_management_async(
+    async def mcp_jira_issue_management(
         self,
-        input: MCPQueryRequest,
-        session_id: Optional[str] = None,
+        input: MCPQueryRequest | Mapping[str, Any],
         *,
+        session_id: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -994,6 +1367,23 @@ class JiraClient(ConnectorClientBase):
         Jira MCP Server
 
         Jira MCP Server
+
+        Swagger operation ID: `mcp_JiraIssueManagement`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            session_id: sessionId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/mcp/JiraIssueManagement"
         query_params = []
@@ -1005,7 +1395,7 @@ class JiraClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1019,6 +1409,7 @@ class JiraClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1026,9 +1417,9 @@ class JiraClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_comment_async(
+    async def add_comment(
         self,
-        input: Comment,
+        input: Comment | Mapping[str, Any],
         issue_key: str,
         *,
         timeout: Optional[float] = None,
@@ -1040,13 +1431,30 @@ class JiraClient(ConnectorClientBase):
         Add comment
 
         This operation is used to add a comment to an existing Jira issue.
+
+        Swagger operation ID: `AddComment_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            issue_key: Unique Key of the issue to add a comment to.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v2/issue/{quote(str(issue_key), safe='')}/comment"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1060,6 +1468,7 @@ class JiraClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1067,7 +1476,7 @@ class JiraClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def cancel_task_async(
+    async def cancel_task(
         self,
         task_id: str,
         *,
@@ -1081,13 +1490,28 @@ class JiraClient(ConnectorClientBase):
 
         Cancels a task. Permissions required: either of: Administer Jira or
         Creator of the task.
+
+        Swagger operation ID: `CancelTask_V2`.
+
+        Args:
+            task_id: The ID of the task.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v2/task/{quote(str(task_id), safe='')}/cancel"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1101,6 +1525,7 @@ class JiraClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1108,9 +1533,9 @@ class JiraClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_issue_async(
+    async def create_issue(
         self,
-        input: CreateIssueInput,
+        input: CreateIssueInput | Mapping[str, Any],
         project_key: str,
         issue_type_ids: str,
         *,
@@ -1123,6 +1548,24 @@ class JiraClient(ConnectorClientBase):
         Create a new issue
 
         This operation is used to create a new issue.
+
+        Swagger operation ID: `CreateIssue_V3`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            project_key: Pick a project to create the issue in.
+            issue_type_ids: Pick an issue type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v3/issue"
         query_params = []
@@ -1137,7 +1580,7 @@ class JiraClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1151,6 +1594,7 @@ class JiraClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1158,9 +1602,9 @@ class JiraClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_project_async(
+    async def create_project(
         self,
-        input: CreateProjectInput,
+        input: CreateProjectInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1171,10 +1615,26 @@ class JiraClient(ConnectorClientBase):
         Create a new project
 
         This operation is used to create a new Jira project.
+
+        Swagger operation ID: `CreateProject_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/project"
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1188,6 +1648,7 @@ class JiraClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1195,9 +1656,9 @@ class JiraClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_project_category_async(
+    async def create_project_category(
         self,
-        input: CreateProjectCategoryInput,
+        input: CreateProjectCategoryInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1209,10 +1670,26 @@ class JiraClient(ConnectorClientBase):
 
         Creates a project category. Permissions required: Administer Jira
         (global permissions)
+
+        Swagger operation ID: `CreateProjectCategory_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/projectCategory"
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1226,6 +1703,7 @@ class JiraClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1233,11 +1711,11 @@ class JiraClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_project_async(
+    async def delete_project(
         self,
         project_id_or_key: str,
-        enable_undo: Optional[bool] = None,
         *,
+        enable_undo: Optional[bool] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1248,6 +1726,23 @@ class JiraClient(ConnectorClientBase):
 
         Deletes a project. Permissions required: Administer Jira (global
         permissions)
+
+        Swagger operation ID: `DeleteProject_V2`.
+
+        Args:
+            project_id_or_key: The project ID or project key (case sensitive).
+            enable_undo: Whether this project is placed in the Jira recycle bin
+                where it will be available for restoration.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1262,7 +1757,7 @@ class JiraClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1276,16 +1771,17 @@ class JiraClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def edit_issue_async(
+    async def edit_issue(
         self,
-        input: EditIssueInput,
+        input: EditIssueInput | Mapping[str, Any],
         issue_id_or_key: str,
+        *,
         notify_users: Optional[bool] = None,
         override_screen_security: Optional[bool] = None,
         override_editable_flag: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1297,6 +1793,28 @@ class JiraClient(ConnectorClientBase):
         Edits an issue. A transition may be applied and issue properties
         updated as part of the edit. The edits to the issue's fields are
         defined using update and fields.
+
+        Swagger operation ID: `EditIssue_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            issue_id_or_key: Provide the Issue ID or Key for the issue you wish
+                to edit.
+            notify_users: Do you want to notify users?
+            override_screen_security: Do you want to override the screen
+                security?
+            override_editable_flag: Do you want to override the editable flag?
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1321,7 +1839,7 @@ class JiraClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1335,6 +1853,7 @@ class JiraClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1342,43 +1861,81 @@ class JiraClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_all_project_categories_async(
+    def list_all_project_categories(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get All Project Categories
 
         Returns all project categories.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetAllProjectCategories_V2`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/projectCategory"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_issue_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def get_issue(
         self,
         issue_key: str,
         *,
@@ -1392,13 +1949,28 @@ class JiraClient(ConnectorClientBase):
 
         This operation is used to retrieve the issue object for a given issue
         Key.
+
+        Swagger operation ID: `GetIssue_V2`.
+
+        Args:
+            issue_key: Unique Key of the issue.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v2/issue/{quote(str(issue_key), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1412,6 +1984,7 @@ class JiraClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1419,7 +1992,7 @@ class JiraClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_task_async(
+    async def get_task(
         self,
         task_id: str,
         *,
@@ -1433,13 +2006,28 @@ class JiraClient(ConnectorClientBase):
 
         Returns the status of a long-running asynchronous task. When a task has
         finished, this operation returns the JSON blob applicable to the task.
+
+        Swagger operation ID: `GetTask_V2`.
+
+        Args:
+            task_id: The ID of the task.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v2/task/{quote(str(task_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1453,6 +2041,7 @@ class JiraClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1460,11 +2049,11 @@ class JiraClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_user_async(
+    async def get_user(
         self,
         account_id: str,
-        expand: Optional[str] = None,
         *,
+        expand: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1474,6 +2063,29 @@ class JiraClient(ConnectorClientBase):
         Get User
 
         Returns a user. Permissions required: Browse users and groups.
+
+        Swagger operation ID: `GetUser_V2`.
+
+        Args:
+            account_id: The account ID of the user, which uniquely identifies
+                the user across all Atlassian products. For example,
+                *5b10ac8d82e05b22cc7d4ef5*. Required.
+            expand: Use expand to include additional information about users in
+                the response. This parameter accepts a comma-separated list.
+                Expand options include: * `groups` includes all groups and
+                nested groups to which the user belongs. * `applicationRoles`
+                includes details of all the applications to which the user has
+                access.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/user"
         query_params = []
@@ -1489,7 +2101,7 @@ class JiraClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1503,6 +2115,7 @@ class JiraClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1510,80 +2123,170 @@ class JiraClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_filters_async(
+    def list_filters(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get list of Filters
 
         This operation returns a list of Filters accessible to user.
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `ListFilters_V2`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/filter/search"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_projects_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+            next_link = page.get("nextPage")
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("values", []):
+                    yield item
+
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_projects(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get projects
 
         This operation is used to retrieve a list of projects for your Jira
         instance.
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `ListProjects_V3`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/project/search"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_project_users_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+            next_link = page.get("nextPage")
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("values", []):
+                    yield item
+
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_project_users(
         self,
         project_key: str,
         *,
@@ -1591,12 +2294,30 @@ class JiraClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List users by project
 
         This operation is used to retrieve a list of all users associated with
         a project.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `ListProjectUsers_V2`.
+
+        Args:
+            project_key: Unique key of the project.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/v2/user/permission/search"
@@ -1608,29 +2329,50 @@ class JiraClient(ConnectorClientBase):
         query_params.append(f"projectKey={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def remove_project_category_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def remove_project_category(
         self,
         id: int,
         *,
@@ -1644,13 +2386,28 @@ class JiraClient(ConnectorClientBase):
 
         Deletes a project category. Permissions required: Administer Jira
         (global permissions)
+
+        Swagger operation ID: `RemoveProjectCategory_V2`.
+
+        Args:
+            id: ID of the project category to delete.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v2/projectCategory/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1664,11 +2421,12 @@ class JiraClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def update_project_async(
+    async def update_project(
         self,
-        input: UpdateProjectInput,
+        input: UpdateProjectInput | Mapping[str, Any],
         project_id_or_key: str,
         *,
         timeout: Optional[float] = None,
@@ -1680,13 +2438,31 @@ class JiraClient(ConnectorClientBase):
         Update Project
 
         Updates the project details of a project.
+
+        Swagger operation ID: `UpdateProject_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            project_id_or_key: Provide the project ID or Key you want to
+                update1.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v2/project/{quote(str(project_id_or_key), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1700,6 +2476,7 @@ class JiraClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1707,7 +2484,7 @@ class JiraClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_issue_types_async(
+    def list_issue_types(
         self,
         project_key: str,
         *,
@@ -1715,12 +2492,30 @@ class JiraClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get issue types
 
         This operation is used to retrieve a list of issue types for a given
         project.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `ListIssueTypes_V2`.
+
+        Args:
+            project_key: Project.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/v2/types/issue/createmeta"
@@ -1732,29 +2527,50 @@ class JiraClient(ConnectorClientBase):
         query_params.append(f"projectKey={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_issue_types_fields_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_issue_types_fields(
         self,
         project_key: str,
         issuetype_ids: str,
@@ -1763,12 +2579,31 @@ class JiraClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get issue types fields
 
         This operation is used to retrieve a list of fields for a specific
         issue type.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `ListIssueTypesFields_V2`.
+
+        Args:
+            project_key: Project.
+            issuetype_ids: Issue Types.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v3/issue/createmeta"
         query_params = []
@@ -1782,27 +2617,48 @@ class JiraClient(ConnectorClientBase):
         query_params.append(f"issuetypeIds={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
 
 
 # Trigger Operations

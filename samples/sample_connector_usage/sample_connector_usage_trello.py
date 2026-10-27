@@ -1,7 +1,7 @@
 """
-Trello Connector SDK Sample
+Trello sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Trello connector SDK.
+This sample demonstrates how to use the Trello client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a Trello connection
@@ -24,7 +24,8 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.trello import CreateBoard, CreateCard, CreateList, TrelloClient
+from azure.connectors.trello import TrelloClient
+from azure.connectors.trello import CreateBoard, CreateCard, CreateList
 
 
 # Connection runtime URL format:
@@ -38,7 +39,7 @@ async def example_1_list_boards() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with TrelloClient(CONNECTION_RUNTIME_URL, credential) as client:
-            boards = await client.list_boards_simple_async()
+            boards = [item async for item in client.list_boards_simple()]
             print(f"Boards: {boards}")
 
 
@@ -48,10 +49,10 @@ async def example_2_create_board() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with TrelloClient(CONNECTION_RUNTIME_URL, credential) as client:
-            board = await client.create_board_async(
+            board = await client.create_board(
                 input=CreateBoard(
                     name="SDK sample board",
-                    desc="Created from the Trello connector SDK sample.",
+                    desc="Created by the Trello client in the Azure Connectors Python SDK.",
                     default_lists="false",
                 )
             )
@@ -64,7 +65,7 @@ async def example_3_create_list() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with TrelloClient(CONNECTION_RUNTIME_URL, credential) as client:
-            created_list = await client.create_list_async(
+            created_list = await client.create_list(
                 input=CreateList(
                     name="SDK sample list",
                     id_board="board-id",
@@ -80,11 +81,11 @@ async def example_4_create_card() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with TrelloClient(CONNECTION_RUNTIME_URL, credential) as client:
-            card = await client.create_card_async(
+            card = await client.create_card(
                 input=CreateCard(
                     id_list="list-id",
                     name="SDK sample card",
-                    desc="Created from the Trello connector SDK sample.",
+                    desc="Created by the Trello client in the Azure Connectors Python SDK.",
                 ),
                 board_id="board-id",
             )
@@ -98,7 +99,7 @@ async def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Trello Connector SDK - Sample Usage")
+    print("Trello sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

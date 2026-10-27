@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Excel Online (Business) Connector SDK Sample
+Excel Online (Business) sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Excel Online Business connector SDK
+This sample demonstrates how to use the Excel Online Business client from the Azure Connectors Python SDK
 to work with Excel files stored in SharePoint document libraries.
 
 Prerequisites:
@@ -29,8 +29,8 @@ import asyncio
 import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.excelonlinebusiness import ExcelonlinebusinessClient
 from azure.connectors.excelonlinebusiness import (
-    ExcelonlinebusinessClient,
     TableToCreate,
     Item,
 )
@@ -71,7 +71,7 @@ async def example_1_list_table_rows():
 
         async with ExcelonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                rows = [item async for item in client.get_items_async(
+                rows = [item async for item in client.list_items(
                     drive=DRIVE_ID,
                     file=FILE_ID,
                     table=TABLE_NAME,
@@ -114,7 +114,7 @@ async def example_2_get_specific_row():
 
         async with ExcelonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_item_async(
+                result = await client.get_item(
                     drive=DRIVE_ID,
                     file=FILE_ID,
                     table=TABLE_NAME,
@@ -151,14 +151,14 @@ async def example_3_list_workbook_comments():
 
         async with ExcelonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_comments_async(
+                items = [item async for item in client.list_comments(
                     drive=DRIVE_ID,
                     file=FILE_ID,
                     source=SOURCE_URL if SOURCE_URL else None,
-                )
+                )]
 
-                if result and "value" in result:
-                    comments = result["value"]
+                if items:
+                    comments = items
                     print(f"Found {len(comments)} comment(s):")
                     for comment in comments[:5]:
                         comment_id = comment.get("id", "N/A")
@@ -202,7 +202,7 @@ async def example_4_create_table():
                     columns_names=column_names if column_names else None,
                 )
 
-                result = await client.create_table_async(
+                result = await client.create_table(
                     input=table_input,
                     drive=DRIVE_ID,
                     file=FILE_ID,
@@ -251,7 +251,7 @@ async def example_5_update_row():
                     }
                 )
 
-                result = await client.patch_item_async(
+                result = await client.patch_item(
                     input=update_data,
                     drive=DRIVE_ID,
                     file=FILE_ID,
@@ -277,7 +277,7 @@ async def example_5_update_row():
 
 async def main():
     """Run all examples."""
-    print("Excel Online (Business) Connector SDK - Sample Usage")
+    print("Excel Online (Business) sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
 
     if not CONNECTION_RUNTIME_URL:

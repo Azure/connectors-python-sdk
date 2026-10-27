@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Microsoft Bookings Connector SDK Sample
+Microsoft Bookings sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Microsoft Bookings connector SDK to
+This sample demonstrates how to use the Microsoft Bookings client from the Azure Connectors Python SDK to
 manage booking businesses and appointment webhooks.
 
 Prerequisites:
@@ -25,8 +25,8 @@ import asyncio
 import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.microsoftbookings import MicrosoftbookingsClient
 from azure.connectors.microsoftbookings import (
-    MicrosoftbookingsClient,
     CreateAppointmentInput,
     UpdateAppointmentInput,
     CancelAppointmentInput,
@@ -60,10 +60,10 @@ async def example_1_list_booking_businesses():
 
         async with MicrosoftbookingsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.list_bookings_business_user_as_admin_async()
+                items = [item async for item in client.list_bookings_business_user_as_admin()]
 
-                if result and result.get("mailboxes"):
-                    mailboxes = result["mailboxes"]
+                if items:
+                    mailboxes = items
                     print(f"Found {len(mailboxes)} booking business(es):")
                     for mailbox in mailboxes:
                         print(f"  - {mailbox.get('display_name')}")

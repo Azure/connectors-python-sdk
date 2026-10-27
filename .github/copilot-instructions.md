@@ -2,7 +2,7 @@
 
 ## Overview
 
-This repository contains the Python SDK for Azure Connectors. Code must follow Python best practices (PEP 8, PEP 484) and the team's conventions for async/await patterns, type safety, and API design.
+This repository contains the Python SDK for Azure Connectors. Code must follow Python best practices (PEP 8, PEP 484) and the team's conventions for async-only APIs, type safety, and API design.
 
 ## Client Refresh and Review
 
@@ -13,6 +13,9 @@ This repository contains the Python SDK for Azure Connectors. Code must follow P
 - Capture known response data directly in semantic variables, without redundant `result` aliases or duplicated conditions. Check the actual returned shape after regeneration; an item list is not a response dictionary.
 - Preserve nullable-response guards such as `response and response.get(...)`; they are not duplicate conditions. Test non-pageable consumers with `None`, empty dictionaries, and populated responses separately. Do not simplify conditions by matching text prefixes.
 - Execute changed samples with empty and nonempty mocked results and assert their output, including absence of caught-and-printed errors. Pagination tests must exercise continuation requests, later-page items, and termination, including an empty initial page with a next link.
+- Generate one async-only client and its models in `azure.connectors.<connector>`. Do not add synchronous mirrors or a duplicate `.aio` catalog.
+- Use unsuffixed operation names. Pageable operations return `AsyncItemPaged`; retained Location-backed long-running operations return `AsyncLROPoller` after awaiting `begin_*`.
+- Keep direct connector imports and lazy package-root client exports. Do not eagerly import every generated module from package `__init__.py`.
 
 ## Quick Reference: Coding Style Rules
 
@@ -397,31 +400,28 @@ When adding a new connector client to the SDK, use the **add-connector** skill (
 
 ### Steps
 
-1. **Create the connector module** in `src/azure/connectors/`:
-   - File name should match the connector API name (e.g., `office365.py`, `sharepointonline.py`)
+1. **Generate one async-only root connector** using the live-download procedure in `GENERATION.md`:
+    - `src/azure/connectors/<connector>.py` owns the client, models, and trigger metadata
+    - Do not create a synchronous mirror or an `azure.connectors.aio` module
 
-2. **Implement the client class** following existing patterns:
-   ```python
-   from azure.connectors.sdk import ConnectorClient
-   
-   class Office365Client(ConnectorClient):
-       """Client for Office 365 connector operations."""
-       
-       async def send_email(self, ...) -> EmailResponse:
-           ...
-   ```
+2. **Verify direct imports** from the root connector module:
 
-3. **Export from `__init__.py`** — add the new client to `src/azure/connectors/__init__.py`
+    ```python
+    from azure.connectors.office365 import Office365Client, SendEmailInput
+    ```
+
+3. **Keep package exports lazy** — regenerate `src/azure/connectors/_client_registry.py` and `src/azure/connectors/__init__.pyi` with the connector inventory. Preserve the lazy loader in `src/azure/connectors/__init__.py`; do not add eager generated-client barrel imports or try/except imports that replace broken clients with `None`.
 
 4. **Update `README.md`** — add the connector to the "Validated Connectors" table with status (`✅ E2E Validated` or `🔄 SDK Generated`) and test count
 
-5. **Add unit tests** — create `test_<connector>.py` in `tests/` following the pattern of existing tests:
-   - Constructor tests
-   - Method tests with mocked responses
-   - Error handling tests
-   - Type serialization round-trips
+5. **Add unit tests** — create `test_<connector>.py` in `tests/` for the root async client:
+    - Constructor options, `await client.close()`, and `async with` lifecycle
+    - Unsuffixed operations, mocked success and error responses, and serialization round-trips
+    - `AsyncItemPaged` iteration without awaiting construction, including continuation and empty pages
+    - Retained Location-backed operations: await `begin_*` for an `AsyncLROPoller`, then await `poller.result()` while the client remains open
+    - Direct imports and lazy package-root exports agree with the generated registry and type stub
 
-6. **Create sample usage file** — create `sample_connector_usage_<connector>.py` in `samples/sample_connector_usage/` following the pattern of existing samples (port from .NET if available)
+6. **Create one async sample** under `samples/sample_connector_usage/`. Use root connector imports, `azure.identity.aio` credentials, `async with`, and `await`. End the `__main__` guard with `asyncio.run(main())`, not an extra bare `main()` call.
 
 7. **Update `samples/sample_connector_usage/README.md`** — add the new sample to the samples table
 
@@ -439,10 +439,13 @@ When adding a new connector client to the SDK, use the **add-connector** skill (
 - [ ] Client class has proper type hints on all public methods
 - [ ] Docstrings present on class and all public methods
 - [ ] Existing connector tests still pass (no regressions)
-- [ ] New connector tests cover: constructor, mocked success, mocked error, exception handling
-- [ ] Module exported in `__init__.py`
+- [ ] New connector tests cover constructor options, async lifecycle, mocked responses, exceptions, and serialization
+- [ ] One root module owns the async-only client, models, and trigger metadata; no sync or aio mirror exists
+- [ ] Unsuffixed operations use `AsyncItemPaged` and awaited `AsyncLROPoller` contracts where applicable
+- [ ] Generated client registry and package type stub match; package-root exports remain lazy and import failures propagate
 - [ ] README.md connector table updated
-- [ ] Sample file created and compiles without errors
+- [ ] One async sample imports public root types and compiles without errors
+- [ ] Offline sample tests check output for empty and nonempty results and run the actual main guard without unawaited coroutine warnings
 - [ ] Samples README updated
 - [ ] CHANGELOG.md updated
 - [ ] Connection setup skill updated

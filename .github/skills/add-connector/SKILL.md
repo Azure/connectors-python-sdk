@@ -1,6 +1,6 @@
 ---
 name: add-connector
-description: 'Add a new connector to the Azure Connectors Python SDK. USE WHEN: adding a new connector client, scaffolding connector files, creating unit tests, updating __init__.py exports, updating README status table, creating sample usage files. Covers the full workflow from connector file creation through test validation. NOT FOR: modifying existing connectors, connection setup, or trigger registration.'
+description: 'Add a new connector to the Azure Connectors Python SDK. USE WHEN: adding a generated async-only root connector, creating async unit tests and samples, or updating connector documentation. Covers the full workflow from generation through validation. NOT FOR: modifying existing connectors, connection setup, or trigger registration.'
 argument-hint: 'Provide the connector name (e.g., "dynamics365", "servicenow")'
 ---
 
@@ -17,8 +17,8 @@ Automates the complete workflow for adding a new connector to the Azure Connecto
 
 ## Prerequisites
 
-- The connector module file (e.g., `dynamics365.py`) is provided or needs to be created
-- The connector follows the `ConnectorClientBase` pattern
+- The connector can be generated as one async root module
+- The client follows the async `ConnectorClientBase` runtime patterns
 - A .NET sample exists to port to Python (optional)
 
 ## Procedure
@@ -39,9 +39,11 @@ Collect the following details from the user:
 
 ### Step 2: Create/Verify Connector Module
 
-Ensure the connector file exists at `src/azure/connectors/{connector_name}.py`.
+Generate one async root module from CodefulSdkGenerator:
 
-The connector must follow this structure:
+- `src/azure/connectors/{connector_name}.py`
+
+The root connector owns models, metadata, and the async-only client:
 
 ```python
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -74,21 +76,22 @@ class {ClientClassName}(ConnectorClientBase):
     def connector_name(self) -> str:
         return "{connector_name}"
 
-    # ... async methods ...
+    # ... asynchronous unsuffixed methods ...
 ```
 
-### Step 3: Update `__init__.py` Exports
+The module defines models, aliases, enums, and `TRIGGER_OPERATIONS`. Its client
+uses `AsyncTokenCredential` and `AsyncHttpTransport`. Pageable operations return
+`AsyncItemPaged` without awaiting construction. Await `begin_*` operations to
+obtain an `AsyncLROPoller`. Do not create a synchronous mirror.
 
-Add the connector import to `src/azure/connectors/__init__.py`:
+### Step 3: Keep Package Initializers Minimal
 
-```python
-try:
-    from .{connector_name} import {ClientClassName}
-except (ImportError, NameError):
-    {ClientClassName} = None  # type: ignore[assignment,misc]
-```
-
-Also add to the `__all__` list if present.
+Consumers import clients and models directly from each root connector module.
+Regenerate `src/azure/connectors/_client_registry.py` and
+`src/azure/connectors/__init__.pyi` with the connector inventory; do not hand-edit
+generated package exports. Preserve the lazy loader in
+`src/azure/connectors/__init__.py`. Do not add eager generated-client barrel
+imports or try/except imports that replace failed clients with `None`.
 
 ### Step 4: Update README Connector Table
 
@@ -113,9 +116,9 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.{connector_name} import {ClientClassName}
 from azure.connectors.{connector_name} import (
-    {ClientClassName},
-    # Import all public dataclasses from the connector
+    {RequestModelName},
 )
 from azure.connectors.sdk import ConnectorException
 from tests.conftest import MockResponse
@@ -197,7 +200,7 @@ class Test{ClientClassName}Lifecycle:
 
         with patch.object(client._http_client, 'close', new_callable=AsyncMock) as mock_close:
             await client.close()
-            mock_close.assert_called_once()
+            mock_close.assert_awaited_once()
 
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
@@ -209,14 +212,14 @@ class Test{ClientClassName}Lifecycle:
             ) as client:
                 assert isinstance(client, {ClientClassName})
 
-            mock_close.assert_called_once()
+            mock_close.assert_awaited_once()
 
 
 # Add test classes for each public method in the connector
 # Follow the pattern:
 #
 # class Test{MethodName}:
-#     """Tests for {method_name}_async method."""
+#     """Tests for {method_name} on the root async client."""
 #
 #     @pytest.mark.asyncio
 #     async def test_success(self, mock_credential):
@@ -230,16 +233,26 @@ class Test{ClientClassName}Lifecycle:
 ```
 
 **Required test categories:**
+
 1. **Initialization tests** — constructor, URL handling, options, error cases
-2. **Lifecycle tests** — close(), context manager
-3. **Method tests** — one class per public async method with:
-   - Success case with mocked response
-   - Parameter handling tests
-   - Error response handling
+2. **Lifecycle tests** — `await client.close()`, `async with`, and awaited cleanup
+3. **Method tests** — exercise root async operations with:
+    - Success cases with asynchronous mocked responses
+    - Keyword-only optional parameters and request controls
+    - Azure Core error response handling
+    - Models declared in the same root module
+    - `AsyncItemPaged` iteration without awaiting construction, including continuation requests, empty pages, later-page items, and termination
+    - Retained Location-backed operations: await `begin_*` for an `AsyncLROPoller`, then await `poller.result()` while the client remains open
+4. **Export tests** — direct imports and lazy package-root clients match the generated registry and type stub; broken imports raise instead of returning `None`
 
 ### Step 6: Create Sample Usage File
 
-Create `samples/sample_connector_usage/sample_connector_usage_{connector_name}.py`:
+Create one async sample file:
+
+- `samples/sample_connector_usage/sample_connector_usage_{connector_name}.py`
+
+Use `azure.identity.aio.DefaultAzureCredential`, import the client from its root
+connector module, and retain `async with` and `await`:
 
 ```python
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -268,9 +281,9 @@ import asyncio
 import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.{connector_name} import {ClientClassName}
 from azure.connectors.{connector_name} import (
-    {ClientClassName},
-    # Import relevant dataclasses for the examples
+    {RequestModelName},
 )
 
 # Connection runtime URL format:
@@ -285,12 +298,12 @@ async def example_1_basic_operation():
     """Example 1: Basic connector operation."""
     print("\n=== Example 1: Basic Operation ===")
     
-    credential = DefaultAzureCredential()
-    
-    async with {ClientClassName}(CONNECTION_RUNTIME_URL, credential) as client:
+    async with DefaultAzureCredential() as credential, {ClientClassName}(
+        CONNECTION_RUNTIME_URL, credential
+    ) as client:
         try:
             # Call a basic read operation
-            result = await client.{example_method}_async()
+            result = await client.{example_method}()
             
             print(f"Result: {{result}}")
                 
@@ -304,12 +317,12 @@ async def example_2_advanced_operation():
     """Example 2: Advanced connector operation."""
     print("\n=== Example 2: Advanced Operation ===")
     
-    credential = DefaultAzureCredential()
-    
-    async with {ClientClassName}(CONNECTION_RUNTIME_URL, credential) as client:
+    async with DefaultAzureCredential() as credential, {ClientClassName}(
+        CONNECTION_RUNTIME_URL, credential
+    ) as client:
         try:
             # Call a write or complex operation
-            # result = await client.{another_method}_async(...)
+            # result = await client.{another_method}(...)
             print("Advanced operation completed")
             
         except ConnectorException as ex:
@@ -338,10 +351,11 @@ if __name__ == "__main__":
 ```
 
 **When porting from .NET:**
+
 1. Find the corresponding .NET sample
-2. Translate each example method to Python async/await syntax
+2. Create one asynchronous example under the conventional root sample path
 3. Convert C# types to Python dataclasses
-4. Use `async with` for client lifecycle
+4. Use `async with` for client and credential lifecycle
 5. Handle exceptions with `ConnectorException`
 
 ### Step 7: Update Samples README
@@ -385,16 +399,19 @@ Supported SDK connector names: `arm`, `azuread`, ..., `{connector_name}`, ... (a
 
 ### Step 10: Run Tests
 
-Execute the full test suite to validate:
+Start with focused connector and lazy-export tests from the repository root:
 
 ```powershell
-.\.venv\Scripts\python -m pytest tests/test_{connector_name}.py tests/test_code_quality.py -v --tb=short
+$env:PYTHONPATH = (Join-Path $PWD "src")
+.\.venv\Scripts\python -m pytest tests/test_{connector_name}.py tests/test_root_client_exports.py -v --tb=short
 ```
 
 **Required checks:**
-- [ ] All tests pass
-- [ ] No import errors
-- [ ] Code quality tests pass (imports, structure)
+
+- [ ] Focused tests pass against this checkout, not another editable installation
+- [ ] Direct client/model imports work and resolve under this checkout's `src` directory
+- [ ] Generated registry and type stub agree; package import does not eagerly load connectors
+- [ ] Full tests and code quality checks pass before submitting the connector PR
 
 ### Step 11: Validate Sample Syntax
 
@@ -403,30 +420,40 @@ python -m py_compile samples/sample_connector_usage/sample_connector_usage_{conn
 .\.venv\Scripts\python.exe -m flake8 samples/sample_connector_usage/sample_connector_usage_{connector_name}.py --max-line-length=100
 ```
 
+Run the sample offline with empty and nonempty mocked responses and assert its
+output contains no caught-and-printed errors. Test its actual parsed `__main__`
+guard with the example functions mocked by `AsyncMock`, leaving `main()` and
+`asyncio.run()` intact. Assert each example is awaited once and no unawaited
+coroutine warning occurs. Keep only `asyncio.run(main())` in the guard.
+
 ## Checklist
 
 Before completing, verify:
 
 - [ ] `src/azure/connectors/{connector_name}.py` exists with proper structure
-- [ ] `src/azure/connectors/__init__.py` updated with try/except import
+- [ ] One async-only root module owns the client, models, and trigger metadata; no sync or aio mirror exists
+- [ ] Generated `_client_registry.py` and `__init__.pyi` agree with the connector inventory
+- [ ] Package-root exports remain lazy; no eager barrel imports or failed-client `None` placeholders
 - [ ] `README.md` connector table updated with correct status and test count
-- [ ] `tests/test_{connector_name}.py` created with comprehensive tests
-- [ ] `samples/sample_connector_usage/sample_connector_usage_{connector_name}.py` created
+- [ ] `tests/test_{connector_name}.py` covers async lifecycle, operations, serialization, and applicable `AsyncItemPaged` / `AsyncLROPoller` behavior
+- [ ] One async sample exists at `samples/sample_connector_usage/sample_connector_usage_{connector_name}.py`
 - [ ] `samples/sample_connector_usage/README.md` updated
 - [ ] `CHANGELOG.md` updated with new connector in `[Unreleased]` section
 - [ ] `.github/skills/connection-setup/SKILL.md` Step 2 updated with connector API name
 - [ ] All tests pass
 - [ ] Sample file compiles without errors
+- [ ] Offline sample checks cover empty and nonempty output and the actual main guard without unawaited coroutines
 
 ## Files Modified
 
 | File | Change |
 |------|--------|
-| `src/azure/connectors/{connector_name}.py` | New connector module |
-| `src/azure/connectors/__init__.py` | Add export |
+| `src/azure/connectors/{connector_name}.py` | New async-only root connector module |
+| `src/azure/connectors/_client_registry.py` | Regenerate the lazy client registry |
+| `src/azure/connectors/__init__.pyi` | Regenerate package-root type exports |
 | `README.md` | Add to connector table |
 | `tests/test_{connector_name}.py` | New test file |
-| `samples/sample_connector_usage/sample_connector_usage_{connector_name}.py` | New sample |
+| `samples/sample_connector_usage/sample_connector_usage_{connector_name}.py` | One async sample |
 | `samples/sample_connector_usage/README.md` | Add to samples table |
 | `CHANGELOG.md` | Add to `[Unreleased]` section |
 | `.github/skills/connection-setup/SKILL.md` | Add connector name to Step 2 |
@@ -435,7 +462,12 @@ Before completing, verify:
 
 ### Import Error in `__init__.py`
 
-If the connector has undefined type references, the try/except wrapper handles it gracefully. The connector will be `None` until fixed.
+The package root loads a client only when requested. Import failures must
+propagate; never hide a broken connector behind a try/except import or assign
+its client to `None`. Check direct connector imports, fix undefined references
+in CodefulSdkGenerator, then regenerate the connector, registry, and type stub.
+Do not hand-edit generated output or eagerly import all clients to bypass the
+lazy loader.
 
 ### Test Discovery
 

@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
+from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
 from azure.core.credentials_async import AsyncTokenCredential
 from azure.core.pipeline.transport import AsyncHttpTransport
@@ -18,7 +19,44 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "TextrequestClient",
+    "BulkUpdateContactsInput",
+    "CancelPaymentResponse",
+    "CreateContactInput",
+    "CreateContactResponse",
+    "CreateDashboardInput",
+    "CreateDashboardResponse",
+    "CreateGroupInput",
+    "CreateGroupResponse",
+    "CreatePaymentInput",
+    "CreatePaymentResponse",
+    "GetContactByPhoneNumberResponse",
+    "GetContactsResponse",
+    "GetConversationsResponse",
+    "GetDashboardResponse",
+    "GetDashboardsResponse",
+    "GetGroupByIdResponse",
+    "GetGroupsResponse",
+    "GetMessagesByContactPhoneResponse",
+    "GetPaymentResponse",
+    "GetPaymentsResponse",
+    "GetTagsResponse",
+    "MarkPaymentPaidResponse",
+    "SendMessageByPhoneNumberInput",
+    "SendMessageByPhoneNumberResponse",
+    "SendPaymentReminderResponse",
+    "TextingWebhookInput",
+    "TextingWebhookResponse",
+    "UpdateDashboardsNameInput",
+    "UpdateDashboardsNameResponse",
+    "UpdateGroupInput",
+    "UpdateGroupResponse",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -29,12 +67,12 @@ class GetMessagesByContactPhoneResponse:
     Response for Get a conversation's messages by a contact's phone number
     """
 
-    meta: Optional[Dict[str, Any]] = None
+    meta: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """
     Metadata about the data returned by this request. This data is returned by
     all bulk GET requests.
     """
-    items: Optional[List[Dict[str, Any]]] = None
+    items: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of message entities gotten from Text Request."""
 
 
@@ -44,26 +82,26 @@ class SendMessageByPhoneNumberInput:
     Send a message to the contact with the given phone number
     """
 
-    body: Optional[str] = None
+    body: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Content of the message to send."""
-    sender_name: Optional[str] = None
+    sender_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The name of the message sender. This is shown in the TextRequest web app
     and api when retrieving this message.
     """
-    status_callback: Optional[str] = None
+    status_callback: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Url for the web app to hit with a POST command whenever this message's
     status goes from undelivered to sent (or error).
     """
-    location_callback: Optional[str] = None
+    location_callback: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Location callback url to hit with a POST command when the user accesses and
     approves sharing their location with the sender. To include the link, add
     [Location Request] to the message body. This callback is not required for
     location requests, but it can be useful for APIs.
     """
-    mms_media: Optional[List[str]] = None
+    mms_media: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     Array of MMS Media attachments for this message. Attachments must be urls
     gotten from the post /mms endpoint (not included in this connector).
@@ -77,32 +115,32 @@ class SendMessageByPhoneNumberResponse:
     Response for Send a message to the contact with the given phone number
     """
 
-    message_id: Optional[str] = None
+    message_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Id of the message. This value is unique for each message."""
-    body: Optional[str] = None
+    body: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Content of this message."""
-    message_direction: Optional[str] = None
+    message_direction: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Singular character, either R or S, denoting whether this message was
     received from the contact or sent to them, respectively.
     """
-    response_by_username: Optional[str] = None
+    response_by_username: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Username of the Text Request user that last sent a message to this user.
     """
-    message_timestamp_utc: Optional[str] = None
+    message_timestamp_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Timestamp of when the message was sent or received by Text Request."""
-    delivery_status: Optional[str] = None
+    delivery_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Current status of this message. This can be 'sending', 'delivered',
     'error', or 'send'.
     """
-    delivery_error: Optional[str] = None
+    delivery_error: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Error that caused this message to not be delivered. If the delivery_status
     is not 'error', this value will be null.
     """
-    mms_media: Optional[List[str]] = None
+    mms_media: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     List of urls pointing to this message's attachments. All urls will be
     text-request generated urls.
@@ -115,75 +153,80 @@ class GetContactByPhoneNumberResponse:
     Response for Gets the contact with the specified phone number
     """
 
-    phone_number: Optional[str] = None
+    phone_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Phone number of this contact."""
-    first_name: Optional[str] = None
+    first_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """First name of this contact."""
-    last_name: Optional[str] = None
+    last_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Last name of this contact."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Full name of this contact. This is the default name displayed in the web
     app when viewing contacts.
     """
-    is_suppressed: Optional[bool] = None
+    is_suppressed: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether the conversation with this contact are suppressed, and therefore
     not pushed to the top of the message queue when received.
     """
-    is_archived: Optional[bool] = None
+    is_archived: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether the conversation with this contact are archived, and therefore
     cannot be seen when querying conversations (by default).
     """
-    is_blocked: Optional[bool] = None
+    is_blocked: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether the conversation with this contact are blocked, and therefore not
     received or stored.
     """
-    suppressed_reason: Optional[str] = None
+    suppressed_reason: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Phrase describing the reason for suppressing contact. If is_suppressed is
     false, this will be null.
     """
-    note: Optional[str] = None
+    note: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Short phrase describing contact. Used for convenience. This is never shown
     to the contact.
     """
-    groups: Optional[List[int]] = None
+    groups: Optional[List[int]] = dataclass_field(default=None, kw_only=True)
     """Array of integer ids referring to groups this contact belongs to."""
-    contact_tags: Optional[List[str]] = None
+    contact_tags: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Array of guids referring to tags attached to this contact."""
-    custom_fields: Optional[List[Dict[str, Any]]] = None
+    custom_fields: Optional[
+        List[Dict[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Array of custom field ids and values defined for this contact."""
-    is_resolved: Optional[bool] = None
+    is_resolved: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether the conversation with this contact is resolved. Any new texts
     received by this contact will set this false.
     """
-    first_contact_utc: Optional[str] = None
+    first_contact_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Timestamp of when the first message was sent to this contact."""
-    opted_out_utc: Optional[str] = None
+    opted_out_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Timestamp of when this contact opted out to receiving messages."""
-    last_msg_sent_utc: Optional[str] = None
+    last_msg_sent_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Timestamp of when the last message was sent to this contact."""
-    last_msg_received_utc: Optional[str] = None
+    last_msg_received_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Timestamp of when the last message was received from this contact."""
-    total_msgs_sent: Optional[int] = None
+    total_msgs_sent: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of total messages sent to this contact."""
-    total_msgs_received: Optional[int] = None
+    total_msgs_received: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of total messages received from this contact."""
-    response_count: Optional[int] = None
+    response_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The total number of response messages from the contact."""
-    date_created_utc: Optional[str] = None
+    date_created_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The timestamp of when ths contact was created."""
-    last_contact_date_utc: Optional[str] = None
+    last_contact_date_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The timestamp of when the last message was sent or received from this
     contact.
     """
-    last_message: Optional[Dict[str, Any]] = None
+    last_message: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Last message sent to or from this contact."""
 
 
@@ -193,44 +236,49 @@ class CreateContactInput:
     Create or update a contact
     """
 
-    first_name: Optional[str] = None
+    first_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The new first name of the contact."""
-    last_name: Optional[str] = None
+    last_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The new last name of the contact."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The new full name of the contact. This is the default name displayed in the
     web app when viewing contacts.
     """
-    is_suppressed: Optional[bool] = None
+    is_suppressed: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Determines whether conversations with this contact are suppressed, and
     therefore not pushed to the top of the message queue when received.
     """
-    is_archived: Optional[bool] = None
+    is_archived: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Determines whether conversations with this contact are archived, and
     therefore cannot be seen when querying conversations (by default).
     """
-    is_blocked: Optional[bool] = None
+    is_blocked: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Determines whether conversations with this contact are blocked, and
     therefore not received or stored.
     """
-    suppressed_reason: Optional[str] = None
+    suppressed_reason: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Phrase describing the reason for suppressing contact."""
-    note: Optional[str] = None
+    note: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Short phrase describing contact. Used for convenience. This is never shown
     to the contact.
     """
-    groups: Optional[List[int]] = None
+    groups: Optional[List[int]] = dataclass_field(default=None, kw_only=True)
     """Array of integer ids referring to groups this contact will belong to."""
-    contact_tags: Optional[List[str]] = None
+    contact_tags: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Array of guids referring to tags attached to this contact."""
-    custom_fields: Optional[List[Dict[str, Any]]] = None
+    custom_fields: Optional[
+        List[Dict[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Array of custom field ids and values defined for this contact."""
-    is_resolved: Optional[bool] = None
+    is_resolved: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Determines whether the current conversation with this contact is resolved.
     Any new texts received by this contact will set this false.
@@ -243,74 +291,79 @@ class CreateContactResponse:
     Response for Create or update a contact
     """
 
-    phone_number: Optional[str] = None
+    phone_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Phone number of this contact."""
-    first_name: Optional[str] = None
+    first_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """First name of this contact."""
-    last_name: Optional[str] = None
+    last_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Last name of this contact."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Full name of this contact. This is the default name displayed in the web
     app when viewing contacts.
     """
-    is_suppressed: Optional[bool] = None
+    is_suppressed: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether the conversation with this contact are suppressed, and therefore
     not pushed to the top of the message queue when received.
     """
-    is_archived: Optional[bool] = None
+    is_archived: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether the conversation with this contact are archived, and therefore
     cannot be seen when querying conversations (by default).
     """
-    is_blocked: Optional[bool] = None
+    is_blocked: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether the conversation with this contact are blocked, and therefore not
     received or stored.
     """
-    suppressed_reason: Optional[str] = None
+    suppressed_reason: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Phrase describing the reason for suppressing contact. If is_suppressed is
     false, this will be null.
     """
-    note: Optional[str] = None
+    note: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Short phrase describing contact. Used for convenience. This is never shown
     to the contact.
     """
-    groups: Optional[List[int]] = None
+    groups: Optional[List[int]] = dataclass_field(default=None, kw_only=True)
     """Array of integer ids referring to groups this contact belongs to."""
-    contact_tags: Optional[List[str]] = None
+    contact_tags: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Array of guids referring to tags attached to this contact."""
-    custom_fields: Optional[List[Dict[str, Any]]] = None
+    custom_fields: Optional[
+        List[Dict[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Array of custom field ids and values defined for this contact."""
-    is_resolved: Optional[bool] = None
+    is_resolved: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether the conversation with this contact is resolved. Any new texts
     received by this contact will set this false.
     """
-    first_contact_utc: Optional[str] = None
+    first_contact_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Timestamp of when the first message was sent to this contact."""
-    opted_out_utc: Optional[str] = None
+    opted_out_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Timestamp of when this contact opted out to receiving messages."""
-    last_msg_sent_utc: Optional[str] = None
+    last_msg_sent_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Timestamp of when the last message was sent to this contact."""
-    last_msg_received_utc: Optional[str] = None
+    last_msg_received_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Timestamp of when the last message was received from this contact."""
-    total_msgs_sent: Optional[int] = None
+    total_msgs_sent: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of total messages sent to this contact."""
-    total_msgs_received: Optional[int] = None
+    total_msgs_received: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of total messages received from this contact."""
-    response_count: Optional[int] = None
+    response_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Total number of response messages from the contact."""
-    date_created_utc: Optional[str] = None
+    date_created_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Timestamp of when ths contact was created."""
-    last_contact_date_utc: Optional[str] = None
+    last_contact_date_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Timestamp of when the last message was sent or received from this contact.
     """
-    last_message: Optional[Dict[str, Any]] = None
+    last_message: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Last message sent to or from this contact."""
 
 
@@ -320,12 +373,12 @@ class GetContactsResponse:
     Response for Get all contacts that match the specified filtering criterion
     """
 
-    meta: Optional[Dict[str, Any]] = None
+    meta: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """
     Metadata about the data returned by this request. This data is returned by
     all bulk GET requests.
     """
-    items: Optional[List[Dict[str, Any]]] = None
+    items: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of contact entities gotten from Text Request."""
 
 
@@ -338,20 +391,20 @@ class GetGroupByIdResponse:
     Response for Get a group by its id
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numerical id of the group."""
-    group_member_count: Optional[int] = None
+    group_member_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of members of the group."""
-    is_keyword: Optional[bool] = None
+    is_keyword: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Wheter this group is a keyword group. Such groups are autogenerated when a
     user sets up a keyword. Contacts are automatically added when they enroll.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of this group."""
-    notes: Optional[str] = None
+    notes: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Any notes on this group."""
-    last_message_sent_utc: Optional[str] = None
+    last_message_sent_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Timestamp of when the last group message was sent for this group."""
 
 
@@ -361,9 +414,9 @@ class UpdateGroupInput:
     Updates a group with the given id
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The new name of the group."""
-    notes: Optional[str] = None
+    notes: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Short phrase describing group. Used for convenience."""
 
 
@@ -373,20 +426,20 @@ class UpdateGroupResponse:
     Response for Updates a group with the given id
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numerical id of the group."""
-    group_member_count: Optional[int] = None
+    group_member_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of members of the group."""
-    is_keyword: Optional[bool] = None
+    is_keyword: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Wheter this group is a keyword group. Such groups are autogenerated when a
     user sets up a keyword. Contacts are automatically added when they enroll.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of this group."""
-    notes: Optional[str] = None
+    notes: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Any notes on this group."""
-    last_message_sent_utc: Optional[str] = None
+    last_message_sent_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Timestamp of when the last group message was sent for this group."""
 
 
@@ -396,12 +449,12 @@ class GetGroupsResponse:
     Response for Gets all groups
     """
 
-    meta: Optional[Dict[str, Any]] = None
+    meta: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """
     Metadata about the data returned by this request. This data is returned by
     all bulk GET requests.
     """
-    items: Optional[List[Dict[str, Any]]] = None
+    items: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of group entities gotten from Text Request."""
 
 
@@ -411,9 +464,9 @@ class CreateGroupInput:
     Creates a new group
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The new name of the group."""
-    notes: Optional[str] = None
+    notes: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Short phrase describing group. Used for convenience."""
 
 
@@ -423,20 +476,20 @@ class CreateGroupResponse:
     Response for Creates a new group
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numerical id of the group."""
-    group_member_count: Optional[int] = None
+    group_member_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of members of the group."""
-    is_keyword: Optional[bool] = None
+    is_keyword: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Wheter this group is a keyword group. Such groups are autogenerated when a
     user sets up a keyword. Contacts are automatically added when they enroll.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of this group."""
-    notes: Optional[str] = None
+    notes: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Any notes on this group."""
-    last_message_sent_utc: Optional[str] = None
+    last_message_sent_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Timestamp of when the last group message was sent for this group."""
 
 
@@ -446,12 +499,12 @@ class GetTagsResponse:
     Response for Gets all tags
     """
 
-    meta: Optional[Dict[str, Any]] = None
+    meta: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """
     Metadata about the data returned by this request. This data is returned by
     all bulk GET requests.
     """
-    items: Optional[List[Dict[str, Any]]] = None
+    items: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of tag entities gotten from Text Request."""
 
 
@@ -461,40 +514,40 @@ class GetPaymentResponse:
     Response for Gets the payment with the specified id
     """
 
-    payment_id: Optional[int] = None
+    payment_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numerical id of the payment."""
-    request_date: Optional[str] = None
+    request_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The timestamp of when this payment's initial message was queued to be sent.
     """
-    recipient: Optional[str] = None
+    recipient: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The name of the payment recipient. This may be null if the contact does not
     have a name associated with their phone number.
     """
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The description of the payment. This is not shown to the contact. It is
     only used by internal users for context about payments.
     """
-    customer_phone: Optional[str] = None
+    customer_phone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The phone number of the contact who is being sent this payment."""
-    amount_requested: Optional[float] = None
+    amount_requested: Optional[float] = dataclass_field(default=None, kw_only=True)
     """The amount in dollars requested by this payment."""
-    is_past_due: Optional[bool] = None
+    is_past_due: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether this payment is past the request date."""
-    reminder_was_sent: Optional[bool] = None
+    reminder_was_sent: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether a text reminder has already been sent for this payment."""
-    transaction_status: Optional[str] = None
+    transaction_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The status of the transaction in authvia. This value starts as Unknown.
     """
-    textrequest_payment_status: Optional[str] = None
+    textrequest_payment_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The status of the transaction in Text Request. This represents that status
     shown in the payments page on the Text Request app. It starts as Sent.
     """
-    reference_number: Optional[str] = None
+    reference_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The user-defined id defined when payments are created that can be used to
     quickly find payments. Reference numbers are not unique; many payments can
@@ -508,40 +561,40 @@ class MarkPaymentPaidResponse:
     Response for Mark a payment as paid
     """
 
-    payment_id: Optional[int] = None
+    payment_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numerical id of the payment."""
-    request_date: Optional[str] = None
+    request_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The timestamp of when this payment's initial message was queued to be sent.
     """
-    recipient: Optional[str] = None
+    recipient: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The name of the payment recipient. This may be null if the contact does not
     have a name associated with their phone number.
     """
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The description of the payment. This is not shown to the contact. It is
     only used by internal users for context about payments.
     """
-    customer_phone: Optional[str] = None
+    customer_phone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The phone number of the contact who is being sent this payment."""
-    amount_requested: Optional[float] = None
+    amount_requested: Optional[float] = dataclass_field(default=None, kw_only=True)
     """The amount in dollars requested by this payment."""
-    is_past_due: Optional[bool] = None
+    is_past_due: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether this payment is past the request date."""
-    reminder_was_sent: Optional[bool] = None
+    reminder_was_sent: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether a text reminder has already been sent for this payment."""
-    transaction_status: Optional[str] = None
+    transaction_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The status of the transaction in authvia. This value starts as Unknown.
     """
-    textrequest_payment_status: Optional[str] = None
+    textrequest_payment_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The status of the transaction in Text Request. This represents that status
     shown in the payments page on the Text Request app. It starts as Sent.
     """
-    reference_number: Optional[str] = None
+    reference_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The user-defined id defined when payments are created that can be used to
     quickly find payments. Reference numbers are not unique; many payments can
@@ -555,40 +608,40 @@ class SendPaymentReminderResponse:
     Response for Send a follow-up text reminding the user to pay the specified payment
     """
 
-    payment_id: Optional[int] = None
+    payment_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numerical id of the payment."""
-    request_date: Optional[str] = None
+    request_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The timestamp of when this payment's initial message was queued to be sent.
     """
-    recipient: Optional[str] = None
+    recipient: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The name of the payment recipient. This may be null if the contact does not
     have a name associated with their phone number.
     """
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The description of the payment. This is not shown to the contact. It is
     only used by internal users for context about payments.
     """
-    customer_phone: Optional[str] = None
+    customer_phone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The phone number of the contact who is being sent this payment."""
-    amount_requested: Optional[float] = None
+    amount_requested: Optional[float] = dataclass_field(default=None, kw_only=True)
     """The amount in dollars requested by this payment."""
-    is_past_due: Optional[bool] = None
+    is_past_due: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether this payment is past the request date."""
-    reminder_was_sent: Optional[bool] = None
+    reminder_was_sent: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether a text reminder has already been sent for this payment."""
-    transaction_status: Optional[str] = None
+    transaction_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The status of the transaction in authvia. This value starts as Unknown.
     """
-    textrequest_payment_status: Optional[str] = None
+    textrequest_payment_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The status of the transaction in Text Request. This represents that status
     shown in the payments page on the Text Request app. It starts as Sent.
     """
-    reference_number: Optional[str] = None
+    reference_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The user-defined id defined when payments are created that can be used to
     quickly find payments. Reference numbers are not unique; many payments can
@@ -602,40 +655,40 @@ class CancelPaymentResponse:
     Response for Cancels the specified payment
     """
 
-    payment_id: Optional[int] = None
+    payment_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numerical id of the payment."""
-    request_date: Optional[str] = None
+    request_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The timestamp of when this payment's initial message was queued to be sent.
     """
-    recipient: Optional[str] = None
+    recipient: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The name of the payment recipient. This may be null if the contact does not
     have a name associated with their phone number.
     """
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The description of the payment. This is not shown to the contact. It is
     only used by internal users for context about payments.
     """
-    customer_phone: Optional[str] = None
+    customer_phone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The phone number of the contact who is being sent this payment."""
-    amount_requested: Optional[float] = None
+    amount_requested: Optional[float] = dataclass_field(default=None, kw_only=True)
     """The amount in dollars requested by this payment."""
-    is_past_due: Optional[bool] = None
+    is_past_due: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether this payment is past the request date."""
-    reminder_was_sent: Optional[bool] = None
+    reminder_was_sent: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether a text reminder has already been sent for this payment."""
-    transaction_status: Optional[str] = None
+    transaction_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The status of the transaction in authvia. This value starts as Unknown.
     """
-    textrequest_payment_status: Optional[str] = None
+    textrequest_payment_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The status of the transaction in Text Request. This represents that status
     shown in the payments page on the Text Request app. It starts as Sent.
     """
-    reference_number: Optional[str] = None
+    reference_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The user-defined id defined when payments are created that can be used to
     quickly find payments. Reference numbers are not unique; many payments can
@@ -649,12 +702,12 @@ class GetPaymentsResponse:
     Response for Gets all payments
     """
 
-    meta: Optional[Dict[str, Any]] = None
+    meta: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """
     Metadata about the data returned by this request. This data is returned by
     all bulk GET requests.
     """
-    items: Optional[List[Dict[str, Any]]] = None
+    items: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of payment entities gotten from Text Request."""
 
 
@@ -664,18 +717,18 @@ class CreatePaymentInput:
     Creates a new payment
     """
 
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Description of the payment. Description is not shown to the contact and is
     only used by internal users for context about payments.
     """
-    customer_phone: Optional[str] = None
+    customer_phone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Phone number of the contact this payment will be sent to."""
-    amount_requested: Optional[float] = None
+    amount_requested: Optional[float] = dataclass_field(default=None, kw_only=True)
     """The amount in dollars requested by this payment. """
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Message text to send to contact along with payment link."""
-    reference_number: Optional[str] = None
+    reference_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     User-defined id defined when payments are created that can be used to
     quickly find payments. Reference numbers are not unique; many payments can
@@ -689,40 +742,40 @@ class CreatePaymentResponse:
     Response for Creates a new payment
     """
 
-    payment_id: Optional[int] = None
+    payment_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numerical id of the payment."""
-    request_date: Optional[str] = None
+    request_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The timestamp of when this payment's initial message was queued to be sent.
     """
-    recipient: Optional[str] = None
+    recipient: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The name of the payment recipient. This may be null if the contact does not
     have a name associated with their phone number.
     """
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The description of the payment. This is not shown to the contact. It is
     only used by internal users for context about payments.
     """
-    customer_phone: Optional[str] = None
+    customer_phone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The phone number of the contact who is being sent this payment."""
-    amount_requested: Optional[float] = None
+    amount_requested: Optional[float] = dataclass_field(default=None, kw_only=True)
     """The amount in dollars requested by this payment."""
-    is_past_due: Optional[bool] = None
+    is_past_due: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether this payment is past the request date."""
-    reminder_was_sent: Optional[bool] = None
+    reminder_was_sent: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether a text reminder has already been sent for this payment."""
-    transaction_status: Optional[str] = None
+    transaction_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The status of the transaction in authvia. This value starts as Unknown.
     """
-    textrequest_payment_status: Optional[str] = None
+    textrequest_payment_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The status of the transaction in Text Request. This represents that status
     shown in the payments page on the Text Request app. It starts as Sent.
     """
-    reference_number: Optional[str] = None
+    reference_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The user-defined id defined when payments are created that can be used to
     quickly find payments. Reference numbers are not unique; many payments can
@@ -736,11 +789,11 @@ class GetDashboardResponse:
     Response for Get info on this specific dashboard
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numerical id of the dashboard."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the dashboard."""
-    phone: Optional[str] = None
+    phone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The texting number associated with this dashboard."""
 
 
@@ -750,7 +803,7 @@ class UpdateDashboardsNameInput:
     Update a specific dashboard's name
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The new name of the dashboard."""
 
 
@@ -760,11 +813,11 @@ class UpdateDashboardsNameResponse:
     Response for Update a specific dashboard's name
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numerical id of the dashboard."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the dashboard."""
-    phone: Optional[str] = None
+    phone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The texting number associated with this dashboard."""
 
 
@@ -774,12 +827,12 @@ class GetConversationsResponse:
     Response for Gets all conversations for this dashboard
     """
 
-    meta: Optional[Dict[str, Any]] = None
+    meta: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """
     Metadata about the data returned by this request. This data is returned by
     all bulk GET requests.
     """
-    items: Optional[List[Dict[str, Any]]] = None
+    items: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of conversation entities gotten from Text Request."""
 
 
@@ -789,12 +842,12 @@ class GetDashboardsResponse:
     Response for Get all dashboards in an account
     """
 
-    meta: Optional[Dict[str, Any]] = None
+    meta: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """
     Metadata about the data returned by this request. This data is returned by
     all bulk GET requests.
     """
-    items: Optional[List[Dict[str, Any]]] = None
+    items: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of dashboard entities gotten from Text Request."""
 
 
@@ -804,9 +857,9 @@ class CreateDashboardInput:
     Create a new dashboard with the given name and phone number
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the dashboard."""
-    phone: Optional[str] = None
+    phone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The texting number associated with this dashboard."""
 
 
@@ -816,11 +869,11 @@ class CreateDashboardResponse:
     Response for Create a new dashboard with the given name and phone number
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numerical id of the dashboard."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the dashboard."""
-    phone: Optional[str] = None
+    phone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The texting number associated with this dashboard."""
 
 
@@ -830,14 +883,11 @@ class TextingWebhookInput:
     Triggers when a text is sent or received
     """
 
-    target_url: Optional[str] = None
+    target_url: str
     """Url the webhook will redirect to"""
-    event: Optional[str] = None
+    event: str
     """event"""
-    http_verb: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "httpVerb"},
-    )
+    http_verb: str = dataclass_field(metadata={"wire_name": "httpVerb"})
     """httpVerb"""
 
 
@@ -847,11 +897,11 @@ class TextingWebhookResponse:
     Response for Triggers when a text is sent or received
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numerical id of the dashboard."""
-    target_url: Optional[str] = None
+    target_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The url the webhook will post to"""
-    event: Optional[str] = None
+    event: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The webhook's associated trigger event"""
 
 
@@ -866,7 +916,7 @@ class TextrequestClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -883,8 +933,8 @@ class TextrequestClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -905,7 +955,7 @@ class TextrequestClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -920,7 +970,84 @@ class TextrequestClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "textrequest"
 
-    async def get_messages_by_contact_phone_async(
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
+            if next_link.startswith("?"):
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
+
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
+    def list_messages_by_contact_phone(
         self,
         dashboard_id: int,
         phone_number: str,
@@ -931,11 +1058,38 @@ class TextrequestClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get a conversation's messages by a contact's phone number
 
         Get the conversation between the specified dashboard and phone number.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetMessagesByContactPhone`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            phone_number: Phone number of the contact to get messages for.
+            page: The page of entities to get. When getting values, there is a
+                max size per page, defined by page_size. If page is greater
+                than the last page, an empty array will be returned.
+            page_size: The size of each page to get. When getting values, this
+                is a max size per page, with accessing subsequent pages done by
+                the page parameter.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -956,31 +1110,52 @@ class TextrequestClient(ConnectorClientBase):
         query_params.append(f"page_size={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def send_message_by_phone_number_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("items", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def send_message_by_phone_number(
         self,
-        input: SendMessageByPhoneNumberInput,
+        input: SendMessageByPhoneNumberInput | Mapping[str, Any],
         dashboard_id: int,
         phone_number: str,
         *,
@@ -994,6 +1169,26 @@ class TextrequestClient(ConnectorClientBase):
 
         Sends a message (starting a new conversation if the given phone number
         has no message history).
+
+        Swagger operation ID: `SendMessageByPhoneNumber`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            phone_number: Phone number of the contact to send a message to.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1004,7 +1199,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/messages"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1018,6 +1213,7 @@ class TextrequestClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1025,7 +1221,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def archive_conversation_async(
+    async def archive_conversation(
         self,
         dashboard_id: int,
         phone_number: str,
@@ -1046,6 +1242,24 @@ class TextrequestClient(ConnectorClientBase):
         you don't plan on talking to in the future. Note that if a customer
         texts in \"STOP\" to prevent you from sending them any further SMS
         messages, the conversation is automatically archived.
+
+        Swagger operation ID: `ArchiveConversation`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            phone_number: Phone number of the conversation to archive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1057,7 +1271,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/archive"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1071,6 +1285,7 @@ class TextrequestClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1078,7 +1293,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def unarchive_conversation_async(
+    async def unarchive_conversation(
         self,
         dashboard_id: int,
         phone_number: str,
@@ -1095,6 +1310,24 @@ class TextrequestClient(ConnectorClientBase):
         once again appear in the queue. it will also appear in conversations
         returned by the /conversations endpoint. If a conversation is already
         unarchived, this method has no effect.
+
+        Swagger operation ID: `UnarchiveConversation`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            phone_number: Phone number of the conversation to archive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1106,7 +1339,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/unarchive"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1120,6 +1353,7 @@ class TextrequestClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1127,7 +1361,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_contact_by_phone_number_async(
+    async def get_contact_by_phone_number(
         self,
         dashboard_id: int,
         phone_number: str,
@@ -1141,6 +1375,24 @@ class TextrequestClient(ConnectorClientBase):
         Gets the contact with the specified phone number
 
         Gets the contact with the specified phone number
+
+        Swagger operation ID: `GetContactByPhoneNumber`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            phone_number: Phone number of the contact to get.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1150,7 +1402,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/{quote(str(phone_number), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1164,6 +1416,7 @@ class TextrequestClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1171,7 +1424,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_contact_async(
+    async def delete_contact(
         self,
         dashboard_id: int,
         phone_number: str,
@@ -1185,6 +1438,24 @@ class TextrequestClient(ConnectorClientBase):
         Deletes the contact with the specified phone number
 
         Deletes the contact with the specified phone number
+
+        Swagger operation ID: `DeleteContact`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            phone_number: Phone number of the contact to delete.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1194,7 +1465,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/{quote(str(phone_number), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1208,6 +1479,7 @@ class TextrequestClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1215,9 +1487,9 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_contact_async(
+    async def create_contact(
         self,
-        input: CreateContactInput,
+        input: CreateContactInput | Mapping[str, Any],
         dashboard_id: int,
         phone_number: str,
         *,
@@ -1231,6 +1503,26 @@ class TextrequestClient(ConnectorClientBase):
 
         Creates or updates a contact (depending on whether one already exists
         with the given phone number).
+
+        Swagger operation ID: `CreateContact`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            phone_number: Phone number of the contact to create or update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1240,7 +1532,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/{quote(str(phone_number), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1254,6 +1546,7 @@ class TextrequestClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1261,11 +1554,12 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_contacts_async(
+    def list_contacts(
         self,
         dashboard_id: int,
         page: int,
         page_size: int,
+        *,
         contact_phone_number: Optional[str] = None,
         last_message_timestamp_before_utc: Optional[str] = None,
         last_message_timestamp_after_utc: Optional[str] = None,
@@ -1288,18 +1582,100 @@ class TextrequestClient(ConnectorClientBase):
         custom_field_value2: Optional[str] = None,
         custom_field_id3: Optional[str] = None,
         custom_field_value3: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get all contacts that match the specified filtering criterion
 
         Gets all contacts that match the specified filtering criterion. Only
         the dashboard specified will be searched; there is no account level
         search for a number available.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetContacts`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            page: The page of entities to get. When getting values, there is a
+                max size per page, defined by page_size. If page is greater
+                than the last page, an empty array will be returned.
+            page_size: The size of each page to get. When getting values, this
+                is a max size per page, with accessing subsequent pages done by
+                the page parameter.
+            contact_phone_number: Phone number to filter contacts by.
+            last_message_timestamp_before_utc: Cutoff time for searching
+                contacts by the last message sent or received. No contacts who
+                sent messages after this time will be shown.
+            last_message_timestamp_after_utc: Cutoff time for searching
+                contacts by the last message sent or received. No contacts
+                whose last sent message is before this time will be shown.
+            contact_created_before: Cutoff time for searching contacts by when
+                they were created. No contacts created after this time will be
+                shown.
+            contact_created_after: Cutoff time for searching contacts by when
+                they were created. No contacts created before this time will be
+                shown.
+            is_resolved: Whether to search for contacts whose conversations
+                have been resolved.
+            is_blocked: Whether to search for contacts who have been blocked.
+            is_archived: Whether to search for contacts who have been archived.
+            is_suppressed: Whether to search for contacts who have been
+                suppressed.
+            has_opted_out: Whether to search for contacts who have opted out of
+                receiving texts.
+            last_message_sent_before: Cutoff time for searching contacts by
+                when the last message was sent to the customer. No contacts who
+                sent messages after this time will be shown. Uses timestamp as
+                local time. To filter by time stamp in UTC time, use
+                last_message_sent_before_utc.
+            last_message_sent_after: Cutoff time for searching contacts by when
+                the last message was sent to the customer. No contacts whose
+                last sent message is before this time will be shown. Uses
+                timestamp as local time. To filter by time stamp in UTC time,
+                use last_message_sent_after_utc.
+            last_message_received_before: Cutoff time for searching contacts by
+                the last message received from the customer. No contacts who
+                received messages after this time will be shown. Uses timestamp
+                as local time. To filter by time stamp in UTC time, use
+                last_message_sent_before_utc.
+            last_message_received_after: Cutoff time for searching contacts by
+                the last message received from the customer. No contacts whose
+                last sent message is before this time will be shown. Uses
+                timestamp as local time. To filter by time stamp in UTC time,
+                use last_message_sent_before_utc.
+            tags: Comma-separated list of guids referring to tags to filter
+                contacts by.
+            groups: Comma-separated list of integer ids referring to groups to
+                filter contacts by.
+            custom_field_id1: Guid referring to custom field to filter contacts
+                by.
+            custom_field_value1: Value referring to custom field to filter
+                contacts by.
+            custom_field_id2: Guid referring to second custom field to filter
+                contacts by.
+            custom_field_value2: Value referring to second custom field to
+                filter contacts by.
+            custom_field_id3: Guid referring to third custom field to filter
+                contacts by.
+            custom_field_value3: Value referring to third custom field to
+                filter contacts by.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1426,29 +1802,50 @@ class TextrequestClient(ConnectorClientBase):
         query_params.append(f"page_size={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def bulk_update_contacts_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("items", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def bulk_update_contacts(
         self,
         input: BulkUpdateContactsInput,
         dashboard_id: int,
@@ -1464,13 +1861,31 @@ class TextrequestClient(ConnectorClientBase):
         Only the dashboard specified will have contacts added; contacts are
         organized by dashboard, and there is no account level search for a
         number available.
+
+        Swagger operation ID: `BulkUpdateContacts`.
+
+        Args:
+            input: The request body.
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/dashboards/{quote(str(dashboard_id), safe='')}/contacts"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1484,6 +1899,7 @@ class TextrequestClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1491,7 +1907,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_group_by_id_async(
+    async def get_group_by_id(
         self,
         dashboard_id: int,
         group_id: int,
@@ -1505,6 +1921,24 @@ class TextrequestClient(ConnectorClientBase):
         Get a group by its id
 
         Gets the group with the specified id.
+
+        Swagger operation ID: `GetGroupById`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            group_id: The numerical id of the group to get.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1514,7 +1948,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/{quote(str(group_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1528,6 +1962,7 @@ class TextrequestClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1535,7 +1970,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_group_async(
+    async def delete_group(
         self,
         dashboard_id: int,
         group_id: int,
@@ -1551,6 +1986,24 @@ class TextrequestClient(ConnectorClientBase):
         Deletes the group with the specified id. This will succeed even if
         there are contacts that are members of the group (the contacts will not
         be deleted).
+
+        Swagger operation ID: `DeleteGroup`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            group_id: The numerical id of the group to delete.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1560,7 +2013,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/{quote(str(group_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1574,6 +2027,7 @@ class TextrequestClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1581,9 +2035,9 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_group_async(
+    async def update_group(
         self,
-        input: UpdateGroupInput,
+        input: UpdateGroupInput | Mapping[str, Any],
         dashboard_id: int,
         group_id: int,
         *,
@@ -1597,6 +2051,26 @@ class TextrequestClient(ConnectorClientBase):
 
         Updates a group's name using the group's numerical id. If the passed in
         group id does not exist, the call will fail.
+
+        Swagger operation ID: `UpdateGroup`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            group_id: The numerical id of the group to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1606,7 +2080,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/{quote(str(group_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1620,6 +2094,7 @@ class TextrequestClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1627,7 +2102,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_groups_async(
+    def list_groups(
         self,
         dashboard_id: int,
         page: int,
@@ -1637,11 +2112,37 @@ class TextrequestClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Gets all groups
 
         Gets all groups for the user's account.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetGroups`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            page: The page of entities to get. When getting values, there is a
+                max size per page, defined by page_size. If page is greater
+                than the last page, an empty array will be returned.
+            page_size: The size of each page to get. When getting values, this
+                is a max size per page, with accessing subsequent pages done by
+                the page parameter.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1658,31 +2159,52 @@ class TextrequestClient(ConnectorClientBase):
         query_params.append(f"page_size={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def create_group_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("items", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def create_group(
         self,
-        input: CreateGroupInput,
+        input: CreateGroupInput | Mapping[str, Any],
         dashboard_id: int,
         *,
         timeout: Optional[float] = None,
@@ -1694,13 +2216,32 @@ class TextrequestClient(ConnectorClientBase):
         Creates a new group
 
         Creates a new group with the provided name.
+
+        Swagger operation ID: `CreateGroup`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/dashboards/{quote(str(dashboard_id), safe='')}/groups"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1714,6 +2255,7 @@ class TextrequestClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1721,7 +2263,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_tags_async(
+    def list_tags(
         self,
         dashboard_id: int,
         page: int,
@@ -1731,12 +2273,38 @@ class TextrequestClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Gets all tags
 
         Gets all the tags for this dashboard. Tags are unique between
         dashboards.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetTags`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            page: The page of entities to get. When getting values, there is a
+                max size per page, defined by page_size. If page is greater
+                than the last page, an empty array will be returned.
+            page_size: The size of each page to get. When getting values, this
+                is a max size per page, with accessing subsequent pages done by
+                the page parameter.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1753,29 +2321,50 @@ class TextrequestClient(ConnectorClientBase):
         query_params.append(f"page_size={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_custom_fields_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("items", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_custom_fields(
         self,
         dashboard_id: int,
         *,
@@ -1783,40 +2372,81 @@ class TextrequestClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Gets all custom fields
 
         Gets all custom fields for this dashboard. Custom fields are unique
         between dashboards.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetCustomFields`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/dashboards/{quote(str(dashboard_id), safe='')}/fields"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_payment_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def get_payment(
         self,
         dashboard_id: int,
         payment_id: int,
@@ -1830,6 +2460,24 @@ class TextrequestClient(ConnectorClientBase):
         Gets the payment with the specified id
 
         Gets the payment with the specified id.
+
+        Swagger operation ID: `GetPayment`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            payment_id: The numerical id of the payment to get.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1839,7 +2487,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/{quote(str(payment_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1853,6 +2501,7 @@ class TextrequestClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1860,7 +2509,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def mark_payment_paid_async(
+    async def mark_payment_paid(
         self,
         dashboard_id: int,
         payment_id: int,
@@ -1879,6 +2528,24 @@ class TextrequestClient(ConnectorClientBase):
         endpoint is not required for payments paid through the payments-portal
         sent through Text Request; that will automatically mark a payment as
         paid.
+
+        Swagger operation ID: `MarkPaymentPaid`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            payment_id: The numerical id of the payment to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1889,7 +2556,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/mark_as_paid"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1903,6 +2570,7 @@ class TextrequestClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1910,7 +2578,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def send_payment_reminder_async(
+    async def send_payment_reminder(
         self,
         dashboard_id: int,
         payment_id: int,
@@ -1926,6 +2594,24 @@ class TextrequestClient(ConnectorClientBase):
         Sends a reminder to the contact to pay the specified payment. The
         content of the message is auto-generated. To avoid spam, only one
         reminder can be sent per payment
+
+        Swagger operation ID: `SendPaymentReminder`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            payment_id: The numerical id of the payment to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1936,7 +2622,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/resend"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1950,6 +2636,7 @@ class TextrequestClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1957,7 +2644,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def cancel_payment_async(
+    async def cancel_payment(
         self,
         dashboard_id: int,
         payment_id: int,
@@ -1973,6 +2660,24 @@ class TextrequestClient(ConnectorClientBase):
         Cancels the specified payment, texting the user that the payment has
         been canceled. Payments cannot be edited, so canceling and issuing a
         new payment is the best way to correct a payment.
+
+        Swagger operation ID: `CancelPayment`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            payment_id: The numerical id of the payment to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1983,7 +2688,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/cancel"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1997,6 +2702,7 @@ class TextrequestClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2004,26 +2710,60 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_payments_async(
+    def list_payments(
         self,
         dashboard_id: int,
         page: int,
         page_size: int,
+        *,
         reference_number: Optional[str] = None,
         phone_number: Optional[str] = None,
         sort_type: Optional[str] = None,
         sort_direction: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Gets all payments
 
         Gets all payments, including canceled and paid payments. These can be
         filtered using the query parameters.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetPayments`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            page: The page of entities to get. When getting values, there is a
+                max size per page, defined by page_size. If page is greater
+                than the last page, an empty array will be returned.
+            page_size: The size of each page to get. When getting values, this
+                is a max size per page, with accessing subsequent pages done by
+                the page parameter.
+            reference_number: User-defined id defined when payments are created
+                that can be used to quickly find payments. Reference numbers
+                are not unique; many payments can have the same reference.
+            phone_number: Phone number of the contact this payment was sent to.
+            sort_type: Property to sort payments by. Can be \"amount\",
+                \"contact\", \"date\", \"status\".
+            sort_direction: Direction to sort payments in. Can be \"desc\" for
+                greatest to smallest, or \"asc\" for smallest to greatest.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2060,31 +2800,52 @@ class TextrequestClient(ConnectorClientBase):
         query_params.append(f"page_size={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def create_payment_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("items", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def create_payment(
         self,
-        input: CreatePaymentInput,
+        input: CreatePaymentInput | Mapping[str, Any],
         dashboard_id: int,
         *,
         timeout: Optional[float] = None,
@@ -2097,13 +2858,32 @@ class TextrequestClient(ConnectorClientBase):
 
         Creates a new payment with the provided message to the provided
         contact.
+
+        Swagger operation ID: `CreatePayment`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/dashboards/{quote(str(dashboard_id), safe='')}/payments"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2117,6 +2897,7 @@ class TextrequestClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2124,7 +2905,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_dashboard_async(
+    async def get_dashboard(
         self,
         dashboard_id: int,
         *,
@@ -2137,13 +2918,30 @@ class TextrequestClient(ConnectorClientBase):
         Get info on this specific dashboard
 
         Returns the name and phone of the dashboard.
+
+        Swagger operation ID: `GetDashboard`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/dashboards/{quote(str(dashboard_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2157,6 +2955,7 @@ class TextrequestClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2164,7 +2963,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_dashboard_async(
+    async def delete_dashboard(
         self,
         dashboard_id: int,
         *,
@@ -2177,13 +2976,30 @@ class TextrequestClient(ConnectorClientBase):
         Deletes the specified dashboard
 
         Deletes the specified dashboard.
+
+        Swagger operation ID: `DeleteDashboard`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/dashboards/{quote(str(dashboard_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2197,6 +3013,7 @@ class TextrequestClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2204,9 +3021,9 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_dashboards_name_async(
+    async def update_dashboards_name(
         self,
-        input: UpdateDashboardsNameInput,
+        input: UpdateDashboardsNameInput | Mapping[str, Any],
         dashboard_id: int,
         *,
         timeout: Optional[float] = None,
@@ -2221,13 +3038,32 @@ class TextrequestClient(ConnectorClientBase):
         If you want a new number with another dashboard's contacts, you will
         have to create a new dashboard with a POST and add the contacts with a
         bulk export/import.
+
+        Swagger operation ID: `UpdateDashboardsName`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/dashboards/{quote(str(dashboard_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2241,6 +3077,7 @@ class TextrequestClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2248,26 +3085,63 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_conversations_async(
+    def list_conversations(
         self,
         dashboard_id: int,
+        *,
         tags: Optional[str] = None,
         show_unresolved_only: Optional[str] = None,
         include_archived: Optional[str] = None,
         search: Optional[str] = None,
         page: Optional[int] = None,
         page_size: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Gets all conversations for this dashboard
 
         Gets all conversations for this dashboard, and includes info on the
         last message for each conversation.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetConversations`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            tags: Comma-separated list of guids referring to tags to filter
+                conversations by.
+            show_unresolved_only: Whether to only search for contacts whose
+                conversations have been resolved. If this is false, both
+                resolved and unresolved conversations will be shown.
+            include_archived: Whether to include conversations with contacts
+                that have been archived.
+            search: Search term for filtering conversations by phone number or
+                display name. If the search term is less than a full name or
+                phone number, the search will return all conversations that
+                partially match it.
+            page: The page of entities to get. When getting values, there is a
+                max size per page, defined by page_size. If page is greater
+                than the last page, an empty array will be returned.
+            page_size: The size of each page to get. When getting values, this
+                is a max size per page, with accessing subsequent pages done by
+                the page parameter.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2306,42 +3180,86 @@ class TextrequestClient(ConnectorClientBase):
             query_params.append(f"page_size={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_dashboards_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("items", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_dashboards(
         self,
+        *,
         page: Optional[int] = None,
         page_size: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get all dashboards in an account
 
         Gets all dashboards in an account.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetDashboards`.
+
+        Args:
+            page: The page of entities to get. When getting values, there is a
+                max size per page, defined by page_size. If page is greater
+                than the last page, an empty array will be returned.
+            page_size: The size of each page to get. When getting values, this
+                is a max size per page, with accessing subsequent pages done by
+                the page parameter.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/dashboards"
         query_params = []
@@ -2357,31 +3275,52 @@ class TextrequestClient(ConnectorClientBase):
             query_params.append(f"page_size={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def create_dashboard_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("items", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def create_dashboard(
         self,
-        input: CreateDashboardInput,
+        input: CreateDashboardInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2397,10 +3336,26 @@ class TextrequestClient(ConnectorClientBase):
         search for provisioned numbers in a specific area code using GET
         /dashboards/provisioning. If the phone number is already in use, a Bad
         Request exception will be thrown.
+
+        Swagger operation ID: `CreateDashboard`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/dashboards"
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2414,6 +3369,7 @@ class TextrequestClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

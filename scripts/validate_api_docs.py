@@ -64,6 +64,10 @@ def validate_api_docs(site_directory: Path) -> list[str]:
         errors.extend(_format_difference(f"Missing {section} API pages", expected - actual))
         errors.extend(_format_difference(f"Unexpected {section} API pages", actual - expected))
 
+    for section in ("core-aio", "connectors-aio"):
+        if (api_directory / section).exists():
+            errors.append(f"Obsolete dual-mode API section: '{section}'. Build a clean site.")
+
     return errors
 
 
@@ -92,7 +96,8 @@ def main() -> int:
     core_count = len(_source_module_names(PACKAGE_ROOT / "sdk"))
     print(
         "API documentation validation passed: "
-        f"{core_count} core modules and {connector_count} connector modules.",
+        f"{core_count} async core modules and "
+        f"{connector_count} async connector modules.",
     )
     return 0
 

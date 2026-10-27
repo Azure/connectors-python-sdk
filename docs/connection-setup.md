@@ -310,14 +310,24 @@ Add the runtime URL to your application settings:
 
 ## Authentication Modes
 
-The generated connector clients (e.g., `Office365Client`, `TeamsClient`) authenticate to API Hub using Azure credentials. Each client offers two constructors that cover three authentication modes:
+Generated connector clients authenticate to API Hub with caller-owned
+`AsyncTokenCredential` or `AzureKeyCredential` credentials. Python clients are
+async-only; import clients from their root connector modules.
 
 ### Mode 1: DefaultAzureCredential (Recommended for Local Development)
 
-Uses the [DefaultAzureCredential](https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication/?tabs=command-line#defaultazurecredential) chain, which tries multiple sources automatically — Azure CLI, Visual Studio, environment variables, and managed identity.
+Use the [DefaultAzureCredential](https://learn.microsoft.com/python/api/azure-identity/azure.identity.aio.defaultazurecredential) chain for local development and managed identity.
 
-```csharp
-var client = new Office365Client(connectionRuntimeUrl);
+```python
+from azure.identity.aio import DefaultAzureCredential
+
+from azure.connectors.office365 import Office365Client
+
+
+async def use_connection(connection_runtime_url: str) -> None:
+    async with DefaultAzureCredential() as credential:
+        async with Office365Client(connection_runtime_url, credential) as client:
+            print(client.connector_name)
 ```
 
 This is the simplest setup. Locally, it authenticates as your Azure CLI identity (`az login`), which must have an [access policy](#step-5-add-access-policy-for-clilocal-testing) on the connection for local testing. When deployed to Azure, it falls through to the app's managed identity, which must have an [access policy](#a5-add-access-policy-for-function-app-msi) on the connection.
@@ -326,22 +336,28 @@ This is the simplest setup. Locally, it authenticates as your Azure CLI identity
 
 Uses `ManagedIdentityCredential` with no client ID, targeting the app's system-assigned identity.
 
-```csharp
-var client = new Office365Client(
-    connectionRuntimeUrl,
-    managedIdentityClientId: null);
+```python
+from azure.identity.aio import ManagedIdentityCredential
+
+
+async def use_managed_identity(connection_runtime_url: str) -> None:
+    async with ManagedIdentityCredential() as credential:
+        async with Office365Client(connection_runtime_url, credential) as client:
+            print(client.connector_name)
 ```
 
-Pass `null` (or an empty string) for `managedIdentityClientId`. The Function App must have system-assigned managed identity enabled, and the identity must have an [access policy](#a5-add-access-policy-for-function-app-msi) on the connection.
+Omit `client_id` for the system-assigned identity. The Function App must have
+that identity enabled and grant it an [access policy](#a5-add-access-policy-for-function-app-msi).
 
 ### Mode 3: User-Assigned Managed Identity
 
 Uses `ManagedIdentityCredential` with a specific client ID, targeting a user-assigned managed identity attached to the app.
 
-```csharp
-var client = new Office365Client(
-    connectionRuntimeUrl,
-    managedIdentityClientId: "<client-id-of-user-assigned-msi>");
+```python
+async def use_user_assigned_identity(connection_runtime_url: str) -> None:
+    async with ManagedIdentityCredential(client_id="<user-assigned-client-id>") as credential:
+        async with Office365Client(connection_runtime_url, credential) as client:
+            print(client.connector_name)
 ```
 
 Use this when multiple apps share a single identity, or when you need the identity to outlive any single app deployment.
@@ -358,14 +374,19 @@ Use this when multiple apps share a single identity, or when you need the identi
 
 ### Custom Credentials
 
-The primary constructor also accepts any `TokenCredential` directly, enabling advanced scenarios (e.g., certificate-based auth, chained credentials):
+The constructor accepts any `AsyncTokenCredential`, including async chained
+credentials. The caller must close the credential:
 
-```csharp
-var credential = new ChainedTokenCredential(
-    new ManagedIdentityCredential(),
-    new AzurePowerShellCredential());
+```python
+from azure.identity.aio import AzureCliCredential, ChainedTokenCredential, ManagedIdentityCredential
 
-var client = new Office365Client(connectionRuntimeUrl, credential);
+
+async def use_chained_credentials(connection_runtime_url: str) -> None:
+    async with ChainedTokenCredential(
+        ManagedIdentityCredential(), AzureCliCredential()
+    ) as credential:
+        async with Office365Client(connection_runtime_url, credential) as client:
+            print(client.connector_name)
 ```
 
 ---

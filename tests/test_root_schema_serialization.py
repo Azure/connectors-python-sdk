@@ -62,7 +62,7 @@ async def test_array_root_is_serialized_through_send_async(
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.send_async(
+            await client.send(
                 "POST",
                 "https://api.example.com/messages",
                 body=messages,

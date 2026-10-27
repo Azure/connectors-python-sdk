@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Cloudmersive Convert Connector SDK Sample
+Cloudmersive Convert sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Cloudmersive Convert connector SDK.
+This sample demonstrates how to use the Cloudmersive Convert client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a Cloudmersive Convert connection
@@ -27,8 +27,8 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
+from azure.connectors.cloudmersiveconvert import CloudmersiveconvertClient
 from azure.connectors.cloudmersiveconvert import (
-    CloudmersiveconvertClient,
     GetDocxBodyRequest,
     ScreenshotRequest,
 )
@@ -50,7 +50,7 @@ async def example_1_convert_url_to_pdf():
                     url="https://www.example.com",
                 )
 
-                result = await client.convert_web_url_to_pdf_async(input=request)
+                result = await client.convert_web_url_to_pdf(input=request)
 
                 print(f"Converted PDF byte length: {len(result) if result else 0}")
 
@@ -72,7 +72,7 @@ async def example_2_get_docx_body():
                     input_file_url="https://example.com/document.docx",
                 )
 
-                result = await client.edit_document_docx_body_async(input=request)
+                result = await client.edit_document_docx_body(input=request)
 
                 print(f"DOCX body result: {result}")
 

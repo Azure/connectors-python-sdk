@@ -6,9 +6,9 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.excelonline import ExcelonlineClient
 from azure.connectors.excelonline import (
     CreateWorksheetInput,
-    ExcelonlineClient,
     GetAllWorksheetsResponse,
     GetColumnsResponse,
     GetTablesResponse,
@@ -28,27 +28,27 @@ from tests.generated_connector_test_utils import resolve_generated_result
 async def _invoke_operation(client: ExcelonlineClient, operation: str):
     """Invoke an Excel Online operation by name for shared error tests."""
     if operation == "create_table":
-        return await client.create_table_async(
+        return await client.create_table(
             input=TableToCreate(table_name="Table1", range="A1:B2"),
             drive="drive123",
             file="file123",
         )
     if operation == "create_id_column":
-        return await client.create_id_column_async(
+        return await client.create_id_column(
             drive="drive123",
             file="file123",
             table="Table1",
             id_column="ID",
         )
-    if operation == "get_items":
-        return await resolve_generated_result(client.get_items_async(
+    if operation == "list_items":
+        return await resolve_generated_result(client.list_items(
             drive="drive123",
             file="file123",
             table="Table1",
             top="10",
         ))
     if operation == "get_item":
-        return await client.get_item_async(
+        return await client.get_item(
             drive="drive123",
             file="file123",
             table="Table1",
@@ -56,7 +56,7 @@ async def _invoke_operation(client: ExcelonlineClient, operation: str):
             id_column="ID",
         )
     if operation == "delete_item":
-        return await client.delete_item_async(
+        return await client.delete_item(
             drive="drive123",
             file="file123",
             table="Table1",
@@ -64,7 +64,7 @@ async def _invoke_operation(client: ExcelonlineClient, operation: str):
             id_column="ID",
         )
     if operation == "patch_item":
-        return await client.patch_item_async(
+        return await client.patch_item(
             input=Item(dynamic_properties={"Name": "Updated"}),
             drive="drive123",
             file="file123",
@@ -72,28 +72,34 @@ async def _invoke_operation(client: ExcelonlineClient, operation: str):
             id="row1",
             id_column="ID",
         )
-    if operation == "get_all_worksheets":
-        return await client.get_all_worksheets_async(drive="drive123", file="file123")
+    if operation == "list_all_worksheets":
+        return await resolve_generated_result(
+            client.list_all_worksheets(drive="drive123", file="file123")
+        )
     if operation == "create_worksheet":
-        return await client.create_worksheet_async(
+        return await client.create_worksheet(
             input=CreateWorksheetInput(name="Sheet2"),
             drive="drive123",
             file="file123",
         )
-    if operation == "get_tables":
-        return await client.get_tables_async(drive="drive123", file="file123")
+    if operation == "list_tables":
+        return await resolve_generated_result(
+            client.list_tables(drive="drive123", file="file123")
+        )
     if operation == "add_row":
-        return await client.add_row_async(
+        return await client.add_row(
             input=Item(dynamic_properties={"Name": "Item1", "Value": 100}),
             drive="drive123",
             file="file123",
             table="Table1",
         )
-    if operation == "get_columns":
-        return await client.get_columns_async(
-            drive="drive123",
-            file="file123",
-            table="Table1",
+    if operation == "list_columns":
+        return await resolve_generated_result(
+            client.list_columns(
+                drive="drive123",
+                file="file123",
+                table="Table1",
+            )
         )
 
     raise ValueError(f"Unsupported operation '{operation}'.")
@@ -132,7 +138,7 @@ class TestExcelonlineClientInitialization:
         client = ExcelonlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -199,11 +205,11 @@ class TestExcelonlineClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_table_async(
+            result = await client.create_table(
                 input=TableToCreate(table_name="Table1", range="A1:B2"),
                 drive="drive123",
                 file="file123",
@@ -224,11 +230,11 @@ class TestExcelonlineClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await resolve_generated_result(client.get_items_async(
+            result = await resolve_generated_result(client.list_items(
                 drive="drive123",
                 file="file123",
                 table="Table1",
@@ -252,11 +258,11 @@ class TestExcelonlineClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.patch_item_async(
+            result = await client.patch_item(
                 input=Item(dynamic_properties={"Name": "Updated"}),
                 drive="drive123",
                 file="file123",
@@ -270,8 +276,8 @@ class TestExcelonlineClientMethods:
             assert isinstance(mock_send.call_args.kwargs["body"], Item)
 
     @pytest.mark.asyncio
-    async def test_get_all_worksheets_success(self, mock_credential):
-        """Test get_all_worksheets_async uses codeless worksheets endpoint."""
+    async def test_list_all_worksheets_success(self, mock_credential):
+        """Test list_all_worksheets uses codeless worksheets endpoint."""
         client = ExcelonlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
@@ -280,13 +286,15 @@ class TestExcelonlineClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_all_worksheets_async(drive="drive123", file="file123")
+            result = await resolve_generated_result(
+                client.list_all_worksheets(drive="drive123", file="file123")
+            )
 
-            assert len(result["value"]) == 1
+            assert result == [{"name": "Sheet1"}]
             assert "/workbook/worksheets" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
@@ -300,11 +308,11 @@ class TestExcelonlineClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.add_row_async(
+            result = await client.add_row(
                 input=Item(dynamic_properties={"Name": "Item1"}),
                 drive="drive123",
                 file="file123",
@@ -324,15 +332,15 @@ class TestExcelonlineClientErrorHandling:
         [
             "create_table",
             "create_id_column",
-            "get_items",
+            "list_items",
             "get_item",
             "delete_item",
             "patch_item",
-            "get_all_worksheets",
+            "list_all_worksheets",
             "create_worksheet",
-            "get_tables",
+            "list_tables",
             "add_row",
-            "get_columns",
+            "list_columns",
         ],
     )
     async def test_error_response_raises_exception_for_all_operations(
@@ -349,7 +357,7 @@ class TestExcelonlineClientErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):

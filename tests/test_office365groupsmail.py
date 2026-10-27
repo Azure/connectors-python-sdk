@@ -6,12 +6,13 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.office365groupsmail import Office365groupsmailClient
 from azure.connectors.office365groupsmail import (
     Conversation,
     CreateConversationBody,
     ForwardPostBody,
+    GetUsersGraphAction,
     ListConversationsResponse,
-    Office365groupsmailClient,
     ReplyConversationThreadBody,
     TRIGGER_OPERATIONS,
 )
@@ -20,93 +21,93 @@ from azure.connectors.sdk import (
 )
 from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
-from tests.generated_connector_test_utils import resolve_generated_result
+from tests.generated_connector_test_utils import model_instance, resolve_generated_result
 
 
 async def _invoke_operation(client: Office365groupsmailClient, operation: str):
     """Invoke an operation by name for shared parameterized tests."""
     if operation == "list_conversations":
-        return await resolve_generated_result(client.list_conversations_async(group_id="group123"))
+        return await resolve_generated_result(client.list_conversations(group_id="group123"))
     if operation == "create_conversation":
-        return await client.create_conversation_async(
+        return await client.create_conversation(
             input=CreateConversationBody(topic="Hello"),
             group_id="group123",
         )
     if operation == "get_group_conversation":
-        return await client.get_group_conversation_async(
+        return await client.get_group_conversation(
             group_id="group123",
             conversation_id="conv123",
         )
     if operation == "list_conversation_threads":
-        return await resolve_generated_result(client.list_conversation_threads_async(
+        return await resolve_generated_result(client.list_conversation_threads(
             group_id="group123",
             conversation_id="conv123",
         ))
     if operation == "create_conversation_thread":
-        return await client.create_conversation_thread_async(
+        return await client.create_conversation_thread(
             input=CreateConversationBody(topic="Thread"),
             group_id="group123",
             conversation_id="conv123",
         )
     if operation == "list_group_threads":
-        return await resolve_generated_result(client.list_group_threads_async(group_id="group123"))
+        return await resolve_generated_result(client.list_group_threads(group_id="group123"))
     if operation == "create_group_thread":
-        return await client.create_group_thread_async(
+        return await client.create_group_thread(
             input=CreateConversationBody(topic="Group thread"),
             group_id="group123",
         )
     if operation == "get_conversation_thread":
-        return await client.get_conversation_thread_async(
+        return await client.get_conversation_thread(
             group_id="group123",
             thread_id="thread123",
         )
     if operation == "delete_conversation_thread":
-        return await client.delete_conversation_thread_async(
+        return await client.delete_conversation_thread(
             group_id="group123",
             thread_id="thread123",
         )
     if operation == "list_thread_posts":
-        return await resolve_generated_result(client.list_thread_posts_async(
+        return await resolve_generated_result(client.list_thread_posts(
             group_id="group123",
             thread_id="thread123",
         ))
     if operation == "get_thread":
-        return await client.get_thread_async(
+        return await client.get_thread(
             group_id="group123",
             thread_id="thread123",
             post_id="post123",
         )
-    if operation == "get_attachments":
-        return await resolve_generated_result(client.get_attachments_async(
+    if operation == "list_attachments":
+        return await resolve_generated_result(client.list_attachments(
             group_id="group123",
             thread_id="thread123",
             post_id="post123",
         ))
     if operation == "reply_to_a_thread":
-        return await client.reply_to_a_thread_async(
+        return await client.reply_to_a_thread(
             input=ReplyConversationThreadBody(),
             group_id="group123",
             thread_id="thread123",
         )
     if operation == "reply":
-        return await client.reply_async(
+        return await client.reply(
             input=ReplyConversationThreadBody(),
             group_id="group123",
             thread_id="thread123",
             post_id="post123",
         )
     if operation == "http_request":
-        return await client.http_request_async(input=b"request")
+        return await client.http_request(input=b"request")
     if operation == "forward":
-        return await client.forward_async(
-            input=ForwardPostBody(comment="Forward this"),
+        return await client.forward(
+            input=model_instance(ForwardPostBody, comment="Forward this"),
             group_mail="group@contoso.com",
             conversation_id="conv123",
             thread_id="thread123",
             post_id="post123",
         )
     if operation == "list_groups":
-        return await client.list_groups_async()
+        return await resolve_generated_result(client.list_groups())
 
     raise ValueError(f"Unsupported operation '{operation}'.")
 
@@ -144,7 +145,7 @@ class TestOffice365groupsmailClientInitialization:
         client = Office365groupsmailClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -202,12 +203,12 @@ class TestOffice365groupsmailClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
             result = await resolve_generated_result(
-                client.list_conversations_async(group_id="group123")
+                client.list_conversations(group_id="group123")
             )
 
             assert len(result) == 1
@@ -224,11 +225,11 @@ class TestOffice365groupsmailClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_conversation_async(
+            result = await client.create_conversation(
                 input=CreateConversationBody(topic="Hi"),
                 group_id="group123",
             )
@@ -247,11 +248,11 @@ class TestOffice365groupsmailClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.get_thread_async(
+            await client.get_thread(
                 group_id="group123",
                 thread_id="thread123",
                 post_id="post123",
@@ -270,11 +271,11 @@ class TestOffice365groupsmailClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.list_groups_async()
+            await resolve_generated_result(client.list_groups())
 
             call_path = mock_send.call_args[0][1]
             assert "$filter=" in call_path
@@ -300,7 +301,7 @@ class TestOffice365groupsmailClientErrorHandling:
             "delete_conversation_thread",
             "list_thread_posts",
             "get_thread",
-            "get_attachments",
+            "list_attachments",
             "reply_to_a_thread",
             "reply",
             "http_request",
@@ -322,7 +323,7 @@ class TestOffice365groupsmailClientErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
@@ -359,6 +360,12 @@ class TestOffice365groupsmailTypeSerialization:
 
     def test_forward_post_body_uses_swagger_wire_names(self):
         """Test the current forward-post request preserves Swagger casing."""
-        request = ForwardPostBody(comment="Please review")
+        request = ForwardPostBody(
+            to_recipients=[GetUsersGraphAction()],
+            comment="Please review",
+        )
 
-        assert to_wire(request) == {"Comment": "Please review"}
+        assert to_wire(request) == {
+            "Comment": "Please review",
+            "ToRecipients": [{}],
+        }

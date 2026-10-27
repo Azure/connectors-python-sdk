@@ -1,4 +1,4 @@
-"""Meeting Room Map connector SDK sample."""
+"""Meeting Room Map sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os
@@ -24,7 +24,7 @@ async def main() -> None:
                 CONNECTION_RUNTIME_URL,
                 credential,
             ) as client:
-                categories = await client.get_categories_async()
+                categories = [item async for item in client.list_categories()]
                 print(f"Categories: {categories}")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")

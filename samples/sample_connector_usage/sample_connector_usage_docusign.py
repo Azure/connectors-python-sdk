@@ -1,7 +1,7 @@
 """
-DocuSign Connector SDK Sample
+DocuSign sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the DocuSign connector SDK.
+This sample demonstrates how to use the DocuSign client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with DocuSign connection
@@ -38,8 +38,8 @@ async def example_1_get_login_accounts() -> list[dict]:
 
     async with DefaultAzureCredential() as credential:
         async with DocusignClient(CONNECTION_RUNTIME_URL, credential) as client:
-            accounts_response = await client.get_login_accounts_async()
-            accounts = accounts_response.get("accounts", []) if accounts_response else []
+            accounts_response = [item async for item in client.list_login_accounts()]
+            accounts = accounts_response
 
             print(f"Found {len(accounts)} accounts")
             for account in accounts[:10]:
@@ -54,12 +54,14 @@ async def example_2_search_envelopes(account_id: str) -> None:
 
     async with DefaultAzureCredential() as credential:
         async with DocusignClient(CONNECTION_RUNTIME_URL, credential) as client:
-            envelopes_response = await client.search_list_envelopes_async(
+            envelopes_response = await client.search_list_envelopes(
                 account_id=account_id,
                 top=5,
             )
 
-            envelopes = envelopes_response.get("value", []) if envelopes_response else []
+            envelopes = (
+                envelopes_response.get("value", []) if envelopes_response else []
+            )
             print(f"Found {len(envelopes)} envelopes")
             for envelope in envelopes[:5]:
                 print(f"  - {envelope.get('envelopeId')} ({envelope.get('status')})")
@@ -72,7 +74,7 @@ async def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("DocuSign Connector SDK - Sample Usage")
+    print("DocuSign sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

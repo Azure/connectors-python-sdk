@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
+from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
 from azure.core.credentials_async import AsyncTokenCredential
 from azure.core.pipeline.transport import AsyncHttpTransport
@@ -18,7 +19,52 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "GithubClient",
+    "ActionsPublicKey",
+    "Commit",
+    "CommitComparison",
+    "CreateReferenceRequest",
+    "CreateRepositorySecretRequest",
+    "CreateRepositoryUsingTemplateRequest",
+    "DiffEntry",
+    "GeneralAPIModel",
+    "GitReference",
+    "GitUser",
+    "GraphQlQuery",
+    "IssueBasicDetailsModel",
+    "IssueDetailsModel",
+    "IssueUpdateModel",
+    "Label",
+    "LicenseDetails",
+    "Link",
+    "Milestone",
+    "MilestoneUpdateModel",
+    "MultipleFetchModel",
+    "MultipleSearchFetchModel",
+    "PullRequest",
+    "PullRequestCreateRequest",
+    "PullRequestFile",
+    "PullRequestMergeRequest",
+    "PullRequestMergeResult",
+    "PullRequestUpdateRequest",
+    "QueryRequest",
+    "RepositoryDetails",
+    "RepositoryDispatchEvent",
+    "RepositoryMiniDetails",
+    "RequestReviewersBody",
+    "SingleSearchFetchModel",
+    "TeamDetails",
+    "UserDetailsModel",
+    "Verification",
+    "WebhookCreationResponse",
+    "WebhookPullRequestResponse",
+    "WebhookRequestBody",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -29,22 +75,27 @@ class IssueDetailsModel:
     Response for Create an issue
     """
 
-    title: Optional[str] = None
+    title: str
     """Summary of the issue."""
-    body: Optional[str] = None
+    body: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of the issue."""
-    assignee: Optional[UserDetailsModel] = None
-    number: Optional[int] = None
+    assignee: Optional[
+        UserDetailsModel | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    number: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Unique id of the issue."""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Status of the issue."""
-    created_at: Optional[str] = None
+    created_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)."""
-    repository_url: Optional[str] = None
+    repository_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Web link to the repository."""
 
 
-MultipleFetchModel = List["GeneralAPIModel"]
+MultipleFetchModel = List["GeneralAPIModel | Mapping[str, Any]"]
 
 
 @dataclass
@@ -53,17 +104,17 @@ class ActionsPublicKey:
     Response for Get a repository public key
     """
 
-    key_id: Optional[str] = None
+    key_id: str
     """The identifier for the key."""
-    key: Optional[str] = None
+    key: str
     """The Base64 encoded public key."""
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the key."""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Public key url."""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Public key title."""
-    created_at: Optional[str] = None
+    created_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date and time when the key was created."""
 
 
@@ -73,182 +124,192 @@ class RepositoryDetails:
     Response for Create a repository using a template
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the repository."""
-    node_id: Optional[str] = None
+    node_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Node Id of the repository."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the repository."""
-    full_name: Optional[str] = None
+    full_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The full name of the repository."""
-    license: Optional[LicenseDetails] = None
-    forks: Optional[int] = None
+    license: Optional[
+        LicenseDetails | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    forks: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of forks of the repository."""
-    permissions: Optional[Dict[str, Any]] = None
+    permissions: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Permissions on the repository."""
-    owner: Optional[UserDetailsModel] = None
-    private: Optional[bool] = None
+    owner: Optional[
+        UserDetailsModel | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    private: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the repository is private or public."""
-    html_url: Optional[str] = None
+    html_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Html Url of the repository"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The description of the repository"""
-    fork: Optional[bool] = None
+    fork: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """If the repository is a fork?"""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The HTTP URL for this repository"""
-    archive_url: Optional[str] = None
+    archive_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Archive URL for this repository"""
-    assignees_url: Optional[str] = None
+    assignees_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Assignees URL for this repository"""
-    blobs_url: Optional[str] = None
+    blobs_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Blobs URL for this repository"""
-    branches_url: Optional[str] = None
+    branches_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Branches URL for this repository"""
-    collaborators_url: Optional[str] = None
+    collaborators_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Collaborators URL for this repository"""
-    comments_url: Optional[str] = None
+    comments_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Comments URL for this repository"""
-    commits_url: Optional[str] = None
+    commits_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Commits URL for this repository"""
-    compare_url: Optional[str] = None
+    compare_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Compare URL for this repository"""
-    contents_url: Optional[str] = None
+    contents_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Contents URL for this repository"""
-    contributors_url: Optional[str] = None
+    contributors_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Contributors URL for this repository"""
-    deployments_url: Optional[str] = None
+    deployments_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Deployments URL for this repository"""
-    downloads_url: Optional[str] = None
+    downloads_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Downloads URL for this repository"""
-    events_url: Optional[str] = None
+    events_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Events URL for this repository"""
-    forks_url: Optional[str] = None
+    forks_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Forks URL for this repository"""
-    git_commits_url: Optional[str] = None
+    git_commits_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Git Commits URL for this repository"""
-    git_refs_url: Optional[str] = None
+    git_refs_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Git References URL for this repository"""
-    git_tags_url: Optional[str] = None
+    git_tags_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Git Tags URL for this repository"""
-    git_url: Optional[str] = None
+    git_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Git URL for this repository"""
-    issue_comment_url: Optional[str] = None
+    issue_comment_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The issue comment URL for this repository"""
-    issue_events_url: Optional[str] = None
+    issue_events_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The issue events URL for this repository"""
-    issues_url: Optional[str] = None
+    issues_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The issues URL for this repository"""
-    keys_url: Optional[str] = None
+    keys_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The keys URL for this repository"""
-    labels_url: Optional[str] = None
+    labels_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The labels URL for this repository"""
-    languages_url: Optional[str] = None
+    languages_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The languages URL for this repository"""
-    merges_url: Optional[str] = None
+    merges_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The merges URL for this repository"""
-    milestones_url: Optional[str] = None
+    milestones_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The milestones URL for this repository"""
-    notifications_url: Optional[str] = None
+    notifications_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The notifications URL for this repository"""
-    pulls_url: Optional[str] = None
+    pulls_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The pulls URL for this repository"""
-    releases_url: Optional[str] = None
+    releases_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The releases URL for this repository"""
-    ssh_url: Optional[str] = None
+    ssh_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The SSH URL to clone this repository"""
-    stargazers_url: Optional[str] = None
+    stargazers_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The stargazers (Stargazers are the people that have bookmarked the GitHub
     repository) URL for this repository
     """
-    statuses_url: Optional[str] = None
+    statuses_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The statuses URL for this repository"""
-    subscribers_url: Optional[str] = None
+    subscribers_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The subscribers URL for this repository"""
-    subscription_url: Optional[str] = None
+    subscription_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The subscription URL for this repository"""
-    tags_url: Optional[str] = None
+    tags_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The tags URL for this repository"""
-    teams_url: Optional[str] = None
+    teams_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The teams URL for this repository"""
-    trees_url: Optional[str] = None
+    trees_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The trees URL for this repository"""
-    clone_url: Optional[str] = None
+    clone_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The clone URL for this repository"""
-    mirror_url: Optional[str] = None
+    mirror_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The original mirror URL for this repository"""
-    hooks_url: Optional[str] = None
+    hooks_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The hooks URL for this repository"""
-    svn_url: Optional[str] = None
+    svn_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The SVN URL for this repository"""
-    homepage: Optional[str] = None
+    homepage: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The homepage for this repository"""
-    language: Optional[str] = None
+    language: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The language for this repository"""
-    forks_count: Optional[int] = None
+    forks_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of forks there are of this repository in the whole network."""
-    stargazers_count: Optional[int] = None
+    stargazers_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of users who have starred the repository."""
-    watchers_count: Optional[int] = None
+    watchers_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of users watching the repository."""
-    size: Optional[int] = None
+    size: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Size of the repository"""
-    default_branch: Optional[str] = None
+    default_branch: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The default branch of the repository."""
-    open_issues_count: Optional[int] = None
+    open_issues_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of open issues in the repository."""
-    is_template: Optional[bool] = None
+    is_template: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether this repository acts as a template that can be used to generate new
     repositories.
     """
-    topics: Optional[List[str]] = None
+    topics: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """List of topics in the repository"""
-    has_issues: Optional[bool] = None
+    has_issues: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether issues are enabled."""
-    has_projects: Optional[bool] = None
+    has_projects: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether projects are enabled."""
-    has_wiki: Optional[bool] = None
+    has_wiki: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the wiki is enabled."""
-    has_pages: Optional[bool] = None
+    has_pages: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether pages are enabled."""
-    has_downloads: Optional[bool] = None
+    has_downloads: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether downloads are enabled."""
-    archived: Optional[bool] = None
+    archived: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the repository is archived."""
-    disabled: Optional[bool] = None
+    disabled: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Returns whether or not this repository disabled."""
-    visibility: Optional[str] = None
+    visibility: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The repository visibility: public, private, or internal."""
-    pushed_at: Optional[str] = None
+    pushed_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """When the repository was last pushed to."""
-    created_at: Optional[str] = None
+    created_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """the date and time when the repository was created."""
-    updated_at: Optional[str] = None
+    updated_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """the date and time when the repository was last updated."""
-    allow_rebase_merge: Optional[bool] = None
+    allow_rebase_merge: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether to allow rebase merges for pull requests."""
-    template_repository: Optional[Dict[str, Any]] = None
-    temp_clone_token: Optional[str] = None
+    template_repository: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    temp_clone_token: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Temporary authentication token for cloning this repository."""
-    allow_squash_merge: Optional[bool] = None
+    allow_squash_merge: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether to allow squash merges for pull requests."""
-    delete_branch_on_merge: Optional[bool] = None
+    delete_branch_on_merge: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether to delete head branches when pull requests are merged"""
-    allow_merge_commit: Optional[bool] = None
+    allow_merge_commit: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether to allow merge commits for pull requests."""
-    subscribers_count: Optional[int] = None
+    subscribers_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of subscribers for the repository."""
-    network_count: Optional[int] = None
+    network_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Repository Network Count"""
-    open_issues: Optional[int] = None
+    open_issues: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Repository open issues."""
-    watchers: Optional[int] = None
+    watchers: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Repository Watchers."""
-    master_branch: Optional[str] = None
+    master_branch: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Repository master branch."""
-    starred_at: Optional[str] = None
+    starred_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Repository Starred At"""
 
 
@@ -258,13 +319,13 @@ class GitReference:
     Response for Create a reference
     """
 
-    ref: Optional[str] = None
+    ref: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the fully qualified reference."""
-    node_id: Optional[str] = None
+    node_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Node Id of the reference."""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The url of the reference."""
-    object: Optional[Dict[str, Any]] = None
+    object: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -273,11 +334,11 @@ class PullRequestMergeResult:
     Response for Merge a pull request
     """
 
-    sha: Optional[str] = None
+    sha: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SHA for the merge commit."""
-    merged: Optional[bool] = None
+    merged: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether or not the pull request was merged."""
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Merge response message."""
 
 
@@ -287,96 +348,131 @@ class PullRequest:
     Response for Get a pull request
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The HTTP URL for this pull request."""
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The Unique Identifier for the pull request."""
-    node_id: Optional[str] = None
+    node_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Node ID for the pull request."""
-    html_url: Optional[str] = None
+    html_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The HTML URL for the pull request."""
-    diff_url: Optional[str] = None
+    diff_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Diff URL for the pull request."""
-    patch_url: Optional[str] = None
+    patch_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The patch URL for the pull request."""
-    issue_url: Optional[str] = None
+    issue_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The issue URL for the pull request."""
-    commits_url: Optional[str] = None
+    commits_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The commit URL for the pull request."""
-    review_comments_url: Optional[str] = None
+    review_comments_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The review comments URL for the pull request."""
-    review_comment_url: Optional[str] = None
+    review_comment_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The review comment URL for the pull request."""
-    comments_url: Optional[str] = None
+    comments_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Diff URL for the pull request."""
-    statuses_url: Optional[str] = None
+    statuses_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The statuses URL for the pull request."""
-    number: Optional[int] = None
+    number: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number uniquely identifying the pull request within its repository."""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """State of this Pull Request. Either `open` or `closed`."""
-    locked: Optional[bool] = None
+    locked: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the pull request is locked or not."""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The title of the pull request."""
-    user: Optional[UserDetailsModel] = None
-    body: Optional[str] = None
+    user: Optional[
+        UserDetailsModel | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    body: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The body as Markdown."""
-    labels: Optional[List[Label]] = None
+    labels: Optional[
+        List[Label | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of labels associated with the pull request."""
-    milestone: Optional[Milestone] = None
-    active_lock_reason: Optional[str] = None
+    milestone: Optional[Milestone | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    active_lock_reason: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Reason that the conversation was locked."""
-    created_at: Optional[str] = None
+    created_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date and time when the pull request was created."""
-    updated_at: Optional[str] = None
+    updated_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date and time when the pull request was last updated."""
-    closed_at: Optional[str] = None
+    closed_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date and time when the pull request was closed."""
-    merged_at: Optional[str] = None
+    merged_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date and time that the pull request was merged."""
-    merge_commit_sha: Optional[str] = None
+    merge_commit_sha: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The merge commit Sha of the pull request."""
-    assignee: Optional[UserDetailsModel] = None
-    assignees: Optional[List[UserDetailsModel]] = None
+    assignee: Optional[
+        UserDetailsModel | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    assignees: Optional[
+        List[UserDetailsModel | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of assignees for the pull request."""
-    requested_reviewers: Optional[List[UserDetailsModel]] = None
+    requested_reviewers: Optional[
+        List[UserDetailsModel | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of Users assigned to this pull request."""
-    requested_teams: Optional[List[TeamDetails]] = None
+    requested_teams: Optional[
+        List[TeamDetails | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of requested teams to this pull request."""
-    head: Optional[Dict[str, Any]] = None
+    head: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Head"""
-    base: Optional[Dict[str, Any]] = None
+    base: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Base"""
-    author_association: Optional[str] = None
+    author_association: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Author's association with the subject of the comment."""
-    draft: Optional[bool] = None
+    draft: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether or not the pull request is a draft."""
-    merged: Optional[bool] = None
+    merged: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether or not the pull request was merged."""
-    mergeable: Optional[bool] = None
+    mergeable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether or not the pull request can be merged based on the existence of
     merge conflicts.
     """
-    rebaseable: Optional[bool] = None
+    rebaseable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether or not the pull request is rebaseable."""
-    mergeable_state: Optional[str] = None
+    mergeable_state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The mergeable state of the pull request."""
-    merged_by: Optional[UserDetailsModel] = None
-    comments: Optional[int] = None
+    merged_by: Optional[
+        UserDetailsModel | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    comments: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of comments in this pull request."""
-    review_comments: Optional[int] = None
+    review_comments: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of review comments in this pull request."""
-    maintainer_can_modify: Optional[bool] = None
+    maintainer_can_modify: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether maintainers can modify the pull request."""
-    commits: Optional[int] = None
+    commits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of commits in this pull request."""
-    additions: Optional[int] = None
+    additions: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of additions in this pull request."""
-    deletions: Optional[int] = None
+    deletions: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of deletions in this pull request."""
-    changed_files: Optional[int] = None
+    changed_files: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of changed files in this pull request."""
 
 
@@ -386,25 +482,25 @@ class PullRequestFile:
     Response for Get the list of files from a pull request
     """
 
-    sha: Optional[str] = None
+    sha: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The sha for the file."""
-    filename: Optional[str] = None
+    filename: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The file name."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The modification status for the file."""
-    additions: Optional[int] = None
+    additions: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of additions made to the file."""
-    deletions: Optional[int] = None
+    deletions: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of deletions made to the file."""
-    changes: Optional[int] = None
+    changes: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of changes made to the file."""
-    blob_url: Optional[str] = None
+    blob_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The blob Url for the file."""
-    raw_url: Optional[str] = None
+    raw_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Raw Url for the file."""
-    contents_url: Optional[str] = None
+    contents_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The contents Url for the file."""
-    patch: Optional[str] = None
+    patch: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The patch content for the file."""
 
 
@@ -414,29 +510,44 @@ class CommitComparison:
     Response for Compare two commits
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Url for the comparison"""
-    html_url: Optional[str] = None
+    html_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Html Url for the comparison"""
-    permalink_url: Optional[str] = None
+    permalink_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Permanent Url for the comparison """
-    diff_url: Optional[str] = None
+    diff_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Diff Url"""
-    patch_url: Optional[str] = None
+    patch_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Patch Url"""
-    base_commit: Optional[Commit] = None
-    merge_base_commit: Optional[Commit] = None
-    status: Optional[str] = None
+    base_commit: Optional[Commit | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    merge_base_commit: Optional[
+        Commit | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Status of the comparision eg. diverged etc.,"""
-    ahead_by: Optional[int] = None
+    ahead_by: Optional[int] = dataclass_field(default=None, kw_only=True)
     """ahead by base branch"""
-    behind_by: Optional[int] = None
+    behind_by: Optional[int] = dataclass_field(default=None, kw_only=True)
     """behind_by base branch"""
-    total_commits: Optional[int] = None
+    total_commits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """total commits"""
-    commits: Optional[List[Commit]] = None
+    commits: Optional[
+        List[Commit | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """commits"""
-    files: Optional[List[DiffEntry]] = None
+    files: Optional[
+        List[DiffEntry | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """files"""
 
 
@@ -446,18 +557,22 @@ class WebhookCreationResponse:
     Response for When a pull request is created or modified
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    id: Optional[int] = None
-    name: Optional[str] = None
-    active: Optional[bool] = None
-    events: Optional[List[str]] = None
-    config: Optional[Dict[str, Any]] = None
-    updated_at: Optional[str] = None
-    created_at: Optional[str] = None
-    url: Optional[str] = None
-    test_url: Optional[str] = None
-    ping_url: Optional[str] = None
-    last_response: Optional[Dict[str, Any]] = None
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    active: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    events: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
+    config: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    updated_at: Optional[str] = dataclass_field(default=None, kw_only=True)
+    created_at: Optional[str] = dataclass_field(default=None, kw_only=True)
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
+    test_url: Optional[str] = dataclass_field(default=None, kw_only=True)
+    ping_url: Optional[str] = dataclass_field(default=None, kw_only=True)
+    last_response: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -466,36 +581,41 @@ class Milestone:
     Response for Update a milestone
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The HTTP URL for the milestone."""
-    html_url: Optional[str] = None
+    html_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The HTML URL for the milestone."""
-    labels_url: Optional[str] = None
+    labels_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The labels URL for the milestone."""
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The Unique Identifier for the milestone."""
-    node_id: Optional[str] = None
+    node_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Node ID for the milestone."""
-    number: Optional[int] = None
+    number: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of the milestone."""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The state of the milestone."""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The title of the milestone."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The description of the milestone."""
-    creator: Optional[UserDetailsModel] = None
-    open_issues: Optional[int] = None
+    creator: Optional[
+        UserDetailsModel | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    open_issues: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of open issues for the repository."""
-    closed_issues: Optional[int] = None
+    closed_issues: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of closed issues for the repository."""
-    created_at: Optional[str] = None
+    created_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date and time when the milestone was created."""
-    updated_at: Optional[str] = None
+    updated_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date and time when the milestone was last updated."""
-    closed_at: Optional[str] = None
+    closed_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date and time when the milestone was closed."""
-    due_on: Optional[str] = None
+    due_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The due date of the milestone."""
 
 
@@ -505,67 +625,71 @@ class UserDetailsModel:
     Response for Get the authenticated user
     """
 
-    login: Optional[str] = None
+    login: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User Login."""
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """User Id."""
-    node_id: Optional[str] = None
+    node_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User Node Id."""
-    avatar_url: Optional[str] = None
+    avatar_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User Avatar Url."""
-    gravatar_id: Optional[str] = None
+    gravatar_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User Gravatar Id."""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User Url."""
-    html_url: Optional[str] = None
+    html_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User Html Url."""
-    followers_url: Optional[str] = None
+    followers_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User FollowersUrl"""
-    following_url: Optional[str] = None
+    following_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User Following Url."""
-    gists_url: Optional[str] = None
+    gists_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User Gists Url."""
-    starred_url: Optional[str] = None
+    starred_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User Starred Url."""
-    subscriptions_url: Optional[str] = None
+    subscriptions_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User Subscriptions Url."""
-    organizations_url: Optional[str] = None
+    organizations_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User Organizations Url."""
-    repos_url: Optional[str] = None
+    repos_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User Repos Url."""
-    events_url: Optional[str] = None
+    events_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User Events Url."""
-    received_events_url: Optional[str] = None
+    received_events_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User Received Events Url."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """User Type."""
-    site_admin: Optional[bool] = None
+    site_admin: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Is User Site Admin?"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User Name."""
-    company: Optional[str] = None
+    company: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User Company."""
-    blog: Optional[str] = None
+    blog: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User Blog."""
-    location: Optional[str] = None
+    location: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User Location."""
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User Email."""
-    hireable: Optional[bool] = None
+    hireable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """User Hireable?"""
-    bio: Optional[str] = None
+    bio: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User Bio."""
-    public_repos: Optional[int] = None
+    public_repos: Optional[int] = dataclass_field(default=None, kw_only=True)
     """User Public Repos."""
-    public_gists: Optional[int] = None
+    public_gists: Optional[int] = dataclass_field(default=None, kw_only=True)
     """User Public Gists."""
-    followers: Optional[int] = None
+    followers: Optional[int] = dataclass_field(default=None, kw_only=True)
     """User Followers."""
-    following: Optional[int] = None
+    following: Optional[int] = dataclass_field(default=None, kw_only=True)
     """User Following."""
-    created_at: Optional[str] = None
+    created_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User Created At."""
-    updated_at: Optional[str] = None
+    updated_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User Updated At."""
 
 
@@ -575,7 +699,7 @@ class GeneralAPIModel:
     Response for Check if a user is a repository collaborator
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -588,7 +712,12 @@ class MultipleSearchFetchModel:
     Response for Find issues by state and keyword
     """
 
-    body: Optional[List[GeneralAPIModel]] = None
+    body: Optional[
+        List[GeneralAPIModel | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """body of result"""
 
 
@@ -598,9 +727,9 @@ class IssueBasicDetailsModel:
     Definition: IssueBasicDetailsModel
     """
 
-    title: Optional[str] = None
+    title: str
     """Summary of the issue."""
-    body: Optional[str] = None
+    body: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of the issue."""
 
 
@@ -610,7 +739,12 @@ class SingleSearchFetchModel:
     Definition: SingleSearchFetchModel
     """
 
-    body: Optional[List[GeneralAPIModel]] = None
+    body: Optional[
+        List[GeneralAPIModel | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """body of result"""
 
 
@@ -620,21 +754,21 @@ class IssueUpdateModel:
     Definition: IssueUpdateModel
     """
 
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Summary of the issue."""
-    body: Optional[str] = None
+    body: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of the issue."""
-    assignee: Optional[str] = None
+    assignee: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Assignee of the issue."""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The open or close state of an issue. Can be one of open or closed."""
-    state_reason: Optional[str] = None
+    state_reason: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The reason for change of state."""
-    milestone: Optional[str] = None
+    milestone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Number of milestones to associate with issue."""
-    labels: Optional[List[str]] = None
+    labels: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """labels associated with the issue."""
-    assignees: Optional[List[str]] = None
+    assignees: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """UserSnames to assign to the issue."""
 
 
@@ -644,13 +778,13 @@ class MilestoneUpdateModel:
     Definition: MilestoneUpdateModel
     """
 
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Summary of the milestone."""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The open or close state of the milestone."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A description of the milestone."""
-    due_on: Optional[str] = None
+    due_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Due date of the milestone."""
 
 
@@ -660,16 +794,16 @@ class Verification:
     Definition: Verification
     """
 
-    verified: Optional[bool] = None
+    verified: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Indicates whether GitHub considers the signature in this commit to be
     verified.
     """
-    reason: Optional[str] = None
+    reason: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The reason for verified value."""
-    payload: Optional[str] = None
+    payload: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The value that was signed."""
-    signature: Optional[str] = None
+    signature: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The signature that was extracted from the commit."""
 
 
@@ -679,11 +813,11 @@ class GitUser:
     Definition: GitUser
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User Name"""
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email"""
-    date: Optional[str] = None
+    date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Timestamp of Commit."""
 
 
@@ -693,7 +827,7 @@ class GraphQlQuery:
     Definition: GraphQlQuery
     """
 
-    query: Optional[str] = None
+    query: Optional[str] = dataclass_field(default=None, kw_only=True)
     """query"""
 
 
@@ -703,27 +837,27 @@ class DiffEntry:
     Definition: DiffEntry
     """
 
-    filename: Optional[str] = None
+    filename: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Changed File Name."""
-    additions: Optional[int] = None
+    additions: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of additions in the file"""
-    deletions: Optional[int] = None
+    deletions: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of Deletions in the file"""
-    changes: Optional[int] = None
+    changes: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of Changes in the file"""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Status of the change modified, renamed etc.,"""
-    raw_url: Optional[str] = None
+    raw_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Raw Url link to the file"""
-    blob_url: Optional[str] = None
+    blob_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Blob Url link to the file"""
-    patch: Optional[str] = None
+    patch: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Actual changes made to the file."""
-    sha: Optional[str] = None
+    sha: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SHA of the change."""
-    contents_url: Optional[str] = None
+    contents_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """File Contents Url."""
-    previous_filename: Optional[str] = None
+    previous_filename: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Previous FileName if the FileName is changed"""
 
 
@@ -733,22 +867,37 @@ class Commit:
     Definition: Commit
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The HTTP URL for the commit."""
-    sha: Optional[str] = None
+    sha: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SHA of the commit"""
-    node_id: Optional[str] = None
+    node_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Node Id of the commit."""
-    html_url: Optional[str] = None
+    html_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """HTML Url of the commit"""
-    comments_url: Optional[str] = None
+    comments_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Comments Url of the commit"""
-    commit: Optional[Dict[str, Any]] = None
-    author: Optional[UserDetailsModel] = None
-    committer: Optional[UserDetailsModel] = None
-    parents: Optional[List[Dict[str, Any]]] = None
-    stats: Optional[Dict[str, Any]] = None
-    files: Optional[List[DiffEntry]] = None
+    commit: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    author: Optional[
+        UserDetailsModel | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    committer: Optional[
+        UserDetailsModel | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    parents: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    stats: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    files: Optional[
+        List[DiffEntry | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -757,9 +906,9 @@ class RepositoryDispatchEvent:
     Definition: RepositoryDispatchEvent
     """
 
-    event_type: Optional[str] = None
+    event_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A custom webhook event name."""
-    client_payload: Optional[Dict[str, Any]] = None
+    client_payload: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """
     JSON payload with extra information about the webhook event that your
     action or worklow may use.
@@ -772,12 +921,12 @@ class CreateRepositorySecretRequest:
     Definition: CreateRepositorySecretRequest
     """
 
-    encrypted_value: Optional[str] = None
+    encrypted_value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Value for your secret, encrypted with LibSodium using the public key
     retrieved from the Get an Repository public key action.
     """
-    key_id: Optional[str] = None
+    key_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ID of the key you used to encrypt the secret."""
 
 
@@ -787,16 +936,16 @@ class CreateRepositoryUsingTemplateRequest:
     Definition: CreateRepositoryUsingTemplateRequest
     """
 
-    owner: Optional[str] = None
+    owner: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The organization or person who will own the new repository. If left blank,
     the authenticated user will be the owner.
     """
-    name: Optional[str] = None
+    name: str
     """The name of the new repository."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A short description of the new repository."""
-    private: Optional[bool] = None
+    private: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Either `true` to create a new private repository or `false` to create a new
     public one.
@@ -809,17 +958,17 @@ class LicenseDetails:
     Definition: LicenseDetails
     """
 
-    key: Optional[str] = None
+    key: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The lowercased SPDX Id of the license."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The license full name specified by https://spdx.org/licenses."""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """URL to the license on https://choosealicense.com."""
-    spdx_id: Optional[str] = None
+    spdx_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Short identifier specified by https://spdx.org/licenses."""
-    node_id: Optional[str] = None
+    node_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """License Node Id."""
-    html_url: Optional[str] = None
+    html_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """License HTML URL."""
 
 
@@ -829,44 +978,49 @@ class RepositoryMiniDetails:
     Definition: RepositoryMiniDetails
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the repository."""
-    node_id: Optional[str] = None
+    node_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Node Id of the repository."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the repository."""
-    full_name: Optional[str] = None
+    full_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The full name of the repository."""
-    permissions: Optional[Dict[str, Any]] = None
+    permissions: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Permissions on the repository."""
-    owner: Optional[UserDetailsModel] = None
-    private: Optional[bool] = None
+    owner: Optional[
+        UserDetailsModel | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    private: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the repository is private or public."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The description of the repository"""
-    homepage: Optional[str] = None
+    homepage: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The homepage for this repository"""
-    language: Optional[str] = None
+    language: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The language for this repository"""
-    archived: Optional[bool] = None
+    archived: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the repository is archived."""
-    disabled: Optional[bool] = None
+    disabled: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Returns whether or not this repository disabled."""
-    visibility: Optional[str] = None
+    visibility: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The repository visibility: public, private, or internal."""
-    created_at: Optional[str] = None
+    created_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """the date and time when the repository was created."""
-    updated_at: Optional[str] = None
+    updated_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """the date and time when the repository was last updated."""
-    allow_rebase_merge: Optional[bool] = None
+    allow_rebase_merge: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether to allow rebase merges for pull requests."""
-    allow_squash_merge: Optional[bool] = None
+    allow_squash_merge: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether to allow squash merges for pull requests."""
-    delete_branch_on_merge: Optional[bool] = None
+    delete_branch_on_merge: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether to delete head branches when pull requests are merged"""
-    allow_merge_commit: Optional[bool] = None
+    allow_merge_commit: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether to allow merge commits for pull requests."""
-    master_branch: Optional[str] = None
+    master_branch: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Repository master branch."""
 
 
@@ -876,13 +1030,13 @@ class CreateReferenceRequest:
     Definition: CreateReferenceRequest
     """
 
-    ref: Optional[str] = None
+    ref: str
     """
     The name of the fully qualified reference (ie: `refs/heads/master`). If it
     doesn't start with 'refs' and have at least two slashes, it will be
     rejected.
     """
-    sha: Optional[str] = None
+    sha: str
     """The SHA1 value for this reference."""
 
 
@@ -892,25 +1046,25 @@ class PullRequestCreateRequest:
     Definition: PullRequestCreateRequest
     """
 
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The title of the new pull request."""
-    head: Optional[str] = None
+    head: str
     """
     The name of the branch where your changes are implemented. For
     cross-repository pull requests in the same network, namespace `head` with a
     user like this: `username:branch`.
     """
-    base: Optional[str] = None
+    base: str
     """
     The name of the branch you want the changes pulled into. This should be an
     existing branch on the current repository. You cannot submit a pull request
     to one repository that requests a merge to a base of another repository.
     """
-    body: Optional[str] = None
+    body: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The contents of the pull request."""
-    maintainer_can_modify: Optional[bool] = None
+    maintainer_can_modify: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether maintainers can modify the pull request."""
-    draft: Optional[bool] = None
+    draft: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether the pull request is a draft."""
 
 
@@ -920,20 +1074,23 @@ class PullRequestMergeRequest:
     Definition: PullRequestMergeRequest
     """
 
-    commit_title: Optional[str] = field(
+    commit_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "commitTitle"},
     )
     """Title for the automatic commit message."""
-    commit_message: Optional[str] = field(
+    commit_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "commitMessage"},
     )
     """Extra detail to append to automatic commit message."""
-    sha: Optional[str] = None
+    sha: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SHA that pull request head must match to allow merge."""
-    merge_method: Optional[str] = field(
+    merge_method: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mergeMethod"},
     )
     """
@@ -948,19 +1105,19 @@ class PullRequestUpdateRequest:
     Definition: PullRequestUpdateRequest
     """
 
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The title of the pull request."""
-    body: Optional[str] = None
+    body: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The contents of the pull request."""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """State of this Pull Request. Either `open` or `closed`."""
-    base: Optional[str] = None
+    base: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The name of the branch you want your changes pulled into. This should be an
     existing branch on the current repository. You cannot update the base
     branch on a pull request to point to another repository.
     """
-    maintainer_can_modify: Optional[bool] = None
+    maintainer_can_modify: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether maintainers can modify the pull request."""
 
 
@@ -970,19 +1127,19 @@ class Label:
     Definition: Label
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The Unique Identifier for the label."""
-    node_id: Optional[str] = None
+    node_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Node ID for the label."""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """URL for the label"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the label."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A brief description of this label."""
-    color: Optional[str] = None
+    color: Optional[str] = dataclass_field(default=None, kw_only=True)
     """6-character hex code, without the leading #, identifying the color"""
-    default: Optional[bool] = None
+    default: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether or not this is a default label."""
 
 
@@ -992,29 +1149,29 @@ class TeamDetails:
     Definition: TeamDetails
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the team."""
-    node_id: Optional[str] = None
+    node_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Node ID for the team."""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """URL for the team."""
-    members_url: Optional[str] = None
+    members_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The HTTP URL for the team members."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the team"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of the team"""
-    permission: Optional[str] = None
+    permission: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Permission that the team will have for its repositories"""
-    privacy: Optional[str] = None
+    privacy: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The level of privacy this team should have"""
-    html_url: Optional[str] = None
+    html_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """HTML Url of the team."""
-    repositories_url: Optional[str] = None
+    repositories_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The HTTP URL for this team's repositories."""
-    slug: Optional[str] = None
+    slug: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The slug corresponding to the team."""
-    ldap_dn: Optional[str] = None
+    ldap_dn: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Distinguished Name (DN) that team maps to within LDAP environment"""
 
 
@@ -1024,7 +1181,7 @@ class Link:
     Definition: Link
     """
 
-    href: Optional[str] = None
+    href: str
 
 
 @dataclass
@@ -1033,11 +1190,16 @@ class WebhookPullRequestResponse:
     Definition: WebhookPullRequestResponse
     """
 
-    action: Optional[str] = None
+    action: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The action that was performed."""
-    number: Optional[int] = None
+    number: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The pull request number."""
-    pull_request: Optional[PullRequest] = None
+    pull_request: Optional[
+        PullRequest | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1046,13 +1208,13 @@ class WebhookRequestBody:
     Definition: WebhookRequestBody
     """
 
-    active: Optional[bool] = None
+    active: bool
     """State of the Trigger, always set to true"""
-    name: Optional[str] = None
+    name: str
     """Name of the trigger"""
-    config: Optional[Dict[str, Any]] = None
+    config: Dict[str, Any]
     """Configuration of the Trigger"""
-    events: Optional[List[str]] = None
+    events: List[str]
     """Webhook events to listen on"""
 
 
@@ -1062,8 +1224,8 @@ class RequestReviewersBody:
     Definition: RequestReviewersBody
     """
 
-    reviewers: Optional[List[str]] = None
-    team_reviewers: Optional[List[str]] = None
+    reviewers: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
+    team_reviewers: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1072,12 +1234,12 @@ class QueryRequest:
     Definition: QueryRequest
     """
 
-    jsonrpc: Optional[str] = None
-    id: Optional[str] = None
-    method: Optional[str] = None
-    params: Optional[Dict[str, Any]] = None
-    result: Optional[Dict[str, Any]] = None
-    error: Optional[Dict[str, Any]] = None
+    jsonrpc: Optional[str] = dataclass_field(default=None, kw_only=True)
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    method: Optional[str] = dataclass_field(default=None, kw_only=True)
+    params: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    result: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    error: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 # Client Class
@@ -1091,7 +1253,7 @@ class GithubClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -1108,8 +1270,8 @@ class GithubClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -1130,7 +1292,7 @@ class GithubClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -1145,9 +1307,86 @@ class GithubClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "github"
 
-    async def create_issue_async(
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
+            if next_link.startswith("?"):
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
+
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
+    async def create_issue(
         self,
-        input: IssueBasicDetailsModel,
+        input: IssueBasicDetailsModel | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         *,
@@ -1160,6 +1399,24 @@ class GithubClient(ConnectorClientBase):
         Create an issue
 
         This operation is used to create a new issue for a specific repository.
+
+        Swagger operation ID: `CreateIssue`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1169,7 +1426,7 @@ class GithubClient(ConnectorClientBase):
             f"/issues"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1183,6 +1440,7 @@ class GithubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1190,10 +1448,11 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_issues_async(
+    def list_issues(
         self,
         repository_owner: str,
         repository_name: str,
+        *,
         milestone: Optional[str] = None,
         state: Optional[str] = None,
         assignee: Optional[str] = None,
@@ -1205,16 +1464,45 @@ class GithubClient(ConnectorClientBase):
         since: Optional[str] = None,
         per_page: Optional[int] = None,
         page: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get all issues of a repository
 
         Get all issues of a repository.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetIssues`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            milestone: Filter by milestone.
+            state: Filter by state.
+            assignee: Filter by assignee.
+            creator: Filter by creator.
+            mentioned: Filter by mentions.
+            labels: Filter by label names.
+            sort: Field to sort results by.
+            direction: Direction of sort.
+            since: Filter by issues after given date.
+            per_page: Number of results per page.
+            page: Page number to display.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1281,29 +1569,50 @@ class GithubClient(ConnectorClientBase):
             query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_repository_public_key_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def get_repository_public_key(
         self,
         repository_owner: str,
         repository_name: str,
@@ -1318,6 +1627,22 @@ class GithubClient(ConnectorClientBase):
 
         Gets your public key, which you need to encrypt secrets. You need to
         encrypt a secret before you can create or update secrets.
+
+        Swagger operation ID: `GetRepositoryPublicKey`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1329,7 +1654,7 @@ class GithubClient(ConnectorClientBase):
             f"/public-key"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1343,6 +1668,7 @@ class GithubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1350,9 +1676,9 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_update_repository_secret_async(
+    async def create_update_repository_secret(
         self,
-        input: CreateRepositorySecretRequest,
+        input: CreateRepositorySecretRequest | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         secret_name: str,
@@ -1367,6 +1693,25 @@ class GithubClient(ConnectorClientBase):
 
         Creates or updates a repository secret with an encrypted value. Encrypt
         your secret using LibSodium.
+
+        Swagger operation ID: `CreateUpdateRepositorySecret`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            secret_name: Name of the secret.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1378,7 +1723,7 @@ class GithubClient(ConnectorClientBase):
             f"/{quote(str(secret_name), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1392,11 +1737,12 @@ class GithubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def create_repository_using_template_async(
+    async def create_repository_using_template(
         self,
-        input: CreateRepositoryUsingTemplateRequest,
+        input: CreateRepositoryUsingTemplateRequest | Mapping[str, Any],
         template_owner: str,
         template_repository: str,
         *,
@@ -1411,6 +1757,24 @@ class GithubClient(ConnectorClientBase):
         Creates a new repository using a repository template. The authenticated
         user must own or be a member of an organization that owns the
         repository.
+
+        Swagger operation ID: `CreateRepositoryUsingTemplate`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            template_owner: Name of the template repository owner.
+            template_repository: Name of the template repository.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1420,7 +1784,7 @@ class GithubClient(ConnectorClientBase):
             f"/generate"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1434,6 +1798,7 @@ class GithubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1441,7 +1806,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_repository_by_id_async(
+    async def get_repository_by_id(
         self,
         repository_id: int,
         *,
@@ -1454,13 +1819,28 @@ class GithubClient(ConnectorClientBase):
         Get a repository by Id
 
         Gets a repository by Id.
+
+        Swagger operation ID: `GetRepositoryById`.
+
+        Args:
+            repository_id: Unique Identifier of the repository.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/repositories/{quote(str(repository_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1474,6 +1854,7 @@ class GithubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1481,9 +1862,9 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_reference_async(
+    async def create_reference(
         self,
-        input: CreateReferenceRequest,
+        input: CreateReferenceRequest | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         *,
@@ -1498,6 +1879,24 @@ class GithubClient(ConnectorClientBase):
         Creates a reference for your repository. You are unable to create new
         references for empty repositories, even if the commit SHA-1 hash used
         exists. Empty repositories are repositories without branches.
+
+        Swagger operation ID: `CreateReference`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1508,7 +1907,7 @@ class GithubClient(ConnectorClientBase):
             f"/refs"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1522,6 +1921,7 @@ class GithubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1529,7 +1929,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_reference_async(
+    async def get_reference(
         self,
         repository_owner: str,
         repository_name: str,
@@ -1547,6 +1947,24 @@ class GithubClient(ConnectorClientBase):
         parameter must be formatted as `heads/<branch name>` for branches and
         `tags/<tag name>` for tags. If the `reference` doesn't match an
         existing ref, a `404` is returned.
+
+        Swagger operation ID: `GetReference`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            reference: The ref in the URL must be formatted as heads/<branch
+                name> for branches and tags/<tag name> for tags.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1558,7 +1976,7 @@ class GithubClient(ConnectorClientBase):
             f"/{quote(str(reference), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1572,6 +1990,7 @@ class GithubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1579,9 +1998,9 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def merge_pull_request_async(
+    async def merge_pull_request(
         self,
-        input: PullRequestMergeRequest,
+        input: PullRequestMergeRequest | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         pull_number: int,
@@ -1595,6 +2014,25 @@ class GithubClient(ConnectorClientBase):
         Merge a pull request
 
         This operation is used to merge a pull request for the repository.
+
+        Swagger operation ID: `MergePullRequest`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            pull_number: Pull Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1606,7 +2044,7 @@ class GithubClient(ConnectorClientBase):
             f"/merge"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1620,6 +2058,7 @@ class GithubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1627,7 +2066,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_pull_request_async(
+    async def get_pull_request(
         self,
         repository_owner: str,
         repository_name: str,
@@ -1642,6 +2081,23 @@ class GithubClient(ConnectorClientBase):
         Get a pull request
 
         This operation is used to get a pull request for the repository.
+
+        Swagger operation ID: `GetPullRequest`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            pull_number: Pull Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1652,7 +2108,7 @@ class GithubClient(ConnectorClientBase):
             f"/{quote(str(pull_number), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1666,6 +2122,7 @@ class GithubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1673,9 +2130,9 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_pull_request_async(
+    async def update_pull_request(
         self,
-        input: PullRequestUpdateRequest,
+        input: PullRequestUpdateRequest | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         pull_number: int,
@@ -1693,6 +2150,25 @@ class GithubClient(ConnectorClientBase):
         access to the head or the source branch. For organization-owned
         repositories, you must be a member of the organization that owns the
         repository to open or update a pull request.
+
+        Swagger operation ID: `UpdatePullRequest`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            pull_number: Pull Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1703,7 +2179,7 @@ class GithubClient(ConnectorClientBase):
             f"/{quote(str(pull_number), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1717,6 +2193,7 @@ class GithubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1724,7 +2201,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_pull_request_files_async(
+    def list_pull_request_files(
         self,
         repository_owner: str,
         repository_name: str,
@@ -1734,12 +2211,32 @@ class GithubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get the list of files from a pull request
 
         This operation is used to get the list of files from a pull request for
         the repository.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetPullRequestFiles`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            pull_number: Pull Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1750,31 +2247,52 @@ class GithubClient(ConnectorClientBase):
             f"/{quote(str(pull_number), safe='')}"
             f"/files"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def request_reviewers_pull_request_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def request_reviewers_pull_request(
         self,
-        input: RequestReviewersBody,
+        input: RequestReviewersBody | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         pull_number: int,
@@ -1789,6 +2307,25 @@ class GithubClient(ConnectorClientBase):
 
         Requests reviews for a pull request from a given set of users and/or
         teams.
+
+        Swagger operation ID: `RequestReviewersPullRequest`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            pull_number: Pull Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1800,7 +2337,7 @@ class GithubClient(ConnectorClientBase):
             f"/requested_reviewers"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1814,11 +2351,12 @@ class GithubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def remove_reviewers_pull_request_async(
+    async def remove_reviewers_pull_request(
         self,
-        input: RequestReviewersBody,
+        input: RequestReviewersBody | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         pull_number: int,
@@ -1833,6 +2371,25 @@ class GithubClient(ConnectorClientBase):
 
         Remove requested reviewers from a pull request from a given set of
         users and/or teams.
+
+        Swagger operation ID: `RemoveReviewersPullRequest`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            pull_number: Pull Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1844,7 +2401,7 @@ class GithubClient(ConnectorClientBase):
             f"/requested_reviewers"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1858,11 +2415,12 @@ class GithubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def create_pull_request_async(
+    async def create_pull_request(
         self,
-        input: PullRequestCreateRequest,
+        input: PullRequestCreateRequest | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         *,
@@ -1879,6 +2437,24 @@ class GithubClient(ConnectorClientBase):
         access to the head or the source branch. For organization-owned
         repositories, you must be a member of the organization that owns the
         repository to create a pull request.
+
+        Swagger operation ID: `CreatePullRequest`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1888,7 +2464,7 @@ class GithubClient(ConnectorClientBase):
             f"/pulls"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1902,6 +2478,7 @@ class GithubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1909,10 +2486,11 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_pull_requests_async(
+    def list_pull_requests(
         self,
         repository_owner: str,
         repository_name: str,
+        *,
         state: Optional[str] = None,
         head: Optional[str] = None,
         base: Optional[str] = None,
@@ -1920,16 +2498,41 @@ class GithubClient(ConnectorClientBase):
         direction: Optional[str] = None,
         per_page: Optional[int] = None,
         page: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get all Pull Requests of A Repository
 
         Get all Pull Requests of A Repository.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetPullRequests`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            state: Filter by state.
+            head: Filter by head user or organization.
+            base: Filter by base branch name.
+            sort: What to sort the results by.
+            direction: Direction of sort.
+            per_page: Number of results per page.
+            page: Page number to display.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1976,31 +2579,52 @@ class GithubClient(ConnectorClientBase):
             query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def create_repository_dispatch_event_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def create_repository_dispatch_event(
         self,
-        input: RepositoryDispatchEvent,
+        input: RepositoryDispatchEvent | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         *,
@@ -2017,6 +2641,24 @@ class GithubClient(ConnectorClientBase):
         GitHub to trigger a GitHub Actions workflow or GitHub App webhook. You
         must configure your GitHub Actions workflow or GitHub App to run when
         the `repository_dispatch` event occurs.
+
+        Swagger operation ID: `CreateRepositoryDispatchEvent`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2026,7 +2668,7 @@ class GithubClient(ConnectorClientBase):
             f"/dispatches"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2040,9 +2682,10 @@ class GithubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def compare_repository_commits_async(
+    async def compare_repository_commits(
         self,
         repository_owner: str,
         repository_name: str,
@@ -2062,6 +2705,24 @@ class GithubClient(ConnectorClientBase):
         `repositoryName`, use the format `<USERNAME>:branch`. The response is
         equivalent to running the `git log base..head` command; however,
         commits are returned in chronological order.
+
+        Swagger operation ID: `CompareRepositoryCommits`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            base: base parameter.
+            head: head parameter.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2072,7 +2733,7 @@ class GithubClient(ConnectorClientBase):
             f"/{quote(str(base), safe='')}...{quote(str(head), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2086,6 +2747,7 @@ class GithubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2093,7 +2755,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_selected_repo_to_org_secret_async(
+    async def add_selected_repo_to_org_secret(
         self,
         repository_owner: str,
         repository_id: int,
@@ -2114,6 +2776,23 @@ class GithubClient(ConnectorClientBase):
         You must authenticate using an access token with the `admin:org` scope
         to use this endpoint. GitHub Apps must have the `secrets` organization
         permission to use this endpoint.
+
+        Swagger operation ID: `AddSelectedRepoToOrgSecret`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_id: Unique Identifier of the repository.
+            secret_name: Name of the secret.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2126,7 +2805,7 @@ class GithubClient(ConnectorClientBase):
             f"/{quote(str(repository_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2140,9 +2819,10 @@ class GithubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def remove_selected_repo_from_org_secret_async(
+    async def remove_selected_repo_from_org_secret(
         self,
         repository_owner: str,
         repository_id: int,
@@ -2163,6 +2843,23 @@ class GithubClient(ConnectorClientBase):
         You must authenticate using an access token with the `admin:org` scope
         to use this endpoint. GitHub Apps must have the `secrets` organization
         permission to use this endpoint.
+
+        Swagger operation ID: `RemoveSelectedRepoFromOrgSecret`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_id: Unique Identifier of the repository.
+            secret_name: Name of the secret.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2175,7 +2872,7 @@ class GithubClient(ConnectorClientBase):
             f"/{quote(str(repository_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2189,9 +2886,10 @@ class GithubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def delete_webhook_trigger_async(
+    async def delete_webhook_trigger(
         self,
         repository_owner: str,
         repository_name: str,
@@ -2206,6 +2904,23 @@ class GithubClient(ConnectorClientBase):
         Deletes a GitHub Webhook
 
         Deletes a GitHub Webhook
+
+        Swagger operation ID: `DeleteWebhookTrigger`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            webhook_id: ID of the GitHub Webhook.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2216,7 +2931,7 @@ class GithubClient(ConnectorClientBase):
             f"/{quote(str(webhook_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2230,9 +2945,10 @@ class GithubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_issue_num_async(
+    async def get_issue_num(
         self,
         repository_owner: str,
         repository_name: str,
@@ -2247,6 +2963,23 @@ class GithubClient(ConnectorClientBase):
         Get a particular issue of a repository
 
         Get a particular issue of a repository.
+
+        Swagger operation ID: `GetIssueNum`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            issue_number: Issue Number for a given issue.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2257,7 +2990,7 @@ class GithubClient(ConnectorClientBase):
             f"/{quote(str(issue_number), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2271,6 +3004,7 @@ class GithubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2278,9 +3012,9 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_issue_num_async(
+    async def update_issue_num(
         self,
-        input: IssueUpdateModel,
+        input: IssueUpdateModel | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         issue_number: int,
@@ -2294,6 +3028,25 @@ class GithubClient(ConnectorClientBase):
         Update an Issue
 
         Update an existing issue given the issue number.
+
+        Swagger operation ID: `UpdateIssueNum`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            issue_number: Issue Number for a given issue.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2304,7 +3057,7 @@ class GithubClient(ConnectorClientBase):
             f"/{quote(str(issue_number), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2318,6 +3071,7 @@ class GithubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2325,9 +3079,9 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_milestone_async(
+    async def update_milestone(
         self,
-        input: MilestoneUpdateModel,
+        input: MilestoneUpdateModel | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         milestone_number: int,
@@ -2341,6 +3095,25 @@ class GithubClient(ConnectorClientBase):
         Update a milestone
 
         Update an existing milestone.
+
+        Swagger operation ID: `UpdateMilestone`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            milestone_number: Milestone number for a given milestone.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2351,7 +3124,7 @@ class GithubClient(ConnectorClientBase):
             f"/{quote(str(milestone_number), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2365,6 +3138,7 @@ class GithubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2372,7 +3146,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_user_async(
+    async def get_user(
         self,
         *,
         timeout: Optional[float] = None,
@@ -2384,10 +3158,24 @@ class GithubClient(ConnectorClientBase):
         Get the authenticated user
 
         Get the authenticated user.
+
+        Swagger operation ID: `GetUser`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/user"
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2401,6 +3189,7 @@ class GithubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2408,9 +3197,9 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def search_github_with_query_async(
+    async def search_github_with_query(
         self,
-        input: GraphQlQuery,
+        input: GraphQlQuery | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2421,10 +3210,26 @@ class GithubClient(ConnectorClientBase):
         Search Github using Query
 
         Search Github using Query
+
+        Swagger operation ID: `SearchGithubWithQuery`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/graphql"
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2438,24 +3243,46 @@ class GithubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_assignees_async(
+    def list_assignees(
         self,
         repository_owner: str,
         repository_name: str,
+        *,
         per_page: Optional[int] = None,
         page: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Lists the available assignees for issues in a repository
 
         Lists the available assignees for issues in a repository.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetAssignees`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            per_page: Number of results per page.
+            page: Page number to display.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2477,44 +3304,86 @@ class GithubClient(ConnectorClientBase):
             query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_collaborators_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_collaborators(
         self,
         repository_owner: str,
         repository_name: str,
+        *,
         per_page: Optional[int] = None,
         page: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List repository collaborators
 
         List repository collaborators.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `ListCollaborators`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            per_page: Number of results per page.
+            page: Page number to display.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2536,29 +3405,50 @@ class GithubClient(ConnectorClientBase):
             query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def check_collaborator_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def check_collaborator(
         self,
         repository_owner: str,
         repository_name: str,
@@ -2573,6 +3463,23 @@ class GithubClient(ConnectorClientBase):
         Check if a user is a repository collaborator
 
         Check if a user is a repository collaborator.
+
+        Swagger operation ID: `checkCollaborator`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            user_name: The handle for the GitHub user account.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2583,7 +3490,7 @@ class GithubClient(ConnectorClientBase):
             f"/{quote(str(user_name), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2597,6 +3504,7 @@ class GithubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2604,25 +3512,49 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_milestones_async(
+    def list_milestones(
         self,
         repository_owner: str,
         repository_name: str,
+        *,
         state: Optional[str] = None,
         sort: Optional[str] = None,
         direction: Optional[str] = None,
         per_page: Optional[int] = None,
         page: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Lists all milestones of a repository
 
         Lists all milestones of a repository.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetMilestones`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            state: State of the milestone.
+            sort: What to sort the results by.
+            direction: Direction of sort.
+            per_page: Number of results per page.
+            page: Page number to display.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2659,44 +3591,86 @@ class GithubClient(ConnectorClientBase):
             query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_labels_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_labels(
         self,
         repository_owner: str,
         repository_name: str,
+        *,
         per_page: Optional[int] = None,
         page: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Lists all labels for a repository
 
         Lists all labels for a repository.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetLabels`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            per_page: Number of results per page.
+            page: Page number to display.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2718,45 +3692,88 @@ class GithubClient(ConnectorClientBase):
             query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_issue_labels_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_issue_labels(
         self,
         repository_owner: str,
         repository_name: str,
         issue_number: int,
+        *,
         per_page: Optional[int] = None,
         page: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Lists all labels for an issue
 
         Lists all labels for an issue.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetIssueLabels`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            issue_number: Issue Number for a given issue.
+            per_page: Number of results per page.
+            page: Page number to display.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2780,46 +3797,90 @@ class GithubClient(ConnectorClientBase):
             query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_repos_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_repos(
         self,
         repository_owner: str,
+        *,
         type_: Optional[str] = None,
         sort: Optional[str] = None,
         direction: Optional[str] = None,
         per_page: Optional[int] = None,
         page: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Lists all public repositories for a user
 
         Lists all public repositories for a user.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetRepos`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            type_: Limit results to repositories of the specified type.
+            sort: The property to sort the results by.
+            direction: Direction of sort.
+            per_page: Number of results per page.
+            page: Page number to fetch.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2853,46 +3914,90 @@ class GithubClient(ConnectorClientBase):
             query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_org_repos_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_org_repos(
         self,
         repository_owner: str,
+        *,
         type_: Optional[str] = None,
         sort: Optional[str] = None,
         direction: Optional[str] = None,
         per_page: Optional[int] = None,
         page: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Lists all public repositories for an organization
 
         Lists all public repositories for an organization.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetOrgRepos`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            type_: Limit results to repositories of the specified type.
+            sort: The property to sort the results by.
+            direction: Direction of sort.
+            per_page: Number of results per page.
+            page: Page number to fetch.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2926,30 +4031,52 @@ class GithubClient(ConnectorClientBase):
             query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_user_repos_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_user_repos(
         self,
+        *,
         visibility: Optional[str] = None,
         affiliation: Optional[str] = None,
         since: Optional[str] = None,
@@ -2959,17 +4086,43 @@ class GithubClient(ConnectorClientBase):
         direction: Optional[str] = None,
         per_page: Optional[int] = None,
         page: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Lists all repositories for the authenticated user
 
         Lists all repositories (both public and private) for the authenticated
         user.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetUserRepos`.
+
+        Args:
+            visibility: Limit results to repositories of the specified
+                visibility(public/private/all).
+            affiliation: Limit results based on affiliation.
+            since: Limit results to repositories updated after a given time.
+            before: Limit results to repositories updated before a given time.
+            type_: Limit results to repositories of the specified type.
+            sort: The property to sort the results by.
+            direction: Direction of sort.
+            per_page: Number of results per page.
+            page: Page number to fetch.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/user/repos"
         query_params = []
@@ -3020,45 +4173,88 @@ class GithubClient(ConnectorClientBase):
             query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def search_issues_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_search_issues(
         self,
         q: str,
+        *,
         sort: Optional[str] = None,
         order: Optional[str] = None,
         per_page: Optional[int] = None,
         page: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Find issues by state and keyword
 
         Find issues by state and keyword.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `SearchIssues`.
+
+        Args:
+            q: Search keywords and qualifiers.
+            sort: The property to sort the results by.
+            order: Direction of sort.
+            per_page: Number of results per page.
+            page: Page number to fetch.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/search/issues"
         query_params = []
@@ -3088,31 +4284,52 @@ class GithubClient(ConnectorClientBase):
             query_params.append(f"page={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def invoke_mcp_server_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("body", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def invoke_mcp_server(
         self,
-        input: QueryRequest,
+        input: QueryRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -3123,10 +4340,26 @@ class GithubClient(ConnectorClientBase):
         Github MCP Server
 
         Github MCP Server
+
+        Swagger operation ID: `InvokeMCPServer`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/mcp"
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3140,6 +4373,7 @@ class GithubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
 

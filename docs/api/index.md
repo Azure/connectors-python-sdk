@@ -2,13 +2,24 @@
 
 The API reference is generated from the current Python source on every documentation build.
 
-## Core SDK
+## Async core SDK
 
-Core modules provide authentication, client lifecycle, HTTP behavior, serialization, options, exceptions, and trigger payload types. These modules are maintained by the SDK team.
+Root core modules provide asynchronous client lifecycle, HTTP behavior,
+serialization, exceptions, and trigger payload types. The root runtime is async-only.
 
-## Connector modules
+## Connector clients
 
-Each shipped connector has its own generated module containing an asynchronous client and the request and response models reachable from that connector's contract. Connector pages are discovered automatically, so newly generated modules appear without a separate documentation allow-list.
+Each shipped connector has an asynchronous root module containing its client and
+the shared request and response declarations reachable from that connector's
+contract. No separate aio catalog or synchronous mirror is provided. Import
+clients and models from `azure.connectors.<connector>`.
+
+Pageable operations return `AsyncItemPaged` without awaiting construction.
+Location-backed long-running operations return `AsyncLROPoller` from awaited
+`begin_*` methods.
+
+Both API sections are discovered automatically, so new connector modules
+appear without a separate documentation allow-list.
 
 Generated connector source is read-only. Corrections to generated signatures or docstrings must be made in the CodefulSdkGenerator and regenerated into this repository.
 

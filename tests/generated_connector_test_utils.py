@@ -5,13 +5,20 @@
 from __future__ import annotations
 
 import dataclasses
+import importlib
 import inspect
+import re
+from collections.abc import Mapping
+from enum import Enum
 from types import ModuleType
-from typing import Any, get_args, get_origin, get_type_hints
+from typing import Any, Literal, get_args, get_origin, get_type_hints
 from unittest.mock import AsyncMock, patch
 
 import pytest
+from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
+from azure.core.paging import ItemPaged
+from azure.core.polling import AsyncLROPoller, LROPoller
 
 from azure.connectors.sdk import ConnectorException
 from azure.connectors.sdk.serialization import (
@@ -29,25 +36,82 @@ _REQUEST_CONTROL_PARAMETER_NAMES = {
 }
 
 
+def _get_generated_type_hints(method: Any, module: ModuleType) -> dict[str, Any]:
+    """Resolve annotations from shared root models and the client module."""
+    method_module = importlib.import_module(method.__module__)
+    return get_type_hints(
+        method,
+        globalns={**vars(module), **vars(method_module)},
+    )
+
+
 def get_generated_operations(client_type: type[Any]) -> set[str]:
-    """Return generated async operation names without their async suffix."""
+    """Return public operations declared by a generated client."""
     return {
-        name.removesuffix("_async")
-        for name in dir(client_type)
-        if name.endswith("_async")
-        and (
-            inspect.iscoroutinefunction(getattr(client_type, name))
-            or inspect.isasyncgenfunction(getattr(client_type, name))
-        )
+        name
+        for name, member in vars(client_type).items()
+        if not name.startswith("_")
+        and name != "close"
+        and callable(member)
     }
 
 
-async def resolve_generated_result(result: Any) -> Any:
-    """Resolve a generated coroutine or collect a generated async iterator."""
-    if inspect.isasyncgen(result):
-        return [item async for item in result]
+def generated_pager_response_text(method: Any) -> str:
+    """Build a one-item response matching a generated pager's wire shape."""
+    method_source = inspect.getsource(method)
+    if "for item in page:" in method_source:
+        return '[{"ok": true}]'
 
-    return await result
+    collection_match = re.search(
+        r'for item in page\.get\("([^"]+)", \[\]\):',
+        method_source,
+    )
+    assert collection_match is not None, method.__qualname__
+    return f'{{"{collection_match.group(1)}": [{{"ok": true}}]}}'
+
+
+def resolve_sync_generated_result(result: Any) -> Any:
+    """Resolve a generated result, consuming a synchronous pager or poller."""
+    if isinstance(result, ItemPaged):
+        return list(result)
+    if isinstance(result, LROPoller):
+        return result.result()
+
+    return result
+
+
+async def resolve_generated_result(result: Any) -> Any:
+    """Resolve an asynchronous generated result, consuming a pager or poller."""
+    if isinstance(result, AsyncItemPaged):
+        return [item async for item in result]
+    if isinstance(result, AsyncLROPoller):
+        return await result.result()
+
+    awaited_result = await result
+    if isinstance(awaited_result, AsyncLROPoller):
+        return await awaited_result.result()
+
+    return awaited_result
+
+
+def invoke_sync_generated_operation(
+    client: Any,
+    operation: str,
+    module: ModuleType,
+    include_optional_parameters: bool = False,
+    request_controls: dict[str, Any] | None = None,
+) -> Any:
+    """Invoke a synchronous generated operation with representative arguments."""
+    method = getattr(client, operation)
+    type_hints = _get_generated_type_hints(method, module)
+    arguments = {
+        parameter.name: _representative_value(type_hints[parameter.name])
+        for parameter in inspect.signature(method).parameters.values()
+        if parameter.name not in _REQUEST_CONTROL_PARAMETER_NAMES
+        and (include_optional_parameters or parameter.default is inspect.Parameter.empty)
+    }
+    arguments.update(request_controls or {})
+    return resolve_sync_generated_result(method(**arguments))
 
 
 async def invoke_generated_operation(
@@ -57,9 +121,9 @@ async def invoke_generated_operation(
     include_optional_parameters: bool = False,
     request_controls: dict[str, Any] | None = None,
 ) -> Any:
-    """Invoke a generated operation with representative arguments."""
-    method = getattr(client, f"{operation}_async")
-    type_hints = get_type_hints(method, globalns=vars(module))
+    """Invoke an asynchronous generated operation with representative arguments."""
+    method = getattr(client, operation)
+    type_hints = _get_generated_type_hints(method, module)
     arguments = {
         parameter.name: _representative_value(type_hints[parameter.name])
         for parameter in inspect.signature(method).parameters.values()
@@ -68,6 +132,39 @@ async def invoke_generated_operation(
     }
     arguments.update(request_controls or {})
     return await resolve_generated_result(method(**arguments))
+
+
+def model_instance(
+    model_type: type[Any],
+    *args: Any,
+    **kwargs: Any,
+) -> Any:
+    """Construct a model while filling required fields omitted by a focused test."""
+    type_hints = get_type_hints(model_type)
+    model_fields = [
+        model_field
+        for model_field in dataclasses.fields(model_type)
+        if model_field.init
+    ]
+    positional_field_names = [
+        model_field.name
+        for model_field in model_fields
+        if not model_field.kw_only
+    ]
+    provided_field_names = set(positional_field_names[:len(args)]) | set(kwargs)
+
+    for model_field in model_fields:
+        if (
+            model_field.name not in provided_field_names
+            and model_field.default is dataclasses.MISSING
+            and model_field.default_factory is dataclasses.MISSING
+        ):
+            kwargs[model_field.name] = _representative_value(
+                type_hints[model_field.name],
+                active_model_types=frozenset({model_type}),
+            )
+
+    return model_type(*args, **kwargs)
 
 
 class GeneratedConnectorContractTests:
@@ -98,7 +195,7 @@ class GeneratedConnectorContractTests:
 
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential: Any) -> None:
-        """Test async context manager cleanup."""
+        """Test asynchronous context manager cleanup."""
         with patch.object(self.client_type, "close", new_callable=AsyncMock) as mock_close:
             async with self.client_type(
                 "https://example.azure.com/connections/test",
@@ -106,7 +203,7 @@ class GeneratedConnectorContractTests:
             ) as client:
                 assert isinstance(client, self.client_type)
 
-        mock_close.assert_called_once()
+        mock_close.assert_awaited_once()
 
     def test_all_generated_operations_are_covered(self) -> None:
         """Test the expected generated operation surface."""
@@ -125,7 +222,7 @@ class GeneratedConnectorContractTests:
         assert model_types
 
         for model_type in model_types:
-            instance = model_type()
+            instance = model_instance(model_type)
             expected = {}
             wire_names = []
 
@@ -156,15 +253,26 @@ class GeneratedConnectorContractTests:
                 "https://example.azure.com/connections/test",
                 credential=mock_credential,
             )
-            generated_method = getattr(client, f"{operation}_async")
-            is_pageable = inspect.isasyncgenfunction(generated_method)
+            generated_method = getattr(client, operation)
+            return_type = _get_generated_type_hints(
+                generated_method,
+                self.connector_module,
+            )["return"]
+            is_pageable = get_origin(return_type) is AsyncItemPaged
+            result_type = (
+                get_args(return_type)[0]
+                if get_origin(return_type) is AsyncLROPoller
+                else return_type
+            )
             response_text = (
-                '{"value": [{"ok": true}]}' if is_pageable else '{"ok": true}'
+                generated_pager_response_text(generated_method)
+                if is_pageable
+                else '{"ok": true}'
             )
 
             with patch.object(
                 client._http_client,
-                "send_async",
+                "send",
                 new_callable=AsyncMock,
                 return_value=MockResponse(status=200, text=response_text),
             ) as mock_send:
@@ -183,17 +291,13 @@ class GeneratedConnectorContractTests:
             body = mock_send.call_args.kwargs["body"]
             assert (body is not None) is expects_body, operation
             if expects_body:
-                assert to_wire(body), operation
+                assert to_wire(body) is not None, operation
 
-            return_type = get_type_hints(
-                getattr(client, f"{operation}_async"),
-                globalns=vars(self.connector_module),
-            )["return"]
-            if return_type is type(None):
+            if result_type is type(None):
                 assert result is None, operation
             elif is_pageable:
                 assert result == [{"ok": True}], operation
-            elif return_type is bytes:
+            elif result_type is bytes:
                 assert result == b'{"ok": true}', operation
             else:
                 assert result == {"ok": True}, operation
@@ -209,7 +313,7 @@ class GeneratedConnectorContractTests:
 
             with patch.object(
                 client._http_client,
-                "send_async",
+                "send",
                 new_callable=AsyncMock,
                 return_value=MockResponse(status=400, text="bad request"),
             ):
@@ -217,7 +321,10 @@ class GeneratedConnectorContractTests:
                     await invoke_generated_operation(client, operation, self.connector_module)
 
 
-def _representative_value(annotation: Any) -> Any:
+def _representative_value(
+    annotation: Any,
+    active_model_types: frozenset[type[Any]] = frozenset(),
+) -> Any:
     """Create a representative value for a required generated parameter."""
     if annotation is str:
         return "value"
@@ -237,10 +344,27 @@ def _representative_value(annotation: Any) -> Any:
     origin = get_origin(annotation)
     if origin is list:
         item_types = get_args(annotation)
-        return [_representative_value(item_types[0])] if item_types else ["value"]
+        if not item_types:
+            return ["value"]
+
+        if item_types[0] in active_model_types:
+            return []
+
+        return [
+            _representative_value(
+                item_types[0],
+                active_model_types=active_model_types,
+            )
+        ]
 
     if origin is dict:
         return {"key": "value"}
+
+    if origin is Mapping:
+        return {"key": "value"}
+
+    if origin is Literal:
+        return get_args(annotation)[0]
 
     non_null_types = [
         item_type
@@ -248,23 +372,61 @@ def _representative_value(annotation: Any) -> Any:
         if item_type is not type(None)
     ]
     if len(non_null_types) == 1:
-        return _representative_value(non_null_types[0])
+        return _representative_value(
+            non_null_types[0],
+            active_model_types=active_model_types,
+        )
+
+    mapping_types = [
+        item_type
+        for item_type in non_null_types
+        if get_origin(item_type) is Mapping
+    ]
+    if mapping_types:
+        return _representative_value(
+            mapping_types[0],
+            active_model_types=active_model_types,
+        )
+
+    for item_type in non_null_types:
+        try:
+            return _representative_value(
+                item_type,
+                active_model_types=active_model_types,
+            )
+        except AssertionError:
+            continue
 
     if annotation is Any:
         return "value"
 
-    if inspect.isclass(annotation) and dataclasses.is_dataclass(annotation):
-        instance = annotation()
-        model_fields = dataclasses.fields(instance)
-        if model_fields:
-            model_field = model_fields[0]
-            value = (
-                {"key": "value"}
-                if model_field.name == ADDITIONAL_PROPERTIES_FIELD
-                else "value"
-            )
-            setattr(instance, model_field.name, value)
+    if inspect.isclass(annotation) and issubclass(annotation, Enum):
+        return next(iter(annotation))
 
-        return instance
+    if inspect.isclass(annotation) and dataclasses.is_dataclass(annotation):
+        return _representative_model(
+            annotation,
+            active_model_types=active_model_types,
+        )
 
     raise AssertionError(f"Unsupported generated parameter type '{annotation}'.")
+
+
+def _representative_model(
+    model_type: type[Any],
+    active_model_types: frozenset[type[Any]],
+) -> Any:
+    """Construct a generated model with values for every required field."""
+    type_hints = get_type_hints(model_type)
+    nested_model_types = active_model_types | {model_type}
+    arguments = {
+        model_field.name: _representative_value(
+            type_hints[model_field.name],
+            active_model_types=nested_model_types,
+        )
+        for model_field in dataclasses.fields(model_type)
+        if model_field.init
+        and model_field.default is dataclasses.MISSING
+        and model_field.default_factory is dataclasses.MISSING
+    }
+    return model_type(**arguments)

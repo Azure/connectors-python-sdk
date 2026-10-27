@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-DocuWare Connector SDK Sample
+DocuWare sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the DocuWare connector SDK.
+This sample demonstrates how to use the DocuWare client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a DocuWare connection
@@ -27,8 +27,8 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
+from azure.connectors.docuware import DocuwareClient
 from azure.connectors.docuware import (
-    DocuwareClient,
     SearchForDocumentsInFileCabinetInput,
 )
 
@@ -45,11 +45,11 @@ async def example_1_get_file_cabinets():
 
         async with DocuwareClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_file_cabinets_async(
+                items = [item async for item in client.list_file_cabinets(
                     file_cabinet_type="<file-cabinet-type>",
-                )
+                )]
 
-                print(f"File cabinets result: {result}")
+                print(f"File cabinets result: {items}")
 
             except ConnectorException as ex:
                 print(f"Connector error: {ex}")
@@ -67,7 +67,7 @@ async def example_2_search_documents():
             try:
                 request = SearchForDocumentsInFileCabinetInput()
 
-                result = await client.search_for_documents_in_file_cabinet_async(
+                result = await client.search_for_documents_in_file_cabinet(
                     input=request,
                     file_cabinet="<file-cabinet-id>",
                     search_dialog_id="<search-dialog-id>",

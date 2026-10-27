@@ -1,7 +1,7 @@
 """
-Shifts Connector SDK Sample
+Shifts sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Shifts connector SDK.
+This sample demonstrates how to use the Shifts client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Shifts connection
@@ -38,8 +38,7 @@ async def example_1_list_teams() -> list[dict]:
 
     async with DefaultAzureCredential() as credential:
         async with ShiftsClient(CONNECTION_RUNTIME_URL, credential) as client:
-            teams_response = await client.get_all_teams_async()
-            teams = teams_response.get("value", []) if teams_response else []
+            teams = [team async for team in client.list_all_teams()]
 
             print(f"Found {len(teams)} teams")
             for team in teams[:10]:
@@ -54,7 +53,7 @@ async def example_2_get_schedule(team_id: str) -> None:
 
     async with DefaultAzureCredential() as credential:
         async with ShiftsClient(CONNECTION_RUNTIME_URL, credential) as client:
-            schedule = await client.get_schedule_async(team_id=team_id)
+            schedule = await client.get_schedule(team_id=team_id)
 
             if not schedule:
                 print("No schedule returned")
@@ -71,7 +70,7 @@ async def example_3_list_shifts(team_id: str) -> None:
 
     async with DefaultAzureCredential() as credential:
         async with ShiftsClient(CONNECTION_RUNTIME_URL, credential) as client:
-            shifts_response = [item async for item in client.list_shifts_async(team_id=team_id, top=10)]
+            shifts_response = [item async for item in client.list_shifts(team_id=team_id, top=10)]
             shifts = shifts_response if shifts_response else []
 
             print(f"Found {len(shifts)} shifts")
@@ -86,7 +85,7 @@ async def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Shifts Connector SDK - Sample Usage")
+    print("Shifts sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

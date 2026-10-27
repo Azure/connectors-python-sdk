@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure Digital Twins Connector SDK Sample
+Azure Digital Twins sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure Digital Twins connector SDK
+This sample demonstrates how to use the Azure Digital Twins client from the Azure Connectors Python SDK
 to manage digital twins, models, relationships, and queries.
 
 Prerequisites:
@@ -32,8 +32,8 @@ import asyncio
 import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.azuredigitaltwins import AzuredigitaltwinsClient
 from azure.connectors.azuredigitaltwins import (
-    AzuredigitaltwinsClient,
     QueryTwinsInput,
     SendTelemetryInput,
     TwinRelationship,
@@ -59,7 +59,7 @@ async def example_1_list_models():
         ) as client:
             try:
                 # List all models
-                models = [item async for item in client.list_models_async(
+                models = [item async for item in client.list_models(
                     include_model_definition="true"
                 )]
 
@@ -88,7 +88,7 @@ async def example_2_get_twin():
         ) as client:
             try:
                 # Get a twin by ID
-                result = await client.get_twin_by_id_async(twinid=twin_id)
+                result = await client.get_twin_by_id(twinid=twin_id)
 
                 if result:
                     print(f"Twin ID: {result.get('$dtId', 'Unknown')}")
@@ -122,7 +122,7 @@ async def example_3_query_twins():
                 query_input = QueryTwinsInput(
                     query="SELECT * FROM digitaltwins"
                 )
-                result = await client.query_twins_async(input=query_input)
+                result = await client.query_twins(input=query_input)
 
                 if result and result.get("value"):
                     print(f"Query results: {result['value']}")
@@ -151,7 +151,7 @@ async def example_4_list_relationships():
         ) as client:
             try:
                 # List outgoing relationships
-                outgoing = [item async for item in client.list_relationships_async(twinid=twin_id)]
+                outgoing = [item async for item in client.list_relationships(twinid=twin_id)]
 
                 if outgoing:
                     print(f"Outgoing relationships from {twin_id}:")
@@ -162,7 +162,7 @@ async def example_4_list_relationships():
                     print(f"No outgoing relationships from {twin_id}")
 
                 # List incoming relationships
-                incoming = [item async for item in client.list_incoming_relationships_async(
+                incoming = [item async for item in client.list_incoming_relationships(
                     twinid=twin_id
                 )]
 
@@ -195,7 +195,7 @@ async def example_5_send_telemetry():
                 telemetry = SendTelemetryInput(
                     value='{"temperature": 72.5, "humidity": 45}'
                 )
-                await client.send_telemetry_async(
+                await client.send_telemetry(
                     input=telemetry,
                     twinid=twin_id
                 )

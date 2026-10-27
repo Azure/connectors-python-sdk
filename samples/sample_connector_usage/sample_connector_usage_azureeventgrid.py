@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure Event Grid Connector SDK Sample
+Azure Event Grid sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure Event Grid connector SDK.
+This sample demonstrates how to use the Azure Event Grid client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with an Azure Event Grid connection
@@ -26,8 +26,8 @@ import asyncio
 import os
 
 from azure.identity.aio import DefaultAzureCredential
+from azure.connectors.azureeventgrid import AzureeventgridClient
 from azure.connectors.azureeventgrid import (
-    AzureeventgridClient,
     EventRequest,
 )
 
@@ -46,8 +46,8 @@ async def example_1_list_subscriptions():
     async with DefaultAzureCredential() as credential:
 
         async with AzureeventgridClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.subscriptions_list_async()
-            subscriptions = result.get("value", []) if result else []
+            items = [item async for item in client.list_subscriptions()]
+            subscriptions = items
 
             print(f"Found {len(subscriptions)} subscription(s).")
             for subscription in subscriptions[:10]:
@@ -63,8 +63,8 @@ async def example_2_list_topic_types():
     async with DefaultAzureCredential() as credential:
 
         async with AzureeventgridClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.topic_types_list_async()
-            topic_types = result.get("value", []) if result else []
+            items = [item async for item in client.list_topic_types()]
+            topic_types = items
 
             print(f"Found {len(topic_types)} topic type(s).")
             for topic_type in topic_types[:10]:

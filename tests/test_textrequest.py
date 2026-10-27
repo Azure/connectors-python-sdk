@@ -8,6 +8,7 @@ import pytest
 
 from azure.core.credentials import AzureKeyCredential
 import azure.connectors.textrequest as textrequest_module
+from azure.connectors.textrequest import TextrequestClient
 from azure.connectors.textrequest import (
     CreateContactInput,
     CreateDashboardInput,
@@ -16,7 +17,6 @@ from azure.connectors.textrequest import (
     GetContactByPhoneNumberResponse,
     SendMessageByPhoneNumberInput,
     SendMessageByPhoneNumberResponse,
-    TextrequestClient,
     UpdateDashboardsNameInput,
     UpdateGroupInput,
     TRIGGER_OPERATIONS,
@@ -28,6 +28,7 @@ from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import (
     get_generated_operations,
     invoke_generated_operation,
+    resolve_generated_result,
 )
 
 
@@ -55,33 +56,33 @@ SUCCESS_CONTRACTS = {
         "/dashboards/1/contacts/value",
         False,
     ),
-    "get_contacts": (
+    "list_contacts": (
         "GET",
         "/dashboards/1/contacts?page=1&page_size=1",
         False,
     ),
-    "get_conversations": ("GET", "/dashboards/1/conversations", False),
-    "get_custom_fields": ("GET", "/dashboards/1/fields", False),
+    "list_conversations": ("GET", "/dashboards/1/conversations", False),
+    "list_custom_fields": ("GET", "/dashboards/1/fields", False),
     "get_dashboard": ("GET", "/dashboards/1", False),
-    "get_dashboards": ("GET", "/dashboards", False),
+    "list_dashboards": ("GET", "/dashboards", False),
     "get_group_by_id": ("GET", "/dashboards/1/groups/1", False),
-    "get_groups": (
+    "list_groups": (
         "GET",
         "/dashboards/1/groups?page=1&page_size=1",
         False,
     ),
-    "get_messages_by_contact_phone": (
+    "list_messages_by_contact_phone": (
         "GET",
         "/dashboards/1/contacts/value/messages?page=1&page_size=1",
         False,
     ),
     "get_payment": ("GET", "/dashboards/1/payments/1", False),
-    "get_payments": (
+    "list_payments": (
         "GET",
         "/dashboards/1/payments?page=1&page_size=1",
         False,
     ),
-    "get_tags": (
+    "list_tags": (
         "GET",
         "/dashboards/1/tags?page=1&page_size=1",
         False,
@@ -110,6 +111,15 @@ SUCCESS_CONTRACTS = {
     "update_group": ("PUT", "/dashboards/1/groups/1", True),
 }
 ALL_OPERATIONS = list(SUCCESS_CONTRACTS)
+PAGED_OPERATIONS = {
+    "list_contacts",
+    "list_conversations",
+    "list_dashboards",
+    "list_groups",
+    "list_messages_by_contact_phone",
+    "list_payments",
+    "list_tags",
+}
 
 
 class TestTextrequestClientInitialization:
@@ -145,7 +155,7 @@ class TestTextrequestClientInitialization:
         client = TextrequestClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -232,9 +242,21 @@ class TestTextrequestClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
-            return_value=MockResponse(status=200, text='{"ok": true}'),
+            return_value=MockResponse(
+                status=200,
+                text=(
+                    '[{"ok": true}]'
+                    if operation in {
+                        "bulk_update_contacts",
+                        "list_custom_fields",
+                    }
+                    else '{"items": [{"ok": true}]}'
+                    if operation in PAGED_OPERATIONS
+                    else '{"ok": true}'
+                ),
+            ),
         ) as mock_send:
             result = await invoke_generated_operation(
                 client,
@@ -246,7 +268,15 @@ class TestTextrequestClientOperations:
         assert method == expected_method
         assert url.endswith(expected_url_suffix)
         assert (mock_send.call_args.kwargs["body"] is not None) is expects_body
-        assert result == {"ok": True}
+        expected_result = (
+            [{"ok": True}]
+            if operation in {
+                "bulk_update_contacts",
+                "list_custom_fields",
+            } | PAGED_OPERATIONS
+            else {"ok": True}
+        )
+        assert result == expected_result
 
     @pytest.mark.asyncio
     async def test_get_messages_by_contact_phone_success(self, mock_credential):
@@ -255,11 +285,16 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"items": []}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_messages_by_contact_phone_async(
-                dashboard_id="7", phone_number="+15551112222", page="1", page_size="20"
+            result = await resolve_generated_result(
+                client.list_messages_by_contact_phone(
+                    dashboard_id="7",
+                    phone_number="+15551112222",
+                    page="1",
+                    page_size="20",
+                )
             )
 
             url = mock_send.call_args[0][1]
@@ -267,7 +302,7 @@ class TestTextrequestClientOperations:
             assert "/dashboards/7/contacts/%2B15551112222/messages" in url
             assert "page=1" in url
             assert "page_size=20" in url
-            assert result == {"items": []}
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_send_message_by_phone_number_success(self, mock_credential):
@@ -277,10 +312,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"message_id": "m1"}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.send_message_by_phone_number_async(
+            result = await client.send_message_by_phone_number(
                 input=payload, dashboard_id="7", phone_number="+15551112222"
             )
 
@@ -296,10 +331,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"ok": true}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.archive_conversation_async(
+            result = await client.archive_conversation(
                 dashboard_id="7", phone_number="+15551112222"
             )
 
@@ -314,10 +349,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"ok": true}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.unarchive_conversation_async(
+            result = await client.unarchive_conversation(
                 dashboard_id="7", phone_number="+15551112222"
             )
 
@@ -332,10 +367,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"phone_number": "+15551112222"}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_contact_by_phone_number_async(
+            result = await client.get_contact_by_phone_number(
                 dashboard_id="7", phone_number="+15551112222"
             )
 
@@ -350,10 +385,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"ok": true}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.delete_contact_async(
+            result = await client.delete_contact(
                 dashboard_id="7", phone_number="+15551112222"
             )
 
@@ -369,10 +404,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"phone_number": "+15551112222"}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_contact_async(
+            result = await client.create_contact(
                 input=payload, dashboard_id="7", phone_number="+15551112222"
             )
 
@@ -388,11 +423,16 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"items": []}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_contacts_async(
-                dashboard_id="7", page="1", page_size="20", is_resolved="true"
+            result = await resolve_generated_result(
+                client.list_contacts(
+                    dashboard_id="7",
+                    page="1",
+                    page_size="20",
+                    is_resolved="true",
+                )
             )
 
             url = mock_send.call_args[0][1]
@@ -400,7 +440,7 @@ class TestTextrequestClientOperations:
             assert "/dashboards/7/contacts" in url
             assert "is_resolved=true" in url
             assert "page=1" in url
-            assert result == {"items": []}
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_get_group_by_id_success(self, mock_credential):
@@ -409,10 +449,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"id": 3}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_group_by_id_async(dashboard_id="7", group_id="3")
+            result = await client.get_group_by_id(dashboard_id="7", group_id="3")
 
             assert mock_send.call_args[0][0] == "GET"
             assert "/dashboards/7/groups/3" in mock_send.call_args[0][1]
@@ -426,10 +466,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"id": 3}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.update_group_async(
+            result = await client.update_group(
                 input=payload, dashboard_id="7", group_id="3"
             )
 
@@ -446,10 +486,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"id": 3}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_group_async(input=payload, dashboard_id="7")
+            result = await client.create_group(input=payload, dashboard_id="7")
 
             assert mock_send.call_args[0][0] == "POST"
             assert "/dashboards/7/groups" in mock_send.call_args[0][1]
@@ -457,20 +497,25 @@ class TestTextrequestClientOperations:
             assert result == {"id": 3}
 
     @pytest.mark.asyncio
-    async def test_get_custom_fields_success(self, mock_credential):
-        """Test get_custom_fields issues a GET to the fields route."""
+    async def test_list_custom_fields_success(self, mock_credential):
+        """Test list_custom_fields issues a GET to the fields route."""
         client = self._make_client(mock_credential)
-        mock_response = MockResponse(status=200, text='[]')
+        mock_response = MockResponse(status=200, text='[{"id": "field-1"}]')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_custom_fields_async(dashboard_id="7")
+            result = await invoke_generated_operation(
+                client,
+                "list_custom_fields",
+                textrequest_module,
+                request_controls={"dashboard_id": "7"},
+            )
 
             assert mock_send.call_args[0][0] == "GET"
             assert "/dashboards/7/fields" in mock_send.call_args[0][1]
-            assert result == []
+            assert result == [{"id": "field-1"}]
 
     @pytest.mark.asyncio
     async def test_mark_payment_paid_success(self, mock_credential):
@@ -479,10 +524,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"ok": true}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.mark_payment_paid_async(dashboard_id="7", payment_id="9")
+            result = await client.mark_payment_paid(dashboard_id="7", payment_id="9")
 
             assert mock_send.call_args[0][0] == "POST"
             assert "/dashboards/7/payments/9/mark_as_paid" in mock_send.call_args[0][1]
@@ -496,10 +541,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"id": 9}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_payment_async(input=payload, dashboard_id="7")
+            result = await client.create_payment(input=payload, dashboard_id="7")
 
             assert mock_send.call_args[0][0] == "POST"
             assert "/dashboards/7/payments" in mock_send.call_args[0][1]
@@ -513,16 +558,18 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"items": []}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_dashboards_async(page="1", page_size="20")
+            result = await resolve_generated_result(
+                client.list_dashboards(page="1", page_size="20")
+            )
 
             url = mock_send.call_args[0][1]
             assert mock_send.call_args[0][0] == "GET"
             assert "/dashboards" in url
             assert "page=1" in url
-            assert result == {"items": []}
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_create_dashboard_success(self, mock_credential):
@@ -532,10 +579,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"id": 1}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_dashboard_async(input=payload)
+            result = await client.create_dashboard(input=payload)
 
             assert mock_send.call_args[0][0] == "POST"
             assert mock_send.call_args[0][1].endswith("/dashboards")
@@ -550,10 +597,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"id": 7}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.update_dashboards_name_async(input=payload, dashboard_id="7")
+            result = await client.update_dashboards_name(input=payload, dashboard_id="7")
 
             assert mock_send.call_args[0][0] == "PUT"
             assert mock_send.call_args[0][1].endswith("/dashboards/7")
@@ -567,12 +614,12 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text="")
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.get_dashboards_async()
+            result = await resolve_generated_result(client.list_dashboards())
 
-            assert result is None
+            assert result == []
 
 
 class TestTextrequestClientErrorHandling:
@@ -582,33 +629,33 @@ class TestTextrequestClientErrorHandling:
     @pytest.mark.parametrize(
         "operation",
         [
-            "get_messages_by_contact_phone",
+            "list_messages_by_contact_phone",
             "send_message_by_phone_number",
             "archive_conversation",
             "unarchive_conversation",
             "get_contact_by_phone_number",
             "delete_contact",
             "create_contact",
-            "get_contacts",
+            "list_contacts",
             "bulk_update_contacts",
             "get_group_by_id",
             "delete_group",
             "update_group",
-            "get_groups",
+            "list_groups",
             "create_group",
-            "get_tags",
-            "get_custom_fields",
+            "list_tags",
+            "list_custom_fields",
             "get_payment",
             "mark_payment_paid",
             "send_payment_reminder",
             "cancel_payment",
-            "get_payments",
+            "list_payments",
             "create_payment",
             "get_dashboard",
             "delete_dashboard",
             "update_dashboards_name",
-            "get_conversations",
-            "get_dashboards",
+            "list_conversations",
+            "list_dashboards",
             "create_dashboard",
         ],
     )
@@ -621,80 +668,15 @@ class TestTextrequestClientErrorHandling:
         mock_response = MockResponse(status=500, text='{"error":"server failure"}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                if operation == "get_messages_by_contact_phone":
-                    await client.get_messages_by_contact_phone_async(
-                        dashboard_id="7", phone_number="p", page="1", page_size="20"
-                    )
-                elif operation == "send_message_by_phone_number":
-                    await client.send_message_by_phone_number_async(
-                        input=SendMessageByPhoneNumberInput(), dashboard_id="7", phone_number="p"
-                    )
-                elif operation == "archive_conversation":
-                    await client.archive_conversation_async(dashboard_id="7", phone_number="p")
-                elif operation == "unarchive_conversation":
-                    await client.unarchive_conversation_async(dashboard_id="7", phone_number="p")
-                elif operation == "get_contact_by_phone_number":
-                    await client.get_contact_by_phone_number_async(
-                        dashboard_id="7", phone_number="p"
-                    )
-                elif operation == "delete_contact":
-                    await client.delete_contact_async(dashboard_id="7", phone_number="p")
-                elif operation == "create_contact":
-                    await client.create_contact_async(
-                        input=CreateContactInput(), dashboard_id="7", phone_number="p"
-                    )
-                elif operation == "get_contacts":
-                    await client.get_contacts_async(
-                        dashboard_id="7", page="1", page_size="20"
-                    )
-                elif operation == "bulk_update_contacts":
-                    await client.bulk_update_contacts_async(input=[], dashboard_id="7")
-                elif operation == "get_group_by_id":
-                    await client.get_group_by_id_async(dashboard_id="7", group_id="3")
-                elif operation == "delete_group":
-                    await client.delete_group_async(dashboard_id="7", group_id="3")
-                elif operation == "update_group":
-                    await client.update_group_async(
-                        input=UpdateGroupInput(), dashboard_id="7", group_id="3"
-                    )
-                elif operation == "get_groups":
-                    await client.get_groups_async(dashboard_id="7", page="1", page_size="20")
-                elif operation == "create_group":
-                    await client.create_group_async(input=CreateGroupInput(), dashboard_id="7")
-                elif operation == "get_tags":
-                    await client.get_tags_async(dashboard_id="7", page="1", page_size="20")
-                elif operation == "get_custom_fields":
-                    await client.get_custom_fields_async(dashboard_id="7")
-                elif operation == "get_payment":
-                    await client.get_payment_async(dashboard_id="7", payment_id="9")
-                elif operation == "mark_payment_paid":
-                    await client.mark_payment_paid_async(dashboard_id="7", payment_id="9")
-                elif operation == "send_payment_reminder":
-                    await client.send_payment_reminder_async(dashboard_id="7", payment_id="9")
-                elif operation == "cancel_payment":
-                    await client.cancel_payment_async(dashboard_id="7", payment_id="9")
-                elif operation == "get_payments":
-                    await client.get_payments_async(dashboard_id="7", page="1", page_size="20")
-                elif operation == "create_payment":
-                    await client.create_payment_async(input=CreatePaymentInput(), dashboard_id="7")
-                elif operation == "get_dashboard":
-                    await client.get_dashboard_async(dashboard_id="7")
-                elif operation == "delete_dashboard":
-                    await client.delete_dashboard_async(dashboard_id="7")
-                elif operation == "update_dashboards_name":
-                    await client.update_dashboards_name_async(
-                        input=UpdateDashboardsNameInput(), dashboard_id="7"
-                    )
-                elif operation == "get_conversations":
-                    await client.get_conversations_async(dashboard_id="7")
-                elif operation == "get_dashboards":
-                    await client.get_dashboards_async()
-                else:
-                    await client.create_dashboard_async(input=CreateDashboardInput())
+                await invoke_generated_operation(
+                    client,
+                    operation,
+                    textrequest_module,
+                )
 
             assert exc_info.value.status_code == 500
 

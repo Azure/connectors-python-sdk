@@ -20,18 +20,17 @@ async def main() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with RssClient(connection_url, credential) as client:
-            items = await client.list_feed_items_async(
+            items = [item async for item in client.list_feed_items(
                 feed_url=feed_url,
                 since_property="PublishDate",
-            )
+            )]
             print(f"Retrieved {len(items or [])} item(s) from '{feed_url}'.")
 
-            latest_items = await client.list_feed_items_async(
+            latest_items = [item async for item in client.list_feed_items(
                 feed_url=feed_url,
                 since_property="PublishDate",
-            )
-            values = (latest_items or {}).get("value", [])
-            print(f"Polling query returned {len(values)} item(s).")
+            )]
+            print(f"Polling query returned {len(latest_items)} item(s).")
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 """
-Microsoft To Do Connector SDK Sample
+Microsoft To Do sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Microsoft To Do connector SDK.
+This sample demonstrates how to use the Microsoft To Do client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Microsoft To Do connection
@@ -24,7 +24,8 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.todo import CreateToDo, CreateToDoList, TodoClient, UpdateToDo
+from azure.connectors.todo import TodoClient
+from azure.connectors.todo import CreateToDo, CreateToDoList, UpdateToDo
 
 
 # Connection runtime URL format:
@@ -38,8 +39,8 @@ async def example_1_list_lists() -> list[dict]:
 
     async with DefaultAzureCredential() as credential:
         async with TodoClient(CONNECTION_RUNTIME_URL, credential) as client:
-            lists_response = await client.get_all_todo_lists_async()
-            lists = lists_response.get("value", []) if lists_response else []
+            lists_response = [item async for item in client.list_all_todo_lists()]
+            lists = lists_response
 
             print(f"Found {len(lists)} lists")
             for todo_list in lists[:10]:
@@ -55,7 +56,7 @@ async def example_2_create_list() -> str | None:
     async with DefaultAzureCredential() as credential:
         async with TodoClient(CONNECTION_RUNTIME_URL, credential) as client:
             request = CreateToDoList(display_name="SDK Sample List")
-            created = await client.create_to_do_list_async(input=request)
+            created = await client.create_to_do_list(input=request)
 
             if not created:
                 print("No list was created")
@@ -73,7 +74,7 @@ async def example_3_create_and_update_todo(list_id: str) -> None:
     async with DefaultAzureCredential() as credential:
         async with TodoClient(CONNECTION_RUNTIME_URL, credential) as client:
             create_request = CreateToDo(title="SDK sample task", status="notStarted")
-            created_todo = await client.create_to_do_async(input=create_request, folder_id=list_id)
+            created_todo = await client.create_to_do(input=create_request, folder_id=list_id)
 
             if not created_todo:
                 print("No to-do item returned from create operation")
@@ -86,7 +87,7 @@ async def example_3_create_and_update_todo(list_id: str) -> None:
                 return
 
             update_request = UpdateToDo(title="SDK sample task (updated)", status="inProgress")
-            updated_todo = await client.update_to_do_async(
+            updated_todo = await client.update_to_do(
                 input=update_request,
                 folder_id=list_id,
                 id=todo_id,
@@ -101,7 +102,7 @@ async def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Microsoft To Do Connector SDK - Sample Usage")
+    print("Microsoft To Do sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

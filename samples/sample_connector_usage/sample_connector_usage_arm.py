@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure Resource Manager (ARM) Connector SDK Sample
+Azure Resource Manager (ARM) sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the ARM connector SDK to interact
+This sample demonstrates how to use the ARM client from the Azure Connectors Python SDK to interact
 with Azure Resource Manager APIs.
 
 Prerequisites:
@@ -48,7 +48,7 @@ async def example_1_list_subscriptions():
         async with ArmClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 subscriptions = [
-                    item async for item in client.subscriptions_list_async()
+                    item async for item in client.list_subscriptions()
                 ]
 
                 if subscriptions:
@@ -78,7 +78,7 @@ async def example_2_list_subscriptions_with_details():
         async with ArmClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 subscriptions = [
-                    item async for item in client.subscriptions_list_async()
+                    item async for item in client.list_subscriptions()
                 ]
 
                 if subscriptions:
@@ -121,7 +121,7 @@ async def example_3_filter_enabled_subscriptions():
         async with ArmClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 subscriptions = [
-                    item async for item in client.subscriptions_list_async()
+                    item async for item in client.list_subscriptions()
                 ]
 
                 if subscriptions:
@@ -158,7 +158,7 @@ async def example_3_filter_enabled_subscriptions():
 
 async def main():
     """Run all examples."""
-    print("Azure Resource Manager (ARM) Connector SDK - Sample Usage")
+    print("Azure Resource Manager (ARM) sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
 
     if not CONNECTION_RUNTIME_URL:

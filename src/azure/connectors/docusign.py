@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
+from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
 from azure.core.credentials_async import AsyncTokenCredential
 from azure.core.pipeline.transport import AsyncHttpTransport
@@ -18,7 +19,128 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "DocusignClient",
+    "AccountCustomFields",
+    "Activity",
+    "ActivityListResponseEnvelope",
+    "AddDocumentsResponse",
+    "AddDocumentsToEnvelopeInput",
+    "AddRecipientTabsResponse",
+    "AddRecipientToEnvelopeRequest",
+    "AddRemindersResponse",
+    "AddVerificationToRecipientResponse",
+    "AdditionalRecipientData",
+    "AdditionalRecipientParamsSchema",
+    "AdditionalURL",
+    "AdditionalURLForSenderView",
+    "AnchorTabSchema",
+    "ApiError",
+    "ApplyTemplatesToDocumentsInput",
+    "AuditResponse",
+    "BuildNumberResponse",
+    "BuildNumberSchema",
+    "BulkSendListGuid",
+    "CombinedEmailBodyAndCustomFields",
+    "CompositeTemplateSchema",
+    "CompositeTemplatesResponse",
+    "CreateBulkSendListInput",
+    "CreateEnvelopeResponse",
+    "CreateHookEnvelopeInput",
+    "CreateHookEnvelopeResponse",
+    "CreateOrgHookEnvelopeInput",
+    "CreateOrgHookEnvelopeResponse",
+    "DeclineReasonWithoutType",
+    "DocGenFormField",
+    "DocGenFormFieldsResponse",
+    "DocumentRecord",
+    "DocumentRecordListResponseEnvelope",
+    "DocumentType",
+    "DocumentTypesResponse",
+    "DynamicRecipients",
+    "DynamicSigners",
+    "DynamicSigningUrlFields",
+    "EmailSummary",
+    "EmailSummaryResponse",
+    "EmbeddedSenderResponse",
+    "EmbeddedSigningResponse",
+    "Envelope",
+    "EnvelopeCustomFieldResponse",
+    "EnvelopeDocument",
+    "EnvelopeDocumentField",
+    "EnvelopeIDsResponse",
+    "EnvelopeIds",
+    "EnvelopeResendResponse",
+    "EnvelopeTemplate",
+    "EnvelopeVoidResponse",
+    "FilteredEnvelopeListResponse",
+    "FilteredEnvelopes",
+    "FilteredSalesCopilotEnvelopeListResponse",
+    "Folder",
+    "FolderItem",
+    "FontName",
+    "FontNamesResponse",
+    "GetDocGenTemplateTabsResponse",
+    "GetDocumentsResponse",
+    "GetDynamicRecipientsResponse",
+    "GetDynamicSignersResponse",
+    "GetLoginAccountsResponse",
+    "GetOrganizationsResponse",
+    "GetWorkFlowIdsResponse",
+    "KeySales",
+    "KeySalesResponse",
+    "ListDocumentsResponse",
+    "ListEnvelopeDocumentFieldsResponse",
+    "ListEnvelopesResponse",
+    "ListFoldersResponse",
+    "ListRecipientsResponse",
+    "ListSigningGroupResponse",
+    "ListTabsResponse",
+    "ListTemplateDocumentsResponse",
+    "ListTemplatesResponse",
+    "LoginAccount",
+    "MaestroInputVariables",
+    "OnEnvelopeStatusChangesResponse",
+    "Organization",
+    "RecipientTab",
+    "RecipientTabsResponse",
+    "RecipientType",
+    "RecipientTypesResponse",
+    "SalesCopilotFilteredEnvelopes",
+    "SendDraftEnvelopeResponse",
+    "SignatureType",
+    "SignatureTypesResponse",
+    "Signer",
+    "SignerRequest",
+    "SigningGroup",
+    "StaticResponseForAnchorTabSchemaResponse",
+    "StaticResponseForBuildNumberSchemaResponse",
+    "StaticResponseForCompositeTemplatesResponse",
+    "StaticResponseForEmbeddedSenderSchemaResponse",
+    "StaticResponseForEmbeddedSigningSchemaResponse",
+    "StaticResponseForRecipientTypeSchemaResponse",
+    "StaticResponseForVerificationTypeSchemaResponse",
+    "Tab",
+    "TabType",
+    "TabTypesResponse",
+    "TriggerMaestroFlowResponse",
+    "UpdateDocgenFormFieldsInput",
+    "UpdateEnvelopeCustomFieldResponse",
+    "UpdateEnvelopePrefillTabsInput",
+    "UpdateRecipientTabsValuesInput",
+    "WebhookEnvelopeResponse",
+    "WebhookOrganizationResponse",
+    "WebhookRequest",
+    "WorkflowDefPayloadSchema",
+    "WorkflowDefinition",
+    "WorkflowDefinitionResponse",
+    "WorkflowDefinitionsResponse",
+    "WorkflowId",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -29,29 +151,22 @@ class CreateOrgHookEnvelopeInput:
     When a Docusign Connect event occurs (Organization-level)
     """
 
-    all_users: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "allUsers"},
-    )
-    allow_envelope_publish: Optional[str] = field(
-        default=None,
+    all_users: str = dataclass_field(metadata={"wire_name": "allUsers"})
+    allow_envelope_publish: str = dataclass_field(
         metadata={"wire_name": "allowEnvelopePublish"},
     )
-    include_document_fields: Optional[str] = field(
-        default=None,
+    include_document_fields: str = dataclass_field(
         metadata={"wire_name": "includeDocumentFields"},
     )
-    requires_acknowledgement: Optional[str] = field(
-        default=None,
+    requires_acknowledgement: str = dataclass_field(
         metadata={"wire_name": "requiresAcknowledgement"},
     )
-    url_to_publish_to: Optional[str] = field(
-        default=None,
+    url_to_publish_to: str = dataclass_field(
         metadata={"wire_name": "urlToPublishTo"},
     )
-    name: Optional[str] = None
+    name: str
     """Name your Connect configuration (for example, \"Envelope Events\")."""
-    events: Optional[List[str]] = None
+    events: List[str]
     """Select an event. To include another event, select \"Add new item.\""""
 
 
@@ -61,7 +176,7 @@ class CreateOrgHookEnvelopeResponse:
     Response for When a Docusign Connect event occurs (Organization-level)
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -74,8 +189,9 @@ class DocGenFormFieldsResponse:
     Response for Get document generation form fields from envelope
     """
 
-    docgen_fields: Optional[List[DocGenFormField]] = field(
+    docgen_fields: Optional[List[DocGenFormField | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "docgenFields"},
     )
     """Docgen Fields"""
@@ -90,7 +206,7 @@ class GetDocGenTemplateTabsResponse:
     Response for Get document generation form fields from template (bulk send templates only)
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -103,7 +219,7 @@ class EnvelopeVoidResponse:
     Response for Void the envelope
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -116,7 +232,7 @@ class EnvelopeResendResponse:
     Response for Resend the envelope
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -129,8 +245,9 @@ class AddRemindersResponse:
     Response for Add reminders for an envelope
     """
 
-    reminder_enabled: Optional[str] = field(
+    reminder_enabled: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "reminderEnabled"},
     )
     """Reminder enabled"""
@@ -142,7 +259,12 @@ class ListTabsResponse:
     Response for Get document tabs from envelope
     """
 
-    tabs: Optional[List[Tab]] = None
+    tabs: Optional[
+        List[Tab | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Tabs"""
 
 
@@ -155,8 +277,11 @@ class ListEnvelopeDocumentFieldsResponse:
     Response for Get document custom fields from envelope
     """
 
-    envelope_document_fields: Optional[List[EnvelopeDocumentField]] = field(
+    envelope_document_fields: Optional[
+        List[EnvelopeDocumentField | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "envelopeDocumentFields"},
     )
     """Document Custom Fields"""
@@ -168,19 +293,21 @@ class CompositeTemplatesResponse:
     Response for Create envelope using composite templates
     """
 
-    envelope_id: Optional[str] = field(
+    envelope_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "envelopeId"},
     )
     """The id of the envelope."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The status of the envelope."""
-    status_date_time: Optional[str] = field(
+    status_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "statusDateTime"},
     )
     """The datetime the status was set."""
-    uri: Optional[str] = None
+    uri: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The URI for the envelope in DocuSign."""
 
 
@@ -190,10 +317,16 @@ class FilteredEnvelopeListResponse:
     Response for List envelopes
     """
 
-    value: Optional[List[FilteredEnvelopes]] = None
-    """Filtered envelopes"""
-    has_more_results: Optional[bool] = field(
+    value: Optional[
+        List[FilteredEnvelopes | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """Filtered envelopes"""
+    has_more_results: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "hasMoreResults"},
     )
     """
@@ -208,24 +341,27 @@ class CreateEnvelopeResponse:
     Response for Create envelope using template
     """
 
-    envelope_id: Optional[str] = field(
+    envelope_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "envelopeId"},
     )
     """The id of the envelope."""
-    template_id: Optional[str] = field(
+    template_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "templateId"},
     )
     """The id of the template."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The status of the envelope."""
-    status_date_time: Optional[str] = field(
+    status_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "statusDateTime"},
     )
     """The datetime the status was set."""
-    uri: Optional[str] = None
+    uri: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The URI for the envelope in DocuSign."""
 
 
@@ -235,7 +371,7 @@ class SendDraftEnvelopeResponse:
     Response for Send envelope
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -248,19 +384,21 @@ class EnvelopeCustomFieldResponse:
     Response for Get envelope custom field info
     """
 
-    field_id: Optional[str] = field(
+    field_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "fieldId"},
     )
     """The id of the envelope custom field."""
-    field_type: Optional[str] = field(
+    field_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "fieldType"},
     )
     """The type of the envelope custom field."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the envelope custom field."""
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The value of the envelope custom field."""
 
 
@@ -270,19 +408,21 @@ class UpdateEnvelopeCustomFieldResponse:
     Response for Update envelope custom field
     """
 
-    field_id: Optional[str] = field(
+    field_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "fieldId"},
     )
     """The id of the envelope custom field."""
-    field_type: Optional[str] = field(
+    field_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "fieldType"},
     )
     """The type of the envelope custom field."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the envelope custom field."""
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The value of the envelope custom field."""
 
 
@@ -292,7 +432,7 @@ class EmbeddedSenderResponse:
     Response for Generate Embedded Sender URL
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The url of embedded sender view."""
 
 
@@ -302,11 +442,17 @@ class ListRecipientsResponse:
     Response for List recipients from an envelope
     """
 
-    envelope_id: Optional[str] = field(
+    envelope_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "envelopeId"},
     )
-    signers: Optional[List[Signer]] = None
+    signers: Optional[
+        List[Signer | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Signers"""
 
 
@@ -316,37 +462,43 @@ class Signer:
     Response for Get recipient info from envelope
     """
 
-    routing_order: Optional[str] = field(
+    routing_order: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "routingOrder"},
     )
     """The signing order of the recipient in the document."""
-    role_name: Optional[str] = field(
+    role_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "roleName"},
     )
     """The role of the signer."""
-    recipient_id: Optional[str] = field(
+    recipient_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientId"},
     )
     """The id the recipient."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the recipient."""
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The email of the recipient."""
-    recipient_type: Optional[str] = field(
+    recipient_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientType"},
     )
     """The type the recipient."""
-    verification_type: Optional[str] = field(
+    verification_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "verificationType"},
     )
     """The type of verification."""
-    recipient_id_guid: Optional[str] = field(
+    recipient_id_guid: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientIdGuid"},
     )
     """The recipient GUID."""
@@ -358,7 +510,7 @@ class AuditResponse:
     Response for Get audit event list
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -371,7 +523,7 @@ class AddVerificationToRecipientResponse:
     Response for Add verification type to a recipient
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -384,8 +536,9 @@ class ApplyTemplatesToDocumentsInput:
     Apply a template to documents
     """
 
-    document_templates: Optional[List[Dict[str, Any]]] = field(
+    document_templates: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "documentTemplates"},
     )
     """Document Templates"""
@@ -397,10 +550,11 @@ class CreateBulkSendListInput:
     Create bulk send list
     """
 
-    csv: Optional[str] = None
+    csv: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Upload CSV File"""
-    raw_output: Optional[Dict[str, Any]] = field(
+    raw_output: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "rawOutput"},
     )
     """Document generation fields"""
@@ -412,8 +566,9 @@ class BulkSendListGuid:
     Response for Create bulk send list
     """
 
-    list_id: Optional[str] = field(
+    list_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "listId"},
     )
     """Bulk send list guid"""
@@ -425,8 +580,9 @@ class GetLoginAccountsResponse:
     Response for Login
     """
 
-    login_accounts: Optional[List[LoginAccount]] = field(
+    login_accounts: Optional[List[LoginAccount | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "loginAccounts"},
     )
     """Login accounts"""
@@ -438,8 +594,11 @@ class ListTemplatesResponse:
     Response for List templates
     """
 
-    envelope_templates: Optional[List[EnvelopeTemplate]] = field(
+    envelope_templates: Optional[
+        List[EnvelopeTemplate | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "envelopeTemplates"},
     )
     """The available envelope templates."""
@@ -451,7 +610,7 @@ class AddDocumentsToEnvelopeInput:
     Add documents to an envelope
     """
 
-    documents: Optional[List[Dict[str, Any]]] = None
+    documents: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -460,13 +619,17 @@ class AddDocumentsResponse:
     Response for Add documents to an envelope
     """
 
-    envelope_id: Optional[str] = field(
+    envelope_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "envelopeId"},
     )
     """The id of the envelope."""
-    envelope_documents: Optional[List[EnvelopeDocument]] = field(
+    envelope_documents: Optional[
+        List[EnvelopeDocument | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "envelopeDocuments"},
     )
     """The documents attached to the envelope."""
@@ -478,8 +641,11 @@ class ListTemplateDocumentsResponse:
     Response for List documents from a template
     """
 
-    template_documents: Optional[List[EnvelopeDocument]] = field(
+    template_documents: Optional[
+        List[EnvelopeDocument | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "templateDocuments"},
     )
     """Documents attached to a template."""
@@ -491,8 +657,11 @@ class ListDocumentsResponse:
     Response for List documents from an envelope
     """
 
-    envelope_documents: Optional[List[EnvelopeDocument]] = field(
+    envelope_documents: Optional[
+        List[EnvelopeDocument | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "envelopeDocuments"},
     )
     """The documents attached to the envelope."""
@@ -504,20 +673,23 @@ class EnvelopeDocument:
     Response for Get document info from envelope
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the document."""
-    document_id: Optional[str] = field(
+    document_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "documentId"},
     )
     """The id of the document."""
-    document_id_guid: Optional[str] = field(
+    document_id_guid: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "documentIdGuid"},
     )
     """The guid of the document."""
-    error_details: Optional[Dict[str, Any]] = field(
+    error_details: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "errorDetails"},
     )
     """The error details of the document."""
@@ -529,38 +701,43 @@ class Tab:
     Response for Get info for recipient tab
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the tab."""
-    tab_type: Optional[str] = field(
+    tab_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tabType"},
     )
     """The type of the tab."""
-    tab_label: Optional[str] = field(
+    tab_label: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tabLabel"},
     )
     """The label of the tab."""
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The value of the tab."""
-    tab_id: Optional[str] = field(
+    tab_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tabId"},
     )
     """The id of the tab."""
-    document_id: Optional[str] = field(
+    document_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "documentId"},
     )
     """The id of the document."""
-    recipient_id: Optional[str] = field(
+    recipient_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientId"},
     )
     """The id of the recipient."""
-    prefill: Optional[bool] = None
+    prefill: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether the tab is of prefill type."""
-    selected: Optional[str] = None
+    selected: Optional[str] = dataclass_field(default=None, kw_only=True)
     """If tabs is checkbox, indicates whether the tab is selected."""
 
 
@@ -570,8 +747,9 @@ class AddRecipientTabsResponse:
     Response for Add tabs for a recipient on an envelope
     """
 
-    recipient_tabs: Optional[List[RecipientTab]] = field(
+    recipient_tabs: Optional[List[RecipientTab | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientTabs"},
     )
     """The tabs added to a recipient."""
@@ -586,8 +764,9 @@ class RecipientTabsResponse:
     Response for Get recipient tabs from envelope
     """
 
-    recipient_tabs: Optional[List[Tab]] = field(
+    recipient_tabs: Optional[List[Tab | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientTabs"},
     )
     """Recipient tab"""
@@ -599,7 +778,7 @@ class TriggerMaestroFlowResponse:
     Response for Start Docusign workflow
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -612,7 +791,7 @@ class BuildNumberResponse:
     Response for Show build Number (For reference only. Do not include in a flow for execution)
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -625,29 +804,22 @@ class CreateHookEnvelopeInput:
     When a Docusign Connect event occurs (Account-level)
     """
 
-    all_users: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "allUsers"},
-    )
-    allow_envelope_publish: Optional[str] = field(
-        default=None,
+    all_users: str = dataclass_field(metadata={"wire_name": "allUsers"})
+    allow_envelope_publish: str = dataclass_field(
         metadata={"wire_name": "allowEnvelopePublish"},
     )
-    include_document_fields: Optional[str] = field(
-        default=None,
+    include_document_fields: str = dataclass_field(
         metadata={"wire_name": "includeDocumentFields"},
     )
-    requires_acknowledgement: Optional[str] = field(
-        default=None,
+    requires_acknowledgement: str = dataclass_field(
         metadata={"wire_name": "requiresAcknowledgement"},
     )
-    url_to_publish_to: Optional[str] = field(
-        default=None,
+    url_to_publish_to: str = dataclass_field(
         metadata={"wire_name": "urlToPublishTo"},
     )
-    name: Optional[str] = None
+    name: str
     """Name your Connect configuration (for example, \"Envelope Events\")."""
-    events: Optional[List[str]] = None
+    events: List[str]
     """Select an event. To include another event, select \"Add new item.\""""
 
 
@@ -657,7 +829,7 @@ class CreateHookEnvelopeResponse:
     Response for When a Docusign Connect event occurs (Account-level)
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -670,7 +842,7 @@ class EmbeddedSigningResponse:
     Response for Generate Embedded Signing URL
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The url of embedded signing view."""
 
 
@@ -683,7 +855,12 @@ class GetOrganizationsResponse:
     Response for Get organizations
     """
 
-    organizations: Optional[List[Organization]] = None
+    organizations: Optional[
+        List[Organization | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """list of organizations"""
 
 
@@ -693,7 +870,12 @@ class ListFoldersResponse:
     Response for List folders
     """
 
-    folders: Optional[List[Folder]] = None
+    folders: Optional[
+        List[Folder | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Folders"""
 
 
@@ -703,8 +885,9 @@ class ListEnvelopesResponse:
     Response for List envelopes
     """
 
-    folder_items: Optional[List[FolderItem]] = field(
+    folder_items: Optional[List[FolderItem | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "folderItems"},
     )
     """The envelopes within a folder."""
@@ -716,8 +899,9 @@ class RecipientTypesResponse:
     Response for StaticResponseForRecipientTypes
     """
 
-    tab_types: Optional[List[RecipientType]] = field(
+    tab_types: Optional[List[RecipientType | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tabTypes"},
     )
     """Recipient types"""
@@ -729,8 +913,9 @@ class SignatureTypesResponse:
     Response for StaticResponseForSignatureTypes
     """
 
-    tab_types: Optional[List[SignatureType]] = field(
+    tab_types: Optional[List[SignatureType | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tabTypes"},
     )
     """Signature types"""
@@ -742,8 +927,9 @@ class ListSigningGroupResponse:
     Response for GetSigningGroups
     """
 
-    signing_groups: Optional[List[SigningGroup]] = field(
+    signing_groups: Optional[List[SigningGroup | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "signingGroups"},
     )
     """List of all signing groups"""
@@ -755,8 +941,9 @@ class TabTypesResponse:
     Response for StaticResponseForTabTypes
     """
 
-    tab_types: Optional[List[TabType]] = field(
+    tab_types: Optional[List[TabType | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tabTypes"},
     )
     """Tab types"""
@@ -768,8 +955,11 @@ class WorkflowDefinitionsResponse:
     Response for Get Maestro Workflow Definitions
     """
 
-    workflow_definitions: Optional[List[WorkflowDefinition]] = field(
+    workflow_definitions: Optional[
+        List[WorkflowDefinition | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WorkflowDefinitions"},
     )
     """WorkflowDefinitions"""
@@ -781,8 +971,9 @@ class GetWorkFlowIdsResponse:
     Response for Get All Workflow Ids
     """
 
-    workflow_ids: Optional[List[WorkflowId]] = field(
+    workflow_ids: Optional[List[WorkflowId | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "workflowIds"},
     )
     """Workflow ID"""
@@ -794,12 +985,23 @@ class WorkflowDefinitionResponse:
     Response for Get Maestro Workflow Definition
     """
 
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """Id"""
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """Name"""
-    payload_schema: Optional[List[WorkflowDefPayloadSchema]] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """Id"""
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """Name"""
+    payload_schema: Optional[
+        List[WorkflowDefPayloadSchema | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "PayloadSchema"},
     )
 
@@ -810,7 +1012,7 @@ class GetDynamicSignersResponse:
     Response for Get the signers of a template in dynamic schema format
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -823,7 +1025,7 @@ class GetDynamicRecipientsResponse:
     Response for Get the signers of a template in dynamic schema format
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -836,7 +1038,7 @@ class StaticResponseForRecipientTypeSchemaResponse:
     Response for StaticResponseForRecipientTypeSchema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -849,7 +1051,7 @@ class StaticResponseForVerificationTypeSchemaResponse:
     Response for StaticResponseForVerificationTypeSchema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -862,7 +1064,7 @@ class StaticResponseForEmbeddedSenderSchemaResponse:
     Response for StaticResponseForEmbeddedSenderSchema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -875,7 +1077,7 @@ class StaticResponseForEmbeddedSigningSchemaResponse:
     Response for StaticResponseForEmbeddedSigningSchema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -888,7 +1090,7 @@ class StaticResponseForBuildNumberSchemaResponse:
     Response for StaticResponseForBuildNumberSchema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -901,7 +1103,7 @@ class StaticResponseForAnchorTabSchemaResponse:
     Response for StaticResponseForAnchorTabSchema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -914,7 +1116,7 @@ class StaticResponseForCompositeTemplatesResponse:
     Response for StaticResponseForCompositeTemplates
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -927,29 +1129,21 @@ class WebhookRequest:
     Definition: WebhookRequest
     """
 
-    all_users: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "allUsers"},
-    )
-    allow_envelope_publish: Optional[str] = field(
-        default=None,
+    all_users: str = dataclass_field(metadata={"wire_name": "allUsers"})
+    allow_envelope_publish: str = dataclass_field(
         metadata={"wire_name": "allowEnvelopePublish"},
     )
-    include_document_fields: Optional[str] = field(
-        default=None,
+    include_document_fields: str = dataclass_field(
         metadata={"wire_name": "includeDocumentFields"},
     )
-    requires_acknowledgement: Optional[str] = field(
-        default=None,
+    requires_acknowledgement: str = dataclass_field(
         metadata={"wire_name": "requiresAcknowledgement"},
     )
-    url_to_publish_to: Optional[str] = field(
-        default=None,
+    url_to_publish_to: str = dataclass_field(
         metadata={"wire_name": "urlToPublishTo"},
     )
-    name: Optional[str] = None
-    envelope_events: Optional[str] = field(
-        default=None,
+    name: str
+    envelope_events: str = dataclass_field(
         metadata={"wire_name": "envelopeEvents"},
     )
 
@@ -960,7 +1154,7 @@ class WebhookEnvelopeResponse:
     Definition: WebhookEnvelopeResponse
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -969,7 +1163,7 @@ class WebhookOrganizationResponse:
     Definition: WebhookOrganizationResponse
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -978,9 +1172,17 @@ class WorkflowDefinition:
     Definition: WorkflowDefinition
     """
 
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
+    id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
     """Id"""
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
     """Name"""
 
 
@@ -990,12 +1192,17 @@ class WorkflowDefPayloadSchema:
     Definition: WorkflowDefPayloadSchema
     """
 
-    property_name: Optional[str] = field(
+    property_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PropertyName"},
     )
     """Name"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "Type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Type"},
+    )
     """Type"""
 
 
@@ -1005,7 +1212,7 @@ class MaestroInputVariables:
     Definition: MaestroInputVariables
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1018,7 +1225,7 @@ class DynamicSigners:
     Definition: DynamicSigners
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1031,7 +1238,7 @@ class DynamicRecipients:
     Definition: DynamicRecipients
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1044,7 +1251,7 @@ class AdditionalRecipientParamsSchema:
     Definition: AdditionalRecipientParamsSchema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1057,7 +1264,7 @@ class AdditionalRecipientData:
     Definition: AdditionalRecipientData
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1070,7 +1277,7 @@ class AdditionalURLForSenderView:
     Definition: AdditionalURLForSenderView
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1083,7 +1290,7 @@ class AdditionalURL:
     Definition: AdditionalURL
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1096,7 +1303,7 @@ class DynamicSigningUrlFields:
     Definition: DynamicSigningUrlFields
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1109,7 +1316,7 @@ class BuildNumberSchema:
     Definition: BuildNumberSchema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1122,7 +1329,7 @@ class AccountCustomFields:
     Definition: AccountCustomFields
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1135,7 +1342,7 @@ class AnchorTabSchema:
     Definition: AnchorTabSchema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1148,7 +1355,7 @@ class CompositeTemplateSchema:
     Definition: CompositeTemplateSchema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1161,7 +1368,12 @@ class AddRecipientToEnvelopeRequest:
     Definition: AddRecipientToEnvelopeRequest
     """
 
-    signers: Optional[List[SignerRequest]] = None
+    signers: Optional[
+        List[SignerRequest | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1170,13 +1382,15 @@ class SignerRequest:
     Definition: SignerRequest
     """
 
-    routing_order: Optional[str] = field(
+    routing_order: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "routingOrder"},
     )
     """The signing order of the recipient in the document."""
-    role_name: Optional[str] = field(
+    role_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "roleName"},
     )
     """The role of the signer."""
@@ -1188,7 +1402,12 @@ class OnEnvelopeStatusChangesResponse:
     Definition: OnEnvelopeStatusChangesResponse
     """
 
-    envelopes: Optional[List[Envelope]] = None
+    envelopes: Optional[
+        List[Envelope | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Envelopes"""
 
 
@@ -1198,13 +1417,15 @@ class EnvelopeIds:
     Definition: EnvelopeIds
     """
 
-    email_subject: Optional[str] = field(
+    email_subject: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "emailSubject"},
     )
     """Title of the envelope"""
-    envelope_id: Optional[str] = field(
+    envelope_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "envelopeId"},
     )
     """Envelope ID"""
@@ -1216,34 +1437,37 @@ class FilteredEnvelopes:
     Definition: FilteredEnvelopes
     """
 
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of the envelope"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of the envelope activity"""
-    envelope_id: Optional[str] = field(
+    envelope_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "envelopeId"},
     )
     """Envelope ID"""
-    documents: Optional[str] = None
+    documents: Optional[str] = dataclass_field(default=None, kw_only=True)
     """List of document names"""
-    recipients: Optional[str] = None
+    recipients: Optional[str] = dataclass_field(default=None, kw_only=True)
     """List of recipient names"""
-    sender: Optional[str] = None
+    sender: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Sender name"""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Status of the envelope"""
-    status_date: Optional[str] = field(
+    status_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "statusDate"},
     )
     """Last status update of the activity"""
-    date_sent: Optional[str] = field(
+    date_sent: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dateSent"},
     )
     """Envelope sent date"""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """URL of the envelope"""
 
 
@@ -1253,17 +1477,19 @@ class SalesCopilotFilteredEnvelopes:
     Definition: SalesCopilotFilteredEnvelopes
     """
 
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of the envelope"""
-    sub_title: Optional[str] = field(
+    sub_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "subTitle"},
     )
     """SubTitle of the envelope"""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """URL of the envelope"""
-    additional_properties_for_sales_envelope: Optional[Dict[str, Any]] = field(
+    additional_properties_for_sales_envelope: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "additionalPropertiesForSalesEnvelope"},
     )
     """Additional Properties"""
@@ -1275,19 +1501,17 @@ class Activity:
     Definition: Activity
     """
 
-    title: Optional[str] = None
+    title: str
     """This output indicates the title of the activity in the citation card."""
-    description: Optional[str] = None
+    description: str
     """This output indicates the description of the insight."""
-    date_time: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "dateTime"},
-    )
+    date_time: str = dataclass_field(metadata={"wire_name": "dateTime"})
     """This output indicates the time associated with the insight."""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """This output indicates the URL to open insight."""
-    additional_properties: Optional[Dict[str, Any]] = field(
+    additional_properties: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "additionalProperties"},
     )
     """
@@ -1302,15 +1526,12 @@ class EmailSummary:
     Definition: EmailSummary
     """
 
-    title: Optional[str] = field(default=None, metadata={"wire_name": "Title"})
+    title: str = dataclass_field(metadata={"wire_name": "Title"})
     """
     This output indicates the title of the partner section and should include
     only the partner's name.
     """
-    description: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Description"},
-    )
+    description: str = dataclass_field(metadata={"wire_name": "Description"})
     """
     This output indicates the text you would like to be included in the email
     summary.
@@ -1323,22 +1544,24 @@ class KeySales:
     Definition: KeySales
     """
 
-    title: Optional[str] = field(default=None, metadata={"wire_name": "Title"})
+    title: str = dataclass_field(metadata={"wire_name": "Title"})
     """This output indicates the title of citation card for the insight."""
-    description: Optional[str] = None
+    description: str
     """
     This output indicates the text of the insight to be included in key sales
     info.
     """
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """This output indicates the URL to learn more about the insight."""
-    date_time: Optional[str] = field(
+    date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dateTime"},
     )
     """This output indicates the time associated with the insight."""
-    additional_properties: Optional[Dict[str, Any]] = field(
+    additional_properties: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "additionalProperties"},
     )
     """
@@ -1353,52 +1576,42 @@ class DocumentRecord:
     Definition: DocumentRecord
     """
 
-    record_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "recordId"},
-    )
+    record_id: str = dataclass_field(metadata={"wire_name": "recordId"})
     """
     This output uniquely identifies each related record returned by the action.
     """
-    record_type_display_name: Optional[str] = field(
-        default=None,
+    record_type_display_name: str = dataclass_field(
         metadata={"wire_name": "recordTypeDisplayName"},
     )
     """
     This output indicates the display name of record type of each related
     record returned by the action.
     """
-    record_type_plural_display_name: Optional[str] = field(
-        default=None,
+    record_type_plural_display_name: str = dataclass_field(
         metadata={"wire_name": "recordTypePluralDisplayName"},
     )
     """
     This output indicates the plural display name of the record type of each
     related record returned by the action.
     """
-    record_type: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "recordType"},
-    )
+    record_type: str = dataclass_field(metadata={"wire_name": "recordType"})
     """
     This output indicates the type of each related record returned by the
     action.
     """
-    record_title: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "recordTitle"},
-    )
+    record_title: str = dataclass_field(metadata={"wire_name": "recordTitle"})
     """
     This output indicates the title of each related record returned by the
     action.
     """
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     This output indicates the URL of each related record returned by the
     action.
     """
-    additional_properties: Optional[Dict[str, Any]] = field(
+    additional_properties: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "additionalProperties"},
     )
     """Additional Properties"""
@@ -1410,35 +1623,41 @@ class Envelope:
     Definition: Envelope
     """
 
-    documents_uri: Optional[str] = field(
+    documents_uri: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "documentsUri"},
     )
     """The URI for the document in DocuSign."""
-    envelope_id: Optional[str] = field(
+    envelope_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "envelopeId"},
     )
     """The id of the envelope."""
-    envelope_uri: Optional[str] = field(
+    envelope_uri: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "envelopeUri"},
     )
     """The URI for the envelope in DocuSign."""
-    notification_uri: Optional[str] = field(
+    notification_uri: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "notificationUri"},
     )
     """The URI for the notifications."""
-    recipients_uri: Optional[str] = field(
+    recipients_uri: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientsUri"},
     )
     """The URI for the recipients of the envelope in DocuSign."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The status of the envelope."""
-    status_changed_date_time: Optional[str] = field(
+    status_changed_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "statusChangedDateTime"},
     )
     """The datetime the status changed."""
@@ -1450,13 +1669,15 @@ class CombinedEmailBodyAndCustomFields:
     Definition: CombinedEmailBodyAndCustomFields
     """
 
-    email_blurb: Optional[str] = field(
+    email_blurb: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "emailBlurb"},
     )
     """Body of the email."""
-    account_custom_fields: Optional[AccountCustomFields] = field(
+    account_custom_fields: Optional[AccountCustomFields | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountCustomFields"},
     )
 
@@ -1467,7 +1688,12 @@ class EnvelopeIDsResponse:
     Definition: EnvelopeIDsResponse
     """
 
-    envelopes: Optional[List[EnvelopeIds]] = None
+    envelopes: Optional[
+        List[EnvelopeIds | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """list of envelope ids"""
 
 
@@ -1477,10 +1703,16 @@ class FilteredSalesCopilotEnvelopeListResponse:
     Definition: FilteredSalesCopilotEnvelopeListResponse
     """
 
-    value: Optional[List[SalesCopilotFilteredEnvelopes]] = None
-    """Filtered envelopes"""
-    has_more_results: Optional[bool] = field(
+    value: Optional[
+        List[SalesCopilotFilteredEnvelopes | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """Filtered envelopes"""
+    has_more_results: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "hasMoreResults"},
     )
 
@@ -1491,10 +1723,16 @@ class ActivityListResponseEnvelope:
     Definition: ActivityListResponseEnvelope
     """
 
-    value: Optional[List[Activity]] = None
-    """Related activies"""
-    has_more_results: Optional[bool] = field(
+    value: Optional[
+        List[Activity | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """Related activies"""
+    has_more_results: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "hasMoreResults"},
     )
 
@@ -1505,10 +1743,16 @@ class EmailSummaryResponse:
     Definition: EmailSummaryResponse
     """
 
-    value: Optional[List[EmailSummary]] = None
-    """Key Sales"""
-    has_more_results: Optional[bool] = field(
+    value: Optional[
+        List[EmailSummary | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """Key Sales"""
+    has_more_results: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "hasMoreResults"},
     )
 
@@ -1519,10 +1763,16 @@ class KeySalesResponse:
     Definition: KeySalesResponse
     """
 
-    value: Optional[List[KeySales]] = None
-    """Key Sales"""
-    has_more_results: Optional[bool] = field(
+    value: Optional[
+        List[KeySales | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """Key Sales"""
+    has_more_results: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "hasMoreResults"},
     )
 
@@ -1533,10 +1783,16 @@ class DocumentRecordListResponseEnvelope:
     Definition: DocumentRecordListResponseEnvelope
     """
 
-    value: Optional[List[DocumentRecord]] = None
-    """Related records"""
-    has_more_results: Optional[bool] = field(
+    value: Optional[
+        List[DocumentRecord | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """Related records"""
+    has_more_results: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "hasMoreResults"},
     )
 
@@ -1547,19 +1803,18 @@ class ApiError:
     Definition: ApiError
     """
 
-    error_code: Optional[str] = field(
+    error_code: str = dataclass_field(metadata={"wire_name": "errorCode"})
+    error_message: Optional[str] = dataclass_field(
         default=None,
-        metadata={"wire_name": "errorCode"},
-    )
-    error_message: Optional[str] = field(
-        default=None,
+        kw_only=True,
         metadata={"wire_name": "errorMessage"},
     )
-    activity_id: Optional[str] = field(
+    activity_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "activityId"},
     )
-    details: Optional[Dict[str, Any]] = None
+    details: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1568,9 +1823,9 @@ class Organization:
     Definition: organization
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The id of the organization."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the organization."""
 
 
@@ -1580,10 +1835,9 @@ class LoginAccount:
     Definition: LoginAccount
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the account. """
-    account_id_guid: Optional[str] = field(
-        default=None,
+    account_id_guid: str = dataclass_field(
         metadata={"wire_name": "accountIdGuid"},
     )
     """The GUID of the account."""
@@ -1595,8 +1849,9 @@ class DocumentTypesResponse:
     Definition: DocumentTypesResponse
     """
 
-    document_types: Optional[List[DocumentType]] = field(
+    document_types: Optional[List[DocumentType | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "documentTypes"},
     )
     """Document types"""
@@ -1608,18 +1863,23 @@ class DocGenFormField:
     Definition: DocGenFormField
     """
 
-    document_id: Optional[str] = field(
+    document_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "documentId"},
     )
     """Document Id."""
-    label: Optional[str] = None
+    label: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Label."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """Type."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name."""
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Value."""
 
 
@@ -1629,8 +1889,9 @@ class FontNamesResponse:
     Definition: FontNamesResponse
     """
 
-    font_names: Optional[List[FontName]] = field(
+    font_names: Optional[List[FontName | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "fontNames"},
     )
     """Font names"""
@@ -1642,7 +1903,7 @@ class DocumentType:
     Definition: DocumentType
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The type of a document."""
 
 
@@ -1652,9 +1913,13 @@ class TabType:
     Definition: TabType
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Display name of the tab."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """Type of the tab."""
 
 
@@ -1664,9 +1929,13 @@ class WorkflowId:
     Definition: WorkflowID
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of workflowID"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """The type of workflowID"""
 
 
@@ -1676,9 +1945,13 @@ class RecipientType:
     Definition: RecipientType
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Display name of the recipient type."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """Type of the recipient."""
 
 
@@ -1688,9 +1961,13 @@ class SignatureType:
     Definition: SignatureType
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Display name of the signature type."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """Type of the signature."""
 
 
@@ -1700,7 +1977,7 @@ class FontName:
     Definition: FontName
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of a font metadata."""
 
 
@@ -1710,13 +1987,13 @@ class SigningGroup:
     Definition: SigningGroup
     """
 
-    signing_group_id: Optional[str] = field(
-        default=None,
+    signing_group_id: str = dataclass_field(
         metadata={"wire_name": "signingGroupId"},
     )
     """The ID of the signing group."""
-    group_name: Optional[str] = field(
+    group_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "groupName"},
     )
     """The name of the signing group."""
@@ -1728,12 +2005,9 @@ class EnvelopeTemplate:
     Definition: EnvelopeTemplate
     """
 
-    template_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "templateId"},
-    )
+    template_id: str = dataclass_field(metadata={"wire_name": "templateId"})
     """The id of the template."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the template."""
 
 
@@ -1743,10 +2017,11 @@ class Folder:
     Definition: Folder
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the folder."""
-    folder_id: Optional[str] = field(
+    folder_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "folderId"},
     )
     """The id of the folder."""
@@ -1758,12 +2033,13 @@ class FolderItem:
     Definition: FolderItem
     """
 
-    envelope_id: Optional[str] = field(
+    envelope_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "envelopeId"},
     )
     """The id of the envelope."""
-    subject: Optional[str] = None
+    subject: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The subject of the envelope."""
 
 
@@ -1773,13 +2049,15 @@ class RecipientTab:
     Definition: RecipientTab
     """
 
-    tab_id: Optional[str] = field(
+    tab_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tabId"},
     )
     """The id of the tab."""
-    tab_type: Optional[str] = field(
+    tab_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tabType"},
     )
     """The type of the tab."""
@@ -1791,9 +2069,9 @@ class EnvelopeDocumentField:
     Definition: EnvelopeDocumentField
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the custom field."""
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The value of the custom field."""
 
 
@@ -1803,7 +2081,7 @@ class DeclineReasonWithoutType:
     Definition: DeclineReasonWithoutType
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1821,7 +2099,7 @@ class DocusignClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -1838,8 +2116,8 @@ class DocusignClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -1860,7 +2138,7 @@ class DocusignClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -1875,7 +2153,84 @@ class DocusignClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "docusign"
 
-    async def get_docgen_form_fields_async(
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
+            if next_link.startswith("?"):
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
+
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
+    def list_docgen_form_fields(
         self,
         account_id: str,
         envelope_id: str,
@@ -1884,11 +2239,30 @@ class DocusignClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get document generation form fields from envelope
 
         Get document generation form fields from envelope
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetDocgenFormFields`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1898,29 +2272,50 @@ class DocusignClient(ConnectorClientBase):
             f"/{quote(str(envelope_id), safe='')}"
             f"/docGenFormFields"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def update_docgen_form_fields_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("docgenFields", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def update_docgen_form_fields(
         self,
         input: UpdateDocgenFormFieldsInput,
         account_id: str,
@@ -1936,6 +2331,24 @@ class DocusignClient(ConnectorClientBase):
         Update document generation form fields from envelope
 
         Update document generation form fields from envelope
+
+        Swagger operation ID: `UpdateDocgenFormFields`.
+
+        Args:
+            input: The request body.
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            document_guid: Document GUID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1953,7 +2366,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1967,9 +2380,10 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_doc_gen_template_tabs_async(
+    async def get_doc_gen_template_tabs(
         self,
         account_id: str,
         template_id: str,
@@ -1985,6 +2399,22 @@ class DocusignClient(ConnectorClientBase):
 
         Get document generation form fields from template (bulk send templates
         only)
+
+        Swagger operation ID: `GetDocGenTemplateTabs`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            template_id: Enter or select a template ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1994,7 +2424,7 @@ class DocusignClient(ConnectorClientBase):
             f"/{quote(str(template_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2008,6 +2438,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2015,7 +2446,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def void_envelope_async(
+    async def void_envelope(
         self,
         account_id: str,
         envelope_id: str,
@@ -2030,6 +2461,23 @@ class DocusignClient(ConnectorClientBase):
         Void the envelope
 
         Void the envelope.
+
+        Swagger operation ID: `VoidEnvelope`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            voided_reason: Voided reason.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2047,7 +2495,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2061,6 +2509,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2068,7 +2517,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def resend_envelope_async(
+    async def resend_envelope(
         self,
         envelope_id: str,
         *,
@@ -2083,6 +2532,21 @@ class DocusignClient(ConnectorClientBase):
         This action resends a Docusign envelope or sends a reminder to
         recipients who need to sign a Docusign agreement based on a provided
         EnvelopeId.
+
+        Swagger operation ID: `ResendEnvelope`.
+
+        Args:
+            envelope_id: Enter an envelope ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2093,7 +2557,7 @@ class DocusignClient(ConnectorClientBase):
             f"/resendEnvelope"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2107,6 +2571,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2114,15 +2579,15 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_reminders_async(
+    async def add_reminders(
         self,
         account_id: str,
         envelope_id: str,
         reminder_enabled: bool,
         reminder_delay: str,
         reminder_frequency: str,
-        expire_after: Optional[str] = None,
         *,
+        expire_after: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2132,6 +2597,28 @@ class DocusignClient(ConnectorClientBase):
         Add reminders for an envelope
 
         Add reminders for an envelope
+
+        Swagger operation ID: `AddReminders`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            reminder_enabled: When set to false the reminders are disabled.
+                Default is false.
+            reminder_delay: Add number of days after which recipient receives
+                reminder email.
+            reminder_frequency: Add number of days between reminder emails.
+            expire_after: Add number of days before expiry.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2162,7 +2649,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2176,6 +2663,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2183,7 +2671,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_envelope_document_tabs_async(
+    def list_envelope_document_tabs(
         self,
         account_id: str,
         envelope_id: str,
@@ -2193,11 +2681,31 @@ class DocusignClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get document tabs from envelope
 
         Get document tabs from envelope
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetEnvelopeDocumentTabs`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            document_id: Enter a document ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2209,29 +2717,50 @@ class DocusignClient(ConnectorClientBase):
             f"/{quote(str(document_id), safe='')}"
             f"/tabs"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def update_envelope_prefill_tabs_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("tabs", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def update_envelope_prefill_tabs(
         self,
         input: UpdateEnvelopePrefillTabsInput,
         account_id: str,
@@ -2247,6 +2776,24 @@ class DocusignClient(ConnectorClientBase):
         Update envelope prefill tabs
 
         Update values for a list of prefill tabs
+
+        Swagger operation ID: `UpdateEnvelopePrefillTabs`.
+
+        Args:
+            input: The request body.
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            document_id: Enter a document ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2259,7 +2806,7 @@ class DocusignClient(ConnectorClientBase):
             f"/tabs"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2273,9 +2820,10 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_template_document_tabs_async(
+    def list_template_document_tabs(
         self,
         account_id: str,
         template_id: str,
@@ -2285,11 +2833,31 @@ class DocusignClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get document tabs from template
 
         Get document tabs from template
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetTemplateDocumentTabs`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            template_id: Enter or select a template ID.
+            document_id: Enter a document ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2301,29 +2869,50 @@ class DocusignClient(ConnectorClientBase):
             f"/{quote(str(document_id), safe='')}"
             f"/tabs"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_envelope_document_fields_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("tabs", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_envelope_document_fields(
         self,
         account_id: str,
         envelope_id: str,
@@ -2333,11 +2922,31 @@ class DocusignClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get document custom fields from envelope
 
         Get document custom fields from envelope
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetEnvelopeDocumentFields`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            document_id: Enter a document ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2349,37 +2958,58 @@ class DocusignClient(ConnectorClientBase):
             f"/{quote(str(document_id), safe='')}"
             f"/fields"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def composite_templates_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("envelopeDocumentFields", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def composite_templates(
         self,
-        input: CompositeTemplateSchema,
+        input: CompositeTemplateSchema | Mapping[str, Any],
         account_id: str,
         email_subject: str,
         status: str,
+        *,
         email_body: Optional[str] = None,
         merge_roles_on_draft: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2389,6 +3019,27 @@ class DocusignClient(ConnectorClientBase):
         Create envelope using composite templates
 
         Create envelope using composite templates
+
+        Swagger operation ID: `CompositeTemplates`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            account_id: Enter or select an account ID.
+            email_subject: Subject of the email.
+            status: Envelope status.
+            email_body: Body of the email.
+            merge_roles_on_draft: Merge roles and delete empty recipients.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2419,7 +3070,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2433,6 +3084,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2440,9 +3092,10 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def search_list_envelopes_async(
+    async def search_list_envelopes(
         self,
         account_id: str,
+        *,
         recipient_name: Optional[str] = None,
         recipient_email_id: Optional[str] = None,
         envelope_title: Optional[str] = None,
@@ -2456,7 +3109,6 @@ class DocusignClient(ConnectorClientBase):
         skip: Optional[int] = None,
         from_date: Optional[str] = None,
         to_date: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2471,6 +3123,39 @@ class DocusignClient(ConnectorClientBase):
         title, description, Envelope ID, document names, sender names, envelope
         status, status date, date sent, and a URL of the envelope which can be
         used as a link to view the envelope in Docusign.
+
+        Swagger operation ID: `SearchListEnvelopes`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            recipient_name: This action lists envelopes based on recipient
+                name.
+            recipient_email_id: Filters envelopes by recipient email.
+            envelope_title: Filters envelopes by envelope subject.
+            custom_field_name: This action lists envelopes based on a name of
+                its custom fields.
+            custom_field_value: Filters by custom field value.
+            search_text: Enter one keyword to find matches in envelope
+                subjects, recipients, and custom fields.
+            envelope_status: This action lists envelopes based on status of the
+                envelope.
+            folder_ids: Filters envelopes by the selected folder.
+            order_by: Sorts envelopes in the selected order.
+            top: Specify the number of envelopes to return (default is 10;
+                maximum is 1,000).
+            skip: Specify the number of envelopes to skip from the start.
+            from_date: Enter start date-time in UTC format: 2017-05-02T01:44z.
+            to_date: Enter end date-time in UTC format: 2017-05-02T01:44z.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2548,7 +3233,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2562,6 +3247,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2569,7 +3255,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_envelope_from_template_no_recipients_async(
+    async def create_envelope_from_template_no_recipients(
         self,
         account_id: str,
         template_id: str,
@@ -2584,6 +3270,23 @@ class DocusignClient(ConnectorClientBase):
         Create envelope using template
 
         Create a new envelope using a specified template.
+
+        Swagger operation ID: `CreateEnvelopeFromTemplateNoRecipients`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            template_id: Enter or select a template ID.
+            status: Envelope status.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2604,7 +3307,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2618,6 +3321,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2625,15 +3329,15 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def send_envelope_async(
+    async def send_envelope(
         self,
-        input: DynamicSigners,
+        input: DynamicSigners | Mapping[str, Any],
         account_id: str,
         status: str,
         template_id: str,
+        *,
         email_subject: Optional[str] = None,
         email_body: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2644,6 +3348,27 @@ class DocusignClient(ConnectorClientBase):
 
         Create a new envelope using a specified template and specify
         recipients.
+
+        Swagger operation ID: `SendEnvelope`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            account_id: Enter or select an account ID.
+            status: Envelope status.
+            template_id: Enter or select a template ID.
+            email_subject: Email subject.
+            email_body: Email body.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2671,7 +3396,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2685,6 +3410,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2692,14 +3418,14 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def send_envelope_with_recipient_fields_async(
+    async def send_envelope_with_recipient_fields(
         self,
-        input: DynamicRecipients,
+        input: DynamicRecipients | Mapping[str, Any],
         account_id: str,
         template_id: str,
+        *,
         merge_roles_on_draft: Optional[str] = None,
         email_subject: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2709,6 +3435,26 @@ class DocusignClient(ConnectorClientBase):
         Create envelope using template with recipients and tabs
 
         Create envelope using template with recipients and tabs
+
+        Swagger operation ID: `SendEnvelopeWithRecipientFields`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            account_id: Enter or select an account ID.
+            template_id: Enter or select a template ID.
+            merge_roles_on_draft: Merge roles and delete empty recipients.
+            email_subject: Email subject.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2735,7 +3481,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2749,6 +3495,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2756,7 +3503,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def send_draft_envelope_async(
+    async def send_draft_envelope(
         self,
         account_id: str,
         envelope_id: str,
@@ -2770,6 +3517,22 @@ class DocusignClient(ConnectorClientBase):
         Send envelope
 
         Send an existing envelope.
+
+        Swagger operation ID: `SendDraftEnvelope`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2779,7 +3542,7 @@ class DocusignClient(ConnectorClientBase):
             f"/{quote(str(envelope_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2793,6 +3556,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2800,7 +3564,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_envelope_custom_field_async(
+    async def get_envelope_custom_field(
         self,
         account_id: str,
         envelope_id: str,
@@ -2815,6 +3579,23 @@ class DocusignClient(ConnectorClientBase):
         Get envelope custom field info
 
         Get envelope custom field info.
+
+        Swagger operation ID: `GetEnvelopeCustomField`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            field_name: Custom Field Name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2832,7 +3613,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2846,6 +3627,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2853,7 +3635,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_envelope_custom_field_async(
+    async def update_envelope_custom_field(
         self,
         account_id: str,
         envelope_id: str,
@@ -2871,6 +3653,26 @@ class DocusignClient(ConnectorClientBase):
         Update envelope custom field
 
         Update value for the specified envelope custom field
+
+        Swagger operation ID: `UpdateEnvelopeCustomField`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            field_id: Custom Field ID.
+            field_type: Custom Field Type.
+            name: Custom Field Name.
+            value: Custom Field Value.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2900,7 +3702,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2914,6 +3716,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2921,9 +3724,9 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def generate_embedded_sender_url_async(
+    async def generate_embedded_sender_url(
         self,
-        input: AdditionalURLForSenderView,
+        input: AdditionalURLForSenderView | Mapping[str, Any],
         account_id: str,
         envelope_id: str,
         open_in: str,
@@ -2938,6 +3741,26 @@ class DocusignClient(ConnectorClientBase):
         Generate Embedded Sender URL
 
         Generate Embedded Sender URL
+
+        Swagger operation ID: `GenerateEmbeddedSenderURL`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            open_in: Open in.
+            return_url: Return URL.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2960,7 +3783,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2974,6 +3797,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2981,7 +3805,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_recipient_status_async(
+    async def get_recipient_status(
         self,
         account_id: str,
         envelope_id: str,
@@ -2995,6 +3819,22 @@ class DocusignClient(ConnectorClientBase):
         List recipients from an envelope
 
         List recipients from an envelope
+
+        Swagger operation ID: `GetRecipientStatus`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3005,7 +3845,7 @@ class DocusignClient(ConnectorClientBase):
             f"/recipients"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3019,6 +3859,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3026,7 +3867,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def remove_recipient_from_envelope_async(
+    async def remove_recipient_from_envelope(
         self,
         account_id: str,
         envelope_id: str,
@@ -3042,6 +3883,24 @@ class DocusignClient(ConnectorClientBase):
         Remove recipient from an envelope
 
         Remove recipient from an envelope
+
+        Swagger operation ID: `RemoveRecipientFromEnvelope`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            folder_id: Folder ID.
+            remove_recipient_from_envelope_recipient_id: Recipient ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3063,7 +3922,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3077,6 +3936,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3084,15 +3944,15 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_recipient_fields_async(
+    async def get_recipient_fields(
         self,
         account_id: str,
         envelope_id: str,
+        *,
         recipient_email: Optional[str] = None,
         area_code: Optional[str] = None,
         phone_number: Optional[str] = None,
         recipient_id: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3102,6 +3962,26 @@ class DocusignClient(ConnectorClientBase):
         Get recipient info from envelope
 
         Get recipient info from envelope
+
+        Swagger operation ID: `GetRecipientFields`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            recipient_email: Recipient email.
+            area_code: Area code of the recipient.
+            phone_number: Phone number of the recipient.
+            recipient_id: Enter a recipient ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3135,7 +4015,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3149,6 +4029,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3156,7 +4037,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_audit_events_async(
+    async def get_audit_events(
         self,
         account_id: str,
         envelope_id: str,
@@ -3170,6 +4051,22 @@ class DocusignClient(ConnectorClientBase):
         Get audit event list
 
         Get audit event list
+
+        Swagger operation ID: `GetAuditEvents`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3180,7 +4077,7 @@ class DocusignClient(ConnectorClientBase):
             f"/audit_events"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3194,6 +4091,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3201,9 +4099,9 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_verification_to_recipient_async(
+    async def add_verification_to_recipient(
         self,
-        input: AdditionalRecipientData,
+        input: AdditionalRecipientData | Mapping[str, Any],
         account_id: str,
         envelope_id: str,
         recipient_id: str,
@@ -3219,6 +4117,27 @@ class DocusignClient(ConnectorClientBase):
         Add verification type to a recipient
 
         Add verification type to a recipient.
+
+        Swagger operation ID: `AddVerificationToRecipient`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            recipient_id: Enter a recipient ID.
+            recipient_type: Enter or select a recipient type.
+            verification_type: Verification type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3245,7 +4164,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3259,6 +4178,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3266,13 +4186,14 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_envelope_recipient_async(
+    async def update_envelope_recipient(
         self,
-        input: AdditionalRecipientParamsSchema,
+        input: AdditionalRecipientParamsSchema | Mapping[str, Any],
         account_id: str,
         envelope_id: str,
         recipient_id: str,
         recipient_type: str,
+        *,
         signature_type: Optional[str] = None,
         client_user_id: Optional[str] = None,
         embedded_recipient_start_u_r_l: Optional[str] = None,
@@ -3285,7 +4206,6 @@ class DocusignClient(ConnectorClientBase):
         country_code: Optional[str] = None,
         phone_number: Optional[str] = None,
         signing_group_id: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3295,6 +4215,41 @@ class DocusignClient(ConnectorClientBase):
         Update recipient on an envelope
 
         Update recipient on an envelope
+
+        Swagger operation ID: `UpdateEnvelopeRecipient`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            recipient_id: Enter a recipient ID.
+            recipient_type: Recipient type.
+            signature_type: DocuSign standards-based-signature (SBS) types.
+            client_user_id: Client user ID for embedded signer.
+            embedded_recipient_start_u_r_l: A sender-provided URL string for
+                redirecting an embedded recipient.
+            routing_order: The signing order of the recipient.
+            email_notification_language: Language for the email notification.
+            email_notification_subject: Subject of the email notification.
+            email_notification_body: Body of the email notification.
+            note: Custom note for the recipient.
+            role_name: Role name associated with the recipient.
+            country_code: For SMS notifications, the country code, without
+                leading + sign.
+            phone_number: Signer email or SMS phone required. Exclude country
+                code for phone number.
+            signing_group_id: Signing Group.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3377,7 +4332,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3391,6 +4346,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3398,14 +4354,14 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def apply_templates_to_documents_async(
+    async def apply_templates_to_documents(
         self,
-        input: ApplyTemplatesToDocumentsInput,
+        input: ApplyTemplatesToDocumentsInput | Mapping[str, Any],
         account_id: str,
         envelope_id: str,
         template_id: str,
-        preserve_template_recipient: Optional[str] = None,
         *,
+        preserve_template_recipient: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3415,6 +4371,26 @@ class DocusignClient(ConnectorClientBase):
         Apply a template to documents
 
         Apply a template to documents
+
+        Swagger operation ID: `ApplyTemplatesToDocuments`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            template_id: Enter or select a template ID.
+            preserve_template_recipient: False.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3437,7 +4413,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3451,11 +4427,12 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def create_bulk_send_list_async(
+    async def create_bulk_send_list(
         self,
-        input: CreateBulkSendListInput,
+        input: CreateBulkSendListInput | Mapping[str, Any],
         account_id: str,
         name: str,
         *,
@@ -3468,6 +4445,24 @@ class DocusignClient(ConnectorClientBase):
         Create bulk send list
 
         Create bulk send list
+
+        Swagger operation ID: `CreateBulkSendList`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            account_id: Enter or select an account ID.
+            name: Bulk send list name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3481,7 +4476,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3495,6 +4490,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3502,7 +4498,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def bulk_send_async(
+    async def bulk_send(
         self,
         account_id: str,
         bulk_send_list_id: str,
@@ -3517,6 +4513,24 @@ class DocusignClient(ConnectorClientBase):
         Bulk send envelope using template
 
         Bulk send envelope using template
+
+        Swagger operation ID: `BulkSend`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            bulk_send_list_id: Bulk send list GUID.
+            envelope_or_template_id: Enter the template ID, or choose a
+                template from the dropdown.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3534,7 +4548,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3548,6 +4562,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3555,43 +4570,81 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_login_accounts_async(
+    def list_login_accounts(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Login
 
         Login
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetLoginAccounts`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/oauth/userinfo"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_envelope_templates_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("loginAccounts", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_envelope_templates(
         self,
         account_id: str,
         *,
@@ -3599,41 +4652,80 @@ class DocusignClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List templates
 
         List templates for a specific account.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetEnvelopeTemplates`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts/{quote(str(account_id), safe='')}/templates"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def add_documents_to_envelope_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("envelopeTemplates", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def add_documents_to_envelope(
         self,
-        input: AddDocumentsToEnvelopeInput,
+        input: AddDocumentsToEnvelopeInput | Mapping[str, Any],
         account_id: str,
         envelope_id: str,
         *,
@@ -3646,6 +4738,24 @@ class DocusignClient(ConnectorClientBase):
         Add documents to an envelope
 
         Add documents to an envelope.
+
+        Swagger operation ID: `AddDocumentsToEnvelope`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3656,7 +4766,7 @@ class DocusignClient(ConnectorClientBase):
             f"/documents"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3670,6 +4780,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3677,7 +4788,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_template_documents_async(
+    def list_template_documents(
         self,
         account_id: str,
         template_id: str,
@@ -3686,11 +4797,30 @@ class DocusignClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List documents from a template
 
         List documents from a template
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `ListTemplateDocuments`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            template_id: Enter or select a template ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3700,29 +4830,50 @@ class DocusignClient(ConnectorClientBase):
             f"/{quote(str(template_id), safe='')}"
             f"/documents"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_envelope_documents_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("templateDocuments", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_envelope_documents(
         self,
         account_id: str,
         envelope_id: str,
@@ -3731,11 +4882,30 @@ class DocusignClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List documents from an envelope
 
         List documents from an envelope
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `ListEnvelopeDocuments`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3745,29 +4915,50 @@ class DocusignClient(ConnectorClientBase):
             f"/{quote(str(envelope_id), safe='')}"
             f"/envelopeDocuments"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_envelope_document_info_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("envelopeDocuments", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def get_envelope_document_info(
         self,
         account_id: str,
         envelope_id: str,
@@ -3782,6 +4973,23 @@ class DocusignClient(ConnectorClientBase):
         Get document info from envelope
 
         Get document info from envelope
+
+        Swagger operation ID: `GetEnvelopeDocumentInfo`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            document_name: File name with extension.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3799,7 +5007,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3813,6 +5021,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3820,7 +5029,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_tab_info_async(
+    async def get_tab_info(
         self,
         account_id: str,
         envelope_id: str,
@@ -3836,6 +5045,24 @@ class DocusignClient(ConnectorClientBase):
         Get info for recipient tab
 
         Returns the value of the tab for the given recipient
+
+        Swagger operation ID: `GetTabInfo`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            recipient_id: Enter a recipient ID.
+            tab_label: Tab label.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3855,7 +5082,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3869,6 +5096,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3876,9 +5104,9 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_recipient_tabs_async(
+    async def add_recipient_tabs(
         self,
-        input: AnchorTabSchema,
+        input: AnchorTabSchema | Mapping[str, Any],
         account_id: str,
         envelope_id: str,
         recipient_id: str,
@@ -3893,6 +5121,26 @@ class DocusignClient(ConnectorClientBase):
         Add tabs for a recipient on an envelope
 
         Add tabs for a recipient on an envelope
+
+        Swagger operation ID: `AddRecipientTabs`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            recipient_id: Enter a recipient ID.
+            tab_type: Tab type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3912,7 +5160,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3926,6 +5174,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3933,7 +5182,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_recipient_tabs_values_async(
+    async def update_recipient_tabs_values(
         self,
         input: UpdateRecipientTabsValuesInput,
         account_id: str,
@@ -3949,6 +5198,24 @@ class DocusignClient(ConnectorClientBase):
         Update recipient tab values on an envelope
 
         Update recipient tab values on an envelope
+
+        Swagger operation ID: `UpdateRecipientTabsValues`.
+
+        Args:
+            input: The request body.
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            recipient_id: Enter a recipient ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3961,7 +5228,7 @@ class DocusignClient(ConnectorClientBase):
             f"/tabs"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3975,9 +5242,10 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_envelope_recipient_tabs_async(
+    def list_envelope_recipient_tabs(
         self,
         account_id: str,
         envelope_id: str,
@@ -3987,11 +5255,31 @@ class DocusignClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get recipient tabs from envelope
 
         Get recipient tabs from envelope
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetEnvelopeRecipientTabs`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            recipient_id: Enter a recipient ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4003,31 +5291,52 @@ class DocusignClient(ConnectorClientBase):
             f"/{quote(str(recipient_id), safe='')}"
             f"/recipientTabs"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def trigger_maestro_flow_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("recipientTabs", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def trigger_maestro_flow(
         self,
-        input: MaestroInputVariables,
+        input: MaestroInputVariables | Mapping[str, Any],
         account_id: str,
         workflow_id: str,
         instance_name: str,
@@ -4041,6 +5350,26 @@ class DocusignClient(ConnectorClientBase):
         Start Docusign workflow
 
         Start Docusign workflow
+
+        Swagger operation ID: `TriggerMaestroFlow`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            account_id: Enter or select an account ID.
+            workflow_id: Enter the workflow ID or select the workflow name from
+                the dropdown.
+            instance_name: Name of the workflow instance.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4058,7 +5387,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4072,6 +5401,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4079,9 +5409,9 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def build_number_async(
+    async def build_number(
         self,
-        input: BuildNumberSchema,
+        input: BuildNumberSchema | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -4093,10 +5423,26 @@ class DocusignClient(ConnectorClientBase):
         execution)
 
         Identifier for the currently deployed build.
+
+        Swagger operation ID: `BuildNumber`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/build_number"
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4110,6 +5456,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4117,12 +5464,13 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_recipient_to_envelope_async(
+    async def add_recipient_to_envelope(
         self,
-        input: AdditionalRecipientParamsSchema,
+        input: AdditionalRecipientParamsSchema | Mapping[str, Any],
         account_id: str,
         envelope_id: str,
         recipient_type: str,
+        *,
         client_user_id: Optional[str] = None,
         recipient_id: Optional[str] = None,
         embedded_recipient_start_u_r_l: Optional[str] = None,
@@ -4137,7 +5485,6 @@ class DocusignClient(ConnectorClientBase):
         signing_group_id: Optional[str] = None,
         signature_type: Optional[str] = None,
         workflow_id: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4147,6 +5494,43 @@ class DocusignClient(ConnectorClientBase):
         Add recipient to an envelope
 
         Add recipient to an envelope.
+
+        Swagger operation ID: `AddRecipientToEnvelopeV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            recipient_type: Enter or select a recipient type.
+            client_user_id: Client user ID for embedded signer.
+            recipient_id: Enter a recipient ID.
+            embedded_recipient_start_u_r_l: A sender-provided URL string for
+                redirecting an embedded recipient.
+            routing_order: The signing order of the recipient.
+            email_notification_language: Language for the email notification.
+            email_notification_subject: Subject of the email notification.
+            email_notification_body: Body of the email notification.
+            note: Custom note for the recipient.
+            role_name: Role name associated with the recipient.
+            country_code: For SMS notifications, the country code, without
+                leading + sign.
+            phone_number: Signer email or SMS phone required. Exclude country
+                code for phone number.
+            signing_group_id: Signing Group.
+            signature_type: DocuSign standards-based-signature (SBS) types.
+            workflow_id: IDV workflows with pen signature types must be
+                selected here.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4235,7 +5619,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4249,6 +5633,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4256,9 +5641,9 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_blank_envelope_async(
+    async def create_blank_envelope(
         self,
-        input: CombinedEmailBodyAndCustomFields,
+        input: CombinedEmailBodyAndCustomFields | Mapping[str, Any],
         account_id: str,
         email_subject: str,
         *,
@@ -4271,6 +5656,24 @@ class DocusignClient(ConnectorClientBase):
         Create envelope
 
         Create a new blank envelope.
+
+        Swagger operation ID: `CreateBlankEnvelopeV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            account_id: Enter or select an account ID.
+            email_subject: Subject of the email.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4287,7 +5690,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4301,6 +5704,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4308,9 +5712,9 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def generate_embedded_signing_url_async(
+    async def generate_embedded_signing_url(
         self,
-        input: DynamicSigningUrlFields,
+        input: DynamicSigningUrlFields | Mapping[str, Any],
         account_id: str,
         envelope_id: str,
         is_in_person_signer: str,
@@ -4326,6 +5730,27 @@ class DocusignClient(ConnectorClientBase):
         Generate Embedded Signing URL
 
         Generate Embedded Signing URL
+
+        Swagger operation ID: `GenerateEmbeddedSigningURLV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            is_in_person_signer: Yes/No.
+            authentication_method: Authentication Method.
+            return_url: Return URL.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4352,7 +5777,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4366,6 +5791,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4373,13 +5799,13 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_documents_async(
+    async def get_documents(
         self,
         account_id: str,
         envelope_id: str,
         document_id: str,
-        language: Optional[str] = None,
         *,
+        language: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4389,6 +5815,25 @@ class DocusignClient(ConnectorClientBase):
         Get documents from an envelope
 
         Get documents from an envelope
+
+        Swagger operation ID: `GetDocumentsV2`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            document_id: Enter \"string(document ID)\" to get a single
+                document, or select a format.
+            language: Select language.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4409,7 +5854,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4423,6 +5868,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4430,18 +5876,35 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_organizations_async(
+    def list_organizations(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get organizations
 
         Get organizations
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetOrganizations`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/Management/v2/organizations"
@@ -4450,29 +5913,50 @@ class DocusignClient(ConnectorClientBase):
         query_params.append("mode=" + quote("org_admin", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_account_custom_fields_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("organizations", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def get_account_custom_fields(
         self,
         account_id: str,
         *,
@@ -4485,6 +5969,21 @@ class DocusignClient(ConnectorClientBase):
         Get account custom fields
 
         Get the custom fields for a specified account.
+
+        Swagger operation ID: `GetAccountCustomFields`.
+
+        Args:
+            account_id: Account id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4493,7 +5992,7 @@ class DocusignClient(ConnectorClientBase):
             f"/account_custom_fields"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4507,9 +6006,10 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_folder_list_async(
+    def list_get_folder(
         self,
         account_id: str,
         *,
@@ -4517,39 +6017,78 @@ class DocusignClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List folders
 
         List folders for a specific account.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetFolderList`.
+
+        Args:
+            account_id: Account id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts/{quote(str(account_id), safe='')}/folders"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_folder_envelope_list_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("folders", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_get_folder_envelope(
         self,
         account_id: str,
         folder_id: str,
@@ -4558,11 +6097,30 @@ class DocusignClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List envelopes
 
         List envelopes under a particular folder.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetFolderEnvelopeList`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            folder_id: Folder id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4571,101 +6129,198 @@ class DocusignClient(ConnectorClientBase):
             f"/folders"
             f"/{quote(str(folder_id), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def static_response_for_recipient_types_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("folderItems", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_static_response_for_recipient_types(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         StaticResponseForRecipientTypes
 
         Get recipient types.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `StaticResponseForRecipientTypes`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/recipient_types"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def static_response_for_signature_types_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("tabTypes", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_static_response_for_signature_types(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         StaticResponseForSignatureTypes
 
         Get signature types.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `StaticResponseForSignatureTypes`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/signature_types"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_signing_groups_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("tabTypes", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_signing_groups(
         self,
         account_id: str,
         *,
@@ -4673,75 +6328,152 @@ class DocusignClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         GetSigningGroups
 
         List signing groups for a specific account.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetSigningGroups`.
+
+        Args:
+            account_id: Account id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts/{quote(str(account_id), safe='')}/signing_groups"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def static_response_for_tab_types_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("signingGroups", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_static_response_for_tab_types(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         StaticResponseForTabTypes
 
         Get tab types.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `StaticResponseForTabTypes`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/tab_types"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_maestro_workflow_definitions_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("tabTypes", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_maestro_workflow_definitions(
         self,
         account_id: str,
         *,
@@ -4749,39 +6481,78 @@ class DocusignClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get Maestro Workflow Definitions
 
         Get Maestro Workflow Definitions
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetMaestroWorkflowDefinitions`.
+
+        Args:
+            account_id: accountId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts/{quote(str(account_id), safe='')}/maestro-workflows"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_all_workflow_i_ds_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("WorkflowDefinitions", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_all_workflow_i_ds(
         self,
         account_id: str,
         *,
@@ -4789,11 +6560,29 @@ class DocusignClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get All Workflow Ids
 
         Get All workflow ids
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetAllWorkflowIDs`.
+
+        Args:
+            account_id: Account id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4801,29 +6590,50 @@ class DocusignClient(ConnectorClientBase):
             f"/{quote(str(account_id), safe='')}"
             f"/all_identity_verification"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_maestro_workflow_definition_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("workflowIds", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def get_maestro_workflow_definition(
         self,
         account_id: str,
         workflow_id: str,
@@ -4837,6 +6647,22 @@ class DocusignClient(ConnectorClientBase):
         Get Maestro Workflow Definition
 
         Get Maestro Workflow Definition
+
+        Swagger operation ID: `GetMaestroWorkflowDefinition`.
+
+        Args:
+            account_id: accountId.
+            workflow_id: workflowId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4846,7 +6672,7 @@ class DocusignClient(ConnectorClientBase):
             f"/{quote(str(workflow_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4860,6 +6686,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4867,7 +6694,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_dynamic_signers_async(
+    async def get_dynamic_signers(
         self,
         account_id: str,
         template_id: str,
@@ -4881,6 +6708,22 @@ class DocusignClient(ConnectorClientBase):
         Get the signers of a template in dynamic schema format
 
         Get the signers of a template in dynamic schema format.
+
+        Swagger operation ID: `GetDynamicSigners`.
+
+        Args:
+            account_id: Account to get the signers for.
+            template_id: Template to get the signers for.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4892,7 +6735,7 @@ class DocusignClient(ConnectorClientBase):
             f"/recipients"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4906,6 +6749,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4913,7 +6757,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_dynamic_recipients_async(
+    async def get_dynamic_recipients(
         self,
         account_id: str,
         template_id: str,
@@ -4927,6 +6771,22 @@ class DocusignClient(ConnectorClientBase):
         Get the signers of a template in dynamic schema format
 
         Get the signers of a template in dynamic schema format.
+
+        Swagger operation ID: `GetDynamicRecipients`.
+
+        Args:
+            account_id: Account to get the signers for.
+            template_id: Template to get the signers for.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4937,7 +6797,7 @@ class DocusignClient(ConnectorClientBase):
             f"/{quote(str(template_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4951,6 +6811,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4958,11 +6819,11 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def static_response_for_recipient_type_schema_async(
+    async def static_response_for_recipient_type_schema(
         self,
         recipient_type: str,
-        signature_type: Optional[str] = None,
         *,
+        signature_type: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4972,6 +6833,22 @@ class DocusignClient(ConnectorClientBase):
         StaticResponseForRecipientTypeSchema
 
         Get schema for a specific recipient type.
+
+        Swagger operation ID: `StaticResponseForRecipientTypeSchema`.
+
+        Args:
+            recipient_type: recipient type.
+            signature_type: signature type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/recipienttype_schema"
         query_params = []
@@ -4987,7 +6864,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5001,6 +6878,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5008,7 +6886,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def static_response_for_verification_type_schema_async(
+    async def static_response_for_verification_type_schema(
         self,
         verification_type: str,
         *,
@@ -5021,6 +6899,21 @@ class DocusignClient(ConnectorClientBase):
         StaticResponseForVerificationTypeSchema
 
         Get schema for a verification type.
+
+        Swagger operation ID: `StaticResponseForVerificationTypeSchema`.
+
+        Args:
+            verification_type: Verification Type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/verificationtype_schema"
         query_params = []
@@ -5031,7 +6924,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5045,6 +6938,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5052,7 +6946,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def static_response_for_embedded_sender_schema_async(
+    async def static_response_for_embedded_sender_schema(
         self,
         return_url: str,
         *,
@@ -5065,6 +6959,21 @@ class DocusignClient(ConnectorClientBase):
         StaticResponseForEmbeddedSenderSchema
 
         Get schema for return URL.
+
+        Swagger operation ID: `StaticResponseForEmbeddedSenderSchema`.
+
+        Args:
+            return_url: Return URL.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/embeddedSender_schema"
         query_params = []
@@ -5075,7 +6984,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5089,6 +6998,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5096,7 +7006,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def static_response_for_embedded_signing_schema_async(
+    async def static_response_for_embedded_signing_schema(
         self,
         return_url: str,
         is_in_person_signer: str,
@@ -5110,6 +7020,22 @@ class DocusignClient(ConnectorClientBase):
         StaticResponseForEmbeddedSigningSchema
 
         Get schema for return URL.
+
+        Swagger operation ID: `StaticResponseForEmbeddedSigningSchemaV2`.
+
+        Args:
+            return_url: Return URL.
+            is_in_person_signer: Is this an in-person signer?
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/embeddedSigning_schema_v2"
@@ -5126,7 +7052,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5140,6 +7066,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5147,7 +7074,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def static_response_for_build_number_schema_async(
+    async def static_response_for_build_number_schema(
         self,
         *,
         timeout: Optional[float] = None,
@@ -5159,10 +7086,24 @@ class DocusignClient(ConnectorClientBase):
         StaticResponseForBuildNumberSchema
 
         Get schema for a build number.
+
+        Swagger operation ID: `StaticResponseForBuildNumberSchema`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/build_number_schema"
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5176,6 +7117,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5183,7 +7125,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_custom_fields_async(
+    async def get_custom_fields(
         self,
         account_id: str,
         *,
@@ -5196,13 +7138,28 @@ class DocusignClient(ConnectorClientBase):
         Get custom fields from an account
 
         Get custom fields from an account
+
+        Swagger operation ID: `GetCustomFields`.
+
+        Args:
+            account_id: Account id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/accounts/{quote(str(account_id), safe='')}/custom_fields"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5216,9 +7173,10 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def static_response_for_anchor_tab_schema_async(
+    async def static_response_for_anchor_tab_schema(
         self,
         tab_type: str,
         *,
@@ -5231,6 +7189,21 @@ class DocusignClient(ConnectorClientBase):
         StaticResponseForAnchorTabSchema
 
         Get schema for a specific anchor tab.
+
+        Swagger operation ID: `StaticResponseForAnchorTabSchema`.
+
+        Args:
+            tab_type: tab type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/anchortab_schema"
         query_params = []
@@ -5241,7 +7214,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5255,6 +7228,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5262,7 +7236,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def static_response_for_composite_templates_async(
+    async def static_response_for_composite_templates(
         self,
         *,
         timeout: Optional[float] = None,
@@ -5274,12 +7248,26 @@ class DocusignClient(ConnectorClientBase):
         StaticResponseForCompositeTemplates
 
         Get schema for a composite templates.
+
+        Swagger operation ID: `StaticResponseForCompositeTemplates`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/composite_templates_schema"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5293,6 +7281,7 @@ class DocusignClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

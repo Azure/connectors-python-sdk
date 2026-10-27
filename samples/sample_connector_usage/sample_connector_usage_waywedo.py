@@ -1,4 +1,4 @@
-"""Way We Do connector SDK sample."""
+"""Way We Do sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os
@@ -21,7 +21,7 @@ async def main() -> None:
     async with DefaultAzureCredential() as credential:
         try:
             async with WaywedoClient(CONNECTION_RUNTIME_URL, credential) as client:
-                checklists = await client.find_checklist_async()
+                checklists = [item async for item in client.list_find_checklist()]
                 print(f"Checklists: {checklists}")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")

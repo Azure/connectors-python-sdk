@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure AD (Microsoft Entra ID) Connector SDK Sample
+Azure AD (Microsoft Entra ID) sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure AD connector SDK.
+This sample demonstrates how to use the Azure AD client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Azure AD connection
@@ -24,8 +24,8 @@ import asyncio
 import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.azuread import AzureadClient
 from azure.connectors.azuread import (
-    AzureadClient,
     CreateOffice365GroupInput,
     CreateSecurityGroupInput,
     CreateGroupInput,
@@ -63,7 +63,7 @@ async def example_1_create_office365_group():
                     mail_enabled=True,
                 )
 
-                result = await client.create_office365_group_async(input=input_data)
+                result = await client.create_office365_group(input=input_data)
 
                 if result:
                     print("Office 365 group created:")
@@ -102,7 +102,7 @@ async def example_2_create_security_group():
                     mail_enabled=False,
                 )
 
-                result = await client.create_security_group_async(input=input_data)
+                result = await client.create_security_group(input=input_data)
 
                 if result:
                     print("Security group created:")
@@ -145,7 +145,7 @@ async def example_3_create_group():
                     mail_enabled=bool(group_types),
                 )
 
-                result = await client.create_group_async(input=input_data)
+                result = await client.create_group(input=input_data)
 
                 if result:
                     print("Group created:")
@@ -193,7 +193,7 @@ async def example_4_create_user():
                     },
                 )
 
-                result = await client.create_user_async(input=input_data)
+                result = await client.create_user(input=input_data)
 
                 if result:
                     print("User created:")
@@ -227,7 +227,7 @@ async def example_5_remove_member_from_group():
 
         async with AzureadClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                await client.remove_member_from_group_async(
+                await client.remove_member_from_group(
                     group_id=group_id,
                     member_id=member_id,
                 )
@@ -244,7 +244,7 @@ async def example_5_remove_member_from_group():
 
 async def main():
     """Run all examples."""
-    print("Azure AD (Microsoft Entra ID) Connector SDK - Sample Usage")
+    print("Azure AD (Microsoft Entra ID) sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
 
     if not CONNECTION_RUNTIME_URL:

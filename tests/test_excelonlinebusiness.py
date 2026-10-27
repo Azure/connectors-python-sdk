@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.excelonlinebusiness import ExcelonlinebusinessClient
 from azure.connectors.excelonlinebusiness import (
-    ExcelonlinebusinessClient,
     TableToCreate,
     TableMetadata,
     Item,
@@ -24,7 +24,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
-from tests.generated_connector_test_utils import resolve_generated_result
+from tests.generated_connector_test_utils import model_instance, resolve_generated_result
 
 
 class TestExcelonlinebusinessClientInitialization:
@@ -60,7 +60,7 @@ class TestExcelonlinebusinessClientInitialization:
         client = ExcelonlinebusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -136,11 +136,11 @@ class TestCreateTable:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.create_table_async(
+            result = await client.create_table(
                 input=table_input,
                 drive="drive-id",
                 file="file-id",
@@ -162,16 +162,16 @@ class TestCreateTable:
         )
 
         mock_response = MockResponse(status=400, text='{"error": "Invalid range"}')
-        table_input = TableToCreate(table_name="Table1")
+        table_input = model_instance(TableToCreate, table_name="Table1")
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_table_async(
+                await client.create_table(
                     input=table_input,
                     drive="drive-id",
                     file="file-id",
@@ -196,11 +196,11 @@ class TestCreateIdColumn:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.create_id_column_async(
+            await client.create_id_column(
                 drive="drive-id",
                 file="file-id",
                 table="Table1",
@@ -225,12 +225,12 @@ class TestCreateIdColumn:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_id_column_async(
+                await client.create_id_column(
                     drive="drive-id",
                     file="file-id",
                     table="InvalidTable",
@@ -259,11 +259,11 @@ class TestGetItems:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.get_items_async(
+            result = await resolve_generated_result(client.list_items(
                 drive="drive-id",
                 file="file-id",
                 table="Table1",
@@ -288,11 +288,11 @@ class TestGetItems:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await resolve_generated_result(client.get_items_async(
+            await resolve_generated_result(client.list_items(
                 drive="drive-id",
                 file="file-id",
                 table="Table1",
@@ -322,12 +322,12 @@ class TestGetItems:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await resolve_generated_result(client.get_items_async(
+                await resolve_generated_result(client.list_items(
                     drive="drive-id",
                     file="file-id",
                     table="NonexistentTable",
@@ -337,8 +337,8 @@ class TestGetItems:
             assert exc_info.value.status_code == 404
 
 
-class TestGetComments:
-    """Tests for get_comments_async method."""
+class TestListComments:
+    """Tests for list_comments method."""
 
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
@@ -355,20 +355,22 @@ class TestGetComments:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_comments_async(
-                drive="drive-id",
-                file="file-id"
+            result = await resolve_generated_result(
+                client.list_comments(
+                    drive="drive-id",
+                    file="file-id"
+                )
             )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/workbook/comments" in call_args[0][1]
-            assert result["value"][0]["id"] == "comment1"
+            assert result[0]["id"] == "comment1"
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -382,14 +384,16 @@ class TestGetComments:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_comments_async(
-                    drive="drive-id",
-                    file="nonexistent-file"
+                await resolve_generated_result(
+                    client.list_comments(
+                        drive="drive-id",
+                        file="nonexistent-file"
+                    )
                 )
 
             assert exc_info.value.status_code == 404
@@ -413,11 +417,11 @@ class TestGetComment:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_comment_async(
+            result = await client.get_comment(
                 drive="drive-id",
                 file="file-id",
                 commentid="comment1"
@@ -441,12 +445,12 @@ class TestGetComment:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_comment_async(
+                await client.get_comment(
                     drive="drive-id",
                     file="file-id",
                     commentid="nonexistent"
@@ -477,11 +481,11 @@ class TestReplyComment:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.reply_comment_async(
+            result = await client.reply_comment(
                 input=comment_details,
                 drive="drive-id",
                 file="file-id",
@@ -507,12 +511,12 @@ class TestReplyComment:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.reply_comment_async(
+                await client.reply_comment(
                     input=comment_details,
                     drive="drive-id",
                     file="file-id",
@@ -540,11 +544,11 @@ class TestGetItem:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_item_async(
+            result = await client.get_item(
                 drive="drive-id",
                 file="file-id",
                 table="Table1",
@@ -567,16 +571,16 @@ class TestGetItem:
             credential=mock_credential
         )
 
-        mock_response = MockResponse(status=404, text='{"error": "Row not found"}')
+        mock_response = MockResponse(status=500, text='{"error": "Server error"}')
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_item_async(
+                await client.get_item(
                     drive="drive-id",
                     file="file-id",
                     table="Table1",
@@ -585,7 +589,7 @@ class TestGetItem:
                     id_column="ID"
                 )
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestDeleteItem:
@@ -603,11 +607,11 @@ class TestDeleteItem:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.delete_item_async(
+            await client.delete_item(
                 drive="drive-id",
                 file="file-id",
                 table="Table1",
@@ -629,16 +633,16 @@ class TestDeleteItem:
             credential=mock_credential
         )
 
-        mock_response = MockResponse(status=404, text='{"error": "Row not found"}')
+        mock_response = MockResponse(status=500, text='{"error": "Server error"}')
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.delete_item_async(
+                await client.delete_item(
                     drive="drive-id",
                     file="file-id",
                     table="Table1",
@@ -647,7 +651,7 @@ class TestDeleteItem:
                     id_column="ID"
                 )
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestPatchItem:
@@ -669,11 +673,11 @@ class TestPatchItem:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.patch_item_async(
+            result = await client.patch_item(
                 input=item_input,
                 drive="drive-id",
                 file="file-id",
@@ -702,12 +706,12 @@ class TestPatchItem:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.patch_item_async(
+                await client.patch_item(
                     input=item_input,
                     drive="drive-id",
                     file="file-id",
@@ -741,11 +745,11 @@ class TestRunScriptProd:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.run_script_prod_async(
+            result = await client.run_script_prod(
                 input=script_input,
                 drive="drive-id",
                 file="file-id",
@@ -774,12 +778,12 @@ class TestRunScriptProd:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.run_script_prod_async(
+                await client.run_script_prod(
                     input=script_input,
                     drive="drive-id",
                     file="file-id",
@@ -793,7 +797,7 @@ class TestRunScriptProd:
 
 
 class TestGetAllWorksheets:
-    """Tests for get_all_worksheets_async method."""
+    """Tests for list_all_worksheets method."""
 
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
@@ -810,21 +814,23 @@ class TestGetAllWorksheets:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_all_worksheets_async(
-                drive="drive-id",
-                file="file-id",
-                source="me"
+            result = await resolve_generated_result(
+                client.list_all_worksheets(
+                    drive="drive-id",
+                    file="file-id",
+                    source="me"
+                )
             )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/worksheets" in call_args[0][1]
-            assert result["value"][0]["name"] == "Sheet1"
+            assert result[0]["name"] == "Sheet1"
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -838,15 +844,17 @@ class TestGetAllWorksheets:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_all_worksheets_async(
-                    drive="drive-id",
-                    file="nonexistent",
-                    source="me"
+                await resolve_generated_result(
+                    client.list_all_worksheets(
+                        drive="drive-id",
+                        file="nonexistent",
+                        source="me"
+                    )
                 )
 
             assert exc_info.value.status_code == 404
@@ -871,11 +879,11 @@ class TestCreateWorksheet:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.create_worksheet_async(
+            result = await client.create_worksheet(
                 input=worksheet_input,
                 drive="drive-id",
                 file="file-id",
@@ -901,12 +909,12 @@ class TestCreateWorksheet:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_worksheet_async(
+                await client.create_worksheet(
                     input=worksheet_input,
                     drive="drive-id",
                     file="file-id",
@@ -917,7 +925,7 @@ class TestCreateWorksheet:
 
 
 class TestGetTables:
-    """Tests for get_tables_async method."""
+    """Tests for list_tables method."""
 
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
@@ -934,21 +942,23 @@ class TestGetTables:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_tables_async(
-                drive="drive-id",
-                file="file-id",
-                source="me"
+            result = await resolve_generated_result(
+                client.list_tables(
+                    drive="drive-id",
+                    file="file-id",
+                    source="me"
+                )
             )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/tables" in call_args[0][1]
-            assert len(result["value"]) == 2
+            assert len(result) == 2
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -962,15 +972,17 @@ class TestGetTables:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_tables_async(
-                    drive="drive-id",
-                    file="nonexistent",
-                    source="me"
+                await resolve_generated_result(
+                    client.list_tables(
+                        drive="drive-id",
+                        file="nonexistent",
+                        source="me"
+                    )
                 )
 
             assert exc_info.value.status_code == 404
@@ -995,11 +1007,11 @@ class TestAddRow:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.add_row_async(
+            result = await client.add_row(
                 input=item_input,
                 drive="drive-id",
                 file="file-id",
@@ -1026,12 +1038,12 @@ class TestAddRow:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.add_row_async(
+                await client.add_row(
                     input=item_input,
                     drive="drive-id",
                     file="file-id",
@@ -1201,11 +1213,11 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await resolve_generated_result(client.get_items_async(
+            result = await resolve_generated_result(client.list_items(
                 drive="drive-id",
                 file="file-id",
                 table="Table1",
@@ -1225,17 +1237,17 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await resolve_generated_result(client.get_items_async(
+            await resolve_generated_result(client.list_items(
                 drive="drive1",
                 file="file1",
                 table="Table1",
                 source="me"
             ))
-            await resolve_generated_result(client.get_items_async(
+            await resolve_generated_result(client.list_items(
                 drive="drive2",
                 file="file2",
                 table="Table2",

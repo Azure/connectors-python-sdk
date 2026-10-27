@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
+from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
 from azure.core.credentials_async import AsyncTokenCredential
 from azure.core.pipeline.transport import AsyncHttpTransport
@@ -18,7 +19,23 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "YammerClient",
+    "LikedBy",
+    "Message",
+    "MessageBody",
+    "MessageList",
+    "Network",
+    "PageableMessageList",
+    "PostOperationRequest",
+    "Topic",
+    "User",
+    "YammerEntity",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -29,11 +46,11 @@ class Network:
     Response for Get my networks
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the network."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Summary of the network."""
-    permalink: Optional[str] = None
+    permalink: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Web link to the network page."""
 
 
@@ -43,11 +60,15 @@ class YammerEntity:
     Response for Get groups
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """Details of the Viva Engage entity."""
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the group."""
-    full_name: Optional[str] = None
+    full_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the Viva Engage entity."""
 
 
@@ -57,25 +78,25 @@ class User:
     Response for Get user details
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Username."""
-    job_title: Optional[str] = None
+    job_title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User job title."""
-    location: Optional[str] = None
+    location: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User location."""
-    full_name: Optional[str] = None
+    full_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User full name."""
-    first_name: Optional[str] = None
+    first_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User first name."""
-    last_name: Optional[str] = None
+    last_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User last name."""
-    web_url: Optional[str] = None
+    web_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User profile url."""
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User email."""
-    birth_date: Optional[str] = None
+    birth_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User birth date."""
-    mugshot_url: Optional[str] = None
+    mugshot_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User photo url."""
 
 
@@ -85,9 +106,15 @@ class PageableMessageList:
     Response for Get all messages
     """
 
-    value: Optional[List[Message]] = None
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[Message | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -99,7 +126,12 @@ class MessageList:
     Response for When there is a new message in my followed feed
     """
 
-    messages: Optional[List[Message]] = None
+    messages: Optional[
+        List[Message | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """messages"""
 
 
@@ -109,45 +141,45 @@ class Message:
     Definition: Message
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """ID associated with the post."""
-    content_excerpt: Optional[str] = None
+    content_excerpt: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Text Content of the post."""
-    sender_id: Optional[int] = None
+    sender_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Unique ID of user who posted the message."""
-    replied_to_id: Optional[int] = None
+    replied_to_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """ID of the message to which this message is a reply."""
-    created_at: Optional[str] = None
+    created_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Time at which the message was created."""
-    network_id: Optional[int] = None
+    network_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of the network message is associated with."""
-    message_type: Optional[str] = None
+    message_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of the message type."""
-    sender_type: Optional[str] = None
+    sender_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of the type of sender."""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """API url of the post."""
-    web_url: Optional[str] = None
+    web_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Web url of the post."""
-    group_id: Optional[int] = None
+    group_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Unique ID of group who posted the message."""
-    body: Optional[MessageBody] = None
-    thread_id: Optional[int] = None
+    body: Optional[MessageBody | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    thread_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Unique ID of thread."""
-    direct_message: Optional[bool] = None
+    direct_message: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Flag to specify if the post is a  a direct message."""
-    client_type: Optional[str] = None
+    client_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Type of the client."""
-    client_url: Optional[str] = None
+    client_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Web link of the client."""
-    language: Optional[str] = None
+    language: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Language used in the message."""
-    notified_user_ids: Optional[List[int]] = None
+    notified_user_ids: Optional[List[int]] = dataclass_field(default=None, kw_only=True)
     """Details of users notified."""
-    privacy: Optional[str] = None
+    privacy: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Details of the privacy associated with the message."""
-    liked_by: Optional[LikedBy] = None
-    system_message: Optional[bool] = None
+    liked_by: Optional[LikedBy | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    system_message: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Flag to specify if the post is a system generated message or not."""
 
 
@@ -157,9 +189,9 @@ class Topic:
     Definition: Topic
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the topic."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the topic."""
 
 
@@ -169,20 +201,20 @@ class PostOperationRequest:
     Definition: PostOperationRequest
     """
 
-    group_id: Optional[int] = None
+    group_id: int
     """The group to post a message to (0 = All Company/Network)."""
-    body: Optional[str] = None
+    body: str
     """Your message to be posted into your network."""
-    replied_to_id: Optional[int] = None
+    replied_to_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The message ID this message is in reply to."""
-    direct_to_id: Optional[int] = None
+    direct_to_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     If set, a private message will be sent directly to the user with the
     indicated ID.
     """
-    broadcast: Optional[bool] = None
+    broadcast: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Post message as an announcement to all users in a group."""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of the message to be posted."""
 
 
@@ -192,11 +224,11 @@ class MessageBody:
     Definition: MessageBody
     """
 
-    parsed: Optional[str] = None
+    parsed: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Parsed text format."""
-    plain: Optional[str] = None
+    plain: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Plain text format."""
-    rich: Optional[str] = None
+    rich: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Rich text format."""
 
 
@@ -206,9 +238,9 @@ class LikedBy:
     Definition: LikedBy
     """
 
-    count: Optional[int] = None
+    count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of distinct likes."""
-    names: Optional[List[Dict[str, Any]]] = None
+    names: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of people who liked the post."""
 
 
@@ -223,7 +255,7 @@ class YammerClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -240,8 +272,8 @@ class YammerClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -262,7 +294,7 @@ class YammerClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -278,15 +310,49 @@ class YammerClient(ConnectorClientBase):
         return "yammer"
 
     def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
-        parsed_next_link = urlsplit(next_link)
-        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
             if next_link.startswith("/"):
                 return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
             if next_link.startswith("?"):
-                return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
 
-        parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
         connection_hostname = parsed_connection.hostname
         if next_link_hostname is None or connection_hostname is None:
@@ -303,7 +369,11 @@ class YammerClient(ConnectorClientBase):
                 parsed_next_link.scheme == parsed_connection.scheme
                 and next_link_port == connection_port
             ):
-                return next_link
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
 
             raise ValueError(
                 "Pagination URL origin "
@@ -316,57 +386,115 @@ class YammerClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def get_networks_async(
+    def list_networks(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get my networks
 
         Gets all the networks that the user belongs to.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetNetworks`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/networks.json"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_groups_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_groups(
         self,
+        *,
         network_id: Optional[str] = None,
         mine: Optional[int] = None,
         show_all_company_group: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get groups
 
         Gets all groups. If mine = 1, get only groups to which the user belongs
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetGroups`.
+
+        Args:
+            network_id: Network ID.
+            mine: Used for getting groups which user is part of.
+            show_all_company_group: Used for showing All Company Group.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/groups.json"
         query_params = []
@@ -387,29 +515,50 @@ class YammerClient(ConnectorClientBase):
             query_params.append(f"showAllCompanyGroup={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_user_details_by_id_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def get_user_details_by_id(
         self,
         user_id: int,
         *,
@@ -422,13 +571,28 @@ class YammerClient(ConnectorClientBase):
         Get user details
 
         This operation returns user profile details.
+
+        Swagger operation ID: `GetUserDetailsById`.
+
+        Args:
+            user_id: Unique identifier of the user.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/users/{quote(str(user_id), safe='')}.json"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -442,6 +606,7 @@ class YammerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -449,7 +614,7 @@ class YammerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def like_message_async(
+    async def like_message(
         self,
         message_id: str,
         *,
@@ -462,6 +627,21 @@ class YammerClient(ConnectorClientBase):
         Like message
 
         This operation is used to like the specified message.
+
+        Swagger operation ID: `LikeMessage`.
+
+        Args:
+            message_id: Unique id of the message.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/messages/liked_by/current.json"
@@ -474,7 +654,7 @@ class YammerClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -488,21 +668,22 @@ class YammerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_all_messages_async(
+    def list_all_messages(
         self,
+        *,
         network_id: Optional[str] = None,
         older_than: Optional[int] = None,
         newer_than: Optional[int] = None,
         threaded: Optional[str] = None,
         limit: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get all messages
 
@@ -510,8 +691,43 @@ class YammerClient(ConnectorClientBase):
         Engage network. Corresponds to \"All\" conversations in the Viva Engage
         web interface.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `GetAllMessagesV3`.
+
+        Args:
+            network_id: Network ID.
+            older_than: Returns messages older than the message ID specified as
+                a numeric string. This is useful for paginating messages. For
+                example, if you're currently viewing 20 messages and the oldest
+                is number 2912, you could append \"?older_than=2912″ to your
+                request to get the 20 messages prior to those you're seeing.
+            newer_than: Returns messages newer than the message ID specified as
+                a numeric string. This should be used when polling for new
+                messages. If you're looking at messages, and the most recent
+                message returned is 3516, you can make a request with the
+                parameter \"?newer_than=3516″ to ensure that you do not get
+                duplicate copies of messages already on your page.
+            threaded: Threaded=true will only return the thread starter (first
+                message) for each thread. This parameter is intended for apps
+                which need to display message threads collapsed.
+                threaded=extended will return the thread starter messages and
+                the two most recent messages all ordered by activity, as they
+                are viewed in the default view on the Viva Engage web
+                interface.
+            limit: Return only the specified number of messages.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v3/messages.json"
         query_params = []
@@ -542,11 +758,18 @@ class YammerClient(ConnectorClientBase):
             query_params.append(f"limit={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -559,35 +782,44 @@ class YammerClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_messages_following_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_messages_following(
         self,
+        *,
         network_id: Optional[str] = None,
         older_than: Optional[int] = None,
         newer_than: Optional[int] = None,
         threaded: Optional[str] = None,
         limit: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get the messages from my Following feed
 
@@ -595,8 +827,43 @@ class YammerClient(ConnectorClientBase):
         conversations involving people, groups and topics that the user is
         following.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `GetMessagesFollowingV3`.
+
+        Args:
+            network_id: Unique identifier of the network.
+            older_than: Returns messages older than the message ID specified as
+                a numeric string. This is useful for paginating messages. For
+                example, if you're currently viewing 20 messages and the oldest
+                is number 2912, you could append \"?older_than=2912″ to your
+                request to get the 20 messages prior to those you're seeing.
+            newer_than: Returns messages newer than the message ID specified as
+                a numeric string. This should be used when polling for new
+                messages. If you're looking at messages, and the most recent
+                message returned is 3516, you can make a request with the
+                parameter \"?newer_than=3516″ to ensure that you do not get
+                duplicate copies of messages already on your page.
+            threaded: Threaded=true will only return the thread starter (first
+                message) for each thread. This parameter is intended for apps
+                which need to display message threads collapsed.
+                threaded=extended will return the thread starter messages and
+                the two most recent messages all ordered by activity, as they
+                are viewed in the default view on the Viva Engage web
+                interface.
+            limit: Return only the specified number of messages.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/v3/messages/following.json"
@@ -629,11 +896,18 @@ class YammerClient(ConnectorClientBase):
             query_params.append(f"limit={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -646,43 +920,87 @@ class YammerClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_messages_in_group_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_messages_in_group(
         self,
         group_id: int,
+        *,
         network_id: Optional[str] = None,
         older_than: Optional[int] = None,
         newer_than: Optional[int] = None,
         threaded: Optional[str] = None,
         limit: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get messages in a group
 
         This operation returns the messages posted in a group.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `GetMessagesInGroupV3`.
+
+        Args:
+            group_id: Unique identifier of the group.
+            network_id: Unique identifier of the network.
+            older_than: Returns messages in threads where the thread's latest
+                message is older than the specified message ID. Any thread with
+                a most recent message ID that is newer than or equal to the
+                specified ID will not have any of its messages returned by this
+                query.
+            newer_than: Returns messages in threads where the thread's latest
+                message is newer than the specified message ID. Any thread with
+                a most recent message ID that is older than or equal to the
+                specified ID will not have any of its messages returned by this
+                query.
+            threaded: Threaded=true will only return the thread starter (first
+                message) for each thread. This parameter is intended for apps
+                which need to display message threads collapsed.
+                threaded=extended will return the thread starter messages and
+                the two most recent messages all ordered by activity, as they
+                are viewed in the default view on the Viva Engage web
+                interface.
+            limit: Return only the specified number of messages.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -716,11 +1034,18 @@ class YammerClient(ConnectorClientBase):
             query_params.append(f"limit={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -733,23 +1058,32 @@ class YammerClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_messages_in_thread_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_messages_in_thread(
         self,
         thread_id: int,
         *,
@@ -757,24 +1091,47 @@ class YammerClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get messages in a thread
 
         This operation returns the messages posted in a thread.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `GetMessagesInThreadV3`.
+
+        Args:
+            thread_id: Unique identifier of the thread.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v3/messages/in_thread/{quote(str(thread_id), safe='')}.json"
         )
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -787,27 +1144,36 @@ class YammerClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def post_message_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def post_message(
         self,
-        input: PostOperationRequest,
-        network_id: Optional[str] = None,
+        input: PostOperationRequest | Mapping[str, Any],
         *,
+        network_id: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -819,6 +1185,23 @@ class YammerClient(ConnectorClientBase):
         This operation is used to post a Message to a Group or All Company
         Feed. If group ID is provided, message will be posted to the specified
         group else it will be posted in All Company Feed.
+
+        Swagger operation ID: `PostMessageV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            network_id: Unique id of the network.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/messages.json"
         query_params = []
@@ -830,7 +1213,7 @@ class YammerClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -844,6 +1227,7 @@ class YammerClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

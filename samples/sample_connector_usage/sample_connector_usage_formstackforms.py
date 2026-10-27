@@ -1,4 +1,4 @@
-"""Formstack Forms connector SDK sample."""
+"""Formstack Forms sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os
@@ -24,7 +24,7 @@ async def main() -> None:
                 CONNECTION_RUNTIME_URL,
                 credential,
             ) as client:
-                forms = await client.get_available_forms_async()
+                forms = await client.get_available_forms()
                 print(f"Forms: {forms}")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")

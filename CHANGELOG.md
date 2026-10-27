@@ -9,25 +9,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Mapping-compatible model inputs** — generated request bodies and nested model fields now accept either generated dataclasses or arbitrary `Mapping` implementations.
+- **Azure Core long-running operations** — generated Kusto and Plumsail operations with an HTTP 202 `Location` polling contract now use awaited `begin_*` methods returning `AsyncLROPoller`. Polling honors `Retry-After` and forwards operation request controls.
 - **Generated API documentation site** — adds a MkDocs Material reference for the core SDK and every shipped connector module, strict source-to-site coverage validation, and a GitHub Pages deployment workflow for `main`.
 - **Zoho ZeptoMail generated client** — adds five public mail-agent, send-mail, template-mail, and analytics actions. `SendTemplateMailInput.merge_key_detail` remains `List[Dict[str, Any]]` so fixed string fields and arbitrary non-string merge values stay representable. The malformed Swagger type `ReplyToAddresss` is exposed as `ReplyToAddress` without changing the `reply_to` wire field.
 
 ### Breaking Changes
 
-- **Generated clients now use the asynchronous Azure Core pipeline** — every client requires a caller-owned `AsyncTokenCredential` or `AzureKeyCredential`. The legacy token-provider classes and `ConnectorClientOptions` have been removed; retry, timeout, transport, and policy settings are passed directly to the client. Operations also expose keyword-only `timeout`, `headers`, `client_request_id`, and `response_hook` controls.
+- **Swagger-required model fields are now required constructor arguments** — generated dataclasses no longer default required properties to `None`.
+- **Read collection operations now return Azure Core pagers** — bounded read collections without continuation metadata use `AsyncItemPaged`; mutation and action arrays remain eager operation payloads.
+- **Client timeout configuration now uses `timeout`** — generated async
+  client constructors use the same keyword as per-operation request controls.
+- **Location-backed operations now return pollers** — 44 Kusto and Plumsail operations move from immediate operation names to `begin_*`. Await the call and `poller.result()` while the connector client remains open.
+- **Generated operations now use unsuffixed names** — async-only clients remain in `azure.connectors.<connector>`. Remove `_async` from operation calls while retaining `await`; no synchronous mirror is provided.
+- **Pageable operations now return Azure Core pagers** — root clients return `AsyncItemPaged`. Pager construction is not awaited; use `async for` or `by_page(continuation_token=...)` for page boundaries.
+- **Generated models have one owner** — import dataclasses, aliases, enums, and `TRIGGER_OPERATIONS` from the root `azure.connectors.<connector>` module alongside its async client.
+- **Generated clients now use Azure Core pipelines** — clients require a caller-owned `AsyncTokenCredential` or `AzureKeyCredential`. The legacy token-provider classes and `ConnectorClientOptions` have been removed; retry, timeout, `AsyncHttpTransport`, and policy settings are passed directly to the client. Operations also expose keyword-only `timeout`, `headers`, `client_request_id`, and `response_hook` controls.
 - **Automatic retries are now method-safe by default** — `GET`, `HEAD`, `OPTIONS`, and `TRACE` retain configured retries. `POST`, `PUT`, `PATCH`, `DELETE`, and unknown methods make one attempt for transient responses and transport errors. Set `retry_unsafe_http_methods=True` directly on a generated client only when replay is acceptable; retry count, timeout, and backoff settings are also direct client keyword arguments. ([#85](https://github.com/Azure/connectors-python-sdk/issues/85))
-- Jira `list_issues_async` now exposes the live optional `fields` query parameter
+- Jira `list_issues` now exposes the live optional `fields` query parameter
   instead of sending an internal `fields=*all` default. Pass `fields` and
   `next_page_token` by keyword; `fields` precedes the token in the generated signature.
-- This regeneration propagates the async-iterator paging contract to 32 additional
+- This regeneration propagates the Azure Core paging contract to 32 additional
   connectors, extending [Fix Dataverse list pagination (#84)](https://github.com/Azure/connectors-python-sdk/pull/84).
-  Pageable operations return items rather than response dictionaries. Consume them
-  with `async for`, or collect them with
-  `[item async for item in client.get_items_async(...)]`; samples use this contract.
+  Pageable operations return items rather than response dictionaries. Iterate
+  pagers with `async for`; samples use this contract.
 
 - Seismic Planner `CustomPropertyValues.localizations` now exposes `Dict[str, CustomPropertyDataDisplay]` instead of `Dict[str, Any]`. Callers can access typed values directly, such as `localizations["en-US"].name`. ([Azure/Connectors-NET-SDK#262](https://github.com/Azure/Connectors-NET-SDK/issues/262), AzureUX-BPM PR 17131877)
 
-- Microsoft Dataverse `get_items_async` now returns an `AsyncIterator[dict[str, Any]]`. Callers must use `async for` instead of awaiting a single response dictionary; iteration preserves and follows `@odata.nextLink` until all rows are returned. ([Azure/Connectors-NET-SDK#208](https://github.com/Azure/Connectors-NET-SDK/issues/208), AzureUX-BPM PR 17086991)
+- Microsoft Dataverse collection operations now return `AsyncItemPaged[dict[str, Any]]` from root clients. Iterate instead of awaiting a single response dictionary; paging preserves and follows `@odata.nextLink` until all rows are returned. ([Azure/Connectors-NET-SDK#208](https://github.com/Azure/Connectors-NET-SDK/issues/208), AzureUX-BPM PR 17086991)
 
 - Regenerated all 99 supported connector clients from current live managed connector metadata using the Azure Core contract generator.
 - Corrected generated parameter types across connector operations, including pagination values, numeric identifiers, and Boolean options. Callers must now pass the annotated `int` and `bool` values instead of string representations.
@@ -35,6 +44,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Generated async operations now document their arguments, return types,
+  connector operation IDs, and `ConnectorException` failure contract.
+- Generated connector clients are available as lazy exports from `azure.connectors`, with matching package type stubs for static analysis. Prefer concrete connector-module imports in applications.
+- Kept async-only root clients, aligned with the .NET connector SDK. This intentionally diverges from the Azure SDK synchronous-client guideline without reverting keyword-only options, Azure Core errors, paging, or polling.
+- Updated the 99 root async samples to use unsuffixed operation names; there is no duplicate synchronous sample catalog.
+- Updated the generated API reference and CI validation for one async client catalog and one core runtime section.
 - Made `azure-identity` a required runtime dependency so Azure Identity credentials and the shipped samples work with the default package installation.
 - Updated all connector samples to match generated method signatures and added literal-type validation to the sample contract checks.
 - Added focused success, route, request-body, response, and error coverage for newly generated operations.
@@ -42,14 +57,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **Request timeout enforcement**: `timeout_seconds` and per-operation `timeout`
-  now bound the complete network operation, including retries, response loading,
-  and body reads across Azure Core async transports. Zero and negative values
-  disable SDK and transport deadlines.
+- **Jira continuation tokens**: Treat next-page tokens as opaque values rather than continuation URLs.
+- **Initial polling URLs**: Resolve relative initial `Location` headers against the initiating request URL.
+- **Sample pager consumption**: Iterate async pagers directly instead of treating them as response envelopes or awaiting pager construction.
+- **Collection response contracts**: Mutation and action arrays execute eagerly and preserve their response envelopes instead of delaying the request behind a pager. Primitive read collections now expose `AsyncItemPaged[str]` rather than dictionary item types.
+- **Finite polling delays**: Non-finite `Retry-After` values such as `Infinity`, `NaN`, and numeric overflow now use the finite default polling interval.
+- **Collection paging classification**: Explicit pageable responses now infer omitted item properties and follow continuation fields present in the response schema. Bounded read envelopes select their primary array over auxiliary array metadata and expose Azure-guideline `list_*` operations returning `AsyncItemPaged`; mutation and action arrays execute eagerly under their action names.
+- **Caller continuation isolation**: Caller-provided `by_page()` continuation URLs now pass through the same origin normalization as service-provided next links, preventing authenticated requests from being sent to an arbitrary host.
+- **HTTP DELETE contracts** — generated operations now preserve declared success payloads and ordinary HTTP 404 errors regardless of verb. Only explicitly curated resource deletions, currently ARM deployment deletion, treat an already absent target as idempotent success.
+- **Orderful transaction responses** — `list_transactions` now preserves and returns the runtime JSON payload despite the managed connector Swagger omitting its response schema.
+- **Relative continuation URLs** — pagers now resolve bare relative continuation links against the current page URL, preserving nested resource paths.
+- **Azure Core exception compatibility**: `ConnectorException` now derives from `HttpResponseError` and exposes the failed response status, reason, headers, and body while preserving connector-specific operation and path details.
+- **Generation provenance**: record the exact generator revision and source metadata for the complete 99-connector async catalog in the pull request.
+- **Request timeout enforcement**: Client-level and per-operation `timeout`
+  configures Azure Core retry and transport deadlines. Async clients bound
+  the complete network operation, including response loading and body reads.
+  Blocking callbacks must bound their own execution. Zero and
+  negative values disable SDK and transport deadlines.
 - **Async transport compatibility**: Empty buffered responses now produce normal
   snapshots and connector errors without re-reading consumed streams. Injected
   transports receive only supported timeout options and close through their
   asynchronous lifecycle.
+- **Default transport configuration**: Standard Azure Core transport options,
+  including `connection_verify` and `connection_cert`, now configure the owned
+  aiohttp transport instead of being ignored.
 - **Explicit Azure Core policy chains**: `per_call_policies` and
   `per_retry_policies` now compose with an explicit `policies` chain instead of
   being silently discarded. Per-retry extensions require an `AsyncRetryPolicy`,
@@ -65,7 +96,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Generated caller-supplied and internal-default query values escape reserved
   characters, including `/`, so paths, URLs, and collection values remain within
   their intended query parameters.
-- **Microsoft Dataverse**: Corrected `create_attachment_async()` to accept GUID/string row IDs instead of integers.
+- **Microsoft Dataverse**: Corrected `create_attachment()` to accept GUID/string row IDs instead of integers.
 
 ## [0.5.0b1] - 2026-08-31
 

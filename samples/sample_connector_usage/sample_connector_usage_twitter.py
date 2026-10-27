@@ -1,4 +1,4 @@
-"""Twitter connector SDK sample."""
+"""Twitter sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os
@@ -16,10 +16,10 @@ async def list_user_timeline() -> None:
     """List recent posts from a user's timeline."""
     async with DefaultAzureCredential() as credential:
         async with TwitterClient(CONNECTION_RUNTIME_URL, credential) as client:
-            timeline = await client.user_timeline_async(
+            timeline = [item async for item in client.list_user_timeline(
                 user_name="Azure",
                 max_results=10,
-            )
+            )]
             print(f"Timeline: {timeline}")
 
 
@@ -27,10 +27,10 @@ async def search_posts() -> None:
     """Search recent posts."""
     async with DefaultAzureCredential() as credential:
         async with TwitterClient(CONNECTION_RUNTIME_URL, credential) as client:
-            results = await client.search_tweet_async(
+            results = [item async for item in client.list_search_tweet(
                 search_query="Azure Logic Apps",
                 max_results=10,
-            )
+            )]
             print(f"Search results: {results}")
 
 

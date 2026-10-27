@@ -6,8 +6,8 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.azureiotcentral import AzureiotcentralClient
 from azure.connectors.azureiotcentral import (
-    AzureiotcentralClient,
     Device,
     DeviceCloudProperties,
     DeviceCommand,
@@ -24,7 +24,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
-from tests.generated_connector_test_utils import resolve_generated_result
+from tests.generated_connector_test_utils import model_instance, resolve_generated_result
 
 
 BASE_URL = "https://example.azure.com/connections/test"
@@ -34,11 +34,11 @@ BASE_URL = "https://example.azure.com/connections/test"
 # keyword arguments required to invoke it. The "input" body argument is passed
 # as an empty dict since send_async is mocked in every test.
 OPERATION_ARGS = {
-    "device_groups_list": {"application": "app-1"},
+    "list_device_groups": {"application": "app-1"},
     "device_groups_get": {"device_group_id": "dg-1", "application": "app-1"},
     "device_groups_set": {"input": {}, "device_group_id": "dg-1", "application": "app-1"},
     "device_groups_remove": {"device_group_id": "dg-1", "application": "app-1"},
-    "device_groups_get_devices": {"device_group_id": "dg-1", "application": "app-1"},
+    "list_device_groups_get_devices": {"device_group_id": "dg-1", "application": "app-1"},
     "devices_get_cloud_properties": {"device_id": "d-1", "application": "app-1"},
     "devices_update_cloud_properties": {"input": {}, "device_id": "d-1", "application": "app-1"},
     "devices_execute_component_command": {
@@ -48,7 +48,7 @@ OPERATION_ARGS = {
         "command_name": "cmd-1",
         "application": "app-1",
     },
-    "device_relationships_list": {"device_id": "d-1", "application": "app-1"},
+    "list_device_relationships": {"device_id": "d-1", "application": "app-1"},
     "device_relationships_get": {
         "device_id": "d-1",
         "relationship_id": "r-1",
@@ -71,14 +71,14 @@ OPERATION_ARGS = {
         "relationship_id": "r-1",
         "application": "app-1",
     },
-    "jobs_list": {"application": "app-1"},
+    "list_jobs": {"application": "app-1"},
     "jobs_get": {"job_id": "j-1", "application": "app-1"},
     "jobs_set": {"input": {}, "job_id": "j-1", "application": "app-1"},
-    "jobs_get_devices": {"job_id": "j-1", "application": "app-1"},
+    "list_jobs_get_devices": {"job_id": "j-1", "application": "app-1"},
     "jobs_stop": {"job_id": "j-1", "application": "app-1"},
     "jobs_resume": {"job_id": "j-1", "application": "app-1"},
     "jobs_rerun": {"job_id": "j-1", "rerun_id": "rr-1", "application": "app-1"},
-    "organizations_list": {"application": "app-1"},
+    "list_organizations": {"application": "app-1"},
     "organizations_get": {"organization_id": "o-1", "application": "app-1"},
     "organizations_set": {
         "input": {},
@@ -86,7 +86,7 @@ OPERATION_ARGS = {
         "application": "app-1",
     },
     "organizations_remove": {"organization_id": "o-1", "application": "app-1"},
-    "scheduled_jobs_list": {"application": "app-1"},
+    "list_scheduled_jobs": {"application": "app-1"},
     "scheduled_jobs_get": {"scheduled_job_id": "sj-1", "application": "app-1"},
     "scheduled_jobs_set": {
         "input": {},
@@ -99,7 +99,7 @@ OPERATION_ARGS = {
         "application": "app-1",
     },
     "scheduled_jobs_remove": {"scheduled_job_id": "sj-1", "application": "app-1"},
-    "scheduled_jobs_list_jobs": {"scheduled_job_id": "sj-1", "application": "app-1"},
+    "list_scheduled_jobs_list_jobs": {"scheduled_job_id": "sj-1", "application": "app-1"},
     "devices_get": {"device_id": "d-1", "application": "app-1"},
     "devices_get_command_response": {
         "device_id": "d-1",
@@ -151,7 +151,7 @@ OPERATION_ARGS = {
         "telemetry_name": "t-1",
         "application": "app-1",
     },
-    "devices_list": {"application": "app-1"},
+    "list_devices": {"application": "app-1"},
     "devices_remove": {"device_id": "d-1", "application": "app-1"},
     "devices_run_command": {
         "input": {},
@@ -190,22 +190,22 @@ OPERATION_ARGS = {
     },
     "devices_update_properties": {"input": {}, "device_id": "d-1", "application": "app-1"},
     "device_templates_get": {"template_id": "tpl-1", "application": "app-1"},
-    "device_templates_list": {"application": "app-1"},
-    "device_templates_list_2": {"application": "app-1"},
+    "list_device_templates": {"application": "app-1"},
+    "list_device_templates_2": {"application": "app-1"},
     "device_templates_remove": {"template_id": "tpl-1", "application": "app-1"},
     "roles_get": {"role_id": "role-1", "application": "app-1"},
-    "roles_list": {"application": "app-1"},
+    "list_roles": {"application": "app-1"},
     "users_create": {"input": {}, "user_id": "u-1", "application": "app-1"},
     "users_get": {"user_id": "u-1", "application": "app-1"},
-    "users_list": {"application": "app-1"},
+    "list_users": {"application": "app-1"},
     "users_remove": {"user_id": "u-1", "application": "app-1"},
     "users_update": {"input": {}, "user_id": "u-1", "application": "app-1"},
-    "applications_list": {},
-    "workflow_get_components": {"application": "app-1", "template": "tpl-1"},
-    "workflow_get_capabilities": {"application": "app-1", "template": "tpl-1"},
-    "workflow_get_capabilities_v1": {"application": "app-1", "template": "tpl-1"},
-    "workflow_get_components_v1": {"application": "app-1", "template": "tpl-1"},
-    "workflow_get_modules": {"application": "app-1", "template": "tpl-1"},
+    "list_applications": {},
+    "list_workflow_get_components": {"application": "app-1", "template": "tpl-1"},
+    "list_workflow_get_capabilities": {"application": "app-1", "template": "tpl-1"},
+    "list_workflow_get_capabilities_v1": {"application": "app-1", "template": "tpl-1"},
+    "list_workflow_get_components_v1": {"application": "app-1", "template": "tpl-1"},
+    "list_workflow_get_modules": {"application": "app-1", "template": "tpl-1"},
     "schema_device_cloud_properties": {"application": "app-1"},
     "schema_device_command": {"application": "app-1"},
     "schema_device_command_v1": {"application": "app-1"},
@@ -232,7 +232,7 @@ ALL_OPERATIONS = sorted(OPERATION_ARGS.keys())
 
 async def _invoke_operation(client: AzureiotcentralClient, operation: str):
     """Invoke an IoT Central operation by name for shared method tests."""
-    method = getattr(client, f"{operation}_async")
+    method = getattr(client, f"{operation}")
     return await resolve_generated_result(method(**OPERATION_ARGS[operation]))
 
 
@@ -271,7 +271,7 @@ class TestAzureiotcentralClientInitialization:
         client = AzureiotcentralClient(
             BASE_URL,
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -329,11 +329,11 @@ class TestAzureiotcentralClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await resolve_generated_result(client.devices_list_async(application="app-1"))
+            result = await resolve_generated_result(client.list_devices(application="app-1"))
 
             assert result[0]["id"] == "d-1"
             assert mock_send.call_args[0][0] == "GET"
@@ -349,11 +349,11 @@ class TestAzureiotcentralClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.devices_get_async(device_id="d-1", application="app-1")
+            result = await client.devices_get(device_id="d-1", application="app-1")
 
             assert result["id"] == "d-1"
             assert "/devices/d-1" in mock_send.call_args[0][1]
@@ -363,15 +363,15 @@ class TestAzureiotcentralClientMethods:
         """Test device_groups_set_async issues a PUT and forwards the body."""
         client = _make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"id":"dg-1"}')
-        body = DeviceGroup(display_name="group")
+        body = model_instance(DeviceGroup, display_name="group")
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.device_groups_set_async(
+            result = await client.device_groups_set(
                 input=body,
                 device_group_id="dg-1",
                 application="app-1",
@@ -394,11 +394,11 @@ class TestAzureiotcentralClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.devices_execute_component_command_async(
+            await client.devices_execute_component_command(
                 input=body,
                 device_id="d-1",
                 component_name="component-1",
@@ -417,15 +417,15 @@ class TestAzureiotcentralClientMethods:
         """Test device_relationships_update_async forwards the PATCH body."""
         client = _make_client(mock_credential)
         mock_response = MockResponse(status=200, text="{}")
-        body = DeviceRelationship()
+        body = model_instance(DeviceRelationship)
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.device_relationships_update_async(
+            await client.device_relationships_update(
                 input=body,
                 device_id="d-1",
                 relationship_id="relationship-1",
@@ -443,11 +443,11 @@ class TestAzureiotcentralClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.device_groups_remove_async(
+            result = await client.device_groups_remove(
                 device_group_id="dg-1",
                 application="app-1",
             )
@@ -463,12 +463,12 @@ class TestAzureiotcentralClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.jobs_set_async(
-                input=Job(display_name="job"),
+            await client.jobs_set(
+                input=model_instance(Job, display_name="job"),
                 job_id="j-1",
                 application="app-1",
                 job_type="cloudProperty",
@@ -485,11 +485,11 @@ class TestAzureiotcentralClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.devices_get_command_response_async(
+            await client.devices_get_command_response(
                 device_id="d-1",
                 command_name="cmd-1",
                 application="app one",
@@ -508,11 +508,11 @@ class TestAzureiotcentralClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await resolve_generated_result(client.devices_list_async(application="app-1"))
+            result = await resolve_generated_result(client.list_devices(application="app-1"))
 
             assert result == []
 
@@ -525,7 +525,7 @@ class TestAzureiotcentralClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
@@ -551,7 +551,7 @@ class TestAzureiotcentralClientErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
@@ -566,16 +566,16 @@ class TestAzureiotcentralTypeSerialization:
 
     def test_dataclass_instances_initialize_expected_defaults(self):
         """Test generated dataclasses initialize with expected default values."""
-        device_group = DeviceGroup()
-        device = Device()
-        device_command = DeviceCommand()
-        cloud_properties = DeviceCloudProperties()
-        relationship = DeviceRelationship()
-        job = Job()
-        organization = Organization()
-        scheduled_job = ScheduledJob()
-        user = User()
-        trigger = WorkflowTrigger()
+        device_group = model_instance(DeviceGroup)
+        device = model_instance(Device)
+        device_command = model_instance(DeviceCommand)
+        cloud_properties = model_instance(DeviceCloudProperties)
+        relationship = model_instance(DeviceRelationship)
+        job = model_instance(Job)
+        organization = model_instance(Organization)
+        scheduled_job = model_instance(ScheduledJob)
+        user = model_instance(User)
+        trigger = model_instance(WorkflowTrigger)
 
         assert device_group.id is None
         assert device.id is None
