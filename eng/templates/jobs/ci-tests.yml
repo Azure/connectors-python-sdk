@@ -1,10 +1,17 @@
 parameters:
   - name: artifactFeed
     type: string
+  - name: PoolName
+    type: string
 
 jobs:
   - job: "TestPython"
     displayName: "Run Connectors SDK Unit Tests"
+
+    pool:
+      name: ${{ parameters.PoolName }}
+      image: 1es-ubuntu-24.04-min
+      os: linux
 
     strategy:
       matrix:
