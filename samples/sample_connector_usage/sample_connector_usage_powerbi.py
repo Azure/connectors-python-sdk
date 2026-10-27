@@ -1,7 +1,7 @@
 """
-Power BI Connector SDK Sample
+Power BI sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Power BI connector SDK.
+This sample demonstrates how to use the Power BI client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Power BI connection
@@ -38,8 +38,8 @@ async def example_1_list_groups() -> list[dict]:
 
     async with DefaultAzureCredential() as credential:
         async with PowerbiClient(CONNECTION_RUNTIME_URL, credential) as client:
-            groups_response = await client.list_groups_async()
-            groups = groups_response.get("value", []) if groups_response else []
+            groups_response = [item async for item in client.list_groups()]
+            groups = groups_response
 
             print(f"Found {len(groups)} groups")
             for group in groups[:5]:
@@ -54,8 +54,8 @@ async def example_2_list_datasets(group_id: str) -> list[dict]:
 
     async with DefaultAzureCredential() as credential:
         async with PowerbiClient(CONNECTION_RUNTIME_URL, credential) as client:
-            datasets_response = await client.list_datasets_async(groupid=group_id)
-            datasets = datasets_response.get("value", []) if datasets_response else []
+            datasets_response = [item async for item in client.list_datasets(groupid=group_id)]
+            datasets = datasets_response
 
             print(f"Found {len(datasets)} datasets in group '{group_id}'")
             for dataset in datasets[:5]:
@@ -70,7 +70,7 @@ async def example_3_refresh_dataset(group_id: str, dataset_id: str) -> None:
 
     async with DefaultAzureCredential() as credential:
         async with PowerbiClient(CONNECTION_RUNTIME_URL, credential) as client:
-            await client.refresh_dataset_async(groupid=group_id, datasetid=dataset_id)
+            await client.refresh_dataset(groupid=group_id, datasetid=dataset_id)
             print(f"Refresh requested for dataset '{dataset_id}'")
 
 
@@ -81,7 +81,7 @@ async def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Power BI Connector SDK - Sample Usage")
+    print("Power BI sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

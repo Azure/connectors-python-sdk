@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
+from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
 from azure.core.credentials_async import AsyncTokenCredential
 from azure.core.pipeline.transport import AsyncHttpTransport
@@ -18,7 +19,33 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "OnenoteClient",
+    "CreatePageInQuickNotesInput",
+    "CreatePageInSectionInput",
+    "CreateSectionInNotebookResponse",
+    "CreateSectionRequest",
+    "GetPageResponse",
+    "GetPagesInSectionResponse",
+    "GetSectionsInNotebookResponse",
+    "Link",
+    "NewPageResponse",
+    "NewSectionGroupResponse",
+    "NewSectionResponse",
+    "Notebook",
+    "OneNoteClientUrl",
+    "OneNoteWebUrl",
+    "Page",
+    "ParentNotebook",
+    "SectionGroupResponse",
+    "SectionListItem",
+    "SectionResponse",
+    "UpdatePageContentRequest",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -29,47 +56,54 @@ class CreateSectionInNotebookResponse:
     Response for Create section in a notebook
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The OData context."""
-    created_by: Optional[str] = field(
+    created_by: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdBy"},
     )
     """This section created by name."""
-    created_time: Optional[str] = field(
+    created_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdTime"},
     )
     """This section created time."""
-    id: Optional[str] = None
-    is_default: Optional[bool] = field(
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    is_default: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isDefault"},
     )
     """A flag to indication if this is the default section."""
-    last_modified_by: Optional[str] = field(
+    last_modified_by: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedBy"},
     )
     """Last modified by name."""
-    last_modified_time: Optional[str] = field(
+    last_modified_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedTime"},
     )
     """The time this section was last modified."""
-    links: Optional[Dict[str, Any]] = None
+    links: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """OneNote client links."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the section."""
-    pages_url: Optional[str] = field(
+    pages_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pagesUrl"},
     )
     """The url of the pages."""
-    self: Optional[str] = None
+    self: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The url to create section in notebook group."""
 
 
@@ -82,25 +116,28 @@ class Page:
     Response for Create page in a section
     """
 
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The title of the page."""
-    links: Optional[Link] = None
-    content_url: Optional[str] = field(
+    links: Optional[Link | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    content_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentUrl"},
     )
     """A url to the page content."""
-    last_modified_time: Optional[str] = field(
+    last_modified_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedTime"},
     )
     """The last modified date of the page."""
-    created_time: Optional[str] = field(
+    created_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdTime"},
     )
     """The date the page was created."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique identifier of the page."""
 
 
@@ -110,15 +147,17 @@ class GetPagesInSectionResponse:
     Response for Get pages for a specific section
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The OData context."""
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """value"""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -133,11 +172,16 @@ class Notebook:
     Response for Get recent notebooks
     """
 
-    file_name: Optional[str] = field(
+    file_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FileName"},
     )
-    key: Optional[str] = field(default=None, metadata={"wire_name": "Key"})
+    key: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Key"},
+    )
 
 
 @dataclass
@@ -146,7 +190,12 @@ class GetSectionsInNotebookResponse:
     Response for Get sections in notebook
     """
 
-    value: Optional[List[SectionListItem]] = None
+    value: Optional[
+        List[SectionListItem | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -155,7 +204,12 @@ class NewSectionResponse:
     Response for When a new section is created
     """
 
-    value: Optional[List[SectionResponse]] = None
+    value: Optional[
+        List[SectionResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """An array of objects, each representing a specific section."""
 
 
@@ -165,7 +219,12 @@ class NewSectionGroupResponse:
     Response for When a new section group is created
     """
 
-    value: Optional[List[SectionGroupResponse]] = None
+    value: Optional[
+        List[SectionGroupResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """An array of objects, each representing a specific section group."""
 
 
@@ -175,7 +234,12 @@ class NewPageResponse:
     Response for When a new page is created in a section
     """
 
-    value: Optional[List[Page]] = None
+    value: Optional[
+        List[Page | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """An array of objects, each representing a specific page."""
 
 
@@ -185,7 +249,7 @@ class CreateSectionRequest:
     Definition: CreateSectionRequest
     """
 
-    name: Optional[str] = None
+    name: str
     """The name of the new section."""
 
 
@@ -198,12 +262,13 @@ class GetPageResponse:
     Definition: GetPageResponse
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The OData context."""
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """This page response value."""
 
 
@@ -213,11 +278,11 @@ class ParentNotebook:
     Definition: ParentNotebook
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique identifier of the parent notebook."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the parent notebook."""
-    self: Optional[str] = None
+    self: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A url link to the parent notebook."""
 
 
@@ -227,12 +292,10 @@ class Link:
     Definition: Link
     """
 
-    one_note_client_url: Optional[OneNoteClientUrl] = field(
-        default=None,
+    one_note_client_url: OneNoteClientUrl | Mapping[str, Any] = dataclass_field(
         metadata={"wire_name": "oneNoteClientUrl"},
     )
-    one_note_web_url: Optional[OneNoteWebUrl] = field(
-        default=None,
+    one_note_web_url: OneNoteWebUrl | Mapping[str, Any] = dataclass_field(
         metadata={"wire_name": "oneNoteWebUrl"},
     )
 
@@ -243,7 +306,7 @@ class OneNoteClientUrl:
     Definition: OneNoteClientUrl
     """
 
-    href: Optional[str] = None
+    href: str
     """A link to the notebook using the OneNote windows client."""
 
 
@@ -253,7 +316,7 @@ class OneNoteWebUrl:
     Definition: OneNoteWebUrl
     """
 
-    href: Optional[str] = None
+    href: str
     """A link to the notebook using the OneNote web client."""
 
 
@@ -263,14 +326,15 @@ class SectionListItem:
     Definition: SectionListItem
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the section."""
-    pages_url: Optional[str] = field(
+    pages_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pagesUrl"},
     )
     """The key used to reference this section; also a url to the pages."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the section."""
 
 
@@ -280,45 +344,52 @@ class SectionResponse:
     Definition: SectionResponse
     """
 
-    created_by: Optional[str] = field(
+    created_by: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdBy"},
     )
     """The creator of the section."""
-    created_time: Optional[str] = field(
+    created_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdTime"},
     )
     """The creation date and time of the section."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the section."""
-    is_default: Optional[bool] = field(
+    is_default: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isDefault"},
     )
     """Indicates whether it is the default section."""
-    last_modified_by: Optional[str] = field(
+    last_modified_by: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedBy"},
     )
     """The user who last modified the section."""
-    last_modified_time: Optional[str] = field(
+    last_modified_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedTime"},
     )
     """The last modified date and time of the section."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the section."""
-    pages_url: Optional[str] = field(
+    pages_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pagesUrl"},
     )
     """Url to the pages in this section."""
-    parent_notebook: Optional[ParentNotebook] = field(
+    parent_notebook: Optional[ParentNotebook | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parentNotebook"},
     )
-    self: Optional[str] = None
+    self: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The url to this section."""
 
 
@@ -328,36 +399,41 @@ class SectionGroupResponse:
     Definition: SectionGroupResponse
     """
 
-    created_time: Optional[str] = field(
+    created_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdTime"},
     )
     """The creation date and time of the section group."""
-    created_by: Optional[str] = field(
+    created_by: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdBy"},
     )
     """The creator of the section group."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the section group."""
-    last_modified_by: Optional[str] = field(
+    last_modified_by: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedBy"},
     )
     """The user who last modified the section group."""
-    last_modified_time: Optional[str] = field(
+    last_modified_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedTime"},
     )
     """The last modification date and time of the section group."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the section group."""
-    sections_url: Optional[str] = field(
+    sections_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sectionsUrl"},
     )
     """Url of the sections within this section group."""
-    self: Optional[str] = None
+    self: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The url to this section group."""
 
 
@@ -372,7 +448,7 @@ class OnenoteClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -389,8 +465,8 @@ class OnenoteClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -411,7 +487,7 @@ class OnenoteClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -427,15 +503,49 @@ class OnenoteClient(ConnectorClientBase):
         return "onenote"
 
     def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
-        parsed_next_link = urlsplit(next_link)
-        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
             if next_link.startswith("/"):
                 return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
             if next_link.startswith("?"):
-                return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
 
-        parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
         connection_hostname = parsed_connection.hostname
         if next_link_hostname is None or connection_hostname is None:
@@ -452,7 +562,11 @@ class OnenoteClient(ConnectorClientBase):
                 parsed_next_link.scheme == parsed_connection.scheme
                 and next_link_port == connection_port
             ):
-                return next_link
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
 
             raise ValueError(
                 "Pagination URL origin "
@@ -465,9 +579,9 @@ class OnenoteClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def create_section_in_notebook_async(
+    async def create_section_in_notebook(
         self,
-        input: CreateSectionRequest,
+        input: CreateSectionRequest | Mapping[str, Any],
         notebook_key: str,
         *,
         timeout: Optional[float] = None,
@@ -479,6 +593,24 @@ class OnenoteClient(ConnectorClientBase):
         Create section in a notebook
 
         Create section in a notebook.
+
+        Swagger operation ID: `CreateSectionInNotebook`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            notebook_key: A key identifying the notebook. Note this is specific
+                to the API and cannot be hand-typed.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/notebooks/Dynamic/sections"
@@ -491,7 +623,7 @@ class OnenoteClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -505,6 +637,7 @@ class OnenoteClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -512,7 +645,7 @@ class OnenoteClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_page_in_section_async(
+    async def create_page_in_section(
         self,
         input: CreatePageInSectionInput,
         notebook_key: str,
@@ -527,6 +660,24 @@ class OnenoteClient(ConnectorClientBase):
         Create page in a section
 
         Create new page in a specified section.
+
+        Swagger operation ID: `CreatePageInSection`.
+
+        Args:
+            input: The request body.
+            notebook_key: A key identifying the notebook. Note this is specific
+                to the API and cannot be hand-typed.
+            section_id: API URL of the section pages.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/sections/Dynamic/pages"
         query_params = []
@@ -541,7 +692,7 @@ class OnenoteClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -555,6 +706,7 @@ class OnenoteClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -562,7 +714,7 @@ class OnenoteClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_pages_in_section_async(
+    def list_pages_in_section(
         self,
         notebook_key: str,
         section_id: str,
@@ -571,14 +723,32 @@ class OnenoteClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get pages for a specific section
 
         Get pages for a specific section.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `GetPagesInSection`.
+
+        Args:
+            notebook_key: A key identifying the notebook. Note this is specific
+                to the API and cannot be hand-typed.
+            section_id: API URL of the section pages.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/sections/Dynamic/pages"
         query_params = []
@@ -592,11 +762,18 @@ class OnenoteClient(ConnectorClientBase):
         query_params.append(f"sectionId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -609,23 +786,32 @@ class OnenoteClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def create_page_in_quick_notes_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def create_page_in_quick_notes(
         self,
         input: CreatePageInQuickNotesInput,
         *,
@@ -638,10 +824,25 @@ class OnenoteClient(ConnectorClientBase):
         Create a page in Quick Notes
 
         Create a new page in the Quick Notes section.
+
+        Swagger operation ID: `CreatePageInQuickNotes`.
+
+        Args:
+            input: The request body.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/pages"
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -655,6 +856,7 @@ class OnenoteClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -662,7 +864,7 @@ class OnenoteClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_page_async(
+    async def delete_page(
         self,
         notebook_key: str,
         section_id: str,
@@ -677,6 +879,24 @@ class OnenoteClient(ConnectorClientBase):
         Delete a page
 
         Delete a page.
+
+        Swagger operation ID: `DeletePage`.
+
+        Args:
+            notebook_key: A key identifying the notebook. Note this is specific
+                to the API and cannot be hand-typed.
+            section_id: API URL of the section pages.
+            page_id: Unique id of the page.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/pages"
         query_params = []
@@ -695,7 +915,7 @@ class OnenoteClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -709,9 +929,10 @@ class OnenoteClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def get_page_content_async(
+    async def get_page_content(
         self,
         notebook_key: str,
         section_id: str,
@@ -726,6 +947,24 @@ class OnenoteClient(ConnectorClientBase):
         Get page content
 
         Get HTML page content.
+
+        Swagger operation ID: `GetPageContent`.
+
+        Args:
+            notebook_key: A key identifying the notebook. Note this is specific
+                to the API and cannot be hand-typed.
+            section_id: API URL of the section pages.
+            page_id: Unique id of the page.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/pages/Dynamic/content"
         query_params = []
@@ -745,7 +984,7 @@ class OnenoteClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -759,6 +998,7 @@ class OnenoteClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -766,7 +1006,7 @@ class OnenoteClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_page_content_async(
+    async def update_page_content(
         self,
         input: UpdatePageContentRequest,
         notebook_key: str,
@@ -782,6 +1022,25 @@ class OnenoteClient(ConnectorClientBase):
         Update page content
 
         Update HTML page content.
+
+        Swagger operation ID: `UpdatePageContent`.
+
+        Args:
+            input: The request body.
+            notebook_key: A key identifying the notebook. Note this is specific
+                to the API and cannot be hand-typed.
+            section_id: API URL of the section pages.
+            page_id: Unique id of the page.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/pages/Dynamic/content"
         query_params = []
@@ -800,7 +1059,7 @@ class OnenoteClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -814,6 +1073,7 @@ class OnenoteClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -821,43 +1081,81 @@ class OnenoteClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_notebooks_async(
+    def list_notebooks(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get recent notebooks
 
         Get recent notebooks.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetNotebooks`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/notebooks"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_sections_in_notebook_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_sections_in_notebook(
         self,
         notebook_key: str,
         *,
@@ -865,11 +1163,30 @@ class OnenoteClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get sections in notebook
 
         Get sections in a specific notebook.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetSectionsInNotebook`.
+
+        Args:
+            notebook_key: A key identifying the notebook. Note this is specific
+                to the API and cannot be hand-typed.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/notebooks/notebookKey/sections"
@@ -881,27 +1198,48 @@ class OnenoteClient(ConnectorClientBase):
         query_params.append(f"notebookKey={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
 
 
 # Trigger Operations

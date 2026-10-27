@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-IBM MQ Connector SDK Sample
+IBM MQ sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the IBM MQ connector SDK.
+This sample demonstrates how to use the IBM MQ client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with IBM MQ connection
@@ -27,8 +27,8 @@ import asyncio
 import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.mq import MqClient
 from azure.connectors.mq import (
-    MqClient,
     SendValidDataOptions,
     SingleGetValidOptions,
     MultipleGetValidOptions,
@@ -63,7 +63,7 @@ async def example_1_send_message():
                     queue=DEFAULT_QUEUE,
                 )
 
-                result = await client.send_async(input=options)
+                result = await client.send(input=options)
 
                 if result:
                     print("Message sent successfully:")
@@ -91,7 +91,7 @@ async def example_2_browse_message():
                     include_info="true",
                 )
 
-                result = await client.read_async(input=options)
+                result = await client.read(input=options)
 
                 if result:
                     print("Browsed message:")
@@ -125,11 +125,12 @@ async def example_3_browse_messages_batch():
                     include_info="true",
                 )
 
-                result = await client.read_all_async(input=options)
+                result = await client.read_all(input=options)
+                items = result.get("value", []) if result else []
 
-                if result and isinstance(result, list):
-                    print(f"Browsed {len(result)} messages:")
-                    for i, msg in enumerate(result[:5]):  # Show first 5
+                if items:
+                    print(f"Browsed {len(items)} messages:")
+                    for i, msg in enumerate(items[:5]):  # Show first 5
                         msg_id = msg.get("messageId", "N/A")
                         data = msg.get("messageData", "")
                         preview = data[:50] if data else "(empty)"
@@ -156,7 +157,7 @@ async def example_4_receive_message():
                     include_info="true",
                 )
 
-                result = await client.receive_async(input=options)
+                result = await client.receive(input=options)
 
                 if result:
                     print("Received message (removed from queue):")
@@ -186,7 +187,7 @@ async def example_5_delete_message():
                     queue=DEFAULT_QUEUE,
                 )
 
-                result = await client.delete_async(input=options)
+                result = await client.delete(input=options)
 
                 if result:
                     print("Deleted message:")
@@ -203,7 +204,7 @@ async def example_5_delete_message():
 
 async def main():
     """Run all examples."""
-    print("IBM MQ Connector SDK - Sample Usage")
+    print("IBM MQ sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
 
     if not CONNECTION_RUNTIME_URL:

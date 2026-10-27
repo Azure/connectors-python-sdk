@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Office 365 Groups Connector SDK Sample
+Office 365 Groups sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Office 365 Groups connector SDK
+This sample demonstrates how to use the Office 365 Groups client from the Azure Connectors Python SDK
 for group management and calendar operations.
 
 Prerequisites:
@@ -25,8 +25,8 @@ import asyncio
 import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.office365groups import Office365groupsClient
 from azure.connectors.office365groups import (
-    Office365groupsClient,
     UpdateCalendarEventHTMLRequest,
 )
 
@@ -46,7 +46,7 @@ async def example_1_list_groups():
 
         async with Office365groupsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                groups = [item async for item in client.list_groups_async(top=10)]
+                groups = [item async for item in client.list_groups(top=10)]
 
                 if groups:
                     print(f"Found {len(groups)} groups:")
@@ -73,7 +73,7 @@ async def example_2_list_group_members():
         async with Office365groupsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 members = [
-                    item async for item in client.list_group_members_async(
+                    item async for item in client.list_group_members(
                         group_id=GROUP_ID
                     )
                 ]
@@ -99,10 +99,9 @@ async def example_3_list_owned_groups():
 
         async with Office365groupsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.list_owned_groups_async()
+                groups = [group async for group in client.list_owned_groups()]
 
-                if result and "value" in result:
-                    groups = result["value"]
+                if groups:
                     print(f"You own or belong to {len(groups)} groups:")
                     for group in groups[:5]:
                         print(f"  - {group.get('displayName', 'N/A')}")
@@ -146,7 +145,7 @@ async def example_4_create_group_event():
                     }
                 )
 
-                result = await client.create_calendar_event_async(
+                result = await client.create_calendar_event(
                     input=event_input,
                     group_id=GROUP_ID
                 )
@@ -176,7 +175,7 @@ async def example_5_add_member_to_group():
 
         async with Office365groupsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                await client.add_member_to_group_async(
+                await client.add_member_to_group(
                     group_id=GROUP_ID,
                     user_upn=USER_UPN
                 )
@@ -198,7 +197,7 @@ async def example_6_list_deleted_groups():
         async with Office365groupsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 groups = [
-                    item async for item in client.list_deleted_groups_async()
+                    item async for item in client.list_deleted_groups()
                 ]
 
                 if groups:

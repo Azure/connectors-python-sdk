@@ -50,11 +50,11 @@ async def test_attractions_get_serializes_query_and_response(
 
     with patch.object(
         client._http_client,
-        "send_async",
+        "send",
         new_callable=AsyncMock,
         return_value=MockResponse(status=200, text='{"items": []}'),
     ) as mock_send:
-        result = await client.attractions_get_async(
+        result = await client.attractions_get(
             keyword="rock & roll",
             classification_name=["music", "comedy"],
         )

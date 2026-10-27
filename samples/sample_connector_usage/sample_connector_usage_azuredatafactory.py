@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure Data Factory Connector SDK Sample
+Azure Data Factory sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure Data Factory connector SDK
+This sample demonstrates how to use the Azure Data Factory client from the Azure Connectors Python SDK
 to create, monitor, and cancel pipeline runs.
 
 Prerequisites:
@@ -30,8 +30,8 @@ import asyncio
 import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.azuredatafactory import AzuredatafactoryClient
 from azure.connectors.azuredatafactory import (
-    AzuredatafactoryClient,
     ParameterValueSpecification,
     CreatePipelineRunResponse,
     PipelineRun,
@@ -71,7 +71,7 @@ async def example_1_create_pipeline_run():
                 )
 
                 # Create the pipeline run
-                result = await client.create_pipeline_run_async(
+                result = await client.create_pipeline_run(
                     input=parameters,
                     subscription_id=SUBSCRIPTION_ID,
                     resource_group_name=RESOURCE_GROUP,
@@ -111,7 +111,7 @@ async def example_2_get_pipeline_run_status(run_id: str):
         ) as client:
             try:
                 # Get the pipeline run status
-                result = await client.get_pipeline_run_async(
+                result = await client.get_pipeline_run(
                     subscription_id=SUBSCRIPTION_ID,
                     resource_group_name=RESOURCE_GROUP,
                     data_factory_name=DATA_FACTORY_NAME,
@@ -154,7 +154,7 @@ async def example_3_cancel_pipeline_run(run_id: str):
         ) as client:
             try:
                 # Cancel the pipeline run
-                await client.cancel_pipeline_run_async(
+                await client.cancel_pipeline_run(
                     subscription_id=SUBSCRIPTION_ID,
                     resource_group_name=RESOURCE_GROUP,
                     data_factory_name=DATA_FACTORY_NAME,

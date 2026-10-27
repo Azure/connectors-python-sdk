@@ -1,7 +1,7 @@
 """
-Projectplace Connector SDK Sample
+Projectplace sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Projectplace connector SDK.
+This sample demonstrates how to use the Projectplace client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a Projectplace connection
@@ -24,11 +24,11 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
+from azure.connectors.projectplace import ProjectplaceClient
 from azure.connectors.projectplace import (
     CreateCardInput,
     MoveCardInput,
-    ProjectplaceClient,
-)
+    )
 
 
 # Connection runtime URL format:
@@ -42,7 +42,7 @@ async def example_1_list_boards() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with ProjectplaceClient(CONNECTION_RUNTIME_URL, credential) as client:
-            boards = await client.list_boards_async()
+            boards = [item async for item in client.list_boards()]
             print(f"Boards: {boards}")
 
 
@@ -52,7 +52,7 @@ async def example_2_create_card() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with ProjectplaceClient(CONNECTION_RUNTIME_URL, credential) as client:
-            card = await client.create_card_async(
+            card = await client.create_card(
                 input=CreateCardInput(
                     column_id=123456,
                     title="SDK sample card",
@@ -69,7 +69,7 @@ async def example_3_move_card() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with ProjectplaceClient(CONNECTION_RUNTIME_URL, credential) as client:
-            card = await client.move_card_async(
+            card = await client.move_card(
                 input=MoveCardInput(card_id=123456, column_id=654321),
                 board_id=789012,
             )
@@ -83,7 +83,7 @@ async def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Projectplace Connector SDK - Sample Usage")
+    print("Projectplace sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

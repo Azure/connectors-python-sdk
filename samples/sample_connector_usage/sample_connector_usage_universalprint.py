@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Universal Print Connector SDK Sample
+Universal Print sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Universal Print connector SDK.
+This sample demonstrates how to use the Universal Print client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a Universal Print connection
@@ -44,9 +44,9 @@ async def example_1_list_recent_shares():
 
         async with UniversalprintClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.list_recent_shares_async()
+                items = [item async for item in client.list_recent_shares()]
 
-                shares = (result or {}).get("value", []) if isinstance(result, dict) else []
+                shares = items
                 print(f"Found {len(shares)} recent printer share(s).")
                 for share in shares:
                     print(f"  - {share}")
@@ -68,7 +68,7 @@ async def example_2_print_file():
 
         async with UniversalprintClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                await client.print_file_async(
+                await client.print_file(
                     input=pdf_file_path.read_bytes(),
                     printer="your-printer-share-id",
                     file_name=pdf_file_path.name,

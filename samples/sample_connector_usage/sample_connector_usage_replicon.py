@@ -1,4 +1,4 @@
-"""Replicon connector SDK sample."""
+"""Replicon sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os
@@ -21,7 +21,7 @@ async def main() -> None:
     async with DefaultAzureCredential() as credential:
         try:
             async with RepliconClient(CONNECTION_RUNTIME_URL, credential) as client:
-                endpoint = await client.get_my_tenant_endpoint_details_async()
+                endpoint = await client.get_my_tenant_endpoint_details()
                 print(f"Tenant endpoint: {endpoint}")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")

@@ -7,11 +7,11 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.onedriveforbusiness import OnedriveforbusinessClient
 from azure.connectors.onedriveforbusiness import (
     BlobMetadata,
     BlobMetadataPage,
     ForASelectedFileResponse,
-    OnedriveforbusinessClient,
     SharingLink,
     Tags,
     Thumbnail,
@@ -24,14 +24,14 @@ from tests.generated_connector_test_utils import resolve_generated_result
 
 
 METHOD_ARGUMENTS: list[tuple[str, dict]] = [
-    ("get_file_metadata_async", {"id": "file123"}),
-    ("update_file_async", {"id": "file123", "input": b"updated content"}),
-    ("delete_file_async", {"id": "file123"}),
-    ("get_file_metadata_by_path_async", {"path": "/Documents/file.txt"}),
-    ("get_file_content_by_path_async", {"path": "/Documents/file.txt"}),
-    ("get_file_content_async", {"id": "file123"}),
+    ("get_file_metadata", {"id": "file123"}),
+    ("update_file", {"id": "file123", "input": b"updated content"}),
+    ("delete_file", {"id": "file123"}),
+    ("get_file_metadata_by_path", {"path": "/Documents/file.txt"}),
+    ("get_file_content_by_path", {"path": "/Documents/file.txt"}),
+    ("get_file_content", {"id": "file123"}),
     (
-        "create_file_async",
+        "create_file",
         {
             "input": b"file content",
             "folder_path": "/Documents",
@@ -39,51 +39,51 @@ METHOD_ARGUMENTS: list[tuple[str, dict]] = [
         },
     ),
     (
-        "copy_file_async",
+        "copy_file",
         {"source": "https://contoso.com/file.txt", "destination": "/Documents/copy.txt"},
     ),
     (
-        "copy_drive_file_async",
+        "copy_drive_file",
         {"id": "file123", "destination": "/Documents/copy.txt"},
     ),
     (
-        "copy_drive_file_by_path_async",
+        "copy_drive_file_by_path",
         {"source": "/Documents/source.txt", "destination": "/Documents/copy.txt"},
     ),
     (
-        "move_file_async",
+        "move_file",
         {"id": "file123", "destination": "/Documents/moved.txt"},
     ),
     (
-        "move_file_by_path_async",
+        "move_file_by_path",
         {"source": "/Documents/source.txt", "destination": "/Documents/moved.txt"},
     ),
-    ("convert_file_async", {"id": "file123"}),
-    ("convert_file_by_path_async", {"path": "/Documents/file.docx"}),
-    ("get_file_thumbnail_async", {"id": "file123", "size": "small"}),
-    ("list_root_folder_async", {}),
+    ("convert_file", {"id": "file123"}),
+    ("convert_file_by_path", {"path": "/Documents/file.docx"}),
+    ("get_file_thumbnail", {"id": "file123", "size": "small"}),
+    ("list_root_folder", {}),
     (
-        "find_files_async",
+        "list_find_files",
         {"id": "folder123", "query": "report", "find_mode": "search"},
     ),
     (
-        "find_files_by_path_async",
+        "list_find_files_by_path",
         {
             "query": "report",
             "path": "/Documents",
             "find_mode": "search",
         },
     ),
-    ("create_share_link_async", {"id": "file123", "type_": "view"}),
+    ("create_share_link", {"id": "file123", "type_": "view"}),
     (
-        "create_share_link_by_path_async",
+        "create_share_link_by_path",
         {"path": "/Documents/file.txt", "type_": "view"},
     ),
     (
-        "extract_folder_async",
+        "extract_folder",
         {"source": "/Documents/archive.zip", "destination": "/Documents/extracted"},
     ),
-    ("list_folder_async", {"id": "folder123"}),
+    ("list_folder", {"id": "folder123"}),
 ]
 
 
@@ -113,7 +113,7 @@ class TestOnedriveforbusinessClientInitialization:
         client = OnedriveforbusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -172,11 +172,11 @@ class TestOnedriveforbusinessClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_file_metadata_async(id="file123")
+            result = await client.get_file_metadata(id="file123")
 
             assert result["id"] == "file123"
             assert result["name"] == "doc.txt"
@@ -195,11 +195,11 @@ class TestOnedriveforbusinessClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.get_file_content_async(id="file123")
+            result = await client.get_file_content(id="file123")
 
             assert result == content
 
@@ -224,7 +224,7 @@ class TestOnedriveforbusinessClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):

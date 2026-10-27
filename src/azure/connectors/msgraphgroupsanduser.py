@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
+from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
 from azure.core.credentials_async import AsyncTokenCredential
 from azure.core.pipeline.transport import AsyncHttpTransport
@@ -18,7 +19,20 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "MsgraphgroupsanduserClient",
+    "GetGroupPropertiesResponse",
+    "GetMemberGroupsInput",
+    "GetMemberGroupsResponse",
+    "GetMemberLicenseDetailsResponse",
+    "ListDirectGroupMembersResponse",
+    "ListGroupsByDisplayNameSearchResponse",
+    "ListSubscribedSkusResponse",
+    "ListUsersResponse",
+]
 
 
 # Type Definitions
@@ -29,12 +43,13 @@ class ListUsersResponse:
     Response for List Users
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The Odata.context link."""
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """value"""
 
 
@@ -44,17 +59,19 @@ class ListGroupsByDisplayNameSearchResponse:
     Response for List Groups By Display Name Search
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The Odata.context link."""
-    count: Optional[int] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.count"},
     )
     """@odata.count"""
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """value"""
 
 
@@ -64,12 +81,13 @@ class ListSubscribedSkusResponse:
     Response for List Subscribed Skus
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The Odata.context link."""
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """value"""
 
 
@@ -79,17 +97,19 @@ class ListDirectGroupMembersResponse:
     Response for List Direct Group Members
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The Odata.context link."""
-    count: Optional[int] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.count"},
     )
     """@odata.count"""
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """value"""
 
 
@@ -99,12 +119,13 @@ class GetMemberLicenseDetailsResponse:
     Response for Get Member License Details
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The Odata.context link."""
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """value"""
 
 
@@ -114,158 +135,185 @@ class GetGroupPropertiesResponse:
     Response for Get Group Properties
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The Odata.context link."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Object id of the group"""
-    deleted_date_time: Optional[str] = field(
+    deleted_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "deletedDateTime"},
     )
     """Group's deletion date time"""
-    classification: Optional[str] = None
+    classification: Optional[str] = dataclass_field(default=None, kw_only=True)
     """classification"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """Group's creation date time"""
-    creation_options: Optional[List[str]] = field(
+    creation_options: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "creationOptions"},
     )
     """Created options of the group."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """description"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Group's display name"""
-    expiration_date_time: Optional[str] = field(
+    expiration_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "expirationDateTime"},
     )
     """Group's expiration date time"""
-    group_types: Optional[List[str]] = field(
+    group_types: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "groupTypes"},
     )
     """Group types for the group."""
-    is_assignable_to_role: Optional[str] = field(
+    is_assignable_to_role: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isAssignableToRole"},
     )
     """Can a role be assigned to this group?"""
-    mail: Optional[str] = None
+    mail: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Group's email"""
-    mail_enabled: Optional[bool] = field(
+    mail_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mailEnabled"},
     )
     """Is group email enabled?"""
-    mail_nickname: Optional[str] = field(
+    mail_nickname: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mailNickname"},
     )
     """Group's email nick name"""
-    membership_rule: Optional[str] = field(
+    membership_rule: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "membershipRule"},
     )
     """The rule that is used for membership evaluation."""
-    membership_rule_processing_state: Optional[str] = field(
+    membership_rule_processing_state: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "membershipRuleProcessingState"},
     )
     """
     The processing state of the rule that is used for membership evaluation.
     """
-    on_premises_domain_name: Optional[str] = field(
+    on_premises_domain_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onPremisesDomainName"},
     )
     """
     Contains the on-premises domainFQDN, also called dnsDomainName synchronized
     from the on-premises directory.
     """
-    on_premises_last_sync_date_time: Optional[str] = field(
+    on_premises_last_sync_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onPremisesLastSyncDateTime"},
     )
     """
     The time and date at which the tenant was last synced with the on-premise
     directory.
     """
-    on_premises_net_bios_name: Optional[str] = field(
+    on_premises_net_bios_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onPremisesNetBiosName"},
     )
     """Name of networking service for on-premise server."""
-    on_premises_sam_account_name: Optional[str] = field(
+    on_premises_sam_account_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onPremisesSamAccountName"},
     )
     """Sam account name for on-premise directory."""
-    on_premises_security_identifier: Optional[str] = field(
+    on_premises_security_identifier: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onPremisesSecurityIdentifier"},
     )
     """The on-premises security identifier."""
-    on_premises_sync_enabled: Optional[bool] = field(
+    on_premises_sync_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onPremisesSyncEnabled"},
     )
     """True if on-premises sync is enabled for the group."""
-    preferred_data_location: Optional[str] = field(
+    preferred_data_location: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "preferredDataLocation"},
     )
     """Preferred data location of the group."""
-    preferred_language: Optional[str] = field(
+    preferred_language: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "preferredLanguage"},
     )
     """Preferred language as configured in Microsoft Entra ID."""
-    proxy_addresses: Optional[List[str]] = field(
+    proxy_addresses: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "proxyAddresses"},
     )
     """Proxy addresses of the group."""
-    renewed_date_time: Optional[str] = field(
+    renewed_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "renewedDateTime"},
     )
     """Renewed date time of the group."""
-    resource_behavior_options: Optional[List[str]] = field(
+    resource_behavior_options: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resourceBehaviorOptions"},
     )
     """Resource behavior options of the group."""
-    resource_provisioning_options: Optional[List[str]] = field(
+    resource_provisioning_options: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resourceProvisioningOptions"},
     )
     """Resource provisioning options of the group."""
-    security_enabled: Optional[bool] = field(
+    security_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "securityEnabled"},
     )
     """Indicates if the group is security enabled."""
-    security_identifier: Optional[str] = field(
+    security_identifier: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "securityIdentifier"},
     )
     """Security identifier of the group."""
-    theme: Optional[str] = None
+    theme: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Theme of Microsoft Entra ID group."""
-    visibility: Optional[str] = None
+    visibility: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Visibility of the group."""
-    on_premises_provisioning_errors: Optional[List[str]] = field(
+    on_premises_provisioning_errors: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onPremisesProvisioningErrors"},
     )
     """On premise provisioning errors of the group."""
@@ -277,8 +325,7 @@ class GetMemberGroupsInput:
     Get Member Groups
     """
 
-    security_enabled_only: Optional[bool] = field(
-        default=None,
+    security_enabled_only: bool = dataclass_field(
         metadata={"wire_name": "securityEnabledOnly"},
     )
     """Do you want to retrieve security enabled groups only?"""
@@ -290,12 +337,13 @@ class GetMemberGroupsResponse:
     Response for Get Member Groups
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The Odata.context link."""
-    value: Optional[List[str]] = None
+    value: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """value"""
 
 
@@ -310,7 +358,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -327,8 +375,8 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -349,7 +397,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -364,55 +412,189 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "msgraphgroupsanduser"
 
-    async def list_users_async(
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
+            if next_link.startswith("?"):
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
+
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
+    def list_users(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List Users
 
         Retrieve all users in the organization (Microsoft Entra ID Tenant)
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `ListUsers`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/users"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_groups_by_display_name_search_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_groups_by_display_name_search(
         self,
-        search: Optional[str] = None,
         *,
+        search: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List Groups By Display Name Search
 
         Retrieve groups by searching group's display name
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `ListGroupsByDisplayNameSearch`.
+
+        Args:
+            search: Search by keyword in display name of the Microsoft Entra ID
+                group.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/groups"
         query_params = []
@@ -424,79 +606,158 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
             query_params.append(f"$search={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_subscribed_skus_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_subscribed_skus(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List Subscribed Skus
 
         Details of organization's subscribed license plan SKUs
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `ListSubscribedSkus`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/subscribedSkus"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_direct_group_members_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_direct_group_members(
         self,
         group_id: str,
+        *,
         filter: Optional[str] = None,
         select: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List Direct Group Members
 
         Retrieve direct members of a group with count
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `ListDirectGroupMembers`.
+
+        Args:
+            group_id: Object ID of the Microsoft Entra ID group.
+            filter: Filter By.
+            select: Select which columns to retrieve.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -516,42 +777,82 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
             query_params.append(f"$select={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_member_license_details_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_member_license_details(
         self,
         id: str,
-        select: Optional[str] = None,
         *,
+        select: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get Member License Details
 
         Retrieve group member(user)'s license details
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetMemberLicenseDetails`.
+
+        Args:
+            id: Object ID of the Microsoft Entra ID member(user).
+            select: Selection of data points(columns).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -565,29 +866,50 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
             query_params.append(f"$select={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_group_properties_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def get_group_properties(
         self,
         group_id: str,
         *,
@@ -600,13 +922,28 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         Get Group Properties
 
         Retrieve properties and relationships of an Microsoft Entra ID group
+
+        Swagger operation ID: `GetGroupProperties`.
+
+        Args:
+            group_id: Object ID of the Microsoft Entra ID group.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/groups/{quote(str(group_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -620,6 +957,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -627,43 +965,84 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_member_groups_async(
+    def list_member_groups(
         self,
-        input: GetMemberGroupsInput,
+        input: GetMemberGroupsInput | Mapping[str, Any],
         member_id: str,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[str]:
         """
         Get Member Groups
 
         Group memberships for a user (member)
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetMemberGroups`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            member_id: Object ID of the Microsoft Entra ID member(user).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[str]: An Azure Core pager over connector results.
+                Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/users/{quote(str(member_id), safe='')}/getMemberGroups"
         )
+        initial_request_url = request_url
+        request_body = input
 
-        response = await self.http_client.send_async(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[str]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[str]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)

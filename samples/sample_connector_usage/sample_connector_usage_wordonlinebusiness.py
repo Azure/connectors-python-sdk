@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Word Online (Business) Connector SDK Sample
+Word Online (Business) sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Word Online (Business) connector SDK.
+This sample demonstrates how to use the Word Online (Business) client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Word Online (Business) connection
@@ -25,8 +25,8 @@ import asyncio
 import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.wordonlinebusiness import WordonlinebusinessClient
 from azure.connectors.wordonlinebusiness import (
-    WordonlinebusinessClient,
     CreateFileItemInput,
     ContentBody,
 )
@@ -65,7 +65,7 @@ async def example_1_populate_word_template():
                     }
                 )
 
-                result = await client.create_file_item_async(
+                result = await client.create_file_item(
                     input=input_data,
                     source=SOURCE,
                     drive=DRIVE,
@@ -97,7 +97,7 @@ async def example_2_create_word_document():
                             "It can include multiple paragraphs and formatting."
                 )
 
-                result = await client.create_word_file_with_content_async(
+                result = await client.create_word_file_with_content(
                     input=content,
                     file_name="MyDocument.docx"
                 )
@@ -127,7 +127,7 @@ async def example_3_create_word_document_without_filename():
             try:
                 content = ContentBody(content="Auto-generated document content.")
 
-                result = await client.create_word_file_with_content_async(input=content)
+                result = await client.create_word_file_with_content(input=content)
 
                 if result:
                     print(f"Document created: {result}")
@@ -151,7 +151,7 @@ async def example_4_convert_word_to_pdf():
 
         async with WordonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_file_pdf_async(
+                result = await client.get_file_pdf(
                     source=SOURCE,
                     drive=DRIVE,
                     file=FILE
@@ -176,7 +176,7 @@ async def example_5_convert_with_sensitivity_labels():
 
         async with WordonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_file_pdf_async(
+                result = await client.get_file_pdf(
                     source=SOURCE,
                     drive=DRIVE,
                     file=FILE,

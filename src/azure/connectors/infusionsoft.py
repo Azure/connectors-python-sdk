@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
+from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
 from azure.core.credentials_async import AsyncTokenCredential
 from azure.core.pipeline.transport import AsyncHttpTransport
@@ -18,7 +19,18 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "InfusionsoftClient",
+    "CreateTaskRequest",
+    "ListOrdersResponse",
+    "ListTasksResponse",
+    "OnNewTaskResponse",
+    "TaskResponse",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -29,28 +41,32 @@ class TaskResponse:
     Response for Create a task
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """An integer that uniquely identifies this task."""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The actual task name (Do this thing)."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A description of the task defined by the user."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """
     A string representing the type of Task as defined by the user from a list
     of types editable in the Infusionsoft application.
     """
-    priority: Optional[int] = None
+    priority: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The priority of the task."""
-    completed: Optional[bool] = None
+    completed: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """A boolean indicating the completed status of the task."""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The link to the task."""
-    due_date: Optional[str] = None
+    due_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The datetime the task is due, given as GMT in ISO 8601 format."""
 
 
-OnNewTaskResponse = List["TaskResponse"]
+OnNewTaskResponse = List["TaskResponse | Mapping[str, Any]"]
 
 
 ListOrdersResponse = List[Dict[str, Any]]
@@ -62,7 +78,7 @@ class ListTasksResponse:
     Response for List tasks
     """
 
-    tasks: Optional[List[Dict[str, Any]]] = None
+    tasks: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Collection of tasks."""
 
 
@@ -72,15 +88,19 @@ class CreateTaskRequest:
     Definition: CreateTask_Request
     """
 
-    title: Optional[str] = None
+    title: str
     """The title of the task."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A description of the task title."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """Type of the task."""
-    priority: Optional[int] = None
+    priority: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Priority of the task (1, 2, 3, etc.)"""
-    due_date: Optional[str] = None
+    due_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Due date of the task (Ex. 2014-06-17T17:12:52.000Z"""
 
 
@@ -95,7 +115,7 @@ class InfusionsoftClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -112,8 +132,8 @@ class InfusionsoftClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -134,7 +154,7 @@ class InfusionsoftClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -149,9 +169,86 @@ class InfusionsoftClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "infusionsoft"
 
-    async def create_task_async(
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
+            if next_link.startswith("?"):
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
+
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
+    async def create_task(
         self,
-        input: CreateTaskRequest,
+        input: CreateTaskRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -162,10 +259,26 @@ class InfusionsoftClient(ConnectorClientBase):
         Create a task
 
         Create a new task.
+
+        Swagger operation ID: `CreateTask`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/crm/rest/v1/tasks/"
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -179,6 +292,7 @@ class InfusionsoftClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -186,9 +300,9 @@ class InfusionsoftClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_task_async(
+    async def update_task(
         self,
-        input: CreateTaskRequest,
+        input: CreateTaskRequest | Mapping[str, Any],
         id: int,
         *,
         timeout: Optional[float] = None,
@@ -200,13 +314,30 @@ class InfusionsoftClient(ConnectorClientBase):
         Update a task
 
         Update an existing task.
+
+        Swagger operation ID: `UpdateTask`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Id of the task.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/crm/rest/v1/tasks/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -220,6 +351,7 @@ class InfusionsoftClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -227,18 +359,35 @@ class InfusionsoftClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_tasks_async(
+    def list_tasks(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List tasks
 
         Retrieve a page of tasks ordered by due date.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `ListTasks`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/crm/rest/v1/tasks/search"
@@ -247,27 +396,48 @@ class InfusionsoftClient(ConnectorClientBase):
         query_params.append("order=" + quote("-due_date", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("tasks", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
 
 
 # Trigger Operations

@@ -7,12 +7,15 @@ from __future__ import annotations
 import ast
 import importlib
 import importlib.util
-from collections.abc import AsyncIterator
+import inspect
+import subprocess
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+from azure.core.async_paging import AsyncItemPaged
 
 from scripts.validate_connector_samples import SampleVisitor, validate_samples
 
@@ -32,27 +35,37 @@ class TypedInput:
     value: str
 
 
-class TypedClient:
-    """Provide a typed client surface for sample validator tests."""
+class TypedAsyncClient:
+    """Provide a typed asynchronous client surface for sample validator tests."""
 
     def __init__(self, connection_runtime_url: str) -> None:
         """Initialize the test client."""
 
-    async def list_items_async(self, *, top: int) -> None:
+    async def __aenter__(self) -> TypedAsyncClient:
+        """Expose the async lifecycle used to recognize generated clients."""
+        return self
+
+    async def list_items(self, *, top: int) -> None:
         """Represent a generated method with an integer argument."""
 
-    async def create_item_async(self, *, input: TypedInput) -> None:
+    async def create_item(self, *, input: TypedInput) -> None:
         """Represent a generated method with a typed request body."""
 
-    async def get_items_async(self) -> AsyncIterator[dict[str, str]]:
-        """Represent a generated pageable method."""
-        yield {"id": "item-1"}
+    def get_items(self) -> AsyncItemPaged[dict[str, str]]:
+        """Represent a generated asynchronous pageable method."""
+
+
+async def invoke_sample(module: object, function_name: str, *arguments: str) -> None:
+    """Require and await the async root sample entry point."""
+    function = getattr(module, function_name)
+    assert inspect.iscoroutinefunction(function), function_name
+    await function(*arguments)
 
 
 @pytest.mark.parametrize(
     "sample_path",
     SAMPLE_PATHS,
-    ids=lambda sample_path: sample_path.stem,
+    ids=lambda sample_path: f"{sample_path.parent.name}-{sample_path.stem}",
 )
 def test_regenerated_connector_sample_imports(sample_path: Path) -> None:
     """Test every connector sample imports its current public models."""
@@ -76,13 +89,39 @@ def test_all_connector_samples_match_generated_apis() -> None:
 
     sample_paths, issues = validate_samples(repo_root)
 
-    assert len(sample_paths) == 99
+    assert len(SAMPLE_PATHS) == 101
+    assert set(sample_paths) == set(SAMPLE_PATHS)
+    assert not (SAMPLE_DIRECTORY / "aio").exists()
+    assert not (SAMPLE_DIRECTORY / "sync").exists()
     assert issues == []
+
+
+def test_connector_samples_have_no_undefined_names() -> None:
+    """Test every sample resolves all names used by executable code."""
+    repo_root = Path(__file__).parent.parent
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "flake8",
+            "--isolated",
+            "--select",
+            "F821",
+            str(SAMPLE_DIRECTORY),
+        ],
+        check=False,
+        capture_output=True,
+        cwd=repo_root,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
 
 
 def test_sample_validator_rejects_unscoped_async_credential() -> None:
     """Test asynchronous credentials must use an async context manager."""
     tree = ast.parse(
+        "from azure.identity.aio import DefaultAzureCredential\n"
         "async def main():\n"
         "    credential = DefaultAzureCredential()\n"
     )
@@ -91,30 +130,60 @@ def test_sample_validator_rejects_unscoped_async_credential() -> None:
     visitor.visit(tree)
 
     assert [issue.message for issue in visitor.issues] == [
-        "DefaultAzureCredential must use an async context manager",
+        "asynchronous DefaultAzureCredential must use an async context manager",
+    ]
+
+
+def test_sample_validator_rejects_sync_credential() -> None:
+    """Reject synchronous credentials even when their lifecycle is scoped."""
+    tree = ast.parse(
+        "from azure.identity import DefaultAzureCredential\n"
+        "with DefaultAzureCredential() as credential:\n"
+        "    pass\n"
+    )
+    visitor = SampleVisitor(Path("sample.py"), modules={})
+
+    visitor.visit(tree)
+
+    assert [issue.message for issue in visitor.issues] == [
+        "connector samples require azure.identity.aio credentials",
+    ]
+
+
+@pytest.mark.parametrize(
+    "module_name", ["azure.connectors.aio.office365", "azure.connectors.sdk.aio"],
+)
+def test_sample_validator_rejects_aio_connector_namespace(module_name: str) -> None:
+    """Reject stale aio connector imports rather than accepting a second surface."""
+    visitor = SampleVisitor(Path("sample.py"), modules={})
+
+    visitor.visit(ast.parse(f"from {module_name} import Office365Client\n"))
+
+    assert [issue.message for issue in visitor.issues] == [
+        "import async clients from root connector modules, not aio",
     ]
 
 
 def test_sample_validator_rejects_awaiting_pageable_method() -> None:
     """Test pageable methods require iteration rather than await."""
     tree = ast.parse(
-        "client = TypedClient('https://example.azure.com/connections/test')\n"
-        "await client.get_items_async()\n"
+        "client = TypedAsyncClient('https://example.azure.com/connections/test')\n"
+        "await client.get_items()\n"
     )
     visitor = SampleVisitor(Path("sample.py"), modules={})
-    visitor.imported_symbols["TypedClient"] = TypedClient
+    visitor.imported_symbols["TypedAsyncClient"] = TypedAsyncClient
 
     visitor.visit(tree)
 
     assert [issue.message for issue in visitor.issues] == [
-        "'get_items_async' must be consumed with async for",
+        "'get_items' must be consumed with async for",
     ]
 
 
 def test_sample_validator_rejects_dictionary_access_on_collected_items() -> None:
     """Test collecting an async iterator does not permit response-envelope access."""
     tree = ast.parse(
-        "items = [item async for item in client.get_items_async()]\n"
+        "items = [item async for item in client.get_items()]\n"
         "items.get('value', [])\n"
     )
     visitor = SampleVisitor(Path("sample.py"), modules={})
@@ -131,7 +200,7 @@ def test_sample_validator_checks_rhs_before_reassigning_the_same_name() -> None:
     visitor = SampleVisitor(Path("sample.py"), modules={})
 
     visitor.visit(ast.parse(
-        "items = [item async for item in client.get_items_async()]\n"
+        "items = [item async for item in client.get_items()]\n"
         "items = items.get('value', [])\n"
     ))
 
@@ -147,11 +216,11 @@ def test_sample_validator_parameters_shadow_outer_facts(
 ) -> None:
     """Test parameters shadow outer container and client facts without losing outer checks."""
     visitor = SampleVisitor(Path("sample.py"), modules={})
-    visitor.imported_symbols["TypedClient"] = TypedClient
+    visitor.imported_symbols["TypedAsyncClient"] = TypedAsyncClient
 
     visitor.visit(ast.parse(
         "items = []\n"
-        "client = TypedClient('https://example.com')\n"
+        "client = TypedAsyncClient('https://example.com')\n"
         f"{function_kind} consume({parameters}):\n"
         "    items.get('value', [])\n"
         "    client.unrelated_method()\n"
@@ -165,16 +234,16 @@ def test_sample_validator_parameters_shadow_outer_facts(
 def test_sample_validator_function_defaults_use_outer_facts() -> None:
     """Test default expressions are validated before a parameter shadows its outer name."""
     visitor = SampleVisitor(Path("sample.py"), modules={})
-    visitor.imported_symbols["TypedClient"] = TypedClient
+    visitor.imported_symbols["TypedAsyncClient"] = TypedAsyncClient
 
     visitor.visit(ast.parse(
-        "client = TypedClient('https://example.com')\n"
+        "client = TypedAsyncClient('https://example.com')\n"
         "async def consume(client=client.missing_method()):\n"
         "    pass\n"
     ))
 
     assert [issue.message for issue in visitor.issues] == [
-        "'TypedClient' has no method 'missing_method'",
+        "'TypedAsyncClient' has no method 'missing_method'",
     ]
 
 
@@ -200,15 +269,15 @@ def test_sample_validator_comprehension_targets_shadow_outer_facts(expression: s
 def test_sample_validator_comprehension_clears_client_target_facts() -> None:
     """Test comprehension-local receivers do not retain an outer generated client type."""
     visitor = SampleVisitor(Path("sample.py"), modules={})
-    visitor.imported_symbols["TypedClient"] = TypedClient
+    visitor.imported_symbols["TypedAsyncClient"] = TypedAsyncClient
 
     visitor.visit(ast.parse(
-        "client = TypedClient('https://example.com')\n"
+        "client = TypedAsyncClient('https://example.com')\n"
         "identifiers = [client.get('id') for client in [{'id': 'entry-1'}]]\n"
     ))
 
     assert visitor.issues == []
-    assert visitor.client_variables["client"] is TypedClient
+    assert visitor.client_variables["client"] is TypedAsyncClient
 
 
 def test_sample_validator_comprehension_iterable_uses_outer_facts() -> None:
@@ -227,15 +296,15 @@ def test_sample_validator_comprehension_iterable_uses_outer_facts() -> None:
     "source,expected_messages",
     [
         (
-            "result = [item async for item in client.get_items_async()]",
+            "result = [item async for item in client.get_items()]",
             ["capture collected items in a semantic name instead of 'result'"],
         ),
         ("if items and items:\n    pass", ["remove repeated conditions"]),
-        ("items = [item async for item in client.get_items_async()]", []),
+        ("items = [item async for item in client.get_items()]", []),
         ("if items and ready:\n    pass", []),
         ("if response and response.get('value'):\n    pass", []),
         (
-            "items = [item async for item in client.get_items_async()]\n"
+            "items = [item async for item in client.get_items()]\n"
             "items = items if items else []",
             ["remove redundant fallback for collected items"],
         ),
@@ -258,17 +327,20 @@ def test_sample_validator_checks_consumer_principles(
     "connector,function_name,client_name,operation_name,expected_noun",
     [
         ("documentdb", "example_3_query_with_pagination", "DocumentdbClient",
-         "query_documents_async", "document(s)"),
+         "list_query_documents", "document(s)"),
         ("documentdb", "example_5_query_with_consistency", "DocumentdbClient",
-         "query_documents_async", "document(s)"),
+         "list_query_documents", "document(s)"),
         ("office365groupsmail", "main", "Office365groupsmailClient",
-         "list_conversations_async", "conversation(s)"),
+         "list_conversations", "conversation(s)"),
+        ("planner", "example_2_list_group_plans", "PlannerClient",
+         "list_group_plans", "plans in group"),
         ("zendesk", "example_2_get_items", "ZendeskClient",
-         "get_items_async", "item(s)"),
+         "list_items", "item(s)"),
         ("azuretables", "example_4_get_entities", "AzuretablesClient",
-         "get_entities_async", "entity(s)"),
+         "list_entities", "entity(s)"),
     ],
 )
+@pytest.mark.asyncio
 async def test_pageable_samples_report_collected_items(
     connector: str,
     function_name: str,
@@ -284,7 +356,7 @@ async def test_pageable_samples_report_collected_items(
         f"samples.sample_connector_usage.sample_connector_usage_{connector}"
     )
 
-    async def items() -> AsyncIterator[dict[str, str]]:
+    async def async_items():
         """Yield distinct items to expose incorrect counts or lost data."""
         for index in range(item_count):
             yield {
@@ -294,11 +366,11 @@ async def test_pageable_samples_report_collected_items(
             }
 
     client = MagicMock()
-    getattr(client, operation_name).return_value = items()
-    client.list_groups_async = AsyncMock(return_value={"value": []})
-    context = MagicMock()
-    context.__aenter__.return_value = client
-    monkeypatch.setattr(module, client_name, MagicMock(return_value=context))
+    operation = getattr(client, operation_name)
+    operation.return_value = async_items()
+    client.list_groups.return_value = async_items()
+    client.__aenter__.return_value = client
+    monkeypatch.setattr(module, client_name, MagicMock(return_value=client))
     if hasattr(module, "DefaultAzureCredential"):
         monkeypatch.setattr(module, "DefaultAzureCredential", MagicMock())
     for setting in (
@@ -309,8 +381,10 @@ async def test_pageable_samples_report_collected_items(
     monkeypatch.setenv("OFFICE365GROUPSMAIL_CONNECTION_URL", "https://example.com")
     monkeypatch.setenv("OFFICE365GROUPSMAIL_GROUP_ID", "sample-group")
 
-    await getattr(module, function_name)()
+    arguments = ["sample-group"] if connector == "planner" else []
+    await invoke_sample(module, function_name, *arguments)
 
+    operation.assert_called_once()
     output = capsys.readouterr().out
     assert "Error:" not in output
     assert "Connector error" not in output
@@ -323,6 +397,8 @@ async def test_pageable_samples_report_collected_items(
             assert "No entities found" not in output
     elif connector == "documentdb" and item_count == 0:
         assert "No documents found." in output
+    elif connector == "planner" and item_count == 0:
+        assert "No plans found" in output
     elif connector == "documentdb" and function_name.endswith("consistency"):
         assert f"Documents retrieved: {item_count}" in output
     else:
@@ -334,13 +410,12 @@ async def test_pageable_samples_report_collected_items(
     "connector,function_name,client_name,operation_name,item_key,empty_message",
     [
         ("azuredigitaltwins", "example_3_query_twins", "AzuredigitaltwinsClient",
-         "query_twins_async", "value", "No twins found matching query"),
-        ("planner", "example_2_list_group_plans", "PlannerClient",
-         "list_group_plans_async", "value", "No plans found"),
+         "query_twins", "value", "No twins found matching query"),
         ("wdatp", "example_3_advanced_hunting", "WdatpClient",
-         "advanced_hunting_async", "results", "No results from query."),
+         "advanced_hunting", "results", "No results from query."),
     ],
 )
+@pytest.mark.asyncio
 async def test_nonpageable_samples_preserve_nullable_responses(
     connector: str,
     function_name: str,
@@ -360,14 +435,15 @@ async def test_nonpageable_samples_preserve_nullable_responses(
     if response_kind == "populated":
         response = {item_key: [{"id": "matched-item", "title": "matched-plan"}]}
     client = MagicMock()
-    setattr(client, operation_name, AsyncMock(return_value=response))
+    operation = AsyncMock(return_value=response)
+    setattr(client, operation_name, operation)
     client.__aenter__.return_value = client
     monkeypatch.setattr(module, client_name, MagicMock(return_value=client))
     monkeypatch.setattr(module, "DefaultAzureCredential", MagicMock())
 
-    arguments = ["sample-group"] if connector == "planner" else []
-    await getattr(module, function_name)(*arguments)
+    await invoke_sample(module, function_name)
 
+    operation.assert_awaited_once()
     output = capsys.readouterr().out
     assert "Error:" not in output
     assert "Connector error" not in output
@@ -377,14 +453,141 @@ async def test_nonpageable_samples_preserve_nullable_responses(
         assert empty_message in output
 
 
+@pytest.mark.parametrize("response_kind", ["none", "empty", "populated"])
+@pytest.mark.parametrize(
+    "connector,function_name,client_name,operation_name,item_key,marker",
+    [
+        (
+            "docusign",
+            "example_2_search_envelopes",
+            "DocusignClient",
+            "search_list_envelopes",
+            "value",
+            "sample-envelope",
+        ),
+        (
+            "azuremonitorlogs",
+            "example_run_query",
+            "AzuremonitorlogsClient",
+            "query_data",
+            "value",
+            "sample-row",
+        ),
+    ],
+)
+@pytest.mark.asyncio
+async def test_eager_list_samples_unwrap_nullable_envelopes(
+    connector: str,
+    function_name: str,
+    client_name: str,
+    operation_name: str,
+    item_key: str,
+    marker: str,
+    response_kind: str,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Execute eager async samples without treating response envelopes as lists."""
+    module = importlib.import_module(
+        f"samples.sample_connector_usage.sample_connector_usage_{connector}"
+    )
+    response = None if response_kind == "none" else {}
+    if response_kind == "populated":
+        response = {item_key: [{"envelopeId": marker, "status": marker, "row": marker}]}
+    client = MagicMock()
+    operation = AsyncMock(return_value=response)
+    setattr(client, operation_name, operation)
+    client.__aenter__.return_value = client
+    monkeypatch.setattr(module, client_name, MagicMock(return_value=client))
+    monkeypatch.setattr(module, "DefaultAzureCredential", MagicMock())
+    for setting in (
+        "SUBSCRIPTION_ID",
+        "RESOURCE_GROUP",
+        "RESOURCE_NAME",
+        "RESOURCE_TYPE",
+    ):
+        if hasattr(module, setting):
+            monkeypatch.setattr(module, setting, "sample-value")
+
+    arguments = ["sample-account"] if connector == "docusign" else []
+    await invoke_sample(module, function_name, *arguments)
+
+    output = capsys.readouterr().out
+    assert "Error:" not in output
+    assert "Connector error" not in output
+    operation.assert_awaited_once()
+    if response_kind == "populated":
+        assert marker in output
+    else:
+        assert "0" in output
+
+
+@pytest.mark.asyncio
+async def test_eventhubs_batch_sample_passes_send_event_list(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Execute the batch sample and verify its list alias is passed directly."""
+    module = importlib.import_module(
+        "samples.sample_connector_usage.sample_connector_usage_eventhubs"
+    )
+    client = MagicMock()
+    operation = AsyncMock(return_value=None)
+    client.send_events = operation
+    client.__aenter__.return_value = client
+    monkeypatch.setattr(module, "EventhubsClient", MagicMock(return_value=client))
+    monkeypatch.setattr(module, "DefaultAzureCredential", MagicMock())
+    monkeypatch.setattr(module, "EVENT_HUB_NAME", "sample-hub")
+
+    await invoke_sample(module, "example_3_send_batch_events")
+
+    output = capsys.readouterr().out
+    assert "Error:" not in output
+    assert "Connector error" not in output
+    operation.assert_awaited_once()
+    batch_input = operation.call_args.kwargs["input"]
+    assert isinstance(batch_input, list)
+    assert len(batch_input) == 3
+    assert all(isinstance(event, module.SendEvent) for event in batch_input)
+    assert "Batch of 3 events" in output
+
+
+@pytest.mark.asyncio
+async def test_azuretables_create_sample_passes_scalar_table_name(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Execute the create-table sample and verify its string alias is passed directly."""
+    module = importlib.import_module(
+        "samples.sample_connector_usage.sample_connector_usage_azuretables"
+    )
+    client = MagicMock()
+    operation = AsyncMock(return_value={})
+    client.create_table = operation
+    client.__aenter__.return_value = client
+    monkeypatch.setattr(module, "AzuretablesClient", MagicMock(return_value=client))
+    monkeypatch.setattr(module, "DefaultAzureCredential", MagicMock())
+    monkeypatch.setattr(module, "STORAGE_ACCOUNT", "sample-account")
+    monkeypatch.setenv("AZURETABLES_NEW_TABLE_NAME", "SampleTable")
+
+    await invoke_sample(module, "example_2_create_table")
+
+    output = capsys.readouterr().out
+    assert "Error:" not in output
+    assert "Connector error" not in output
+    operation.assert_awaited_once()
+    assert operation.call_args.kwargs["input"] == "SampleTable"
+    assert "Table 'SampleTable' created successfully." in output
+
+
 def test_sample_validator_rejects_incompatible_literal_type() -> None:
     """Test a string literal is rejected for an integer parameter."""
     tree = ast.parse(
-        "client = TypedClient('https://example.azure.com/connections/test')\n"
-        "client.list_items_async(top='10')\n"
+        "client = TypedAsyncClient('https://example.azure.com/connections/test')\n"
+        "await client.list_items(top='10')\n"
     )
     visitor = SampleVisitor(Path("sample.py"), modules={})
-    visitor.imported_symbols["TypedClient"] = TypedClient
+    visitor.imported_symbols["TypedAsyncClient"] = TypedAsyncClient
 
     visitor.visit(tree)
 
@@ -396,12 +599,12 @@ def test_sample_validator_rejects_incompatible_literal_type() -> None:
 def test_sample_validator_rejects_environment_string_for_integer() -> None:
     """Test an environment string is rejected for an integer parameter."""
     tree = ast.parse(
-        "client = TypedClient('https://example.azure.com/connections/test')\n"
+        "client = TypedAsyncClient('https://example.azure.com/connections/test')\n"
         "top = os.environ.get('TOP', '')\n"
-        "client.list_items_async(top=top)\n"
+        "await client.list_items(top=top)\n"
     )
     visitor = SampleVisitor(Path("sample.py"), modules={})
-    visitor.imported_symbols["TypedClient"] = TypedClient
+    visitor.imported_symbols["TypedAsyncClient"] = TypedAsyncClient
 
     visitor.visit(tree)
 
@@ -413,12 +616,12 @@ def test_sample_validator_rejects_environment_string_for_integer() -> None:
 def test_sample_validator_accepts_cast_environment_value() -> None:
     """Test casting an environment value satisfies an integer parameter."""
     tree = ast.parse(
-        "client = TypedClient('https://example.azure.com/connections/test')\n"
+        "client = TypedAsyncClient('https://example.azure.com/connections/test')\n"
         "top = int(os.environ.get('TOP', '0'))\n"
-        "client.list_items_async(top=top)\n"
+        "await client.list_items(top=top)\n"
     )
     visitor = SampleVisitor(Path("sample.py"), modules={})
-    visitor.imported_symbols["TypedClient"] = TypedClient
+    visitor.imported_symbols["TypedAsyncClient"] = TypedAsyncClient
 
     visitor.visit(tree)
 
@@ -428,12 +631,12 @@ def test_sample_validator_accepts_cast_environment_value() -> None:
 def test_sample_validator_rejects_dynamic_dict_for_typed_input() -> None:
     """Test a dictionary with a dynamic value is rejected for a typed input."""
     tree = ast.parse(
-        "client = TypedClient('https://example.azure.com/connections/test')\n"
+        "client = TypedAsyncClient('https://example.azure.com/connections/test')\n"
         "index = 0\n"
-        "client.create_item_async(input={'value': f'Item {index + 1}'})\n"
+        "await client.create_item(input={'value': f'Item {index + 1}'})\n"
     )
     visitor = SampleVisitor(Path("sample.py"), modules={})
-    visitor.imported_symbols["TypedClient"] = TypedClient
+    visitor.imported_symbols["TypedAsyncClient"] = TypedAsyncClient
 
     visitor.visit(tree)
 

@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.pdfco import PdfcoClient
 from azure.connectors.pdfco import (
-    PdfcoClient,
     HtmlToPdfInput,
     UrlToPdfInput,
     PdfFillerInput,
@@ -52,7 +52,7 @@ class TestPdfcoClientInitialization:
         client = PdfcoClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -115,16 +115,16 @@ class TestHtmlToPdfAsync:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        request = HtmlToPdfInput()
+        request = HtmlToPdfInput(html="<p>Hello</p>")
         mock_response = MockResponse(status=200, text='{"url": "https://example.com/out.pdf"}')
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.html_to_pdf_async(input=request)
+            result = await client.html_to_pdf(input=request)
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -145,12 +145,12 @@ class TestHtmlToPdfAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.html_to_pdf_async(input=HtmlToPdfInput())
+                await client.html_to_pdf(input=HtmlToPdfInput(html="<p>Hello</p>"))
 
             assert exc_info.value.status_code == 400
 
@@ -165,16 +165,16 @@ class TestUrlToPdfAsync:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        request = UrlToPdfInput()
+        request = UrlToPdfInput(url="https://example.com/document")
         mock_response = MockResponse(status=200, text='{"url": "https://example.com/out.pdf"}')
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.url_to_pdf_async(input=request)
+            result = await client.url_to_pdf(input=request)
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -194,12 +194,14 @@ class TestUrlToPdfAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.url_to_pdf_async(input=UrlToPdfInput())
+                await client.url_to_pdf(
+                    input=UrlToPdfInput(url="https://example.com/document")
+                )
 
 
 class TestPdfFillerAsync:
@@ -212,16 +214,16 @@ class TestPdfFillerAsync:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        request = PdfFillerInput()
+        request = PdfFillerInput(url="https://example.com/form.pdf")
         mock_response = MockResponse(status=200, text='{"url": "https://example.com/filled.pdf"}')
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.pdf_filler_async(input=request)
+            result = await client.pdf_filler(input=request)
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -241,11 +243,13 @@ class TestPdfFillerAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.pdf_filler_async(input=PdfFillerInput())
+            result = await client.pdf_filler(
+                input=PdfFillerInput(url="https://example.com/form.pdf")
+            )
 
             assert result is None
 
@@ -260,12 +264,14 @@ class TestPdfFillerAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.pdf_filler_async(input=PdfFillerInput())
+                await client.pdf_filler(
+                    input=PdfFillerInput(url="https://example.com/form.pdf")
+                )
 
 
 BASE_URL = "https://example.azure.com/connections/test"
@@ -331,7 +337,7 @@ ALL_OPERATIONS = sorted(OPERATION_ARGS.keys())
 
 async def _invoke_operation(client: PdfcoClient, operation: str):
     """Invoke a PDF.co operation by name for shared method tests."""
-    method = getattr(client, f"{operation}_async")
+    method = getattr(client, f"{operation}")
     return await method(**OPERATION_ARGS[operation])
 
 
@@ -363,7 +369,7 @@ class TestPdfcoClientAllOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
@@ -389,7 +395,7 @@ class TestPdfcoClientAllOperationsErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):

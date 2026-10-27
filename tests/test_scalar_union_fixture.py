@@ -14,9 +14,11 @@ import sys
 from dataclasses import fields
 from pathlib import Path
 from typing import get_type_hints
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from azure.connectors.sdk import ConnectorException, ConnectorResponseSnapshot
 from azure.connectors.sdk.serialization import to_wire
 
 
@@ -125,6 +127,57 @@ def test_generated_model_rejects_mutation_on_serialization():
     model.properties["invalid"] = [1]
     with pytest.raises(TypeError, match="Properties"):
         to_wire(model)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("status", [200, 400])
+async def test_generated_operation_uses_merged_runtime_serialization(
+    mock_credential, status,
+):
+    """The pinned client dispatches scalar models through the async runtime."""
+    model = fixture.ScalarMaps(
+        properties={"text": "value", "integer": 1,
+                    "number": 1.5, "boolean": True},
+        nullable_values={"missing": None},
+    )
+    payload = {"Properties": model.properties, "nullableValues": {"missing": None}}
+    response_json = json.dumps(payload)
+    response = ConnectorResponseSnapshot(
+        status=status, headers={}, text=response_json, content=response_json.encode(),
+    )
+    async with fixture.ScalarunionfixtureClient(
+        "https://example.invalid/connection", mock_credential,
+    ) as client:
+        with patch.object(
+            client.http_client, "_send_with_retry", new_callable=AsyncMock,
+            return_value=response,
+        ) as send:
+            if status == 200:
+                assert await client.create_item(model) == payload
+            else:
+                with pytest.raises(ConnectorException) as error:
+                    await client.create_item(model)
+                assert error.value.status_code == status
+            send.assert_awaited_once()
+            assert send.call_args.args[1] == "POST"
+            assert send.call_args.args[2] == "https://example.invalid/connection/items"
+            assert json.loads(send.call_args.args[4]) == payload
+
+
+@pytest.mark.asyncio
+async def test_generated_operation_rejects_mutation_before_dispatch(mock_credential):
+    """The merged runtime keeps scalar validation before sending the request."""
+    model = fixture.ScalarMaps(properties={"valid": 1})
+    model.properties["invalid"] = [1]
+    async with fixture.ScalarunionfixtureClient(
+        "https://example.invalid/connection", mock_credential,
+    ) as client:
+        with patch.object(
+            client.http_client, "_send_with_retry", new_callable=AsyncMock,
+        ) as send:
+            with pytest.raises(TypeError, match="Properties"):
+                await client.create_item(model)
+            send.assert_not_called()
 
 
 @pytest.mark.skipif(shutil.which("mypy") is None, reason="mypy is not installed")

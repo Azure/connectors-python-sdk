@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Zendesk Connector SDK Sample
+Zendesk sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Zendesk connector SDK.
+This sample demonstrates how to use the Zendesk client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a Zendesk connection
@@ -25,10 +25,10 @@ import os
 
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.zendesk import ZendeskClient
 from azure.connectors.zendesk import (
     Item,
-    ZendeskClient,
-)
+    )
 
 # Connection runtime URL format:
 # https://[region].azure-apihub.net/apim/zendesk/[connection-id]
@@ -46,9 +46,9 @@ async def example_1_get_tables():
 
         async with ZendeskClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_tables_async()
+                items = [item async for item in client.list_tables()]
 
-                tables = (result or {}).get("value", []) if isinstance(result, dict) else []
+                tables = items
                 print(f"Found {len(tables)} table(s).")
                 for table in tables:
                     print(f"  - {table}")
@@ -67,7 +67,7 @@ async def example_2_get_items():
 
         async with ZendeskClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                items = [item async for item in client.get_items_async(
+                items = [item async for item in client.list_items(
                     table="tickets",
                     top=10,
                 )]
@@ -95,7 +95,7 @@ async def example_3_create_item():
                     },
                 )
 
-                result = await client.post_item_async(input=new_item, table="tickets")
+                result = await client.post_item(input=new_item, table="tickets")
                 print(f"Created item: {result}")
 
             except ConnectorException as ex:
@@ -112,12 +112,12 @@ async def example_4_search_articles():
 
         async with ZendeskClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.search_articles_async(
+                items = [item async for item in client.list_search_articles(
                     query="password reset",
                     locale="en-us",
-                )
+                )]
 
-                articles = (result or {}).get("results", []) if isinstance(result, dict) else []
+                articles = items
                 print(f"Found {len(articles)} article(s).")
 
             except ConnectorException as ex:

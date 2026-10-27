@@ -1,4 +1,4 @@
-"""StarRez REST V1 connector SDK sample."""
+"""StarRez REST V1 sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os
@@ -6,7 +6,8 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.starrezrestv1 import SelectBookingInput, Starrezrestv1Client
+from azure.connectors.starrezrestv1 import Starrezrestv1Client
+from azure.connectors.starrezrestv1 import SelectBookingInput
 
 
 CONNECTION_RUNTIME_URL = os.environ.get("STARREZRESTV1_CONNECTION_URL", "")
@@ -24,12 +25,13 @@ async def main() -> None:
                 CONNECTION_RUNTIME_URL,
                 credential,
             ) as client:
-                bookings = await client.select_booking_async(
+                bookings = [item async for item in client.list_select_booking(
                     input=SelectBookingInput(
                         return_empty_array_on_no_result=True,
                         page_size=10,
+                        page_index=1,
                     )
-                )
+                )]
                 print(f"Bookings: {bookings}")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")

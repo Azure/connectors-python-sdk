@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.cloudmersiveconvert import CloudmersiveconvertClient
 from azure.connectors.cloudmersiveconvert import (
-    CloudmersiveconvertClient,
     GetDocxBodyRequest,
     GetDocxGetCommentsHierarchicalRequest,
 )
@@ -51,7 +51,7 @@ class TestCloudmersiveconvertClientInitialization:
         client = CloudmersiveconvertClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -119,11 +119,11 @@ class TestEditDocumentDocxBodyAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.edit_document_docx_body_async(input=request)
+            result = await client.edit_document_docx_body(input=request)
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -144,12 +144,12 @@ class TestEditDocumentDocxBodyAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.edit_document_docx_body_async(input=GetDocxBodyRequest())
+                await client.edit_document_docx_body(input=GetDocxBodyRequest())
 
             assert exc_info.value.status_code == 400
 
@@ -169,11 +169,11 @@ class TestEditDocumentDocxGetCommentsHierarchicalAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.edit_document_docx_get_comments_hierarchical_async(
+            result = await client.edit_document_docx_get_comments_hierarchical(
                 input=request
             )
 
@@ -195,12 +195,12 @@ class TestEditDocumentDocxGetCommentsHierarchicalAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.edit_document_docx_get_comments_hierarchical_async(
+                await client.edit_document_docx_get_comments_hierarchical(
                     input=GetDocxGetCommentsHierarchicalRequest()
                 )
 
@@ -269,12 +269,12 @@ ALL_OPERATIONS = sorted(OPERATION_ARGS.keys())
 def test_generated_operation_inventory_matches_contract():
     """Test all 53 supported operations are represented without multipart APIs."""
     assert len(ALL_OPERATIONS) == 53
-    assert not hasattr(CloudmersiveconvertClient, "create_document_async")
+    assert not hasattr(CloudmersiveconvertClient, "create_document")
 
 
 async def _invoke_operation(client: CloudmersiveconvertClient, operation: str):
     """Invoke a Cloudmersive Convert operation by name for shared method tests."""
-    method = getattr(client, f"{operation}_async")
+    method = getattr(client, f"{operation}")
     return await method(**OPERATION_ARGS[operation])
 
 
@@ -290,7 +290,7 @@ class TestCloudmersiveconvertClientAllOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
@@ -316,7 +316,7 @@ class TestCloudmersiveconvertClientAllOperationsErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):

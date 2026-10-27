@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
+from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
 from azure.core.credentials_async import AsyncTokenCredential
 from azure.core.pipeline.transport import AsyncHttpTransport
@@ -18,7 +19,20 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "WordonlinebusinessClient",
+    "BlobMetadata",
+    "ContentBody",
+    "CreateFileItemInput",
+    "GetDrivesResponse",
+    "GetFileSchemaResponse",
+    "GetFiles",
+    "GetSourcesResponse",
+    "SensitivityLabelMetadata",
+]
 
 
 # Type Definitions
@@ -29,7 +43,7 @@ class CreateFileItemInput:
     Populate a Microsoft Word template
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -42,7 +56,7 @@ class GetSourcesResponse:
     Response for Get sources
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -51,7 +65,7 @@ class GetDrivesResponse:
     Response for Get drives
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -60,7 +74,7 @@ class GetFileSchemaResponse:
     Response for Fetches the schema of the selected file
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -79,32 +93,48 @@ class BlobMetadata:
     Definition: BlobMetadata
     """
 
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """The unique identifier of the file or folder."""
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """The name of the file or folder."""
-    display_name: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """The unique identifier of the file or folder."""
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """The name of the file or folder."""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the file or folder."""
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
-    """The path of the file or folder."""
-    media_type: Optional[str] = field(
+    path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
+    """The path of the file or folder."""
+    media_type: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "MediaType"},
     )
     """The media type of the file or folder."""
-    is_folder: Optional[bool] = field(
+    is_folder: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsFolder"},
     )
     """
     A boolean value (true, false) to indicate whether or not the blob is a
     folder.
     """
-    file_locator: Optional[str] = field(
+    file_locator: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FileLocator"},
     )
     """The file locator of the file or folder."""
@@ -116,7 +146,7 @@ class ContentBody:
     Definition: ContentBody
     """
 
-    content: Optional[str] = None
+    content: str
     """Content of the word document"""
 
 
@@ -131,7 +161,7 @@ class WordonlinebusinessClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -148,8 +178,8 @@ class WordonlinebusinessClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -170,7 +200,7 @@ class WordonlinebusinessClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -185,9 +215,86 @@ class WordonlinebusinessClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "wordonlinebusiness"
 
-    async def create_file_item_async(
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
+            if next_link.startswith("?"):
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
+
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
+    async def create_file_item(
         self,
-        input: CreateFileItemInput,
+        input: CreateFileItemInput | Mapping[str, Any],
         source: str,
         drive: str,
         file: str,
@@ -202,6 +309,28 @@ class WordonlinebusinessClient(ConnectorClientBase):
 
         Reads a Microsoft Word template to then fill the template fields with
         selected dynamic values to generate a Word Document.
+
+        Swagger operation ID: `CreateFileItem`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (colons are required).
+            drive: Select a document library from the drop-down.
+            file: Select a Word file through File Browse.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/templates/getFile"
         query_params = []
@@ -220,7 +349,7 @@ class WordonlinebusinessClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -234,15 +363,16 @@ class WordonlinebusinessClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
 
-    async def create_word_file_with_content_async(
+    async def create_word_file_with_content(
         self,
-        input: ContentBody,
-        file_name: Optional[str] = None,
+        input: ContentBody | Mapping[str, Any],
         *,
+        file_name: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -253,6 +383,23 @@ class WordonlinebusinessClient(ConnectorClientBase):
 
         Creates a Microsoft Word file with the given content in the root
         directory (use only from Copilot Studio)
+
+        Swagger operation ID: `CreateWordFileWithContent`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            file_name: Name of the file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -267,7 +414,7 @@ class WordonlinebusinessClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -281,6 +428,7 @@ class WordonlinebusinessClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -288,14 +436,14 @@ class WordonlinebusinessClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_file_pdf_async(
+    async def get_file_pdf(
         self,
         source: str,
         drive: str,
         file: str,
+        *,
         extract_sensitivity_label: Optional[bool] = None,
         fetch_sensitivity_label_metadata: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -305,6 +453,30 @@ class WordonlinebusinessClient(ConnectorClientBase):
         Convert Word Document to PDF
 
         Gets a PDF version of the selected file
+
+        Swagger operation ID: `GetFilePDF`.
+
+        Args:
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (colons are required).
+            drive: Select a document library from the drop-down.
+            file: Select a Word file through File Browse.
+            extract_sensitivity_label: Select if you want to extract
+                Sensitivity label ( false, true).
+            fetch_sensitivity_label_metadata: A boolean whether to fetch
+                sensitivity label Metadata for associated LabelId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/templates/convertFile"
@@ -336,7 +508,7 @@ class WordonlinebusinessClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -350,62 +522,118 @@ class WordonlinebusinessClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
 
-    async def get_sources_async(
+    def list_sources(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get sources
 
         Get a list of sources.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetSources`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/codeless/v1.0/sources"
         query_params = []
         query_params.append("$top=" + quote("", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_drives_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_drives(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get drives
 
         Get a list of drives.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetDrives`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/codeless/v1.0/drives"
         query_params = []
@@ -413,29 +641,50 @@ class WordonlinebusinessClient(ConnectorClientBase):
         query_params.append("$select=" + quote("", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_file_schema_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def get_file_schema(
         self,
         source: str,
         drive: str,
@@ -450,6 +699,23 @@ class WordonlinebusinessClient(ConnectorClientBase):
         Fetches the schema of the selected file
 
         Fetches the schema of the selected file.
+
+        Swagger operation ID: `GetFileSchema`.
+
+        Args:
+            source: source.
+            drive: drive.
+            file: file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/templates/schema"
         query_params = []
@@ -468,7 +734,7 @@ class WordonlinebusinessClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -482,6 +748,7 @@ class WordonlinebusinessClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

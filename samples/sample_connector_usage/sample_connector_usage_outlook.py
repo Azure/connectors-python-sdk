@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Outlook.com Connector SDK Sample
+Outlook.com sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Outlook connector SDK
+This sample demonstrates how to use the Outlook client from the Azure Connectors Python SDK
 to interact with Outlook.com calendars, contacts, and email.
 
 Note: This connector is for Outlook.com (personal Microsoft accounts).
@@ -29,8 +29,8 @@ import asyncio
 import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.outlook import OutlookClient
 from azure.connectors.outlook import (
-    OutlookClient,
     ClientSendHtmlMessage,
 )
 
@@ -50,10 +50,10 @@ async def example_1_list_calendars():
 
         async with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.calendar_get_tables_async()
+                items = [item async for item in client.list_calendar_get_tables()]
 
-                if result:
-                    calendars = result.get("value", [])
+                if items:
+                    calendars = items
                     print(f"Found {len(calendars)} calendar(s):")
                     for cal in calendars:
                         name = cal.get("Name", cal.get("name", "N/A"))
@@ -81,10 +81,10 @@ async def example_2_list_contact_folders():
 
         async with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.contact_get_tables_async()
+                items = [item async for item in client.list_contact_get_tables()]
 
-                if result:
-                    folders = result.get("value", [])
+                if items:
+                    folders = items
                     print(f"Found {len(folders)} contact folder(s):")
                     for folder in folders:
                         name = folder.get("Name", folder.get("name", "N/A"))
@@ -114,13 +114,13 @@ async def example_3_get_calendar_events():
 
         async with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.calendar_get_items_async(
+                items = [item async for item in client.list_calendar_get_items(
                     table=calendar_id,
                     top=5  # Get up to 5 events
-                )
+                )]
 
-                if result:
-                    events = result.get("value", [])
+                if items:
+                    events = items
                     print(f"Found {len(events)} event(s) in calendar:")
                     for event in events[:5]:
                         subject = event.get("Subject", event.get("subject", "N/A"))
@@ -147,13 +147,13 @@ async def example_4_get_contacts():
 
         async with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.contact_get_items_async(
+                items = [item async for item in client.list_contact_get_items(
                     table=folder_id,
                     top=10  # Get up to 10 contacts
-                )
+                )]
 
-                if result:
-                    contacts = result.get("value", [])
+                if items:
+                    contacts = items
                     print(f"Found {len(contacts)} contact(s):")
                     for contact in contacts[:5]:
                         display_name = contact.get("DisplayName", "N/A")
@@ -196,7 +196,7 @@ async def example_5_send_email():
                     importance="Normal"
                 )
 
-                await client.send_email_async(input=email)
+                await client.send_email(input=email)
 
                 print("Email sent successfully!")
                 print(f"  To: {recipient}")
@@ -210,7 +210,7 @@ async def example_5_send_email():
 
 async def main():
     """Run all examples."""
-    print("Outlook.com Connector SDK - Sample Usage")
+    print("Outlook.com sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
 
     if not CONNECTION_RUNTIME_URL:

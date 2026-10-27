@@ -114,7 +114,7 @@ class ConnectorHttpClient:
         self._credential = credential
         self._timeout_seconds = timeout_seconds
         self._retry_unsafe_http_methods = retry_unsafe_http_methods
-        self._transport = transport or AioHttpTransport()
+        self._transport = transport or AioHttpTransport(**kwargs)
         policy_options = dict(kwargs)
         per_call_policies = self._as_policy_list(
             policy_options.pop("per_call_policies", [])
@@ -306,7 +306,7 @@ class ConnectorHttpClient:
         """Close the HTTP transport without closing the caller credential."""
         await self._pipeline.__aexit__(None, None, None)
 
-    async def send_async(
+    async def send(
         self,
         method: str,
         url: str,
@@ -417,28 +417,30 @@ class ConnectorHttpClient:
                 error=ex,
             ) from ex
 
-    async def get_async(self, request_uri: str) -> Any:
+    async def get(self, request_uri: str) -> Any:
         """Send a GET request."""
-        response = await self.send_async("GET", request_uri)
+        response = await self.send("GET", request_uri)
         if not 200 <= response.status < 300:
             raise ConnectorException(
                 "GET",
                 request_uri,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return json.loads(response.text) if response.text else None
 
-    async def post_async(self, request_uri: str, body: Any) -> Any:
+    async def post(self, request_uri: str, body: Any) -> Any:
         """Send a POST request with a JSON body."""
-        response = await self.send_async("POST", request_uri, body)
+        response = await self.send("POST", request_uri, body)
         if not 200 <= response.status < 300:
             raise ConnectorException(
                 "POST",
                 request_uri,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return json.loads(response.text) if response.text else None

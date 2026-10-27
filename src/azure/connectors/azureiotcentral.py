@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
+from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
 from azure.core.credentials_async import AsyncTokenCredential
 from azure.core.pipeline.transport import AsyncHttpTransport
@@ -18,7 +19,92 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "AzureiotcentralClient",
+    "Action",
+    "ActionGroupsAction",
+    "Application",
+    "ApplicationCollection",
+    "CloudPropertyJobData",
+    "CommandJobData",
+    "DateJobSchedule",
+    "Device",
+    "DeviceCloudProperties",
+    "DeviceCollection",
+    "DeviceCommand",
+    "DeviceCommandV1",
+    "DeviceComponentCommand",
+    "DeviceComponentTelemetry",
+    "DeviceGroup",
+    "DeviceGroupCollection",
+    "DeviceGroupDeviceCollection",
+    "DeviceModuleCommand",
+    "DeviceModuleComponentCommand",
+    "DeviceModuleComponentTelemetry",
+    "DeviceModuleTelemetry",
+    "DeviceProperties",
+    "DeviceRelationship",
+    "DeviceRelationshipCollection",
+    "DeviceRelationshipStatic",
+    "DeviceTelemetry",
+    "DeviceTemplate",
+    "DeviceTemplateCollection",
+    "DeviceTemplateCollectionV1",
+    "DeviceTemplateMigrationJobData",
+    "DeviceTemplateV1",
+    "DeviceV1",
+    "DeviceV2",
+    "DynamicValues",
+    "EmailAction",
+    "EmailUser",
+    "Job",
+    "JobBatch",
+    "JobCancellationThreshold",
+    "JobCollection",
+    "JobDeviceStatus",
+    "JobDeviceStatusCollection",
+    "JobSchedule",
+    "JobScheduleEnd",
+    "JobStatic",
+    "LogicAppsAction",
+    "ModuleProperties",
+    "OccurrencesJobSchedule",
+    "Organization",
+    "OrganizationCollection",
+    "OrganizationStatic",
+    "PowerAutomateAction",
+    "PropertyJobData",
+    "Role",
+    "RoleAssignment",
+    "RoleCollection",
+    "Rule",
+    "RuleCollection",
+    "ScheduledJob",
+    "ScheduledJobCollection",
+    "ScheduledJobJobCollection",
+    "ScheduledJobPatch",
+    "ScheduledJobStatic",
+    "SchemaDeviceCloudPropertiesResponse",
+    "SchemaDeviceCommandResponse",
+    "SchemaDevicePropertiesResponse",
+    "SchemaDeviceTelemetryResponse",
+    "SchemaJobResponse",
+    "SchemaScheduledJobResponse",
+    "SchemaUserResponse",
+    "ServicePrincipalUser",
+    "User",
+    "UserCollection",
+    "UserPatch",
+    "UserStatic",
+    "WebhookAction",
+    "WebhookActionBody",
+    "WebhookActionDevice",
+    "WorkflowTrigger",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -29,10 +115,11 @@ class DeviceGroupCollection:
     Response for List device groups
     """
 
-    value: Optional[List[DeviceGroup]] = None
+    value: List[DeviceGroup | Mapping[str, Any]]
     """The collection of device groups."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of device groups."""
@@ -44,20 +131,17 @@ class DeviceGroup:
     Response for Get a device group
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the device group."""
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """Display name of the device group."""
-    filter: Optional[str] = None
+    filter: str
     """Query defining which devices should be in this group."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Short summary of device group."""
-    etag: Optional[str] = None
+    etag: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ETag used to prevent conflict in device group updates."""
-    organizations: Optional[List[str]] = None
+    organizations: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     List of organizations of the device group, only one organization is
     supported today, multiple organizations will be supported soon.
@@ -70,10 +154,11 @@ class DeviceGroupDeviceCollection:
     Response for Get devices by device group ID
     """
 
-    value: Optional[List[DeviceV1]] = None
+    value: List[DeviceV1 | Mapping[str, Any]]
     """The collection of devices belonging to the device group."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of devices in the group."""
@@ -85,7 +170,7 @@ class DeviceCloudProperties:
     Response for Get device cloud properties (deprecated)
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -98,30 +183,33 @@ class DeviceCommand:
     Response for Execute a device command (deprecated)
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The request ID of the device command execution."""
-    request: Optional[Any] = None
+    request: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """The payload for the device command."""
-    response: Optional[Any] = None
+    response: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """The payload of the device command response."""
-    connection_timeout: Optional[int] = field(
+    connection_timeout: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "connectionTimeout"},
     )
     """
     Connection timeout in seconds to wait for a disconnected device to come
     online. Defaults to 0 seconds.
     """
-    response_timeout: Optional[int] = field(
+    response_timeout: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseTimeout"},
     )
     """
     Response timeout in seconds to wait for a command completion on a device.
     Defaults to 30 seconds.
     """
-    response_code: Optional[int] = field(
+    response_code: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseCode"},
     )
     """The status code of the device command response."""
@@ -133,10 +221,11 @@ class DeviceRelationshipCollection:
     Response for List relationships
     """
 
-    value: Optional[List[DeviceRelationshipStatic]] = None
+    value: List[DeviceRelationshipStatic | Mapping[str, Any]]
     """The collection of device relationships."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of device relationships."""
@@ -148,11 +237,11 @@ class DeviceRelationshipStatic:
     Response for Get device relationship
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the device relationship."""
-    source: Optional[str] = None
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The device ID of the source (parent) device."""
-    target: Optional[str] = None
+    target: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The device ID of the source (child) device."""
 
 
@@ -162,10 +251,11 @@ class JobCollection:
     Response for List jobs
     """
 
-    value: Optional[List[JobStatic]] = None
+    value: List[JobStatic | Mapping[str, Any]]
     """The collection of jobs."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of jobs."""
@@ -177,36 +267,37 @@ class JobStatic:
     Response for Get a job
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the job."""
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """Display name of the job."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Detailed description of the job."""
-    group: Optional[str] = None
+    group: str
     """The ID of the device group on which to execute the job."""
-    batch: Optional[JobBatch] = None
+    batch: Optional[JobBatch | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The batching configuration for the job."""
-    cancellation_threshold: Optional[JobCancellationThreshold] = field(
+    cancellation_threshold: Optional[
+        JobCancellationThreshold | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "cancellationThreshold"},
     )
     """The cancellation threshold for the job."""
-    data: Optional[List[Dict[str, Any]]] = None
+    data: List[Dict[str, Any]]
     """
     Data related to the operation being performed by this job. All entries must
     be of the same type.
     """
-    organizations: Optional[List[str]] = None
+    organizations: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     List of organizations of the job, only one organization is supported today,
     multiple organizations will be supported soon.
     """
-    scheduled_job_id: Optional[str] = field(
+    scheduled_job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "scheduledJobId"},
     )
     """Id of the scheduled job definition that created this job."""
@@ -218,31 +309,32 @@ class Job:
     Response for Create a job
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the job."""
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """Display name of the job."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Detailed description of the job."""
-    group: Optional[str] = None
+    group: str
     """The ID of the device group on which to execute the job."""
-    batch: Optional[JobBatch] = None
+    batch: Optional[JobBatch | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The batching configuration for the job."""
-    cancellation_threshold: Optional[JobCancellationThreshold] = field(
+    cancellation_threshold: Optional[
+        JobCancellationThreshold | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "cancellationThreshold"},
     )
     """The cancellation threshold for the job."""
-    organizations: Optional[List[str]] = None
+    organizations: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     List of organizations of the job, only one organization is supported today,
     multiple organizations will be supported soon.
     """
-    scheduled_job_id: Optional[str] = field(
+    scheduled_job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "scheduledJobId"},
     )
     """Id of the scheduled job definition that created this job."""
@@ -254,10 +346,11 @@ class JobDeviceStatusCollection:
     Response for Get device statuses
     """
 
-    value: Optional[List[JobDeviceStatus]] = None
+    value: List[JobDeviceStatus | Mapping[str, Any]]
     """The collection of job device statuses."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of job device statuses."""
@@ -269,10 +362,11 @@ class OrganizationCollection:
     Response for List organizations
     """
 
-    value: Optional[List[Organization]] = None
+    value: List[Organization | Mapping[str, Any]]
     """The collection of organizations."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of organizations."""
@@ -284,14 +378,15 @@ class Organization:
     Response for Get an organization
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the organization."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the organization."""
-    parent: Optional[str] = None
+    parent: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Display name of the parent organization."""
 
 
@@ -301,10 +396,11 @@ class ScheduledJobCollection:
     Response for List scheduled jobs
     """
 
-    value: Optional[List[ScheduledJob]] = None
+    value: List[ScheduledJob | Mapping[str, Any]]
     """The collection of scheduled jobs."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of scheduled jobs."""
@@ -316,36 +412,36 @@ class ScheduledJob:
     Response for Get a scheduled job
     """
 
-    etag: Optional[str] = None
+    etag: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ETag used to prevent conflict in scheduled job updates."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the scheduled job."""
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """Display name of the scheduled job."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Detailed description of the scheduled job."""
-    group: Optional[str] = None
+    group: str
     """The ID of the device group on which to execute the job."""
-    batch: Optional[JobBatch] = None
+    batch: Optional[JobBatch | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The batching configuration for the scheduled job."""
-    cancellation_threshold: Optional[JobCancellationThreshold] = field(
+    cancellation_threshold: Optional[
+        JobCancellationThreshold | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "cancellationThreshold"},
     )
     """The cancellation threshold for the scheduled job."""
-    organizations: Optional[List[str]] = None
+    organizations: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     List of organizations of the job, only one organization is supported today,
     multiple organizations will be supported soon.
     """
-    schedule: Optional[Dict[str, Any]] = None
+    schedule: Dict[str, Any]
     """The schedule at which to execute the job."""
-    enabled: Optional[bool] = None
+    enabled: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the scheduled job is enabled."""
-    completed: Optional[bool] = None
+    completed: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the scheduled job has completed."""
 
 
@@ -355,41 +451,41 @@ class ScheduledJobStatic:
     Response for Update a scheduled job
     """
 
-    etag: Optional[str] = None
+    etag: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ETag used to prevent conflict in scheduled job updates."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the scheduled job."""
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """Display name of the scheduled job."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Detailed description of the scheduled job."""
-    group: Optional[str] = None
+    group: str
     """The ID of the device group on which to execute the job."""
-    batch: Optional[JobBatch] = None
+    batch: Optional[JobBatch | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The batching configuration for the scheduled job."""
-    cancellation_threshold: Optional[JobCancellationThreshold] = field(
+    cancellation_threshold: Optional[
+        JobCancellationThreshold | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "cancellationThreshold"},
     )
     """The cancellation threshold for the scheduled job."""
-    data: Optional[List[Dict[str, Any]]] = None
+    data: List[Dict[str, Any]]
     """
     Data related to the operation being performed by this job. All entries must
     be of the same type.
     """
-    organizations: Optional[List[str]] = None
+    organizations: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     List of organizations of the job, only one organization is supported today,
     multiple organizations will be supported soon.
     """
-    schedule: Optional[Dict[str, Any]] = None
+    schedule: Dict[str, Any]
     """The schedule at which to execute the job."""
-    enabled: Optional[bool] = None
+    enabled: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the scheduled job is enabled."""
-    completed: Optional[bool] = None
+    completed: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the scheduled job has completed."""
 
 
@@ -399,10 +495,11 @@ class ScheduledJobJobCollection:
     Response for Get jobs by scheduled job ID
     """
 
-    value: Optional[List[JobStatic]] = None
+    value: List[JobStatic | Mapping[str, Any]]
     """The collection of jobs."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of jobs."""
@@ -414,11 +511,11 @@ class WorkflowTrigger:
     Response for When a rule is fired
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the workflow trigger."""
-    rule: Optional[str] = None
+    rule: str
     """Unique ID of the rule that is tied to the workflow trigger."""
-    url: Optional[str] = None
+    url: str
     """Callback URL of the workflow Trigger."""
 
 
@@ -428,22 +525,23 @@ class DeviceV1:
     Response for Get a device by ID
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the device."""
-    etag: Optional[str] = None
+    etag: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ETag used to prevent conflict in device updates."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the device."""
-    template: Optional[str] = None
+    template: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The device template definition for the device."""
-    simulated: Optional[bool] = None
+    simulated: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the device is simulated."""
-    enabled: Optional[bool] = None
+    enabled: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the device connection to IoT Central has been enabled."""
-    provisioned: Optional[bool] = None
+    provisioned: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether resources have been allocated for the device."""
 
 
@@ -453,30 +551,33 @@ class DeviceCommandV1:
     Response for Get device command response
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The request ID of the device command execution."""
-    request: Optional[Any] = None
+    request: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """The payload for the device command."""
-    response: Optional[Any] = None
+    response: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """The payload of the device command response."""
-    connection_timeout: Optional[int] = field(
+    connection_timeout: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "connectionTimeout"},
     )
     """
     Connection timeout in seconds to wait for a disconnected device to come
     online. Defaults to 0 seconds.
     """
-    response_timeout: Optional[int] = field(
+    response_timeout: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseTimeout"},
     )
     """
     Response timeout in seconds to wait for a command completion on a device.
     Defaults to 30 seconds.
     """
-    response_code: Optional[int] = field(
+    response_code: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseCode"},
     )
     """The status code of the device command response."""
@@ -488,30 +589,33 @@ class DeviceComponentCommand:
     Response for Get component command response
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The request ID of the device command execution."""
-    request: Optional[Any] = None
+    request: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """The payload for the device command."""
-    response: Optional[Any] = None
+    response: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """The payload of the device command response."""
-    connection_timeout: Optional[int] = field(
+    connection_timeout: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "connectionTimeout"},
     )
     """
     Connection timeout in seconds to wait for a disconnected device to come
     online. Defaults to 0 seconds.
     """
-    response_timeout: Optional[int] = field(
+    response_timeout: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseTimeout"},
     )
     """
     Response timeout in seconds to wait for a command completion on a device.
     Defaults to 30 seconds.
     """
-    response_code: Optional[int] = field(
+    response_code: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseCode"},
     )
     """The status code of the device command response."""
@@ -523,9 +627,9 @@ class DeviceComponentTelemetry:
     Response for Get component telemetry value
     """
 
-    value: Optional[Any] = None
+    value: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """The last known value of this device telemetry."""
-    timestamp: Optional[str] = None
+    timestamp: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     String-formatted date representing the time when the telemetry value was
     sent.
@@ -538,30 +642,33 @@ class DeviceModuleCommand:
     Response for Get module command response
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The request ID of the device command execution."""
-    request: Optional[Any] = None
+    request: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """The payload for the device command."""
-    response: Optional[Any] = None
+    response: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """The payload of the device command response."""
-    connection_timeout: Optional[int] = field(
+    connection_timeout: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "connectionTimeout"},
     )
     """
     Connection timeout in seconds to wait for a disconnected device to come
     online. Defaults to 0 seconds.
     """
-    response_timeout: Optional[int] = field(
+    response_timeout: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseTimeout"},
     )
     """
     Response timeout in seconds to wait for a command completion on a device.
     Defaults to 30 seconds.
     """
-    response_code: Optional[int] = field(
+    response_code: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseCode"},
     )
     """The status code of the device command response."""
@@ -573,30 +680,33 @@ class DeviceModuleComponentCommand:
     Response for Get module component command response
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The request ID of the device command execution."""
-    request: Optional[Any] = None
+    request: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """The payload for the device command."""
-    response: Optional[Any] = None
+    response: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """The payload of the device command response."""
-    connection_timeout: Optional[int] = field(
+    connection_timeout: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "connectionTimeout"},
     )
     """
     Connection timeout in seconds to wait for a disconnected device to come
     online. Defaults to 0 seconds.
     """
-    response_timeout: Optional[int] = field(
+    response_timeout: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseTimeout"},
     )
     """
     Response timeout in seconds to wait for a command completion on a device.
     Defaults to 30 seconds.
     """
-    response_code: Optional[int] = field(
+    response_code: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseCode"},
     )
     """The status code of the device command response."""
@@ -608,9 +718,9 @@ class DeviceModuleComponentTelemetry:
     Response for Get module component telemetry value
     """
 
-    value: Optional[Any] = None
+    value: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """The last known value of this device telemetry."""
-    timestamp: Optional[str] = None
+    timestamp: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     String-formatted date representing the time when the telemetry value was
     sent.
@@ -623,7 +733,7 @@ class ModuleProperties:
     Response for Get module properties
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -636,9 +746,9 @@ class DeviceModuleTelemetry:
     Response for Get module telemetry value
     """
 
-    value: Optional[Any] = None
+    value: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """The last known value of this device telemetry."""
-    timestamp: Optional[str] = None
+    timestamp: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     String-formatted date representing the time when the telemetry value was
     sent.
@@ -651,7 +761,7 @@ class DeviceProperties:
     Response for Get device properties
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -664,9 +774,9 @@ class DeviceTelemetry:
     Response for Get device telemetry value
     """
 
-    value: Optional[Any] = None
+    value: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """The last known value of this device telemetry."""
-    timestamp: Optional[str] = None
+    timestamp: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     String-formatted date representing the time when the telemetry value was
     sent.
@@ -679,10 +789,11 @@ class DeviceCollection:
     Response for List devices
     """
 
-    value: Optional[List[DeviceV1]] = None
+    value: List[DeviceV1 | Mapping[str, Any]]
     """The collection of devices."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of devices."""
@@ -694,27 +805,28 @@ class DeviceV2:
     Response for Create or update a device
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the device."""
-    etag: Optional[str] = None
+    etag: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ETag used to prevent conflict in device updates."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the device."""
-    template: Optional[str] = None
+    template: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The device template definition for the device."""
-    simulated: Optional[bool] = None
+    simulated: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the device is simulated."""
-    enabled: Optional[bool] = None
+    enabled: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the device connection to IoT Central has been enabled."""
-    organizations: Optional[List[str]] = None
+    organizations: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     List of organizations of the device, only one organization is supported
     today, multiple organizations will be supported soon.
     """
-    provisioned: Optional[bool] = None
+    provisioned: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether resources have been allocated for the device."""
 
 
@@ -724,24 +836,27 @@ class DeviceTemplateV1:
     Response for Get a device template by ID
     """
 
-    id: Optional[str] = field(default=None, metadata={"wire_name": "@id"})
-    """Unique ID of the device template."""
-    etag: Optional[str] = None
-    """ETag used to prevent conflict in device template updates."""
-    type_: Optional[List[str]] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
-        metadata={"wire_name": "@type"},
+        kw_only=True,
+        metadata={"wire_name": "@id"},
     )
+    """Unique ID of the device template."""
+    etag: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """ETag used to prevent conflict in device template updates."""
+    type_: List[str] = dataclass_field(metadata={"wire_name": "@type"})
     """The JSON-LD types of this device template."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the device template."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Detailed description of the device template."""
-    capability_model: Optional[Any] = field(
+    capability_model: Optional[Any] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "capabilityModel"},
     )
     """The capability model utilized by this device template."""
@@ -753,10 +868,11 @@ class DeviceTemplateCollectionV1:
     Response for List device templates
     """
 
-    value: Optional[List[DeviceTemplateV1]] = None
+    value: List[DeviceTemplateV1 | Mapping[str, Any]]
     """The collection of device templates."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of device templates."""
@@ -768,10 +884,11 @@ class Role:
     Response for Get role
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the role."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the role."""
@@ -783,7 +900,7 @@ class RoleCollection:
     Response for List roles
     """
 
-    value: Optional[List[Role]] = None
+    value: List[Role | Mapping[str, Any]]
     """The collection of roles."""
 
 
@@ -793,7 +910,7 @@ class User:
     Response for Create user
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -806,11 +923,15 @@ class UserStatic:
     Response for Get user
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the user."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """Type of the user."""
-    roles: Optional[List[RoleAssignment]] = None
+    roles: List[RoleAssignment | Mapping[str, Any]]
     """
     List of role assignments that specify the permissions to access the
     application.
@@ -823,7 +944,7 @@ class UserCollection:
     Response for List users
     """
 
-    value: Optional[List[UserStatic]] = None
+    value: List[UserStatic | Mapping[str, Any]]
     """The collection of users."""
 
 
@@ -833,7 +954,7 @@ class UserPatch:
     Response for Update user
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -846,10 +967,11 @@ class ApplicationCollection:
     Response for Get the list of applications accessible to the signed-in user
     """
 
-    value: Optional[List[Application]] = None
+    value: List[Application | Mapping[str, Any]]
     """The collection of applications."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of applications."""
@@ -861,10 +983,11 @@ class DeviceTemplateCollection:
     Response for List device templates
     """
 
-    value: Optional[List[DeviceTemplate]] = None
+    value: List[DeviceTemplate | Mapping[str, Any]]
     """The collection of device templates."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of device templates."""
@@ -879,7 +1002,7 @@ class SchemaDeviceCloudPropertiesResponse:
     Response for Schema_DeviceCloudProperties
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -892,7 +1015,7 @@ class SchemaDeviceCommandResponse:
     Response for Schema_DeviceCommand
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -905,7 +1028,7 @@ class SchemaDevicePropertiesResponse:
     Response for Schema_DeviceProperties
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -918,7 +1041,7 @@ class SchemaDeviceTelemetryResponse:
     Response for Schema_DeviceTelemetry
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -931,7 +1054,7 @@ class SchemaJobResponse:
     Response for Schema_Job
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -944,7 +1067,7 @@ class SchemaScheduledJobResponse:
     Response for Schema_ScheduledJob
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -957,7 +1080,7 @@ class SchemaUserResponse:
     Response for Schema_User
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -970,16 +1093,17 @@ class Action:
     Definition: Action
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the action."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the action."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """Type of the action."""
-    rules: Optional[List[str]] = None
+    rules: List[str]
     """Unique IDs of the rules that are tied to the action."""
 
 
@@ -989,16 +1113,17 @@ class EmailAction:
     Definition: EmailAction
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the email action."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the email action."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """Type of the email action."""
-    rules: Optional[List[str]] = None
+    rules: List[str]
     """Unique IDs of the rules that are tied to the email action."""
 
 
@@ -1008,18 +1133,19 @@ class WebhookAction:
     Definition: WebhookAction
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the webhook action."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the webhook action."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """Type of the webhook action."""
-    rules: Optional[List[str]] = None
+    rules: List[str]
     """Unique IDs of the rules that are tied to the webhook action."""
-    url: Optional[str] = None
+    url: str
     """Callback URL of the webhook."""
 
 
@@ -1029,16 +1155,17 @@ class PowerAutomateAction:
     Definition: PowerAutomateAction
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the Power Automate action."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the Power Automate action."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """Type of the Power Automate action."""
-    rules: Optional[List[str]] = None
+    rules: List[str]
     """Unique IDs of the rules that are tied to the Power Automate action."""
 
 
@@ -1048,16 +1175,17 @@ class LogicAppsAction:
     Definition: LogicAppsAction
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the Logic Apps action."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the Logic Apps action."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """Type of the Logic Apps action."""
-    rules: Optional[List[str]] = None
+    rules: List[str]
     """Unique IDs of the rules that are tied to the Logic Apps action."""
 
 
@@ -1067,16 +1195,17 @@ class ActionGroupsAction:
     Definition: ActionGroupsAction
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the Action Groups action."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the Action Groups action."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """Type of the Action Groups action."""
-    rules: Optional[List[str]] = None
+    rules: List[str]
     """Unique IDs of the rules that are tied to the Action Groups action."""
 
 
@@ -1086,16 +1215,17 @@ class Application:
     Definition: Application
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the application."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the application."""
-    subdomain: Optional[str] = None
+    subdomain: str
     """The URL subdomain of the application."""
-    host: Optional[str] = None
+    host: str
     """The URL host of the application."""
 
 
@@ -1105,25 +1235,27 @@ class Device:
     Definition: Device
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the device."""
-    etag: Optional[str] = None
+    etag: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ETag used to prevent conflict in device updates."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the device."""
-    instance_of: Optional[str] = field(
+    instance_of: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "instanceOf"},
     )
     """The device template definition for the device."""
-    simulated: Optional[bool] = None
+    simulated: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the device is simulated."""
-    approved: Optional[bool] = None
+    approved: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the device has been approved to connect to IoT Central."""
-    provisioned: Optional[bool] = None
+    provisioned: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether resources have been allocated for the device."""
 
 
@@ -1133,9 +1265,9 @@ class DeviceRelationship:
     Definition: DeviceRelationship
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the device relationship."""
-    target: Optional[str] = None
+    target: str
     """The device ID of the source (child) device."""
 
 
@@ -1145,18 +1277,19 @@ class DeviceTemplate:
     Definition: DeviceTemplate
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the device template."""
-    etag: Optional[str] = None
+    etag: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ETag used to prevent conflict in device template updates."""
-    types: Optional[List[str]] = None
+    types: List[str]
     """The types of device to which this template applies."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the device template."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Detailed description of the device template."""
 
 
@@ -1166,7 +1299,7 @@ class PropertyJobData:
     Definition: PropertyJobData
     """
 
-    data: Optional[List[Dict[str, Any]]] = None
+    data: List[Dict[str, Any]]
     """
     Data related to the operation being performed by this job. All entries must
     be of the same type.
@@ -1179,7 +1312,7 @@ class CommandJobData:
     Definition: CommandJobData
     """
 
-    data: Optional[List[Dict[str, Any]]] = None
+    data: List[Dict[str, Any]]
     """
     Data related to the operation being performed by this job. All entries must
     be of the same type.
@@ -1192,7 +1325,7 @@ class CloudPropertyJobData:
     Definition: CloudPropertyJobData
     """
 
-    data: Optional[List[Dict[str, Any]]] = None
+    data: List[Dict[str, Any]]
     """The collection of job data."""
 
 
@@ -1202,7 +1335,7 @@ class DeviceTemplateMigrationJobData:
     Definition: DeviceTemplateMigrationJobData
     """
 
-    data: Optional[List[Dict[str, Any]]] = None
+    data: List[Dict[str, Any]]
     """The collection of job data."""
 
 
@@ -1212,9 +1345,9 @@ class JobDeviceStatus:
     Definition: JobDeviceStatus
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ID of the device whose job status is being provided."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Indicates whether the job is starting, running, etc. for the given device.
     """
@@ -1226,12 +1359,12 @@ class JobBatch:
     Definition: JobBatch
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """
     Whether batching is done on a specified number of devices or a percentage
     of the total devices.
     """
-    value: Optional[float] = None
+    value: float
     """The number or percentage of devices on which batching is done."""
 
 
@@ -1241,17 +1374,17 @@ class JobCancellationThreshold:
     Definition: JobCancellationThreshold
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """
     Whether the cancellation threshold is per a specified number of devices or
     a percentage of the total devices.
     """
-    value: Optional[float] = None
+    value: float
     """
     The number or percentage of devices on which the cancellation threshold is
     applied.
     """
-    batch: Optional[bool] = None
+    batch: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether the cancellation threshold applies per-batch or to the overall job.
     """
@@ -1266,10 +1399,11 @@ class Rule:
     Definition: Rule
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the rule."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the rule."""
@@ -1281,10 +1415,11 @@ class RuleCollection:
     Definition: RuleCollection
     """
 
-    value: Optional[List[Rule]] = None
+    value: List[Rule | Mapping[str, Any]]
     """The collection of rules."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of rules."""
@@ -1296,7 +1431,7 @@ class JobSchedule:
     Definition: JobSchedule
     """
 
-    schedule: Optional[Dict[str, Any]] = None
+    schedule: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The schedule at which to execute the job."""
 
 
@@ -1306,7 +1441,7 @@ class DateJobSchedule:
     Definition: DateJobSchedule
     """
 
-    schedule: Optional[Dict[str, Any]] = None
+    schedule: Dict[str, Any]
     """The schedule at which to execute the job."""
 
 
@@ -1316,7 +1451,7 @@ class OccurrencesJobSchedule:
     Definition: OccurrencesJobSchedule
     """
 
-    schedule: Optional[Dict[str, Any]] = None
+    schedule: Dict[str, Any]
     """The schedule at which to execute the job."""
 
 
@@ -1326,11 +1461,15 @@ class JobScheduleEnd:
     Definition: JobScheduleEnd
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """Type of the job schedule end."""
-    date: Optional[str] = None
+    date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date when to end the scheduled job (YYYY-MM-DDTHH:MM:SSZ)."""
-    occurrences: Optional[int] = None
+    occurrences: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of occurrences after which to end the scheduled job."""
 
 
@@ -1340,15 +1479,15 @@ class ScheduledJobPatch:
     Definition: ScheduledJobPatch
     """
 
-    etag: Optional[str] = None
+    etag: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ETag used to prevent conflict in scheduled job updates."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the scheduled job."""
-    schedule: Optional[Dict[str, Any]] = None
+    schedule: Dict[str, Any]
     """The schedule at which to execute the job."""
-    enabled: Optional[bool] = None
+    enabled: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the scheduled job is enabled."""
-    completed: Optional[bool] = None
+    completed: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the scheduled job has completed."""
 
 
@@ -1358,16 +1497,16 @@ class EmailUser:
     Definition: EmailUser
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the user."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """Type of the user."""
-    roles: Optional[List[RoleAssignment]] = None
+    roles: List[RoleAssignment | Mapping[str, Any]]
     """
     List of role assignments that specify the permissions to access the
     application.
     """
-    email: Optional[str] = None
+    email: str
     """Email address of the user."""
 
 
@@ -1377,24 +1516,18 @@ class ServicePrincipalUser:
     Definition: ServicePrincipalUser
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the user."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """Type of the user."""
-    roles: Optional[List[RoleAssignment]] = None
+    roles: List[RoleAssignment | Mapping[str, Any]]
     """
     List of role assignments that specify the permissions to access the
     application.
     """
-    tenant_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "tenantId"},
-    )
+    tenant_id: str = dataclass_field(metadata={"wire_name": "tenantId"})
     """The Microsoft Entra ID tenant ID of the service principal."""
-    object_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "objectId"},
-    )
+    object_id: str = dataclass_field(metadata={"wire_name": "objectId"})
     """The Microsoft Entra ID object ID of the service principal."""
 
 
@@ -1404,7 +1537,7 @@ class RoleAssignment:
     Definition: RoleAssignment
     """
 
-    role: Optional[str] = None
+    role: str
     """ID of the role for this role assignment."""
 
 
@@ -1414,34 +1547,37 @@ class WebhookActionDevice:
     Definition: WebhookActionDevice
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the device."""
-    etag: Optional[str] = None
+    etag: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ETag used to prevent conflict in device updates."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the device."""
-    instance_of: Optional[str] = field(
+    instance_of: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "instanceOf"},
     )
     """The device template definition for the device."""
-    simulated: Optional[bool] = None
+    simulated: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the device is simulated."""
-    approved: Optional[bool] = None
+    approved: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the device has been approved to connect to IoT Central."""
-    provisioned: Optional[bool] = None
+    provisioned: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether resources have been allocated for the device."""
-    cloud_properties: Optional[Dict[str, Any]] = field(
+    cloud_properties: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "cloudProperties"},
     )
     """Cloud properties that triggered the webhook."""
-    properties: Optional[Dict[str, Any]] = None
+    properties: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Device properties that triggered the webhook."""
-    telemetry: Optional[Dict[str, Any]] = None
+    telemetry: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Device telemetry that triggered the webhook."""
 
 
@@ -1451,15 +1587,15 @@ class WebhookActionBody:
     Definition: WebhookActionBody
     """
 
-    action: Optional[Action] = None
+    action: Action | Mapping[str, Any]
     """Action that triggered the webhook."""
-    application: Optional[Application] = None
+    application: Application | Mapping[str, Any]
     """Application that triggered the webhook."""
-    device: Optional[WebhookActionDevice] = None
+    device: WebhookActionDevice | Mapping[str, Any]
     """Device that triggered the webhook."""
-    rule: Optional[Rule] = None
+    rule: Rule | Mapping[str, Any]
     """Rule that triggered the webhook."""
-    timestamp: Optional[str] = None
+    timestamp: str
     """Timestamp at which the webhook was triggered."""
 
 
@@ -1474,7 +1610,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -1491,8 +1627,8 @@ class AzureiotcentralClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -1513,7 +1649,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -1529,15 +1665,49 @@ class AzureiotcentralClient(ConnectorClientBase):
         return "azureiotcentral"
 
     def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
-        parsed_next_link = urlsplit(next_link)
-        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
             if next_link.startswith("/"):
                 return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
             if next_link.startswith("?"):
-                return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
 
-        parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
         connection_hostname = parsed_connection.hostname
         if next_link_hostname is None or connection_hostname is None:
@@ -1554,7 +1724,11 @@ class AzureiotcentralClient(ConnectorClientBase):
                 parsed_next_link.scheme == parsed_connection.scheme
                 and next_link_port == connection_port
             ):
-                return next_link
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
 
             raise ValueError(
                 "Pagination URL origin "
@@ -1567,7 +1741,7 @@ class AzureiotcentralClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def device_groups_list_async(
+    def list_device_groups(
         self,
         application: str,
         *,
@@ -1575,14 +1749,30 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List device groups
 
         Get the list of device groups in an application.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `DeviceGroups_List`.
+
+        Args:
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/ga_2022_07_31/deviceGroups"
@@ -1594,11 +1784,18 @@ class AzureiotcentralClient(ConnectorClientBase):
         query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1611,23 +1808,32 @@ class AzureiotcentralClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def device_groups_get_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def device_groups_get(
         self,
         device_group_id: str,
         application: str,
@@ -1641,6 +1847,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get a device group
 
         Get details about an existing device group by ID.
+
+        Swagger operation ID: `DeviceGroups_Get`.
+
+        Args:
+            device_group_id: Unique ID of the device group.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1657,7 +1879,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1671,6 +1893,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1678,9 +1901,9 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def device_groups_set_async(
+    async def device_groups_set(
         self,
-        input: DeviceGroup,
+        input: DeviceGroup | Mapping[str, Any],
         device_group_id: str,
         application: str,
         *,
@@ -1693,6 +1916,24 @@ class AzureiotcentralClient(ConnectorClientBase):
         Create a device group
 
         Create or update a device group.
+
+        Swagger operation ID: `DeviceGroups_Set`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            device_group_id: Unique ID of the device group.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1709,7 +1950,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1723,6 +1964,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1730,7 +1972,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def device_groups_remove_async(
+    async def device_groups_remove(
         self,
         device_group_id: str,
         application: str,
@@ -1744,6 +1986,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Delete device group
 
         Delete an existing device group by ID
+
+        Swagger operation ID: `DeviceGroups_Remove`.
+
+        Args:
+            device_group_id: Unique ID of the device group.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1760,7 +2018,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1774,9 +2032,10 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def device_groups_get_devices_async(
+    def list_device_groups_get_devices(
         self,
         device_group_id: str,
         application: str,
@@ -1785,14 +2044,31 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get devices by device group ID
 
         Get the list of devices in a device group in an application.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `DeviceGroups_GetDevices`.
+
+        Args:
+            device_group_id: Unique ID of the device group.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1809,11 +2085,18 @@ class AzureiotcentralClient(ConnectorClientBase):
         query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1826,28 +2109,37 @@ class AzureiotcentralClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def devices_get_cloud_properties_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def devices_get_cloud_properties(
         self,
         device_id: str,
         application: str,
-        instance_of: Optional[str] = None,
         *,
+        instance_of: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1857,6 +2149,23 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get device cloud properties (deprecated)
 
         Get all cloud property values of a device by device ID (deprecated).
+
+        Swagger operation ID: `Devices_GetCloudProperties`.
+
+        Args:
+            device_id: Unique ID of the device.
+            application: Unique ID of the application.
+            instance_of: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1879,7 +2188,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1893,6 +2202,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1900,13 +2210,13 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_update_cloud_properties_async(
+    async def devices_update_cloud_properties(
         self,
-        input: DeviceCloudProperties,
+        input: DeviceCloudProperties | Mapping[str, Any],
         device_id: str,
         application: str,
-        instance_of: Optional[str] = None,
         *,
+        instance_of: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1916,6 +2226,25 @@ class AzureiotcentralClient(ConnectorClientBase):
         Update device cloud properties (deprecated)
 
         Update all cloud property values of a device by device ID (deprecated).
+
+        Swagger operation ID: `Devices_UpdateCloudProperties`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            device_id: Unique ID of the device.
+            application: Unique ID of the application.
+            instance_of: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1938,7 +2267,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1952,6 +2281,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1959,15 +2289,15 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_execute_component_command_async(
+    async def devices_execute_component_command(
         self,
-        input: DeviceCommand,
+        input: DeviceCommand | Mapping[str, Any],
         device_id: str,
         component_name: str,
         command_name: str,
         application: str,
-        instance_of: Optional[str] = None,
         *,
+        instance_of: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1977,6 +2307,27 @@ class AzureiotcentralClient(ConnectorClientBase):
         Execute a device command (deprecated)
 
         Execute a command on a device (deprecated).
+
+        Swagger operation ID: `Devices_ExecuteComponentCommand`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            device_id: Unique ID of the device.
+            component_name: Name of the device component.
+            command_name: Name of this device command.
+            application: Unique ID of the application.
+            instance_of: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2002,7 +2353,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2016,6 +2367,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2023,7 +2375,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def device_relationships_list_async(
+    def list_device_relationships(
         self,
         device_id: str,
         application: str,
@@ -2032,14 +2384,31 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List relationships
 
         List all relationships based on device ID.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `DeviceRelationships_List`.
+
+        Args:
+            device_id: Unique ID of the device.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2056,11 +2425,18 @@ class AzureiotcentralClient(ConnectorClientBase):
         query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2073,23 +2449,32 @@ class AzureiotcentralClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def device_relationships_get_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def device_relationships_get(
         self,
         device_id: str,
         relationship_id: str,
@@ -2105,6 +2490,23 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Get details about an existing device relationship by device ID and by
         relationship ID.
+
+        Swagger operation ID: `DeviceRelationships_Get`.
+
+        Args:
+            device_id: Unique ID of the device.
+            relationship_id: Unique ID of the device relationship.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2123,7 +2525,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2137,6 +2539,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2144,9 +2547,9 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def device_relationships_set_async(
+    async def device_relationships_set(
         self,
-        input: DeviceRelationship,
+        input: DeviceRelationship | Mapping[str, Any],
         relationship_id: str,
         device_id: str,
         application: str,
@@ -2161,6 +2564,25 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Create a new device relationship between the given device and a new
         device given a device ID and a relationship ID.
+
+        Swagger operation ID: `DeviceRelationships_Set`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            relationship_id: Unique ID of the device relationship.
+            device_id: Unique ID of the device.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2179,7 +2601,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2193,6 +2615,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2200,9 +2623,9 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def device_relationships_update_async(
+    async def device_relationships_update(
         self,
-        input: DeviceRelationship,
+        input: DeviceRelationship | Mapping[str, Any],
         device_id: str,
         relationship_id: str,
         application: str,
@@ -2217,6 +2640,25 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Update an existing device relationship between the given device and a
         new device given a device ID and a relationship ID.
+
+        Swagger operation ID: `DeviceRelationships_Update`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            device_id: Unique ID of the device.
+            relationship_id: Unique ID of the device relationship.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2235,7 +2677,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2249,6 +2691,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2256,7 +2699,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def device_relationships_remove_async(
+    async def device_relationships_remove(
         self,
         device_id: str,
         relationship_id: str,
@@ -2272,6 +2715,23 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Delete an existing device relationship by device ID and relationship
         ID.
+
+        Swagger operation ID: `DeviceRelationships_Remove`.
+
+        Args:
+            device_id: Unique ID of the device.
+            relationship_id: Unique ID of the device relationship.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2290,7 +2750,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2304,9 +2764,10 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def jobs_list_async(
+    def list_jobs(
         self,
         application: str,
         *,
@@ -2314,14 +2775,30 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List jobs
 
         Get the list of jobs in an application.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `Jobs_List`.
+
+        Args:
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/ga_2022_07_31/jobs"
         query_params = []
@@ -2331,11 +2808,18 @@ class AzureiotcentralClient(ConnectorClientBase):
         query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2348,23 +2832,32 @@ class AzureiotcentralClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def jobs_get_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def jobs_get(
         self,
         job_id: str,
         application: str,
@@ -2378,6 +2871,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get a job
 
         Get details about an existing job by ID.
+
+        Swagger operation ID: `Jobs_Get`.
+
+        Args:
+            job_id: Unique ID of the job.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2391,7 +2900,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2405,6 +2914,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2412,13 +2922,13 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def jobs_set_async(
+    async def jobs_set(
         self,
-        input: Job,
+        input: Job | Mapping[str, Any],
         job_id: str,
         application: str,
-        job_type: Optional[str] = None,
         *,
+        job_type: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2428,6 +2938,25 @@ class AzureiotcentralClient(ConnectorClientBase):
         Create a job
 
         Create and execute a new job via its job definition.
+
+        Swagger operation ID: `Jobs_Set`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            job_id: Unique ID of the job.
+            application: Unique ID of the application.
+            job_type: Type of the job.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2446,7 +2975,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2460,6 +2989,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2467,7 +2997,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def jobs_get_devices_async(
+    def list_jobs_get_devices(
         self,
         job_id: str,
         application: str,
@@ -2476,14 +3006,31 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get device statuses
 
         Get the list of individual device statuses by job ID.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `Jobs_GetDevices`.
+
+        Args:
+            job_id: Unique ID of the job.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2496,11 +3043,18 @@ class AzureiotcentralClient(ConnectorClientBase):
         query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2513,23 +3067,32 @@ class AzureiotcentralClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def jobs_stop_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def jobs_stop(
         self,
         job_id: str,
         application: str,
@@ -2543,6 +3106,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Stop a running job
 
         Stop execution of a job that is currently running.
+
+        Swagger operation ID: `Jobs_Stop`.
+
+        Args:
+            job_id: Unique ID of the job.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2556,7 +3135,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2570,9 +3149,10 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def jobs_resume_async(
+    async def jobs_resume(
         self,
         job_id: str,
         application: str,
@@ -2586,6 +3166,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Resume a stopped job
 
         Resume execution of an existing stopped job.
+
+        Swagger operation ID: `Jobs_Resume`.
+
+        Args:
+            job_id: Unique ID of the job.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2599,7 +3195,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2613,9 +3209,10 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def jobs_rerun_async(
+    async def jobs_rerun(
         self,
         job_id: str,
         rerun_id: str,
@@ -2630,6 +3227,23 @@ class AzureiotcentralClient(ConnectorClientBase):
         Resume a job on failed devices
 
         Execute a rerun of an existing job on all failed devices.
+
+        Swagger operation ID: `Jobs_Rerun`.
+
+        Args:
+            job_id: Unique ID of the job.
+            rerun_id: Unique ID of the rerun.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2648,7 +3262,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2662,6 +3276,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2669,7 +3284,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def organizations_list_async(
+    def list_organizations(
         self,
         application: str,
         *,
@@ -2677,14 +3292,30 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List organizations
 
         Get the list of organizations in an application.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `Organizations_List`.
+
+        Args:
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/ga_2022_07_31/organizations"
@@ -2696,11 +3327,18 @@ class AzureiotcentralClient(ConnectorClientBase):
         query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2713,23 +3351,32 @@ class AzureiotcentralClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def organizations_get_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def organizations_get(
         self,
         organization_id: str,
         application: str,
@@ -2743,6 +3390,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get an organization
 
         Get details about an existing organization by ID.
+
+        Swagger operation ID: `Organizations_Get`.
+
+        Args:
+            organization_id: Unique ID of the organization.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2759,7 +3422,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2773,6 +3436,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2780,9 +3444,9 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def organizations_set_async(
+    async def organizations_set(
         self,
-        input: Organization,
+        input: Organization | Mapping[str, Any],
         organization_id: str,
         application: str,
         *,
@@ -2795,6 +3459,24 @@ class AzureiotcentralClient(ConnectorClientBase):
         Create an organization
 
         Create a new organization.
+
+        Swagger operation ID: `Organizations_Set`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            organization_id: Unique ID of the organization.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2811,7 +3493,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2825,6 +3507,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2832,7 +3515,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def organizations_remove_async(
+    async def organizations_remove(
         self,
         organization_id: str,
         application: str,
@@ -2846,6 +3529,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Delete organization
 
         Delete an existing organization by ID
+
+        Swagger operation ID: `Organizations_Remove`.
+
+        Args:
+            organization_id: Unique ID of the organization.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2862,7 +3561,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2876,9 +3575,10 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def scheduled_jobs_list_async(
+    def list_scheduled_jobs(
         self,
         application: str,
         *,
@@ -2886,14 +3586,30 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List scheduled jobs
 
         Get the list of scheduled jobs in an application.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `ScheduledJobs_List`.
+
+        Args:
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/ga_2022_07_31/scheduledJobs"
@@ -2905,11 +3621,18 @@ class AzureiotcentralClient(ConnectorClientBase):
         query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2922,23 +3645,32 @@ class AzureiotcentralClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def scheduled_jobs_get_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def scheduled_jobs_get(
         self,
         scheduled_job_id: str,
         application: str,
@@ -2952,6 +3684,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get a scheduled job
 
         Get details about an existing scheduled job by ID.
+
+        Swagger operation ID: `ScheduledJobs_Get`.
+
+        Args:
+            scheduled_job_id: Unique ID of the scheduled job.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2968,7 +3716,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2982,6 +3730,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2989,14 +3738,14 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def scheduled_jobs_set_async(
+    async def scheduled_jobs_set(
         self,
-        input: ScheduledJob,
+        input: ScheduledJob | Mapping[str, Any],
         scheduled_job_id: str,
         application: str,
+        *,
         job_type: Optional[str] = None,
         scheduled_job_end_type: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3006,6 +3755,27 @@ class AzureiotcentralClient(ConnectorClientBase):
         Create a scheduled job
 
         Create and execute a new scheduled job via its job definition.
+
+        Swagger operation ID: `ScheduledJobs_Set`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            scheduled_job_id: Unique ID of the scheduled job.
+            application: Unique ID of the application.
+            job_type: Type of the job.
+            scheduled_job_end_type: How the scheduled job should end (not
+                applied to device template migrations).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3032,7 +3802,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3046,6 +3816,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3053,13 +3824,13 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def scheduled_jobs_update_async(
+    async def scheduled_jobs_update(
         self,
-        input: ScheduledJobPatch,
+        input: ScheduledJobPatch | Mapping[str, Any],
         scheduled_job_id: str,
         application: str,
-        scheduled_job_end_type: Optional[str] = None,
         *,
+        scheduled_job_end_type: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3069,6 +3840,26 @@ class AzureiotcentralClient(ConnectorClientBase):
         Update a scheduled job
 
         Update an existing scheduled job by ID.
+
+        Swagger operation ID: `ScheduledJobs_Update`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            scheduled_job_id: Unique ID of the scheduled job.
+            application: Unique ID of the application.
+            scheduled_job_end_type: How the scheduled job should end (not
+                applied to device template migrations).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3090,7 +3881,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3104,6 +3895,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3111,7 +3903,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def scheduled_jobs_remove_async(
+    async def scheduled_jobs_remove(
         self,
         scheduled_job_id: str,
         application: str,
@@ -3125,6 +3917,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Delete a scheduled job
 
         Delete an existing scheduled job by ID.
+
+        Swagger operation ID: `ScheduledJobs_Remove`.
+
+        Args:
+            scheduled_job_id: Unique ID of the scheduled job.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3141,7 +3949,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3155,9 +3963,10 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def scheduled_jobs_list_jobs_async(
+    def list_scheduled_jobs_list_jobs(
         self,
         scheduled_job_id: str,
         application: str,
@@ -3166,14 +3975,31 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get jobs by scheduled job ID
 
         Get the list of jobs for a scheduled job definition.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `ScheduledJobs_ListJobs`.
+
+        Args:
+            scheduled_job_id: Unique ID of the scheduled job.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3190,11 +4016,18 @@ class AzureiotcentralClient(ConnectorClientBase):
         query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -3207,23 +4040,32 @@ class AzureiotcentralClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def devices_get_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def devices_get(
         self,
         device_id: str,
         application: str,
@@ -3237,6 +4079,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get a device by ID
 
         Get details about an existing device by device ID.
+
+        Swagger operation ID: `Devices_Get_V1`.
+
+        Args:
+            device_id: Unique ID of the device.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3250,7 +4108,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3264,6 +4122,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3271,13 +4130,13 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_get_command_response_async(
+    async def devices_get_command_response(
         self,
         device_id: str,
         command_name: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3287,6 +4146,24 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get device command response
 
         Get the last response for a device command.
+
+        Swagger operation ID: `Devices_GetCommandResponse_V1`.
+
+        Args:
+            device_id: Unique ID of the device.
+            command_name: Name of this device command.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3310,7 +4187,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3324,6 +4201,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3331,14 +4209,14 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_get_component_command_response_async(
+    async def devices_get_component_command_response(
         self,
         device_id: str,
         component_name: str,
         command_name: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3348,6 +4226,25 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get component command response
 
         Get the last response for a device component command.
+
+        Swagger operation ID: `Devices_GetComponentCommandResponse_V1`.
+
+        Args:
+            device_id: Unique ID of the device.
+            component_name: Name of the device component.
+            command_name: Name of this device command.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3373,7 +4270,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3387,6 +4284,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3394,14 +4292,14 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_get_component_telemetry_value_async(
+    async def devices_get_component_telemetry_value(
         self,
         device_id: str,
         component_name: str,
         telemetry_name: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3411,6 +4309,25 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get component telemetry value
 
         Get the last telemetry value from a component.
+
+        Swagger operation ID: `Devices_GetComponentTelemetryValue_V1`.
+
+        Args:
+            device_id: Unique ID of the device.
+            component_name: Name of the device component.
+            telemetry_name: Name of this device telemetry.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3436,7 +4353,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3450,6 +4367,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3457,14 +4375,14 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_get_module_command_response_async(
+    async def devices_get_module_command_response(
         self,
         device_id: str,
         module: str,
         command_name: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3474,6 +4392,25 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get module command response
 
         Get the last response for a device module command
+
+        Swagger operation ID: `Devices_GetModuleCommandResponse_V1`.
+
+        Args:
+            device_id: Unique ID of the device.
+            module: Name of the device module.
+            command_name: Name of this device command.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3499,7 +4436,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3513,6 +4450,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3520,15 +4458,15 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_get_module_component_command_response_async(
+    async def devices_get_module_component_command_response(
         self,
         device_id: str,
         module: str,
         component_name: str,
         command_name: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3538,6 +4476,26 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get module component command response
 
         Get the last response for a module component command.
+
+        Swagger operation ID: `Devices_GetModuleComponentCommandResponse_V1`.
+
+        Args:
+            device_id: Unique ID of the device.
+            module: Name of the device module.
+            component_name: Name of the device component.
+            command_name: Name of this device command.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3565,7 +4523,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3579,6 +4537,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3586,15 +4545,15 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_get_module_component_telemetry_value_async(
+    async def devices_get_module_component_telemetry_value(
         self,
         device_id: str,
         module: str,
         component_name: str,
         telemetry_name: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3604,6 +4563,26 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get module component telemetry value
 
         Get the last telemetry value from a module component.
+
+        Swagger operation ID: `Devices_GetModuleComponentTelemetryValue_V1`.
+
+        Args:
+            device_id: Unique ID of the device.
+            module: Name of the device module.
+            component_name: Name of the device component.
+            telemetry_name: Name of this device telemetry.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3631,7 +4610,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3645,6 +4624,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3652,13 +4632,13 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_get_module_properties_async(
+    async def devices_get_module_properties(
         self,
         device_id: str,
         module: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3668,6 +4648,24 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get module properties
 
         Get all property values of a module.
+
+        Swagger operation ID: `Devices_GetModuleProperties_V1`.
+
+        Args:
+            device_id: Unique ID of the device.
+            module: Name of the device module.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3692,7 +4690,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3706,6 +4704,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3713,14 +4712,14 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_get_module_telemetry_value_async(
+    async def devices_get_module_telemetry_value(
         self,
         device_id: str,
         module: str,
         telemetry_name: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3730,6 +4729,25 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get module telemetry value
 
         Get the last telemetry value from a module.
+
+        Swagger operation ID: `Devices_GetModuleTelemetryValue_V1`.
+
+        Args:
+            device_id: Unique ID of the device.
+            module: Name of the device module.
+            telemetry_name: Name of this device telemetry.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3755,7 +4773,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3769,6 +4787,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3776,12 +4795,12 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_get_properties_async(
+    async def devices_get_properties(
         self,
         device_id: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3791,6 +4810,23 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get device properties
 
         Get all property values of a device by device ID.
+
+        Swagger operation ID: `Devices_GetProperties_V1`.
+
+        Args:
+            device_id: Unique ID of the device.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3809,7 +4845,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3823,6 +4859,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3830,13 +4867,13 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_get_telemetry_value_async(
+    async def devices_get_telemetry_value(
         self,
         device_id: str,
         telemetry_name: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3846,6 +4883,24 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get device telemetry value
 
         Get the last telemetry value from a device.
+
+        Swagger operation ID: `Devices_GetTelemetryValue_V1`.
+
+        Args:
+            device_id: Unique ID of the device.
+            telemetry_name: Name of this device telemetry.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3869,7 +4924,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3883,6 +4938,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3890,7 +4946,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_list_async(
+    def list_devices(
         self,
         application: str,
         *,
@@ -3898,14 +4954,30 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List devices
 
         Get the list of devices in an application.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `Devices_List_V1`.
+
+        Args:
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/v1/devices"
         query_params = []
@@ -3915,11 +4987,18 @@ class AzureiotcentralClient(ConnectorClientBase):
         query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -3932,23 +5011,32 @@ class AzureiotcentralClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def devices_remove_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def devices_remove(
         self,
         device_id: str,
         application: str,
@@ -3962,6 +5050,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Delete a device
 
         Delete an existing device by device ID.
+
+        Swagger operation ID: `Devices_Remove_V1`.
+
+        Args:
+            device_id: Unique ID of the device.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3975,7 +5079,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3989,16 +5093,17 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def devices_run_command_async(
+    async def devices_run_command(
         self,
-        input: DeviceCommandV1,
+        input: DeviceCommandV1 | Mapping[str, Any],
         device_id: str,
         command_name: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4008,6 +5113,26 @@ class AzureiotcentralClient(ConnectorClientBase):
         Run a device command
 
         Run a command on a device.
+
+        Swagger operation ID: `Devices_RunCommand_V1`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            device_id: Unique ID of the device.
+            command_name: Name of this device command.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4031,7 +5156,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4045,6 +5170,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4052,15 +5178,15 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_run_component_command_async(
+    async def devices_run_component_command(
         self,
-        input: DeviceComponentCommand,
+        input: DeviceComponentCommand | Mapping[str, Any],
         device_id: str,
         component_name: str,
         command_name: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4070,6 +5196,27 @@ class AzureiotcentralClient(ConnectorClientBase):
         Run a component command
 
         Run a command on a component.
+
+        Swagger operation ID: `Devices_RunComponentCommand_V1`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            device_id: Unique ID of the device.
+            component_name: Name of the device component.
+            command_name: Name of this device command.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4095,7 +5242,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4109,6 +5256,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4116,15 +5264,15 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_run_module_command_async(
+    async def devices_run_module_command(
         self,
-        input: DeviceModuleCommand,
+        input: DeviceModuleCommand | Mapping[str, Any],
         device_id: str,
         module: str,
         command_name: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4134,6 +5282,27 @@ class AzureiotcentralClient(ConnectorClientBase):
         Run a module command
 
         Run a command on a module.
+
+        Swagger operation ID: `Devices_RunModuleCommand_V1`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            device_id: Unique ID of the device.
+            module: Name of the device module.
+            command_name: Name of this device command.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4159,7 +5328,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4173,6 +5342,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4180,16 +5350,16 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_run_module_component_command_async(
+    async def devices_run_module_component_command(
         self,
-        input: DeviceModuleComponentCommand,
+        input: DeviceModuleComponentCommand | Mapping[str, Any],
         device_id: str,
         module: str,
         component_name: str,
         command_name: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4199,6 +5369,28 @@ class AzureiotcentralClient(ConnectorClientBase):
         Run a module component command
 
         Run a command on a module component.
+
+        Swagger operation ID: `Devices_RunModuleComponentCommand_V1`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            device_id: Unique ID of the device.
+            module: Name of the device module.
+            component_name: Name of the device component.
+            command_name: Name of this device command.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4226,7 +5418,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4240,6 +5432,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4247,9 +5440,9 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_set_async(
+    async def devices_set(
         self,
-        input: DeviceV2,
+        input: DeviceV2 | Mapping[str, Any],
         device_id: str,
         application: str,
         *,
@@ -4262,6 +5455,24 @@ class AzureiotcentralClient(ConnectorClientBase):
         Create or update a device
 
         Create a new device or update an existing one by device ID.
+
+        Swagger operation ID: `Devices_Set_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            device_id: Unique ID of the device.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4275,7 +5486,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4289,6 +5500,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4296,14 +5508,14 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_update_module_properties_async(
+    async def devices_update_module_properties(
         self,
-        input: ModuleProperties,
+        input: ModuleProperties | Mapping[str, Any],
         device_id: str,
         module: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4313,6 +5525,26 @@ class AzureiotcentralClient(ConnectorClientBase):
         Update module properties
 
         Update all property values of a module.
+
+        Swagger operation ID: `Devices_UpdateModuleProperties_V1`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            device_id: Unique ID of the device.
+            module: Name of the device module.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4337,7 +5569,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4351,6 +5583,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4358,13 +5591,13 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_update_properties_async(
+    async def devices_update_properties(
         self,
-        input: DeviceProperties,
+        input: DeviceProperties | Mapping[str, Any],
         device_id: str,
         application: str,
-        template: Optional[str] = None,
         *,
+        template: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4374,6 +5607,25 @@ class AzureiotcentralClient(ConnectorClientBase):
         Update device properties
 
         Update all property values of a device by device ID.
+
+        Swagger operation ID: `Devices_UpdateProperties_V1`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            device_id: Unique ID of the device.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4392,7 +5644,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4406,6 +5658,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4413,7 +5666,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def device_templates_get_async(
+    async def device_templates_get(
         self,
         template_id: str,
         application: str,
@@ -4427,6 +5680,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get a device template by ID
 
         Get details about an existing device template by ID.
+
+        Swagger operation ID: `DeviceTemplates_Get_V1`.
+
+        Args:
+            template_id: Unique ID of the template.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4440,7 +5709,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4454,6 +5723,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4461,7 +5731,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def device_templates_list_async(
+    def list_device_templates(
         self,
         application: str,
         *,
@@ -4469,14 +5739,30 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List device templates
 
         Get the list of device templates in an application.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `DeviceTemplates_List_V1`.
+
+        Args:
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/v1/deviceTemplates"
         query_params = []
@@ -4486,11 +5772,18 @@ class AzureiotcentralClient(ConnectorClientBase):
         query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -4503,23 +5796,32 @@ class AzureiotcentralClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def device_templates_remove_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def device_templates_remove(
         self,
         template_id: str,
         application: str,
@@ -4533,6 +5835,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Delete a device template
 
         Delete an existing device template by ID.
+
+        Swagger operation ID: `DeviceTemplates_Remove_V1`.
+
+        Args:
+            template_id: Unique ID of the template.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4546,7 +5864,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4560,9 +5878,10 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def roles_get_async(
+    async def roles_get(
         self,
         role_id: str,
         application: str,
@@ -4576,6 +5895,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get role
 
         Get a role by ID.
+
+        Swagger operation ID: `Roles_Get_V1`.
+
+        Args:
+            role_id: Unique ID for the role.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4589,7 +5924,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4603,6 +5938,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4610,7 +5946,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def roles_list_async(
+    def list_roles(
         self,
         application: str,
         *,
@@ -4618,11 +5954,29 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List roles
 
         Get the list of roles in an application.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `Roles_List_V1`.
+
+        Args:
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/v1/roles"
         query_params = []
@@ -4632,35 +5986,56 @@ class AzureiotcentralClient(ConnectorClientBase):
         query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def users_create_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def users_create(
         self,
-        input: User,
+        input: User | Mapping[str, Any],
         user_id: str,
         application: str,
-        user_type: Optional[str] = None,
         *,
+        user_type: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4670,6 +6045,25 @@ class AzureiotcentralClient(ConnectorClientBase):
         Create user
 
         Create a user in the application
+
+        Swagger operation ID: `Users_Create_V1`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            user_id: Unique ID of the user.
+            application: Unique ID of the application.
+            user_type: Type of the user.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4688,7 +6082,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4702,6 +6096,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4709,7 +6104,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def users_get_async(
+    async def users_get(
         self,
         user_id: str,
         application: str,
@@ -4723,6 +6118,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get user
 
         Get a user by ID
+
+        Swagger operation ID: `Users_Get_V1`.
+
+        Args:
+            user_id: Unique ID of the user.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4736,7 +6147,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4750,6 +6161,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4757,7 +6169,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def users_list_async(
+    def list_users(
         self,
         application: str,
         *,
@@ -4765,11 +6177,29 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List users
 
         Get the list of users in an application
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `Users_List_V1`.
+
+        Args:
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/v1/users"
         query_params = []
@@ -4779,29 +6209,50 @@ class AzureiotcentralClient(ConnectorClientBase):
         query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def users_remove_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def users_remove(
         self,
         user_id: str,
         application: str,
@@ -4815,6 +6266,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Delete user
 
         Delete a user
+
+        Swagger operation ID: `Users_Remove_V1`.
+
+        Args:
+            user_id: Unique ID of the user.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4828,7 +6295,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4842,15 +6309,16 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def users_update_async(
+    async def users_update(
         self,
-        input: UserPatch,
+        input: UserPatch | Mapping[str, Any],
         user_id: str,
         application: str,
-        user_type: Optional[str] = None,
         *,
+        user_type: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4860,6 +6328,25 @@ class AzureiotcentralClient(ConnectorClientBase):
         Update user
 
         Update a user in the application via patch
+
+        Swagger operation ID: `Users_Update_V1`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            user_id: Unique ID of the user.
+            application: Unique ID of the application.
+            user_type: Type of the user.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4878,7 +6365,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4892,6 +6379,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4899,28 +6387,50 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def applications_list_async(
+    def list_applications(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get the list of applications accessible to the signed-in user
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `Applications_List`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/preview/applications"
         )
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -4933,23 +6443,32 @@ class AzureiotcentralClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def device_templates_list_2_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_device_templates_2(
         self,
         application: str,
         *,
@@ -4957,14 +6476,30 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List device templates
 
         Get the list of device templates in an application.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `DeviceTemplates_List`.
+
+        Args:
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/preview/deviceTemplates"
@@ -4976,11 +6511,18 @@ class AzureiotcentralClient(ConnectorClientBase):
         query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -4993,35 +6535,64 @@ class AzureiotcentralClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def workflow_get_components_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_workflow_get_components(
         self,
         application: str,
         template: str,
-        module: Optional[str] = None,
         *,
+        module: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Workflow_GetComponents
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `Workflow_GetComponents`.
+
+        Args:
+            application: Unique ID of the application.
+            template: template.
+            module: module.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5043,43 +6614,86 @@ class AzureiotcentralClient(ConnectorClientBase):
             query_params.append(f"module={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def workflow_get_capabilities_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_workflow_get_capabilities(
         self,
         application: str,
         template: str,
+        *,
         component: Optional[str] = None,
         module: Optional[str] = None,
         type_: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Workflow_GetCapabilities
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `Workflow_GetCapabilities`.
+
+        Args:
+            application: Unique ID of the application.
+            template: template.
+            component: component.
+            module: module.
+            type_: type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5111,43 +6725,86 @@ class AzureiotcentralClient(ConnectorClientBase):
             query_params.append(f"type={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def workflow_get_capabilities_v1_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_workflow_get_capabilities_v1(
         self,
         application: str,
         template: str,
+        *,
         component: Optional[str] = None,
         module: Optional[str] = None,
         type_: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Workflow_GetCapabilities_V1
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `Workflow_GetCapabilities_V1`.
+
+        Args:
+            application: Unique ID of the application.
+            template: template.
+            component: component.
+            module: module.
+            type_: type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5179,41 +6836,82 @@ class AzureiotcentralClient(ConnectorClientBase):
             query_params.append(f"type={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def workflow_get_components_v1_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_workflow_get_components_v1(
         self,
         application: str,
         template: str,
-        module: Optional[str] = None,
         *,
+        module: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Workflow_GetComponents_V1
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `Workflow_GetComponents_V1`.
+
+        Args:
+            application: Unique ID of the application.
+            template: template.
+            module: module.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5235,29 +6933,50 @@ class AzureiotcentralClient(ConnectorClientBase):
             query_params.append(f"module={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def workflow_get_modules_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_workflow_get_modules(
         self,
         application: str,
         template: str,
@@ -5266,9 +6985,28 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Workflow_GetModules
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `Workflow_GetModules_V1`.
+
+        Args:
+            application: Unique ID of the application.
+            template: template.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/v1/_internal/workflow/modules"
@@ -5284,33 +7022,54 @@ class AzureiotcentralClient(ConnectorClientBase):
         query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def schema_device_cloud_properties_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def schema_device_cloud_properties(
         self,
         application: str,
-        instance_of: Optional[str] = None,
         *,
+        instance_of: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5318,6 +7077,22 @@ class AzureiotcentralClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         Schema_DeviceCloudProperties
+
+        Swagger operation ID: `Schema_DeviceCloudProperties`.
+
+        Args:
+            application: Unique ID of the application.
+            instance_of: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5336,7 +7111,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5350,6 +7125,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5357,13 +7133,13 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def schema_device_command_async(
+    async def schema_device_command(
         self,
         application: str,
+        *,
         instance_of: Optional[str] = None,
         component: Optional[str] = None,
         capability: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5371,6 +7147,24 @@ class AzureiotcentralClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         Schema_DeviceCommand
+
+        Swagger operation ID: `Schema_DeviceCommand`.
+
+        Args:
+            application: Unique ID of the application.
+            instance_of: The device template definition for the device.
+            component: component.
+            capability: capability.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5399,7 +7193,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5413,6 +7207,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5420,14 +7215,14 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def schema_device_command_v1_async(
+    async def schema_device_command_v1(
         self,
         application: str,
+        *,
         template: Optional[str] = None,
         module: Optional[str] = None,
         component: Optional[str] = None,
         capability: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5435,6 +7230,25 @@ class AzureiotcentralClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         Schema_DeviceCommand_V1
+
+        Swagger operation ID: `Schema_DeviceCommand_V1`.
+
+        Args:
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            module: module.
+            component: component.
+            capability: capability.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5468,7 +7282,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5482,6 +7296,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5489,12 +7304,12 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def schema_device_properties_async(
+    async def schema_device_properties(
         self,
         application: str,
+        *,
         template: Optional[str] = None,
         module: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5502,6 +7317,23 @@ class AzureiotcentralClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         Schema_DeviceProperties
+
+        Swagger operation ID: `Schema_DeviceProperties_V1`.
+
+        Args:
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            module: module.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5525,7 +7357,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5539,6 +7371,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5546,14 +7379,14 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def schema_device_telemetry_async(
+    async def schema_device_telemetry(
         self,
         application: str,
+        *,
         template: Optional[str] = None,
         module: Optional[str] = None,
         component: Optional[str] = None,
         capability: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5561,6 +7394,25 @@ class AzureiotcentralClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         Schema_DeviceTelemetry
+
+        Swagger operation ID: `Schema_DeviceTelemetry_V1`.
+
+        Args:
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            module: module.
+            component: component.
+            capability: capability.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5594,7 +7446,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5608,6 +7460,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5615,11 +7468,11 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def schema_job_async(
+    async def schema_job(
         self,
         application: str,
-        job_type: Optional[str] = None,
         *,
+        job_type: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5627,6 +7480,22 @@ class AzureiotcentralClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         Schema_Job
+
+        Swagger operation ID: `Schema_Job`.
+
+        Args:
+            application: Unique ID of the application.
+            job_type: job_type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5645,7 +7514,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5659,6 +7528,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5666,13 +7536,13 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def schema_scheduled_job_async(
+    async def schema_scheduled_job(
         self,
         application: str,
+        *,
         scheduled_job_end_type: Optional[str] = None,
         job_type: Optional[str] = None,
         patch: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5680,6 +7550,24 @@ class AzureiotcentralClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         Schema_ScheduledJob
+
+        Swagger operation ID: `Schema_ScheduledJob`.
+
+        Args:
+            application: Unique ID of the application.
+            scheduled_job_end_type: scheduled_job_end_type.
+            job_type: job_type.
+            patch: patch.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5708,7 +7596,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5722,6 +7610,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5729,12 +7618,12 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def schema_user_async(
+    async def schema_user(
         self,
         application: str,
+        *,
         user_type: Optional[str] = None,
         patch: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5742,6 +7631,23 @@ class AzureiotcentralClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         Schema_User
+
+        Swagger operation ID: `Schema_User_V1`.
+
+        Args:
+            application: Unique ID of the application.
+            user_type: user_type.
+            patch: patch.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5765,7 +7671,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5779,6 +7685,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5786,11 +7693,11 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def schema_webhook_action_body_async(
+    async def schema_webhook_action_body(
         self,
         application: str,
-        rule: Optional[str] = None,
         *,
+        rule: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5798,6 +7705,22 @@ class AzureiotcentralClient(ConnectorClientBase):
     ) -> None:
         """
         Schema_WebhookActionBody
+
+        Swagger operation ID: `Schema_WebhookActionBody`.
+
+        Args:
+            application: Unique ID of the application.
+            rule: rule.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5816,7 +7739,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5830,6 +7753,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
 

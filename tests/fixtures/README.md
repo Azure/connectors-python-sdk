@@ -24,8 +24,9 @@ LogicAppsCompiler.exe <output-directory> --directClient --language=python     --
 
 The SDK tests import the emitted model, compile the full module, exercise
 runtime value checks and wire serialization, and type-check valid and invalid
-consumers. The generated operation method currently needs the separate Azure
-Core migration (#103): it calls `ConnectorHttpClient.send`, while the Python
-SDK on `main` exposes `send_async`. The fixture does not claim to test an HTTP
-call. Live production regeneration and its hashes are tracked separately;
-this synthetic input does not replace fresh managed-API downloads.
+consumers. The merged Azure Core runtime supports the generated operation method. Tests
+exercise its success/error dispatch and verify scalar JSON values and mutation
+rejection through the real SDK serializer with mocked network responses. This
+does not validate a live endpoint for the synthetic connector. Live production
+regeneration and its hashes are tracked separately; this synthetic input does
+not replace fresh managed-API downloads.

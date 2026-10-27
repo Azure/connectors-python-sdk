@@ -1,7 +1,7 @@
 """
-Jira Connector SDK Sample
+Jira sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Jira connector SDK.
+This sample demonstrates how to use the Jira client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Jira connection
@@ -24,7 +24,8 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.jira import JiraClient, CreateIssueInput
+from azure.connectors.jira import JiraClient
+from azure.connectors.jira import CreateIssueInput
 
 
 # Connection runtime URL format:
@@ -38,12 +39,8 @@ async def example_1_list_resources() -> list[dict]:
 
     async with DefaultAzureCredential() as credential:
         async with JiraClient(CONNECTION_RUNTIME_URL, credential) as client:
-            resources_response = await client.list_resources_async()
-            resources = (
-                resources_response
-                if isinstance(resources_response, list)
-                else resources_response.get("value", []) if resources_response else []
-            )
+            resources_response = [item async for item in client.list_resources()]
+            resources = resources_response
 
             print(f"Found {len(resources)} resources")
             for resource in resources[:5]:
@@ -60,9 +57,9 @@ async def example_2_list_issues(cloud_id: str) -> None:
         async with JiraClient(CONNECTION_RUNTIME_URL, credential) as client:
             del cloud_id
 
-            issues_response = await client.list_issues_async()
+            issues_response = [item async for item in client.list_issues()]
 
-            issues = issues_response.get("issues", []) if issues_response else []
+            issues = issues_response
             print(f"Found {len(issues)} issues")
             for issue in issues[:5]:
                 print(f"  - {issue.get('key')}: {issue.get('fields', {}).get('summary')}")
@@ -97,7 +94,7 @@ async def example_3_create_issue(cloud_id: str) -> None:
                 }
             )
 
-            created = await client.create_issue_async(
+            created = await client.create_issue(
                 input=request,
                 project_key="PROJ",
                 issue_type_ids="10001",
@@ -112,7 +109,7 @@ async def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Jira Connector SDK - Sample Usage")
+    print("Jira sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

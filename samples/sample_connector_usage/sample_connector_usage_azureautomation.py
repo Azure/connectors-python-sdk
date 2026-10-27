@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure Automation Connector SDK Sample
+Azure Automation sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure Automation connector SDK
+This sample demonstrates how to use the Azure Automation client from the Azure Connectors Python SDK
 to interact with Azure Automation accounts, runbooks, and jobs.
 
 Prerequisites:
@@ -34,8 +34,8 @@ import asyncio
 import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.azureautomation import AzureautomationClient
 from azure.connectors.azureautomation import (
-    AzureautomationClient,
     CreateJobInput,
     CreateJobResponse,
     Subscription,
@@ -99,7 +99,7 @@ async def example_2_create_job():
         ) as client:
             try:
                 # Create a new automation job
-                result = await client.create_job_async(
+                result = await client.create_job(
                     input=CreateJobInput(properties={}),
                     subscription_id=SUBSCRIPTION_ID,
                     resource_group_name=RESOURCE_GROUP_NAME,
@@ -130,7 +130,7 @@ async def example_3_create_job_and_wait():
         ) as client:
             try:
                 # Create job with wait parameter to wait for completion
-                result = await client.create_job_async(
+                result = await client.create_job(
                     input=CreateJobInput(properties={}),
                     subscription_id=SUBSCRIPTION_ID,
                     resource_group_name=RESOURCE_GROUP_NAME,
@@ -161,7 +161,7 @@ async def example_4_get_job_status():
         ) as client:
             try:
                 # Get status of a job
-                result = await client.get_status_of_job_async(
+                result = await client.get_status_of_job(
                     subscription_id=SUBSCRIPTION_ID,
                     resource_group_name=RESOURCE_GROUP_NAME,
                     automation_account=AUTOMATION_ACCOUNT,
@@ -194,7 +194,7 @@ async def example_5_get_job_output():
         ) as client:
             try:
                 # Get output from a completed job
-                output = await client.get_job_output_async(
+                output = await client.get_job_output(
                     subscription_id=SUBSCRIPTION_ID,
                     resource_group_name=RESOURCE_GROUP_NAME,
                     automation_account=AUTOMATION_ACCOUNT,

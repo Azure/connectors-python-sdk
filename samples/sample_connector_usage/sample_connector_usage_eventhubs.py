@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure Event Hubs Connector SDK Sample
+Azure Event Hubs sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure Event Hubs connector SDK
+This sample demonstrates how to use the Azure Event Hubs client from the Azure Connectors Python SDK
 to send and receive events from Azure Event Hubs.
 
 Prerequisites:
@@ -28,10 +28,9 @@ import json
 import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.eventhubs import EventhubsClient
 from azure.connectors.eventhubs import (
-    EventhubsClient,
     SendEvent,
-    SendEventsInput,
 )
 
 # Connection runtime URL format:
@@ -71,7 +70,7 @@ async def example_1_send_event():
                     }
                 )
 
-                await client.send_event_async(
+                await client.send_event(
                     input=event,
                     event_hub_name=EVENT_HUB_NAME
                 )
@@ -110,7 +109,7 @@ async def example_2_send_event_with_partition_key():
                     }
                 )
 
-                await client.send_event_async(
+                await client.send_event(
                     input=event,
                     event_hub_name=EVENT_HUB_NAME,
                     partition_key=partition_key
@@ -138,35 +137,30 @@ async def example_3_send_batch_events():
         async with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Create batch with multiple events
-                batch_input = SendEventsInput(
-                    additional_properties={
-                        "events": [
-                            {
-                                "contentData": json.dumps({"id": 1, "name": "Event 1"}),
-                                "properties": {"index": "1"}
-                            },
-                            {
-                                "contentData": json.dumps({"id": 2, "name": "Event 2"}),
-                                "properties": {"index": "2"}
-                            },
-                            {
-                                "contentData": json.dumps({"id": 3, "name": "Event 3"}),
-                                "properties": {"index": "3"}
-                            }
-                        ]
-                    }
-                )
+                batch_input = [
+                    SendEvent(
+                        content_data=json.dumps({"id": 1, "name": "Event 1"}),
+                        properties={"index": "1"},
+                    ),
+                    SendEvent(
+                        content_data=json.dumps({"id": 2, "name": "Event 2"}),
+                        properties={"index": "2"},
+                    ),
+                    SendEvent(
+                        content_data=json.dumps({"id": 3, "name": "Event 3"}),
+                        properties={"index": "3"},
+                    ),
+                ]
 
-                await client.send_events_async(
+                await client.send_events(
                     input=batch_input,
                     event_hub_name=EVENT_HUB_NAME,
                     partition_key=os.environ.get("EVENTHUBS_PARTITION_KEY", "partition-1")
                 )
 
-                events = batch_input.additional_properties.get("events", [])
-                print(f"Batch of {len(events)} events sent to '{EVENT_HUB_NAME}':")
-                for i, evt in enumerate(events, 1):
-                    print(f"  {i}. {evt.get('contentData', 'N/A')[:40]}...")
+                print(f"Batch of {len(batch_input)} events sent to '{EVENT_HUB_NAME}':")
+                for i, event in enumerate(batch_input, 1):
+                    print(f"  {i}. {event.content_data[:40]}...")
 
             except ConnectorException as ex:
                 print(f"Connector error (status {ex.status_code}): {ex}")
@@ -182,8 +176,8 @@ async def example_4_list_event_hubs():
 
         async with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_event_hubs_async()
-                print(f"Event Hubs: {result}")
+                items = [item async for item in client.list_event_hubs()]
+                print(f"Event Hubs: {items}")
 
             except ConnectorException as ex:
                 print(f"Connector error (status {ex.status_code}): {ex}")
@@ -203,10 +197,10 @@ async def example_5_list_consumer_groups():
 
         async with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_consumer_groups_async(
+                items = [item async for item in client.list_consumer_groups(
                     event_hub_name=EVENT_HUB_NAME
-                )
-                print(f"Consumer groups for '{EVENT_HUB_NAME}': {result}")
+                )]
+                print(f"Consumer groups for '{EVENT_HUB_NAME}': {items}")
 
             except ConnectorException as ex:
                 print(f"Connector error (status {ex.status_code}): {ex}")
@@ -216,7 +210,7 @@ async def example_5_list_consumer_groups():
 
 async def main():
     """Run all examples."""
-    print("Azure Event Hubs Connector SDK - Sample Usage")
+    print("Azure Event Hubs sample usage for the Azure Connectors Python SDK")
     print("=" * 60)
 
     if not CONNECTION_RUNTIME_URL:

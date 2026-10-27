@@ -1,7 +1,7 @@
 """
-Slack Connector SDK Sample
+Slack sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Slack connector SDK.
+This sample demonstrates how to use the Slack client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Slack connection
@@ -24,7 +24,8 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.slack import PostMessageRequest, SlackClient
+from azure.connectors.slack import SlackClient
+from azure.connectors.slack import PostMessageRequest
 
 
 # Connection runtime URL format:
@@ -38,7 +39,7 @@ async def example_1_list_channels() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with SlackClient(CONNECTION_RUNTIME_URL, credential) as client:
-            channels_response = [item async for item in client.list_channels_async()]
+            channels_response = [item async for item in client.list_channels()]
             channels = channels_response if channels_response else []
 
             print(f"Found {len(channels)} channels")
@@ -52,7 +53,7 @@ async def example_2_create_channel() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with SlackClient(CONNECTION_RUNTIME_URL, credential) as client:
-            created = await client.create_channel_async(
+            created = await client.create_channel(
                 name="sdk-sample-channel",
                 is_private=False,
             )
@@ -70,9 +71,9 @@ async def example_3_post_message() -> None:
                 channel="#general",
                 text="Hello from Slack Python SDK sample",
             )
-            posted = await client.post_message_async(input=payload)
+            posted = await client.post_message(input=payload)
             print(
-                f"Posted: ok={posted.get('ok') if posted else None}, "
+                f"Posted result: {posted}; "
                 f"ts={posted.get('ts') if posted else None}"
             )
 
@@ -84,7 +85,7 @@ async def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Slack Connector SDK - Sample Usage")
+    print("Slack sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

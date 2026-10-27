@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
@@ -20,6 +20,23 @@ from azure.connectors.sdk import (
     ConnectorResponseHook,
 )
 
+__all__ = [
+    "TicketmasterClient",
+    "AttractionGetResponse",
+    "AttractionsGetResponse",
+    "ClassificationGetResponse",
+    "ClassificationsGetResponse",
+    "EventGetResponse",
+    "EventImagesGetResponse",
+    "EventsGetResponse",
+    "GenreGetResponse",
+    "SegmentGetResponse",
+    "SubGenreGetResponse",
+    "SuggestionsGetResponse",
+    "VenueGetResponse",
+    "VenuesGetResponse",
+]
+
 
 # Type Definitions
 
@@ -29,15 +46,17 @@ class EventsGetResponse:
     Response for Event search
     """
 
-    links: Optional[Dict[str, Any]] = field(
+    links: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
-    embedded: Optional[Dict[str, Any]] = field(
+    embedded: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_embedded"},
     )
-    page: Optional[Dict[str, Any]] = None
+    page: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -46,39 +65,52 @@ class EventGetResponse:
     Response for Get event details
     """
 
-    embedded: Optional[Dict[str, Any]] = field(
+    embedded: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_embedded"},
     )
-    links: Optional[Dict[str, Any]] = field(
+    links: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
-    classifications: Optional[List[Dict[str, Any]]] = None
-    dates: Optional[Dict[str, Any]] = None
-    id: Optional[str] = None
-    """The identifier."""
-    images: Optional[List[Dict[str, Any]]] = None
-    locale: Optional[str] = None
-    """The locale."""
-    name: Optional[str] = None
-    """The name."""
-    please_note: Optional[str] = field(
+    classifications: Optional[
+        List[Dict[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    dates: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """The identifier."""
+    images: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    locale: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """The locale."""
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """The name."""
+    please_note: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "pleaseNote"},
     )
     """The please note."""
-    price_ranges: Optional[List[Dict[str, Any]]] = field(
+    price_ranges: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "priceRanges"},
     )
-    promoter: Optional[Dict[str, Any]] = None
-    sales: Optional[Dict[str, Any]] = None
-    test: Optional[bool] = None
+    promoter: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    sales: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    test: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether test."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """The type."""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The URL address."""
 
 
@@ -88,13 +120,18 @@ class EventImagesGetResponse:
     Response for Get event images
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    """The type."""
-    id: Optional[str] = None
-    """The identifier."""
-    images: Optional[List[Dict[str, Any]]] = None
-    links: Optional[Dict[str, Any]] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    """The type."""
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """The identifier."""
+    images: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    links: Optional[Dict[str, Any]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
 
@@ -105,15 +142,17 @@ class AttractionsGetResponse:
     Response for Attraction search
     """
 
-    links: Optional[Dict[str, Any]] = field(
+    links: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
-    embedded: Optional[Dict[str, Any]] = field(
+    embedded: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_embedded"},
     )
-    page: Optional[Dict[str, Any]] = None
+    page: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -122,20 +161,30 @@ class AttractionGetResponse:
     Response for Get attraction details
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    """The type."""
-    id: Optional[str] = None
-    """The identifier."""
-    test: Optional[bool] = None
-    """Whether test."""
-    locale: Optional[str] = None
-    """The locale."""
-    images: Optional[List[Dict[str, Any]]] = None
-    classifications: Optional[List[Dict[str, Any]]] = None
-    links: Optional[Dict[str, Any]] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    """The type."""
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """The identifier."""
+    test: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    """Whether test."""
+    locale: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """The locale."""
+    images: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    classifications: Optional[
+        List[Dict[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    links: Optional[Dict[str, Any]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
 
@@ -146,15 +195,17 @@ class ClassificationsGetResponse:
     Response for Classification search
     """
 
-    links: Optional[Dict[str, Any]] = field(
+    links: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
-    embedded: Optional[Dict[str, Any]] = field(
+    embedded: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_embedded"},
     )
-    page: Optional[Dict[str, Any]] = None
+    page: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -163,11 +214,12 @@ class ClassificationGetResponse:
     Response for Get classification details
     """
 
-    links: Optional[Dict[str, Any]] = field(
+    links: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
-    segment: Optional[Dict[str, Any]] = None
+    segment: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -176,17 +228,19 @@ class GenreGetResponse:
     Response for Get genre details
     """
 
-    embedded: Optional[Dict[str, Any]] = field(
+    embedded: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_embedded"},
     )
-    links: Optional[Dict[str, Any]] = field(
+    links: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The identifier."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name."""
 
 
@@ -196,16 +250,18 @@ class SegmentGetResponse:
     Response for Get segment details
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The identifier."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name."""
-    links: Optional[Dict[str, Any]] = field(
+    links: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
-    embedded: Optional[Dict[str, Any]] = field(
+    embedded: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_embedded"},
     )
 
@@ -216,15 +272,16 @@ class SubGenreGetResponse:
     Response for Get sub-genre details
     """
 
-    links: Optional[Dict[str, Any]] = field(
+    links: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The identifier."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name."""
-    locale: Optional[str] = None
+    locale: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The locale."""
 
 
@@ -234,15 +291,17 @@ class VenuesGetResponse:
     Response for Venue search
     """
 
-    embedded: Optional[Dict[str, Any]] = field(
+    embedded: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_embedded"},
     )
-    links: Optional[Dict[str, Any]] = field(
+    links: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
-    page: Optional[Dict[str, Any]] = None
+    page: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -251,31 +310,37 @@ class VenueGetResponse:
     Response for Get venue details
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    """The type."""
-    id: Optional[str] = None
-    """The identifier."""
-    test: Optional[bool] = None
-    """Whether test."""
-    locale: Optional[str] = None
-    """The locale."""
-    postal_code: Optional[str] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    """The type."""
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """The identifier."""
+    test: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    """Whether test."""
+    locale: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """The locale."""
+    postal_code: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "postalCode"},
     )
     """The postal code."""
-    timezone: Optional[str] = None
+    timezone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The timezone."""
-    city: Optional[Dict[str, Any]] = None
-    state: Optional[Dict[str, Any]] = None
-    country: Optional[Dict[str, Any]] = None
-    address: Optional[Dict[str, Any]] = None
-    location: Optional[Dict[str, Any]] = None
-    markets: Optional[List[Dict[str, Any]]] = None
-    links: Optional[Dict[str, Any]] = field(
+    city: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    state: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    country: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    address: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    location: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    markets: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    links: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
 
@@ -286,12 +351,14 @@ class SuggestionsGetResponse:
     Response for Find suggestions
     """
 
-    links: Optional[Dict[str, Any]] = field(
+    links: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
-    embedded: Optional[Dict[str, Any]] = field(
+    embedded: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_embedded"},
     )
 
@@ -307,7 +374,7 @@ class TicketmasterClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -324,8 +391,8 @@ class TicketmasterClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -346,7 +413,7 @@ class TicketmasterClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -361,8 +428,9 @@ class TicketmasterClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "ticketmaster"
 
-    async def events_get_async(
+    async def events_get(
         self,
+        *,
         size: Optional[int] = None,
         id: Optional[str] = None,
         keyword: Optional[str] = None,
@@ -410,7 +478,6 @@ class TicketmasterClient(ConnectorClientBase):
         preferred_country: Optional[str] = None,
         include_spellcheck: Optional[str] = None,
         domain: Optional[List[str]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -421,6 +488,89 @@ class TicketmasterClient(ConnectorClientBase):
 
         Find events and filter your search by location, date, availability, and
         much more.
+
+        Swagger operation ID: `EventsGet`.
+
+        Args:
+            size: The page size of the response.
+            id: The filter for entities by their identifier.
+            keyword: The keyword to search on.
+            attraction_id: The filter by attraction identifier.
+            venue_id: The filter by venue identifier.
+            postal_code: The filter by postal code or zipcode.
+            latlong: The filter for events by latitude and longitude. This
+                filter is deprecated and may be removed in a future release,
+                please use geoPoint instead.
+            radius: The radius of the area in which we want to search for
+                events.
+            unit: The unit of the radius.
+            source: The filter for entities by their primary source name or
+                publishing source name.
+            locale: The locale in ISO code format. Multiple comma-separated
+                values can be provided.
+            market_id: The filter by market identifier.
+            start_date_time: The filter with a start date after this date.
+            end_date_time: The filter with a start date before this date.
+            include_t_b_a: Indicates whether to include events with date to be
+                announced (TBA).
+            include_t_b_d: Indicates whether to include events with a date to
+                be defined (TBD).
+            include_test: Indicates whether to include entities flagged as test
+                in the response.
+            page: The page number.
+            sort: The sorting order of the search result.
+            onsale_start_date_time: The filter with onsale start date after
+                this date.
+            onsale_end_date_time: The filter with onsale end date before this
+                date.
+            city: The filter by city.
+            country_code: The filter by country code.
+            state_code: The filter by state code.
+            classification_name: The filter by classification name: name of any
+                segment, genre, sub-genre, type, sub-type.
+            classification_id: The filter by classification identifier:
+                identifier of any segment, genre, sub-genre, type, sub-type.
+            dma_id: The filter by DMA identifier.
+            local_start_date_time: The filter with event local start date time
+                within this range.
+            local_start_end_date_time: The filter for events where event local
+                start and end date overlap this range.
+            start_end_date_time: The filter for events where event start and
+                end date overlap this range.
+            public_visibility_start_date_time: The filter for events with
+                public visibility starting.
+            pre_sale_date_time: The filter for events with a presale start and
+                end that intersects with this range.
+            onsale_on_start_date: The filter with onsale start date on this
+                date.
+            onsale_on_after_start_date: The filter with onsale range within
+                this date.
+            collection_id: The filter by collection identifier.
+            segment_id: The filter by segment identifier.
+            segment_name: The filter by segment name.
+            include_family: The filter by classification that are
+                family-friendly.
+            promoter_id: The filter by promoter identifier.
+            genre_id: The filter by genre identifier.
+            sub_genre_id: The filter by sub-genre identifier.
+            type_id: The filter by type identifier.
+            sub_type_id: The filter by sub-type identifier.
+            geo_point: The filter for events by geoHash.
+            preferred_country: The popularity boost by country, default is us.
+            include_spellcheck: Indicates whether to include spell check
+                suggestions in the response.
+            domain: The filter for entities based on domains they are available
+                on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/discovery/v2/events.json"
@@ -825,7 +975,7 @@ class TicketmasterClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -839,6 +989,7 @@ class TicketmasterClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -846,12 +997,12 @@ class TicketmasterClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def event_get_async(
+    async def event_get(
         self,
         id: str,
+        *,
         locale: Optional[str] = None,
         domain: Optional[List[str]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -863,6 +1014,25 @@ class TicketmasterClient(ConnectorClientBase):
         Get details for a specific event using the unique identifier for the
         event. This includes the venue and location, the attraction(s), and the
         Ticketmaster Website URL for purchasing tickets for the event
+
+        Swagger operation ID: `EventGet`.
+
+        Args:
+            id: The unique identifier for the event.
+            locale: The locale in ISO code format. Multiple comma-separated
+                values can be provided.
+            domain: The filter for entities based on domains they are available
+                on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -893,7 +1063,7 @@ class TicketmasterClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -907,6 +1077,7 @@ class TicketmasterClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -914,12 +1085,12 @@ class TicketmasterClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def event_images_get_async(
+    async def event_images_get(
         self,
         id: str,
+        *,
         locale: Optional[str] = None,
         domain: Optional[List[str]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -930,6 +1101,25 @@ class TicketmasterClient(ConnectorClientBase):
 
         Get images for a specific event using the unique identifier for the
         event.
+
+        Swagger operation ID: `EventImagesGet`.
+
+        Args:
+            id: The unique identifier for the event.
+            locale: The locale in ISO code format. Multiple comma-separated
+                values can be provided.
+            domain: The filter for entities based on domains they are available
+                on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -960,7 +1150,7 @@ class TicketmasterClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -974,6 +1164,7 @@ class TicketmasterClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -981,8 +1172,9 @@ class TicketmasterClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def attractions_get_async(
+    async def attractions_get(
         self,
+        *,
         id: Optional[str] = None,
         keyword: Optional[str] = None,
         source: Optional[str] = None,
@@ -1003,7 +1195,6 @@ class TicketmasterClient(ConnectorClientBase):
         preferred_country: Optional[str] = None,
         include_spellcheck: Optional[str] = None,
         domain: Optional[List[str]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1014,6 +1205,48 @@ class TicketmasterClient(ConnectorClientBase):
 
         Find attractions (artists, sports, packages, plays and so on) and
         filter your search by name, and much more.
+
+        Swagger operation ID: `AttractionsGet`.
+
+        Args:
+            id: The filter for entities by their identifier.
+            keyword: The keyword to search on.
+            source: The filter for entities by their primary source name or
+                publishing source name.
+            locale: The locale in ISO code format. Multiple comma-separated
+                values can be provided.
+            include_test: Indicates whether to include entities flagged as test
+                in the response.
+            size: The page size of the response.
+            page: The page number.
+            sort: The sorting order of the search result.
+            classification_name: The filter for attractions by classification
+                name.
+            classification_id: The filter for attractions by classification
+                identifier.
+            include_family: The filter by classification that are
+                family-friendly.
+            segment_id: The filter for attractions by segment identifier.
+            genre_id: The filter for attractions by genre identifier.
+            sub_genre_id: The filter for attractions by sub-genre identifier.
+            type_id: The filter for attractions by type identifier.
+            sub_type_id: The filter for attractions by sub-type identifier.
+            country_code: The filter for attractions by country code.
+            preferred_country: The popularity boost by country, default is us.
+            include_spellcheck: Indicates whether to include spell check
+                suggestions in the response.
+            domain: The filter for entities based on domains they are available
+                on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/discovery/v2/attractions"
@@ -1203,7 +1436,7 @@ class TicketmasterClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1217,6 +1450,7 @@ class TicketmasterClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1224,12 +1458,12 @@ class TicketmasterClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def attraction_get_async(
+    async def attraction_get(
         self,
         id: str,
+        *,
         locale: Optional[str] = None,
         domain: Optional[List[str]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1240,6 +1474,25 @@ class TicketmasterClient(ConnectorClientBase):
 
         Get details for a specific attraction using the unique identifier for
         the attraction.
+
+        Swagger operation ID: `AttractionGet`.
+
+        Args:
+            id: The unique identifier for the attraction.
+            locale: The locale in ISO code format. Multiple comma-separated
+                values can be provided.
+            domain: The filter for entities based on domains they are available
+                on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1270,7 +1523,7 @@ class TicketmasterClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1284,6 +1537,7 @@ class TicketmasterClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1291,8 +1545,9 @@ class TicketmasterClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def classifications_get_async(
+    async def classifications_get(
         self,
+        *,
         id: Optional[str] = None,
         keyword: Optional[str] = None,
         source: Optional[str] = None,
@@ -1305,7 +1560,6 @@ class TicketmasterClient(ConnectorClientBase):
         preferred_country: Optional[str] = None,
         include_spellcheck: Optional[str] = None,
         domain: Optional[List[str]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1316,6 +1570,37 @@ class TicketmasterClient(ConnectorClientBase):
 
         Find classifications and filter your search by name, and much more.
         Classifications help define the nature of attractions and events.
+
+        Swagger operation ID: `ClassificationsGet`.
+
+        Args:
+            id: The filter for entities by their identifier.
+            keyword: The keyword to search on.
+            source: The filter for entities by their primary source name or
+                publishing source name.
+            locale: The locale in ISO code format. Multiple comma-separated
+                values can be provided.
+            include_test: Indicates whether to include entities flagged as test
+                in the response.
+            size: The page size of the response.
+            page: The page number.
+            sort: The sorting order of the search result.
+            country_code: The filter for classifications by country code.
+            preferred_country: The popularity boost by country, default is us.
+            include_spellcheck: Indicates whether to include spell check
+                suggestions in the response.
+            domain: The filter for entities based on domains they are available
+                on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/discovery/v2/classifications"
@@ -1395,7 +1680,7 @@ class TicketmasterClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1409,6 +1694,7 @@ class TicketmasterClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1416,12 +1702,12 @@ class TicketmasterClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def classification_get_async(
+    async def classification_get(
         self,
         id: str,
+        *,
         locale: Optional[str] = None,
         domain: Optional[List[str]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1432,6 +1718,25 @@ class TicketmasterClient(ConnectorClientBase):
 
         Get details for a specific segment, genre, or sub-genre using its
         unique identifier.
+
+        Swagger operation ID: `ClassificationGet`.
+
+        Args:
+            id: The unique identifier for the classification.
+            locale: The locale in ISO code format. Multiple comma-separated
+                values can be provided.
+            domain: The filter for entities based on domains they are available
+                on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1462,7 +1767,7 @@ class TicketmasterClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1476,6 +1781,7 @@ class TicketmasterClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1483,12 +1789,12 @@ class TicketmasterClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def genre_get_async(
+    async def genre_get(
         self,
         id: str,
+        *,
         locale: Optional[str] = None,
         domain: Optional[List[str]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1498,6 +1804,25 @@ class TicketmasterClient(ConnectorClientBase):
         Get genre details
 
         Get details for a specific genre using its unique identifier.
+
+        Swagger operation ID: `GenreGet`.
+
+        Args:
+            id: The unique identifier for the genre.
+            locale: The locale in ISO code format. Multiple comma-separated
+                values can be provided.
+            domain: The filter for entities based on domains they are available
+                on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1528,7 +1853,7 @@ class TicketmasterClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1542,6 +1867,7 @@ class TicketmasterClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1549,12 +1875,12 @@ class TicketmasterClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def segment_get_async(
+    async def segment_get(
         self,
         id: str,
+        *,
         locale: Optional[str] = None,
         domain: Optional[List[str]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1564,6 +1890,25 @@ class TicketmasterClient(ConnectorClientBase):
         Get segment details
 
         Get details for a specific segment using its unique identifier.
+
+        Swagger operation ID: `SegmentGet`.
+
+        Args:
+            id: The unique identifier for the segment.
+            locale: The locale in ISO code format. Multiple comma-separated
+                values can be provided.
+            domain: The filter for entities based on domains they are available
+                on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1594,7 +1939,7 @@ class TicketmasterClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1608,6 +1953,7 @@ class TicketmasterClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1615,12 +1961,12 @@ class TicketmasterClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def sub_genre_get_async(
+    async def sub_genre_get(
         self,
         id: str,
+        *,
         locale: Optional[str] = None,
         domain: Optional[List[str]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1630,6 +1976,25 @@ class TicketmasterClient(ConnectorClientBase):
         Get sub-genre details
 
         Get details for a specific sub-genre using its unique identifier.
+
+        Swagger operation ID: `SubGenreGet`.
+
+        Args:
+            id: The unique identifier for the sub-genre.
+            locale: The locale in ISO code format. Multiple comma-separated
+                values can be provided.
+            domain: The filter for entities based on domains they are available
+                on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1664,7 +2029,7 @@ class TicketmasterClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1678,6 +2043,7 @@ class TicketmasterClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1685,8 +2051,9 @@ class TicketmasterClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def venues_get_async(
+    async def venues_get(
         self,
+        *,
         id: Optional[str] = None,
         keyword: Optional[str] = None,
         latlong: Optional[str] = None,
@@ -1704,7 +2071,6 @@ class TicketmasterClient(ConnectorClientBase):
         preferred_country: Optional[str] = None,
         include_spellcheck: Optional[str] = None,
         domain: Optional[List[str]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1714,6 +2080,45 @@ class TicketmasterClient(ConnectorClientBase):
         Venue search
 
         Find venues and filter your search by name, and much more.
+
+        Swagger operation ID: `VenuesGet`.
+
+        Args:
+            id: The filter for entities by their identifier.
+            keyword: The keyword to search on.
+            latlong: The filter for venues by latitude and longitude. This
+                filter is deprecated and may be removed in a future release,
+                please use geoPoint instead.
+            radius: The radius of the area in which we want to search for
+                venues.
+            unit: The unit of the radius.
+            source: The filter for entities by their primary source name or
+                publishing source name.
+            locale: The locale in ISO code format. Multiple comma-separated
+                values can be provided.
+            include_test: Indicates whether to include entities flagged as test
+                in the response.
+            size: The page size of the response.
+            page: The page number.
+            sort: The sorting order of the search result.
+            country_code: The filter for venues by country code.
+            state_code: The filter by state / province code.
+            geo_point: The filter for venues by geoHash.
+            preferred_country: The popularity boost by country, default is us.
+            include_spellcheck: Indicates whether to include spell check
+                suggestions in the response.
+            domain: The filter for entities based on domains they are available
+                on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/discovery/v2/venues"
         query_params = []
@@ -1816,7 +2221,7 @@ class TicketmasterClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1830,6 +2235,7 @@ class TicketmasterClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1837,12 +2243,12 @@ class TicketmasterClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def venue_get_async(
+    async def venue_get(
         self,
         id: str,
+        *,
         locale: Optional[str] = None,
         domain: Optional[List[str]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1853,6 +2259,25 @@ class TicketmasterClient(ConnectorClientBase):
 
         Get details for a specific venue using the unique identifier for the
         venue.
+
+        Swagger operation ID: `VenueGet`.
+
+        Args:
+            id: The unique identifier for the venue.
+            locale: The locale in ISO code format. Multiple comma-separated
+                values can be provided.
+            domain: The filter for entities based on domains they are available
+                on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1883,7 +2308,7 @@ class TicketmasterClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1897,6 +2322,7 @@ class TicketmasterClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1904,8 +2330,9 @@ class TicketmasterClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def suggestions_get_async(
+    async def suggestions_get(
         self,
+        *,
         keyword: Optional[str] = None,
         latlong: Optional[str] = None,
         radius: Optional[str] = None,
@@ -1925,7 +2352,6 @@ class TicketmasterClient(ConnectorClientBase):
         local_start_end_date_time: Optional[List[str]] = None,
         include_spellcheck: Optional[str] = None,
         domain: Optional[List[str]] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1936,6 +2362,54 @@ class TicketmasterClient(ConnectorClientBase):
 
         Find search suggestions and filter your suggestions by location,
         source, etc.
+
+        Swagger operation ID: `SuggestionsGet`.
+
+        Args:
+            keyword: The keyword to search on.
+            latlong: The filter for events by latitude and longitude. This
+                filter is deprecated and may be removed in a future release,
+                please use geoPoint instead.
+            radius: The radius of the area in which we want to search for
+                events.
+            unit: The unit of the radius.
+            source: The filter for entities by their primary source name or
+                publishing source name.
+            locale: The locale in ISO code format. Multiple comma-separated
+                values can be provided.
+            include_t_b_a: Indicates whether to include events with date to be
+                announced (TBA). Defaults to no if date parameter sent, yes
+                otherwise.
+            include_t_b_d: Indicates whether to include events with a date to
+                be defined (TBD). Defaults to no if date parameter sent, yes
+                otherwise.
+            include_test: Indicates whether to include entities flagged as test
+                in the response.
+            size: Size of every entity returned in the response.
+            country_code: The filter suggestions by country code.
+            segment_id: The filter suggestions by segment identifier.
+            geo_point: The filter for events by geoHash.
+            resource: Which resources to include in the suggest response,
+                defaults to all resources.
+            preferred_country: The popularity boost by country, default is us.
+            start_end_date_time: The filter for events where event start and
+                end date overlap this range.
+            local_start_end_date_time: The filter for events where event local
+                start and end date overlap this range.
+            include_spellcheck: Indicates whether to include spell check
+                suggestions in the response.
+            domain: The filter for entities based on domains they are available
+                on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/discovery/v2/suggest"
         query_params = []
@@ -2088,7 +2562,7 @@ class TicketmasterClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2102,6 +2576,7 @@ class TicketmasterClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

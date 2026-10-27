@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Zoho Sign connector SDK sample."""
+"""Zoho Sign sample for the Azure Connectors Python SDK."""
 
 import asyncio
 import os
@@ -19,7 +19,7 @@ async def list_templates() -> None:
     """List available Zoho Sign templates."""
     async with DefaultAzureCredential() as credential:
         async with ZohosignClient(CONNECTION_RUNTIME_URL, credential) as client:
-            templates = await client.get_templates_async()
+            templates = [item async for item in client.list_templates()]
             print(f"Templates: {templates}")
 
 
@@ -31,7 +31,7 @@ async def get_document() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with ZohosignClient(CONNECTION_RUNTIME_URL, credential) as client:
-            document = await client.get_document_async(request_id=int(REQUEST_ID))
+            document = await client.get_document(request_id=int(REQUEST_ID))
             print(f"Document: {document}")
 
 

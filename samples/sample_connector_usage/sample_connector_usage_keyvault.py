@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-Azure Key Vault Connector SDK Sample
+Azure Key Vault sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Azure Key Vault connector SDK to
+This sample demonstrates how to use the Azure Key Vault client from the Azure Connectors Python SDK to
 manage keys and secrets.
 
 Prerequisites:
@@ -25,8 +25,8 @@ import asyncio
 import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
+from azure.connectors.keyvault import KeyvaultClient
 from azure.connectors.keyvault import (
-    KeyvaultClient,
     KeyEncryptInput,
     KeyDecryptInput,
 )
@@ -51,10 +51,9 @@ async def example_1_list_keys():
 
         async with KeyvaultClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.list_keys_async()
+                keys = [key async for key in client.list_keys()]
 
-                if result and result.get("value"):
-                    keys = result["value"]
+                if keys:
                     print(f"Found {len(keys)} keys:")
                     for key in keys:
                         print(f"  - {key.get('name')} (enabled: {key.get('is_enabled')})")
@@ -75,7 +74,7 @@ async def example_2_get_key_metadata():
 
         async with KeyvaultClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_key_metadata_async(key_name=KEY_NAME)
+                result = await client.get_key_metadata(key_name=KEY_NAME)
 
                 if result:
                     print(f"Key Name: {result.get('name')}")
@@ -110,7 +109,7 @@ async def example_3_encrypt_decrypt():
                     algorithm="RSA-OAEP",
                     raw_data=plaintext
                 )
-                encrypt_result = await client.encrypt_data_async(
+                encrypt_result = await client.encrypt_data(
                     input=encrypt_input,
                     key_name=KEY_NAME
                 )
@@ -124,7 +123,7 @@ async def example_3_encrypt_decrypt():
                         algorithm="RSA-OAEP",
                         encrypted_data=encrypted
                     )
-                    decrypt_result = await client.decrypt_data_async(
+                    decrypt_result = await client.decrypt_data(
                         input=decrypt_input,
                         key_name=KEY_NAME
                     )
@@ -147,10 +146,9 @@ async def example_4_list_secrets():
 
         async with KeyvaultClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.list_secrets_async()
+                secrets = [secret async for secret in client.list_secrets()]
 
-                if result and result.get("value"):
-                    secrets = result["value"]
+                if secrets:
                     print(f"Found {len(secrets)} secrets:")
                     for _ in secrets:
                         print("  - [REDACTED]")
@@ -171,7 +169,7 @@ async def example_5_get_secret():
 
         async with KeyvaultClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_secret_async(secret_name=SECRET_NAME)
+                result = await client.get_secret(secret_name=SECRET_NAME)
 
                 if result:
                     print(f"Secret Name: {result.get('name')}")
@@ -197,7 +195,7 @@ async def example_6_get_secret_metadata():
 
         async with KeyvaultClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_secret_metadata_async(
+                result = await client.get_secret_metadata(
                     secret_name=SECRET_NAME
                 )
 

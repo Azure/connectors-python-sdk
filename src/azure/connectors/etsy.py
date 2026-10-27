@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, List, Literal, Any, Mapping
 from urllib.parse import quote
 import json
@@ -20,6 +20,114 @@ from azure.connectors.sdk import (
     ConnectorResponseHook,
 )
 
+__all__ = [
+    "EtsyClient",
+    "ApplicationListingsInventoryRequest",
+    "ApplicationShopsListingsVariationImagesRequest",
+    "Channel",
+    "DestinationRegion",
+    "DestinationRegion1",
+    "ErrorSchema",
+    "Include",
+    "Includes",
+    "Includes1",
+    "ItemDimensionsUnit",
+    "ItemDimensionsUnit2",
+    "ItemWeightUnit",
+    "ItemWeightUnit2",
+    "ListingCreateInput",
+    "ListingCreateTranslationInput",
+    "ListingImage",
+    "ListingImages",
+    "ListingInventory",
+    "ListingInventoryProduct",
+    "ListingInventoryProductOffering",
+    "ListingInventoryWithAssociations",
+    "ListingPropertyValue",
+    "ListingPropertyValues",
+    "ListingTranslation",
+    "ListingUpdateInput",
+    "ListingUpdateInventoryInput",
+    "ListingUpdatePropertyInput",
+    "ListingUpdateTranslationInput",
+    "ListingUpdateVariationInput",
+    "ListingUploadImageInput",
+    "ListingUploadInput",
+    "ListingVariationImage",
+    "ListingVariationImages",
+    "Money",
+    "Occasion",
+    "Offering",
+    "Payment",
+    "PaymentAccountLedgerEntries",
+    "PaymentAccountLedgerEntry",
+    "PaymentAdjustment",
+    "Payments",
+    "Pong",
+    "ProcessingTimeUnit",
+    "Product",
+    "ProfileType",
+    "PropertyValue",
+    "ReceiptCreateShipmentInput",
+    "Recipient",
+    "SellerTaxonomyNode",
+    "SellerTaxonomyNodes",
+    "ShippingCarrier",
+    "ShippingCarrierMailClass",
+    "ShippingCarriers",
+    "ShippingCreateDestinationInput",
+    "ShippingCreateProfileInput",
+    "ShippingCreateUpgradeInput",
+    "ShippingUpdateProfileDestinationInput",
+    "ShippingUpdateProfileInput",
+    "ShippingUpdateProfileUpgradeInput",
+    "Shop",
+    "ShopCreateSectionInput",
+    "ShopListing",
+    "ShopListingFile",
+    "ShopListingFiles",
+    "ShopListingWithAssociations",
+    "ShopListings",
+    "ShopListingsWithAssociations",
+    "ShopProductionPartner",
+    "ShopProductionPartners",
+    "ShopReceipt",
+    "ShopReceiptShipment",
+    "ShopReceiptTransaction",
+    "ShopReceiptTransactions",
+    "ShopReceipts",
+    "ShopSection",
+    "ShopSections",
+    "ShopShippingProfile",
+    "ShopShippingProfileDestination",
+    "ShopShippingProfileDestinations",
+    "ShopShippingProfileUpgrade",
+    "ShopShippingProfileUpgrades",
+    "ShopShippingProfiles",
+    "ShopUpdateInput",
+    "Shops",
+    "SortOn",
+    "SortOrder",
+    "State",
+    "State2",
+    "TaxonomyNodeProperties",
+    "TaxonomyNodeProperty",
+    "TaxonomyPropertyScale",
+    "TaxonomyPropertyValue",
+    "TransactionReview",
+    "TransactionReviews",
+    "Type",
+    "Type1",
+    "User",
+    "UserAddress",
+    "UserAddresses",
+    "VariationImage",
+    "WhenMade",
+    "WhenMade2",
+    "WhoMade",
+    "WhoMade2",
+]
+
 
 # Type Definitions
 
@@ -29,7 +137,7 @@ class Pong:
     Response for Ping
     """
 
-    application_id: Optional[int] = None
+    application_id: int
     """The authenticated application's ID"""
 
 
@@ -39,9 +147,9 @@ class PaymentAccountLedgerEntries:
     Response for Get a shop payment account ledger's entries
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of payment account ledger entry resources found."""
-    results: Optional[List[PaymentAccountLedgerEntry]] = None
+    results: List[PaymentAccountLedgerEntry | Mapping[str, Any]]
     """The payment account ledger entry resources found."""
 
 
@@ -51,9 +159,9 @@ class Payments:
     Response for Get a payment from a payment account ledger entry ID
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of payments in the response."""
-    results: Optional[List[Payment]] = None
+    results: List[Payment | Mapping[str, Any]]
     """A list of payments."""
 
 
@@ -63,52 +171,52 @@ class ShopReceipt:
     Response for Get a receipt
     """
 
-    receipt_id: Optional[int] = None
+    receipt_id: int
     """The numeric ID for the receipt associated to this transaction."""
-    receipt_type: Optional[int] = None
+    receipt_type: int
     """
     The numeric value for the Etsy channel that serviced the purchase: 0 for
     Etsy.com, 1 for a Pattern shop.
     """
-    seller_user_id: Optional[int] = None
+    seller_user_id: int
     """The numeric ID for the user (seller) fulfilling the purchase."""
-    seller_email: Optional[str] = None
+    seller_email: str
     """The email address string for the seller of the listing."""
-    buyer_user_id: Optional[int] = None
+    buyer_user_id: int
     """The numeric ID for the user making the purchase."""
-    buyer_email: Optional[str] = None
+    buyer_email: str
     """The email address string for the buyer of the listing."""
-    name: Optional[str] = None
+    name: str
     """The name string for the recipient in the shipping address."""
-    first_line: Optional[str] = None
+    first_line: str
     """
     The first address line string for the recipient in the shipping address.
     """
-    second_line: Optional[str] = None
+    second_line: str
     """
     The optional second address line string for the recipient in the shipping
     address.
     """
-    city: Optional[str] = None
+    city: str
     """The city string for the recipient in the shipping address."""
-    state: Optional[str] = None
+    state: str
     """The state string for the recipient in the shipping address."""
-    zip: Optional[str] = None
+    zip: str
     """
     The zip code string (not necessarily a number) for the recipient in the
     shipping address.
     """
-    formatted_address: Optional[str] = None
+    formatted_address: str
     """
     The formatted shipping address string for the recipient in the shipping
     address.
     """
-    country_iso: Optional[str] = None
+    country_iso: str
     """
     The ISO-3166 alpha-2 country code string for the recipient in the shipping
     address.
     """
-    payment_method: Optional[str] = None
+    payment_method: str
     """
     The payment method string identifying purchaser's payment method, which
     must be one of: 'cc' (credit card), 'paypal', 'check', 'mo' (money order),
@@ -116,36 +224,36 @@ class ShopReceipt:
     'android_pay', 'google_pay', 'klarna', 'k_pay_in_4' (klarna), or
     'k_financing' (klarna).
     """
-    payment_email: Optional[str] = None
+    payment_email: str
     """
     The email address string for the email address to which to send payment
     confirmation
     """
-    message_from_seller: Optional[str] = None
+    message_from_seller: str
     """An optional message string from the seller."""
-    message_from_buyer: Optional[str] = None
+    message_from_buyer: str
     """An optional message string from the buyer."""
-    message_from_payment: Optional[str] = None
+    message_from_payment: str
     """The machine-generated acknowledgement string from the payment system."""
-    is_paid: Optional[bool] = None
+    is_paid: bool
     """When true, buyer paid for this purchase."""
-    is_shipped: Optional[bool] = None
+    is_shipped: bool
     """When true, seller shipped the products."""
-    create_timestamp: Optional[int] = None
+    create_timestamp: int
     """The receipt's creation time, in epoch seconds."""
-    update_timestamp: Optional[int] = None
+    update_timestamp: int
     """The time of the last update to the receipt, in epoch seconds."""
-    gift_message: Optional[str] = None
+    gift_message: str
     """A gift message string the buyer requests delivered with the product."""
-    grandtotal: Optional[Money] = None
-    subtotal: Optional[Money] = None
-    total_price: Optional[Money] = None
-    total_shipping_cost: Optional[Money] = None
-    total_tax_cost: Optional[Money] = None
-    total_vat_cost: Optional[Money] = None
-    discount_amt: Optional[Money] = None
-    gift_wrap_price: Optional[Money] = None
-    shipments: Optional[List[ShopReceiptShipment]] = None
+    grandtotal: Money | Mapping[str, Any]
+    subtotal: Money | Mapping[str, Any]
+    total_price: Money | Mapping[str, Any]
+    total_shipping_cost: Money | Mapping[str, Any]
+    total_tax_cost: Money | Mapping[str, Any]
+    total_vat_cost: Money | Mapping[str, Any]
+    discount_amt: Money | Mapping[str, Any]
+    gift_wrap_price: Money | Mapping[str, Any]
+    shipments: List[ShopReceiptShipment | Mapping[str, Any]]
     """A list of shipment statements for this receipt."""
 
 
@@ -155,9 +263,9 @@ class ShopReceipts:
     Response for Get receipts
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of Shop Receipts found."""
-    results: Optional[List[ShopReceipt]] = None
+    results: List[ShopReceipt | Mapping[str, Any]]
     """
     List of Shop Receipt resources found, with all Shop Receipt fields for each
     resource.
@@ -170,11 +278,11 @@ class ReceiptCreateShipmentInput:
     Create a Shipment Receipt
     """
 
-    tracking_code: Optional[str] = None
+    tracking_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The tracking code for this receipt."""
-    carrier_name: Optional[str] = None
+    carrier_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The carrier name for this receipt."""
-    send_bcc: Optional[bool] = None
+    send_bcc: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """If true, the shipping notification will be sent to the seller as well"""
 
 
@@ -184,9 +292,9 @@ class ShopReceiptTransactions:
     Response for Retrieve a listing's transactions
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of shop receipt transaction resources found."""
-    results: Optional[List[ShopReceiptTransaction]] = None
+    results: List[ShopReceiptTransaction | Mapping[str, Any]]
     """The shop receipt transaction resources found."""
 
 
@@ -196,42 +304,42 @@ class ShopReceiptTransaction:
     Response for Get a transaction
     """
 
-    transaction_id: Optional[int] = None
+    transaction_id: int
     """The unique numeric ID for a transaction."""
-    title: Optional[str] = None
+    title: str
     """The title string of the listing purchased in this transaction."""
-    description: Optional[str] = None
+    description: str
     """The description string of the listing purchased in this transaction."""
-    seller_user_id: Optional[int] = None
+    seller_user_id: int
     """The numeric user ID for the seller in this transaction."""
-    buyer_user_id: Optional[int] = None
+    buyer_user_id: int
     """The numeric user ID for the buyer in this transaction."""
-    create_timestamp: Optional[int] = None
+    create_timestamp: int
     """The transaction's creation date and time, in epoch seconds."""
-    paid_timestamp: Optional[int] = None
+    paid_timestamp: int
     """The transaction's paid date and time, in epoch seconds."""
-    shipped_timestamp: Optional[int] = None
+    shipped_timestamp: int
     """The transaction's shipping date and time, in epoch seconds."""
-    quantity: Optional[int] = None
+    quantity: int
     """The numeric quantity of products purchased in this transaction."""
-    listing_image_id: Optional[int] = None
+    listing_image_id: int
     """The numeric ID of the primary listing image for this transaction."""
-    receipt_id: Optional[int] = None
+    receipt_id: int
     """The numeric ID for the receipt associated to this transaction."""
-    is_digital: Optional[bool] = None
+    is_digital: bool
     """
     When true, the transaction recorded the purchase of a digital listing.
     """
-    file_data: Optional[str] = None
+    file_data: str
     """A string describing the files purchased in this transaction."""
-    listing_id: Optional[int] = None
+    listing_id: int
     """The numeric ID for the listing associated to this transaction."""
-    transaction_type: Optional[str] = None
+    transaction_type: str
     """The type string for the transaction, usually listing"""
-    product_id: Optional[int] = None
+    product_id: int
     """The numeric ID for a specific product purchased from a listing."""
-    price: Optional[Money] = None
-    shipping_cost: Optional[Money] = None
+    price: Money | Mapping[str, Any]
+    shipping_cost: Money | Mapping[str, Any]
 
 
 @dataclass
@@ -240,9 +348,9 @@ class TransactionReviews:
     Response for Get reviews
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of TransactionReview resources found."""
-    results: Optional[List[TransactionReview]] = None
+    results: List[TransactionReview | Mapping[str, Any]]
     """The TransactionReview resources found."""
 
 
@@ -252,8 +360,8 @@ class ShippingCarriers:
     Response for Get shipping carriers
     """
 
-    count: Optional[int] = None
-    results: Optional[List[ShippingCarrier]] = None
+    count: int
+    results: List[ShippingCarrier | Mapping[str, Any]]
 
 
 @dataclass
@@ -262,37 +370,37 @@ class ShopShippingProfile:
     Response for Get shipping profiles
     """
 
-    shipping_profile_id: Optional[int] = None
+    shipping_profile_id: int
     """The numeric ID of the shipping profile."""
-    title: Optional[str] = None
+    title: str
     """The name string of this shipping profile."""
-    user_id: Optional[int] = None
+    user_id: int
     """The numeric ID for the user who owns the shipping profile."""
-    min_processing_days: Optional[int] = None
+    min_processing_days: int
     """The minimum number of days for processing the listing."""
-    max_processing_days: Optional[int] = None
+    max_processing_days: int
     """The maximum number of days for processing the listing."""
-    processing_days_display_label: Optional[str] = None
+    processing_days_display_label: str
     """Translated display label string for processing days."""
-    origin_country_iso: Optional[str] = None
+    origin_country_iso: str
     """The ISO code of the country from which the listing ships."""
-    is_deleted: Optional[bool] = None
+    is_deleted: bool
     """When true, someone deleted this shipping profile."""
-    shipping_profile_destinations: Optional[List[ShopShippingProfileDestination]] = None
+    shipping_profile_destinations: List[ShopShippingProfileDestination | Mapping[str, Any]]
     """
     A list of shipping profile destinations available for this shipping
     profile.
     """
-    shipping_profile_upgrades: Optional[List[ShopShippingProfileUpgrade]] = None
+    shipping_profile_upgrades: List[ShopShippingProfileUpgrade | Mapping[str, Any]]
     """
     A list of shipping profile upgrades available for this shipping profile.
     """
-    origin_postal_code: Optional[str] = None
+    origin_postal_code: str
     """
     The postal code string (not necessarily a number) for the location from
     which the listing ships.
     """
-    profile_type: Optional[ProfileType] = None
+    profile_type: Optional[ProfileType] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -301,38 +409,38 @@ class ShippingCreateProfileInput:
     Create a shipping profile
     """
 
-    title: Optional[str] = None
+    title: str
     """The name string of this shipping profile."""
-    origin_country_iso: Optional[str] = None
+    origin_country_iso: str
     """The ISO code of the country from which the listing ships."""
-    primary_cost: Optional[float] = None
+    primary_cost: float
     """
     The cost of shipping to this country/region alone, measured in the store's
     default currency.
     """
-    secondary_cost: Optional[float] = None
+    secondary_cost: float
     """
     The cost of shipping to this country/region with another item, measured in
     the store's default currency.
     """
-    min_processing_time: Optional[int] = None
+    min_processing_time: int
     """
     The minimum time required to process to ship listings with this shipping
     profile.
     """
-    max_processing_time: Optional[int] = None
+    max_processing_time: int
     """The maximum processing time the listing needs to ship."""
-    processing_time_unit: Optional[str] = None
+    processing_time_unit: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The unit used to represent how long a processing time is. A week is
     equivalent to 5 business days.
     """
-    destination_country_iso: Optional[str] = None
+    destination_country_iso: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The ISO code of the country to which the listing ships. If null, request
     sets destination to destination region.
     """
-    destination_region: Optional[str] = None
+    destination_region: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The code of the region to which the listing ships. A region represents a
     set of countries. Supported regions are Europe Union and Non-Europe Union
@@ -340,27 +448,27 @@ class ShippingCreateProfileInput:
     destination country ISO, or everywhere if destination country ISO is also
     null.
     """
-    origin_postal_code: Optional[str] = None
+    origin_postal_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The postal code string (not necessarily a number) for the location from
     which the listing ships.
     """
-    shipping_carrier_id: Optional[int] = None
+    shipping_carrier_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The unique ID of a supported shipping carrier, which is used to calculate
     an estimated delivery date.
     """
-    mail_class: Optional[str] = None
+    mail_class: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The unique ID string of a shipping carrier's mail class, which is used to
     calculate an estimated delivery date.
     """
-    min_delivery_days: Optional[int] = None
+    min_delivery_days: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The minimum number of business days a buyer can expect to wait to receive
     their purchased item once it has shipped.
     """
-    max_delivery_days: Optional[int] = None
+    max_delivery_days: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The maximum number of business days a buyer can expect to wait to receive
     their purchased item once it has shipped.
@@ -373,24 +481,24 @@ class ShippingUpdateProfileInput:
     Update a shipping profile
     """
 
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name string of this shipping profile."""
-    origin_country_iso: Optional[str] = None
+    origin_country_iso: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ISO code of the country from which the listing ships."""
-    min_processing_time: Optional[int] = None
+    min_processing_time: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The minimum time required to process to ship listings with this shipping
     profile.
     """
-    max_processing_time: Optional[int] = None
+    max_processing_time: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The maximum processing time the listing needs to ship."""
-    processing_time_unit: Optional[str] = None
+    processing_time_unit: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The unit used to represent how long a processing time is. A week is
     equivalent to 5 business days. If none is provided, the unit is set to
     business_days.
     """
-    origin_postal_code: Optional[str] = None
+    origin_postal_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The postal code string (not necessarily a number) for the location from
     which the listing ships.
@@ -403,9 +511,9 @@ class ShopShippingProfileDestinations:
     Response for Get profile destinations by shipping profile
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of results."""
-    results: Optional[List[ShopShippingProfileDestination]] = None
+    results: List[ShopShippingProfileDestination | Mapping[str, Any]]
     """The list of requested resources."""
 
 
@@ -415,27 +523,27 @@ class ShippingCreateDestinationInput:
     Create a shipping profile destination
     """
 
-    primary_cost: Optional[float] = None
+    primary_cost: float
     """
     The cost of shipping to this country/region alone, measured in the store's
     default currency.
     """
-    secondary_cost: Optional[str] = None
+    secondary_cost: str
     """
     The cost of shipping to this country/region with another item, measured in
     the store's default currency.
     """
-    destination_country_iso: Optional[str] = None
+    destination_country_iso: Optional[str] = dataclass_field(default=None, kw_only=True)
     """destination_country_iso"""
-    destination_region: Optional[str] = None
+    destination_region: Optional[str] = dataclass_field(default=None, kw_only=True)
     """destination_region"""
-    shipping_carrier_id: Optional[int] = None
+    shipping_carrier_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """shipping_carrier_id"""
-    mail_class: Optional[str] = None
+    mail_class: Optional[str] = dataclass_field(default=None, kw_only=True)
     """mail_class"""
-    min_delivery_days: Optional[int] = None
+    min_delivery_days: Optional[int] = dataclass_field(default=None, kw_only=True)
     """min_delivery_days"""
-    max_delivery_days: Optional[int] = None
+    max_delivery_days: Optional[int] = dataclass_field(default=None, kw_only=True)
     """max_delivery_days"""
 
 
@@ -445,39 +553,39 @@ class ShopShippingProfileDestination:
     Response for Create a shipping profile destination
     """
 
-    shipping_profile_destination_id: Optional[int] = None
+    shipping_profile_destination_id: int
     """
     The numeric ID of the shipping profile destination in the shipping profile
     associated with the listing.
     """
-    shipping_profile_id: Optional[int] = None
+    shipping_profile_id: int
     """The numeric ID of the shipping profile."""
-    origin_country_iso: Optional[str] = None
+    origin_country_iso: str
     """The ISO code of the country from which the listing ships."""
-    destination_country_iso: Optional[str] = None
+    destination_country_iso: str
     """
     The ISO code of the country to which the listing ships. If null, request
     sets destination to destination_region
     """
-    destination_region: Optional[DestinationRegion] = None
-    primary_cost: Optional[Money] = None
-    secondary_cost: Optional[Money] = None
-    shipping_carrier_id: Optional[int] = None
+    destination_region: DestinationRegion
+    primary_cost: Money | Mapping[str, Any]
+    secondary_cost: Money | Mapping[str, Any]
+    shipping_carrier_id: int
     """
     The unique ID of a supported shipping carrier, which is used to calculate
     an Estimated Delivery Date.
     """
-    mail_class: Optional[str] = None
+    mail_class: str
     """
     The unique ID string of a shipping carrier's mail class, which is used to
     calculate an estimated delivery date.
     """
-    min_delivery_days: Optional[int] = None
+    min_delivery_days: int
     """
     The minimum number of business days a buyer can expect to wait to receive
     their purchased item once it has shipped.
     """
-    max_delivery_days: Optional[int] = None
+    max_delivery_days: int
     """
     The maximum number of business days a buyer can expect to wait to receive
     their purchased item once it has shipped.
@@ -490,21 +598,21 @@ class ShippingUpdateProfileDestinationInput:
     Update a shipping profile destination
     """
 
-    primary_cost: Optional[str] = None
+    primary_cost: Optional[str] = dataclass_field(default=None, kw_only=True)
     """primary_cost"""
-    secondary_cost: Optional[str] = None
+    secondary_cost: Optional[str] = dataclass_field(default=None, kw_only=True)
     """secondary_cost"""
-    destination_country_iso: Optional[str] = None
+    destination_country_iso: Optional[str] = dataclass_field(default=None, kw_only=True)
     """destination_country_iso"""
-    destination_region: Optional[str] = None
+    destination_region: Optional[str] = dataclass_field(default=None, kw_only=True)
     """destination_region"""
-    shipping_carrier_id: Optional[int] = None
+    shipping_carrier_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """shipping_carrier_id"""
-    mail_class: Optional[str] = None
+    mail_class: Optional[str] = dataclass_field(default=None, kw_only=True)
     """mail_class"""
-    min_delivery_days: Optional[int] = None
+    min_delivery_days: Optional[int] = dataclass_field(default=None, kw_only=True)
     """min_delivery_days"""
-    max_delivery_days: Optional[int] = None
+    max_delivery_days: Optional[int] = dataclass_field(default=None, kw_only=True)
     """max_delivery_days"""
 
 
@@ -514,9 +622,9 @@ class ShopShippingProfileUpgrades:
     Response for Get shipping profile upgrades
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of results."""
-    results: Optional[List[ShopShippingProfileUpgrade]] = None
+    results: List[ShopShippingProfileUpgrade | Mapping[str, Any]]
     """The list of requested resources."""
 
 
@@ -526,32 +634,32 @@ class ShippingCreateUpgradeInput:
     Create a shipping profile upgrade
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """The type of the shipping upgrade. Domestic (0) or international (1)."""
-    upgrade_name: Optional[str] = None
+    upgrade_name: str
     """
     Name for the shipping upgrade shown to shoppers at checkout, e.g. USPS
     Priority.
     """
-    price: Optional[float] = None
+    price: float
     """Additional cost of adding the shipping upgrade."""
-    secondary_price: Optional[float] = None
+    secondary_price: float
     """
     Additional cost of adding the shipping upgrade for each additional item.
     """
-    shipping_carrier_id: Optional[int] = None
+    shipping_carrier_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The unique ID of a supported shipping carrier, which is used to calculate
     an Estimated Delivery Date.
     """
-    mail_class: Optional[str] = None
+    mail_class: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The unique ID string of a shipping carrier's mail class, which is used to
     calculate an estimated delivery date.
     """
-    min_delivery_days: Optional[int] = None
+    min_delivery_days: Optional[int] = dataclass_field(default=None, kw_only=True)
     """min_delivery_days"""
-    max_delivery_days: Optional[int] = None
+    max_delivery_days: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The maximum number of business days a buyer can expect to wait to receive
     their purchased item once it has shipped.
@@ -564,45 +672,45 @@ class ShopShippingProfileUpgrade:
     Response for Create a shipping profile upgrade
     """
 
-    shipping_profile_id: Optional[int] = None
+    shipping_profile_id: int
     """The numeric ID of the base shipping profile."""
-    upgrade_id: Optional[int] = None
+    upgrade_id: int
     """The numeric ID that is associated with a shipping upgrade"""
-    upgrade_name: Optional[str] = None
+    upgrade_name: str
     """
     Name for the shipping upgrade shown to shoppers at checkout, e.g. USPS
     Priority.
     """
-    type_: Optional[Type] = field(default=None, metadata={"wire_name": "type"})
-    rank: Optional[int] = None
+    type_: Type = dataclass_field(metadata={"wire_name": "type"})
+    rank: int
     """
     The positive non-zero numeric position in the images displayed in a
     listing, with rank 1 images appearing in the left-most position in a
     listing.
     """
-    language: Optional[str] = None
+    language: str
     """
     The IETF language tag for the language of the shipping profile. Ex: de, en,
     es, fr, it, ja, nl, pl, pt, ru.
     """
-    price: Optional[Money] = None
-    secondary_price: Optional[Money] = None
-    shipping_carrier_id: Optional[int] = None
+    price: Money | Mapping[str, Any]
+    secondary_price: Money | Mapping[str, Any]
+    shipping_carrier_id: int
     """
     The unique ID of a supported shipping carrier, which is used to calculate
     an Estimated Delivery Date.
     """
-    mail_class: Optional[str] = None
+    mail_class: str
     """
     The unique ID string of a shipping carrier's mail class, which is used to
     calculate an estimated delivery date.
     """
-    min_delivery_days: Optional[int] = None
+    min_delivery_days: int
     """
     The minimum number of business days a buyer can expect to wait to receive
     their purchased item once it has shipped.
     """
-    max_delivery_days: Optional[int] = None
+    max_delivery_days: int
     """
     The maximum number of business days a buyer can expect to wait to receive
     their purchased item once it has shipped.
@@ -615,32 +723,36 @@ class ShippingUpdateProfileUpgradeInput:
     Update a shipping profile upgrade
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """The type of the shipping upgrade. Domestic (0) or international (1)."""
-    upgrade_name: Optional[str] = None
+    upgrade_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Name for the shipping upgrade shown to shoppers at checkout, e.g. USPS
     Priority.
     """
-    price: Optional[float] = None
+    price: Optional[float] = dataclass_field(default=None, kw_only=True)
     """Additional cost of adding the shipping upgrade."""
-    secondary_price: Optional[float] = None
+    secondary_price: Optional[float] = dataclass_field(default=None, kw_only=True)
     """
     Additional cost of adding the shipping upgrade for each additional item.
     """
-    shipping_carrier_id: Optional[int] = None
+    shipping_carrier_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The unique ID of a supported shipping carrier, which is used to calculate
     an Estimated Delivery Date.
     """
-    mail_class: Optional[str] = None
+    mail_class: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The unique ID string of a shipping carrier's mail class, which is used to
     calculate an estimated delivery date.
     """
-    min_delivery_days: Optional[int] = None
+    min_delivery_days: Optional[int] = dataclass_field(default=None, kw_only=True)
     """min_delivery_days"""
-    max_delivery_days: Optional[int] = None
+    max_delivery_days: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The maximum number of business days a buyer can expect to wait to receive
     their purchased item once it has shipped.
@@ -653,17 +765,17 @@ class ShopUpdateInput:
     Update a shop
     """
 
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A brief heading string for the shop's main page."""
-    announcement: Optional[str] = None
+    announcement: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     An announcement string to buyers that displays on the shop's homepage.
     """
-    sale_message: Optional[str] = None
+    sale_message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A message string sent to users who complete a purchase from this shop.
     """
-    digital_sale_message: Optional[str] = None
+    digital_sale_message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A message string sent to users who purchase a digital item from this shop.
     """
@@ -675,120 +787,119 @@ class Shop:
     Response for Update a shop
     """
 
-    shop_id: Optional[int] = None
+    shop_id: int
     """The unique positive non-zero numeric ID for an Etsy Shop."""
-    user_id: Optional[int] = None
+    user_id: int
     """The numeric user ID of the user who owns this shop."""
-    shop_name: Optional[str] = None
+    shop_name: str
     """The shop's name string."""
-    create_date: Optional[int] = None
+    create_date: int
     """The date and time this shop was created, in epoch seconds."""
-    title: Optional[str] = None
+    title: str
     """A brief heading string for the shop's main page."""
-    announcement: Optional[str] = None
+    announcement: str
     """
     An announcement string to buyers that displays on the shop's homepage.
     """
-    currency_code: Optional[str] = None
+    currency_code: str
     """
     The ISO (alphabetic) code for the shop's currency. The shop displays all
     prices in this currency by default.
     """
-    is_vacation: Optional[bool] = None
+    is_vacation: bool
     """When true, this shop is not accepting purchases."""
-    vacation_message: Optional[str] = None
+    vacation_message: str
     """The shop's message string displayed when is_vacation is true."""
-    sale_message: Optional[str] = None
+    sale_message: str
     """
     A message string sent to users who complete a purchase from this shop.
     """
-    digital_sale_message: Optional[str] = None
+    digital_sale_message: str
     """
     A message string sent to users who purchase a digital item from this shop.
     """
-    update_date: Optional[int] = None
+    update_date: int
     """The date and time of the last update to the shop, in epoch seconds."""
-    listing_active_count: Optional[int] = None
+    listing_active_count: int
     """The number of active listings in the shop."""
-    digital_listing_count: Optional[int] = None
+    digital_listing_count: int
     """The number of digital listings in the shop."""
-    login_name: Optional[str] = None
+    login_name: str
     """The shop owner's login name string."""
-    accepts_custom_requests: Optional[bool] = None
+    accepts_custom_requests: bool
     """When true, the shop accepts customization requests."""
-    policy_welcome: Optional[str] = None
+    policy_welcome: str
     """The shop's policy welcome string (may be blank)."""
-    policy_payment: Optional[str] = None
+    policy_payment: str
     """The shop's payment policy string (may be blank)."""
-    policy_shipping: Optional[str] = None
+    policy_shipping: str
     """The shop's shipping policy string (may be blank)."""
-    policy_refunds: Optional[str] = None
+    policy_refunds: str
     """The shop's refund policy string (may be blank)."""
-    policy_additional: Optional[str] = None
+    policy_additional: str
     """The shop's additional policies string (may be blank)."""
-    policy_seller_info: Optional[str] = None
+    policy_seller_info: str
     """The shop's seller infomation string (may be blank)."""
-    policy_update_date: Optional[int] = None
+    policy_update_date: int
     """
     The date and time of the last update to the shop's policies, in epoch
     seconds.
     """
-    policy_has_private_receipt_info: Optional[bool] = None
+    policy_has_private_receipt_info: bool
     """When true, EU receipts display private info."""
-    has_unstructured_policies: Optional[bool] = None
+    has_unstructured_policies: bool
     """When true, the shop displays additional unstructured policy fields."""
-    policy_privacy: Optional[str] = None
+    policy_privacy: str
     """The shop's privacy policy string (may be blank)."""
-    vacation_autoreply: Optional[str] = None
+    vacation_autoreply: str
     """
     The shop's automatic reply string displayed in new conversations when
     is_vacation is true.
     """
-    url: Optional[str] = None
+    url: str
     """The URL string for this shop."""
-    image_url760x100: Optional[str] = field(
-        default=None,
+    image_url760x100: str = dataclass_field(
         metadata={"wire_name": "image_url_760x100"},
     )
     """The URL string for this shop's banner image."""
-    num_favorers: Optional[int] = None
+    num_favorers: int
     """The number of users who marked this shop a favorite."""
-    languages: Optional[List[str]] = None
+    languages: List[str]
     """A list of language strings for the shop's enrolled languages."""
-    icon_url_fullxfull: Optional[str] = None
+    icon_url_fullxfull: str
     """The URL string for this shop's icon image."""
-    is_using_structured_policies: Optional[bool] = None
+    is_using_structured_policies: bool
     """When true, the shop accepted using structured policies."""
-    has_onboarded_structured_policies: Optional[bool] = None
+    has_onboarded_structured_policies: bool
     """
     When true, the shop accepted OR declined after viewing structured policies
     onboarding.
     """
-    include_dispute_form_link: Optional[bool] = None
+    include_dispute_form_link: bool
     """
     When true, this shop's policies include a link to an EU online dispute
     form.
     """
-    is_direct_checkout_onboarded: Optional[bool] = None
+    is_direct_checkout_onboarded: bool
     """When true, the shop has onboarded onto Etsy Payments."""
-    is_calculated_eligible: Optional[bool] = None
+    is_calculated_eligible: bool
     """
     When true, the shop is elegible for calculated shipping profiles. (Only
     available in the US and Canada)
     """
-    is_opted_in_to_buyer_promise: Optional[bool] = None
+    is_opted_in_to_buyer_promise: bool
     """When true, the shop opted in to buyer promise."""
-    is_shop_us_based: Optional[bool] = None
+    is_shop_us_based: bool
     """When true, the shop is based in the US."""
-    transaction_sold_count: Optional[int] = None
+    transaction_sold_count: int
     """The total number of sales transactions for this shop"""
-    shipping_from_country_iso: Optional[str] = None
+    shipping_from_country_iso: str
     """The country iso the shop is shipping from."""
-    shop_location_country_iso: Optional[str] = None
+    shop_location_country_iso: str
     """The country iso where the shop is located."""
-    review_count: Optional[int] = None
+    review_count: int
     """Number of reviews of shop listings in the past year."""
-    review_average: Optional[float] = None
+    review_average: float
     """Average rating based on reviews of shop listings in the past year."""
 
 
@@ -798,9 +909,9 @@ class Shops:
     Response for Search shops
     """
 
-    count: Optional[int] = None
+    count: int
     """The total number of Shops"""
-    results: Optional[List[Shop]] = None
+    results: List[Shop | Mapping[str, Any]]
     """The Shop resources."""
 
 
@@ -810,9 +921,9 @@ class ShopSections:
     Response for Get shop sections
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of results."""
-    results: Optional[List[ShopSection]] = None
+    results: List[ShopSection | Mapping[str, Any]]
     """The list of requested resources."""
 
 
@@ -822,7 +933,7 @@ class ShopCreateSectionInput:
     Create a shop section
     """
 
-    title: Optional[str] = None
+    title: str
     """The title string for a shop section."""
 
 
@@ -832,18 +943,18 @@ class ShopSection:
     Response for Create a shop section
     """
 
-    shop_section_id: Optional[int] = None
+    shop_section_id: int
     """The numeric ID of a section in a specific Etsy shop."""
-    title: Optional[str] = None
+    title: str
     """The title string for a shop section."""
-    rank: Optional[int] = None
+    rank: int
     """
     The positive non-zero numeric position of this section in the section
     display order for a shop, with rank 1 sections appearing first.
     """
-    user_id: Optional[int] = None
+    user_id: int
     """The numeric ID of the user who owns this shop section."""
-    active_listing_count: Optional[int] = None
+    active_listing_count: int
     """The number of active listings in one section of a specific Etsy shop."""
 
 
@@ -853,38 +964,38 @@ class User:
     Response for Get user
     """
 
-    user_id: Optional[int] = None
+    user_id: int
     """
     The numeric ID of a user. This number is also a valid shop ID for the
     user's shop.
     """
-    login_name: Optional[str] = None
+    login_name: str
     """The user's login name string."""
-    primary_email: Optional[str] = None
+    primary_email: str
     """An email address string for the user's primary email address."""
-    first_name: Optional[str] = None
+    first_name: str
     """The user's first name."""
-    last_name: Optional[str] = None
+    last_name: str
     """The user's last name."""
-    create_timestamp: Optional[int] = None
+    create_timestamp: int
     """The date and time the user created their account, in epoch seconds."""
-    referred_by_user_id: Optional[int] = None
+    referred_by_user_id: int
     """The numeric ID of the user who referred this user."""
-    use_new_inventory_endpoints: Optional[bool] = None
+    use_new_inventory_endpoints: bool
     """Deprecated. Always true."""
-    is_seller: Optional[bool] = None
+    is_seller: bool
     """True if the user is seller."""
-    bio: Optional[str] = None
+    bio: str
     """The user's biography."""
-    gender: Optional[str] = None
+    gender: str
     """The user's gender."""
-    birth_month: Optional[str] = None
+    birth_month: str
     """The user's month of birth."""
-    birth_day: Optional[str] = None
+    birth_day: str
     """The user's day of birth."""
-    transaction_buy_count: Optional[int] = None
+    transaction_buy_count: int
     """The number of transactions where the user has bought."""
-    transaction_sold_count: Optional[int] = None
+    transaction_sold_count: int
     """The number of transactions where the user has sold."""
 
 
@@ -894,27 +1005,27 @@ class UserAddress:
     Response for Get user's address
     """
 
-    user_address_id: Optional[int] = None
+    user_address_id: int
     """The numeric ID of the user's address."""
-    user_id: Optional[int] = None
+    user_id: int
     """The user's numeric ID."""
-    name: Optional[str] = None
+    name: str
     """The user's name for this address."""
-    first_line: Optional[str] = None
+    first_line: str
     """The first line of the user's address."""
-    second_line: Optional[str] = None
+    second_line: str
     """The second line of the user's address."""
-    city: Optional[str] = None
+    city: str
     """The city field of the user's address."""
-    state: Optional[str] = None
+    state: str
     """The state field of the user's address."""
-    zip: Optional[str] = None
+    zip: str
     """The zip code field of the user's address."""
-    iso_country_code: Optional[str] = None
+    iso_country_code: str
     """The ISO code of the country in this address."""
-    country_name: Optional[str] = None
+    country_name: str
     """The name of the user's country."""
-    is_default_shipping_address: Optional[bool] = None
+    is_default_shipping_address: bool
     """Is this the user's default shipping address."""
 
 
@@ -924,9 +1035,9 @@ class UserAddresses:
     Response for Get user addresses
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of UserAddress records being returned."""
-    results: Optional[List[UserAddress]] = None
+    results: List[UserAddress | Mapping[str, Any]]
     """An array of UserAddress resources."""
 
 
@@ -936,9 +1047,9 @@ class SellerTaxonomyNodes:
     Response for Get seller taxonomy nodes
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of results."""
-    results: Optional[List[SellerTaxonomyNode]] = None
+    results: List[SellerTaxonomyNode | Mapping[str, Any]]
     """The list of requested resources."""
 
 
@@ -948,9 +1059,9 @@ class TaxonomyNodeProperties:
     Response for Get product properties by taxonomy ID
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of results."""
-    results: Optional[List[TaxonomyNodeProperty]] = None
+    results: List[TaxonomyNodeProperty | Mapping[str, Any]]
     """The list of requested resources."""
 
 
@@ -960,9 +1071,9 @@ class ShopListings:
     Response for Get listings by shop
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of shop listing resources found."""
-    results: Optional[List[ShopListing]] = None
+    results: List[ShopListing | Mapping[str, Any]]
     """The shop listing resources found."""
 
 
@@ -972,126 +1083,126 @@ class ListingCreateInput:
     Create a draft listing
     """
 
-    quantity: Optional[int] = None
+    quantity: int
     """
     The positive non-zero number of products available for purchase in the
     listing.
     """
-    title: Optional[str] = None
+    title: str
     """
     The listing's title string. Valid title strings contain only letters,
     numbers, punctuation marks, mathematical symbols, whitespace characters, ™,
     ©, and ®. (regex: /[^\\p{L}\\p{Nd}\\p{P}\\p{Sm}\\p{Zs}™©®]/u) You can only
     use the %, :, & and + characters once each.
     """
-    description: Optional[str] = None
+    description: str
     """A description string of the product for sale in the listing."""
-    price: Optional[float] = None
+    price: float
     """
     The positive non-zero price of the product. (Sold product listings are
     private) Note: The price is the minimum possible price.
     """
-    who_made: Optional[str] = None
+    who_made: str
     """
     An string inidcated who made the product. Helps buyers locate the listing
     under the Handmade heading. Requires 'is_supply' and 'when_made'.
     """
-    when_made: Optional[str] = None
+    when_made: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A string for the era in which the maker made the product in this listing.
     Helps buyers locate the listing under the Vintage heading. Requires
     'is_supply' and 'who_made'.
     """
-    taxonomy_id: Optional[int] = None
+    taxonomy_id: int
     """
     The numeric taxonomy ID of the listing. The seller manages listing taxonomy
     IDs for their shop.
     """
-    shipping_profile_id: Optional[int] = None
+    shipping_profile_id: int
     """The numeric ID of the shipping profile associated with the listing."""
-    materials: Optional[str] = None
+    materials: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A array of material strings for materials used in the product. Valid
     materials strings contain only letters, numbers, and whitespace characters.
     (regex: /[^\\p{L}\\p{Nd}\\p{Zs}]/u)
     """
-    shop_section_id: Optional[int] = None
+    shop_section_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numeric ID of the shop section for this listing."""
-    processing_min: Optional[int] = None
+    processing_min: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The minimum number of days required to process this listing."""
-    processing_max: Optional[int] = None
+    processing_max: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The maximum number of days required to process this listing."""
-    tags: Optional[str] = None
+    tags: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     An array of tag strings for the listing. Valid tag strings contain only
     letters, numbers, whitespace characters, -, ', ™, ©, and ®. (regex:
     /[^\\p{L}\\p{Nd}\\p{Zs}-'™©®]/u)
     """
-    recipient: Optional[str] = None
+    recipient: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A string indicating a person for whom this product would make an
     appropriate gift.
     """
-    occasion: Optional[str] = None
+    occasion: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A string indicating an occassion for which this product would make an
     appropriate gift.
     """
-    styles: Optional[str] = None
+    styles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     An array of style strings for this listing, each of which is free-form text
     string such as Formal, or Steampunk. A Listing may have up to two styles.
     Valid style strings contain only letters, numbers, and whitespace
     characters. (regex: /[^\\p{L}\\p{Nd}\\p{Zs}]/u)
     """
-    item_weight: Optional[float] = None
+    item_weight: Optional[float] = dataclass_field(default=None, kw_only=True)
     """
     The numeric weight of the product measured in units set in item weight
     unit.
     """
-    item_length: Optional[int] = None
+    item_length: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The numeric length of the product measured in units set in item dimensions
     unit.
     """
-    item_width: Optional[float] = None
+    item_width: Optional[float] = dataclass_field(default=None, kw_only=True)
     """
     The numeric width of the product measured in units set in 'item dimensions
     unit'.
     """
-    item_height: Optional[float] = None
+    item_height: Optional[float] = dataclass_field(default=None, kw_only=True)
     """
     The numeric height of the product measured in units set in 'item dimensions
     unit'.
     """
-    item_weight_unit: Optional[str] = None
+    item_weight_unit: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A string defining the units used to measure the weight of the product.
     """
-    item_dimensions_unit: Optional[str] = None
+    item_dimensions_unit: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A string defining the units used to measure the dimensions of the product.
     """
-    is_personalizable: Optional[bool] = None
+    is_personalizable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """When true, this listing is personalizable."""
-    image_ids: Optional[str] = None
+    image_ids: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     An array of numeric image IDs of the images in a listing, which can include
     up to 10 images.
     """
-    is_supply: Optional[bool] = None
+    is_supply: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     When true, tags the listing as a supply product, else indicates that it's a
     finished product. Helps buyers locate the listing under the Supplies
     heading. Requires 'who made' and 'when made'.
     """
-    is_customizable: Optional[bool] = None
+    is_customizable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     When true, a buyer may contact the seller for a customized order. The
     default value is true when a shop accepts custom orders. Does not apply to
     shops that do not accept custom orders.
     """
-    is_taxable: Optional[bool] = None
+    is_taxable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     When true, applicable shop tax rates apply to this listing at checkout.
     """
@@ -1103,146 +1214,146 @@ class ShopListing:
     Response for Create a draft listing
     """
 
-    listing_id: Optional[int] = None
+    listing_id: int
     """The numeric ID for the listing associated to this transaction."""
-    user_id: Optional[int] = None
+    user_id: int
     """The numeric ID for the user posting the listing."""
-    shop_id: Optional[int] = None
+    shop_id: int
     """The unique positive non-zero numeric ID for an Etsy Shop."""
-    title: Optional[str] = None
+    title: str
     """
     The listing's title string. Valid title strings contain only letters,
     numbers, punctuation marks, mathematical symbols, whitespace characters, ™,
     ©, and ®. (regex: /[^\\\\p{L}\\\\p{Nd}\\\\p{P}\\\\p{Sm}\\\\p{Zs}™©®]/u) You
     can only use the %, :, & and + characters once each.
     """
-    description: Optional[str] = None
+    description: str
     """A description string of the product for sale in the listing."""
-    state: Optional[State] = None
-    creation_timestamp: Optional[int] = None
+    state: State
+    creation_timestamp: int
     """The listing's creation time, in epoch seconds."""
-    ending_timestamp: Optional[int] = None
+    ending_timestamp: int
     """The listing's expiration time, in epoch seconds."""
-    original_creation_timestamp: Optional[int] = None
+    original_creation_timestamp: int
     """The listing's creation time, in epoch seconds."""
-    last_modified_timestamp: Optional[int] = None
+    last_modified_timestamp: int
     """The time of the last update to the listing, in epoch seconds."""
-    state_timestamp: Optional[int] = None
+    state_timestamp: int
     """The date and time of the last state change of this listing."""
-    quantity: Optional[int] = None
+    quantity: int
     """
     The positive non-zero number of products available for purchase in the
     listing. Note: The listing quantity is the sum of available offering
     quantities. You can request the quantities for individual offerings from
     the ListingInventory resource using the get listing inventory endpoint.
     """
-    shop_section_id: Optional[int] = None
+    shop_section_id: int
     """The numeric ID of a section in a specific Etsy shop."""
-    featured_rank: Optional[int] = None
+    featured_rank: int
     """
     The positive non-zero numeric position in the featured listings of the
     shop, with rank 1 listings appearing in the left-most position in featured
     listing on a shop's home page.
     """
-    url: Optional[str] = None
+    url: str
     """The full URL to the listing's page on Etsy."""
-    num_favorers: Optional[int] = None
+    num_favorers: int
     """The number of users who marked this listing a favorite."""
-    non_taxable: Optional[bool] = None
+    non_taxable: bool
     """
     When true, applicable shop tax rates do not apply to this listing at
     checkout.
     """
-    is_customizable: Optional[bool] = None
+    is_customizable: bool
     """
     When true, a buyer may contact the seller for a customized order. The
     default value is true when a shop accepts custom orders. Does not apply to
     shops that do not accept custom orders.
     """
-    is_personalizable: Optional[bool] = None
+    is_personalizable: bool
     """When true, this listing is personalizable. The default value is null."""
-    personalization_is_required: Optional[bool] = None
+    personalization_is_required: bool
     """
     When true, this listing requires personalization. The default value is
     null.
     """
-    personalization_char_count_max: Optional[int] = None
+    personalization_char_count_max: int
     """
     This an integer value representing the maximum length for the
     personalization message entered by the buyer.
     """
-    personalization_instructions: Optional[str] = None
+    personalization_instructions: str
     """
     When true, this listing requires personalization. The default value is
     null.
     """
-    listing_type: Optional[bool] = None
+    listing_type: bool
     """
     An enumerated type string that indicates whether the listing is physical or
     a digital download.
     """
-    tags: Optional[List[str]] = None
+    tags: List[str]
     """
     A list of tag strings for the listing. Valid tag strings contain only
     letters, numbers, whitespace characters, -, ', ™, ©, and ®. (regex:
     /[^\\\\p{L}\\\\p{Nd}\\\\p{Zs}\\\\-'™©®]/u) Default value is null.
     """
-    materials: Optional[List[str]] = None
+    materials: List[str]
     """
     A list of material strings for materials used in the product. Valid
     materials strings contain only letters, numbers, and whitespace characters.
     (regex: /[^\\\\p{L}\\\\p{Nd}\\\\p{Zs}]/u) Default value is null.
     """
-    shipping_profile_id: Optional[int] = None
+    shipping_profile_id: int
     """The numeric ID of the shipping profile associated with the listing."""
-    processing_min: Optional[int] = None
+    processing_min: int
     """
     The minimum number of days required to process this listing. Default value
     is null.
     """
-    processing_max: Optional[int] = None
+    processing_max: int
     """
     The maximum number of days required to process this listing. Default value
     is null.
     """
-    who_made: Optional[WhoMade] = None
-    when_made: Optional[WhenMade] = None
-    is_supply: Optional[bool] = None
+    who_made: WhoMade
+    when_made: WhenMade
+    is_supply: bool
     """
     When true, tags the listing as a supply product, else indicates that it's a
     finished product. Helps buyers locate the listing under the Supplies
     heading. Requires 'who_made' and 'when_made'.
     """
-    item_weight: Optional[float] = None
+    item_weight: float
     """
     The numeric weight of the product measured in units set in item weight
     unit. Default value is null. If set, the value must be greater than 0.
     """
-    item_weight_unit: Optional[ItemWeightUnit] = None
-    item_length: Optional[float] = None
+    item_weight_unit: ItemWeightUnit
+    item_length: float
     """
     The numeric length of the product measured in units set in item dimensions
     unit. Default value is null. If set, the value must be greater than 0.
     """
-    item_width: Optional[float] = None
+    item_width: float
     """
     The numeric width of the product measured in units set in item dimensions
     unit. Default value is null. If set, the value must be greater than 0.
     """
-    item_height: Optional[float] = None
+    item_height: float
     """
     The numeric length of the product measured in units set in item dimensions
     unit. Default value is null. If set, the value must be greater than 0.
     """
-    item_dimensions_unit: Optional[ItemDimensionsUnit] = None
-    is_private: Optional[bool] = None
+    item_dimensions_unit: ItemDimensionsUnit
+    is_private: bool
     """
     When true, this is a private listing intendend for a specific buyer and
     hidden from shop view.
     """
-    recipient: Optional[Recipient] = None
-    occasion: Optional[Occasion] = None
-    style: Optional[List[str]] = None
+    recipient: Recipient
+    occasion: Occasion
+    style: List[str]
     """
     An array of style strings for this listing, each of which is free-form text
     string such as Formal, or Steampunk. A Listing may have up to two styles.
@@ -1250,11 +1361,11 @@ class ShopListing:
     characters. (regex: /[^\\\\p{L}\\\\p{Nd}\\\\p{Zs}]/u) Default value is
     null.
     """
-    file_data: Optional[str] = None
+    file_data: str
     """A string describing the files attached to a digital listing."""
-    has_variations: Optional[bool] = None
+    has_variations: bool
     """When true, the listing has variations."""
-    should_auto_renew: Optional[bool] = None
+    should_auto_renew: bool
     """
     When true, renews a listing for four months upon expriation. If set to true
     when previously false, etsy.com renews the listing before it expires, but
@@ -1262,13 +1373,13 @@ class ShopListing:
     expiration date. Any unused time remaining on the listing is lost. Renewals
     result in charges to a user's bill.
     """
-    language: Optional[str] = None
+    language: str
     """
     The IETF language tag for the default language of the listing. Ex: `de`,
     `en`, `es`, `fr`, `it`, `ja`, `nl`, `pl`, `pt`, `ru`.
     """
-    price: Optional[Money] = None
-    taxonomy_id: Optional[int] = None
+    price: Money | Mapping[str, Any]
+    taxonomy_id: int
     """
     The numeric taxonomy ID of the listing. The seller manages listing taxonomy
     IDs for their shop. See seller taxonomy for more information.
@@ -1281,9 +1392,9 @@ class ShopListingsWithAssociations:
     Response for Get listings by ID
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of shop listing resources found."""
-    results: Optional[List[ShopListing]] = None
+    results: List[ShopListing | Mapping[str, Any]]
     """The shop listing resources found."""
 
 
@@ -1293,11 +1404,11 @@ class ListingUpdatePropertyInput:
     Update a listing property
     """
 
-    value_ids: Optional[int] = None
+    value_ids: int
     """The numeric ID of a single Etsy.com measurement scale."""
-    values: Optional[str] = None
+    values: str
     """An array of value strings for multiple Etsy listing property values."""
-    scale_id: Optional[int] = None
+    scale_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numeric ID of a single Etsy.com measurement scale."""
 
 
@@ -1307,17 +1418,17 @@ class ListingPropertyValue:
     Response for Update a listing property
     """
 
-    property_id: Optional[int] = None
+    property_id: int
     """The numeric ID of the Property."""
-    property_name: Optional[str] = None
+    property_name: str
     """The name of the Property."""
-    scale_id: Optional[int] = None
+    scale_id: int
     """The numeric ID of the scale (if any)."""
-    scale_name: Optional[str] = None
+    scale_name: str
     """The label used to describe the chosen scale (if any)."""
-    value_ids: Optional[List[int]] = None
+    value_ids: List[int]
     """The numeric IDs of the property values"""
-    values: Optional[List[str]] = None
+    values: List[str]
     """The property values"""
 
 
@@ -1327,9 +1438,9 @@ class ListingPropertyValues:
     Response for Get a listing's properties
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of shop listing resources found."""
-    results: Optional[List[ListingPropertyValue]] = None
+    results: List[ListingPropertyValue | Mapping[str, Any]]
     """The shop listing resources found."""
 
 
@@ -1339,136 +1450,136 @@ class ListingUpdateInput:
     Update a listing
     """
 
-    quantity: Optional[int] = None
+    quantity: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The positive non-zero number of products available for purchase in the
     listing.
     """
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The listing's title string. Valid title strings contain only letters,
     numbers, punctuation marks, mathematical symbols, whitespace characters, ™,
     ©, and ®. (regex: /[^\\p{L}\\p{Nd}\\p{P}\\p{Sm}\\p{Zs}™©®]/u) You can only
     use the %, :, & and + characters once each.
     """
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A description string of the product for sale in the listing."""
-    price: Optional[float] = None
+    price: Optional[float] = dataclass_field(default=None, kw_only=True)
     """
     The positive non-zero price of the product. (Sold product listings are
     private) Note: The price is the minimum possible price.
     """
-    who_made: Optional[str] = None
+    who_made: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     An string inidcated who made the product. Helps buyers locate the listing
     under the Handmade heading. Requires 'is_supply' and 'when_made'.
     """
-    when_made: Optional[str] = None
+    when_made: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A string for the era in which the maker made the product in this listing.
     Helps buyers locate the listing under the Vintage heading. Requires
     'is_supply' and 'who_made'.
     """
-    taxonomy_id: Optional[int] = None
+    taxonomy_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The numeric taxonomy ID of the listing. The seller manages listing taxonomy
     IDs for their shop.
     """
-    shipping_profile_id: Optional[int] = None
+    shipping_profile_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numeric ID of the shipping profile associated with the listing."""
-    materials: Optional[str] = None
+    materials: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A array of material strings for materials used in the product. Valid
     materials strings contain only letters, numbers, and whitespace characters.
     (regex: /[^\\p{L}\\p{Nd}\\p{Zs}]/u)
     """
-    shop_section_id: Optional[int] = None
+    shop_section_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numeric ID of the shop section for this listing."""
-    processing_min: Optional[int] = None
+    processing_min: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The minimum number of days required to process this listing."""
-    processing_max: Optional[int] = None
+    processing_max: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The maximum number of days required to process this listing."""
-    tags: Optional[str] = None
+    tags: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     An array of tag strings for the listing. Valid tag strings contain only
     letters, numbers, whitespace characters, -, ', ™, ©, and ®. (regex:
     /[^\\p{L}\\p{Nd}\\p{Zs}-'™©®]/u)
     """
-    recipient: Optional[str] = None
+    recipient: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A string indicating a person for whom this product would make an
     appropriate gift.
     """
-    occasion: Optional[str] = None
+    occasion: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A string indicating an occassion for which this product would make an
     appropriate gift.
     """
-    styles: Optional[str] = None
+    styles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     An array of style strings for this listing, each of which is free-form text
     string such as Formal, or Steampunk. A Listing may have up to two styles.
     Valid style strings contain only letters, numbers, and whitespace
     characters. (regex: /[^\\p{L}\\p{Nd}\\p{Zs}]/u)
     """
-    item_weight: Optional[float] = None
+    item_weight: Optional[float] = dataclass_field(default=None, kw_only=True)
     """
     The numeric weight of the product measured in units set in item weight
     unit.
     """
-    item_length: Optional[int] = None
+    item_length: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The numeric length of the product measured in units set in item dimensions
     unit.
     """
-    item_width: Optional[float] = None
+    item_width: Optional[float] = dataclass_field(default=None, kw_only=True)
     """
     The numeric width of the product measured in units set in 'item dimensions
     unit'.
     """
-    item_height: Optional[float] = None
+    item_height: Optional[float] = dataclass_field(default=None, kw_only=True)
     """
     The numeric height of the product measured in units set in 'item dimensions
     unit'.
     """
-    item_weight_unit: Optional[str] = None
+    item_weight_unit: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A string defining the units used to measure the weight of the product.
     """
-    item_dimensions_unit: Optional[str] = None
+    item_dimensions_unit: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A string defining the units used to measure the dimensions of the product.
     """
-    is_personalizable: Optional[bool] = None
+    is_personalizable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """When true, this listing is personalizable."""
-    image_ids: Optional[str] = None
+    image_ids: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     An array of numeric image IDs of the images in a listing, which can include
     up to 10 images.
     """
-    is_supply: Optional[bool] = None
+    is_supply: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     When true, tags the listing as a supply product, else indicates that it's a
     finished product. Helps buyers locate the listing under the Supplies
     heading. Requires 'who made' and 'when made'.
     """
-    is_customizable: Optional[bool] = None
+    is_customizable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     When true, a buyer may contact the seller for a customized order. The
     default value is true when a shop accepts custom orders. Does not apply to
     shops that do not accept custom orders.
     """
-    is_taxable: Optional[bool] = None
+    is_taxable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     When true, applicable shop tax rates apply to this listing at checkout.
     """
-    featured_rank: Optional[int] = None
+    featured_rank: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The positive non-zero numeric position in the featured listings of the shop
     with rank 1 listings appearing in the left-most position in featured
     listing on a shop's home page.
     """
-    should_auto_renew: Optional[bool] = None
+    should_auto_renew: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     When true, renews a listing for four months upon expriation. If set to true
     when previously false, etsy.com renews the listing before it expires, but
@@ -1476,9 +1587,13 @@ class ListingUpdateInput:
     expiration date. Any unused time remaining on the listing is lost. Renewals
     result in charges to a user's bill.
     """
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """Indicates whether the listing is physical or a digital download."""
-    channels: Optional[str] = None
+    channels: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     An array of enumerated channel ID strings. A channel is a venue for sellers
     to reach buyers in order to make sales.
@@ -1491,24 +1606,24 @@ class ShopListingFile:
     Response for Get a file from a listing
     """
 
-    listing_file_id: Optional[int] = None
+    listing_file_id: int
     """The unique numeric ID of a file associated with a digital listing."""
-    listing_id: Optional[int] = None
+    listing_id: int
     """The numeric ID for the listing associated to this transaction."""
-    rank: Optional[int] = None
+    rank: int
     """
     The numeric index of the display order position of this file in the
     listing, starting at 1.
     """
-    filename: Optional[str] = None
+    filename: str
     """The file name string for a file associated with a digital listing."""
-    filesize: Optional[str] = None
+    filesize: str
     """A human-readable format size string for the size of a file."""
-    size_bytes: Optional[int] = None
+    size_bytes: int
     """A number indicating the size of a file, measured in bytes."""
-    filetype: Optional[str] = None
+    filetype: str
     """A type string indicating a file's MIME type."""
-    create_timestamp: Optional[int] = None
+    create_timestamp: int
     """
     The unique numeric timestamp of a file associated with a digital listing.
     """
@@ -1520,9 +1635,9 @@ class ShopListingFiles:
     Response for Get all listing files
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of ShopListingFiles being returned.."""
-    results: Optional[List[ShopListingFile]] = None
+    results: List[ShopListingFile | Mapping[str, Any]]
     """An array of ShopListingFile resources."""
 
 
@@ -1532,13 +1647,13 @@ class ListingUploadInput:
     Upload a listing file
     """
 
-    listing_file_id: Optional[int] = None
+    listing_file_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The unique numeric ID of a file associated with a digital listing."""
-    file: Optional[str] = None
+    file: str
     """A binary file to upload."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The file name string of a file to upload"""
-    rank: Optional[int] = None
+    rank: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The positive non-zero numeric position in the images displayed in a
     listing, with rank 1 images appearing in the left-most position in a
@@ -1552,80 +1667,71 @@ class ListingImage:
     Response for Get a listing image
     """
 
-    listing_id: Optional[int] = None
+    listing_id: int
     """The numeric ID for the listing associated to this transaction."""
-    listing_image_id: Optional[int] = None
+    listing_image_id: int
     """The numeric ID of the primary listing image for this transaction."""
-    hex_code: Optional[str] = None
+    hex_code: str
     """The webhex string for the image's average color, in webhex notation."""
-    red: Optional[int] = None
+    red: int
     """
     The numeric red value equal to the image's average red value, from 0-255
     (RGB color).
     """
-    green: Optional[int] = None
+    green: int
     """
     The numeric red value equal to the image's average red value, from 0-255
     (RGB color).
     """
-    blue: Optional[int] = None
+    blue: int
     """
     The numeric red value equal to the image's average red value, from 0-255
     (RGB color).
     """
-    hue: Optional[int] = None
+    hue: int
     """
     The numeric hue equal to the image's average hue, from 0-360 (HSV color).
     """
-    saturation: Optional[int] = None
+    saturation: int
     """
     The numeric saturation equal to the image's average saturation, from 0-100
     (HSV color).
     """
-    brightness: Optional[int] = None
+    brightness: int
     """
     The numeric brightness equal to the image's average brightness, from 0-100
     (HSV color).
     """
-    is_black_and_white: Optional[bool] = None
+    is_black_and_white: bool
     """When true, the image is in black & white."""
-    creation_tsz: Optional[int] = None
+    creation_tsz: int
     """The listing image's creation time, in epoch seconds."""
-    rank: Optional[int] = None
+    rank: int
     """
     The positive non-zero numeric position in the images displayed in a
     listing, with rank 1 images appearing in the left-most position in a
     listing.
     """
-    url75x75: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "url_75x75"},
-    )
+    url75x75: str = dataclass_field(metadata={"wire_name": "url_75x75"})
     """The url string for a 75x75 pixel thumbnail of the image."""
-    url170x135: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "url_170x135"},
-    )
+    url170x135: str = dataclass_field(metadata={"wire_name": "url_170x135"})
     """The url string for a 170x135 pixel thumbnail of the image."""
-    url570x_n: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "url_570xN"},
-    )
+    url570x_n: str = dataclass_field(metadata={"wire_name": "url_570xN"})
     """
     The url string for a thumbnail of the image, no more than 570 pixels wide
     with variable height.
     """
-    url_fullxfull: Optional[str] = None
+    url_fullxfull: str
     """
     The url string for the full-size image, up to 3000 pixels in each
     dimension.
     """
-    full_height: Optional[int] = None
+    full_height: int
     """
     The numeric height, measured in pixels, of the full-sized image referenced
     in url_fullxfull.
     """
-    full_width: Optional[int] = None
+    full_width: int
     """
     The numeric width, measured in pixels, of the full-sized image referenced
     in url_fullxfull.
@@ -1638,9 +1744,9 @@ class ListingImages:
     Response for Get a listing's images
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of results."""
-    results: Optional[List[ListingImage]] = None
+    results: List[ListingImage | Mapping[str, Any]]
     """The list of requested resources."""
 
 
@@ -1650,19 +1756,19 @@ class ListingUploadImageInput:
     Upload a listing image
     """
 
-    image: Optional[str] = None
+    image: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The file name string of a file to upload."""
-    listing_image_id: Optional[int] = None
+    listing_image_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numeric ID of the primary listing image for this transaction."""
-    rank: Optional[int] = None
+    rank: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The positive non-zero numeric position in the images displayed in a
     listing, with rank 1 images appearing in the left-most position in a
     listing.
     """
-    overwrite: Optional[bool] = None
+    overwrite: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """When true, this request replaces the existing image at a given rank."""
-    is_watermarked: Optional[bool] = None
+    is_watermarked: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """When true, indicates that the uploaded image has a watermark."""
 
 
@@ -1672,33 +1778,33 @@ class ListingInventoryWithAssociations:
     Response for Get a listing's inventory
     """
 
-    products: Optional[List[ListingInventoryProduct]] = None
+    products: List[ListingInventoryProduct | Mapping[str, Any]]
     """
     A JSON array of products available in a listing, even if only one product.
     All field names in the JSON blobs are lowercase.
     """
-    price_on_property: Optional[List[int]] = None
+    price_on_property: List[int]
     """
     An array of unique listing property ID integers for the properties that
     change product prices, if any. For example, if you charge specific prices
     for different sized products in the same listing, then this array contains
     the property ID for size.
     """
-    quantity_on_property: Optional[List[int]] = None
+    quantity_on_property: List[int]
     """
     An array of unique listing property ID integers for the properties that
     change the quantity of the products, if any. For example, if you stock
     specific quantities of different colored products in the same listing, then
     this array contains the property ID for color.
     """
-    sku_on_property: Optional[List[int]] = None
+    sku_on_property: List[int]
     """
     An array of unique listing property ID integers for the properties that
     change the product SKU, if any. For example, if you use specific skus for
     different colored products in the same listing, then this array contains
     the property ID for color.
     """
-    listing: Optional[ShopListing] = None
+    listing: ShopListing | Mapping[str, Any]
 
 
 @dataclass
@@ -1707,26 +1813,26 @@ class ListingUpdateInventoryInput:
     Update a listing's inventory
     """
 
-    products: Optional[str] = None
+    products: str
     """
     A JSON array of products available in a listing, even if only one product.
     All field names in the JSON blobs are lowercase.
     """
-    price_on_property: Optional[str] = None
+    price_on_property: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     An array of unique listing property ID integers for the properties that
     change product prices, if any. For example, if you charge specific prices
     for different sized products in the same listing, then this array contains
     the property ID for size.
     """
-    quantity_on_property: Optional[str] = None
+    quantity_on_property: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     An array of unique listing property ID integers for the properties that
     change the quantity of the products, if any. For example, if you stock
     specific quantities of different colored products in the same listing, then
     this array contains the property ID for color.
     """
-    sku_on_property: Optional[str] = None
+    sku_on_property: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     An array of unique listing property ID integers for the properties that
     change the product SKU, if any. For example, if you use specific skus for
@@ -1741,26 +1847,26 @@ class ListingInventory:
     Response for Update a listing's inventory
     """
 
-    products: Optional[List[ListingInventoryProduct]] = None
+    products: List[ListingInventoryProduct | Mapping[str, Any]]
     """
     A JSON array of products available in a listing, even if only one product.
     All field names in the JSON blobs are lowercase.
     """
-    price_on_property: Optional[List[int]] = None
+    price_on_property: List[int]
     """
     An array of unique listing property ID integers for the properties that
     change product prices, if any. For example, if you charge specific prices
     for different sized products in the same listing, then this array contains
     the property ID for size.
     """
-    quantity_on_property: Optional[List[int]] = None
+    quantity_on_property: List[int]
     """
     An array of unique listing property ID integers for the properties that
     change the quantity of the products, if any. For example, if you stock
     specific quantities of different colored products in the same listing, then
     this array contains the property ID for color.
     """
-    sku_on_property: Optional[List[int]] = None
+    sku_on_property: List[int]
     """
     An array of unique listing property ID integers for the properties that
     change the product SKU, if any. For example, if you use specific skus for
@@ -1775,15 +1881,15 @@ class ListingInventoryProductOffering:
     Response for Get a listing's offering
     """
 
-    offering_id: Optional[int] = None
+    offering_id: int
     """The ID for the product offering"""
-    quantity: Optional[int] = None
+    quantity: int
     """The quantity the product offering"""
-    is_enabled: Optional[bool] = None
+    is_enabled: bool
     """Whether or not the offering can be shown to buyers."""
-    is_deleted: Optional[bool] = None
+    is_deleted: bool
     """Whether or not the offering has been deleted."""
-    price: Optional[Money] = None
+    price: Money | Mapping[str, Any]
 
 
 @dataclass
@@ -1792,15 +1898,15 @@ class ListingInventoryProduct:
     Response for Get a listing's product
     """
 
-    product_id: Optional[int] = None
+    product_id: int
     """The numeric ID for a specific product purchased from a listing."""
-    sku: Optional[str] = None
+    sku: str
     """The SKU string for the product"""
-    is_deleted: Optional[bool] = None
+    is_deleted: bool
     """When true, someone deleted this product."""
-    offerings: Optional[List[ListingInventoryProductOffering]] = None
+    offerings: List[ListingInventoryProductOffering | Mapping[str, Any]]
     """A list of product offering entries for this product."""
-    property_values: Optional[List[ListingPropertyValue]] = None
+    property_values: List[ListingPropertyValue | Mapping[str, Any]]
     """A list of property value entries for this product."""
 
 
@@ -1810,17 +1916,17 @@ class ListingTranslation:
     Response for Get a listing's translation
     """
 
-    listing_id: Optional[int] = None
+    listing_id: int
     """The numeric ID for the Listing."""
-    language: Optional[str] = None
+    language: str
     """
     The IETF language tag (e.g. 'fr') for the language of this translation.
     """
-    title: Optional[str] = None
+    title: str
     """The title of the Listing of this Translation."""
-    description: Optional[str] = None
+    description: str
     """The description of the Listing of this Translation."""
-    tags: Optional[List[str]] = None
+    tags: List[str]
     """The tags of the Listing of this Translation."""
 
 
@@ -1830,11 +1936,11 @@ class ListingCreateTranslationInput:
     Create a listing translation
     """
 
-    title: Optional[str] = None
+    title: str
     """The title of the Listing of this Translation."""
-    description: Optional[str] = None
+    description: str
     """The description of the Listing of this Translation."""
-    tags: Optional[str] = None
+    tags: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The tags of the Listing of this Translation."""
 
 
@@ -1844,11 +1950,11 @@ class ListingUpdateTranslationInput:
     Update a listing translation
     """
 
-    title: Optional[str] = None
+    title: str
     """The title of the Listing of this Translation."""
-    description: Optional[str] = None
+    description: str
     """The description of the Listing of this Translation."""
-    tags: Optional[str] = None
+    tags: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The tags of the Listing of this Translation."""
 
 
@@ -1858,9 +1964,9 @@ class ListingVariationImages:
     Response for Get listing's variation images
     """
 
-    count: Optional[int] = None
+    count: int
     """The count of variation images."""
-    results: Optional[List[ListingVariationImage]] = None
+    results: List[ListingVariationImage | Mapping[str, Any]]
     """The variation images results."""
 
 
@@ -1870,7 +1976,7 @@ class ListingUpdateVariationInput:
     Update a listing's variation images
     """
 
-    variation_images: Optional[str] = None
+    variation_images: str
     """A array of variation image data."""
 
 
@@ -1880,11 +1986,11 @@ class Money:
     Definition: Money
     """
 
-    amount: Optional[int] = None
+    amount: int
     """The amount of represented by this data."""
-    divisor: Optional[int] = None
+    divisor: int
     """The divisor to render the amount."""
-    currency_code: Optional[str] = None
+    currency_code: str
     """The ISO currency code for this data."""
 
 
@@ -1894,7 +2000,7 @@ class ErrorSchema:
     Definition: ErrorSchema
     """
 
-    error: Optional[str] = None
+    error: str
     """The error code."""
 
 
@@ -1904,146 +2010,146 @@ class ShopListingWithAssociations:
     Definition: ShopListingWithAssociations
     """
 
-    listing_id: Optional[int] = None
+    listing_id: int
     """The numeric ID for the listing associated to this transaction."""
-    user_id: Optional[int] = None
+    user_id: int
     """The numeric ID for the user posting the listing."""
-    shop_id: Optional[int] = None
+    shop_id: int
     """The unique positive non-zero numeric ID for an Etsy Shop."""
-    title: Optional[str] = None
+    title: str
     """
     The listing's title string. Valid title strings contain only letters,
     numbers, punctuation marks, mathematical symbols, whitespace characters, ™,
     ©, and ®. (regex: /[^\\\\p{L}\\\\p{Nd}\\\\p{P}\\\\p{Sm}\\\\p{Zs}™©®]/u) You
     can only use the %, :, & and + characters once each.
     """
-    description: Optional[str] = None
+    description: str
     """A description string of the product for sale in the listing."""
-    state: Optional[State] = None
-    creation_timestamp: Optional[int] = None
+    state: State
+    creation_timestamp: int
     """The listing's creation time, in epoch seconds."""
-    ending_timestamp: Optional[int] = None
+    ending_timestamp: int
     """The listing's expiration time, in epoch seconds."""
-    original_creation_timestamp: Optional[int] = None
+    original_creation_timestamp: int
     """The listing's creation time, in epoch seconds."""
-    last_modified_timestamp: Optional[int] = None
+    last_modified_timestamp: int
     """The time of the last update to the listing, in epoch seconds."""
-    state_timestamp: Optional[int] = None
+    state_timestamp: int
     """The date and time of the last state change of this listing."""
-    quantity: Optional[int] = None
+    quantity: int
     """
     The positive non-zero number of products available for purchase in the
     listing. Note: The listing quantity is the sum of available offering
     quantities. You can request the quantities for individual offerings from
     the ListingInventory resource using the get listing inventory endpoint.
     """
-    shop_section_id: Optional[int] = None
+    shop_section_id: int
     """The numeric ID of a section in a specific Etsy shop."""
-    featured_rank: Optional[int] = None
+    featured_rank: int
     """
     The positive non-zero numeric position in the featured listings of the
     shop, with rank 1 listings appearing in the left-most position in featured
     listing on a shop's home page.
     """
-    url: Optional[str] = None
+    url: str
     """The full URL to the listing's page on Etsy."""
-    num_favorers: Optional[int] = None
+    num_favorers: int
     """The number of users who marked this listing a favorite."""
-    non_taxable: Optional[bool] = None
+    non_taxable: bool
     """
     When true, applicable shop tax rates do not apply to this listing at
     checkout.
     """
-    is_customizable: Optional[bool] = None
+    is_customizable: bool
     """
     When true, a buyer may contact the seller for a customized order. The
     default value is true when a shop accepts custom orders. Does not apply to
     shops that do not accept custom orders.
     """
-    is_personalizable: Optional[bool] = None
+    is_personalizable: bool
     """When true, this listing is personalizable. The default value is null."""
-    personalization_is_required: Optional[bool] = None
+    personalization_is_required: bool
     """
     When true, this listing requires personalization. The default value is
     null.
     """
-    personalization_char_count_max: Optional[int] = None
+    personalization_char_count_max: int
     """
     This an integer value representing the maximum length for the
     personalization message entered by the buyer.
     """
-    personalization_instructions: Optional[str] = None
+    personalization_instructions: str
     """
     When true, this listing requires personalization. The default value is
     null.
     """
-    listing_type: Optional[bool] = None
+    listing_type: bool
     """
     An enumerated type string that indicates whether the listing is physical or
     a digital download.
     """
-    tags: Optional[List[str]] = None
+    tags: List[str]
     """
     A list of tag strings for the listing. Valid tag strings contain only
     letters, numbers, whitespace characters, -, ', ™, ©, and ®. (regex:
     /[^\\\\p{L}\\\\p{Nd}\\\\p{Zs}\\\\-'™©®]/u) Default value is null.
     """
-    materials: Optional[List[str]] = None
+    materials: List[str]
     """
     A list of material strings for materials used in the product. Valid
     materials strings contain only letters, numbers, and whitespace characters.
     (regex: /[^\\\\p{L}\\\\p{Nd}\\\\p{Zs}]/u) Default value is null.
     """
-    shipping_profile_id: Optional[int] = None
+    shipping_profile_id: int
     """The numeric ID of the shipping profile associated with the listing."""
-    processing_min: Optional[int] = None
+    processing_min: int
     """
     The minimum number of days required to process this listing. Default value
     is null.
     """
-    processing_max: Optional[int] = None
+    processing_max: int
     """
     The maximum number of days required to process this listing. Default value
     is null.
     """
-    who_made: Optional[WhoMade] = None
-    when_made: Optional[WhenMade] = None
-    is_supply: Optional[bool] = None
+    who_made: WhoMade
+    when_made: WhenMade
+    is_supply: bool
     """
     When true, tags the listing as a supply product, else indicates that it's a
     finished product. Helps buyers locate the listing under the Supplies
     heading. Requires 'who_made' and 'when_made'.
     """
-    item_weight: Optional[float] = None
+    item_weight: float
     """
     The numeric weight of the product measured in units set in item weight
     unit. Default value is null. If set, the value must be greater than 0.
     """
-    item_weight_unit: Optional[ItemWeightUnit] = None
-    item_length: Optional[float] = None
+    item_weight_unit: ItemWeightUnit
+    item_length: float
     """
     The numeric length of the product measured in units set in item dimensions
     unit. Default value is null. If set, the value must be greater than 0.
     """
-    item_width: Optional[float] = None
+    item_width: float
     """
     The numeric width of the product measured in units set in item dimensions
     unit. Default value is null. If set, the value must be greater than 0.
     """
-    item_height: Optional[float] = None
+    item_height: float
     """
     The numeric length of the product measured in units set in item dimensions
     unit. Default value is null. If set, the value must be greater than 0.
     """
-    item_dimensions_unit: Optional[ItemDimensionsUnit] = None
-    is_private: Optional[bool] = None
+    item_dimensions_unit: ItemDimensionsUnit
+    is_private: bool
     """
     When true, this is a private listing intendend for a specific buyer and
     hidden from shop view.
     """
-    recipient: Optional[Recipient] = None
-    occasion: Optional[Occasion] = None
-    style: Optional[List[str]] = None
+    recipient: Recipient
+    occasion: Occasion
+    style: List[str]
     """
     An array of style strings for this listing, each of which is free-form text
     string such as Formal, or Steampunk. A Listing may have up to two styles.
@@ -2051,11 +2157,11 @@ class ShopListingWithAssociations:
     characters. (regex: /[^\\\\p{L}\\\\p{Nd}\\\\p{Zs}]/u) Default value is
     null.
     """
-    file_data: Optional[str] = None
+    file_data: str
     """A string describing the files attached to a digital listing."""
-    has_variations: Optional[bool] = None
+    has_variations: bool
     """When true, the listing has variations."""
-    should_auto_renew: Optional[bool] = None
+    should_auto_renew: bool
     """
     When true, renews a listing for four months upon expriation. If set to true
     when previously false, etsy.com renews the listing before it expires, but
@@ -2063,25 +2169,25 @@ class ShopListingWithAssociations:
     expiration date. Any unused time remaining on the listing is lost. Renewals
     result in charges to a user's bill.
     """
-    language: Optional[str] = None
+    language: str
     """
     The IETF language tag for the default language of the listing. Ex: `de`,
     `en`, `es`, `fr`, `it`, `ja`, `nl`, `pl`, `pt`, `ru`.
     """
-    price: Optional[Money] = None
-    taxonomy_id: Optional[int] = None
+    price: Money | Mapping[str, Any]
+    taxonomy_id: int
     """
     The numeric taxonomy ID of the listing. The seller manages listing taxonomy
     IDs for their shop. See seller taxonomy for more information.
     """
-    user: Optional[User] = None
-    shop: Optional[Shop] = None
-    images: Optional[List[ListingImage]] = None
+    user: User | Mapping[str, Any]
+    shop: Shop | Mapping[str, Any]
+    images: List[ListingImage | Mapping[str, Any]]
     """
     Represents a list of listing image resources, each of which contains the
     reference URLs and metadata for an image
     """
-    production_partners: Optional[List[ShopProductionPartner]] = None
+    production_partners: List[ShopProductionPartner | Mapping[str, Any]]
     """Represents a list of production partners for a shop."""
 
 
@@ -2091,11 +2197,11 @@ class ShopProductionPartner:
     Definition: ShopProductionPartner
     """
 
-    production_partner_id: Optional[int] = None
+    production_partner_id: int
     """The numeric ID of a production partner."""
-    partner_name: Optional[str] = None
+    partner_name: str
     """The name or title of the production partner."""
-    location: Optional[str] = None
+    location: str
     """A string representing the production partner location."""
 
 
@@ -2105,11 +2211,11 @@ class ListingVariationImage:
     Definition: ListingVariationImage
     """
 
-    property_id: Optional[int] = None
+    property_id: int
     """The numeric ID of the Property."""
-    value_id: Optional[int] = None
+    value_id: int
     """The numeric ID of the Value."""
-    image_id: Optional[int] = None
+    image_id: int
     """The numeric ID of the Image."""
 
 
@@ -2119,31 +2225,31 @@ class PaymentAccountLedgerEntry:
     Definition: PaymentAccountLedgerEntry
     """
 
-    entry_id: Optional[int] = None
+    entry_id: int
     """The ledger entry's numeric ID."""
-    ledger_id: Optional[int] = None
+    ledger_id: int
     """The ledger's numeric ID."""
-    sequence_number: Optional[int] = None
+    sequence_number: int
     """
     The sequence allows ledger entries to be sorted chronologically. The higher
     the sequence, the more recent the entry.
     """
-    amount: Optional[int] = None
+    amount: int
     """The amount of money credited to the ledger."""
-    currency: Optional[str] = None
+    currency: str
     """The currency of the entry on the ledger."""
-    description: Optional[str] = None
+    description: str
     """
     Details what kind of ledger entry this is: a payment, refund, reversal of a
     failed refund, disbursement, returned disbursement, recoupment,
     miscellaneous credit, miscellaneous debit, or bill payment.
     """
-    balance: Optional[int] = None
+    balance: int
     """
     The amount of money in the shop's ledger the moment after this entry was
     applied.
     """
-    create_date: Optional[int] = None
+    create_date: int
     """The date and time the ledger entry was created in Epoch seconds.."""
 
 
@@ -2153,53 +2259,58 @@ class Payment:
     Definition: Payment
     """
 
-    payment_id: Optional[int] = None
+    payment_id: int
     """A unique numeric ID for a payment to a specific Etsy shop."""
-    buyer_user_id: Optional[int] = None
+    buyer_user_id: int
     """The numeric ID for the user who paid the purchase."""
-    shop_id: Optional[int] = None
+    shop_id: int
     """The unique positive non-zero numeric ID for an Etsy Shop."""
-    receipt_id: Optional[int] = None
+    receipt_id: int
     """The numeric ID for the receipt associated to this transaction."""
-    amount_gross: Optional[Money] = None
-    amount_fees: Optional[Money] = None
-    amount_net: Optional[Money] = None
-    posted_gross: Optional[Money] = None
-    posted_fees: Optional[Money] = None
-    posted_net: Optional[Money] = None
-    adjusted_gross: Optional[Money] = None
-    adjusted_fees: Optional[Money] = None
-    adjusted_net: Optional[Money] = None
-    currency: Optional[str] = None
+    amount_gross: Money | Mapping[str, Any]
+    amount_fees: Money | Mapping[str, Any]
+    amount_net: Money | Mapping[str, Any]
+    posted_gross: Optional[Money | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    posted_fees: Optional[Money | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    posted_net: Optional[Money | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    adjusted_gross: Optional[
+        Money | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    adjusted_fees: Optional[Money | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    adjusted_net: Optional[Money | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    currency: str
     """The ISO (alphabetic) code string for the payment's currency."""
-    shop_currency: Optional[str] = None
+    shop_currency: str
     """
     The ISO (alphabetic) code for the shop's currency. The shop displays all
     prices in this currency by default.
     """
-    buyer_currency: Optional[str] = None
+    buyer_currency: str
     """The currency string of the buyer."""
-    shipping_user_id: Optional[int] = None
+    shipping_user_id: int
     """The numeric ID of the user to which the seller ships the order."""
-    shipping_address_id: Optional[int] = None
+    shipping_address_id: int
     """The numeric id identifying the shipping address."""
-    billing_address_id: Optional[int] = None
+    billing_address_id: int
     """The numeric ID identifying the billing address of the buyer."""
-    status: Optional[str] = None
+    status: str
     """
     A string indicating the current status of the payment, most commonly
     settled or authed.
     """
-    shipped_timestamp: Optional[int] = None
+    shipped_timestamp: int
     """The transaction's shipping date and time, in epoch seconds."""
-    create_timestamp: Optional[int] = None
+    create_timestamp: int
     """The transaction's creation date and time, in epoch seconds."""
-    update_timestamp: Optional[int] = None
+    update_timestamp: int
     """
     The date and time of the last change to the payment adjustment in epoch
     seconds.
     """
-    payment_adjustments: Optional[List[PaymentAdjustment]] = None
+    payment_adjustments: List[PaymentAdjustment | Mapping[str, Any]]
     """
     List of refund objects on an Etsy Payments transaction. All monetary
     amounts are in USD pennies unless otherwise specified.
@@ -2212,35 +2323,35 @@ class PaymentAdjustment:
     Definition: PaymentAdjustment
     """
 
-    payment_adjustment_id: Optional[int] = None
+    payment_adjustment_id: int
     """The numeric ID for a payment adjustment."""
-    payment_id: Optional[int] = None
+    payment_id: int
     """A unique numeric ID for a payment to a specific Etsy shop."""
-    status: Optional[str] = None
+    status: str
     """The status string of the payment adjustment."""
-    is_success: Optional[bool] = None
+    is_success: bool
     """
     When true, the payment adjustment was or is likely to complete
     successfully.
     """
-    user_id: Optional[int] = None
+    user_id: int
     """The numeric ID for the user (seller) fulfilling the purchase."""
-    reason_code: Optional[str] = None
+    reason_code: str
     """A human-readable string describing the reason for the refund."""
-    total_adjustment_amount: Optional[int] = None
+    total_adjustment_amount: int
     """The total numeric amount of the refund in the payment currency."""
-    shop_total_adjustment_amount: Optional[int] = None
+    shop_total_adjustment_amount: int
     """The numeric amount of the refund in the shop currency."""
-    buyer_total_adjustment_amount: Optional[int] = None
+    buyer_total_adjustment_amount: int
     """The numeric amount of the refund in the buyer currency."""
-    total_fee_adjustment_amount: Optional[int] = None
+    total_fee_adjustment_amount: int
     """
     The numeric amount of card processing fees associated with a payment
     adjustment.
     """
-    create_timestamp: Optional[int] = None
+    create_timestamp: int
     """The transaction's creation date and time, in epoch seconds."""
-    update_timestamp: Optional[int] = None
+    update_timestamp: int
     """
     The date and time of the last change to the payment adjustment in epoch
     seconds.
@@ -2253,19 +2364,19 @@ class ShopReceiptShipment:
     Definition: ShopReceiptShipment
     """
 
-    receipt_shipping_id: Optional[int] = None
+    receipt_shipping_id: int
     """The unique numeric ID of a Shop Receipt Shipment record."""
-    shipment_notification_timestamp: Optional[int] = None
+    shipment_notification_timestamp: int
     """
     The time at which Etsy notified the buyer of the shipment event, in epoch
     seconds.
     """
-    carrier_name: Optional[str] = None
+    carrier_name: str
     """
     The name string for the carrier/company responsible for delivering the
     shipment.
     """
-    tracking_code: Optional[str] = None
+    tracking_code: str
     """
     The tracking code string provided by the carrier/company for the shipment.
     """
@@ -2277,29 +2388,29 @@ class TransactionReview:
     Definition: TransactionReview
     """
 
-    shop_id: Optional[int] = None
+    shop_id: int
     """The shop's numeric ID."""
-    listing_id: Optional[int] = None
+    listing_id: int
     """The ID of the shop listing that the TransactionReview belongs to."""
-    buyer_user_id: Optional[int] = None
+    buyer_user_id: int
     """
     The numeric ID of the user who was the buyer in this transaction. Note:
     This field may be absent, depending on the buyer's privacy settings.
     """
-    rating: Optional[int] = None
+    rating: int
     """Rating value on scale from 1 to 5"""
-    review: Optional[str] = None
+    review: str
     """A message left by the author, explaining the feedback."""
-    language: Optional[str] = None
+    language: str
     """The language of the TransactionReview"""
-    image_url_fullxfull: Optional[str] = None
+    image_url_fullxfull: str
     """
     The url to a photo provided with the feedback, dimensions fullxfull. Note:
     This field may be absent, depending on the buyer's privacy settings.
     """
-    create_timestamp: Optional[int] = None
+    create_timestamp: int
     """The date and time the TransactionReview was created in epoch seconds."""
-    update_timestamp: Optional[int] = None
+    update_timestamp: int
     """The date and time the TransactionReview was updated in epoch seconds."""
 
 
@@ -2309,7 +2420,7 @@ class SellerTaxonomyNode:
     Definition: SellerTaxonomyNode
     """
 
-    id: Optional[int] = None
+    id: int
     """
     The unique numeric ID of an Etsy taxonomy node, which is a metadata
     category for listings organized into the seller taxonomy hierarchy tree.
@@ -2321,21 +2432,21 @@ class SellerTaxonomyNode:
     associated property names and IDs for EU shoe sizes, such as property
     `value_id`:1394, and `name`:38.
     """
-    level: Optional[int] = None
+    level: int
     """
     The integer depth of this taxonomy node in the seller taxonomy tree, with
     roots at level 0.
     """
-    name: Optional[str] = None
+    name: str
     """The name string for this taxonomy node."""
-    parent_id: Optional[int] = None
+    parent_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numeric taxonomy ID of the parent of this node."""
-    children: Optional[List[SellerTaxonomyNode]] = None
+    children: List[SellerTaxonomyNode | Mapping[str, Any]]
     """
     An array of taxonomy nodes for all the direct children of this taxonomy
     node in the seller taxanomy tree.
     """
-    full_path_taxonomy_ids: Optional[List[int]] = None
+    full_path_taxonomy_ids: List[int]
     """
     An array of taxonomy IDs including this node and all of its direct parents
     in the seller taxonomy tree up to a root node. They are listed in order
@@ -2349,27 +2460,27 @@ class TaxonomyNodeProperty:
     Definition: TaxonomyNodeProperty
     """
 
-    property_id: Optional[int] = None
+    property_id: int
     """The unique numeric ID of this product property."""
-    name: Optional[str] = None
+    name: str
     """The name string for this taxonomy node."""
-    display_name: Optional[str] = None
+    display_name: str
     """The human-readable product property name string."""
-    scales: Optional[List[TaxonomyPropertyScale]] = None
+    scales: List[TaxonomyPropertyScale | Mapping[str, Any]]
     """A list of available scales."""
-    is_required: Optional[bool] = None
+    is_required: bool
     """
     When true, listings assigned eligible taxonomy IDs require this property.
     """
-    supports_attributes: Optional[bool] = None
+    supports_attributes: bool
     """When true, you can use this property in listing attributes."""
-    supports_variations: Optional[bool] = None
+    supports_variations: bool
     """When true, you can use this property in listing variations."""
-    is_multivalued: Optional[bool] = None
+    is_multivalued: bool
     """When true, you can assign multiple property values to this property"""
-    possible_values: Optional[List[TaxonomyPropertyValue]] = None
+    possible_values: List[TaxonomyPropertyValue | Mapping[str, Any]]
     """A list of supported property value strings for this property."""
-    selected_values: Optional[List[TaxonomyPropertyValue]] = None
+    selected_values: List[TaxonomyPropertyValue | Mapping[str, Any]]
     """
     A list of property value strings automatically and always selected for the
     given property.
@@ -2382,11 +2493,11 @@ class TaxonomyPropertyScale:
     Definition: TaxonomyPropertyScale
     """
 
-    scale_id: Optional[int] = None
+    scale_id: int
     """The unique numeric ID of a scale."""
-    display_name: Optional[str] = None
+    display_name: str
     """The name string for a scale."""
-    description: Optional[str] = None
+    description: str
     """The description string for a scale."""
 
 
@@ -2396,15 +2507,15 @@ class TaxonomyPropertyValue:
     Definition: TaxonomyPropertyValue
     """
 
-    value_id: Optional[int] = None
+    value_id: int
     """The numeric ID of this property value."""
-    name: Optional[str] = None
+    name: str
     """The name string of this property value."""
-    scale_id: Optional[int] = None
+    scale_id: int
     """
     The numeric scale ID of the scale to which this property value belongs.
     """
-    equal_to: Optional[List[int]] = None
+    equal_to: List[int]
     """
     A list of numeric property value IDs this property value is equal to (if
     any).
@@ -2417,13 +2528,13 @@ class ShippingCarrier:
     Definition: ShippingCarrier
     """
 
-    shipping_carrier_id: Optional[int] = None
+    shipping_carrier_id: int
     """The numeric ID of this shipping carrier."""
-    name: Optional[str] = None
+    name: str
     """The name of this shipping carrier."""
-    domestic_classes: Optional[List[ShippingCarrierMailClass]] = None
+    domestic_classes: List[ShippingCarrierMailClass | Mapping[str, Any]]
     """Set of domestic mail classes of this shipping carrier."""
-    international_classes: Optional[List[ShippingCarrierMailClass]] = None
+    international_classes: List[ShippingCarrierMailClass | Mapping[str, Any]]
     """Set of international mail classes of this shipping carrier."""
 
 
@@ -2433,9 +2544,9 @@ class ShippingCarrierMailClass:
     Definition: ShippingCarrierMailClass
     """
 
-    mail_class_key: Optional[str] = None
+    mail_class_key: str
     """The unique identifier of this mail class."""
-    name: Optional[str] = None
+    name: str
     """The name of this mail class."""
 
 
@@ -2445,9 +2556,9 @@ class ShopProductionPartners:
     Definition: ShopProductionPartners
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of results."""
-    results: Optional[List[ShopProductionPartner]] = None
+    results: List[ShopProductionPartner | Mapping[str, Any]]
     """The list of requested resources."""
 
 
@@ -2457,8 +2568,8 @@ class ShopShippingProfiles:
     Definition: ShopShippingProfiles
     """
 
-    count: Optional[int] = None
-    results: Optional[List[ShopShippingProfile]] = None
+    count: int
+    results: List[ShopShippingProfile | Mapping[str, Any]]
 
 
 Channel = Literal["etsy.com", "wholesale", "pattern", "sell_on_facebook"]
@@ -2534,11 +2645,11 @@ class Offering:
     Definition: Offering
     """
 
-    price: Optional[float] = None
+    price: Optional[float] = dataclass_field(default=None, kw_only=True)
     """The price of the product."""
-    quantity: Optional[int] = None
+    quantity: Optional[int] = dataclass_field(default=None, kw_only=True)
     """How many of this product are available?"""
-    is_enabled: Optional[bool] = None
+    is_enabled: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the offering is shown to buyers"""
 
 
@@ -2551,11 +2662,21 @@ class Product:
     Definition: Product
     """
 
-    sku: Optional[str] = None
+    sku: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The SKU string for the product"""
-    property_values: Optional[List[PropertyValue]] = None
+    property_values: Optional[
+        List[PropertyValue | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """A list of property value entries for this product."""
-    offerings: Optional[List[Offering]] = None
+    offerings: Optional[
+        List[Offering | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """A list of product offering entries for this product."""
 
 
@@ -2568,23 +2689,23 @@ class PropertyValue:
     Definition: PropertyValue
     """
 
-    property_id: Optional[int] = None
+    property_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The unique ID of an Etsy listing property."""
-    value_ids: Optional[List[int]] = None
+    value_ids: Optional[List[int]] = dataclass_field(default=None, kw_only=True)
     """
     An array of unique IDs of multiple Etsy listing property values. For
     example, if your listing offers different sizes of a product, then the
     value ID list contains value IDs for each size.
     """
-    scale_id: Optional[int] = None
+    scale_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The numeric ID of a single Etsy.com measurement scale. For example, for
     shoe size, there are three `scale_id`s available - *UK*, *US/Canada*, and
     *EU*, where *US/Canada* has `scale_id` 19.
     """
-    property_name: Optional[str] = None
+    property_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the property, in the requested locale language."""
-    values: Optional[List[str]] = None
+    values: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """A list of property value entries for this product."""
 
 
@@ -2633,26 +2754,26 @@ class ApplicationListingsInventoryRequest:
     Definition: V3ApplicationListingsInventoryRequest
     """
 
-    products: Optional[List[Product]] = None
+    products: List[Product | Mapping[str, Any]]
     """
     A JSON array of products available in a listing, even if only one product.
     All field names in the JSON blobs are lowercase.
     """
-    price_on_property: Optional[List[int]] = None
+    price_on_property: Optional[List[int]] = dataclass_field(default=None, kw_only=True)
     """
     An array of unique listing property ID integers for the properties that
     change product prices, if any. For example, if you charge specific prices
     for different sized products in the same listing, then this array contains
     the property ID for size.
     """
-    quantity_on_property: Optional[List[int]] = None
+    quantity_on_property: Optional[List[int]] = dataclass_field(default=None, kw_only=True)
     """
     An array of unique listing property ID integers for the properties that
     change the quantity of the products, if any. For example, if you stock
     specific quantities of different colored products in the same listing, then
     this array contains the property ID for color.
     """
-    sku_on_property: Optional[List[int]] = None
+    sku_on_property: Optional[List[int]] = dataclass_field(default=None, kw_only=True)
     """
     An array of unique listing property ID integers for the properties that
     change the product SKU, if any. For example, if you use specific skus for
@@ -2667,7 +2788,7 @@ class ApplicationShopsListingsVariationImagesRequest:
     Definition: V3ApplicationShopsListingsVariationImagesRequest
     """
 
-    variation_images: Optional[List[VariationImage]] = None
+    variation_images: List[VariationImage | Mapping[str, Any]]
     """A list of variation image data."""
 
 
@@ -2677,9 +2798,9 @@ class VariationImage:
     Definition: VariationImage
     """
 
-    property_id: Optional[int] = None
-    value_id: Optional[int] = None
-    image_id: Optional[int] = None
+    property_id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    value_id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    image_id: Optional[int] = dataclass_field(default=None, kw_only=True)
 
 
 WhenMade2 = Literal[
@@ -2745,7 +2866,7 @@ class EtsyClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -2762,8 +2883,8 @@ class EtsyClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -2784,7 +2905,7 @@ class EtsyClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -2799,7 +2920,7 @@ class EtsyClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "etsy"
 
-    async def ping_async(
+    async def ping(
         self,
         *,
         timeout: Optional[float] = None,
@@ -2811,10 +2932,24 @@ class EtsyClient(ConnectorClientBase):
         Ping
 
         Check to confirm connectivity to the Etsy API with an application.
+
+        Swagger operation ID: `Ping`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/openapi-ping"
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2828,6 +2963,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2835,14 +2971,14 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def payment_ledger_entries_async(
+    async def payment_ledger_entries(
         self,
         shop_id: int,
         min_created: int,
         max_created: int,
+        *,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -2852,6 +2988,28 @@ class EtsyClient(ConnectorClientBase):
         Get a shop payment account ledger's entries
 
         Retrieve the entries of a shop's payment account ledger.
+
+        Swagger operation ID: `PaymentLedgerEntries`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            min_created: The earliest unix timestamp for when a record was
+                created.
+            max_created: The latest unix timestamp for when a record was
+                created.
+            limit: The maximum number of results to return.
+            offset: The number of records to skip before selecting the first
+                result.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2882,7 +3040,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2896,6 +3054,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2903,7 +3062,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def payment_get_entry_id_async(
+    async def payment_get_entry_id(
         self,
         shop_id: int,
         ledger_entry_ids: str,
@@ -2917,6 +3076,22 @@ class EtsyClient(ConnectorClientBase):
         Get a payment from a payment account ledger entry ID
 
         Get a Payment from a Payment Account Ledger Entry ID, if applicable.
+
+        Swagger operation ID: `PaymentGetEntryID`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            ledger_entry_ids: Array of integers.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2934,7 +3109,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2948,6 +3123,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2955,7 +3131,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def payment_get_receipt_async(
+    async def payment_get_receipt(
         self,
         shop_id: int,
         receipt_id: str,
@@ -2970,6 +3146,23 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves a payment from a specific receipt, identified by receipt ID,
         from a specific shop, identified by shop ID.
+
+        Swagger operation ID: `PaymentGetReceipt`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            receipt_id: The numeric ID for the receipt associated to this
+                transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2980,7 +3173,7 @@ class EtsyClient(ConnectorClientBase):
             f"/payments"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2994,6 +3187,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3001,7 +3195,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def payments_get_async(
+    async def payments_get(
         self,
         shop_id: int,
         payment_ids: str,
@@ -3016,6 +3210,22 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves a list of payments from a shop identified by shop ID. You can
         also filter results using a list of payment IDs.
+
+        Swagger operation ID: `PaymentsGet`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            payment_ids: A comma-separated array of Payment IDs numbers.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3029,7 +3239,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3043,6 +3253,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3050,7 +3261,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def receipt_get_async(
+    async def receipt_get(
         self,
         shop_id: int,
         receipt_id: int,
@@ -3064,6 +3275,23 @@ class EtsyClient(ConnectorClientBase):
         Get a receipt
 
         Retrieves a receipt, identified by a receipt ID, from an Etsy shop.
+
+        Swagger operation ID: `ReceiptGet`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            receipt_id: The numeric ID for the receipt associated to this
+                transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3073,7 +3301,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(receipt_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3087,6 +3315,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3094,9 +3323,10 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def receipts_get_async(
+    async def receipts_get(
         self,
         shop_id: int,
+        *,
         min_created: Optional[int] = None,
         max_created: Optional[int] = None,
         min_last_modified: Optional[int] = None,
@@ -3105,7 +3335,6 @@ class EtsyClient(ConnectorClientBase):
         offset: Optional[int] = None,
         was_paid: Optional[bool] = None,
         was_shipped: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3116,6 +3345,36 @@ class EtsyClient(ConnectorClientBase):
 
         Requests the shop receipts from a specific shop, unfiltered or filtered
         by receipt ID range or offset, date, paid, and/or shipped purchases.
+
+        Swagger operation ID: `ReceiptsGet`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            min_created: The earliest unix timestamp for when a record was
+                created.
+            max_created: The latest unix timestamp for when a record was
+                created.
+            min_last_modified: The earliest unix timestamp for when a record
+                last changed.
+            max_last_modified: The latest unix timestamp for when a record last
+                changed.
+            limit: The maximum number of results to return.
+            offset: The number of records to skip before selecting the first
+                result.
+            was_paid: When true, the seller received payment for the product(s)
+                in this receipt.
+            was_shipped: When true, the seller shipped the product(s) in this
+                receipt.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3165,7 +3424,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3179,6 +3438,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3186,9 +3446,9 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def receipt_create_shipment_async(
+    async def receipt_create_shipment(
         self,
-        input: ReceiptCreateShipmentInput,
+        input: ReceiptCreateShipmentInput | Mapping[str, Any],
         shop_id: int,
         receipt_id: int,
         *,
@@ -3206,6 +3466,24 @@ class EtsyClient(ConnectorClientBase):
         the buyer User. When send BCC is true, Etsy sends shipping
         notifications to the seller as well. When tracking code and carrier
         name aren't sent, the receipt is marked as shipped only.
+
+        Swagger operation ID: `ReceiptCreateShipment`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            receipt_id: The receipt to submit tracking for.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3216,7 +3494,7 @@ class EtsyClient(ConnectorClientBase):
             f"/tracking"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3230,6 +3508,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3237,13 +3516,13 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def transactions_listing_async(
+    async def transactions_listing(
         self,
         shop_id: int,
         listing_id: int,
+        *,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3253,6 +3532,26 @@ class EtsyClient(ConnectorClientBase):
         Retrieve a listing's transactions
 
         Retrieves the list of transactions associated with a listing.
+
+        Swagger operation ID: `TransactionsListing`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            limit: The maximum number of results to return.
+            offset: The number of records to skip before selecting the first
+                result.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3276,7 +3575,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3290,6 +3589,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3297,7 +3597,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def transaction_receipt_async(
+    async def transaction_receipt(
         self,
         shop_id: int,
         receipt_id: int,
@@ -3311,6 +3611,23 @@ class EtsyClient(ConnectorClientBase):
         Get a receipt's transaction
 
         Retrieves the list of transactions associated with a specific receipt.
+
+        Swagger operation ID: `TransactionReceipt`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            receipt_id: The numeric ID for the receipt associated to this
+                transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3321,7 +3638,7 @@ class EtsyClient(ConnectorClientBase):
             f"/transactions"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3335,6 +3652,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3342,7 +3660,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def transaction_get_async(
+    async def transaction_get(
         self,
         shop_id: int,
         transaction_id: int,
@@ -3356,6 +3674,22 @@ class EtsyClient(ConnectorClientBase):
         Get a transaction
 
         Retrieves a transaction by transaction ID.
+
+        Swagger operation ID: `TransactionGet`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            transaction_id: The unique numeric ID for a transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3365,7 +3699,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(transaction_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3379,6 +3713,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3386,12 +3721,12 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def transaction_get_shop_async(
+    async def transaction_get_shop(
         self,
         shop_id: int,
+        *,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3401,6 +3736,24 @@ class EtsyClient(ConnectorClientBase):
         Get a shop's transaction
 
         Retrieves the list of transactions associated with a shop.
+
+        Swagger operation ID: `TransactionGetShop`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            limit: The maximum number of results to return.
+            offset: The number of records to skip before selecting the first
+                result.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3420,7 +3773,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3434,6 +3787,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3441,12 +3795,12 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def reviews_get_async(
+    async def reviews_get(
         self,
         shop_id: int,
+        *,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3456,6 +3810,24 @@ class EtsyClient(ConnectorClientBase):
         Get reviews
 
         Retrieves the reviews from a shop given its ID.
+
+        Swagger operation ID: `ReviewsGet`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            limit: The maximum number of results to return.
+            offset: The number of records to skip before selecting the first
+                result.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3475,7 +3847,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3489,6 +3861,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3496,7 +3869,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def shipping_carriers_async(
+    async def shipping_carriers(
         self,
         origin_country_iso: str,
         *,
@@ -3510,6 +3883,22 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves a list of available shipping carriers and the mail classes
         associated with them for a given country.
+
+        Swagger operation ID: `ShippingCarriers`.
+
+        Args:
+            origin_country_iso: The ISO code of the country from which the
+                listing ships.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/shipping-carriers"
         query_params = []
@@ -3520,7 +3909,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3534,6 +3923,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3541,7 +3931,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def shipping_profiles_async(
+    async def shipping_profiles(
         self,
         shop_id: int,
         *,
@@ -3555,13 +3945,28 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves a list of shipping profiles available in the specific Etsy
         shop identified by its shop ID.
+
+        Swagger operation ID: `ShippingProfiles`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/shops/{quote(str(shop_id), safe='')}/shipping-profiles"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3575,6 +3980,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3582,9 +3988,9 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def shipping_create_profile_async(
+    async def shipping_create_profile(
         self,
-        input: ShippingCreateProfileInput,
+        input: ShippingCreateProfileInput | Mapping[str, Any],
         shop_id: int,
         *,
         timeout: Optional[float] = None,
@@ -3599,13 +4005,30 @@ class EtsyClient(ConnectorClientBase):
         region when creating a shipping profile, but not both. Only one is
         required. You must pass either a shipping carrier ID and mail class, or
         both min and max delivery days.
+
+        Swagger operation ID: `ShippingCreateProfile`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/shops/{quote(str(shop_id), safe='')}/shipping-profiles"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3619,6 +4042,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3626,7 +4050,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def shipping_get_profile_async(
+    async def shipping_get_profile(
         self,
         shop_id: int,
         shipping_profile_id: int,
@@ -3640,6 +4064,23 @@ class EtsyClient(ConnectorClientBase):
         Get a shipping profile
 
         Retrieves a shipping profile referenced by shipping profile ID.
+
+        Swagger operation ID: `ShippingGetProfile`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            shipping_profile_id: The numeric ID of the shipping profile
+                associated with the listing.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3649,7 +4090,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(shipping_profile_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3663,9 +4104,10 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def shipping_delete_profile_async(
+    async def shipping_delete_profile(
         self,
         shop_id: int,
         shipping_profile_id: int,
@@ -3679,6 +4121,23 @@ class EtsyClient(ConnectorClientBase):
         Delete a shipping profile
 
         Deletes a shipping profile by given ID.
+
+        Swagger operation ID: `ShippingDeleteProfile`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            shipping_profile_id: The numeric ID of the shipping profile
+                associated with the listing.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3688,7 +4147,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(shipping_profile_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3702,6 +4161,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3709,9 +4169,9 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def shipping_update_profile_async(
+    async def shipping_update_profile(
         self,
-        input: ShippingUpdateProfileInput,
+        input: ShippingUpdateProfileInput | Mapping[str, Any],
         shop_id: int,
         shipping_profile_id: int,
         *,
@@ -3724,6 +4184,25 @@ class EtsyClient(ConnectorClientBase):
         Update a shipping profile
 
         Changes the settings in a shipping profile.
+
+        Swagger operation ID: `ShippingUpdateProfile`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            shipping_profile_id: The numeric ID of the shipping profile
+                associated with the listing.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3733,7 +4212,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(shipping_profile_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3747,6 +4226,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3754,13 +4234,13 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def shipping_get_destinations_async(
+    async def shipping_get_destinations(
         self,
         shop_id: int,
         shipping_profile_id: int,
+        *,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -3771,6 +4251,26 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves a list of shipping destination objects associated with a
         shipping profile.
+
+        Swagger operation ID: `ShippingGetDestinations`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            shipping_profile_id: The numeric ID of the shipping profile
+                associated with the listing.
+            limit: The maximum number of results to return.
+            offset: The number of records to skip before selecting the first
+                result.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3794,7 +4294,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3808,6 +4308,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3815,9 +4316,9 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def shipping_create_destination_async(
+    async def shipping_create_destination(
         self,
-        input: ShippingCreateDestinationInput,
+        input: ShippingCreateDestinationInput | Mapping[str, Any],
         shop_id: int,
         shipping_profile_id: int,
         *,
@@ -3839,6 +4340,25 @@ class EtsyClient(ConnectorClientBase):
         default destination is everywhere. You must also either assign both a
         shipping carrier ID and mail class or both min delivery days and max
         delivery days.
+
+        Swagger operation ID: `ShippingCreateDestination`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            shipping_profile_id: The numeric ID of the shipping profile
+                associated with the listing.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3849,7 +4369,7 @@ class EtsyClient(ConnectorClientBase):
             f"/destinations"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3863,6 +4383,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3870,7 +4391,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def shipping_delete_profile_destination_async(
+    async def shipping_delete_profile_destination(
         self,
         shop_id: int,
         shipping_profile_id: int,
@@ -3890,6 +4411,26 @@ class EtsyClient(ConnectorClientBase):
         cannot delete the final shipping destination for any shipping profile.
         To delete the final shipping destination from a shipping profile, you
         must delete the entire shipping profile.
+
+        Swagger operation ID: `ShippingDeleteProfileDestination`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            shipping_profile_id: The numeric ID of the shipping profile
+                associated with the listing.
+            shipping_profile_destination_id: The numeric ID of the shipping
+                profile destination in the shipping profile associated with the
+                listing.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3901,7 +4442,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(shipping_profile_destination_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3915,11 +4456,12 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def shipping_update_profile_destination_async(
+    async def shipping_update_profile_destination(
         self,
-        input: ShippingUpdateProfileDestinationInput,
+        input: ShippingUpdateProfileDestinationInput | Mapping[str, Any],
         shop_id: int,
         shipping_profile_id: str,
         shipping_profile_destination_id: str,
@@ -3934,6 +4476,27 @@ class EtsyClient(ConnectorClientBase):
 
         Updates an existing shipping destination, which can set or reassign the
         shipping cost, carrier, and class for a destination.
+
+        Swagger operation ID: `ShippingUpdateProfileDestination`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            shipping_profile_id: The numeric ID of the shipping profile
+                associated with the listing.
+            shipping_profile_destination_id: The numeric ID of the shipping
+                profile destinationassociated with the listing.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3945,7 +4508,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(shipping_profile_destination_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3959,6 +4522,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3966,7 +4530,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def shipping_get_profile_upgrades_async(
+    async def shipping_get_profile_upgrades(
         self,
         shop_id: int,
         shipping_profile_id: int,
@@ -3981,6 +4545,23 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves the list of shipping profile upgrades assigned to a specific
         shipping profile.
+
+        Swagger operation ID: `ShippingGetProfileUpgrades`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            shipping_profile_id: The numeric ID of the shipping profile
+                associated with the listing.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3991,7 +4572,7 @@ class EtsyClient(ConnectorClientBase):
             f"/upgrades"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4005,6 +4586,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4012,9 +4594,9 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def shipping_create_upgrade_async(
+    async def shipping_create_upgrade(
         self,
-        input: ShippingCreateUpgradeInput,
+        input: ShippingCreateUpgradeInput | Mapping[str, Any],
         shop_id: int,
         shipping_profile_id: int,
         *,
@@ -4028,6 +4610,25 @@ class EtsyClient(ConnectorClientBase):
 
         Creates a new shipping profile upgrade, which can establish a price for
         a shipping option, such as an alternate carrier or faster delivery.
+
+        Swagger operation ID: `ShippingCreateUpgrade`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            shipping_profile_id: The numeric ID of the shipping profile
+                associated with the listing.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4038,7 +4639,7 @@ class EtsyClient(ConnectorClientBase):
             f"/upgrades"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4052,6 +4653,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4059,7 +4661,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def shipping_delete_profile_upgrade_async(
+    async def shipping_delete_profile_upgrade(
         self,
         shop_id: int,
         shipping_profile_id: int,
@@ -4075,6 +4677,24 @@ class EtsyClient(ConnectorClientBase):
 
         Deletes a shipping profile upgrade and removes the upgrade option from
         every listing that uses the associated shipping profile.
+
+        Swagger operation ID: `ShippingDeleteProfileUpgrade`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            shipping_profile_id: The numeric ID of the shipping profile.
+            upgrade_id: The numeric ID that is associated with a shipping
+                upgrade.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4086,7 +4706,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(upgrade_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4100,11 +4720,12 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def shipping_update_profile_upgrade_async(
+    async def shipping_update_profile_upgrade(
         self,
-        input: ShippingUpdateProfileUpgradeInput,
+        input: ShippingUpdateProfileUpgradeInput | Mapping[str, Any],
         shop_id: int,
         shipping_profile_id: int,
         upgrade_id: int,
@@ -4119,6 +4740,27 @@ class EtsyClient(ConnectorClientBase):
 
         Updates a shipping profile upgrade and updates any listings that use
         the shipping profile.
+
+        Swagger operation ID: `ShippingUpdateProfileUpgrade`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            shipping_profile_id: The numeric ID of the shipping profile
+                associated with the listing.
+            upgrade_id: The numeric ID that is associated with a shipping
+                upgrade.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4130,7 +4772,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(upgrade_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4144,6 +4786,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4151,9 +4794,9 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def shop_update_async(
+    async def shop_update(
         self,
-        input: ShopUpdateInput,
+        input: ShopUpdateInput | Mapping[str, Any],
         shop_id: int,
         *,
         timeout: Optional[float] = None,
@@ -4166,13 +4809,30 @@ class EtsyClient(ConnectorClientBase):
 
         Update a shop. Assumes that all string parameters are provided in the
         shop's primary language.
+
+        Swagger operation ID: `ShopUpdate`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/shops/{quote(str(shop_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4186,6 +4846,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4193,7 +4854,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def shop_get_by_owner_id_async(
+    async def shop_get_by_owner_id(
         self,
         user_id: str,
         *,
@@ -4206,13 +4867,28 @@ class EtsyClient(ConnectorClientBase):
         Get shop by owner ID
 
         Retrieves the shop identified by the shop owner's user ID.
+
+        Swagger operation ID: `ShopGetByOwnerID`.
+
+        Args:
+            user_id: The numeric user ID of the user who owns this shop.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/users/{quote(str(user_id), safe='')}/shops"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4226,6 +4902,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4233,12 +4910,12 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def shop_search_async(
+    async def shop_search(
         self,
         shop_name: str,
+        *,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4248,6 +4925,24 @@ class EtsyClient(ConnectorClientBase):
         Search shops
 
         Returns a list of shops with the matching name.
+
+        Swagger operation ID: `ShopSearch`.
+
+        Args:
+            shop_name: The shop's name string.
+            limit: The maximum number of results to return.
+            offset: The number of records to skip before selecting the first
+                result.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/shops"
         query_params = []
@@ -4268,7 +4963,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4282,6 +4977,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4289,7 +4985,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def shop_get_sections_async(
+    async def shop_get_sections(
         self,
         shop_id: int,
         *,
@@ -4303,13 +4999,28 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves the list of shop sections in a specific shop identified by
         shop ID.
+
+        Swagger operation ID: `ShopGetSections`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/shops/{quote(str(shop_id), safe='')}/sections"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4323,6 +5034,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4330,9 +5042,9 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def shop_create_section_async(
+    async def shop_create_section(
         self,
-        input: ShopCreateSectionInput,
+        input: ShopCreateSectionInput | Mapping[str, Any],
         shop_id: int,
         *,
         timeout: Optional[float] = None,
@@ -4344,13 +5056,30 @@ class EtsyClient(ConnectorClientBase):
         Create a shop section
 
         Creates a new section in a specific shop.
+
+        Swagger operation ID: `ShopCreateSection`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/shops/{quote(str(shop_id), safe='')}/sections"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4364,6 +5093,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4371,7 +5101,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def user_get_async(
+    async def user_get(
         self,
         user_id: int,
         *,
@@ -4384,13 +5114,28 @@ class EtsyClient(ConnectorClientBase):
         Get user
 
         Returns user profile for the user identified by a user ID.
+
+        Swagger operation ID: `UserGet`.
+
+        Args:
+            user_id: The unique positive non-zero numeric ID for an user.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/users/{quote(str(user_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4404,6 +5149,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4411,7 +5157,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def shop_get_section_async(
+    async def shop_get_section(
         self,
         shop_id: int,
         shop_section_id: int,
@@ -4425,6 +5171,23 @@ class EtsyClient(ConnectorClientBase):
         Get shop section
 
         Retrieves a shop section, referenced by section ID and shop ID.
+
+        Swagger operation ID: `ShopGetSection`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            shop_section_id: The numeric ID of a section in a specific Etsy
+                shop.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4434,7 +5197,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(shop_section_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4448,6 +5211,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4455,7 +5219,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def user_get_address_async(
+    async def user_get_address(
         self,
         user_address_id: int,
         *,
@@ -4469,13 +5233,28 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves the user's address. Development for this endpoint is in
         progress. It will only return a 501 response.
+
+        Swagger operation ID: `UserGetAddress`.
+
+        Args:
+            user_address_id: The numeric ID of the user's address.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/user/addresses/{quote(str(user_address_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4489,6 +5268,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4496,11 +5276,11 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def user_get_addresses_async(
+    async def user_get_addresses(
         self,
+        *,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4510,6 +5290,23 @@ class EtsyClient(ConnectorClientBase):
         Get user addresses
 
         Retrieve a list of user addresses.
+
+        Swagger operation ID: `UserGetAddresses`.
+
+        Args:
+            limit: The maximum number of results to return.
+            offset: The number of records to skip before selecting the first
+                result.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/user/addresses"
         query_params = []
@@ -4526,7 +5323,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4540,6 +5337,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4547,7 +5345,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_get_taxonomy_nodes_async(
+    async def listing_get_taxonomy_nodes(
         self,
         *,
         timeout: Optional[float] = None,
@@ -4559,10 +5357,24 @@ class EtsyClient(ConnectorClientBase):
         Get seller taxonomy nodes
 
         Retrieves the full hierarchy tree of seller taxonomy nodes.
+
+        Swagger operation ID: `ListingGetTaxonomyNodes`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/seller-taxonomy/nodes"
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4576,6 +5388,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4583,7 +5396,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_get_properties_by_taxonomy_async(
+    async def listing_get_properties_by_taxonomy(
         self,
         taxonomy_id: str,
         *,
@@ -4597,6 +5410,23 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves a list of product properties, with applicable scales and
         values, supported for a specific seller taxonomy ID.
+
+        Swagger operation ID: `ListingGetPropertiesByTaxonomy`.
+
+        Args:
+            taxonomy_id: The unique numeric ID of an Etsy taxonomy node, which
+                is a metadata category for listings organized into the seller
+                taxonomy hierarchy tree.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4606,7 +5436,7 @@ class EtsyClient(ConnectorClientBase):
             f"/properties"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4620,6 +5450,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4627,15 +5458,15 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_get_shop_async(
+    async def listing_get_shop(
         self,
         shop_id: int,
+        *,
         state: Optional[str] = None,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
         sort_on: Optional[str] = None,
         sort_order: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4646,6 +5477,28 @@ class EtsyClient(ConnectorClientBase):
 
         Returns listings that belong to a Shop. Listings can be filtered using
         the state parameter.
+
+        Swagger operation ID: `ListingGetShop`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            state: An enumerated string from any of: active or inactive.
+            limit: The maximum number of results to return.
+            offset: The number of records to skip before selecting the first
+                result.
+            sort_on: The value to sort a search result of listings on.
+            sort_order: The ascending(up) or descending(down) order to sort
+                listings by.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4680,7 +5533,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4694,6 +5547,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4701,9 +5555,9 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_create_async(
+    async def listing_create(
         self,
-        input: ListingCreateInput,
+        input: ListingCreateInput | Mapping[str, Any],
         shop_id: int,
         *,
         timeout: Optional[float] = None,
@@ -4715,13 +5569,30 @@ class EtsyClient(ConnectorClientBase):
         Create a draft listing
 
         Creates a physical draft listing product in a shop on the Etsy channel.
+
+        Swagger operation ID: `ListingCreate`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/shops/{quote(str(shop_id), safe='')}/listings"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4735,6 +5606,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4742,11 +5614,11 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_get_async(
+    async def listing_get(
         self,
         listing_id: int,
-        includes: Optional[str] = None,
         *,
+        includes: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4756,6 +5628,24 @@ class EtsyClient(ConnectorClientBase):
         Get a listing
 
         Retrieves a listing record by listing ID.
+
+        Swagger operation ID: `ListingGet`.
+
+        Args:
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            includes: An enumerated string that attaches a valid association.
+                Acceptable inputs are 'shop', 'images' and 'user'.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4770,7 +5660,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4784,9 +5674,10 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def listing_delete_async(
+    async def listing_delete(
         self,
         listing_id: int,
         *,
@@ -4802,13 +5693,29 @@ class EtsyClient(ConnectorClientBase):
         the state is one of the following: SOLD_OUT, DRAFT, EXPIRED, INACTIVE,
         ACTIVE and is_available or ACTIVE and has seller flags: SUPRESSED
         (frozen), VACATION, CUSTOM_SHOPS (pattern), SELL_ON_FACEBOOK
+
+        Swagger operation ID: `ListingDelete`.
+
+        Args:
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/listings/{quote(str(listing_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4822,10 +5729,12 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def listing_get_active_async(
+    async def listing_get_active(
         self,
+        *,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
         keywords: Optional[str] = None,
@@ -4835,7 +5744,6 @@ class EtsyClient(ConnectorClientBase):
         max_price: Optional[float] = None,
         taxonomy_id: Optional[int] = None,
         shop_location: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4846,6 +5754,38 @@ class EtsyClient(ConnectorClientBase):
 
         A list of all active listings on Etsy paginated by their creation date.
         Without sort order listings will be returned newest-first by default.
+
+        Swagger operation ID: `ListingGetActive`.
+
+        Args:
+            limit: The maximum number of results to return.
+            offset: The number of records to skip before selecting the first
+                result.
+            keywords: Search term or phrase that must appear in all results.
+            sort_on: The value to sort a search result of listings on. NOTE:
+                sort on only works when combined with one of the search options
+                (keywords, region, etc.).
+            sort_order: The ascending(up) or descending(down) order to sort
+                listings by. NOTE: sort_order only works when combined with one
+                of the search options (keywords, region, etc.).
+            min_price: The minimum price of listings to be returned by a search
+                result.
+            max_price: The maximum price of listings to be returned by a search
+                result.
+            taxonomy_id: The numeric taxonomy ID of the listing. The seller
+                manages listing taxonomy IDs for their shop.
+            shop_location: Filters by shop location. If location cannot be
+                parsed, Etsy responds with an error.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/listings/active"
         query_params = []
@@ -4897,7 +5837,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4911,6 +5851,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4918,13 +5859,13 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_get_active_by_shop_async(
+    async def listing_get_active_by_shop(
         self,
         shop_id: int,
+        *,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
         keywords: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4935,6 +5876,25 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves a list of all active listings on Etsy in a specific shop,
         paginated by listing creation date.
+
+        Swagger operation ID: `ListingGetActiveByShop`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            limit: The maximum number of results to return.
+            offset: The number of records to skip before selecting the first
+                result.
+            keywords: Search term or phrase that must appear in all results.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4959,7 +5919,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4973,6 +5933,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4980,11 +5941,11 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_get_by_id_async(
+    async def listing_get_by_id(
         self,
         listing_ids: str,
-        includes: Optional[str] = None,
         *,
+        includes: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4995,6 +5956,23 @@ class EtsyClient(ConnectorClientBase):
 
         Allows to query multiple listing IDs at once. Limit 100 IDs maximum per
         query.
+
+        Swagger operation ID: `ListingGetByID`.
+
+        Args:
+            listing_ids: The array of numeric IDs for the listings in a
+                specific Etsy shop.
+            includes: An enumerated string that attaches a valid association.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/listings/batch"
         query_params = []
@@ -5010,7 +5988,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5024,6 +6002,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5031,12 +6010,12 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_get_featured_async(
+    async def listing_get_featured(
         self,
         shop_id: int,
+        *,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5046,6 +6025,24 @@ class EtsyClient(ConnectorClientBase):
         Get featured listings by shop
 
         Retrieves listings associated to a shop that are featured.
+
+        Swagger operation ID: `ListingGetFeatured`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            limit: The maximum number of results to return.
+            offset: The number of records to skip before selecting the first
+                result.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5065,7 +6062,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5079,6 +6076,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5086,7 +6084,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_delete_property_async(
+    async def listing_delete_property(
         self,
         shop_id: int,
         listing_id: int,
@@ -5101,6 +6099,24 @@ class EtsyClient(ConnectorClientBase):
         Delete a listing property
 
         Deletes a property from a listing.
+
+        Swagger operation ID: `ListingDeleteProperty`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            property_id: The unique ID of an Etsy listing property.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5112,7 +6128,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(property_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5126,11 +6142,12 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def listing_update_property_async(
+    async def listing_update_property(
         self,
-        input: ListingUpdatePropertyInput,
+        input: ListingUpdatePropertyInput | Mapping[str, Any],
         shop_id: int,
         listing_id: int,
         property_id: int,
@@ -5147,6 +6164,26 @@ class EtsyClient(ConnectorClientBase):
         a listing. Each offering requires both a value and a value ID that are
         valid for a scale ID assigned to the listing or that you assign to the
         listing with this request.
+
+        Swagger operation ID: `ListingUpdateProperty`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            property_id: The unique ID of an Etsy listing property.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5158,7 +6195,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(property_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5172,6 +6209,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5179,7 +6217,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_get_property_async(
+    async def listing_get_property(
         self,
         listing_id: int,
         property_id: int,
@@ -5194,6 +6232,23 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves a listing's property. Development for this endpoint is in
         progress. It will only return a 501 response.
+
+        Swagger operation ID: `ListingGetProperty`.
+
+        Args:
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            property_id: The unique ID of an Etsy listing property.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5203,7 +6258,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(property_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5217,6 +6272,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5224,7 +6280,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_get_properties_async(
+    async def listing_get_properties(
         self,
         shop_id: int,
         listing_id: int,
@@ -5238,6 +6294,23 @@ class EtsyClient(ConnectorClientBase):
         Get a listing's properties
 
         Returns a list of a listing's properties.
+
+        Swagger operation ID: `ListingGetProperties`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5248,7 +6321,7 @@ class EtsyClient(ConnectorClientBase):
             f"/properties"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5262,6 +6335,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5269,9 +6343,9 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_update_async(
+    async def listing_update(
         self,
-        input: ListingUpdateInput,
+        input: ListingUpdateInput | Mapping[str, Any],
         shop_id: int,
         listing_id: int,
         *,
@@ -5285,6 +6359,25 @@ class EtsyClient(ConnectorClientBase):
 
         Updates a listing, identified by a listing ID, for a specific shop
         identified by a shop ID.
+
+        Swagger operation ID: `ListingUpdate`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5294,7 +6387,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(listing_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5308,6 +6401,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5315,13 +6409,13 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_get_by_receipt_async(
+    async def listing_get_by_receipt(
         self,
         shop_id: int,
         receipt_id: int,
+        *,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5331,6 +6425,27 @@ class EtsyClient(ConnectorClientBase):
         Get listings by shop receipt
 
         Gets all listings associated with a receipt.
+
+        Swagger operation ID: `ListingGetByReceipt`.
+
+        Args:
+            shop_id: The numeric ID for the receipt associated to this
+                transaction.
+            receipt_id: The unique positive non-zero numeric ID for an Etsy
+                Shop.
+            limit: The maximum number of results to return.
+            offset: The number of records to skip before selecting the first
+                result.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5354,7 +6469,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5368,6 +6483,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5375,15 +6491,15 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_get_by_section_id_async(
+    async def listing_get_by_section_id(
         self,
         shop_id: int,
         shop_section_ids: str,
+        *,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
         sort_on: Optional[str] = None,
         sort_order: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5393,6 +6509,29 @@ class EtsyClient(ConnectorClientBase):
         Get listings by shop section ID
 
         Retrieves all the listings from the section of a specific shop.
+
+        Swagger operation ID: `ListingGetBySectionID`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            shop_section_ids: A array of numeric IDs for all sections in a
+                specific Etsy shop.
+            limit: The maximum number of results to return.
+            offset: The number of records to skip before selecting the first
+                result.
+            sort_on: The value to sort a search result of listings on.
+            sort_order: The ascending(up) or descending(down) order to sort
+                listings by.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5426,7 +6565,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5440,6 +6579,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5447,7 +6587,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_get_file_async(
+    async def listing_get_file(
         self,
         shop_id: int,
         listing_id: int,
@@ -5463,6 +6603,25 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves a single file associated with the given digital listing.
         Requesting a file from a physical listing returns an empty result.
+
+        Swagger operation ID: `ListingGetFile`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            listing_file_id: The unique numeric ID of a file associated with a
+                digital listing.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5474,7 +6633,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(listing_file_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5488,6 +6647,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5495,7 +6655,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_delete_file_async(
+    async def listing_delete_file(
         self,
         shop_id: int,
         listing_id: int,
@@ -5513,6 +6673,25 @@ class EtsyClient(ConnectorClientBase):
         converts into a physical listing. The response to a delete request
         returns a list of the remaining file records associated with the given
         listing.
+
+        Swagger operation ID: `ListingDeleteFile`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            listing_file_id: The unique numeric ID of a file associated with a
+                digital listing.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5524,7 +6703,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(listing_file_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5538,9 +6717,10 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def listing_get_files_async(
+    async def listing_get_files(
         self,
         shop_id: int,
         listing_id: int,
@@ -5555,6 +6735,24 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves all the files associated with the given digital listing.
         Requesting files from a physical listing returns an empty result.
+
+        Swagger operation ID: `ListingGetFiles`.
+
+        Args:
+            shop_id: The numeric ID for the listing associated to this
+                transaction.
+            listing_id: The unique positive non-zero numeric ID for an Etsy
+                Shop.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5565,7 +6763,7 @@ class EtsyClient(ConnectorClientBase):
             f"/files"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5579,6 +6777,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5586,9 +6785,9 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_upload_async(
+    async def listing_upload(
         self,
-        input: ListingUploadInput,
+        input: ListingUploadInput | Mapping[str, Any],
         shop_id: int,
         listing_id: int,
         *,
@@ -5606,6 +6805,25 @@ class EtsyClient(ConnectorClientBase):
         upload. Associating an existing file to a physical listing converts the
         physical listing into a digital listing, which removes all shipping
         costs and any product and inventory variations.
+
+        Swagger operation ID: `ListingUpload`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5616,7 +6834,7 @@ class EtsyClient(ConnectorClientBase):
             f"/files"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5630,6 +6848,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5637,7 +6856,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_get_image_async(
+    async def listing_get_image(
         self,
         shop_id: int,
         listing_id: int,
@@ -5653,6 +6872,25 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves the references and metadata for a listing image with a
         specific image ID.
+
+        Swagger operation ID: `ListingGetImage`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            listing_image_id: The numeric ID of the primary listing image for
+                this transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5664,7 +6902,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(listing_image_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5678,6 +6916,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5685,7 +6924,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_delete_image_async(
+    async def listing_delete_image(
         self,
         shop_id: int,
         listing_id: int,
@@ -5702,6 +6941,25 @@ class EtsyClient(ConnectorClientBase):
         Deletes a listing image. A copy of the file remains on our servers, and
         so a deleted image may be re-associated with the listing without
         re-uploading the original image.
+
+        Swagger operation ID: `ListingDeleteImage`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            listing_image_id: The numeric ID of the primary listing image for
+                this transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5713,7 +6971,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(listing_image_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5727,9 +6985,10 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def listing_get_images_async(
+    async def listing_get_images(
         self,
         shop_id: int,
         listing_id: int,
@@ -5744,6 +7003,23 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves all listing image resources for a listing with a specific
         listing ID.
+
+        Swagger operation ID: `ListingGetImages`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5754,7 +7030,7 @@ class EtsyClient(ConnectorClientBase):
             f"/images"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5768,6 +7044,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5775,9 +7052,9 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_upload_image_async(
+    async def listing_upload_image(
         self,
-        input: ListingUploadImageInput,
+        input: ListingUploadImageInput | Mapping[str, Any],
         shop_id: int,
         listing_id: int,
         *,
@@ -5796,6 +7073,25 @@ class EtsyClient(ConnectorClientBase):
         parameter. When a request contains both image and listing image ID
         parameter values, the endpoint uploads the image in the image parameter
         only.
+
+        Swagger operation ID: `ListingUploadImage`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5806,7 +7102,7 @@ class EtsyClient(ConnectorClientBase):
             f"/images"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5820,6 +7116,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5827,11 +7124,11 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_get_inventory_async(
+    async def listing_get_inventory(
         self,
         listing_id: int,
-        includes: Optional[str] = None,
         *,
+        includes: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -5844,6 +7141,23 @@ class EtsyClient(ConnectorClientBase):
         using the Etsy.com inventory tools have no inventory records. This
         endpoint returns SKU data if you are the owner of the inventory records
         being fetched.
+
+        Swagger operation ID: `ListingGetInventory`.
+
+        Args:
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            includes: An enumerated string that attaches an valid association.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5858,7 +7172,7 @@ class EtsyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5872,6 +7186,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5879,9 +7194,9 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_update_inventory_async(
+    async def listing_update_inventory(
         self,
-        input: ListingUpdateInventoryInput,
+        input: ListingUpdateInventoryInput | Mapping[str, Any],
         listing_id: str,
         *,
         timeout: Optional[float] = None,
@@ -5897,13 +7212,31 @@ class EtsyClient(ConnectorClientBase):
         and/or price are incompatible with values in on property fields. When
         setting a price, assign a float equal to amount divided by divisor as
         specified in the money resource.
+
+        Swagger operation ID: `ListingUpdateInventory`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/listings/{quote(str(listing_id), safe='')}/inventory"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5917,6 +7250,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5924,7 +7258,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_get_offering_async(
+    async def listing_get_offering(
         self,
         listing_id: int,
         product_id: int,
@@ -5939,6 +7273,26 @@ class EtsyClient(ConnectorClientBase):
         Get a listing's offering
 
         Get an offering for a listing.
+
+        Swagger operation ID: `ListingGetOffering`.
+
+        Args:
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            product_id: The numeric ID for the product associated to this
+                transaction.
+            product_offering_id: The numeric ID for the product offering
+                associated to this transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5950,7 +7304,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(product_offering_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5964,6 +7318,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5971,7 +7326,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_get_product_async(
+    async def listing_get_product(
         self,
         listing_id: int,
         product_id: int,
@@ -5985,6 +7340,23 @@ class EtsyClient(ConnectorClientBase):
         Get a listing's product
 
         Retrieve a listing product by ID.
+
+        Swagger operation ID: `ListingGetProduct`.
+
+        Args:
+            listing_id: The listing to return a listing product for.
+            product_id: The numeric ID for a specific product purchased from a
+                listing.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5995,7 +7367,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(product_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6009,6 +7381,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6016,7 +7389,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_get_translation_async(
+    async def listing_get_translation(
         self,
         shop_id: int,
         listing_id: int,
@@ -6031,6 +7404,25 @@ class EtsyClient(ConnectorClientBase):
         Get a listing's translation
 
         Returns the translation for a listing in the given language.
+
+        Swagger operation ID: `ListingGetTranslation`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            language: The IETF language tag for the language of this
+                translation. Ex: de, en, es, fr, it, ja, nl, pl, pt, ru.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6042,7 +7434,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(language), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6056,6 +7448,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6063,9 +7456,9 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_create_translation_async(
+    async def listing_create_translation(
         self,
-        input: ListingCreateTranslationInput,
+        input: ListingCreateTranslationInput | Mapping[str, Any],
         shop_id: int,
         listing_id: int,
         language: str,
@@ -6079,6 +7472,27 @@ class EtsyClient(ConnectorClientBase):
         Create a listing translation
 
         Creates a listing translation by listing ID and language.
+
+        Swagger operation ID: `ListingCreateTranslation`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            language: The IETF language tag for the language of this
+                translation. Ex: de, en, es, fr, it, ja, nl, pl, pt, ru.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6090,7 +7504,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(language), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6104,6 +7518,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6111,9 +7526,9 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_update_translation_async(
+    async def listing_update_translation(
         self,
-        input: ListingUpdateTranslationInput,
+        input: ListingUpdateTranslationInput | Mapping[str, Any],
         shop_id: int,
         listing_id: int,
         language: str,
@@ -6127,6 +7542,27 @@ class EtsyClient(ConnectorClientBase):
         Update a listing translation
 
         Updates a listing translation by listing ID and language.
+
+        Swagger operation ID: `ListingUpdateTranslation`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            language: The IETF language tag for the language of this
+                translation. Ex: de, en, es, fr, it, ja, nl, pl, pt, ru.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6138,7 +7574,7 @@ class EtsyClient(ConnectorClientBase):
             f"/{quote(str(language), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6152,6 +7588,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6159,7 +7596,7 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_get_variation_async(
+    async def listing_get_variation(
         self,
         shop_id: int,
         listing_id: int,
@@ -6173,6 +7610,23 @@ class EtsyClient(ConnectorClientBase):
         Get listing's variation images
 
         Gets all variation images on a listing.
+
+        Swagger operation ID: `ListingGetVariation`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6183,7 +7637,7 @@ class EtsyClient(ConnectorClientBase):
             f"/variation-images"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6197,6 +7651,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6204,9 +7659,9 @@ class EtsyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def listing_update_variation_async(
+    async def listing_update_variation(
         self,
-        input: ListingUpdateVariationInput,
+        input: ListingUpdateVariationInput | Mapping[str, Any],
         shop_id: int,
         listing_id: int,
         *,
@@ -6219,6 +7674,25 @@ class EtsyClient(ConnectorClientBase):
         Update a listing's variation images
 
         Creates variation images on a listing.
+
+        Swagger operation ID: `ListingUpdateVariation`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6229,7 +7703,7 @@ class EtsyClient(ConnectorClientBase):
             f"/variation-images"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6243,6 +7717,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

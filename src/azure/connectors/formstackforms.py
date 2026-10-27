@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
@@ -20,6 +20,14 @@ from azure.connectors.sdk import (
     ConnectorResponseHook,
 )
 
+__all__ = [
+    "FormstackformsClient",
+    "FormstackFormSubmittedInput",
+    "FormstackFormSubmittedResponse",
+    "GetAvailableFormsResponse",
+    "TRIGGER_OPERATIONS",
+]
+
 
 # Type Definitions
 
@@ -29,13 +37,13 @@ class FormstackFormSubmittedInput:
     Triggers when a form is submitted
     """
 
-    url: Optional[str] = None
+    url: str
     """url"""
-    content_type: Optional[str] = None
+    content_type: str
     """content type"""
-    file_transfer_type: Optional[str] = None
+    file_transfer_type: str
     """file transfer type"""
-    standardize_field_values: Optional[bool] = None
+    standardize_field_values: bool
     """standardize field values"""
 
 
@@ -45,7 +53,7 @@ class FormstackFormSubmittedResponse:
     Response for Triggers when a form is submitted
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -54,9 +62,9 @@ class GetAvailableFormsResponse:
     Response for Get Available Forms
     """
 
-    forms: Optional[List[Dict[str, Any]]] = None
+    forms: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """forms"""
-    total: Optional[int] = None
+    total: Optional[int] = dataclass_field(default=None, kw_only=True)
     """total"""
 
 
@@ -71,7 +79,7 @@ class FormstackformsClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -88,8 +96,8 @@ class FormstackformsClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -110,7 +118,7 @@ class FormstackformsClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -125,7 +133,7 @@ class FormstackformsClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "formstackforms"
 
-    async def get_available_forms_async(
+    async def get_available_forms(
         self,
         *,
         timeout: Optional[float] = None,
@@ -137,10 +145,24 @@ class FormstackformsClient(ConnectorClientBase):
         Get Available Forms
 
         Returns all available forms
+
+        Swagger operation ID: `GetAvailableForms`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/v2/form/"
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -154,6 +176,7 @@ class FormstackformsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -161,7 +184,7 @@ class FormstackformsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_form_schema_async(
+    async def get_form_schema(
         self,
         form_id: int,
         *,
@@ -174,6 +197,21 @@ class FormstackformsClient(ConnectorClientBase):
         Returns Form Schema from Webhook API
 
         Used for the x-ms-dynamic-schema
+
+        Swagger operation ID: `GetFormSchema`.
+
+        Args:
+            form_id: form_id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -184,7 +222,7 @@ class FormstackformsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -198,6 +236,7 @@ class FormstackformsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
 

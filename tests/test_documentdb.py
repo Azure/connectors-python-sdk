@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.documentdb import DocumentdbClient
 from azure.connectors.documentdb import (
-    DocumentdbClient,
     PostDocumentsResponse,
     CreateStoredProcedureInput,
     CreateStoredProcedureResponse,
@@ -75,7 +75,7 @@ class TestDocumentdbClientInitialization:
         client = DocumentdbClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -146,11 +146,11 @@ class TestQueryDocuments:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.query_documents_async(
+            result = await resolve_generated_result(client.list_query_documents(
                 cosmos_db_account_name="mycosmosdb",
                 database_id="mydb",
                 container_id="mycontainer"
@@ -177,11 +177,11 @@ class TestQueryDocuments:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await resolve_generated_result(client.query_documents_async(
+            await resolve_generated_result(client.list_query_documents(
                 cosmos_db_account_name="mycosmosdb",
                 database_id="mydb",
                 container_id="mycontainer",
@@ -204,11 +204,11 @@ class TestQueryDocuments:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await resolve_generated_result(client.query_documents_async(
+            await resolve_generated_result(client.list_query_documents(
                 cosmos_db_account_name="mycosmosdb",
                 database_id="mydb",
                 container_id="mycontainer",
@@ -220,8 +220,8 @@ class TestQueryDocuments:
             assert "partitionKey=region-1" in url
 
     @pytest.mark.asyncio
-    async def test_with_all_query_parameters(self, mock_credential):
-        """Test GET request with all query parameters."""
+    async def test_with_public_query_parameters(self, mock_credential):
+        """Test GET request with public query parameters."""
         client = DocumentdbClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
@@ -234,18 +234,17 @@ class TestQueryDocuments:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await resolve_generated_result(client.query_documents_async(
+            await resolve_generated_result(client.list_query_documents(
                 cosmos_db_account_name="mycosmosdb",
                 database_id="mydb",
                 container_id="mycontainer",
                 query_text="SELECT * FROM c",
                 partition_key="pk1",
                 max_item_count="100",
-                continuation_token="abc123",
                 consistency_level="Session",
                 session_token="session-xyz"
             ))
@@ -255,7 +254,7 @@ class TestQueryDocuments:
             assert "queryText=" in url
             assert "partitionKey=pk1" in url
             assert "maxItemCount=100" in url
-            assert "continuationToken=abc123" in url
+            assert "continuationToken=" not in url
             assert "consistencyLevel=Session" in url
             assert "sessionToken=session-xyz" in url
 
@@ -271,12 +270,12 @@ class TestQueryDocuments:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await resolve_generated_result(client.query_documents_async(
+                await resolve_generated_result(client.list_query_documents(
                     cosmos_db_account_name="mycosmosdb",
                     database_id="mydb",
                     container_id="nonexistent"
@@ -296,11 +295,11 @@ class TestQueryDocuments:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await resolve_generated_result(client.query_documents_async(
+            result = await resolve_generated_result(client.list_query_documents(
                 cosmos_db_account_name="mycosmosdb",
                 database_id="mydb",
                 container_id="mycontainer"
@@ -319,18 +318,53 @@ class TestQueryDocuments:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await resolve_generated_result(client.query_documents_async(
+                await resolve_generated_result(client.list_query_documents(
                     cosmos_db_account_name="mycosmosdb",
                     database_id="mydb",
                     container_id="mycontainer"
                 ))
 
             assert exc_info.value.status_code == 401
+
+
+class TestListDocuments:
+    """Tests for list_documents collection selection."""
+
+    @pytest.mark.asyncio
+    async def test_ignores_auxiliary_metadata_array(self, mock_credential):
+        """Test the pager yields documents rather than auxiliary metadata."""
+        client = DocumentdbClient(
+            "https://example.azure.com/connections/test",
+            credential=mock_credential,
+        )
+        mock_response = MockResponse(
+            status=200,
+            text=(
+                '{"Documents": [{"id": "doc-1"}], '
+                '"@metadata": [{"name": "classification"}]}'
+            ),
+        )
+
+        with patch.object(
+            client._http_client,
+            "send",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            result = await resolve_generated_result(
+                client.list_documents(
+                    cosmos_db_account_name="mycosmosdb",
+                    database_id="mydb",
+                    collection_id="mycollection",
+                )
+            )
+
+        assert result == [{"id": "doc-1"}]
 
 
 class TestDataClasses:
@@ -649,16 +683,16 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await resolve_generated_result(client.query_documents_async(
+            await resolve_generated_result(client.list_query_documents(
                 cosmos_db_account_name="account1",
                 database_id="db1",
                 container_id="container1"
             ))
-            await resolve_generated_result(client.query_documents_async(
+            await resolve_generated_result(client.list_query_documents(
                 cosmos_db_account_name="account2",
                 database_id="db2",
                 container_id="container2"
@@ -678,11 +712,11 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await resolve_generated_result(client.query_documents_async(
+            await resolve_generated_result(client.list_query_documents(
                 cosmos_db_account_name="my-cosmos-db",
                 database_id="my-database",
                 container_id="my-container"

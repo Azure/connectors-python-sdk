@@ -65,7 +65,7 @@ Remove-Item $tempFile -ErrorAction SilentlyContinue
 
 ### Step 2: Create Connection
 
-Supported SDK connector names: `arm`, `azuread`, `azureautomation`, `azureblob`, `azuredatafactory`, `azuredigitaltwins`, `azureeventgrid`, `azureiotcentral`, `azuremonitorlogs`, `azurequeues`, `azuretables`, `azurevm`, `box`, `campfire`, `clicksendsms`, `cloudconvert`, `cloudmersiveconvert`, `commondataservice`, `documentdb`, `docusign`, `docuware`, `dropbox`, `dynamicsax`, `elfsquaddata`, `etsy`, `eventbrite`, `eventhubs`, `excelonline`, `excelonlinebusiness`, `formstackforms`, `freshservice`, `ftp`, `github`, `googlecalendar`, `googledrive`, `googletasks`, `impexium`, `infusionsoft`, `insightly`, `jedoxodatahub`, `jira`, `keyvault`, `kusto`, `mailchimp`, `meetingroommap`, `microsoftbookings`, `microsoftforms`, `monday`, `mq`, `msgraphgroupsanduser`, `office365`, `office365groups`, `office365groupsmail`, `office365users`, `onedrive`, `onedriveforbusiness`, `onenote`, `orderful`, `outlook`, `pdfco`, `pipedrive`, `planner`, `plivo`, `plumsail`, `powerbi`, `projectplace`, `replicon`, `revai`, `rss`, `salesforce`, `seismicplanner`, `sendgrid`, `servicebus`, `sharepointonline`, `shifts`, `signinghub`, `slack`, `smtp`, `sql`, `starmind`, `starrezrestv1`, `tallyfy`, `teams`, `textrequest`, `ticketmaster`, `todo`, `trello`, `twitter`, `typeform`, `universalprint`, `waywedo`, `wdatp`, `webex`, `wordonlinebusiness`, `wordpress`, `yammer`, `zendesk`, `zeptomail`, `zohosign` (and any `Microsoft.Web/connections` connector name).
+Supported SDK connector names: `arm`, `azuread`, `azureautomation`, `azureblob`, `azuredatafactory`, `azuredigitaltwins`, `azureeventgrid`, `azureiotcentral`, `azuremonitorlogs`, `azurequeues`, `azuretables`, `azurevm`, `box`, `campfire`, `clicksendsms`, `cloudconvert`, `cloudmersiveconvert`, `commondataservice`, `dataflows`, `documentdb`, `docusign`, `docuware`, `dropbox`, `dynamicsax`, `elfsquaddata`, `etsy`, `eventbrite`, `eventhubs`, `excelonline`, `excelonlinebusiness`, `formstackforms`, `freshservice`, `ftp`, `github`, `googlecalendar`, `googledrive`, `googletasks`, `impexium`, `infusionsoft`, `insightly`, `jedoxodatahub`, `jira`, `keyvault`, `kusto`, `mailchimp`, `meetingroommap`, `microsoftbookings`, `microsoftforms`, `monday`, `mq`, `msgraphgroupsanduser`, `office365`, `office365groups`, `office365groupsmail`, `office365users`, `onedrive`, `onedriveforbusiness`, `onenote`, `orderful`, `outlook`, `pdfco`, `pipedrive`, `planner`, `plivo`, `plumsail`, `powerbi`, `projectplace`, `replicon`, `revai`, `rss`, `salesforce`, `seismicplanner`, `sendgrid`, `servicebus`, `sharepointonline`, `shifts`, `signinghub`, `slack`, `smtp`, `sql`, `starmind`, `starrezrestv1`, `tallyfy`, `teams`, `textrequest`, `ticketmaster`, `todo`, `trello`, `twitter`, `typeform`, `universalprint`, `visualstudioteamservices`, `waywedo`, `wdatp`, `webex`, `wordonlinebusiness`, `wordpress`, `yammer`, `zendesk`, `zeptomail`, `zohosign` (and any `Microsoft.Web/connections` connector name).
 
 ```powershell
 $connectorName = "<connector-name>"      # e.g., "azureblob", "kusto", "mq", "msgraphgroupsanduser", "office365", "office365users", "sharepointonline", "teams"
@@ -178,21 +178,29 @@ az rest --method GET --uri "$runtimeUrl/v2/datasets" --resource "https://apihub.
 
 ## Next Steps
 
-- **SDK usage:** Use the connection runtime URL with a caller-owned async Azure credential:
-  ```python
-  from azure.identity.aio import DefaultAzureCredential
+### SDK Usage
 
-  from azure.connectors.office365 import Office365Client, SendEmailInput
+Use the connection runtime URL with a caller-owned async Azure credential.
+Root clients are async-only:
 
-  async with DefaultAzureCredential() as credential:
-      async with Office365Client(runtime_url, credential) as client:
-          await client.send_email_async(
-              input=SendEmailInput(
-                  to="recipient@example.com",
-                  subject="Hello",
-                  body="Sent with Azure Connectors.",
-              )
-          )
-  ```
+```python
+from azure.identity.aio import DefaultAzureCredential
+
+from azure.connectors.office365 import Office365Client, SendEmailInput
+
+async with DefaultAzureCredential() as credential:
+    async with Office365Client(runtime_url, credential) as client:
+        await client.send_email(
+            input=SendEmailInput(
+                to="recipient@example.com",
+                subject="Hello",
+                body="Sent with Azure Connectors.",
+            )
+        )
+```
+
+Clients and models share the root connector module. Use `azure.identity.aio`
+credentials and await unsuffixed operations. No synchronous mirror is provided.
+
 - **Azure Functions triggers:** To register connector triggers (e.g., OnNewEmail, OnNewFile) for Azure Functions, use the [trigger-registration skill](../trigger-registration/SKILL.md).
 - **Azure Functions signatures:** For a complete mapping of trigger operations to Azure Functions signatures, see [Operations to Functions Signature Match](https://github.com/Azure/azure-functions-connector-extension/blob/main/docs/operations-functions-match.md).

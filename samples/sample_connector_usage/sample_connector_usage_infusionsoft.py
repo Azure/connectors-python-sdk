@@ -1,7 +1,7 @@
 """
-Infusionsoft (Keap) Connector SDK Sample
+Infusionsoft (Keap) sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Infusionsoft connector SDK.
+This sample demonstrates how to use the Infusionsoft client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Infusionsoft connection
@@ -24,7 +24,8 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.infusionsoft import CreateTaskRequest, InfusionsoftClient
+from azure.connectors.infusionsoft import InfusionsoftClient
+from azure.connectors.infusionsoft import CreateTaskRequest
 
 
 # Connection runtime URL format:
@@ -38,8 +39,8 @@ async def example_1_list_tasks() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with InfusionsoftClient(CONNECTION_RUNTIME_URL, credential) as client:
-            response = await client.list_tasks_async()
-            tasks = response.get("tasks", []) if response else []
+            response = [item async for item in client.list_tasks()]
+            tasks = response
 
             print(f"Found {len(tasks)} tasks")
             for task in tasks[:5]:
@@ -58,7 +59,7 @@ async def example_2_create_task() -> None:
                 priority=1,
             )
 
-            created = await client.create_task_async(input=request)
+            created = await client.create_task(input=request)
             print(f"Created task: {created.get('id') if created else 'n/a'}")
 
 
@@ -73,7 +74,7 @@ async def example_3_update_task() -> None:
                 description="Updated from the infusionsoft SDK sample.",
             )
 
-            updated = await client.update_task_async(input=request, id=1)
+            updated = await client.update_task(input=request, id=1)
             print(f"Updated task: {updated.get('id') if updated else 'n/a'}")
 
 
@@ -84,7 +85,7 @@ async def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Infusionsoft (Keap) Connector SDK - Sample Usage")
+    print("Infusionsoft (Keap) sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

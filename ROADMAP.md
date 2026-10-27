@@ -12,8 +12,8 @@ This document tracks the development roadmap for the Azure Connectors Python SDK
 
 | Component | Status |
 |-----------|--------|
-| Core SDK | ✅ Complete — Token providers, HTTP client, retry logic, async/await |
-| Connectors | ✅ 99 connectors — See [README.md](README.md#validated-connectors) |
+| Core SDK | ✅ Complete — Async Azure Core pipelines, credentials, retries, and paging |
+| Connectors | ✅ 101 connectors — See [README.md](README.md#validated-connectors) |
 | CI/CD | ✅ Complete — GitHub Actions for pytest, flake8, build |
 | PyPI Publishing | ✅ Complete — Release workflow ready |
 | Documentation | ✅ Complete — README, samples, test docs, API reference docs |
@@ -29,7 +29,7 @@ This document tracks the development roadmap for the Azure Connectors Python SDK
 - [x] Core SDK abstractions (`ConnectorClientBase`, `ConnectorHttpClient`)
 - [x] Azure Core credentials (async Azure Identity and API key)
 - [x] HTTP client with retry logic and exponential backoff
-- [x] Async/await support throughout
+- [x] Async-only root clients, aligned with the .NET connector SDK; no synchronous mirror
 - [x] Type hints and dataclass models
 - [x] Office 365 Outlook connector
 - [x] SharePoint Online connector
@@ -252,7 +252,7 @@ Based on usage data, agentic solution value, and community requests:
 
 | Component | Status | Notes |
 |-----------|--------|-------|
-| LogicAppsCompiler with `--python` flag | ✅ Available | BPM PR 15456622 |
+| LogicAppsCompiler with `--pythonDirectClient` flag | ✅ Available | Async-only root connector modules |
 | Python output templates | ✅ Complete | Dataclasses, async methods |
 | Type hint generation | ✅ Complete | Full Python 3.10+ typing |
 | Docstring generation | ✅ Complete | From connector metadata |

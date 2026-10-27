@@ -4,14 +4,14 @@
 
 from __future__ import annotations
 
-import inspect
 import json
 from types import ModuleType
-from typing import Any
+from typing import Any, get_origin, get_type_hints
 from unittest.mock import AsyncMock, patch
 from urllib.parse import urlsplit
 
 import pytest
+from azure.core.async_paging import AsyncItemPaged
 
 import azure.connectors.azureautomation as azureautomation
 import azure.connectors.azureblob as azureblob
@@ -20,31 +20,41 @@ import azure.connectors.azurevm as azurevm
 import azure.connectors.excelonlinebusiness as excelonlinebusiness
 import azure.connectors.teams as teams
 import azure.connectors.wdatp as wdatp
+from azure.connectors.azureautomation import AzureautomationClient
+from azure.connectors.azureblob import AzureblobClient
+from azure.connectors.azuredatafactory import AzuredatafactoryClient
+from azure.connectors.azurevm import AzurevmClient
+from azure.connectors.excelonlinebusiness import ExcelonlinebusinessClient
+from azure.connectors.teams import TeamsClient
+from azure.connectors.wdatp import WdatpClient
 from azure.connectors.sdk import ConnectorException
 from tests.conftest import MockResponse
-from tests.generated_connector_test_utils import invoke_generated_operation
+from tests.generated_connector_test_utils import (
+    generated_pager_response_text,
+    invoke_generated_operation,
+)
 
 
 CONNECTOR_OPERATION_CASES = [
     (
         azureautomation,
-        azureautomation.AzureautomationClient,
+        AzureautomationClient,
         [
-            ("subscriptions_list", "GET", "/subscriptions?", False),
-            ("resource_groups_list", "GET", "/resourcegroups?", False),
-            ("automation_accounts_list", "GET", "/automationAccounts?", False),
-            ("runbooks_list", "GET", "/runbooks?", False),
-            ("get_runbook", "GET", "/runbooks/value?", False),
+            ("list_subscriptions", "GET", "/subscriptions?", False),
+            ("list_resource_groups", "GET", "/resourcegroups?", False),
+            ("list_automation_accounts", "GET", "/automationAccounts?", False),
+            ("list_runbooks", "GET", "/runbooks?", False),
+            ("list_runbook", "GET", "/runbooks/value?", False),
         ],
     ),
     (
         azureblob,
-        azureblob.AzureblobClient,
-        [("get_data_sets", "GET", "/v2/codeless/GetDataSets", False)],
+        AzureblobClient,
+        [("list_data_sets", "GET", "/v2/codeless/GetDataSets", False)],
     ),
     (
         azuredatafactory,
-        azuredatafactory.AzuredatafactoryClient,
+        AzuredatafactoryClient,
         [
             ("list_subscriptions", "GET", "/subscriptions?", False),
             ("list_resource_groups", "GET", "/resourcegroups?", False),
@@ -59,24 +69,24 @@ CONNECTOR_OPERATION_CASES = [
     ),
     (
         azurevm,
-        azurevm.AzurevmClient,
+        AzurevmClient,
         [
-            ("subscriptions_list", "GET", "/subscriptions?", False),
-            ("resource_groups_list", "GET", "/resourcegroups?", False),
+            ("list_subscriptions", "GET", "/subscriptions?", False),
+            ("list_resource_groups", "GET", "/resourcegroups?", False),
             (
-                "virtual_machine_scale_sets_list",
+                "list_virtual_machine_scale_sets",
                 "GET",
                 "/virtualMachineScaleSets?",
                 False,
             ),
             (
-                "virtual_machines_in_scale_set_list",
+                "list_virtual_machines_in_scale_set",
                 "GET",
                 "/virtualMachineScaleSets/value/virtualMachines?",
                 False,
             ),
             (
-                "virtual_machines_list",
+                "list_virtual_machines",
                 "GET",
                 "/Microsoft.Compute/virtualMachines?",
                 False,
@@ -85,11 +95,11 @@ CONNECTOR_OPERATION_CASES = [
     ),
     (
         excelonlinebusiness,
-        excelonlinebusiness.ExcelonlinebusinessClient,
+        ExcelonlinebusinessClient,
         [
-            ("get_sources", "GET", "/codeless/v1.0/sources?", False),
-            ("get_drives", "GET", "/codeless/v1.0/drives?", False),
-            ("get_columns", "GET", "/workbook/tables/value/columns?", False),
+            ("list_sources", "GET", "/codeless/v1.0/sources?", False),
+            ("list_drives", "GET", "/codeless/v1.0/drives?", False),
+            ("list_columns", "GET", "/workbook/tables/value/columns?", False),
             ("get_table", "GET", "/workbook/tables/value/metadata?", False),
             (
                 "get_single_script",
@@ -101,7 +111,7 @@ CONNECTOR_OPERATION_CASES = [
     ),
     (
         teams,
-        teams.TeamsClient,
+        TeamsClient,
         [
             (
                 "archive_channel",
@@ -119,7 +129,7 @@ CONNECTOR_OPERATION_CASES = [
     ),
     (
         wdatp,
-        wdatp.WdatpClient,
+        WdatpClient,
         [
             (
                 "advanced_hunting_schema",
@@ -145,17 +155,38 @@ CASE_PARAMETER_NAMES = (
 )
 
 EXPECTED_PAGEABLE_OPERATIONS = {
-    (azureautomation.AzureautomationClient, "subscriptions_list"),
-    (azureautomation.AzureautomationClient, "resource_groups_list"),
-    (azuredatafactory.AzuredatafactoryClient, "list_subscriptions"),
-    (azuredatafactory.AzuredatafactoryClient, "list_resource_groups"),
-    (azuredatafactory.AzuredatafactoryClient, "list_data_factories"),
-    (azuredatafactory.AzuredatafactoryClient, "list_pipelines"),
-    (azurevm.AzurevmClient, "subscriptions_list"),
-    (azurevm.AzurevmClient, "resource_groups_list"),
-    (azurevm.AzurevmClient, "virtual_machine_scale_sets_list"),
-    (azurevm.AzurevmClient, "virtual_machines_in_scale_set_list"),
-    (azurevm.AzurevmClient, "virtual_machines_list"),
+    (AzureautomationClient, "list_subscriptions"),
+    (AzureautomationClient, "list_resource_groups"),
+    (AzureautomationClient, "list_automation_accounts"),
+    (AzureautomationClient, "list_runbooks"),
+    (AzureautomationClient, "list_runbook"),
+    (AzureblobClient, "list_data_sets"),
+    (AzuredatafactoryClient, "list_subscriptions"),
+    (AzuredatafactoryClient, "list_resource_groups"),
+    (AzuredatafactoryClient, "list_data_factories"),
+    (AzuredatafactoryClient, "list_pipelines"),
+    (AzurevmClient, "list_subscriptions"),
+    (AzurevmClient, "list_resource_groups"),
+    (AzurevmClient, "list_virtual_machine_scale_sets"),
+    (AzurevmClient, "list_virtual_machines_in_scale_set"),
+    (AzurevmClient, "list_virtual_machines"),
+    (ExcelonlinebusinessClient, "list_sources"),
+    (ExcelonlinebusinessClient, "list_drives"),
+    (ExcelonlinebusinessClient, "list_columns"),
+}
+
+CONTINUATION_PAGEABLE_OPERATIONS = {
+    (AzureautomationClient, "list_subscriptions"),
+    (AzureautomationClient, "list_resource_groups"),
+    (AzuredatafactoryClient, "list_subscriptions"),
+    (AzuredatafactoryClient, "list_resource_groups"),
+    (AzuredatafactoryClient, "list_data_factories"),
+    (AzuredatafactoryClient, "list_pipelines"),
+    (AzurevmClient, "list_subscriptions"),
+    (AzurevmClient, "list_resource_groups"),
+    (AzurevmClient, "list_virtual_machine_scale_sets"),
+    (AzurevmClient, "list_virtual_machines_in_scale_set"),
+    (AzurevmClient, "list_virtual_machines"),
 }
 
 PAGEABLE_OPERATION_CASES = [
@@ -163,20 +194,29 @@ PAGEABLE_OPERATION_CASES = [
     if (operation_case[1], operation_case[2]) in EXPECTED_PAGEABLE_OPERATIONS
 ]
 
+CONTINUATION_PAGEABLE_OPERATION_CASES = [
+    operation_case for operation_case in OPERATION_CASES
+    if (operation_case[1], operation_case[2]) in CONTINUATION_PAGEABLE_OPERATIONS
+]
+
 
 def test_expected_pageable_operations_remain_iterator_contracts() -> None:
-    """Test every declared pageable operation stays in coverage and is an async iterator."""
+    """Test every declared pageable operation returns an asynchronous pager."""
     assert {(case[1], case[2]) for case in PAGEABLE_OPERATION_CASES} == EXPECTED_PAGEABLE_OPERATIONS
-    assert len(PAGEABLE_OPERATION_CASES) == 11
+    assert len(PAGEABLE_OPERATION_CASES) == 18
     for client_type, operation in EXPECTED_PAGEABLE_OPERATIONS:
-        assert inspect.isasyncgenfunction(getattr(client_type, f"{operation}_async")), operation
+        return_type = get_type_hints(getattr(client_type, operation))["return"]
+        assert get_origin(return_type) is AsyncItemPaged, operation
 
 
 @pytest.mark.parametrize("empty_first_page", [False, True])
 @pytest.mark.parametrize(
     CASE_PARAMETER_NAMES,
-    PAGEABLE_OPERATION_CASES,
-    ids=[f"{case[0].__name__}.{case[2]}" for case in PAGEABLE_OPERATION_CASES],
+    CONTINUATION_PAGEABLE_OPERATION_CASES,
+    ids=[
+        f"{case[0].__name__}.{case[2]}"
+        for case in CONTINUATION_PAGEABLE_OPERATION_CASES
+    ],
 )
 @pytest.mark.asyncio
 async def test_newly_generated_pageable_contract_follows_later_pages(
@@ -199,7 +239,7 @@ async def test_newly_generated_pageable_contract_follows_later_pages(
     ) as client:
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             side_effect=[
                 MockResponse(status=200, text=json.dumps({
@@ -230,11 +270,55 @@ async def test_newly_generated_pageable_contract_follows_later_pages(
         }
 
 
+@pytest.mark.asyncio
+async def test_relative_continuation_resolves_against_current_page(
+    mock_credential: Any,
+) -> None:
+    """Test a bare relative continuation keeps the current nested route."""
+    async with AzurevmClient(
+        "https://example.azure.com/connections/test",
+        credential=mock_credential,
+    ) as client:
+        with patch.object(
+            client._http_client,
+            "send",
+            new_callable=AsyncMock,
+            side_effect=[
+                MockResponse(
+                    status=200,
+                    text=json.dumps({"value": [], "nextLink": "next-page"}),
+                ),
+                MockResponse(
+                    status=200,
+                    text=json.dumps({"value": [{"id": "vm-2"}]}),
+                ),
+            ],
+        ) as transport:
+            items = [
+                item async for item in client.list_virtual_machines_in_scale_set(
+                    subscription_id="subscription",
+                    resource_group_name="group",
+                    virtual_machine_scale_set_name="scale-set",
+                )
+            ]
+
+    assert items == [{"id": "vm-2"}]
+    assert transport.await_args_list[1].args == (
+        "GET",
+        "https://example.azure.com/connections/test/subscriptions/subscription/"
+        "resourcegroups/group/providers/Microsoft.Compute/virtualMachineScaleSets/"
+        "scale-set/next-page",
+    )
+
+
 @pytest.mark.parametrize("status,body", [(200, ""), (200, '{"value": []}'), (204, "")])
 @pytest.mark.parametrize(
     CASE_PARAMETER_NAMES,
-    PAGEABLE_OPERATION_CASES,
-    ids=[f"{case[0].__name__}.{case[2]}" for case in PAGEABLE_OPERATION_CASES],
+    CONTINUATION_PAGEABLE_OPERATION_CASES,
+    ids=[
+        f"{case[0].__name__}.{case[2]}"
+        for case in CONTINUATION_PAGEABLE_OPERATION_CASES
+    ],
 )
 @pytest.mark.asyncio
 async def test_newly_generated_pageable_contract_preserves_empty_response(
@@ -255,7 +339,7 @@ async def test_newly_generated_pageable_contract_preserves_empty_response(
     ) as client:
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=status, text=body),
         ) as transport:
@@ -288,13 +372,17 @@ async def test_newly_generated_operation_success_contract(
         credential=mock_credential,
     )
     is_pageable = (client_type, operation) in EXPECTED_PAGEABLE_OPERATIONS
-    response_payload = {"value": [{"id": "item-1"}]} if is_pageable else {"ok": True}
+    response_text = (
+        generated_pager_response_text(getattr(client_type, operation))
+        if is_pageable
+        else '{"ok": true}'
+    )
 
     with patch.object(
         client._http_client,
-        "send_async",
+        "send",
         new_callable=AsyncMock,
-        return_value=MockResponse(status=200, text=json.dumps(response_payload)),
+        return_value=MockResponse(status=200, text=response_text),
     ) as mock_send:
         result = await invoke_generated_operation(
             client,
@@ -307,7 +395,7 @@ async def test_newly_generated_operation_success_contract(
     assert method == expected_method
     assert expected_path in request_url
     assert (mock_send.call_args.kwargs["body"] is not None) is expects_body
-    assert result == (response_payload["value"] if is_pageable else response_payload)
+    assert result == ([{"ok": True}] if is_pageable else {"ok": True})
 
 
 @pytest.mark.parametrize(
@@ -333,7 +421,7 @@ async def test_newly_generated_operation_rejects_error_response(
 
     with patch.object(
         client._http_client,
-        "send_async",
+        "send",
         new_callable=AsyncMock,
         return_value=MockResponse(status=400, text="bad request"),
     ):

@@ -1,6 +1,8 @@
 """Unit tests for SDK wire serialization module."""
 
+from collections import UserDict
 from dataclasses import dataclass, field
+from types import MappingProxyType
 
 import pytest
 
@@ -149,3 +151,20 @@ class TestToWire:
         """Never impose scalar-only checks on unrestricted maps."""
         model = ScalarMaps(properties={}, open_values={"nested": {"key": [1]}})
         assert to_wire(model)["open_values"] == {"nested": {"key": [1]}}
+
+    def test_mapping_values_are_recursively_converted(self):
+        """Test arbitrary mappings recurse and omit None values."""
+        payload = UserDict(
+            {
+                "nested": MappingProxyType(
+                    {
+                        "model": Leaf(leaf_value="deep"),
+                        "omitted": None,
+                    }
+                )
+            }
+        )
+
+        result = to_wire(payload)
+
+        assert result == {"nested": {"model": {"leafValue": "deep"}}}

@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
+from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
 from azure.core.credentials_async import AsyncTokenCredential
 from azure.core.pipeline.transport import AsyncHttpTransport
@@ -18,7 +19,29 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "Office365usersClient",
+    "ClientPhotoMetadata",
+    "DirectReportsResponse",
+    "EntityListResponseIReadOnlyListUser",
+    "GraphTrending",
+    "GraphUser",
+    "GraphUserUpdateable",
+    "LinklessEntityListResponseListPerson",
+    "MyTrendingDocumentsResponse",
+    "ObjectEntity",
+    "ObjectWithoutType",
+    "Person",
+    "Phone",
+    "ResourceVisualization",
+    "ScoredEmailAddress",
+    "SensitivityLabelMetadata",
+    "TrendingDocumentsResponse",
+    "User",
+]
 
 
 # Type Definitions
@@ -29,7 +52,12 @@ class MyTrendingDocumentsResponse:
     Response for Get my trending documents
     """
 
-    value: Optional[List[GraphTrending]] = None
+    value: Optional[
+        List[GraphTrending | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """value"""
 
 
@@ -39,7 +67,12 @@ class LinklessEntityListResponseListPerson:
     Response for Get relevant people
     """
 
-    value: Optional[List[Person]] = None
+    value: Optional[
+        List[Person | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Value"""
 
 
@@ -49,25 +82,33 @@ class ClientPhotoMetadata:
     Response for Get user photo metadata
     """
 
-    has_photo: Optional[bool] = field(
+    has_photo: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HasPhoto"},
     )
     """Has photo"""
-    height: Optional[int] = field(
+    height: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Height"},
     )
     """Height of photo"""
-    width: Optional[int] = field(default=None, metadata={"wire_name": "Width"})
-    """Width of photo"""
-    content_type: Optional[str] = field(
+    width: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Width"},
+    )
+    """Width of photo"""
+    content_type: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "ContentType"},
     )
     """Content Type of photo"""
-    image_file_extension: Optional[str] = field(
+    image_file_extension: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ImageFileExtension"},
     )
     """File extension for the photo (ex: \".jpg\")"""
@@ -79,7 +120,12 @@ class TrendingDocumentsResponse:
     Response for Get trending documents
     """
 
-    value: Optional[List[GraphTrending]] = None
+    value: Optional[
+        List[GraphTrending | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """value"""
 
 
@@ -89,7 +135,7 @@ class ObjectWithoutType:
     Response for Send an HTTP request
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -102,7 +148,12 @@ class DirectReportsResponse:
     Response for Get direct reports
     """
 
-    value: Optional[List[GraphUser]] = None
+    value: Optional[
+        List[GraphUser | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Value"""
 
 
@@ -112,96 +163,110 @@ class GraphUser:
     Response for Get manager
     """
 
-    about_me: Optional[str] = field(
+    about_me: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "aboutMe"},
     )
     """About Me"""
-    account_enabled: Optional[bool] = field(
+    account_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "accountEnabled"},
     )
     """
     true if the account is enabled; otherwise, false. This property is required
     when a user is created.
     """
-    birthday: Optional[str] = None
+    birthday: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Birthday"""
-    business_phones: Optional[List[str]] = field(
+    business_phones: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "businessPhones"},
     )
     """Business Phones"""
-    city: Optional[str] = None
+    city: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The city in which the user is located."""
-    company_name: Optional[str] = field(
+    company_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "companyName"},
     )
     """The name of the company in which the user works."""
-    country: Optional[str] = None
+    country: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The country/region in which the user is located; for example, \"US\" or
     \"UK\".
     """
-    department: Optional[str] = None
+    department: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the department in which the user works."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display Name"""
-    given_name: Optional[str] = field(
+    given_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "givenName"},
     )
     """Given Name"""
-    hire_date: Optional[str] = field(
+    hire_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "hireDate"},
     )
     """Hire Date"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Id"""
-    interests: Optional[List[str]] = None
+    interests: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Interests"""
-    job_title: Optional[str] = field(
+    job_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobTitle"},
     )
     """Job Title"""
-    mail: Optional[str] = None
+    mail: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Mail"""
-    mail_nickname: Optional[str] = field(
+    mail_nickname: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mailNickname"},
     )
     """
     The mail alias for the user. This property must be specified when a user is
     created.
     """
-    mobile_phone: Optional[str] = field(
+    mobile_phone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mobilePhone"},
     )
     """Mobile Phone"""
-    my_site: Optional[str] = field(
+    my_site: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mySite"},
     )
     """My Site"""
-    office_location: Optional[str] = field(
+    office_location: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "officeLocation"},
     )
     """Office Location"""
-    past_projects: Optional[List[str]] = field(
+    past_projects: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pastProjects"},
     )
     """Past Projects"""
-    postal_code: Optional[str] = field(
+    postal_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "postalCode"},
     )
     """
@@ -209,38 +274,43 @@ class GraphUser:
     to the user's country/region. In the United States of America, this
     attribute contains the ZIP code.
     """
-    preferred_language: Optional[str] = field(
+    preferred_language: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "preferredLanguage"},
     )
     """Preferred Language"""
-    preferred_name: Optional[str] = field(
+    preferred_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "preferredName"},
     )
     """Preferred Name"""
-    responsibilities: Optional[List[str]] = None
+    responsibilities: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Responsibilities"""
-    schools: Optional[List[str]] = None
+    schools: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Schools"""
-    skills: Optional[List[str]] = None
+    skills: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Skills"""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """State"""
-    street_address: Optional[str] = field(
+    street_address: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "streetAddress"},
     )
     """Street Address"""
-    surname: Optional[str] = None
+    surname: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Surname"""
-    user_principal_name: Optional[str] = field(
+    user_principal_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userPrincipalName"},
     )
     """User Principal Name"""
-    user_type: Optional[str] = field(
+    user_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userType"},
     )
     """User Type"""
@@ -252,10 +322,16 @@ class EntityListResponseIReadOnlyListUser:
     Response for Search for users
     """
 
-    value: Optional[List[User]] = None
-    """Value"""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[User | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """Value"""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """Next page link"""
@@ -267,28 +343,31 @@ class GraphUserUpdateable:
     Definition: GraphUserUpdateable
     """
 
-    about_me: Optional[str] = field(
+    about_me: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "aboutMe"},
     )
     """About Me"""
-    birthday: Optional[str] = None
+    birthday: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Birthday"""
-    interests: Optional[List[str]] = None
+    interests: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Interests"""
-    my_site: Optional[str] = field(
+    my_site: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mySite"},
     )
     """My Site"""
-    past_projects: Optional[List[str]] = field(
+    past_projects: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pastProjects"},
     )
     """Past Projects"""
-    schools: Optional[List[str]] = None
+    schools: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Schools"""
-    skills: Optional[List[str]] = None
+    skills: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Skills"""
 
 
@@ -298,16 +377,20 @@ class GraphTrending:
     Definition: GraphTrending
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the relationship"""
-    weight: Optional[float] = None
+    weight: Optional[float] = dataclass_field(default=None, kw_only=True)
     """Value indicating how much the document is currently trending"""
-    resource_visualization: Optional[ResourceVisualization] = field(
+    resource_visualization: Optional[ResourceVisualization | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resourceVisualization"},
     )
-    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = field(
+    sensitivity_label_info: Optional[
+        List[SensitivityLabelMetadata | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sensitivityLabelInfo"},
     )
 
@@ -318,43 +401,53 @@ class ResourceVisualization:
     Definition: resourceVisualization
     """
 
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The item's title text"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """
     The item's media type (can be used for filtering for a specific file based
     on a specific type)
     """
-    media_type: Optional[str] = field(
+    media_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mediaType"},
     )
     """
     The items media type (can be used for filtering for a specific type of file
     based on supported IANA Media MIME types)
     """
-    preview_image_url: Optional[str] = field(
+    preview_image_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "previewImageUrl"},
     )
     """A URL leading to the preview image for the item"""
-    preview_text: Optional[str] = field(
+    preview_text: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "previewText"},
     )
     """A preview text for the item"""
-    container_web_url: Optional[str] = field(
+    container_web_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "containerWebUrl"},
     )
     """A path leading to the folder in which the item is stored"""
-    container_display_name: Optional[str] = field(
+    container_display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "containerDisplayName"},
     )
     """A string describing where the item is stored"""
-    container_type: Optional[str] = field(
+    container_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "containerType"},
     )
     """
@@ -369,41 +462,47 @@ class SensitivityLabelMetadata:
     Definition: sensitivityLabelMetadata
     """
 
-    sensitivity_label_id: Optional[str] = field(
+    sensitivity_label_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sensitivityLabelId"},
     )
     """SensitivityLabel Id."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel name."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """SensitivityLabel displayName info"""
-    tooltip: Optional[str] = None
+    tooltip: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel details on tooltip."""
-    priority: Optional[int] = None
+    priority: Optional[int] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel priority."""
-    color: Optional[str] = None
+    color: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel color."""
-    is_encrypted: Optional[bool] = field(
+    is_encrypted: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isEncrypted"},
     )
     """ is SensitivityLabel Encrypted."""
-    is_enabled: Optional[bool] = field(
+    is_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isEnabled"},
     )
     """Whether SensitivityLabel is Enabled."""
-    is_parent: Optional[bool] = field(
+    is_parent: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isParent"},
     )
     """Whether SensitivityLabel is Parent."""
-    parent_sensitivity_label_id: Optional[str] = field(
+    parent_sensitivity_label_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parentSensitivityLabelId"},
     )
     """Parent SensitivityLabel Id."""
@@ -415,53 +514,61 @@ class Person:
     Definition: Person
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A unique identifier for the Person object in the directory"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The person's display name"""
-    given_name: Optional[str] = field(
+    given_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "givenName"},
     )
     """The person's given name"""
-    surname: Optional[str] = None
+    surname: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The person's surname"""
-    birthday: Optional[str] = None
+    birthday: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The person's birthday"""
-    person_notes: Optional[str] = field(
+    person_notes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "personNotes"},
     )
     """Free-form notes that the current user has taken about this person"""
-    is_favorite: Optional[bool] = field(
+    is_favorite: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isFavorite"},
     )
     """If the current user has flagged this person as a favorite"""
-    job_title: Optional[str] = field(
+    job_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobTitle"},
     )
     """The person's job title"""
-    company_name: Optional[str] = field(
+    company_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "companyName"},
     )
     """The name of the person's company"""
-    department: Optional[str] = None
+    department: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The person's department"""
-    office_location: Optional[str] = field(
+    office_location: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "officeLocation"},
     )
     """The location of the person's office"""
-    profession: Optional[str] = None
+    profession: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The person's profession"""
-    user_principal_name: Optional[str] = field(
+    user_principal_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userPrincipalName"},
     )
     """
@@ -471,17 +578,26 @@ class Person:
     @domain, where domain must be present in the tenant's collection of
     verified domains.
     """
-    im_address: Optional[str] = field(
+    im_address: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "imAddress"},
     )
     """The person's VOIP SIP address"""
-    scored_email_addresses: Optional[List[ScoredEmailAddress]] = field(
+    scored_email_addresses: Optional[
+        List[ScoredEmailAddress | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "scoredEmailAddresses"},
     )
     """Collection of the person's email addresses with a relevance score"""
-    phones: Optional[List[Phone]] = None
+    phones: Optional[
+        List[Phone | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The person's phone numbers"""
 
 
@@ -491,10 +607,11 @@ class ScoredEmailAddress:
     Definition: ScoredEmailAddress
     """
 
-    address: Optional[str] = None
+    address: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The email address"""
-    relevance_score: Optional[float] = field(
+    relevance_score: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "relevanceScore"},
     )
     """
@@ -512,9 +629,13 @@ class Phone:
     Definition: Phone
     """
 
-    number: Optional[str] = None
+    number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The phone number"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """
     The type of phone number. Possible values: home, business, mobile, other,
     assistant, homeFax, businessFax, otherFax, pager, radio.
@@ -527,43 +648,53 @@ class User:
     Definition: User
     """
 
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
+    id: str = dataclass_field(metadata={"wire_name": "Id"})
     """A unique identifier for the user object in the directory."""
-    account_enabled: Optional[bool] = field(
+    account_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountEnabled"},
     )
     """
     true if the account is enabled; otherwise, false. This property is required
     when a user is created.
     """
-    business_phones: Optional[List[str]] = field(
+    business_phones: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BusinessPhones"},
     )
     """A list of business phone numbers for the user"""
-    city: Optional[str] = field(default=None, metadata={"wire_name": "City"})
-    """The city in which the user is located."""
-    company_name: Optional[str] = field(
+    city: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "City"},
+    )
+    """The city in which the user is located."""
+    company_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "CompanyName"},
     )
     """The name of the company in which the user works."""
-    country: Optional[str] = field(
+    country: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Country"},
     )
     """
     The country/region in which the user is located; for example, \"US\" or
     \"UK\".
     """
-    department: Optional[str] = field(
+    department: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Department"},
     )
     """The name of the department in which the user works."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """
@@ -572,41 +703,51 @@ class User:
     property is required when a user is created and it cannot be cleared during
     updates.
     """
-    given_name: Optional[str] = field(
+    given_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "GivenName"},
     )
     """The given name (first name) of the user."""
-    job_title: Optional[str] = field(
+    job_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "JobTitle"},
     )
     """The user's job title."""
-    mail: Optional[str] = field(default=None, metadata={"wire_name": "Mail"})
+    mail: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Mail"},
+    )
     """
     The SMTP/email address for the user, for example,
     \"jeff@contoso.onmicrosoft.com\". Read-Only.
     """
-    mail_nickname: Optional[str] = field(
+    mail_nickname: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "MailNickname"},
     )
     """
     The mail alias for the user. This property must be specified when a user is
     created.
     """
-    mobile_phone: Optional[str] = field(
+    mobile_phone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mobilePhone"},
     )
     """The primary cellular telephone number for the user."""
-    office_location: Optional[str] = field(
+    office_location: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OfficeLocation"},
     )
     """The office location in the user's place of business."""
-    postal_code: Optional[str] = field(
+    postal_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PostalCode"},
     )
     """
@@ -614,18 +755,21 @@ class User:
     to the user's country/region. In the United States of America, this
     attribute contains the ZIP code.
     """
-    surname: Optional[str] = field(
+    surname: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Surname"},
     )
     """The user's surname (family name or last name)."""
-    telephone_number: Optional[str] = field(
+    telephone_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TelephoneNumber"},
     )
     """The primary cellular telephone number for the user."""
-    user_principal_name: Optional[str] = field(
+    user_principal_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "UserPrincipalName"},
     )
     """
@@ -643,7 +787,7 @@ class ObjectEntity:
     Definition: Object
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -661,7 +805,7 @@ class Office365usersClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -678,8 +822,8 @@ class Office365usersClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -700,7 +844,7 @@ class Office365usersClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -716,15 +860,49 @@ class Office365usersClient(ConnectorClientBase):
         return "office365users"
 
     def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
-        parsed_next_link = urlsplit(next_link)
-        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
             if next_link.startswith("/"):
                 return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
             if next_link.startswith("?"):
-                return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
 
-        parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
         connection_hostname = parsed_connection.hostname
         if next_link_hostname is None or connection_hostname is None:
@@ -741,7 +919,11 @@ class Office365usersClient(ConnectorClientBase):
                 parsed_next_link.scheme == parsed_connection.scheme
                 and next_link_port == connection_port
             ):
-                return next_link
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
 
             raise ValueError(
                 "Pagination URL origin "
@@ -754,9 +936,9 @@ class Office365usersClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def update_my_profile_async(
+    async def update_my_profile(
         self,
-        input: GraphUserUpdateable,
+        input: GraphUserUpdateable | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -767,10 +949,26 @@ class Office365usersClient(ConnectorClientBase):
         Update my profile
 
         Updates the profile of the current user
+
+        Swagger operation ID: `UpdateMyProfile`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/codeless/v1.0/me"
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -784,9 +982,10 @@ class Office365usersClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def update_my_photo_async(
+    async def update_my_photo(
         self,
         input: bytes,
         *,
@@ -800,12 +999,27 @@ class Office365usersClient(ConnectorClientBase):
 
         Updates the profile photo of the current user. The size of the photo
         must be less than 4 MB.
+
+        Swagger operation ID: `UpdateMyPhoto`.
+
+        Args:
+            input: The binary request body.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/codeless/v1.0/me/photo/$value"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PUT",
             request_url,
             body=input,
@@ -822,23 +1036,48 @@ class Office365usersClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def my_trending_documents_async(
+    def list_my_trending_documents(
         self,
+        *,
         filter: Optional[str] = None,
         extract_sensitivity_label: Optional[bool] = None,
         fetch_sensitivity_label_metadata: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get my trending documents
 
         Retrieves the trending documents for the signed in user
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `MyTrendingDocuments`.
+
+        Args:
+            filter: An OData filter to filter the resources selected. Filter
+                selected resources on ResourceVisualization/Type or
+                ResourceVisualization/containerType.
+            extract_sensitivity_label: Select if you want to extract
+                Sensitivity label ( false, true).
+            fetch_sensitivity_label_metadata: A boolean whether to fetch
+                sensitivity label Metadata for associated LabelId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -862,29 +1101,50 @@ class Office365usersClient(ConnectorClientBase):
             query_params.append(f"fetchSensitivityLabelMetadata={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def relevant_people_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_relevant_people(
         self,
         user_id: str,
         *,
@@ -892,39 +1152,78 @@ class Office365usersClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get relevant people
 
         Get relevant people.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `RelevantPeople`.
+
+        Args:
+            user_id: User principal name or id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/users/{quote(str(user_id), safe='')}/relevantpeople"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def user_photo_metadata_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def user_photo_metadata(
         self,
         user_id: str,
         *,
@@ -937,6 +1236,21 @@ class Office365usersClient(ConnectorClientBase):
         Get user photo metadata
 
         Get user photo metadata.
+
+        Swagger operation ID: `UserPhotoMetadata`.
+
+        Args:
+            user_id: User principal name or id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/users/photo"
         query_params = []
@@ -947,7 +1261,7 @@ class Office365usersClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -961,6 +1275,7 @@ class Office365usersClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -968,22 +1283,47 @@ class Office365usersClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def trending_documents_async(
+    def list_trending_documents(
         self,
         id: str,
+        *,
         filter: Optional[str] = None,
         extract_sensitivity_label: Optional[bool] = None,
         fetch_sensitivity_label_metadata: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get trending documents
 
         Retrieves the trending documents for a user
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `TrendingDocuments`.
+
+        Args:
+            id: User principal name or id.
+            filter: An OData filter to filter the resources selected. Filter
+                selected resources on ResourceVisualization/Type or
+                ResourceVisualization/containerType.
+            extract_sensitivity_label: Select if you want to extract
+                Sensitivity label ( false, true).
+            fetch_sensitivity_label_metadata: A boolean whether to fetch
+                sensitivity label Metadata for associated LabelId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1007,29 +1347,50 @@ class Office365usersClient(ConnectorClientBase):
             query_params.append(f"fetchSensitivityLabelMetadata={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def http_request_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def http_request(
         self,
         input: bytes,
         *,
@@ -1046,10 +1407,25 @@ class Office365usersClient(ConnectorClientBase):
         messages, mailFolders, events, calendar, calendars, outlook,
         inferenceClassification. Learn more:
         https://docs.microsoft.com/en-us/graph/use-the-api.
+
+        Swagger operation ID: `HttpRequest`.
+
+        Args:
+            input: The binary request body.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/codeless/httprequest"
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST",
             request_url,
             body=input,
@@ -1066,6 +1442,7 @@ class Office365usersClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1073,23 +1450,45 @@ class Office365usersClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def direct_reports_async(
+    def list_direct_reports(
         self,
         id: str,
+        *,
         select: Optional[str] = None,
         top: Optional[int] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get direct reports
 
         Retrieves the user profiles of the specified user's direct reports.
         Learn more about available fields to select:
         https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/resources/user#properties
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `DirectReports_V2`.
+
+        Args:
+            id: User principal name or id.
+            select: Comma separated list of fields to select. Example: surname,
+                department, jobTitle.
+            top: Limit on the number of results to return. By default returns
+                all entries.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1108,33 +1507,54 @@ class Office365usersClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def manager_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def manager(
         self,
         id: str,
-        select: Optional[str] = None,
         *,
+        select: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1146,6 +1566,23 @@ class Office365usersClient(ConnectorClientBase):
         Retrieves the profile of the specified user's manager. Learn more about
         available fields to select:
         https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/resources/user#properties
+
+        Swagger operation ID: `Manager_V2`.
+
+        Args:
+            id: User principal name or id.
+            select: Comma separated list of fields to select. Example: surname,
+                department, jobTitle.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1160,7 +1597,7 @@ class Office365usersClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1174,6 +1611,7 @@ class Office365usersClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1181,10 +1619,10 @@ class Office365usersClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def my_profile_async(
+    async def my_profile(
         self,
-        select: Optional[str] = None,
         *,
+        select: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1196,6 +1634,22 @@ class Office365usersClient(ConnectorClientBase):
         Retrieves the profile of the current user. Learn more about available
         fields to select:
         https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/resources/user#properties
+
+        Swagger operation ID: `MyProfile_V2`.
+
+        Args:
+            select: Comma separated list of fields to select. Example: surname,
+                department, jobTitle.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/codeless/v1.0/me"
         query_params = []
@@ -1207,7 +1661,7 @@ class Office365usersClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1221,6 +1675,7 @@ class Office365usersClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1228,24 +1683,46 @@ class Office365usersClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def search_user_async(
+    def list_search_user(
         self,
+        *,
         search_term: Optional[str] = None,
         top: Optional[int] = None,
         is_search_term_required: Optional[bool] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Search for users
 
         Retrieves the user profiles that match the search term.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `SearchUserV2`.
+
+        Args:
+            search_term: Search string (applies to: display name, given name,
+                surname, mail, mail nickname and user principal name).
+            top: Limit on the number of results to return. Minimum value is 1.
+                Default value is 1000.
+            is_search_term_required: If set to 'Yes' then no user profiles will
+                be returned when the search term is empty. If set to 'No' then
+                no filtering will be applied when the search term is empty.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/users"
         query_params = []
@@ -1266,11 +1743,18 @@ class Office365usersClient(ConnectorClientBase):
             query_params.append(f"isSearchTermRequired={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1283,23 +1767,32 @@ class Office365usersClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def user_photo_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def user_photo(
         self,
         id: str,
         *,
@@ -1312,13 +1805,28 @@ class Office365usersClient(ConnectorClientBase):
         Get user photo
 
         Retrieves the photo of the specified user if they have one
+
+        Swagger operation ID: `UserPhoto_V2`.
+
+        Args:
+            id: User principal name or id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/codeless/v1.0/users/{quote(str(id), safe='')}/photo/$value"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1332,15 +1840,16 @@ class Office365usersClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
 
-    async def user_profile_async(
+    async def user_profile(
         self,
         id: str,
-        select: Optional[str] = None,
         *,
+        select: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1352,6 +1861,23 @@ class Office365usersClient(ConnectorClientBase):
         Retrieves the profile of a specific user. Learn more about available
         fields to select:
         https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/resources/user#properties
+
+        Swagger operation ID: `UserProfile_V2`.
+
+        Args:
+            id: User principal name or id.
+            select: Comma separated list of fields to select. Example: surname,
+                department, jobTitle.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1366,7 +1892,7 @@ class Office365usersClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1380,6 +1906,7 @@ class Office365usersClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

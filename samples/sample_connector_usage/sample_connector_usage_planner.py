@@ -1,7 +1,7 @@
 """
-Microsoft Planner Connector SDK Sample
+Microsoft Planner sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Planner connector SDK.
+This sample demonstrates how to use the Planner client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with Planner connection
@@ -21,8 +21,8 @@ Usage:
 import asyncio
 import os
 from azure.identity.aio import DefaultAzureCredential
+from azure.connectors.planner import PlannerClient
 from azure.connectors.planner import (
-    PlannerClient,
     CreateTaskRequest,
     CreateBucketInput,
     UpdateTaskRequest,
@@ -45,7 +45,7 @@ async def example_1_list_my_tasks():
 
         try:
             tasks = [
-                task async for task in client.list_my_tasks_async()
+                task async for task in client.list_my_tasks()
             ]
 
             if tasks:
@@ -67,11 +67,11 @@ async def example_2_list_group_plans(group_id: str):
         client = PlannerClient(CONNECTION_RUNTIME_URL, credential)
 
         try:
-            plans = await client.list_group_plans_async(group_id=group_id)
+            plans = [plan async for plan in client.list_group_plans(group_id=group_id)]
 
-            if plans and plans.get('value'):
-                print(f"Found {len(plans.get('value', []))} plans in group")
-                for plan in plans.get('value', [])[:5]:  # Show first 5
+            if plans:
+                print(f"Found {len(plans)} plans in group")
+                for plan in plans[:5]:  # Show first 5
                     print(f"  - {plan.get('title')} ({plan.get('id')})")
             else:
                 print("No plans found in group")
@@ -89,14 +89,14 @@ async def example_3_get_task_details(task_id: str):
 
         try:
             # Get basic task info
-            task = await client.get_task_async(id=task_id)
+            task = await client.get_task(id=task_id)
             if task:
                 print(f"Task: {task.get('title')}")
                 print(f"  - Percent Complete: {task.get('percentComplete')}%")
                 print(f"  - Created: {task.get('createdDateTime')}")
 
             # Get detailed task info
-            details = await client.get_task_details_async(id=task_id)
+            details = await client.get_task_details(id=task_id)
             if details:
                 print(f"  - Description: {details.get('description', 'No description')}")
 
@@ -118,7 +118,7 @@ async def example_4_create_bucket(group_id: str, plan_id: str):
                 plan_id=plan_id
             )
 
-            bucket = await client.create_bucket_async(input=bucket_input)
+            bucket = await client.create_bucket(input=bucket_input)
 
             if bucket:
                 print(f"Created bucket: {bucket.get('name')} ({bucket.get('id')})")
@@ -141,10 +141,10 @@ async def example_5_create_and_update_task(group_id: str, plan_id: str, bucket_i
                 plan_id=plan_id,
                 bucket_id=bucket_id,
                 title="Sample Task from SDK",
-                priority=5  # Medium priority
+                priority=5,  # Medium priority
             )
 
-            task = await client.create_task_async(input=task_input)
+            task = await client.create_task(input=task_input)
 
             if task:
                 task_id = task.get('id')
@@ -153,16 +153,16 @@ async def example_5_create_and_update_task(group_id: str, plan_id: str, bucket_i
                 # Update the task
                 update_input = UpdateTaskRequest(
                     title="Updated Sample Task",
-                    percent_complete=50
+                    percent_complete=50,
                 )
 
-                updated = await client.update_task_async(input=update_input, id=task_id)
+                updated = await client.update_task(input=update_input, id=task_id)
 
                 if updated:
                     print("Updated task to 50% complete")
 
                 # Clean up - delete the task
-                await client.delete_task_async(id=task_id)
+                await client.delete_task(id=task_id)
                 print("Deleted task")
 
         except Exception as ex:
@@ -177,7 +177,7 @@ async def example_6_get_plan_details(plan_id: str):
         client = PlannerClient(CONNECTION_RUNTIME_URL, credential)
 
         try:
-            details = await client.get_plan_details_async(id=plan_id)
+            details = await client.get_plan_details(id=plan_id)
 
             if details:
                 print(f"Plan ID: {details.get('id')}")
@@ -194,7 +194,7 @@ async def example_6_get_plan_details(plan_id: str):
 
 async def main():
     """Run all examples"""
-    print("Planner Connector SDK - Sample Usage")
+    print("Planner sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
     print()
 

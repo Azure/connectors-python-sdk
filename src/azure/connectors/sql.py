@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, SplitResult, urljoin, urlsplit
 import json
 
+from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
 from azure.core.credentials_async import AsyncTokenCredential
 from azure.core.pipeline.transport import AsyncHttpTransport
@@ -18,7 +19,68 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "SqlClient",
+    "BlobDataSetsMetadata",
+    "DataSet",
+    "DataSetParameter",
+    "DataSetsList",
+    "DataSetsMetadata",
+    "DataWithSensitivityLabelInfo",
+    "Database",
+    "DatabasesList",
+    "DynamicTree",
+    "DynamicTreeOpenBrowse",
+    "DynamicTreeSettings",
+    "DynamicValues",
+    "ExecutePassThroughNativeQueryResponse",
+    "ExecuteProcedureInput",
+    "ExecuteProcedureResponse",
+    "GetItemResponse",
+    "GetItemsResponse",
+    "GetTablesResponse",
+    "Item",
+    "ItemsList",
+    "NoNaturalKeyColumnConnectorMetadata",
+    "ODataServersList",
+    "ObjectEntity",
+    "PQMetadata",
+    "PQMetadataValue",
+    "PQRows",
+    "PassThroughNativeQuery",
+    "PassThroughNativeQueryBody",
+    "PassThroughNativeQueryMetadata",
+    "PassThroughNativeQueryResult",
+    "PassThroughPQBody",
+    "PassThroughPQResult",
+    "PatchItemInput",
+    "PatchItemResponse",
+    "PostItemInput",
+    "PostItemResponse",
+    "Procedure",
+    "ProcedureMetadata",
+    "ProcedureResult",
+    "ProceduresList",
+    "SensitivityLabelMetadata",
+    "Server",
+    "SqlItem",
+    "SqlItemsList",
+    "SqlPassThroughNativeQueryBody",
+    "SqlPassThroughNativeQueryResult",
+    "Table",
+    "TableCapabilitiesMetadata",
+    "TableCountRestrictionsMetadata",
+    "TableFilterRestrictionsMetadata",
+    "TableMetadata",
+    "TableSelectRestrictionsMetadata",
+    "TableSortRestrictionsMetadata",
+    "TablesList",
+    "TabularDataSetsMetadata",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -29,7 +91,7 @@ class ExecutePassThroughNativeQueryResponse:
     Response for Execute a SQL query
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -42,7 +104,7 @@ class ExecuteProcedureInput:
     Execute stored procedure
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -55,7 +117,7 @@ class ExecuteProcedureResponse:
     Response for Execute stored procedure
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -68,7 +130,7 @@ class GetItemResponse:
     Response for Get row
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -81,15 +143,24 @@ class GetItemsResponse:
     Response for Get rows
     """
 
-    metadata: Optional[List[DataWithSensitivityLabelInfo]] = field(
+    metadata: Optional[
+        List[DataWithSensitivityLabelInfo | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@metadata"},
     )
     """List of Sensitivity Labels"""
-    value: Optional[List[SqlItem]] = None
-    """List of Columns"""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[SqlItem | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of Columns"""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -101,7 +172,12 @@ class SqlItemsList:
     Response for When an item is created
     """
 
-    value: Optional[List[SqlItem]] = None
+    value: Optional[
+        List[SqlItem | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of Items"""
 
 
@@ -111,12 +187,20 @@ class GetTablesResponse:
     Response for Get tables
     """
 
-    metadata: Optional[List[DataWithSensitivityLabelInfo]] = field(
+    metadata: Optional[
+        List[DataWithSensitivityLabelInfo | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@metadata"},
     )
     """List of Sensitivity Labels"""
-    value: Optional[List[Table]] = None
+    value: Optional[
+        List[Table | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of Tables"""
 
 
@@ -126,7 +210,7 @@ class PatchItemInput:
     Update row
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -139,7 +223,7 @@ class PatchItemResponse:
     Response for Update row
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -152,7 +236,7 @@ class PostItemInput:
     Insert row
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -165,7 +249,7 @@ class PostItemResponse:
     Response for Insert row
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -178,7 +262,12 @@ class ODataServersList:
     Response for List the servers
     """
 
-    value: Optional[List[Server]] = None
+    value: Optional[
+        List[Server | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of datasets"""
 
 
@@ -188,7 +277,12 @@ class DatabasesList:
     Response for List the databases
     """
 
-    value: Optional[List[Database]] = None
+    value: Optional[
+        List[Database | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of datasets"""
 
 
@@ -198,10 +292,16 @@ class TablesList:
     Response for GetTablesForDeleteItem
     """
 
-    value: Optional[List[Table]] = None
-    """List of Tables"""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[Table | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of Tables"""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -213,11 +313,11 @@ class PassThroughNativeQueryMetadata:
     Response for Get pass-through native SQL query metadata
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Query name"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Query title"""
-    schema: Optional[ObjectEntity] = None
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -226,7 +326,12 @@ class ProceduresList:
     Response for Get stored procedures
     """
 
-    value: Optional[List[Procedure]] = None
+    value: Optional[
+        List[Procedure | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of Procedures"""
 
 
@@ -236,11 +341,11 @@ class ProcedureMetadata:
     Response for Get metadata of a Procedure
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Procedure name"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Procedure title"""
-    schema: Optional[ObjectEntity] = None
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -249,26 +354,30 @@ class TableMetadata:
     Response for Get metadata of a table
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Table name"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Table title"""
-    x_ms_permission: Optional[str] = field(
+    x_ms_permission: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "x-ms-permission"},
     )
     """Table permission"""
-    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = field(
+    x_ms_capabilities: Optional[TableCapabilitiesMetadata | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "x-ms-capabilities"},
     )
-    schema: Optional[ObjectEntity] = None
-    referenced_entities: Optional[ObjectEntity] = field(
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    referenced_entities: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "referencedEntities"},
     )
-    web_url: Optional[str] = field(
+    web_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "webUrl"},
     )
     """Url link"""
@@ -280,15 +389,17 @@ class BlobDataSetsMetadata:
     Definition: BlobDataSetsMetadata
     """
 
-    source: Optional[str] = None
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Blob dataset source"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Blob dataset display name"""
-    url_encoding: Optional[str] = field(
+    url_encoding: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "urlEncoding"},
     )
     """Blob dataset url encoding"""
@@ -300,21 +411,32 @@ class Database:
     Definition: Database
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """The name of the database. The name is used at runtime."""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """The name of the database. The name is used at runtime."""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the database."""
-    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DynamicProperties"},
     )
     """
     Additional database properties provided by the connector to the clients.
     """
-    tables: Optional[List[Table]] = None
+    tables: Optional[
+        List[Table | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Database items"""
 
 
@@ -324,14 +446,24 @@ class DataSet:
     Definition: DataSet
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """Dataset name"""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """Dataset name"""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """Dataset display name"""
-    query: Optional[List[PassThroughNativeQuery]] = None
+    query: Optional[
+        List[PassThroughNativeQuery | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Pass-through Native Queries"""
 
 
@@ -341,30 +473,38 @@ class DataSetParameter:
     Definition: DataSetParameter
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    """Type"""
-    url_encoding: Optional[str] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    """Type"""
+    url_encoding: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "urlEncoding"},
     )
     """Parameter url encoding"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description"""
-    required: Optional[bool] = None
+    required: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Is parameter required"""
-    x_ms_summary: Optional[str] = field(
+    x_ms_summary: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "x-ms-summary"},
     )
     """Summary"""
-    x_ms_dynamic_values: Optional[DynamicValues] = field(
+    x_ms_dynamic_values: Optional[DynamicValues | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "x-ms-dynamic-values"},
     )
-    x_ms_dynamic_tree: Optional[DynamicTree] = field(
+    x_ms_dynamic_tree: Optional[DynamicTree | Mapping[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "x-ms-dynamic-tree"},
     )
 
@@ -375,7 +515,12 @@ class DataSetsList:
     Definition: DataSetsList
     """
 
-    value: Optional[List[DataSet]] = None
+    value: Optional[
+        List[DataSet | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of datasets"""
 
 
@@ -385,17 +530,36 @@ class DataSetsMetadata:
     Definition: DataSetsMetadata
     """
 
-    tabular: Optional[TabularDataSetsMetadata] = None
-    blob: Optional[BlobDataSetsMetadata] = None
-    dataset_format: Optional[str] = field(
+    tabular: Optional[
+        TabularDataSetsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    blob: Optional[
+        BlobDataSetsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    dataset_format: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "datasetFormat"},
     )
     """Dataset Format"""
-    parameters: Optional[List[DataSetParameter]] = None
-    """Parameters"""
-    no_natural_key_column_connector: Optional[NoNaturalKeyColumnConnectorMetadata] = field(
+    parameters: Optional[
+        List[DataSetParameter | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """Parameters"""
+    no_natural_key_column_connector: Optional[
+        NoNaturalKeyColumnConnectorMetadata | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "noNaturalKeyColumnConnector"},
     )
 
@@ -406,10 +570,13 @@ class DataWithSensitivityLabelInfo:
     Definition: DataWithSensitivityLabelInfo
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name"""
-    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = field(
+    sensitivity_label_info: Optional[
+        List[SensitivityLabelMetadata | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sensitivityLabelInfo"},
     )
     """List of Sensitivity Label Information"""
@@ -421,9 +588,24 @@ class DynamicTree:
     Definition: DynamicTree
     """
 
-    settings: Optional[DynamicTreeSettings] = None
-    open: Optional[DynamicTreeOpenBrowse] = None
-    browse: Optional[DynamicTreeOpenBrowse] = None
+    settings: Optional[
+        DynamicTreeSettings | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    open: Optional[
+        DynamicTreeOpenBrowse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    browse: Optional[
+        DynamicTreeOpenBrowse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -432,30 +614,35 @@ class DynamicTreeOpenBrowse:
     Definition: DynamicTreeOpenBrowse
     """
 
-    path: Optional[str] = None
+    path: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Path"""
-    item_value_path: Optional[str] = field(
+    item_value_path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "itemValuePath"},
     )
     """Item value path"""
-    item_title_path: Optional[str] = field(
+    item_title_path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "itemTitlePath"},
     )
     """Item title path"""
-    item_full_title_path: Optional[str] = field(
+    item_full_title_path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "itemFullTitlePath"},
     )
     """Item full title path"""
-    item_is_parent: Optional[str] = field(
+    item_is_parent: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "itemIsParent"},
     )
     """Is item parent"""
-    selectable_filter: Optional[str] = field(
+    selectable_filter: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "selectableFilter"},
     )
     """Selectable filter"""
@@ -467,18 +654,21 @@ class DynamicTreeSettings:
     Definition: DynamicTreeSettings
     """
 
-    can_select_parent_nodes: Optional[bool] = field(
+    can_select_parent_nodes: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "canSelectParentNodes"},
     )
     """Can select parent nodes"""
-    can_select_leaf_nodes: Optional[bool] = field(
+    can_select_leaf_nodes: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "canSelectLeafNodes"},
     )
     """Can select leaf nodes"""
-    selected_item_placeholder: Optional[str] = field(
+    selected_item_placeholder: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "selectedItemPlaceholder"},
     )
     """Selected item placeholder in the path"""
@@ -490,20 +680,23 @@ class DynamicValues:
     Definition: DynamicValues
     """
 
-    path: Optional[str] = None
+    path: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Path"""
-    value_collection: Optional[str] = field(
+    value_collection: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "value-collection"},
     )
     """Value collection"""
-    value_path: Optional[str] = field(
+    value_path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "value-path"},
     )
     """Value path"""
-    value_title: Optional[str] = field(
+    value_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "value-title"},
     )
     """Value title"""
@@ -515,8 +708,9 @@ class Item:
     Definition: Item
     """
 
-    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dynamicProperties"},
     )
 
@@ -527,7 +721,12 @@ class ItemsList:
     Definition: ItemsList
     """
 
-    value: Optional[List[Item]] = None
+    value: Optional[
+        List[Item | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of Items"""
 
 
@@ -537,18 +736,21 @@ class NoNaturalKeyColumnConnectorMetadata:
     Definition: NoNaturalKeyColumnConnectorMetadata
     """
 
-    create_key_column_path: Optional[str] = field(
+    create_key_column_path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createKeyColumnPath"},
     )
     """Path to create key column"""
-    create_key_column_method: Optional[str] = field(
+    create_key_column_method: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createKeyColumnMethod"},
     )
     """Method to create key column"""
-    key_column_name_url_encoding: Optional[str] = field(
+    key_column_name_url_encoding: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "keyColumnNameUrlEncoding"},
     )
     """Key column name url encoding"""
@@ -560,7 +762,7 @@ class ObjectEntity:
     Definition: Object
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -573,8 +775,9 @@ class PassThroughNativeQuery:
     Definition: PassThroughNativeQuery
     """
 
-    language: Optional[str] = field(
+    language: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Language"},
     )
     """Query language"""
@@ -586,15 +789,17 @@ class PassThroughNativeQueryBody:
     Definition: PassThroughNativeQueryBody
     """
 
-    query: Optional[str] = None
+    query: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Query Text"""
-    formal_parameters: Optional[Dict[str, str]] = field(
+    formal_parameters: Optional[Dict[str, str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "formalParameters"},
     )
     """Formal Parameters"""
-    actual_parameters: Optional[Dict[str, ObjectEntity]] = field(
+    actual_parameters: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "actualParameters"},
     )
     """Actual parameters"""
@@ -606,13 +811,17 @@ class PassThroughNativeQueryResult:
     Definition: PassThroughNativeQueryResult
     """
 
-    output_parameters: Optional[Dict[str, ObjectEntity]] = field(
+    output_parameters: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OutputParameters"},
     )
     """Output parameter values"""
-    result_sets: Optional[Dict[str, List[Dict[str, ObjectEntity]]]] = field(
+    result_sets: Optional[
+        Dict[str, List[Dict[str, ObjectEntity | Mapping[str, Any]]]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResultSets"},
     )
     """Collection of all result sets"""
@@ -624,10 +833,15 @@ class Procedure:
     Definition: Procedure
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """Procedure name"""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """Procedure name"""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """Procedure display name"""
@@ -639,20 +853,25 @@ class ProcedureResult:
     Definition: ProcedureResult
     """
 
-    output_parameters: Optional[Dict[str, ObjectEntity]] = field(
+    output_parameters: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OutputParameters"},
     )
     """
     Output parameter values. The schema is dynamic based on the procedure.
     """
-    return_code: Optional[int] = field(
+    return_code: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReturnCode"},
     )
     """Return code of a procedure."""
-    result_sets: Optional[Dict[str, List[Dict[str, ObjectEntity]]]] = field(
+    result_sets: Optional[
+        Dict[str, List[Dict[str, ObjectEntity | Mapping[str, Any]]]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResultSets"},
     )
     """
@@ -667,41 +886,47 @@ class SensitivityLabelMetadata:
     Definition: SensitivityLabelMetadata
     """
 
-    sensitivity_label_id: Optional[str] = field(
+    sensitivity_label_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sensitivityLabelId"},
     )
     """SensitivityLabel Id."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel name."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """SensitivityLabel displayName info"""
-    tooltip: Optional[str] = None
+    tooltip: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel details on tooltip."""
-    priority: Optional[int] = None
+    priority: Optional[int] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel priority."""
-    color: Optional[str] = None
+    color: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel color."""
-    is_encrypted: Optional[bool] = field(
+    is_encrypted: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isEncrypted"},
     )
     """ is  SensitivityLabel Encrypted."""
-    is_enabled: Optional[bool] = field(
+    is_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isEnabled"},
     )
     """Whether  SensitivityLabel is Enabled."""
-    is_parent: Optional[bool] = field(
+    is_parent: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isParent"},
     )
     """Whether  SensitivityLabel is Parent."""
-    parent_sensitivity_label_id: Optional[str] = field(
+    parent_sensitivity_label_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parentSensitivityLabelId"},
     )
     """Parent  SensitivityLabel Id."""
@@ -713,21 +938,32 @@ class Server:
     Definition: Server
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """The name of the server. The name is used at runtime."""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """The name of the server. The name is used at runtime."""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the server."""
-    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DynamicProperties"},
     )
     """
     Additional server properties provided by the connector to the clients.
     """
-    databases: Optional[List[Database]] = None
+    databases: Optional[
+        List[Database | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Table items"""
 
 
@@ -737,8 +973,9 @@ class SqlItem:
     Definition: SqlItem
     """
 
-    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dynamicProperties"},
     )
 
@@ -749,15 +986,17 @@ class SqlPassThroughNativeQueryBody:
     Definition: SqlPassThroughNativeQueryBody
     """
 
-    actual_parameters: Optional[Dict[str, ObjectEntity]] = field(
+    actual_parameters: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "actualParameters"},
     )
     """Actual parameters"""
-    query: Optional[str] = None
+    query: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Query Text"""
-    formal_parameters: Optional[Dict[str, str]] = field(
+    formal_parameters: Optional[Dict[str, str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "formalParameters"},
     )
     """Formal Parameters"""
@@ -769,13 +1008,17 @@ class SqlPassThroughNativeQueryResult:
     Definition: SqlPassThroughNativeQueryResult
     """
 
-    output_parameters: Optional[Dict[str, ObjectEntity]] = field(
+    output_parameters: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OutputParameters"},
     )
     """Output parameter values"""
-    result_sets: Optional[Dict[str, List[Dict[str, ObjectEntity]]]] = field(
+    result_sets: Optional[
+        Dict[str, List[Dict[str, ObjectEntity | Mapping[str, Any]]]]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResultSets"},
     )
     """Collection of all result sets"""
@@ -787,15 +1030,21 @@ class Table:
     Definition: Table
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """The name of the table. The name is used at runtime."""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """The name of the table. The name is used at runtime."""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the table."""
-    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DynamicProperties"},
     )
     """Additional table properties provided by the connector to the clients."""
@@ -807,34 +1056,49 @@ class TableCapabilitiesMetadata:
     Definition: TableCapabilitiesMetadata
     """
 
-    sort_restrictions: Optional[TableSortRestrictionsMetadata] = field(
+    sort_restrictions: Optional[
+        TableSortRestrictionsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sortRestrictions"},
     )
-    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = field(
+    filter_restrictions: Optional[
+        TableFilterRestrictionsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "filterRestrictions"},
     )
-    select_restrictions: Optional[TableSelectRestrictionsMetadata] = field(
+    select_restrictions: Optional[
+        TableSelectRestrictionsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "selectRestrictions"},
     )
-    count_restrictions: Optional[TableCountRestrictionsMetadata] = field(
+    count_restrictions: Optional[
+        TableCountRestrictionsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "countRestrictions"},
     )
-    is_only_server_pagable: Optional[bool] = field(
+    is_only_server_pagable: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isOnlyServerPagable"},
     )
     """Server paging restrictions"""
-    filter_function_support: Optional[List[str]] = field(
+    filter_function_support: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "filterFunctionSupport"},
     )
     """List of supported filter capabilities"""
-    server_paging_options: Optional[List[str]] = field(
+    server_paging_options: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "serverPagingOptions"},
     )
     """List of supported server-driven paging capabilities"""
@@ -846,15 +1110,17 @@ class TableFilterRestrictionsMetadata:
     Definition: TableFilterRestrictionsMetadata
     """
 
-    filterable: Optional[bool] = None
+    filterable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether this table has filterable columns"""
-    non_filterable_properties: Optional[List[str]] = field(
+    non_filterable_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nonFilterableProperties"},
     )
     """List of non filterable properties"""
-    required_properties: Optional[List[str]] = field(
+    required_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "requiredProperties"},
     )
     """List of required properties"""
@@ -866,7 +1132,7 @@ class TableSelectRestrictionsMetadata:
     Definition: TableSelectRestrictionsMetadata
     """
 
-    selectable: Optional[bool] = None
+    selectable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether this table has selectable columns"""
 
 
@@ -876,7 +1142,7 @@ class TableCountRestrictionsMetadata:
     Definition: TableCountRestrictionsMetadata
     """
 
-    countable: Optional[bool] = None
+    countable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether this table has countable columns"""
 
 
@@ -886,15 +1152,17 @@ class TableSortRestrictionsMetadata:
     Definition: TableSortRestrictionsMetadata
     """
 
-    sortable: Optional[bool] = None
+    sortable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether this table has sortable columns"""
-    unsortable_properties: Optional[List[str]] = field(
+    unsortable_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "unsortableProperties"},
     )
     """List of unsortable properties"""
-    ascending_only_properties: Optional[List[str]] = field(
+    ascending_only_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ascendingOnlyProperties"},
     )
     """List of properties which support ascending order only"""
@@ -906,25 +1174,29 @@ class TabularDataSetsMetadata:
     Definition: TabularDataSetsMetadata
     """
 
-    source: Optional[str] = None
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Dataset source"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Dataset display name"""
-    url_encoding: Optional[str] = field(
+    url_encoding: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "urlEncoding"},
     )
     """Dataset url encoding"""
-    table_display_name: Optional[str] = field(
+    table_display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tableDisplayName"},
     )
     """Table display name"""
-    table_plural_name: Optional[str] = field(
+    table_plural_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tablePluralName"},
     )
     """Table plural display name"""
@@ -936,7 +1208,7 @@ class PassThroughPQBody:
     Definition: PassThroughPQBody
     """
 
-    query: Optional[str] = None
+    query: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Query Text"""
 
 
@@ -946,9 +1218,15 @@ class PQMetadata:
     Definition: PQMetadata
     """
 
-    value: Optional[PQMetadataValue] = None
-    result_type: Optional[str] = field(
+    value: Optional[
+        PQMetadataValue | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    result_type: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "resultType"},
     )
     """Result Type"""
@@ -960,11 +1238,11 @@ class PQMetadataValue:
     Definition: PQMetadataValue
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Query name"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Query title"""
-    schema: Optional[ObjectEntity] = None
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -973,7 +1251,7 @@ class PassThroughPQResult:
     Definition: PassThroughPQResult
     """
 
-    value: Optional[PQRows] = None
+    value: Optional[PQRows | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -982,7 +1260,7 @@ class PQRows:
     Definition: PQRows
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1000,7 +1278,7 @@ class SqlClient(ConnectorClientBase):
         credential: AsyncTokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
-        timeout_seconds: float = 30.0,
+        timeout: float = 30.0,
         use_exponential_backoff: bool = True,
         initial_retry_delay_seconds: float = 0.5,
         maximum_retry_delay_seconds: float = 120.0,
@@ -1017,8 +1295,8 @@ class SqlClient(ConnectorClientBase):
                 URL from Azure Portal.
             credential: Caller-owned Azure Core credential.
             max_retry_attempts: The maximum number of request attempts.
-            timeout_seconds: The total network timeout for each request,
-                including retries, response loading, and body reads.
+            timeout: The network timeout in seconds for each request.
+                The value configures Azure Core retry and transport deadlines.
                 Nonpositive values disable SDK and transport deadlines.
             use_exponential_backoff: Whether retries use exponential backoff.
             initial_retry_delay_seconds: The initial retry delay in seconds.
@@ -1039,7 +1317,7 @@ class SqlClient(ConnectorClientBase):
         super().__init__(
             credential,
             max_retry_attempts=max_retry_attempts,
-            timeout_seconds=timeout_seconds,
+            timeout=timeout,
             use_exponential_backoff=use_exponential_backoff,
             initial_retry_delay_seconds=initial_retry_delay_seconds,
             maximum_retry_delay_seconds=maximum_retry_delay_seconds,
@@ -1055,15 +1333,49 @@ class SqlClient(ConnectorClientBase):
         return "sql"
 
     def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
-        parsed_next_link = urlsplit(next_link)
-        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+        def split_url(value: str) -> SplitResult:
+            if "\\" in value or any(
+                ord(character) <= 32 or ord(character) == 127
+                for character in value
+            ):
+                raise ValueError("Pagination URLs contain unsafe characters.")
+            parsed = urlsplit(value)
+            if parsed.scheme or parsed.netloc or value.startswith("//"):
+                if not parsed.hostname:
+                    raise ValueError("Pagination URLs must include a hostname.")
+                if (
+                    parsed.scheme not in ("http", "https")
+                    or "@" in parsed.netloc
+                    or "%" in parsed.netloc
+                ):
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+                authority = parsed.hostname
+                if ":" in authority:
+                    authority = f"[{authority}]"
+                if parsed.port is not None:
+                    authority += f":{parsed.port}"
+                if parsed.netloc.casefold() != authority.casefold():
+                    raise ValueError("Pagination URLs have an unsafe authority.")
+            return parsed
+
+        parsed_connection = split_url(self._connection_runtime_url)
+        parsed_next_link = split_url(next_link)
+        if parsed_connection.hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+        if not parsed_next_link.scheme and not parsed_next_link.netloc:
             if next_link.startswith("/"):
                 return f"{self._connection_runtime_url}{next_link}"
+            if split_url(current_request_url).hostname is None:
+                raise ValueError("Pagination URLs must include a hostname.")
             if next_link.startswith("?"):
-                return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+                return self._resolve_pagination_url(
+                    f"{current_request_url.partition('?')[0]}{next_link}",
+                    current_request_url,
+                )
+            return self._resolve_pagination_url(
+                urljoin(current_request_url, next_link), current_request_url
+            )
 
-        parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
         connection_hostname = parsed_connection.hostname
         if next_link_hostname is None or connection_hostname is None:
@@ -1080,7 +1392,11 @@ class SqlClient(ConnectorClientBase):
                 parsed_next_link.scheme == parsed_connection.scheme
                 and next_link_port == connection_port
             ):
-                return next_link
+                return parsed_connection._replace(
+                    path=parsed_next_link.path,
+                    query=parsed_next_link.query,
+                    fragment=parsed_next_link.fragment,
+                ).geturl()
 
             raise ValueError(
                 "Pagination URL origin "
@@ -1093,7 +1409,7 @@ class SqlClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def delete_item_async(
+    async def delete_item(
         self,
         server: str,
         database: str,
@@ -1109,6 +1425,24 @@ class SqlClient(ConnectorClientBase):
         Delete row
 
         This operation deletes a row from a table.
+
+        Swagger operation ID: `DeleteItem_V2`.
+
+        Args:
+            server: Name of SQL server.
+            database: Database name.
+            table: Name of table.
+            id: Unique identifier of the row to delete.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1124,7 +1458,7 @@ class SqlClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1138,11 +1472,12 @@ class SqlClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
-    async def execute_pass_through_native_query_async(
+    async def execute_pass_through_native_query(
         self,
-        input: SqlPassThroughNativeQueryBody,
+        input: SqlPassThroughNativeQueryBody | Mapping[str, Any],
         server: str,
         database: str,
         *,
@@ -1155,6 +1490,24 @@ class SqlClient(ConnectorClientBase):
         Execute a SQL query
 
         Execute a SQL query
+
+        Swagger operation ID: `ExecutePassThroughNativeQuery_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            server: Name of SQL server.
+            database: Database name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1168,7 +1521,7 @@ class SqlClient(ConnectorClientBase):
             f"/sql"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1182,6 +1535,7 @@ class SqlClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1189,9 +1543,9 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def execute_procedure_async(
+    async def execute_procedure(
         self,
-        input: ExecuteProcedureInput,
+        input: ExecuteProcedureInput | Mapping[str, Any],
         server: str,
         database: str,
         procedure: str,
@@ -1205,6 +1559,25 @@ class SqlClient(ConnectorClientBase):
         Execute stored procedure
 
         This operation runs a stored procedure.
+
+        Swagger operation ID: `ExecuteProcedure_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            server: Name of SQL server.
+            database: Database name.
+            procedure: Name of stored procedure.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1218,7 +1591,7 @@ class SqlClient(ConnectorClientBase):
             f"/{quote(quote(str(procedure), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1232,6 +1605,7 @@ class SqlClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1239,7 +1613,7 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_item_async(
+    async def get_item(
         self,
         server: str,
         database: str,
@@ -1255,6 +1629,24 @@ class SqlClient(ConnectorClientBase):
         Get row
 
         This operation gets a row from a table.
+
+        Swagger operation ID: `GetItem_V2`.
+
+        Args:
+            server: Name of SQL server.
+            database: Database name.
+            table: Name of SQL table.
+            id: Unique identifier of the row to retrieve.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1270,7 +1662,7 @@ class SqlClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1284,6 +1676,7 @@ class SqlClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1291,11 +1684,12 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_items_async(
+    def list_items(
         self,
         server: str,
         database: str,
         table: str,
+        *,
         apply: Optional[str] = None,
         filter: Optional[str] = None,
         orderby: Optional[str] = None,
@@ -1305,19 +1699,49 @@ class SqlClient(ConnectorClientBase):
         count: Optional[bool] = None,
         extract_sensitivity_label: Optional[bool] = None,
         purview_account_name: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get rows
 
         This operation gets rows from a table.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `GetItems_V2`.
+
+        Args:
+            server: Name of SQL server.
+            database: Database name.
+            table: Name of SQL table.
+            apply: A sequence of OData aggregation transformations.
+            filter: An ODATA filter query to restrict the entries returned
+                (e.g. stringColumn eq 'string' OR numberColumn lt 123).
+            orderby: An ODATA orderBy query for specifying the order of
+                entries.
+            skip: The number of entries to skip (default = 0).
+            top: Total number of entries to retrieve (default = all).
+            select: Specific fields to retrieve from entries (default = all).
+            count: Option to specify if only total entity count should be
+                returned in the query (default = false).
+            extract_sensitivity_label: Specify whether to extract MIP labels.
+            purview_account_name: Default collection will be queried unless
+                specified.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1379,11 +1803,18 @@ class SqlClient(ConnectorClientBase):
             query_params.append(f"purviewAccountName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1396,38 +1827,69 @@ class SqlClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_tables_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_tables(
         self,
         server: str,
         database: str,
+        *,
         extract_sensitivity_label: Optional[bool] = None,
         purview_account_name: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get tables
 
         This operation gets tables from a database.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetTables_V2`.
+
+        Args:
+            server: Name of SQL server.
+            database: Database name.
+            extract_sensitivity_label: Specify whether to extract MIP labels.
+            purview_account_name: Default collection will be queried unless
+                specified.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1452,31 +1914,52 @@ class SqlClient(ConnectorClientBase):
             query_params.append(f"purviewAccountName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def patch_item_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def patch_item(
         self,
-        input: PatchItemInput,
+        input: PatchItemInput | Mapping[str, Any],
         server: str,
         database: str,
         table: str,
@@ -1491,6 +1974,26 @@ class SqlClient(ConnectorClientBase):
         Update row
 
         This operation updates an existing row in a table.
+
+        Swagger operation ID: `PatchItem_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            server: Name of SQL server.
+            database: Database name.
+            table: Name of table.
+            id: Unique identifier of the row to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1506,7 +2009,7 @@ class SqlClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1520,6 +2023,7 @@ class SqlClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1527,9 +2031,9 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def post_item_async(
+    async def post_item(
         self,
-        input: PostItemInput,
+        input: PostItemInput | Mapping[str, Any],
         server: str,
         database: str,
         table: str,
@@ -1543,6 +2047,25 @@ class SqlClient(ConnectorClientBase):
         Insert row
 
         This operation inserts a new row into a table.
+
+        Swagger operation ID: `PostItem_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            server: Name of SQL server.
+            database: Database name.
+            table: Name of table.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1557,7 +2080,7 @@ class SqlClient(ConnectorClientBase):
             f"/items"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1571,6 +2094,7 @@ class SqlClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1578,120 +2102,49 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_servers_async(
+    def list_servers(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List the servers
 
         List the servers
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetServers`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/servers"
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_databases_async(
-        self,
-        server: str,
-        *,
-        timeout: Optional[float] = None,
-        headers: Optional[Mapping[str, str]] = None,
-        client_request_id: Optional[str] = None,
-        response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
-        """
-        List the databases
-
-        List the databases
-        """
-        request_url = f"{self._connection_runtime_url}/databases"
-        query_params = []
-        value = str(server)
-        if isinstance(server, bool):
-            value = value.lower()
-        query_params.append(f"server={quote(value, safe='')}")
-        if query_params:
-            request_url += '?' + '&'.join(query_params)
-
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
-            )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
-    async def get_tables_for_delete_item_async(
-        self,
-        server: str,
-        database: str,
-        *,
-        timeout: Optional[float] = None,
-        headers: Optional[Mapping[str, str]] = None,
-        client_request_id: Optional[str] = None,
-        response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
-        """
-        GetTablesForDeleteItem
-
-        GetTablesForDeleteItem
-
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
-        """
-        request_url = (
-            f"{self._connection_runtime_url}"
-            f"/v2"
-            f"/datasets"
-            f"/"
-            f"{quote(quote(str(server), safe=''), safe='')}"
-            f","
-            f"{quote(quote(str(database), safe=''), safe='')}"
-            f"/tablesfor"
-            f"/deleteitem"
-        )
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1704,25 +2157,206 @@ class SqlClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
 
-            next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            return None, items()
 
-    async def get_pass_through_native_query_metadata_async(
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_databases(
         self,
-        input: SqlPassThroughNativeQueryBody,
+        server: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> AsyncItemPaged[dict[str, Any]]:
+        """
+        List the databases
+
+        List the databases
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetDatabases`.
+
+        Args:
+            server: Server name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/databases"
+        query_params = []
+        value = str(server)
+        if isinstance(server, bool):
+            value = value.lower()
+        query_params.append(f"server={quote(value, safe='')}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
+
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            )
+
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
+
+            return response, request_url
+
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_tables_for_delete_item(
+        self,
+        server: str,
+        database: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> AsyncItemPaged[dict[str, Any]]:
+        """
+        GetTablesForDeleteItem
+
+        GetTablesForDeleteItem
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `GetTablesForDeleteItem_V2`.
+
+        Args:
+            server: Name of SQL server.
+            database: Database name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/v2"
+            f"/datasets"
+            f"/"
+            f"{quote(quote(str(server), safe=''), safe='')}"
+            f","
+            f"{quote(quote(str(database), safe=''), safe='')}"
+            f"/tablesfor"
+            f"/deleteitem"
+        )
+        initial_request_url = request_url
+        request_body = None
+
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
+            )
+
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
+
+            return response, request_url
+
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+            next_link = page.get("@odata.nextLink")
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def get_pass_through_native_query_metadata(
+        self,
+        input: SqlPassThroughNativeQueryBody | Mapping[str, Any],
         server: str,
         database: str,
         *,
@@ -1735,6 +2369,24 @@ class SqlClient(ConnectorClientBase):
         Get pass-through native SQL query metadata
 
         Retrieves metadata for a pass-through native SQL query.
+
+        Swagger operation ID: `GetPassThroughNativeQueryMetadata_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            server: Name of SQL server.
+            database: Database name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1749,7 +2401,7 @@ class SqlClient(ConnectorClientBase):
             f"/sql"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1763,6 +2415,7 @@ class SqlClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1770,7 +2423,7 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_procedures_v2_async(
+    def list_procedures_v2(
         self,
         server: str,
         database: str,
@@ -1779,11 +2432,30 @@ class SqlClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get stored procedures
 
         This operation gets stored procedures for a database.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetProcedures_V2`.
+
+        Args:
+            server: Name of SQL server.
+            database: Database name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1795,29 +2467,50 @@ class SqlClient(ConnectorClientBase):
             f"{quote(quote(str(database), safe=''), safe='')}"
             f"/procedures"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def get_procedure_v2_async(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def get_procedure_v2(
         self,
         server: str,
         database: str,
@@ -1832,6 +2525,23 @@ class SqlClient(ConnectorClientBase):
         Get metadata of a Procedure
 
         Get metadata of a Procedure.
+
+        Swagger operation ID: `GetProcedure_V2`.
+
+        Args:
+            server: Name of SQL server.
+            database: Database name.
+            procedure: Procedure name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1846,7 +2556,7 @@ class SqlClient(ConnectorClientBase):
             f"/{quote(quote(str(procedure), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1860,6 +2570,7 @@ class SqlClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1867,7 +2578,7 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_tables_for_get_item_async(
+    def list_tables_for_get_item(
         self,
         server: str,
         database: str,
@@ -1876,14 +2587,31 @@ class SqlClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         GetTablesForGetItem
 
         GetTablesForGetItem
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `GetTablesForGetItem_V2`.
+
+        Args:
+            server: Name of SQL server.
+            database: Database name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1896,11 +2624,18 @@ class SqlClient(ConnectorClientBase):
             f"/tablesfor"
             f"/getitem"
         )
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1913,30 +2648,39 @@ class SqlClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_table_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def get_table(
         self,
         server: str,
         database: str,
         table: str,
+        *,
         extract_sensitivity_label: Optional[bool] = None,
         purview_account_name: Optional[str] = None,
-        *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -1946,6 +2690,26 @@ class SqlClient(ConnectorClientBase):
         Get metadata of a table
 
         Get metadata of a table.
+
+        Swagger operation ID: `GetTable_V2`.
+
+        Args:
+            server: Name of SQL server.
+            database: Database name.
+            table: table name.
+            extract_sensitivity_label: Specify whether to extract MIP labels.
+            purview_account_name: Default collection will be queried unless
+                specified.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1973,7 +2737,7 @@ class SqlClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1987,6 +2751,7 @@ class SqlClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1994,7 +2759,7 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_tables_for_get_on_new_items_async(
+    def list_tables_for_get_on_new_items(
         self,
         server: str,
         database: str,
@@ -2003,14 +2768,31 @@ class SqlClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         GetTablesForOnItemCreated
 
         GetTablesForOnItemCreated
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `GetTablesForGetOnNewItems_V2`.
+
+        Args:
+            server: Name of SQL server.
+            database: Database name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2023,11 +2805,18 @@ class SqlClient(ConnectorClientBase):
             f"/tablesfor"
             f"/getonnewitems"
         )
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2040,23 +2829,32 @@ class SqlClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_tables_for_get_on_updated_items_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_tables_for_get_on_updated_items(
         self,
         server: str,
         database: str,
@@ -2065,14 +2863,31 @@ class SqlClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         GetTablesForOnItemUpdated
 
         GetTablesForOnItemUpdated
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `GetTablesForGetOnUpdatedItems_V2`.
+
+        Args:
+            server: Name of SQL server.
+            database: Database name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2085,11 +2900,18 @@ class SqlClient(ConnectorClientBase):
             f"/tablesfor"
             f"/getonupdateditems"
         )
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2102,23 +2924,32 @@ class SqlClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_tables_for_patch_item_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_tables_for_patch_item(
         self,
         server: str,
         database: str,
@@ -2127,14 +2958,31 @@ class SqlClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         GetTablesForPatchItem
 
         GetTablesForPatchItem
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `GetTablesForPatchItem_V2`.
+
+        Args:
+            server: Name of SQL server.
+            database: Database name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2147,11 +2995,18 @@ class SqlClient(ConnectorClientBase):
             f"/tablesfor"
             f"/patchitem"
         )
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2164,23 +3019,32 @@ class SqlClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_table_for_patch_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def get_table_for_patch(
         self,
         server: str,
         database: str,
@@ -2195,6 +3059,23 @@ class SqlClient(ConnectorClientBase):
         Get metadata of a table for Patch operation
 
         Get metadata of a table for Patch operation.
+
+        Swagger operation ID: `GetTableForPatch_V2`.
+
+        Args:
+            server: Name of SQL server.
+            database: Database name.
+            table: table name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2210,7 +3091,7 @@ class SqlClient(ConnectorClientBase):
             f"/forPatchItem"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2224,6 +3105,7 @@ class SqlClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2231,7 +3113,7 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_tables_for_post_item_async(
+    def list_tables_for_post_item(
         self,
         server: str,
         database: str,
@@ -2240,14 +3122,31 @@ class SqlClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         GetTablesForPostItem
 
         GetTablesForPostItem
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
+
+        Swagger operation ID: `GetTablesForPostItem_V2`.
+
+        Args:
+            server: Name of SQL server.
+            database: Database name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2260,11 +3159,18 @@ class SqlClient(ConnectorClientBase):
             f"/tablesfor"
             f"/postitem"
         )
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2277,23 +3183,32 @@ class SqlClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_procedure_async(
+            return continuation_token, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    async def get_procedure(
         self,
         procedure: str,
         *,
@@ -2306,6 +3221,21 @@ class SqlClient(ConnectorClientBase):
         Get procedure metadata
 
         This operation gets metadata for a stored procedure.
+
+        Swagger operation ID: `GetProcedure`.
+
+        Args:
+            procedure: Name of stored procedure.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2316,7 +3246,7 @@ class SqlClient(ConnectorClientBase):
             f"/{quote(quote(str(procedure), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = await self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2330,6 +3260,7 @@ class SqlClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2337,43 +3268,81 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_procedures_async(
+    def list_procedures(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get stored procedures
 
         This operation gets stored procedures for a database.
+
+        Returns a single-page Azure Core async collection.
+
+        Swagger operation ID: `GetProcedures`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results. Consume it with `async for`.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/datasets/default/procedures"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send_async(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                    response=response,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
 
 
 # Trigger Operations

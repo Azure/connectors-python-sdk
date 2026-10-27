@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
 """
-PDF.co Connector SDK Sample
+PDF.co sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the PDF.co connector SDK.
+This sample demonstrates how to use the PDF.co client from the Azure Connectors Python SDK.
 
 Prerequisites:
 1. Azure subscription with a PDF.co connection
@@ -27,8 +27,8 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
+from azure.connectors.pdfco import PdfcoClient
 from azure.connectors.pdfco import (
-    PdfcoClient,
     HtmlToPdfInput,
     UrlToPdfInput,
 )
@@ -50,7 +50,7 @@ async def example_1_html_to_pdf():
                     html="<h1>Hello from PDF.co</h1>",
                 )
 
-                result = await client.html_to_pdf_async(input=request)
+                result = await client.html_to_pdf(input=request)
 
                 print(f"HTML to PDF result: {result}")
 
@@ -72,7 +72,7 @@ async def example_2_url_to_pdf():
                     url="https://example.com",
                 )
 
-                result = await client.url_to_pdf_async(input=request)
+                result = await client.url_to_pdf(input=request)
 
                 print(f"URL to PDF result: {result}")
 

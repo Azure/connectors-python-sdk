@@ -11,7 +11,8 @@ from azure.core.credentials import AzureKeyCredential
 from azure.connectors.sdk import (
     ConnectorException,
 )
-from azure.connectors.slack import PostMessageRequest, SlackClient, TRIGGER_OPERATIONS
+from azure.connectors.slack import SlackClient
+from azure.connectors.slack import PostMessageRequest, TRIGGER_OPERATIONS
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import resolve_generated_result
 
@@ -49,7 +50,7 @@ class TestSlackClientInitialization:
         client = SlackClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -116,11 +117,11 @@ class TestSetDndAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.set_dnd_async(num_minutes="30")
+            result = await client.set_dnd(num_minutes="30")
 
             mock_send.assert_called_once_with(
                 "GET",
@@ -145,12 +146,12 @@ class TestSetDndAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.set_dnd_async(num_minutes="invalid")
+                await client.set_dnd(num_minutes="invalid")
 
 
 class TestSlackContractSurface:
@@ -171,7 +172,7 @@ class TestSlackContractSurface:
 
     def test_deprecated_group_operation_is_not_generated(self):
         """Test the deprecated group operation is absent."""
-        assert not hasattr(SlackClient, "create_group_async")
+        assert not hasattr(SlackClient, "create_group")
 
 
 class TestListChannelsAsync:
@@ -191,11 +192,11 @@ class TestListChannelsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await resolve_generated_result(client.list_channels_async())
+            result = await resolve_generated_result(client.list_channels())
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -218,12 +219,12 @@ class TestListChannelsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await resolve_generated_result(client.list_channels_async())
+                await resolve_generated_result(client.list_channels())
 
 
 class TestCreateChannelAsync:
@@ -243,11 +244,11 @@ class TestCreateChannelAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_channel_async(name="dev-chat", is_private="false")
+            result = await client.create_channel(name="dev-chat", is_private="false")
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -272,12 +273,12 @@ class TestCreateChannelAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.create_channel_async(name="")
+                await client.create_channel(name="")
 
 
 class TestPostMessageAsync:
@@ -298,11 +299,11 @@ class TestPostMessageAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.post_message_async(input=payload)
+            result = await client.post_message(input=payload)
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -328,12 +329,12 @@ class TestPostMessageAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.post_message_async(input=payload)
+                await client.post_message(input=payload)
 
 
 @pytest.mark.asyncio
@@ -353,7 +354,7 @@ async def test_channels_continuation_yields_later_channels(
     ) as client:
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             side_effect=[
                 MockResponse(status=200, text=json.dumps({
@@ -367,7 +368,7 @@ async def test_channels_continuation_yields_later_channels(
             ],
         ) as transport:
             channels = [
-                channel async for channel in client.list_channels_async()
+                channel async for channel in client.list_channels()
             ]
 
     assert channels == first_items + later_items

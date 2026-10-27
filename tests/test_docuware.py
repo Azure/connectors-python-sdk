@@ -2,13 +2,15 @@
 
 """Unit tests for DocuwareClient."""
 
+from collections.abc import Mapping
+from typing import Any, get_args, get_origin, get_type_hints
 from unittest.mock import AsyncMock, patch
 
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.docuware import DocuwareClient
 from azure.connectors.docuware import (
-    DocuwareClient,
     SearchForDocumentsInFileCabinetInput,
     UpdateIndexFieldsInput,
 )
@@ -16,6 +18,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestDocuwareClientInitialization:
@@ -51,7 +54,7 @@ class TestDocuwareClientInitialization:
         client = DocuwareClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -118,11 +121,11 @@ class TestGetOrganizationAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_organization_async()
+            result = await client.get_organization()
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -143,12 +146,12 @@ class TestGetOrganizationAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_organization_async()
+                await client.get_organization()
 
             assert exc_info.value.status_code == 401
 
@@ -167,11 +170,13 @@ class TestGetFileCabinetsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_file_cabinets_async(file_cabinet_type="FileCabinet")
+            result = await resolve_generated_result(
+                client.list_file_cabinets(file_cabinet_type="FileCabinet")
+            )
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -183,6 +188,21 @@ class TestGetFileCabinetsAsync:
 
 class TestSearchForDocumentsInFileCabinetAsync:
     """Tests for search_for_documents_in_file_cabinet_async (POST with body)."""
+
+    def test_input_annotation_accepts_model_or_mapping(self):
+        """Test dynamic search criteria support typed models and wire mappings."""
+        input_annotation = get_type_hints(
+            DocuwareClient.search_for_documents_in_file_cabinet
+        )["input"]
+        annotation_members = get_args(input_annotation)
+
+        assert SearchForDocumentsInFileCabinetInput in annotation_members
+        mapping_annotation = next(
+            member
+            for member in annotation_members
+            if get_origin(member) is Mapping
+        )
+        assert get_args(mapping_annotation) == (str, Any)
 
     @pytest.mark.asyncio
     async def test_success_forwards_request_body(self, mock_credential):
@@ -196,11 +216,11 @@ class TestSearchForDocumentsInFileCabinetAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.search_for_documents_in_file_cabinet_async(
+            result = await client.search_for_documents_in_file_cabinet(
                 input=request,
                 file_cabinet="cabinet-1",
                 search_dialog_id="dialog-1",
@@ -227,12 +247,12 @@ class TestSearchForDocumentsInFileCabinetAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.search_for_documents_in_file_cabinet_async(
+                await client.search_for_documents_in_file_cabinet(
                     input=request,
                     file_cabinet="cabinet-1",
                     search_dialog_id="dialog-1",
@@ -256,11 +276,11 @@ class TestUpdateIndexFieldsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.update_index_fields_async(
+            await client.update_index_fields(
                 input=request,
                 file_cabinet_id="cabinet-1",
                 document_id="document-1",
@@ -284,11 +304,11 @@ class TestDeleteDocumentAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.delete_document_async(
+            result = await client.delete_document(
                 file_cabinet_id="cabinet-1",
                 document_id="doc-1",
             )
@@ -306,21 +326,21 @@ class TestDeleteDocumentAsync:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        mock_response = MockResponse(status=404, text="Not Found")
+        mock_response = MockResponse(status=500, text="Server error")
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.delete_document_async(
+                await client.delete_document(
                     file_cabinet_id="cabinet-1",
                     document_id="doc-1",
                 )
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestDownloadFileAsync:
@@ -337,11 +357,11 @@ class TestDownloadFileAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.download_file_async(
+            result = await client.download_file(
                 file_cabinet_id="cabinet-1",
                 document_id="doc-1",
                 file_number="1",
@@ -362,7 +382,7 @@ BASE_URL = "https://example.azure.com/connections/test"
 
 OPERATION_ARGS = {
     "get_organization": {},
-    "get_file_cabinets": {"file_cabinet_type": None},
+    "list_file_cabinets": {"file_cabinet_type": None},
     "get_document_information": {"file_cabinet_id": "cabinet-1", "document_id": "doc-1"},
     "delete_document": {"file_cabinet_id": "cabinet-1", "document_id": "doc-1"},
     "download_file": {
@@ -389,11 +409,11 @@ OPERATION_ARGS = {
     },
     "transfer_document": {"input": {}, "destination_file_cabinet_id": "cabinet-2"},
     "place_a_stamp": {"input": {}, "file_cabinet_id": "cabinet-1", "document_id": "doc-1"},
-    "get_dialogs": {"file_cabinet": "cabinet-1"},
-    "get_dialog_fields": {"file_cabinet": "cabinet-1", "dialog_id": "dialog-1"},
-    "get_stamps": {"file_cabinet": "cabinet-1"},
-    "get_stamp_fields": {"file_cabinet": "cabinet-1", "stamp": "stamp-1"},
-    "get_file_cabinet_fields": {"file_cabinet": "cabinet-1"},
+    "list_dialogs": {"file_cabinet": "cabinet-1"},
+    "list_dialog_fields": {"file_cabinet": "cabinet-1", "dialog_id": "dialog-1"},
+    "list_stamps": {"file_cabinet": "cabinet-1"},
+    "list_stamp_fields": {"file_cabinet": "cabinet-1", "stamp": "stamp-1"},
+    "list_file_cabinet_fields": {"file_cabinet": "cabinet-1"},
 }
 
 ALL_OPERATIONS = sorted(OPERATION_ARGS.keys())
@@ -401,8 +421,8 @@ ALL_OPERATIONS = sorted(OPERATION_ARGS.keys())
 
 async def _invoke_operation(client: DocuwareClient, operation: str):
     """Invoke a DocuWare operation by name for shared method tests."""
-    method = getattr(client, f"{operation}_async")
-    return await method(**OPERATION_ARGS[operation])
+    method = getattr(client, f"{operation}")
+    return await resolve_generated_result(method(**OPERATION_ARGS[operation]))
 
 
 class TestDocuwareClientAllOperations:
@@ -417,7 +437,7 @@ class TestDocuwareClientAllOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
@@ -443,7 +463,7 @@ class TestDocuwareClientAllOperationsErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):

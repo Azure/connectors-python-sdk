@@ -6,8 +6,8 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.office365groups import Office365groupsClient
 from azure.connectors.office365groups import (
-    Office365groupsClient,
     ListGroupMembersResponse,
     OnGroupMemberAddedOrRemovedResponse,
     ListGroupsResponse,
@@ -60,7 +60,7 @@ class TestOffice365groupsClientInitialization:
         client = Office365groupsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
-            timeout_seconds=60.0,
+            timeout=60.0,
             max_retry_attempts=5,
         )
         assert client._http_client._timeout_seconds == 60.0
@@ -140,12 +140,12 @@ class TestListGroupMembersAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
             result = await resolve_generated_result(
-                client.list_group_members_async(group_id="group-123")
+                client.list_group_members(group_id="group-123")
             )
 
             mock_send.assert_called_once()
@@ -168,12 +168,12 @@ class TestListGroupMembersAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
             await resolve_generated_result(
-                client.list_group_members_async(group_id="group-123", top="10")
+                client.list_group_members(group_id="group-123", top="10")
             )
 
             call_args = mock_send.call_args
@@ -191,12 +191,12 @@ class TestListGroupMembersAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             result = await resolve_generated_result(
-                client.list_group_members_async(group_id="group-123")
+                client.list_group_members(group_id="group-123")
             )
             assert result == []
 
@@ -212,13 +212,13 @@ class TestListGroupMembersAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException):
                 await resolve_generated_result(
-                    client.list_group_members_async(group_id="group-123")
+                    client.list_group_members(group_id="group-123")
                 )
 
 
@@ -240,11 +240,11 @@ class TestListGroupsAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.list_groups_async())
+            result = await resolve_generated_result(client.list_groups())
 
             mock_send.assert_called_once()
             assert result is not None
@@ -262,12 +262,12 @@ class TestListGroupsAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
             await resolve_generated_result(
-                client.list_groups_async(filter="displayName eq 'Engineering'")
+                client.list_groups(filter="displayName eq 'Engineering'")
             )
 
             call_args = mock_send.call_args
@@ -285,11 +285,11 @@ class TestListGroupsAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await resolve_generated_result(client.list_groups_async(top="50", skiptoken="token123"))
+            await resolve_generated_result(client.list_groups(top="50", skiptoken="token123"))
 
             call_args = mock_send.call_args
             path = call_args[0][1]
@@ -312,11 +312,11 @@ class TestAddMemberToGroupAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.add_member_to_group_async(
+            await client.add_member_to_group(
                 group_id="group-123",
                 user_upn="user@contoso.com"
             )
@@ -342,11 +342,11 @@ class TestRemoveMemberFromGroupAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.remove_member_from_group_async(
+            await client.remove_member_from_group(
                 group_id="group-123",
                 user_upn="user@contoso.com"
             )
@@ -374,16 +374,18 @@ class TestCreateCalendarEventAsync:
 
         event_input = UpdateCalendarEventHTMLRequest(
             subject="Team Meeting",
+            start={"dateTime": "2026-10-12T09:00:00Z"},
+            end={"dateTime": "2026-10-12T10:00:00Z"},
             is_all_day=False
         )
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.create_calendar_event_async(
+            result = await client.create_calendar_event(
                 input=event_input,
                 group_id="group-123"
             )
@@ -410,16 +412,18 @@ class TestUpdateCalendarEventAsync:
         )
 
         event_input = UpdateCalendarEventHTMLRequest(
-            subject="Updated Meeting"
+            subject="Updated Meeting",
+            start={"dateTime": "2026-10-12T09:00:00Z"},
+            end={"dateTime": "2026-10-12T10:00:00Z"},
         )
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.update_calendar_event_async(
+            result = await client.update_calendar_event(
                 input=event_input,
                 event="event-123",
                 group_id="group-123"
@@ -446,11 +450,11 @@ class TestCalendarDeleteItemAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.calendar_delete_item_async(
+            await client.calendar_delete_item(
                 event="event-123",
                 group_id="group-123"
             )
@@ -478,11 +482,11 @@ class TestListDeletedGroupsAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.list_deleted_groups_async())
+            result = await resolve_generated_result(client.list_deleted_groups())
 
             mock_send.assert_called_once()
             assert result is not None
@@ -500,11 +504,11 @@ class TestListDeletedGroupsAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await resolve_generated_result(client.list_deleted_groups_async())
+            result = await resolve_generated_result(client.list_deleted_groups())
             assert result == []
 
 
@@ -523,11 +527,11 @@ class TestRestoreDeletedGroupAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.restore_deleted_group_async(group_id="deleted-group-123")
+            await client.restore_deleted_group(group_id="deleted-group-123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -553,15 +557,14 @@ class TestListOwnedGroupsAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_owned_groups_async()
+            result = await resolve_generated_result(client.list_owned_groups())
 
             mock_send.assert_called_once()
-            assert result is not None
-            assert "value" in result
+            assert result == [{"id": "my-group", "displayName": "My Team"}]
 
 
 class TestHttpRequestAsync:
@@ -584,11 +587,11 @@ class TestHttpRequestAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.http_request_async(input=request_input)
+            result = await client.http_request(input=request_input)
 
             mock_send.assert_called_once()
             assert result is not None
@@ -607,12 +610,12 @@ class TestHttpRequestAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException):
-                await client.http_request_async(input=request_input)
+                await client.http_request(input=request_input)
 
 
 class TestOnGroupMembershipChangeAsync:
@@ -657,11 +660,11 @@ class TestListDeletedGroupsByOwnerAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.list_deleted_groups_by_owner_async())
+            result = await resolve_generated_result(client.list_deleted_groups_by_owner())
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -762,16 +765,22 @@ class TestDataclasses:
         assert response.context is None
         assert response.value is None
 
-    def test_update_calendar_event_request_defaults(self):
-        """Test UpdateCalendarEventRequest default values."""
-        request = UpdateCalendarEventRequest()
-        assert request.subject is None
+    def test_update_calendar_event_request_optional_defaults(self):
+        """Test UpdateCalendarEventRequest optional default values."""
+        request = UpdateCalendarEventRequest(
+            subject="Team Meeting",
+            start={"dateTime": "2026-10-12T09:00:00Z"},
+            end={"dateTime": "2026-10-12T10:00:00Z"},
+        )
+        assert request.subject == "Team Meeting"
         assert request.is_all_day is None
 
     def test_update_calendar_event_request_with_values(self):
         """Test UpdateCalendarEventRequest with values."""
         request = UpdateCalendarEventRequest(
             subject="Team Standup",
+            start={"dateTime": "2026-10-12T09:00:00Z"},
+            end={"dateTime": "2026-10-12T09:30:00Z"},
             importance="Normal",
             is_all_day=False,
             is_reminder_on=True,
@@ -781,16 +790,22 @@ class TestDataclasses:
         assert request.is_reminder_on is True
         assert request.reminder_minutes_before_start == 15
 
-    def test_update_calendar_event_html_request_defaults(self):
-        """Test UpdateCalendarEventHTMLRequest default values."""
-        request = UpdateCalendarEventHTMLRequest()
-        assert request.subject is None
+    def test_update_calendar_event_html_request_optional_defaults(self):
+        """Test UpdateCalendarEventHTMLRequest optional default values."""
+        request = UpdateCalendarEventHTMLRequest(
+            subject="HTML Meeting",
+            start={"dateTime": "2026-10-12T09:00:00Z"},
+            end={"dateTime": "2026-10-12T10:00:00Z"},
+        )
+        assert request.subject == "HTML Meeting"
         assert request.body is None
 
     def test_update_calendar_event_html_request_with_values(self):
         """Test UpdateCalendarEventHTMLRequest with values."""
         request = UpdateCalendarEventHTMLRequest(
             subject="HTML Meeting",
+            start={"dateTime": "2026-10-12T09:00:00Z"},
+            end={"dateTime": "2026-10-12T10:00:00Z"},
             body={"contentType": "HTML", "content": "<p>Meeting details</p>"},
             is_all_day=True
         )
@@ -813,11 +828,11 @@ async def test_pageable_group_operation_empty_response_yields_no_items(
         "https://example.azure.com/connections/test",
         credential=mock_credential,
     )
-    method = getattr(client, f"{operation}_async")
+    method = getattr(client, f"{operation}")
     arguments = {"group_id": "group-123"} if operation == "list_group_members" else {}
     with patch.object(
         client._http_client,
-        "send_async",
+        "send",
         new_callable=AsyncMock,
         return_value=MockResponse(status=200, text=""),
     ):
