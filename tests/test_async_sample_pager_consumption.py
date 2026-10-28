@@ -293,7 +293,7 @@ async def test_async_sample_consumes_pages_and_reports_items(
 def test_all_async_pageable_call_sites_are_explicitly_consumed() -> None:
     """Sweep every sample using generated return types, not operation-name guesses."""
     paths = sorted(SAMPLES.glob("sample_connector_usage_*.py"))
-    assert len(paths) == 99
+    assert len(paths) == 101
     pageable_sample_count = 0
     call_count = 0
     for sample_path in paths:
@@ -320,8 +320,8 @@ def test_all_async_pageable_call_sites_are_explicitly_consumed() -> None:
             ) or (
                 isinstance(parent, ast.AsyncFor) and parent.iter is call
             ), (sample_path.name, call.lineno, ast.unparse(call))
-    assert pageable_sample_count == 75
-    assert call_count == 152
+    assert pageable_sample_count == 77
+    assert call_count == 154
 
 
 @pytest.mark.parametrize("response", [None, {}, {"value": [{"id": "created"}]}])

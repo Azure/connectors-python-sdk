@@ -10,7 +10,7 @@ This directory contains samples demonstrating how to use the Azure Connectors SD
 
 ## Samples
 
-Each of the 99 connectors has one async sample in this directory. Clients and
+Each of the 101 connectors has one async sample in this directory. Clients and
 models use root connector imports and unsuffixed operation names. Run a sample with:
 
 ```bash
@@ -31,6 +31,7 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_azuretables.py` | Azure Storage Tables | `AZURETABLES_CONNECTION_URL` |
 | `sample_connector_usage_azurevm.py` | Azure VM | `AZUREVM_CONNECTION_URL` |
 | `sample_connector_usage_commondataservice.py` | Microsoft Dataverse | `COMMONDATASERVICE_CONNECTION_URL` |
+| `sample_connector_usage_dataflows.py` | Power Query Dataflows | `DATAFLOWS_CONNECTION_URL`, `DATAFLOWS_WORKSPACE_TYPE` (optional) |
 | `sample_connector_usage_documentdb.py` | Azure Cosmos DB | `DOCUMENTDB_CONNECTION_URL` |
 | `sample_connector_usage_dropbox.py` | Dropbox | `DROPBOX_CONNECTION_URL` |
 | `sample_connector_usage_docusign.py` | DocuSign | `DOCUSIGN_CONNECTION_URL` |
@@ -87,6 +88,7 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_teams.py` | Microsoft Teams | `TEAMS_CONNECTION_URL` |
 | `sample_connector_usage_todo.py` | Microsoft To Do | `TODO_CONNECTION_URL` |
 | `sample_connector_usage_universalprint.py` | Universal Print | `UNIVERSALPRINT_CONNECTION_URL` |
+| `sample_connector_usage_visualstudioteamservices.py` | Azure DevOps (VSTS) | `VISUALSTUDIOTEAMSERVICES_CONNECTION_URL`, `AZURE_DEVOPS_ORGANIZATION` |
 | `sample_connector_usage_wdatp.py` | Windows Defender ATP | `WDATP_CONNECTION_URL` |
 | `sample_connector_usage_wordonlinebusiness.py` | Word Online (Business) | `WORDONLINEBUSINESS_CONNECTION_URL` |
 | `sample_connector_usage_yammer.py` | Yammer (Viva Engage) | `YAMMER_CONNECTION_URL` |

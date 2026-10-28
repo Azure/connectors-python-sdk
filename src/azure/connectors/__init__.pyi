@@ -30,6 +30,7 @@ from .clicksendsms import ClicksendsmsClient as ClicksendsmsClient
 from .cloudconvert import CloudconvertClient as CloudconvertClient
 from .cloudmersiveconvert import CloudmersiveconvertClient as CloudmersiveconvertClient
 from .commondataservice import CommondataserviceClient as CommondataserviceClient
+from .dataflows import DataflowsClient as DataflowsClient
 from .documentdb import DocumentdbClient as DocumentdbClient
 from .docusign import DocusignClient as DocusignClient
 from .docuware import DocuwareClient as DocuwareClient
@@ -102,6 +103,7 @@ from .trello import TrelloClient as TrelloClient
 from .twitter import TwitterClient as TwitterClient
 from .typeform import TypeformClient as TypeformClient
 from .universalprint import UniversalprintClient as UniversalprintClient
+from .visualstudioteamservices import VisualstudioteamservicesClient as VisualstudioteamservicesClient
 from .waywedo import WaywedoClient as WaywedoClient
 from .wdatp import WdatpClient as WdatpClient
 from .webex import WebexClient as WebexClient

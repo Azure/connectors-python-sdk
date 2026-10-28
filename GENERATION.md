@@ -125,7 +125,7 @@ finally {
 ```
 
 Record the full AzureUX-BPM generator revision and source metadata in the pull
-request. Validate the complete 99-connector root inventory, the lazy client registry, and
+request. Validate the complete 101-connector root inventory, the lazy client registry, and
 package type stubs before committing the reviewed output.
 
 ### Pageable Results

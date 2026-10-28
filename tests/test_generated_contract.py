@@ -47,13 +47,13 @@ def stub_client_names(path: Path) -> set[str]:
 
 
 def test_generated_inventory_has_only_root_connectors() -> None:
-    """Keep all 99 connectors at root without duplicate client namespaces."""
+    """Keep all 101 connectors at root without duplicate client namespaces."""
     connector_names = {
         path.stem
         for path in CONNECTOR_DIRECTORY.glob("*.py")
         if not path.name.startswith("_")
     }
-    assert len(connector_names) == 99
+    assert len(connector_names) == 101
     assert connector_names == set(CLIENT_REGISTRY.values())
     assert not (CONNECTOR_DIRECTORY / "aio").exists()
     assert not (CONNECTOR_DIRECTORY / "sync").exists()

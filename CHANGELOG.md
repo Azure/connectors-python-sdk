@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Azure DevOps (VSTS) and Power Query Dataflows clients** — adds async operations, trigger metadata, lazy package exports, unit tests, and samples.
 - **Mapping-compatible model inputs** — generated request bodies and nested model fields now accept either generated dataclasses or arbitrary `Mapping` implementations.
 - **Azure Core long-running operations** — generated Kusto and Plumsail operations with an HTTP 202 `Location` polling contract now use awaited `begin_*` methods returning `AsyncLROPoller`. Polling honors `Retry-After` and forwards operation request controls.
 - **Generated API documentation site** — adds a MkDocs Material reference for the core SDK and every shipped connector module, strict source-to-site coverage validation, and a GitHub Pages deployment workflow for `main`.
