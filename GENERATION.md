@@ -86,6 +86,30 @@ dotnet LogicAppsCompiler.dll "<path-to-sdk>/src/azure/connectors" --pythonDirect
 The CLI accepts one positional output directory. Use `--pythonDirectClient`
 for Python generation. Do not generate an additional synchronous or aio catalog.
 
+### Explicit Scalar Property Maps
+
+A property map gets a constrained value type only when the source schema
+explicitly declares scalar alternatives in `additionalProperties`, for example
+`{"type": ["string", "number", "boolean"]}` or a supported `anyOf`/`oneOf`
+union. Such a field is emitted as `Dict[str, str | int | float | bool]`:
+JSON `number` includes integers, and values retain their JSON types on the wire.
+Generated dataclasses reject nested objects, arrays, and undeclared null map
+entries at construction. The SDK serializer checks those fields again before
+sending them, including after mutation. It preserves a `None` entry only when
+`null` is an explicit value alternative. A field being optional (`Optional[...]`)
+means the **whole map** may be omitted; it does not make its entries nullable.
+
+Unconstrained maps, including `additionalProperties: {}`, remain open; maps
+with structured value schemas remain object-valued. The generator does not
+reinterpret an empty schema as a scalar union. See the authored schema and
+pinned generated module in `tests/fixtures/` for executable model and
+serialization tests. No current live connector definition used in this refresh
+declares a scalar-only property map, so existing connector clients were not
+rewritten for this feature. The merged async runtime supports the fixture's generated operation. Tests cover
+its success/error request path, scalar wire serialization, and mutation rejection
+before dispatch, using mocked network responses. This is not live-backend
+validation of the synthetic endpoint.
+
 ### Generate C# DirectClient SDK
 
 For the .NET SDK, use `--directClient` without `--language` (defaults to C#) or explicitly specify `--language=csharp`:

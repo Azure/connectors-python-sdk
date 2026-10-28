@@ -4,6 +4,8 @@ from collections import UserDict
 from dataclasses import dataclass, field
 from types import MappingProxyType
 
+import pytest
+
 from azure.connectors.sdk.serialization import to_wire
 
 
@@ -23,6 +25,24 @@ class Node:
     leaf: Leaf = None
     leaves: list = None
     additional_properties: dict = None
+
+
+@dataclass
+class ScalarMaps:
+    """Model with explicit scalar-only map contracts and distinct wire names."""
+
+    properties: dict = field(metadata={
+        "wire_name": "Properties",
+        "scalar_map_types": (str, int, float, bool),
+    })
+    integer_values: dict = field(default=None, metadata={
+        "scalar_map_types": (int,),
+    })
+    nullable_values: dict = field(default=None, metadata={
+        "scalar_map_types": (str, type(None)),
+        "scalar_map_nullable": True,
+    })
+    open_values: dict = None
 
 
 class TestToWire:
@@ -89,6 +109,48 @@ class TestToWire:
         result = to_wire({"a": Leaf(leaf_value="x"), "b": None, "c": 1})
 
         assert result == {"a": {"leafValue": "x"}, "c": 1}
+
+    def test_explicit_scalar_map_retains_types_and_nullable_values(self):
+        """Preserve string, numeric, Boolean, and declared null wire values."""
+        model = ScalarMaps(
+            properties={"eventType": "sample", "attempt": 1,
+                        "ratio": 1.5, "enabled": True},
+            integer_values={"retry": 2},
+            nullable_values={"missing": None, "present": "value"},
+        )
+        assert to_wire(model) == {
+            "Properties": {"eventType": "sample", "attempt": 1,
+                           "ratio": 1.5, "enabled": True},
+            "integer_values": {"retry": 2},
+            "nullable_values": {"missing": None, "present": "value"},
+        }
+
+    @pytest.mark.parametrize("bad", [
+        {"nested": {"value": 1}},
+        {"nested": [1]},
+        {"nested": None},
+    ])
+    def test_explicit_non_nullable_map_rejects_nested_or_null(self, bad):
+        """Reject unsupported objects, arrays, and implicit nulls."""
+        with pytest.raises(TypeError, match="Properties"):
+            to_wire(ScalarMaps(properties=bad))
+
+    def test_integer_only_map_rejects_bool_even_though_bool_is_an_int(self):
+        """Preserve distinct JSON Boolean and integer domains."""
+        with pytest.raises(TypeError, match="integer_values"):
+            to_wire(ScalarMaps(properties={}, integer_values={"retry": True}))
+
+    def test_explicit_map_validation_catches_mutated_models(self):
+        """Validate at serialization even if a model changed since creation."""
+        model = ScalarMaps(properties={"valid": 1})
+        model.properties["invalid"] = [1]
+        with pytest.raises(TypeError, match="Properties"):
+            to_wire(model)
+
+    def test_unconstrained_dynamic_map_stays_open(self):
+        """Never impose scalar-only checks on unrestricted maps."""
+        model = ScalarMaps(properties={}, open_values={"nested": {"key": [1]}})
+        assert to_wire(model)["open_values"] == {"nested": {"key": [1]}}
 
     def test_mapping_values_are_recursively_converted(self):
         """Test arbitrary mappings recurse and omit None values."""

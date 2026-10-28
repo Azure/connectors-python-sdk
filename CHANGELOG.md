@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Explicit scalar-union property maps** — generated models preserve declared string, number (including integer), and Boolean map values without inferring scalar support from empty schemas. A pinned synthetic generated client tests nullable and non-nullable values; no shipped connector client changed because the fresh live definitions contain no explicit scalar-only map union. ([#104](https://github.com/Azure/connectors-python-sdk/issues/104))
 - **Azure DevOps (VSTS) and Power Query Dataflows clients** — adds async operations, trigger metadata, lazy package exports, unit tests, and samples.
 - **Mapping-compatible model inputs** — generated request bodies and nested model fields now accept either generated dataclasses or arbitrary `Mapping` implementations.
 - **Azure Core long-running operations** — generated Kusto and Plumsail operations with an HTTP 202 `Location` polling contract now use awaited `begin_*` methods returning `AsyncLROPoller`. Polling honors `Retry-After` and forwards operation request controls.
@@ -58,6 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Scalar-map wire validation** — generated model fields reject nested objects, arrays, and undeclared nulls at construction and again during SDK serialization; declared null map entries stay in the JSON payload. Raw mapping inputs remain unrestricted. The pinned fixture also exercises generated-method dispatch against the merged async runtime with mocked network responses, not a live endpoint.
 - **Jira continuation tokens**: Treat next-page tokens as opaque values rather than continuation URLs.
 - **Initial polling URLs**: Resolve relative initial `Location` headers against the initiating request URL.
 - **Sample pager consumption**: Iterate async pagers directly instead of treating them as response envelopes or awaiting pager construction.

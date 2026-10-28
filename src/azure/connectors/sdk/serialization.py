@@ -18,6 +18,8 @@ from dataclasses import fields, is_dataclass
 from typing import Any
 
 WIRE_NAME_METADATA_KEY = "wire_name"
+SCALAR_MAP_TYPES_METADATA_KEY = "scalar_map_types"
+SCALAR_MAP_NULLABLE_METADATA_KEY = "scalar_map_nullable"
 ADDITIONAL_PROPERTIES_FIELD = "additional_properties"
 
 
@@ -88,6 +90,22 @@ def _dataclass_to_wire(instance: Any) -> dict:
         wire_name = model_field.metadata.get(
             WIRE_NAME_METADATA_KEY, model_field.name
         )
-        result[wire_name] = to_wire(attribute_value)
+        scalar_types = model_field.metadata.get(SCALAR_MAP_TYPES_METADATA_KEY)
+        if scalar_types is not None:
+            if not isinstance(attribute_value, dict):
+                raise TypeError(f"{wire_name} must be a scalar property map")
+            for key, item in attribute_value.items():
+                if not isinstance(item, scalar_types) or (
+                    isinstance(item, bool) and bool not in scalar_types
+                ):
+                    raise TypeError(
+                        f"{wire_name}[{key!r}] must be a declared scalar value"
+                    )
+            if model_field.metadata.get(SCALAR_MAP_NULLABLE_METADATA_KEY, False):
+                result[wire_name] = dict(attribute_value)
+            else:
+                result[wire_name] = to_wire(attribute_value)
+        else:
+            result[wire_name] = to_wire(attribute_value)
 
     return result
