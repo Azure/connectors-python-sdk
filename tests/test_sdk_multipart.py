@@ -11,6 +11,8 @@ from email.parser import BytesParser
 from urllib.parse import parse_qs, urlsplit
 
 import pytest
+from aiohttp import web
+from aiohttp.test_utils import TestServer
 from azure.core.credentials import AzureKeyCredential
 
 from azure.connectors.cloudmersiveconvert import CloudmersiveconvertClient
@@ -66,6 +68,49 @@ async def test_empty_multipart_has_a_complete_boundary() -> None:
 
     assert body == f"--{message.get_boundary()}--\r\n".encode("ascii")
     assert list(message.iter_parts()) == []
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "file_name",
+    [
+        "invoice.docx",
+        "my invoice.docx",
+        "r\u00e9sum\u00e9-\u6587\u4ef6.docx",
+        "invoice%20paid%.docx",
+        'my "invoice".docx',
+    ],
+)
+async def test_generated_docuware_upload_round_trips_filename(file_name: str) -> None:
+    """Preserve filenames through a generated client and a real local receiver."""
+    content = b"\x00\x7f\x80\xff\r\nnot-json"
+    received_files: list[tuple[str | None, str | None, bytes]] = []
+
+    async def receive_upload(request: web.Request) -> web.Response:
+        reader = await request.multipart()
+        async for part in reader:
+            part_content = await part.read()
+            if part.name == "file":
+                received_files.append(
+                    (part.filename, part.headers.get("Content-Type"), bytes(part_content))
+                )
+        return web.json_response({"DocumentId": 123})
+
+    application = web.Application()
+    application.router.add_post("/FileCabinets/cabinet/Documents", receive_upload)
+    async with TestServer(application) as server:
+        async with DocuwareClient(
+            str(server.make_url("/")),
+            AzureKeyCredential("test-key"),
+        ) as client:
+            result = await client.store_to_file_cabinet(
+                "cabinet",
+                "dialog",
+                file=MultipartFile(content, file_name, "application/custom"),
+            )
+
+    assert result == {"DocumentId": 123}
+    assert received_files == [(file_name, "application/custom", content)]
 
 
 @pytest.mark.parametrize(

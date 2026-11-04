@@ -102,6 +102,7 @@ async def encode_multipart_form_data(
                 )
                 part.set_content_disposition(
                     "form-data",
+                    quote_fields=False,
                     name=name,
                     filename=value.file_name,
                 )

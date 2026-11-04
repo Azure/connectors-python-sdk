@@ -60,6 +60,9 @@ boundary-bearing content type with the buffered body through Azure Core.
 Files retain their original bytes, filename, and media type. Scalar fields,
 empty strings, and repeated names remain separate MIME parts. Arrays use their
 declared `csv`, `ssv`, `tsv`, `pipes`, or `multi` collection format.
+File disposition parameters use quoted-string escaping rather than percent
+encoding, preserving spaces, Unicode, percent signs, and embedded quotes without
+requiring the receiver to URL-decode filenames.
 
 Bodyless operations remain callable when only their `consumes` metadata says
 multipart. File arrays, unknown collection formats, mixed body/form-data

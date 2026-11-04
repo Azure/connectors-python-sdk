@@ -12,7 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Multipart form-data operations** - adds file uploads for Cloudmersive Convert,
   DocuWare, and Zoho Sign, plus DocuWare's bodyless file delete. `MultipartFile`
   preserves filenames and media types; plain bytes use default file metadata.
-  Existing operation signatures remain unchanged.
+  Existing operation signatures remain unchanged. Uploaded filenames retain
+  spaces, Unicode, percent signs, and embedded quotes without receiver URL decoding.
 - **Explicit scalar-union property maps** — generated models preserve declared string, number (including integer), and Boolean map values without inferring scalar support from empty schemas. A pinned synthetic generated client tests nullable and non-nullable values; no shipped connector client changed because the fresh live definitions contain no explicit scalar-only map union. ([#104](https://github.com/Azure/connectors-python-sdk/issues/104))
 - **Azure DevOps (VSTS) and Power Query Dataflows clients** — adds async operations, trigger metadata, lazy package exports, unit tests, and samples.
 - **Mapping-compatible model inputs** — generated request bodies and nested model fields now accept either generated dataclasses or arbitrary `Mapping` implementations.
