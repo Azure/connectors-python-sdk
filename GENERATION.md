@@ -110,6 +110,34 @@ its success/error request path, scalar wire serialization, and mutation rejectio
 before dispatch, using mocked network responses. This is not live-backend
 validation of the synthetic endpoint.
 
+### Multipart form-data refresh
+
+The 2026-11-04 refresh uses generator commit
+`efcfdbd0455f6067eea9be802ee7af27683fddec`, active and unmerged when generated.
+It refreshes `cloudmersiveconvert`, `docuware`, and `zohosign`, adding 81
+operations without removing or changing any existing operation signature.
+The catalog still contains 101 root clients; client exports remain lazy.
+
+Each live generation run used subscription
+`1a839f1f-10b2-4613-95ad-0800a22abbf2`, region `westus`, ARM API version
+`2018-07-01-preview`, and a new empty temporary `ARMCACHE_PATH`. No stored
+responses or fixtures supplied these clients. Separate Python and C# live
+downloads returned identical Swagger bytes for the shared connectors.
+
+| Connector API ID | Live Swagger SHA-256 |
+|---|---|
+| `cloudmersiveconvert` | `860768B6CEFF8CA5FD5F41B118B06D0CFE55076E15636295B3894E6C78CF067C` |
+| `docuware` | `7EBC04B5A47C35F5DA9A2AFDDB9DE3BB022E169744F5362F92449939F07DF143` |
+| `zohosign` | `CE62C4D774B291D1CCBF5A1F258613E938F894400C77CEC02EEFCA0BBD9C8239` |
+
+Generated file arguments accept bytes or `MultipartFile` from
+`azure.connectors.sdk`. The runtime encodes MIME parts and the matching content
+type before using the existing binary request path. Buffering preserves replay
+behavior without taking ownership of caller credentials or streams.
+See [multipart examples](README.md#multipart-file-uploads).
+The paired generator PR must merge before the SDK PR merges; its exact source
+and prerequisite status are recorded in the SDK PR.
+
 ### Generate C# DirectClient SDK
 
 For the .NET SDK, use `--directClient` without `--language` (defaults to C#) or explicitly specify `--language=csharp`:
@@ -612,6 +640,7 @@ Track known generator issues here to prevent silent recurrence across releases.
 
 | Defect | BPM Issue | Affected Connectors | Status | Notes |
 |--------|-----------|---------------------|--------|-------|
+| Multipart form-data operations excluded | Fixed in generator | `cloudmersiveconvert`, `docuware`, `zohosign` | Fixed | Emits typed file and scalar fields, preserves internal defaults and collection formats, and sends native MIME bytes through the existing pipeline. |
 | Teams template variable causes NameError at import | [BPM #TBD](https://dev.azure.com/msazure/One/_workitems/edit/TBD) | `teams` | Workaround (skip import test) | `DynamicValueLookup` references undefined variable; test skipped with issue link |
 | Void operations not checking response status | Fixed in generator | Pre-2024 connectors | Fixed | Regenerate affected connectors: `azurequeues`, `azuretables`, `commondataservice`, `eventhubs`, `excelonlinebusiness`, `office365`, `onedrive`, `outlook`, `servicebus`, `sharepointonline`, `smtp`, `azuread` |
 | api_version parameters missing default values | Fixed in generator | `azuredigitaltwins`, `azurevm`, others | Fixed | Generator now uses swagger default value for api_version/api-version parameters |

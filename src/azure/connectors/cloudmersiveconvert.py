@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Dict, List, Any, Mapping
+from urllib.parse import quote
 import json
 
 from azure.core.credentials import AzureKeyCredential
@@ -17,6 +18,8 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    MultipartFile,
+    encode_multipart_form_data,
 )
 
 __all__ = [
@@ -36,6 +39,7 @@ __all__ = [
     "ClearXlsxCellRequest",
     "ClearXlsxCellResponse",
     "ConvertDataJsonToXmlInput",
+    "ConvertDataXmlToJsonResponse",
     "ConvertWebHtmlToPngResponse",
     "ConvertedPngPage",
     "CreateBlankDocxRequest",
@@ -145,6 +149,7 @@ __all__ = [
     "InsertDocxTablesResponse",
     "InsertXlsxWorksheetRequest",
     "InsertXlsxWorksheetResponse",
+    "MergeDocumentTxtResponse",
     "MultipageImageFormatConversionResult",
     "PageConversionResult",
     "PdfAnnotation",
@@ -218,6 +223,112 @@ __all__ = [
 
 
 # Type Definitions
+
+@dataclass
+class AutodetectGetInfoResult:
+    """
+    Response for Get document type information
+    """
+
+    alternate_file_type_candidates: Optional[
+        List[AlternateFileFormatCandidate | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "AlternateFileTypeCandidates"},
+    )
+    """Alternate file type options and their probability"""
+    author: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Author"},
+    )
+    """
+    User name of the creator/author of the document, if available, null if not
+    available
+    """
+    date_modified: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "DateModified"},
+    )
+    """
+    The timestamp that the document was last modified, if available, null if
+    not available
+    """
+    detected_file_extension: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "DetectedFileExtension"},
+    )
+    """Detected file extension of the file format, with a leading period"""
+    detected_mime_type: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "DetectedMimeType"},
+    )
+    """MIME type of this file extension"""
+    page_count: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "PageCount"},
+    )
+    """
+    Number of pages in a page-based document; for presentations, this is the
+    number of slides and for a spreadsheet this is the number of worksheets.
+    Contains 0 when the page count cannot be determined, or if the concept of
+    page count does not apply (e.g. for an image)
+    """
+    successful: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Successful"},
+    )
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class AutodetectToPngResult:
+    """
+    Response for Convert Document to PNG array
+    """
+
+    png_result_pages: Optional[List[ConvertedPngPage | Mapping[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "PngResultPages"},
+    )
+    """Array of converted pages"""
+    successful: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Successful"},
+    )
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class TextConversionResult:
+    """
+    Response for Convert Document to Text (txt)
+    """
+
+    successful: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Successful"},
+    )
+    """True if the operation was successful, false otherwise"""
+    text_result: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "TextResult"},
+    )
+    """
+    Plain Text (TXT) format conversion result of the input document. The text
+    result is returned as a string.
+    """
+
 
 @dataclass
 class CreateBlankDocxResponse:
@@ -1051,6 +1162,163 @@ class SetXlsxCellResponse:
 
 
 @dataclass
+class PdfToPngResult:
+    """
+    Response for Convert HTML document file to PNG image array
+    """
+
+    png_result_pages: Optional[List[ConvertedPngPage | Mapping[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "PngResultPages"},
+    )
+    """Array of converted pages"""
+    successful: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Successful"},
+    )
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class MultipageImageFormatConversionResult:
+    """
+    Response for Multi-page image format conversion
+    """
+
+    page_count: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "PageCount"},
+    )
+    """The number of pages in the converted output"""
+    pages: Optional[List[PageConversionResult | Mapping[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Pages"},
+    )
+    """Converted page results"""
+    successful: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Successful"},
+    )
+    """True if successful, false otherwise"""
+
+
+@dataclass
+class GetImageInfoResult:
+    """
+    Response for Get information about an image
+    """
+
+    bit_depth: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "BitDepth"},
+    )
+    """Bit depth of the image"""
+    color_count: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ColorCount"},
+    )
+    """Unique colors in the image"""
+    color_space: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ColorSpace"},
+    )
+    """Color space of the image"""
+    color_type: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ColorType"},
+    )
+    """Color type of the image"""
+    comment: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Comment"},
+    )
+    """Comment string in the image"""
+    compression_level: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "CompressionLevel"},
+    )
+    """
+    Compression level value from 0 (lowest quality) to 100 (highest quality)
+    """
+    d_p_i: Optional[float] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "DPI"},
+    )
+    """DPI (pixels per unit, e.g. pixels per inch) of the image"""
+    d_p_i_unit: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "DPIUnit"},
+    )
+    """Units of the DPI measurement; can be either in Inches or Centimeters"""
+    exif_profile_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ExifProfileName"},
+    )
+    """Name of the EXIF profile used"""
+    exif_values: Optional[List[ExifValue | Mapping[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ExifValues"},
+    )
+    """EXIF tags and values embedded in the image"""
+    has_transparency: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "HasTransparency"},
+    )
+    """True if the image contains transparency, otherwise false"""
+    height: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Height"},
+    )
+    """Height in pixels of the image"""
+    image_format: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ImageFormat"},
+    )
+    """Image format"""
+    image_hash_signature: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ImageHashSignature"},
+    )
+    """SHA256 hash signature of the image"""
+    mime_type: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "MimeType"},
+    )
+    """MIME type of the image format"""
+    successful: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Successful"},
+    )
+    width: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Width"},
+    )
+    """Width in pixels of the image"""
+
+
+@dataclass
 class ConvertDataJsonToXmlInput:
     """
     Convert JSON to XML conversion
@@ -1061,6 +1329,152 @@ class ConvertDataJsonToXmlInput:
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
     """
+
+
+@dataclass
+class MergeDocumentTxtResponse:
+    """
+    Response for Merge Two Text (TXT) Files Together
+    """
+
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
+
+
+@dataclass
+class SplitDocxDocumentResult:
+    """
+    Response for Split a single Word Document DOCX into Separate Documents by Page
+    """
+
+    result_documents: Optional[
+        List[SplitDocumentResult | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ResultDocuments"},
+    )
+    successful: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Successful"},
+    )
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class SplitPdfResult:
+    """
+    Response for Split a PDF file into separate PDF files, one per page
+    """
+
+    documents: Optional[List[PdfDocument | Mapping[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Documents"},
+    )
+    """PDF documents as output"""
+    successful: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Successful"},
+    )
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class SplitPptxPresentationResult:
+    """
+    Response for Split a single PowerPoint Presentation PPTX into Separate Slides
+    """
+
+    result_presentations: Optional[
+        List[PresentationResult | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ResultPresentations"},
+    )
+    successful: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Successful"},
+    )
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class SplitTextDocumentByLinesResult:
+    """
+    Response for Split a single Text file (txt) into lines
+    """
+
+    line_count: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "LineCount"},
+    )
+    """The count of lines in the text file"""
+    result_lines: Optional[List[TextDocumentLine | Mapping[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ResultLines"},
+    )
+    successful: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Successful"},
+    )
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class SplitTextDocumentByStringResult:
+    """
+    Response for Split a single Text file (txt) by a string delimiter
+    """
+
+    element_count: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ElementCount"},
+    )
+    """The count of elements in the text file"""
+    result_elements: Optional[
+        List[TextDocumentElement | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ResultElements"},
+    )
+    successful: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Successful"},
+    )
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class SplitXlsxWorksheetResult:
+    """
+    Response for Split a single Excel XLSX into Separate Worksheets
+    """
+
+    result_worksheets: Optional[List[WorksheetResult | Mapping[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ResultWorksheets"},
+    )
+    successful: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Successful"},
+    )
+    """True if the operation was successful, false otherwise"""
 
 
 @dataclass
@@ -1081,6 +1495,79 @@ class HtmlTemplateApplicationResponse:
         metadata={"wire_name": "Successful"},
     )
     """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class AutodetectDocumentValidationResult:
+    """
+    Response for Autodetect content type and validate
+    """
+
+    document_is_valid: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "DocumentIsValid"},
+    )
+    """True if the document is valid and has no errors, false otherwise"""
+    error_count: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ErrorCount"},
+    )
+    """Number of validation errors found in the document"""
+    errors_and_warnings: Optional[
+        List[DocumentValidationError | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ErrorsAndWarnings"},
+    )
+    """Details of errors and warnings found"""
+    file_format_extension: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "FileFormatExtension"},
+    )
+    warning_count: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "WarningCount"},
+    )
+    """Number of validation warnings found in the document"""
+
+
+@dataclass
+class DocumentValidationResult:
+    """
+    Response for Validate a Word document (DOCX)
+    """
+
+    document_is_valid: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "DocumentIsValid"},
+    )
+    """True if the document is valid and has no errors, false otherwise"""
+    error_count: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ErrorCount"},
+    )
+    """Number of validation errors found in the document"""
+    errors_and_warnings: Optional[
+        List[DocumentValidationError | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ErrorsAndWarnings"},
+    )
+    """Details of errors and warnings found"""
+    warning_count: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "WarningCount"},
+    )
+    """Number of validation warnings found in the document"""
 
 
 @dataclass
@@ -1117,6 +1604,26 @@ class HtmlToTextResponse:
 
 
 @dataclass
+class HtmlMdResult:
+    """
+    Response for Convert Markdown to HTML
+    """
+
+    html: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Html"},
+    )
+    """Resulting HTML from the conversion"""
+    successful: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Successful"},
+    )
+    """True if operation was successful, false otherwise"""
+
+
+@dataclass
 class UrlToTextResponse:
     """
     Response for Convert website URL page to text (txt)
@@ -1134,6 +1641,261 @@ class UrlToTextResponse:
         metadata={"wire_name": "TextContentResult"},
     )
     """Text content result from the URL website input"""
+
+
+@dataclass
+class XmlAddAttributeWithXPathResult:
+    """
+    Response for Adds an attribute to all XML nodes matching XPath expression
+    """
+
+    nodes_edited_count: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "NodesEditedCount"},
+    )
+    """Count of the matching results"""
+    resulting_xml_document: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ResultingXmlDocument"},
+    )
+    """Resulting, modified XML document"""
+    successful: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Successful"},
+    )
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class XmlAddChildWithXPathResult:
+    """
+    Response for Adds an XML node as a child to XML nodes matching XPath expression
+    """
+
+    nodes_edited_count: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "NodesEditedCount"},
+    )
+    """Count of the matching results"""
+    resulting_xml_document: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ResultingXmlDocument"},
+    )
+    """Resulting, modified XML document"""
+    successful: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Successful"},
+    )
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class XmlRemoveWithXPathResult:
+    """
+    Response for Remove, delete XML nodes and items matching XPath expression
+    """
+
+    nodes_removed_count: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "NodesRemovedCount"},
+    )
+    """Count of the matching results"""
+    resulting_xml_document: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ResultingXmlDocument"},
+    )
+    """
+    Resulting, modified XML document with matching nodes removed as a string
+    """
+    successful: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Successful"},
+    )
+    """True if the operation was successful, false otherwise"""
+    xml_nodes_removed: Optional[List[str]] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "XmlNodesRemoved"},
+    )
+    """Matching selected XML nodes as strings"""
+
+
+@dataclass
+class XmlRemoveAllChildrenWithXPathResult:
+    """
+    Response for Removes, deletes all children of nodes matching XPath expression, but
+    """
+
+    nodes_edited_count: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "NodesEditedCount"},
+    )
+    """Count of the matching results"""
+    resulting_xml_document: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ResultingXmlDocument"},
+    )
+    """Resulting, modified XML document"""
+    successful: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Successful"},
+    )
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class XmlReplaceWithXPathResult:
+    """
+    Response for Replaces XML nodes matching XPath expression with new node
+    """
+
+    nodes_edited_count: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "NodesEditedCount"},
+    )
+    """Count of the matching results"""
+    resulting_xml_document: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ResultingXmlDocument"},
+    )
+    """Resulting, modified XML document"""
+    successful: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Successful"},
+    )
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class XmlSetValueWithXPathResult:
+    """
+    Response for Sets the value contents of XML nodes matching XPath expression
+    """
+
+    nodes_edited_count: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "NodesEditedCount"},
+    )
+    """Count of the matching results"""
+    resulting_xml_document: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ResultingXmlDocument"},
+    )
+    """Resulting, modified XML document"""
+    successful: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Successful"},
+    )
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class XmlQueryWithXQueryResult:
+    """
+    Response for Query an XML file using XQuery query, get results
+    """
+
+    error_message: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ErrorMessage"},
+    )
+    """If an error occurs, additional details on the error"""
+    resulting_xml: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ResultingXml"},
+    )
+    """Resulting XML result output"""
+    successful: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Successful"},
+    )
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class XmlQueryWithXQueryMultiResult:
+    """
+    Response for Query multiple XML files using XQuery query, get results
+    """
+
+    error_message: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ErrorMessage"},
+    )
+    """If an error occurs, additional details on the error"""
+    resulting_xml: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ResultingXml"},
+    )
+    """Resulting XML result output"""
+    successful: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Successful"},
+    )
+    """True if the operation was successful, false otherwise"""
+
+
+@dataclass
+class XmlFilterWithXPathResult:
+    """
+    Response for Filter, select XML nodes using XPath expression, get results
+    """
+
+    result_count: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ResultCount"},
+    )
+    """Count of the matching results"""
+    successful: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Successful"},
+    )
+    """True if the operation was successful, false otherwise"""
+    xml_nodes: Optional[List[str]] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "XmlNodes"},
+    )
+    """Matching selected XML nodes as strings"""
+
+
+@dataclass
+class ConvertDataXmlToJsonResponse:
+    """
+    Response for Convert XML to JSON conversion
+    """
+
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
 
 
 @dataclass
@@ -1183,128 +1945,6 @@ class AlternateFileFormatCandidate:
     Probability that this extension is the right one; possible values are
     between 0.0 (lowest confidence) and 1.0 (highest confidence)
     """
-
-
-@dataclass
-class AutodetectDocumentValidationResult:
-    """
-    Definition: AutodetectDocumentValidationResult
-    """
-
-    document_is_valid: Optional[bool] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "DocumentIsValid"},
-    )
-    """True if the document is valid and has no errors, false otherwise"""
-    error_count: Optional[int] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "ErrorCount"},
-    )
-    """Number of validation errors found in the document"""
-    errors_and_warnings: Optional[
-        List[DocumentValidationError | Mapping[str, Any]]
-    ] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "ErrorsAndWarnings"},
-    )
-    """Details of errors and warnings found"""
-    file_format_extension: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "FileFormatExtension"},
-    )
-    warning_count: Optional[int] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "WarningCount"},
-    )
-    """Number of validation warnings found in the document"""
-
-
-@dataclass
-class AutodetectGetInfoResult:
-    """
-    Definition: AutodetectGetInfoResult
-    """
-
-    alternate_file_type_candidates: Optional[
-        List[AlternateFileFormatCandidate | Mapping[str, Any]]
-    ] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "AlternateFileTypeCandidates"},
-    )
-    """Alternate file type options and their probability"""
-    author: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Author"},
-    )
-    """
-    User name of the creator/author of the document, if available, null if not
-    available
-    """
-    date_modified: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "DateModified"},
-    )
-    """
-    The timestamp that the document was last modified, if available, null if
-    not available
-    """
-    detected_file_extension: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "DetectedFileExtension"},
-    )
-    """Detected file extension of the file format, with a leading period"""
-    detected_mime_type: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "DetectedMimeType"},
-    )
-    """MIME type of this file extension"""
-    page_count: Optional[int] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "PageCount"},
-    )
-    """
-    Number of pages in a page-based document; for presentations, this is the
-    number of slides and for a spreadsheet this is the number of worksheets.
-    Contains 0 when the page count cannot be determined, or if the concept of
-    page count does not apply (e.g. for an image)
-    """
-    successful: Optional[bool] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Successful"},
-    )
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class AutodetectToPngResult:
-    """
-    Definition: AutodetectToPngResult
-    """
-
-    png_result_pages: Optional[List[ConvertedPngPage | Mapping[str, Any]]] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "PngResultPages"},
-    )
-    """Array of converted pages"""
-    successful: Optional[bool] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Successful"},
-    )
-    """True if the operation was successful, false otherwise"""
 
 
 @dataclass
@@ -1733,40 +2373,6 @@ class DocumentValidationError:
         metadata={"wire_name": "Uri"},
     )
     """URI of the part in question"""
-
-
-@dataclass
-class DocumentValidationResult:
-    """
-    Definition: DocumentValidationResult
-    """
-
-    document_is_valid: Optional[bool] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "DocumentIsValid"},
-    )
-    """True if the document is valid and has no errors, false otherwise"""
-    error_count: Optional[int] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "ErrorCount"},
-    )
-    """Number of validation errors found in the document"""
-    errors_and_warnings: Optional[
-        List[DocumentValidationError | Mapping[str, Any]]
-    ] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "ErrorsAndWarnings"},
-    )
-    """Details of errors and warnings found"""
-    warning_count: Optional[int] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "WarningCount"},
-    )
-    """Number of validation warnings found in the document"""
 
 
 @dataclass
@@ -3535,117 +4141,6 @@ class GetDocxTablesRequest:
 
 
 @dataclass
-class GetImageInfoResult:
-    """
-    Definition: GetImageInfoResult
-    """
-
-    bit_depth: Optional[int] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "BitDepth"},
-    )
-    """Bit depth of the image"""
-    color_count: Optional[int] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "ColorCount"},
-    )
-    """Unique colors in the image"""
-    color_space: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "ColorSpace"},
-    )
-    """Color space of the image"""
-    color_type: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "ColorType"},
-    )
-    """Color type of the image"""
-    comment: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Comment"},
-    )
-    """Comment string in the image"""
-    compression_level: Optional[int] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "CompressionLevel"},
-    )
-    """
-    Compression level value from 0 (lowest quality) to 100 (highest quality)
-    """
-    d_p_i: Optional[float] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "DPI"},
-    )
-    """DPI (pixels per unit, e.g. pixels per inch) of the image"""
-    d_p_i_unit: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "DPIUnit"},
-    )
-    """Units of the DPI measurement; can be either in Inches or Centimeters"""
-    exif_profile_name: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "ExifProfileName"},
-    )
-    """Name of the EXIF profile used"""
-    exif_values: Optional[List[ExifValue | Mapping[str, Any]]] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "ExifValues"},
-    )
-    """EXIF tags and values embedded in the image"""
-    has_transparency: Optional[bool] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "HasTransparency"},
-    )
-    """True if the image contains transparency, otherwise false"""
-    height: Optional[int] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Height"},
-    )
-    """Height in pixels of the image"""
-    image_format: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "ImageFormat"},
-    )
-    """Image format"""
-    image_hash_signature: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "ImageHashSignature"},
-    )
-    """SHA256 hash signature of the image"""
-    mime_type: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "MimeType"},
-    )
-    """MIME type of the image format"""
-    successful: Optional[bool] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Successful"},
-    )
-    width: Optional[int] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Width"},
-    )
-    """Width in pixels of the image"""
-
-
-@dataclass
 class GetPdfAnnotationsResult:
     """
     Definition: GetPdfAnnotationsResult
@@ -3904,26 +4399,6 @@ class GetXlsxWorksheetsRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-
-
-@dataclass
-class HtmlMdResult:
-    """
-    Definition: HtmlMdResult
-    """
-
-    html: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Html"},
-    )
-    """Resulting HTML from the conversion"""
-    successful: Optional[bool] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Successful"},
-    )
-    """True if operation was successful, false otherwise"""
 
 
 @dataclass
@@ -4268,32 +4743,6 @@ class InsertXlsxWorksheetRequest:
 
 
 @dataclass
-class MultipageImageFormatConversionResult:
-    """
-    Definition: MultipageImageFormatConversionResult
-    """
-
-    page_count: Optional[int] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "PageCount"},
-    )
-    """The number of pages in the converted output"""
-    pages: Optional[List[PageConversionResult | Mapping[str, Any]]] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Pages"},
-    )
-    """Converted page results"""
-    successful: Optional[bool] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Successful"},
-    )
-    """True if successful, false otherwise"""
-
-
-@dataclass
 class PageConversionResult:
     """
     Definition: PageConversionResult
@@ -4591,26 +5040,6 @@ class PdfTextByPageResult:
         metadata={"wire_name": "Pages"},
     )
     """Pages in the PDF"""
-    successful: Optional[bool] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Successful"},
-    )
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class PdfToPngResult:
-    """
-    Definition: PdfToPngResult
-    """
-
-    png_result_pages: Optional[List[ConvertedPngPage | Mapping[str, Any]]] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "PngResultPages"},
-    )
-    """Array of converted pages"""
     successful: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
@@ -5267,162 +5696,6 @@ class SplitDocumentResult:
 
 
 @dataclass
-class SplitDocxDocumentResult:
-    """
-    Definition: SplitDocxDocumentResult
-    """
-
-    result_documents: Optional[
-        List[SplitDocumentResult | Mapping[str, Any]]
-    ] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "ResultDocuments"},
-    )
-    successful: Optional[bool] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Successful"},
-    )
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class SplitPdfResult:
-    """
-    Definition: SplitPdfResult
-    """
-
-    documents: Optional[List[PdfDocument | Mapping[str, Any]]] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Documents"},
-    )
-    """PDF documents as output"""
-    successful: Optional[bool] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Successful"},
-    )
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class SplitPptxPresentationResult:
-    """
-    Definition: SplitPptxPresentationResult
-    """
-
-    result_presentations: Optional[
-        List[PresentationResult | Mapping[str, Any]]
-    ] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "ResultPresentations"},
-    )
-    successful: Optional[bool] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Successful"},
-    )
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class SplitTextDocumentByLinesResult:
-    """
-    Definition: SplitTextDocumentByLinesResult
-    """
-
-    line_count: Optional[int] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "LineCount"},
-    )
-    """The count of lines in the text file"""
-    result_lines: Optional[List[TextDocumentLine | Mapping[str, Any]]] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "ResultLines"},
-    )
-    successful: Optional[bool] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Successful"},
-    )
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class SplitTextDocumentByStringResult:
-    """
-    Definition: SplitTextDocumentByStringResult
-    """
-
-    element_count: Optional[int] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "ElementCount"},
-    )
-    """The count of elements in the text file"""
-    result_elements: Optional[
-        List[TextDocumentElement | Mapping[str, Any]]
-    ] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "ResultElements"},
-    )
-    successful: Optional[bool] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Successful"},
-    )
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class SplitXlsxWorksheetResult:
-    """
-    Definition: SplitXlsxWorksheetResult
-    """
-
-    result_worksheets: Optional[List[WorksheetResult | Mapping[str, Any]]] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "ResultWorksheets"},
-    )
-    successful: Optional[bool] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Successful"},
-    )
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class TextConversionResult:
-    """
-    Definition: TextConversionResult
-    """
-
-    successful: Optional[bool] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Successful"},
-    )
-    """True if the operation was successful, false otherwise"""
-    text_result: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "TextResult"},
-    )
-    """
-    Plain Text (TXT) format conversion result of the input document. The text
-    result is returned as a string.
-    """
-
-
-@dataclass
 class TextDocumentElement:
     """
     Definition: TextDocumentElement
@@ -5788,248 +6061,6 @@ class XlsxWorksheet:
 
 
 @dataclass
-class XmlAddAttributeWithXPathResult:
-    """
-    Definition: XmlAddAttributeWithXPathResult
-    """
-
-    nodes_edited_count: Optional[int] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "NodesEditedCount"},
-    )
-    """Count of the matching results"""
-    resulting_xml_document: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "ResultingXmlDocument"},
-    )
-    """Resulting, modified XML document"""
-    successful: Optional[bool] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Successful"},
-    )
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class XmlAddChildWithXPathResult:
-    """
-    Definition: XmlAddChildWithXPathResult
-    """
-
-    nodes_edited_count: Optional[int] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "NodesEditedCount"},
-    )
-    """Count of the matching results"""
-    resulting_xml_document: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "ResultingXmlDocument"},
-    )
-    """Resulting, modified XML document"""
-    successful: Optional[bool] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Successful"},
-    )
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class XmlFilterWithXPathResult:
-    """
-    Definition: XmlFilterWithXPathResult
-    """
-
-    result_count: Optional[int] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "ResultCount"},
-    )
-    """Count of the matching results"""
-    successful: Optional[bool] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Successful"},
-    )
-    """True if the operation was successful, false otherwise"""
-    xml_nodes: Optional[List[str]] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "XmlNodes"},
-    )
-    """Matching selected XML nodes as strings"""
-
-
-@dataclass
-class XmlQueryWithXQueryMultiResult:
-    """
-    Definition: XmlQueryWithXQueryMultiResult
-    """
-
-    error_message: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "ErrorMessage"},
-    )
-    """If an error occurs, additional details on the error"""
-    resulting_xml: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "ResultingXml"},
-    )
-    """Resulting XML result output"""
-    successful: Optional[bool] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Successful"},
-    )
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class XmlQueryWithXQueryResult:
-    """
-    Definition: XmlQueryWithXQueryResult
-    """
-
-    error_message: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "ErrorMessage"},
-    )
-    """If an error occurs, additional details on the error"""
-    resulting_xml: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "ResultingXml"},
-    )
-    """Resulting XML result output"""
-    successful: Optional[bool] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Successful"},
-    )
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class XmlRemoveAllChildrenWithXPathResult:
-    """
-    Definition: XmlRemoveAllChildrenWithXPathResult
-    """
-
-    nodes_edited_count: Optional[int] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "NodesEditedCount"},
-    )
-    """Count of the matching results"""
-    resulting_xml_document: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "ResultingXmlDocument"},
-    )
-    """Resulting, modified XML document"""
-    successful: Optional[bool] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Successful"},
-    )
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class XmlRemoveWithXPathResult:
-    """
-    Definition: XmlRemoveWithXPathResult
-    """
-
-    nodes_removed_count: Optional[int] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "NodesRemovedCount"},
-    )
-    """Count of the matching results"""
-    resulting_xml_document: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "ResultingXmlDocument"},
-    )
-    """
-    Resulting, modified XML document with matching nodes removed as a string
-    """
-    successful: Optional[bool] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Successful"},
-    )
-    """True if the operation was successful, false otherwise"""
-    xml_nodes_removed: Optional[List[str]] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "XmlNodesRemoved"},
-    )
-    """Matching selected XML nodes as strings"""
-
-
-@dataclass
-class XmlReplaceWithXPathResult:
-    """
-    Definition: XmlReplaceWithXPathResult
-    """
-
-    nodes_edited_count: Optional[int] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "NodesEditedCount"},
-    )
-    """Count of the matching results"""
-    resulting_xml_document: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "ResultingXmlDocument"},
-    )
-    """Resulting, modified XML document"""
-    successful: Optional[bool] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Successful"},
-    )
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
-class XmlSetValueWithXPathResult:
-    """
-    Definition: XmlSetValueWithXPathResult
-    """
-
-    nodes_edited_count: Optional[int] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "NodesEditedCount"},
-    )
-    """Count of the matching results"""
-    resulting_xml_document: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "ResultingXmlDocument"},
-    )
-    """Resulting, modified XML document"""
-    successful: Optional[bool] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "Successful"},
-    )
-    """True if the operation was successful, false otherwise"""
-
-
-@dataclass
 class ZipDirectory:
     """
     Definition: ZipDirectory
@@ -6170,6 +6201,847 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     @property
     def connector_name(self) -> str:
         return "cloudmersiveconvert"
+
+    async def convert_document_autodetect_get_info(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Get document type information
+
+        Auto-detects a document's type information; does not require file
+        extension. Analyzes file contents to confirm file type. Even if no file
+        extension is present, the auto-detect system will reliably analyze the
+        contents of the file and identify its file type. Supports over 100
+        image file formats, Office document file formats, PDF, and more.
+
+        Swagger operation ID: `ConvertDocument_AutodetectGetInfo`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}/convert/autodetect/get-info"
+        )
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def convert_document_autodetect_to_pdf(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Convert Document to PDF
+
+        Automatically detect file type and convert it to PDF. Supports all of
+        the major Office document file formats including Word (DOCX, DOC),
+        Excel (XLSX, XLS), PowerPoint (PPTX, PPT), over 100 image formats, HTML
+        files, and even multi-page TIFF files.
+
+        Swagger operation ID: `ConvertDocument_AutodetectToPdf`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}/convert/autodetect/to/pdf"
+        )
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def convert_document_autodetect_to_png_array(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Convert Document to PNG array
+
+        Automatically detect file type and convert it to an array of PNG
+        images. Supports all of the major Office document file formats, over
+        100 image formats, and even multi-page TIFF files.
+
+        Swagger operation ID: `ConvertDocument_AutodetectToPngArray`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}/convert/autodetect/to/png"
+        )
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def convert_document_autodetect_to_txt(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Convert Document to Text (txt)
+
+        Automatically detect file type and convert it to Text. Supports all of
+        the major Office document file formats including Word (DOCX, DOC),
+        Excel (XLSX, XLS), PowerPoint (PPTX, PPT) and PDF files. For
+        spreadsheets, all worksheets will be included. If you wish to exclude
+        certain pages, worksheets, slides, etc. use the Split document API
+        first, or the delete pages/slides/worksheet APIs first to adjust the
+        document to the target state prior to converting to text.
+
+        Swagger operation ID: `ConvertDocument_AutodetectToTxt`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}/convert/autodetect/to/txt"
+        )
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def compare_document_docx(
+        self,
+        input_file1: MultipartFile | bytes,
+        input_file2: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Compare Two Word DOCX
+
+        Compare two Office Word Documents (docx) files and highlight the
+        differences
+
+        Swagger operation ID: `CompareDocument_Docx`.
+
+        Args:
+            input_file1: First input file to perform the operation on.
+            input_file2: Second input file to perform the operation on (more
+                than 2 can be supplied).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/compare/docx"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file1 is None:
+            raise ValueError("Parameter 'inputFile1' is required.")
+        form_data.append(("inputFile1", input_file1))
+        if input_file2 is None:
+            raise ValueError("Parameter 'inputFile2' is required.")
+        form_data.append(("inputFile2", input_file2))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def convert_data_csv_to_json(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Convert CSV to JSON conversion
+
+        Convert a CSV file to a JSON object array
+
+        Swagger operation ID: `ConvertData_CsvToJson`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/csv/to/json"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def convert_document_csv_to_xlsx(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Convert CSV to Excel XLSX Spreadsheet
+
+        Convert CSV file to Office Excel XLSX Workbooks file format.
+
+        Swagger operation ID: `ConvertDocument_CsvToXlsx`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/csv/to/xlsx"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def convert_document_doc_to_docx(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Convert Word DOC (97-03) Document to DOCX
+
+        Convert/upgrade Office Word (97-2003 Format) Documents (doc) to the
+        modern DOCX format
+
+        Swagger operation ID: `ConvertDocument_DocToDocx`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/doc/to/docx"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def convert_document_doc_to_pdf(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Convert Word DOC (97-03) Document to PDF
+
+        Convert Office Word (97-2003 Format) Documents (doc) to standard PDF
+
+        Swagger operation ID: `ConvertDocument_DocToPdf`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/doc/to/pdf"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def convert_document_doc_to_txt(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Convert Word DOC (97-03) Document to Text (txt)
+
+        Convert Office Word DOC (97-03) Document (doc) to text
+
+        Swagger operation ID: `ConvertDocument_DocToTxt`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/doc/to/txt"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def convert_document_docx_to_pdf(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Convert Word DOCX Document to PDF
+
+        Convert Office Word Documents (docx) to standard PDF
+
+        Swagger operation ID: `ConvertDocument_DocxToPdf`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/docx/to/pdf"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def convert_document_docx_to_txt(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Convert Word DOCX Document to Text (txt)
+
+        Convert Office Word Documents (docx) to text
+
+        Swagger operation ID: `ConvertDocument_DocxToTxt`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/docx/to/txt"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def edit_document_begin_editing(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Begin editing a document
+
+        Uploads a document to Cloudmersive to begin a series of one or more
+        editing operations. To edit a document, first call Begin Editing on the
+        document. Then perform operations on the document using the secure URL
+        returned from BeginEditing, such as Word DOCX Delete Pages and Insert
+        Table. Finally, perform finish editing on the URL to return the
+        resulting edited document. The editing URL is temporary and only stored
+        in-memory cache, and will automatically expire from the cache after 30
+        minutes, and cannot be directly accessed.
+
+        Swagger operation ID: `EditDocument_BeginEditing`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}/convert/edit/begin-editing"
+        )
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
 
     async def edit_document_docx_create_blank_document(
         self,
@@ -8739,6 +9611,478 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return response.content
 
+    async def convert_document_html_to_pdf(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Convert HTML document file to PDF Document
+
+        Convert standard HTML, with full support for CSS, JavaScript, Images,
+        and other complex behavior to PDF. To use external files such as
+        images, use an absolute URL to the file.
+
+        Swagger operation ID: `ConvertDocument_HtmlToPdf`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/html/to/pdf"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def convert_document_html_to_png(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Convert HTML document file to PNG image array
+
+        Convert standard HTML, with full support for CSS, JavaScript, Images,
+        and other complex behavior to an array of PNG images, one for each
+        page. To use external files in your HTML such as images, use an
+        absolute URL to the file.
+
+        Swagger operation ID: `ConvertDocument_HtmlToPng`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/html/to/png"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def convert_document_html_to_txt(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        HTML Document file to Text (txt)
+
+        HTML document to text
+
+        Swagger operation ID: `ConvertDocument_HtmlToTxt`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/html/to/txt"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def convert_image_multipage_image_format_convert(
+        self,
+        format1: str,
+        format2: str,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Multi-page image format conversion
+
+        Convert between over 100 file formats, including support for
+        Multiple-Page formats (e.g. PDFs, TIFFs, etc. with multiple pages).
+
+        Swagger operation ID: `ConvertImage_MultipageImageFormatConvert`.
+
+        Args:
+            format1: Input file format as a 3+ letter file extension. You can
+                also provide.
+            format2: Output (convert to this format) file format as a 3+ letter
+                file extens.
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/convert"
+            f"/image-multipage"
+            f"/{quote(str(format1), safe='')}"
+            f"/to"
+            f"/{quote(str(format2), safe='')}"
+        )
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def convert_image_get_image_info(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Get information about an image
+
+        Get details from an image such as size, format and MIME type,
+        compression, EXIF data such as location, DPI, unique colors,
+        transparency information, and more
+
+        Swagger operation ID: `ConvertImage_GetImageInfo`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/image/get-info"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def convert_image_image_set_dpi(
+        self,
+        dpi: int,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Change image DPI
+
+        Resize an image to have a different DPI
+
+        Swagger operation ID: `ConvertImage_ImageSetDPI`.
+
+        Args:
+            dpi: New DPI in pixels-per-inch, for example 300 DPI or 600 DPI.
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/convert/image/set-dpi/{quote(str(dpi), safe='')}"
+        )
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def convert_image_image_format_convert(
+        self,
+        format1: str,
+        format2: str,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Image format conversion
+
+        Convert between over 100 file formats, including key formats such as
+        Photoshop (PSD), PNG, JPG, GIF, NEF, and BMP.
+
+        Swagger operation ID: `ConvertImage_ImageFormatConvert`.
+
+        Args:
+            format1: Input file format as a 3+ letter file extension. You can
+                also provide.
+            format2: Output (convert to this format) file format as a 3+ letter
+                file extens.
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/convert"
+            f"/image"
+            f"/{quote(str(format1), safe='')}"
+            f"/to"
+            f"/{quote(str(format2), safe='')}"
+        )
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
     async def convert_data_json_to_xml(
         self,
         input: ConvertDataJsonToXmlInput | Mapping[str, Any],
@@ -8773,6 +10117,2022 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         response = await self.http_client.send(
             "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def merge_document_docx(
+        self,
+        input_file1: MultipartFile | bytes,
+        input_file2: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Merge Two Word DOCX Together
+
+        Combine two Office Word Documents (docx) into one single Office Word
+        document
+
+        Swagger operation ID: `MergeDocument_Docx`.
+
+        Args:
+            input_file1: First input file to perform the operation on.
+            input_file2: Second input file to perform the operation on (more
+                than 2 can be supplied).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/merge/docx"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file1 is None:
+            raise ValueError("Parameter 'inputFile1' is required.")
+        form_data.append(("inputFile1", input_file1))
+        if input_file2 is None:
+            raise ValueError("Parameter 'inputFile2' is required.")
+        form_data.append(("inputFile2", input_file2))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def merge_document_docx_multi(
+        self,
+        input_file1: MultipartFile | bytes,
+        input_file2: MultipartFile | bytes,
+        *,
+        input_file3: Optional[MultipartFile | bytes] = None,
+        input_file4: Optional[MultipartFile | bytes] = None,
+        input_file5: Optional[MultipartFile | bytes] = None,
+        input_file6: Optional[MultipartFile | bytes] = None,
+        input_file7: Optional[MultipartFile | bytes] = None,
+        input_file8: Optional[MultipartFile | bytes] = None,
+        input_file9: Optional[MultipartFile | bytes] = None,
+        input_file10: Optional[MultipartFile | bytes] = None,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Merge Multple Word DOCX Together
+
+        Combine multiple Office Word Documents (docx) into one single Office
+        Word document
+
+        Swagger operation ID: `MergeDocument_DocxMulti`.
+
+        Args:
+            input_file1: First input file to perform the operation on.
+            input_file2: Second input file to perform the operation on.
+            input_file3: Third input file to perform the operation on.
+            input_file4: Fourth input file to perform the operation on.
+            input_file5: Fifth input file to perform the operation on.
+            input_file6: Sixth input file to perform the operation on.
+            input_file7: Seventh input file to perform the operation on.
+            input_file8: Eighth input file to perform the operation on.
+            input_file9: Ninth input file to perform the operation on.
+            input_file10: Tenth input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}/convert/merge/docx/multi"
+        )
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file1 is None:
+            raise ValueError("Parameter 'inputFile1' is required.")
+        form_data.append(("inputFile1", input_file1))
+        if input_file2 is None:
+            raise ValueError("Parameter 'inputFile2' is required.")
+        form_data.append(("inputFile2", input_file2))
+        if input_file3 is not None:
+            form_data.append(("inputFile3", input_file3))
+        if input_file4 is not None:
+            form_data.append(("inputFile4", input_file4))
+        if input_file5 is not None:
+            form_data.append(("inputFile5", input_file5))
+        if input_file6 is not None:
+            form_data.append(("inputFile6", input_file6))
+        if input_file7 is not None:
+            form_data.append(("inputFile7", input_file7))
+        if input_file8 is not None:
+            form_data.append(("inputFile8", input_file8))
+        if input_file9 is not None:
+            form_data.append(("inputFile9", input_file9))
+        if input_file10 is not None:
+            form_data.append(("inputFile10", input_file10))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def merge_document_pdf(
+        self,
+        input_file1: MultipartFile | bytes,
+        input_file2: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Merge Two PDF Files Together
+
+        Combine two PDF files (pdf) into a single PDF document, preserving the
+        order of the input documents in the combined document
+
+        Swagger operation ID: `MergeDocument_Pdf`.
+
+        Args:
+            input_file1: First input file to perform the operation on.
+            input_file2: Second input file to perform the operation on (more
+                than 2 can be supplied).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/merge/pdf"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file1 is None:
+            raise ValueError("Parameter 'inputFile1' is required.")
+        form_data.append(("inputFile1", input_file1))
+        if input_file2 is None:
+            raise ValueError("Parameter 'inputFile2' is required.")
+        form_data.append(("inputFile2", input_file2))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def merge_document_pdf_multi(
+        self,
+        input_file1: MultipartFile | bytes,
+        input_file2: MultipartFile | bytes,
+        *,
+        input_file3: Optional[MultipartFile | bytes] = None,
+        input_file4: Optional[MultipartFile | bytes] = None,
+        input_file5: Optional[MultipartFile | bytes] = None,
+        input_file6: Optional[MultipartFile | bytes] = None,
+        input_file7: Optional[MultipartFile | bytes] = None,
+        input_file8: Optional[MultipartFile | bytes] = None,
+        input_file9: Optional[MultipartFile | bytes] = None,
+        input_file10: Optional[MultipartFile | bytes] = None,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Merge Multple PDF Files Together
+
+        Combine multiple PDF files (pdf) into a single PDF document, preserving
+        the order of the input documents in the combined document
+
+        Swagger operation ID: `MergeDocument_PdfMulti`.
+
+        Args:
+            input_file1: First input file to perform the operation on.
+            input_file2: Second input file to perform the operation on.
+            input_file3: Third input file to perform the operation on.
+            input_file4: Fourth input file to perform the operation on.
+            input_file5: Fifth input file to perform the operation on.
+            input_file6: Sixth input file to perform the operation on.
+            input_file7: Seventh input file to perform the operation on.
+            input_file8: Eighth input file to perform the operation on.
+            input_file9: Ninth input file to perform the operation on.
+            input_file10: Tenth input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/merge/pdf/multi"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file1 is None:
+            raise ValueError("Parameter 'inputFile1' is required.")
+        form_data.append(("inputFile1", input_file1))
+        if input_file2 is None:
+            raise ValueError("Parameter 'inputFile2' is required.")
+        form_data.append(("inputFile2", input_file2))
+        if input_file3 is not None:
+            form_data.append(("inputFile3", input_file3))
+        if input_file4 is not None:
+            form_data.append(("inputFile4", input_file4))
+        if input_file5 is not None:
+            form_data.append(("inputFile5", input_file5))
+        if input_file6 is not None:
+            form_data.append(("inputFile6", input_file6))
+        if input_file7 is not None:
+            form_data.append(("inputFile7", input_file7))
+        if input_file8 is not None:
+            form_data.append(("inputFile8", input_file8))
+        if input_file9 is not None:
+            form_data.append(("inputFile9", input_file9))
+        if input_file10 is not None:
+            form_data.append(("inputFile10", input_file10))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def merge_document_png(
+        self,
+        input_file1: MultipartFile | bytes,
+        input_file2: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Merge Multple PNG Files Together
+
+        Combine multiple PNG files into a single PNG document, preserving the
+        order of the input documents in the combined document by stacking them
+        vertically
+
+        Swagger operation ID: `MergeDocument_Png`.
+
+        Args:
+            input_file1: First input file to perform the operation on.
+            input_file2: Second input file to perform the operation on (more
+                than 2 can be supplied).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}/convert/merge/png/vertical"
+        )
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file1 is None:
+            raise ValueError("Parameter 'inputFile1' is required.")
+        form_data.append(("inputFile1", input_file1))
+        if input_file2 is None:
+            raise ValueError("Parameter 'inputFile2' is required.")
+        form_data.append(("inputFile2", input_file2))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def merge_document_pptx(
+        self,
+        input_file1: MultipartFile | bytes,
+        input_file2: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Merge Two PowerPoint PPTX Together
+
+        Combine two Office PowerPoint presentations (pptx) into one single
+        Office PowerPoint presentation
+
+        Swagger operation ID: `MergeDocument_Pptx`.
+
+        Args:
+            input_file1: First input file to perform the operation on.
+            input_file2: Second input file to perform the operation on (more
+                than 2 can be supplied).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/merge/pptx"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file1 is None:
+            raise ValueError("Parameter 'inputFile1' is required.")
+        form_data.append(("inputFile1", input_file1))
+        if input_file2 is None:
+            raise ValueError("Parameter 'inputFile2' is required.")
+        form_data.append(("inputFile2", input_file2))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def merge_document_pptx_multi(
+        self,
+        input_file1: MultipartFile | bytes,
+        input_file2: MultipartFile | bytes,
+        *,
+        input_file3: Optional[MultipartFile | bytes] = None,
+        input_file4: Optional[MultipartFile | bytes] = None,
+        input_file5: Optional[MultipartFile | bytes] = None,
+        input_file6: Optional[MultipartFile | bytes] = None,
+        input_file7: Optional[MultipartFile | bytes] = None,
+        input_file8: Optional[MultipartFile | bytes] = None,
+        input_file9: Optional[MultipartFile | bytes] = None,
+        input_file10: Optional[MultipartFile | bytes] = None,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Merge Multple PowerPoint PPTX Together
+
+        Combine multiple Office PowerPoint presentations (pptx) into one single
+        Office PowerPoint presentation
+
+        Swagger operation ID: `MergeDocument_PptxMulti`.
+
+        Args:
+            input_file1: First input file to perform the operation on.
+            input_file2: Second input file to perform the operation on.
+            input_file3: Third input file to perform the operation on.
+            input_file4: Fourth input file to perform the operation on.
+            input_file5: Fifth input file to perform the operation on.
+            input_file6: Sixth input file to perform the operation on.
+            input_file7: Seventh input file to perform the operation on.
+            input_file8: Eighth input file to perform the operation on.
+            input_file9: Ninth input file to perform the operation on.
+            input_file10: Tenth input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}/convert/merge/pptx/multi"
+        )
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file1 is None:
+            raise ValueError("Parameter 'inputFile1' is required.")
+        form_data.append(("inputFile1", input_file1))
+        if input_file2 is None:
+            raise ValueError("Parameter 'inputFile2' is required.")
+        form_data.append(("inputFile2", input_file2))
+        if input_file3 is not None:
+            form_data.append(("inputFile3", input_file3))
+        if input_file4 is not None:
+            form_data.append(("inputFile4", input_file4))
+        if input_file5 is not None:
+            form_data.append(("inputFile5", input_file5))
+        if input_file6 is not None:
+            form_data.append(("inputFile6", input_file6))
+        if input_file7 is not None:
+            form_data.append(("inputFile7", input_file7))
+        if input_file8 is not None:
+            form_data.append(("inputFile8", input_file8))
+        if input_file9 is not None:
+            form_data.append(("inputFile9", input_file9))
+        if input_file10 is not None:
+            form_data.append(("inputFile10", input_file10))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def merge_document_txt(
+        self,
+        input_file1: MultipartFile | bytes,
+        input_file2: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Merge Two Text (TXT) Files Together
+
+        Combine two Text (.TXT) files into a single text document, preserving
+        the order of the input documents in the combined document by stacking
+        them vertically.
+
+        Swagger operation ID: `MergeDocument_Txt`.
+
+        Args:
+            input_file1: First input file to perform the operation on.
+            input_file2: Second input file to perform the operation on (more
+                than 2 can be supplied).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/merge/txt"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file1 is None:
+            raise ValueError("Parameter 'inputFile1' is required.")
+        form_data.append(("inputFile1", input_file1))
+        if input_file2 is None:
+            raise ValueError("Parameter 'inputFile2' is required.")
+        form_data.append(("inputFile2", input_file2))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def merge_document_txt_multi(
+        self,
+        input_file1: MultipartFile | bytes,
+        input_file2: MultipartFile | bytes,
+        *,
+        input_file3: Optional[MultipartFile | bytes] = None,
+        input_file4: Optional[MultipartFile | bytes] = None,
+        input_file5: Optional[MultipartFile | bytes] = None,
+        input_file6: Optional[MultipartFile | bytes] = None,
+        input_file7: Optional[MultipartFile | bytes] = None,
+        input_file8: Optional[MultipartFile | bytes] = None,
+        input_file9: Optional[MultipartFile | bytes] = None,
+        input_file10: Optional[MultipartFile | bytes] = None,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Merge Multple Text (TXT) Files Together
+
+        Combine multiple Text (.TXT) files into a single text document,
+        preserving the order of the input documents in the combined document by
+        stacking them vertically.
+
+        Swagger operation ID: `MergeDocument_TxtMulti`.
+
+        Args:
+            input_file1: First input file to perform the operation on.
+            input_file2: Second input file to perform the operation on.
+            input_file3: Third input file to perform the operation on.
+            input_file4: Fourth input file to perform the operation on.
+            input_file5: Fifth input file to perform the operation on.
+            input_file6: Sixth input file to perform the operation on.
+            input_file7: Seventh input file to perform the operation on.
+            input_file8: Eighth input file to perform the operation on.
+            input_file9: Ninth input file to perform the operation on.
+            input_file10: Tenth input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/merge/txt/multi"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file1 is None:
+            raise ValueError("Parameter 'inputFile1' is required.")
+        form_data.append(("inputFile1", input_file1))
+        if input_file2 is None:
+            raise ValueError("Parameter 'inputFile2' is required.")
+        form_data.append(("inputFile2", input_file2))
+        if input_file3 is not None:
+            form_data.append(("inputFile3", input_file3))
+        if input_file4 is not None:
+            form_data.append(("inputFile4", input_file4))
+        if input_file5 is not None:
+            form_data.append(("inputFile5", input_file5))
+        if input_file6 is not None:
+            form_data.append(("inputFile6", input_file6))
+        if input_file7 is not None:
+            form_data.append(("inputFile7", input_file7))
+        if input_file8 is not None:
+            form_data.append(("inputFile8", input_file8))
+        if input_file9 is not None:
+            form_data.append(("inputFile9", input_file9))
+        if input_file10 is not None:
+            form_data.append(("inputFile10", input_file10))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def merge_document_xlsx(
+        self,
+        input_file1: MultipartFile | bytes,
+        input_file2: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Merge Two Excel XLSX Together
+
+        Combine two Office Excel spreadsheets (xlsx) into a single Office Excel
+        spreadsheet
+
+        Swagger operation ID: `MergeDocument_Xlsx`.
+
+        Args:
+            input_file1: First input file to perform the operation on.
+            input_file2: Second input file to perform the operation on (more
+                than 2 can be supplied).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/merge/xlsx"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file1 is None:
+            raise ValueError("Parameter 'inputFile1' is required.")
+        form_data.append(("inputFile1", input_file1))
+        if input_file2 is None:
+            raise ValueError("Parameter 'inputFile2' is required.")
+        form_data.append(("inputFile2", input_file2))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def merge_document_xlsx_multi(
+        self,
+        input_file1: MultipartFile | bytes,
+        input_file2: MultipartFile | bytes,
+        *,
+        input_file3: Optional[MultipartFile | bytes] = None,
+        input_file4: Optional[MultipartFile | bytes] = None,
+        input_file5: Optional[MultipartFile | bytes] = None,
+        input_file6: Optional[MultipartFile | bytes] = None,
+        input_file7: Optional[MultipartFile | bytes] = None,
+        input_file8: Optional[MultipartFile | bytes] = None,
+        input_file9: Optional[MultipartFile | bytes] = None,
+        input_file10: Optional[MultipartFile | bytes] = None,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Merge Multple Excel XLSX Together
+
+        Combine multiple Office Excel spreadsheets (xlsx) into a single Office
+        Excel spreadsheet
+
+        Swagger operation ID: `MergeDocument_XlsxMulti`.
+
+        Args:
+            input_file1: First input file to perform the operation on.
+            input_file2: Second input file to perform the operation on.
+            input_file3: Third input file to perform the operation on.
+            input_file4: Fourth input file to perform the operation on.
+            input_file5: Fifth input file to perform the operation on.
+            input_file6: Sixth input file to perform the operation on.
+            input_file7: Seventh input file to perform the operation on.
+            input_file8: Eighth input file to perform the operation on.
+            input_file9: Ninth input file to perform the operation on.
+            input_file10: Tenth input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}/convert/merge/xlsx/multi"
+        )
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file1 is None:
+            raise ValueError("Parameter 'inputFile1' is required.")
+        form_data.append(("inputFile1", input_file1))
+        if input_file2 is None:
+            raise ValueError("Parameter 'inputFile2' is required.")
+        form_data.append(("inputFile2", input_file2))
+        if input_file3 is not None:
+            form_data.append(("inputFile3", input_file3))
+        if input_file4 is not None:
+            form_data.append(("inputFile4", input_file4))
+        if input_file5 is not None:
+            form_data.append(("inputFile5", input_file5))
+        if input_file6 is not None:
+            form_data.append(("inputFile6", input_file6))
+        if input_file7 is not None:
+            form_data.append(("inputFile7", input_file7))
+        if input_file8 is not None:
+            form_data.append(("inputFile8", input_file8))
+        if input_file9 is not None:
+            form_data.append(("inputFile9", input_file9))
+        if input_file10 is not None:
+            form_data.append(("inputFile10", input_file10))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def convert_document_pdf_to_docx(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Convert PDF to Word DOCX Document
+
+        Convert standard PDF to Office Word Documents (docx). Converts a PDF at
+        high fidelity into Word format, where it can be easily edited and
+        processed.
+
+        Swagger operation ID: `ConvertDocument_PdfToDocx`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/pdf/to/docx"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def convert_document_pdf_to_docx_rasterize(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Convert PDF to Word DOCX Document based on rasterized version of the
+        PDF
+
+        Convert standard PDF to Office Word Documents (docx), but first
+        rasterize the PDF. Converts a PDF at high fidelity into Word format.
+
+        Swagger operation ID: `ConvertDocument_PdfToDocxRasterize`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}/convert/pdf/to/docx/rasterize"
+        )
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def convert_document_pdf_to_png_array(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Convert PDF to PNG Image Array
+
+        Convert PDF document to PNG array, one image per page.
+
+        Swagger operation ID: `ConvertDocument_PdfToPngArray`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/pdf/to/png"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def convert_document_pdf_to_png_single(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Convert PDF to Single PNG image
+
+        Convert PDF document to a single tall PNG image, by
+        stacking/concatenating the images vertically into a single \"tall\"
+        image
+
+        Swagger operation ID: `ConvertDocument_PdfToPngSingle`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}/convert/pdf/to/png/merge-single"
+        )
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def convert_document_pdf_to_pptx(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Convert PDF to PowerPoint PPTX Presentation
+
+        Convert standard PDF to Office PowerPoint Presentation (pptx). Converts
+        a PDF file at high fidelity into PowerPoint format, where it can be
+        easily edited and processed.
+
+        Swagger operation ID: `ConvertDocument_PdfToPptx`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/pdf/to/pptx"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def convert_document_pdf_to_txt(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Convert PDF Document to Text (txt)
+
+        PDF document to text
+
+        Swagger operation ID: `ConvertDocument_PdfToTxt`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/pdf/to/txt"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def convert_document_png_array_to_pdf(
+        self,
+        input_file1: MultipartFile | bytes,
+        input_file2: MultipartFile | bytes,
+        *,
+        input_file3: Optional[MultipartFile | bytes] = None,
+        input_file4: Optional[MultipartFile | bytes] = None,
+        input_file5: Optional[MultipartFile | bytes] = None,
+        input_file6: Optional[MultipartFile | bytes] = None,
+        input_file7: Optional[MultipartFile | bytes] = None,
+        input_file8: Optional[MultipartFile | bytes] = None,
+        input_file9: Optional[MultipartFile | bytes] = None,
+        input_file10: Optional[MultipartFile | bytes] = None,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Convert PNG Array to PDF
+
+        Convert an array of PNG images, one image per page, into a
+        newly-created PDF. Supports images of different sizes as input.
+
+        Swagger operation ID: `ConvertDocument_PngArrayToPdf`.
+
+        Args:
+            input_file1: First input file to perform the operation on.
+            input_file2: Second input file to perform the operation on.
+            input_file3: Third input file to perform the operation on.
+            input_file4: Fourth input file to perform the operation on.
+            input_file5: Fifth input file to perform the operation on.
+            input_file6: Sixth input file to perform the operation on.
+            input_file7: Seventh input file to perform the operation on.
+            input_file8: Eighth input file to perform the operation on.
+            input_file9: Ninth input file to perform the operation on.
+            input_file10: Tenth input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/png/to/pdf"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file1 is None:
+            raise ValueError("Parameter 'inputFile1' is required.")
+        form_data.append(("inputFile1", input_file1))
+        if input_file2 is None:
+            raise ValueError("Parameter 'inputFile2' is required.")
+        form_data.append(("inputFile2", input_file2))
+        if input_file3 is not None:
+            form_data.append(("inputFile3", input_file3))
+        if input_file4 is not None:
+            form_data.append(("inputFile4", input_file4))
+        if input_file5 is not None:
+            form_data.append(("inputFile5", input_file5))
+        if input_file6 is not None:
+            form_data.append(("inputFile6", input_file6))
+        if input_file7 is not None:
+            form_data.append(("inputFile7", input_file7))
+        if input_file8 is not None:
+            form_data.append(("inputFile8", input_file8))
+        if input_file9 is not None:
+            form_data.append(("inputFile9", input_file9))
+        if input_file10 is not None:
+            form_data.append(("inputFile10", input_file10))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def convert_document_ppt_to_pdf(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Convert PowerPoint PPT (97-03) Presentation to PDF
+
+        Convert Office PowerPoint (97-2003) Documents (ppt) to standard PDF
+
+        Swagger operation ID: `ConvertDocument_PptToPdf`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/ppt/to/pdf"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def convert_document_ppt_to_pptx(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Convert PowerPoint PPT (97-03) Presentation to PPTX
+
+        Convert/upgrade Office PowerPoint (97-2003) Documents (ppt) to modern
+        PPTX
+
+        Swagger operation ID: `ConvertDocument_PptToPptx`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/ppt/to/pptx"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def convert_document_pptx_to_pdf(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Convert PowerPoint PPTX Presentation to PDF
+
+        Convert Office PowerPoint Documents (pptx) to standard PDF
+
+        Swagger operation ID: `ConvertDocument_PptxToPdf`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/pptx/to/pdf"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def convert_document_pptx_to_txt(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Convert PowerPoint PPTX Presentation to Text (txt)
+
+        Convert Office PowerPoint Documents (pptx) to standard Text
+
+        Swagger operation ID: `ConvertDocument_PptxToTxt`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/pptx/to/txt"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def split_document_docx(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Split a single Word Document DOCX into Separate Documents by Page
+
+        Split a Word DOCX Document, comprised of multiple pages into separate
+        Word DOCX document files, with each containing exactly one page.
+
+        Swagger operation ID: `SplitDocument_Docx`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/split/docx"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def split_document_pdf_by_page(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Split a PDF file into separate PDF files, one per page
+
+        Split an input PDF file into separate pages, comprised of one PDF file
+        per page.
+
+        Swagger operation ID: `SplitDocument_PdfByPage`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/split/pdf"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def split_document_pptx(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Split a single PowerPoint Presentation PPTX into Separate Slides
+
+        Split an PowerPoint PPTX Presentation, comprised of multiple slides
+        into separate PowerPoint PPTX presentation files, with each containing
+        exactly one slide.
+
+        Swagger operation ID: `SplitDocument_Pptx`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/split/pptx"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def split_document_txt_by_line(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Split a single Text file (txt) into lines
+
+        Split a Text (txt) Document by line, returning each line separately in
+        order. Supports multiple types of newlines.
+
+        Swagger operation ID: `SplitDocument_TxtByLine`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}/convert/split/txt/by-line"
+        )
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def split_document_txt_by_string(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Split a single Text file (txt) by a string delimiter
+
+        Split a Text (txt) Document by a string delimiter, returning each
+        component of the string as an array of strings.
+
+        Swagger operation ID: `SplitDocument_TxtByString`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}/convert/split/txt/by-string"
+        )
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def split_document_xlsx(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Split a single Excel XLSX into Separate Worksheets
+
+        Split an Excel XLSX Spreadsheet, comprised of multiple Worksheets (or
+        Tabs) into separate Excel XLSX spreadsheet files, with each containing
+        exactly one Worksheet.
+
+        Swagger operation ID: `SplitDocument_Xlsx`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/split/xlsx"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
             timeout=timeout,
             headers=headers,
             client_request_id=client_request_id,
@@ -8830,6 +12190,457 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         response = await self.http_client.send(
             "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def validate_document_autodetect_validation(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Autodetect content type and validate
+
+        Automatically detect the type of content, verify and validate that the
+        content is indeed fully valid at depth, and then report the validation
+        result.
+
+        Swagger operation ID: `ValidateDocument_AutodetectValidation`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}/convert/validate/autodetect"
+        )
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def validate_document_docx_validation(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Validate a Word document (DOCX)
+
+        Validate a Word document (DOCX); if the document is not valid,
+        identifies the errors in the document
+
+        Swagger operation ID: `ValidateDocument_DocxValidation`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/validate/docx"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def validate_document_json_validation(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Validate a JSON file
+
+        Validate a JSON (JavaScript Object Notation) document file; if the
+        document is not valid, identifies the errors in the document
+
+        Swagger operation ID: `ValidateDocument_JsonValidation`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/validate/json"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def validate_document_pdf_validation(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Validate a PDF document file
+
+        Validate a PDF document; if the document is not valid, identifies the
+        errors in the document
+
+        Swagger operation ID: `ValidateDocument_PdfValidation`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/validate/pdf"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def validate_document_pptx_validation(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Validate a PowerPoint presentation (PPTX)
+
+        Validate a PowerPoint presentation (PPTX); if the document is not
+        valid, identifies the errors in the document
+
+        Swagger operation ID: `ValidateDocument_PptxValidation`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/validate/pptx"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def validate_document_xlsx_validation(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Validate a Excel document (XLSX)
+
+        Validate a Excel document (XLSX); if the document is not valid,
+        identifies the errors in the document
+
+        Swagger operation ID: `ValidateDocument_XlsxValidation`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/validate/xlsx"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def validate_document_xml_validation(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Validate an XML file
+
+        Validate an XML document file; if the document is not valid, identifies
+        the errors in the document
+
+        Swagger operation ID: `ValidateDocument_XmlValidation`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/validate/xml"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
             timeout=timeout,
             headers=headers,
             client_request_id=client_request_id,
@@ -9011,6 +12822,69 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
+    async def convert_web_md_to_html(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Convert Markdown to HTML
+
+        Convert a markdown file (.md) to HTML
+
+        Swagger operation ID: `ConvertWeb_MdToHtml`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/web/md/to/html"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
     async def convert_web_url_to_pdf(
         self,
         input: ScreenshotRequest | Mapping[str, Any],
@@ -9152,6 +13026,1285 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         response = await self.http_client.send(
             "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def convert_document_xls_to_csv(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Convert Excel XLS (97-03) Spreadsheet to CSV
+
+        Convert/upgrade Office Excel (97-2003) Workbooks (xls) to standard CSV
+        format.
+
+        Swagger operation ID: `ConvertDocument_XlsToCsv`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/xls/to/csv"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def convert_data_xls_to_json(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Convert Excel (97-2003) XLS to JSON conversion
+
+        Convert an Excel (97-2003) XLS file to a JSON object array
+
+        Swagger operation ID: `ConvertData_XlsToJson`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/xls/to/json"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def convert_document_xls_to_pdf(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Convert Excel XLS (97-03) Spreadsheet to PDF
+
+        Convert Office Excel (97-2003) Workbooks (xls) to standard PDF.
+        Converts all worksheets in the workbook to PDF.
+
+        Swagger operation ID: `ConvertDocument_XlsToPdf`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/xls/to/pdf"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def convert_document_xls_to_xlsx(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Convert Excel XLS (97-03) Spreadsheet to XLSX
+
+        Convert/upgrade Office Excel (97-2003) Workbooks (xls) to modern XLSX
+        format.
+
+        Swagger operation ID: `ConvertDocument_XlsToXlsx`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/xls/to/xlsx"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def convert_document_xlsx_to_csv(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Convert Excel XLSX Spreadsheet to CSV
+
+        Convert Office Excel Workbooks (XLSX) to standard Comma-Separated
+        Values (CSV) format. Supports both XLSX and XLSB file Excel formats.
+
+        Swagger operation ID: `ConvertDocument_XlsxToCsv`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/xlsx/to/csv"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def convert_data_xlsx_to_json(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Convert Excel XLSX to JSON conversion
+
+        Convert an Excel XLSX file to a JSON object array
+
+        Swagger operation ID: `ConvertData_XlsxToJson`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/xlsx/to/json"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def convert_document_xlsx_to_pdf(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> bytes:
+        """
+        Convert Excel XLSX Spreadsheet to PDF
+
+        Convert Office Excel Workbooks (XLSX) to standard PDF. Converts all
+        worksheets in the workbook to PDF. Supports both XLSX and XLSB Excel
+        file formats.
+
+        Swagger operation ID: `ConvertDocument_XlsxToPdf`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/xlsx/to/pdf"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        return response.content
+
+    async def convert_document_xlsx_to_txt(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Convert Excel XLSX Spreadsheet to Text (txt)
+
+        Convert Office Excel Workbooks (XLSX) to standard Text. Converts all
+        worksheets in the workbook to Text. Supports both XLSX and XLSB file
+        formats. When a spreadsheet contains multiple worksheets, will export
+        all of the text from all of the worksheets. If you wish to export the
+        text from only one worksheet, try using the Split XLSX API to split the
+        spreadsheet into multiple worksheet files, and then run XLSX to Text on
+        the individual worksheet file that you need to extract the text from.
+
+        Swagger operation ID: `ConvertDocument_XlsxToTxt`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/xlsx/to/txt"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def convert_data_xml_edit_add_attribute_with_x_path(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Adds an attribute to all XML nodes matching XPath expression
+
+        Return the reuslts of editing an XML document by adding an attribute to
+        all of the nodes that match an input XPath expression.
+
+        Swagger operation ID: `ConvertData_XmlEditAddAttributeWithXPath`.
+
+        Args:
+            input_file: Input XML file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/convert/xml/edit/xpath/add-attribute"
+        )
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def convert_data_xml_edit_add_child_with_x_path(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Adds an XML node as a child to XML nodes matching XPath expression
+
+        Return the reuslts of editing an XML document by adding an XML node as
+        a child to all of the nodes that match an input XPath expression.
+
+        Swagger operation ID: `ConvertData_XmlEditAddChildWithXPath`.
+
+        Args:
+            input_file: Input XML file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}/convert/xml/edit/xpath/add-child"
+        )
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def convert_data_xml_remove_with_x_path(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Remove, delete XML nodes and items matching XPath expression
+
+        Return the reuslts of editing an XML document by removing all of the
+        nodes that match an input XPath expression
+
+        Swagger operation ID: `ConvertData_XmlRemoveWithXPath`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}/convert/xml/edit/xpath/remove"
+        )
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def convert_data_xml_edit_remove_all_child_nodes_with_x_path(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Removes, deletes all children of nodes matching XPath expression, but
+
+        Return the reuslts of editing an XML document by removing all child
+        nodes of the nodes that match an input XPath expression.
+
+        Swagger operation ID:
+        `ConvertData_XmlEditRemoveAllChildNodesWithXPath`.
+
+        Args:
+            input_file: Input XML file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/convert/xml/edit/xpath/remove-all-children"
+        )
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def convert_data_xml_edit_replace_with_x_path(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Replaces XML nodes matching XPath expression with new node
+
+        Return the reuslts of editing an XML document by replacing all of the
+        nodes that match an input XPath expression with a new XML node
+        expression.
+
+        Swagger operation ID: `ConvertData_XmlEditReplaceWithXPath`.
+
+        Args:
+            input_file: Input XML file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}/convert/xml/edit/xpath/replace"
+        )
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def convert_data_xml_edit_set_value_with_x_path(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Sets the value contents of XML nodes matching XPath expression
+
+        Return the reuslts of editing an XML document by setting the contents
+        of all of the nodes that match an input XPath expression. Supports
+        elements and attributes.
+
+        Swagger operation ID: `ConvertData_XmlEditSetValueWithXPath`.
+
+        Args:
+            input_file: Input XML file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}/convert/xml/edit/xpath/set-value"
+        )
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def convert_data_xml_query_with_x_query(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Query an XML file using XQuery query, get results
+
+        Return the reuslts of querying a single XML document with an XQuery
+        expression. Supports XQuery 3.1 and earlier. This API is optimized for
+        a single XML document as input. Provided XML document is automatically
+        loaded as the default context; to access elements in the document,
+        simply refer to them without a document reference, such as
+        bookstore/book
+
+        Swagger operation ID: `ConvertData_XmlQueryWithXQuery`.
+
+        Args:
+            input_file: Input XML file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}/convert/xml/query/xquery"
+        )
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def convert_data_xml_query_with_x_query_multi(
+        self,
+        input_file1: MultipartFile | bytes,
+        *,
+        input_file2: Optional[MultipartFile | bytes] = None,
+        input_file3: Optional[MultipartFile | bytes] = None,
+        input_file4: Optional[MultipartFile | bytes] = None,
+        input_file5: Optional[MultipartFile | bytes] = None,
+        input_file6: Optional[MultipartFile | bytes] = None,
+        input_file7: Optional[MultipartFile | bytes] = None,
+        input_file8: Optional[MultipartFile | bytes] = None,
+        input_file9: Optional[MultipartFile | bytes] = None,
+        input_file10: Optional[MultipartFile | bytes] = None,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Query multiple XML files using XQuery query, get results
+
+        Return the reuslts of querying an XML document with an XQuery
+        expression. Supports XQuery 3.1 and earlier. This API is optimized for
+        multiple XML documents as input. You can refer to the contents of a
+        given document by name, for example doc(\"books.xml\") or
+        doc(\"restaurants.xml\") if you included two input files named
+        books.xml and restaurants.xml. If input files contain no file name,
+        they will default to file names input1.xml, input2.xml and so on.
+
+        Swagger operation ID: `ConvertData_XmlQueryWithXQueryMulti`.
+
+        Args:
+            input_file1: First input XML file to perform the operation on.
+            input_file2: Second input XML file to perform the operation on.
+            input_file3: Third input XML file to perform the operation on.
+            input_file4: Fourth input XML file to perform the operation on.
+            input_file5: Fifth input XML file to perform the operation on.
+            input_file6: Sixth input XML file to perform the operation on.
+            input_file7: Seventh input XML file to perform the operation on.
+            input_file8: Eighth input XML file to perform the operation on.
+            input_file9: Ninth input XML file to perform the operation on.
+            input_file10: Tenth input XML file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}/convert/xml/query/xquery/multi"
+        )
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file1 is None:
+            raise ValueError("Parameter 'inputFile1' is required.")
+        form_data.append(("inputFile1", input_file1))
+        if input_file2 is not None:
+            form_data.append(("inputFile2", input_file2))
+        if input_file3 is not None:
+            form_data.append(("inputFile3", input_file3))
+        if input_file4 is not None:
+            form_data.append(("inputFile4", input_file4))
+        if input_file5 is not None:
+            form_data.append(("inputFile5", input_file5))
+        if input_file6 is not None:
+            form_data.append(("inputFile6", input_file6))
+        if input_file7 is not None:
+            form_data.append(("inputFile7", input_file7))
+        if input_file8 is not None:
+            form_data.append(("inputFile8", input_file8))
+        if input_file9 is not None:
+            form_data.append(("inputFile9", input_file9))
+        if input_file10 is not None:
+            form_data.append(("inputFile10", input_file10))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def convert_data_xml_filter_with_x_path(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Filter, select XML nodes using XPath expression, get results
+
+        Return the reuslts of filtering, selecting an XML document with an
+        XPath expression
+
+        Swagger operation ID: `ConvertData_XmlFilterWithXPath`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}/convert/xml/select/xpath"
+        )
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def convert_data_xml_to_json(
+        self,
+        input_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Convert XML to JSON conversion
+
+        Convert an XML string or file into JSON
+
+        Swagger operation ID: `ConvertData_XmlToJson`.
+
+        Args:
+            input_file: Input file to perform the operation on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/convert/xml/to/json"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def convert_data_xml_transform_with_xslt_to_xml(
+        self,
+        input_file: MultipartFile | bytes,
+        transform_file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Transform XML document file with XSLT into a new XML document
+
+        Convert an XML string or file into JSON
+
+        Swagger operation ID: `ConvertData_XmlTransformWithXsltToXml`.
+
+        Args:
+            input_file: Input XML file to perform the operation on.
+            transform_file: Input XSLT file to use to transform the input XML
+                file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}/convert/xml/transform/xslt/to/xml"
+        )
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if input_file is None:
+            raise ValueError("Parameter 'inputFile' is required.")
+        form_data.append(("inputFile", input_file))
+        if transform_file is None:
+            raise ValueError("Parameter 'transformFile' is required.")
+        form_data.append(("transformFile", transform_file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
             timeout=timeout,
             headers=headers,
             client_request_id=client_request_id,

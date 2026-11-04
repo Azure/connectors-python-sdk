@@ -20,10 +20,13 @@ from azure.connectors.sdk import (
     ConnectorException,
     ConnectorResponseHook,
     ConnectorResponseSnapshot,
+    MultipartFile,
+    encode_multipart_form_data,
 )
 
 __all__ = [
     "DocuwareClient",
+    "AppendFileResponse",
     "GetDialogFieldsResponse",
     "GetDialogsResponse",
     "GetDocumentInformationResponse",
@@ -32,11 +35,14 @@ __all__ = [
     "GetOrganizationResponse",
     "GetStampFieldsResponse",
     "GetStampsResponse",
+    "ImportToDocumentTrayResponse",
     "ListDocumentsInDocumentTrayResponse",
     "PlaceAStampInput",
     "PlaceAStampResponse",
+    "ReplaceFileResponse",
     "SearchForDocumentsInFileCabinetInput",
     "SearchForDocumentsInFileCabinetResponse",
+    "StoreToFileCabinetResponse",
     "TransferDocumentInput",
     "TransferDocumentResponse",
     "UpdateIndexFieldsInput",
@@ -45,6 +51,142 @@ __all__ = [
 
 
 # Type Definitions
+
+@dataclass
+class StoreToFileCabinetResponse:
+    """
+    Response for Store to file cabinet
+    """
+
+    sections: Optional[List[Dict[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Sections"},
+    )
+    """Sections"""
+    document_id: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "DocumentId"},
+    )
+    """DocumentId"""
+    index_fields: Optional[Dict[str, Any]] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "IndexFields"},
+    )
+    """IndexFields"""
+    document_title: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "DocumentTitle"},
+    )
+    """DocumentTitle"""
+    file_cabinet_id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "FileCabinetId"},
+    )
+    """FileCabinetId"""
+    total_pages: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "TotalPages"},
+    )
+    """TotalPages"""
+    file_size: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "FileSize"},
+    )
+    """FileSize"""
+    content_type: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ContentType"},
+    )
+    """ContentType"""
+    version_status: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "VersionStatus"},
+    )
+    """VersionStatus"""
+    document_flags: Optional[Dict[str, Any]] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "DocumentFlags"},
+    )
+    """DocumentFlags"""
+
+
+@dataclass
+class ImportToDocumentTrayResponse:
+    """
+    Response for Import to document tray
+    """
+
+    sections: Optional[List[Dict[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Sections"},
+    )
+    """Sections"""
+    document_id: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "DocumentId"},
+    )
+    """DocumentId"""
+    index_fields: Optional[Dict[str, Any]] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "IndexFields"},
+    )
+    """IndexFields"""
+    document_title: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "DocumentTitle"},
+    )
+    """DocumentTitle"""
+    file_cabinet_id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "FileCabinetId"},
+    )
+    """FileCabinetId"""
+    total_pages: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "TotalPages"},
+    )
+    """TotalPages"""
+    file_size: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "FileSize"},
+    )
+    """FileSize"""
+    content_type: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ContentType"},
+    )
+    """ContentType"""
+    version_status: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "VersionStatus"},
+    )
+    """VersionStatus"""
+    document_flags: Optional[Dict[str, Any]] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "DocumentFlags"},
+    )
+    """DocumentFlags"""
+
 
 @dataclass
 class SearchForDocumentsInFileCabinetInput:
@@ -399,6 +541,142 @@ class GetDialogsResponse:
 
 
 @dataclass
+class AppendFileResponse:
+    """
+    Response for Append a file
+    """
+
+    signature_status: Optional[List[str]] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "SignatureStatus"},
+    )
+    """SignatureStatus"""
+    section_id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "SectionId"},
+    )
+    """SectionId"""
+    content_type: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ContentType"},
+    )
+    """ContentType"""
+    have_more_pages: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "HaveMorePages"},
+    )
+    """HaveMorePages"""
+    page_count: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "PageCount"},
+    )
+    """PageCount"""
+    file_size: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "FileSize"},
+    )
+    """FileSize"""
+    original_file_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "OriginalFileName"},
+    )
+    """OriginalFileName"""
+    content_modified: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ContentModified"},
+    )
+    """ContentModified"""
+    has_text_annotation: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "HasTextAnnotation"},
+    )
+    """HasTextAnnotation"""
+    annotations_preview: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "AnnotationsPreview"},
+    )
+    """AnnotationsPreview"""
+
+
+@dataclass
+class ReplaceFileResponse:
+    """
+    Response for Replace a file
+    """
+
+    signature_status: Optional[List[str]] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "SignatureStatus"},
+    )
+    """SignatureStatus"""
+    section_id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "SectionId"},
+    )
+    """SectionId"""
+    content_type: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ContentType"},
+    )
+    """ContentType"""
+    have_more_pages: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "HaveMorePages"},
+    )
+    """HaveMorePages"""
+    page_count: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "PageCount"},
+    )
+    """PageCount"""
+    file_size: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "FileSize"},
+    )
+    """FileSize"""
+    original_file_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "OriginalFileName"},
+    )
+    """OriginalFileName"""
+    content_modified: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ContentModified"},
+    )
+    """ContentModified"""
+    has_text_annotation: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "HasTextAnnotation"},
+    )
+    """HasTextAnnotation"""
+    annotations_preview: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "AnnotationsPreview"},
+    )
+    """AnnotationsPreview"""
+
+
+@dataclass
 class GetStampsResponse:
     """
     Response for Get stamps
@@ -614,6 +892,175 @@ class DocuwareClient(ConnectorClientBase):
         if parsed_next_link.query:
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
+
+    async def store_to_file_cabinet(
+        self,
+        file_cabinet: str,
+        store_dialog_id: str,
+        *,
+        index: Optional[str] = None,
+        file: Optional[MultipartFile | bytes] = None,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Store to file cabinet
+
+        Stores a new document to a file cabinet.
+
+        Swagger operation ID: `StoreToFileCabinet`.
+
+        Args:
+            file_cabinet: Select the File Cabinet to store to.
+            store_dialog_id: Select the store dialog to use for storing.
+            index: Specify the index data for the document.
+            file: Specify the contents of the file to store.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/FileCabinets/{quote(str(file_cabinet), safe='')}/Documents"
+        )
+        query_params = []
+        value = str(store_dialog_id)
+        if isinstance(store_dialog_id, bool):
+            value = value.lower()
+        query_params.append(f"StoreDialogId={quote(value, safe='')}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if index is not None:
+            form_data.append(("index", str(index)))
+        if file is not None:
+            form_data.append(("file", file))
+        form_data.append((
+            "Default",
+            "{}",
+        ))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def import_to_document_tray(
+        self,
+        document_tray: str,
+        *,
+        store_dialog_id: Optional[str] = None,
+        index: Optional[str] = None,
+        file: Optional[MultipartFile | bytes] = None,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Import to document tray
+
+        Import a new document into a document tray.
+
+        Swagger operation ID: `ImportToDocumentTray`.
+
+        Args:
+            document_tray: Select the Document Tray to import to.
+            store_dialog_id: Select the store dialog to use during import.
+            index: Specify the index data for the document.
+            file: Specify the contents of the file to import.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/DocumentTrays/{quote(str(document_tray), safe='')}/Documents"
+        )
+        query_params = []
+        if store_dialog_id is not None:
+            value = str(store_dialog_id)
+            if isinstance(store_dialog_id, bool):
+                value = value.lower()
+            query_params.append(f"StoreDialogId={quote(value, safe='')}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if index is not None:
+            form_data.append(("index", str(index)))
+        if file is not None:
+            form_data.append(("file", file))
+        form_data.append((
+            "Default",
+            "{}",
+        ))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
 
     async def search_for_documents_in_file_cabinet(
         self,
@@ -1377,6 +1824,224 @@ class DocuwareClient(ConnectorClientBase):
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
+
+    async def append_file(
+        self,
+        file_cabinet: str,
+        doc_id: str,
+        *,
+        file: Optional[MultipartFile | bytes] = None,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Append a file
+
+        Appends a file/section to an existing document.
+
+        Swagger operation ID: `AppendFile`.
+
+        Args:
+            file_cabinet: Select the File Cabinet or Document Tray with your
+                document.
+            doc_id: Specify the ID of the document to append to.
+            file: Specify the contents of the file to store.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/FileCabinets/{quote(str(file_cabinet), safe='')}/Sections"
+        )
+        query_params = []
+        value = str(doc_id)
+        if isinstance(doc_id, bool):
+            value = value.lower()
+        query_params.append(f"DocID={quote(value, safe='')}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if file is not None:
+            form_data.append(("file", file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
+
+    async def delete_file(
+        self,
+        file_cabinet: str,
+        document_id: int,
+        file_number: int,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> None:
+        """
+        Delete a file
+
+        Deletes a file/section from an existing document.
+
+        Swagger operation ID: `DeleteFile`.
+
+        Args:
+            file_cabinet: Select the File Cabinet or Document Tray with your
+                document.
+            document_id: Specify the ID of the document to delete from.
+            file_number: Specify the file number to delete.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/FileCabinets"
+            f"/{quote(str(file_cabinet), safe='')}"
+            f"/Documents"
+            f"/{quote(str(document_id), safe='')}"
+            f"/Sections"
+            f"/{quote(str(file_number), safe='')}"
+            f"/Data"
+        )
+
+        response = await self.http_client.send(
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+    async def replace_file(
+        self,
+        file_cabinet: str,
+        document_id: int,
+        file_number: int,
+        *,
+        file: Optional[MultipartFile | bytes] = None,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Replace a file
+
+        Replaces a file/section in an existing document.
+
+        Swagger operation ID: `ReplaceFile`.
+
+        Args:
+            file_cabinet: Select the File Cabinet or Document Tray with your
+                document.
+            document_id: Specify the ID of the document with the file to
+                replace.
+            file_number: Specify the file number to replace.
+            file: Specify the contents of the file to store.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/FileCabinets"
+            f"/{quote(str(file_cabinet), safe='')}"
+            f"/Documents"
+            f"/{quote(str(document_id), safe='')}"
+            f"/Sections"
+            f"/{quote(str(file_number), safe='')}"
+            f"/Data"
+        )
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if file is not None:
+            form_data.append(("file", file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
 
     def list_stamps(
         self,

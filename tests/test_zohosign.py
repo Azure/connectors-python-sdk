@@ -4,6 +4,7 @@
 
 from typing import get_type_hints
 
+from azure.connectors.sdk import MultipartFile
 import azure.connectors.zohosign as zohosign_module
 from azure.connectors.zohosign import ZohosignClient
 from azure.connectors.zohosign import TRIGGER_OPERATIONS
@@ -11,6 +12,7 @@ from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 
 
 OPERATION_CONTRACTS = {
+    "create_document": ("POST", True),
     "delete_document": ("PUT", False),
     "download_completion_certificate": ("GET", False),
     "download_document": ("GET", False),
@@ -66,6 +68,8 @@ def test_document_identifiers_use_integer_annotations() -> None:
         assert type_hints["request_id"] is str, operation
 
 
-def test_multipart_create_document_is_not_generated() -> None:
-    """Test the unsupported multipart operation is excluded."""
-    assert not hasattr(ZohosignClient, "create_document")
+def test_multipart_create_document_accepts_file_bytes_and_metadata() -> None:
+    """Expose the upload without losing the file's metadata or bytes."""
+    type_hints = get_type_hints(ZohosignClient.create_document)
+
+    assert type_hints["file"] == MultipartFile | bytes
