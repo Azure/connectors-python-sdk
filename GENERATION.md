@@ -113,7 +113,7 @@ validation of the synthetic endpoint.
 ### Multipart form-data refresh
 
 The 2026-11-04 refresh uses generator commit
-`efcfdbd0455f6067eea9be802ee7af27683fddec`, active and unmerged when generated.
+`d3aa23dcb55c09d8bf3b85fd4f23ad351e97f586`, active and unmerged when generated.
 It refreshes `cloudmersiveconvert`, `docuware`, and `zohosign`, adding 81
 operations without removing or changing any existing operation signature.
 The catalog still contains 101 root clients; client exports remain lazy.
@@ -123,6 +123,8 @@ Each live generation run used subscription
 `2018-07-01-preview`, and a new empty temporary `ARMCACHE_PATH`. No stored
 responses or fixtures supplied these clients. Separate Python and C# live
 downloads returned identical Swagger bytes for the shared connectors.
+The review refresh produced byte-identical Python clients while picking up the
+shared ServiceNow file-last rule for future Python generation.
 
 | Connector API ID | Live Swagger SHA-256 |
 |---|---|
