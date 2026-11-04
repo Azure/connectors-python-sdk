@@ -612,6 +612,7 @@ Track known generator issues here to prevent silent recurrence across releases.
 
 | Defect | BPM Issue | Affected Connectors | Status | Notes |
 |--------|-----------|---------------------|--------|-------|
+| Raw string request bodies JSON-quoted on the wire | Paired generator PR recorded in the SDK PR | `azuremonitorlogs`, `azurequeues`, `azuretables`, `documentdb`, `onenote`, `powerbi`, `teams` | Fixed | The generator encodes string-schema bodies as UTF-8 bytes and forwards the declared media type. Empty strings stay zero-length and `None` stays absent. Object and binary bodies keep their existing paths. Transport tests cover all eight affected operations. |
 | Teams template variable causes NameError at import | [BPM #TBD](https://dev.azure.com/msazure/One/_workitems/edit/TBD) | `teams` | Workaround (skip import test) | `DynamicValueLookup` references undefined variable; test skipped with issue link |
 | Void operations not checking response status | Fixed in generator | Pre-2024 connectors | Fixed | Regenerate affected connectors: `azurequeues`, `azuretables`, `commondataservice`, `eventhubs`, `excelonlinebusiness`, `office365`, `onedrive`, `outlook`, `servicebus`, `sharepointonline`, `smtp`, `azuread` |
 | api_version parameters missing default values | Fixed in generator | `azuredigitaltwins`, `azurevm`, others | Fixed | Generator now uses swagger default value for api_version/api-version parameters |
