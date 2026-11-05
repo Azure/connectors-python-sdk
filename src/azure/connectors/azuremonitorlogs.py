@@ -972,9 +972,13 @@ class AzuremonitorlogsClient(ConnectorClientBase):
         query_params.append(f"resourcename={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        request_body = input.encode("utf-8") if input is not None else None
 
         response = await self.http_client.send(
-            "POST", request_url, body=input,
+            "POST",
+            request_url,
+            body=request_body,
+            content_type="application/json; charset=utf-8",
             timeout=timeout,
             headers=headers,
             client_request_id=client_request_id,
