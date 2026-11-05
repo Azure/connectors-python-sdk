@@ -113,7 +113,7 @@ validation of the synthetic endpoint.
 ### Multipart form-data refresh
 
 The 2026-11-05 merge refresh uses generator commit
-`b01d76781a8e48c04749bb06fdb8ff6a83c1dcc2`, active and unmerged when generated.
+`0e59e0177283438686e3c14b6dc59e6e2cc42859`, active and unmerged when generated.
 It refreshes `cloudmersiveconvert`, `docuware`, and `zohosign`, adding 81
 operations without removing or changing any existing operation signature.
 The catalog still contains 101 root clients; client exports remain lazy.
@@ -129,6 +129,8 @@ The generator was built with the master-pinned .NET SDK `10.0.114`.
 The fresh merge refresh produced byte-identical multipart clients. The SDK
 branch also includes the current main branch's raw-string clients and retains
 the runtime filename-preservation fix.
+The cross-stack filename follow-up changes C# file header construction only;
+another fresh Python download confirmed these three clients remain unchanged.
 
 | Connector API ID | Live Swagger SHA-256 |
 |---|---|
