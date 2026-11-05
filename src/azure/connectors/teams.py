@@ -57,6 +57,8 @@ __all__ = [
     "CardResponseTriggerMetadata",
     "ChannelIdForTeam",
     "ChannelIds",
+    "ChannelJoinedUserTriggerRequest",
+    "ChannelJoinedUserWebhookResponseSchema",
     "ChannelWithOwnerTeamId",
     "ChatId",
     "ChatMessage",
@@ -3748,6 +3750,67 @@ class TagMemberWebhookResponseSchema:
     """
     Per-event identifier from the source tag event, unique per event and stable
     across retries. Used for delivery idempotency and correlation.
+    """
+
+
+@dataclass
+class ChannelJoinedUserTriggerRequest:
+    """
+    Definition: ChannelJoinedUserTriggerRequest
+    """
+
+    notification_url: str = dataclass_field(
+        metadata={"wire_name": "notificationUrl"},
+    )
+    """Webhook callback URL"""
+    group_id: str = dataclass_field(metadata={"wire_name": "groupId"})
+    """The team that owns the channel to monitor"""
+    channel_id: str = dataclass_field(metadata={"wire_name": "channelId"})
+    """The channel to monitor for users joining"""
+
+
+@dataclass
+class ChannelJoinedUserWebhookResponseSchema:
+    """
+    Definition: ChannelJoinedUserWebhookResponseSchema
+    """
+
+    team_id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "teamId"},
+    )
+    """The team (group) ID that owns the channel."""
+    channel_id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "channelId"},
+    )
+    """The channel ID the user joined."""
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """The channel membership identifier of the joined user."""
+    user_id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "userId"},
+    )
+    """Azure AD user ID of the joined user."""
+    tenant_id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "tenantId"},
+    )
+    """Tenant ID of the joined user."""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "displayName"},
+    )
+    """Display name of the joined user."""
+    roles: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
+    """
+    Roles of the joined user in the channel (for example, 'owner' or 'guest';
+    an empty set denotes a standard member).
     """
 
 
@@ -9892,9 +9955,13 @@ class TeamsClient(ConnectorClientBase):
             f"/$metadata.json"
             f"/subscriptionoutputs"
         )
+        request_body = input.encode("utf-8") if input is not None else None
 
         response = await self.http_client.send(
-            "POST", request_url, body=input,
+            "POST",
+            request_url,
+            body=request_body,
+            content_type="application/json; charset=utf-8",
             timeout=timeout,
             headers=headers,
             client_request_id=client_request_id,

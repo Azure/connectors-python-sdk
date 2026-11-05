@@ -391,9 +391,8 @@ class TestPutMessage:
             assert call_args[0][0] == "POST"
             expected_path = "/storageAccounts/mystorageaccount/queues/myqueue/messages"
             assert expected_path in call_args[0][1]
-            # Verify body is passed
-            body = call_args.kwargs.get('body') or call_args[1].get('body')
-            assert body is message_input
+            assert call_args.kwargs['body'] == message_input.encode('utf-8')
+            assert call_args.kwargs['content_type'].split(';', 1)[0] == 'application/json'
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):

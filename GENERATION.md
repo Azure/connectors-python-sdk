@@ -112,8 +112,8 @@ validation of the synthetic endpoint.
 
 ### Multipart form-data refresh
 
-The 2026-11-04 refresh uses generator commit
-`d3aa23dcb55c09d8bf3b85fd4f23ad351e97f586`, active and unmerged when generated.
+The 2026-11-05 merge refresh uses generator commit
+`b01d76781a8e48c04749bb06fdb8ff6a83c1dcc2`, active and unmerged when generated.
 It refreshes `cloudmersiveconvert`, `docuware`, and `zohosign`, adding 81
 operations without removing or changing any existing operation signature.
 The catalog still contains 101 root clients; client exports remain lazy.
@@ -123,8 +123,12 @@ Each live generation run used subscription
 `2018-07-01-preview`, and a new empty temporary `ARMCACHE_PATH`. No stored
 responses or fixtures supplied these clients. Separate Python and C# live
 downloads returned identical Swagger bytes for the shared connectors.
-The review refresh produced byte-identical Python clients while picking up the
-shared ServiceNow file-last rule for future Python generation.
+The merge includes BPM master `11164ff37305cce13cfc23905f9375ccea26a44d`
+and preserves its raw UTF-8 string-body fixes alongside multipart serialization.
+The generator was built with the master-pinned .NET SDK `10.0.114`.
+The fresh merge refresh produced byte-identical multipart clients. The SDK
+branch also includes the current main branch's raw-string clients and retains
+the runtime filename-preservation fix.
 
 | Connector API ID | Live Swagger SHA-256 |
 |---|---|
@@ -643,6 +647,7 @@ Track known generator issues here to prevent silent recurrence across releases.
 | Defect | BPM Issue | Affected Connectors | Status | Notes |
 |--------|-----------|---------------------|--------|-------|
 | Multipart form-data operations excluded | Fixed in generator | `cloudmersiveconvert`, `docuware`, `zohosign` | Fixed | Emits typed file and scalar fields, preserves internal defaults and collection formats, and sends native MIME bytes through the existing pipeline. |
+| Raw string request bodies JSON-quoted on the wire | Paired generator PR recorded in the SDK PR | `azuremonitorlogs`, `azurequeues`, `azuretables`, `documentdb`, `onenote`, `powerbi`, `teams` | Fixed | The generator encodes string-schema bodies as UTF-8 bytes and forwards the declared media type. Empty strings stay zero-length and `None` stays absent. Object and binary bodies keep their existing paths. Transport tests cover all eight affected operations. |
 | Teams template variable causes NameError at import | [BPM #TBD](https://dev.azure.com/msazure/One/_workitems/edit/TBD) | `teams` | Workaround (skip import test) | `DynamicValueLookup` references undefined variable; test skipped with issue link |
 | Void operations not checking response status | Fixed in generator | Pre-2024 connectors | Fixed | Regenerate affected connectors: `azurequeues`, `azuretables`, `commondataservice`, `eventhubs`, `excelonlinebusiness`, `office365`, `onedrive`, `outlook`, `servicebus`, `sharepointonline`, `smtp`, `azuread` |
 | api_version parameters missing default values | Fixed in generator | `azuredigitaltwins`, `azurevm`, others | Fixed | Generator now uses swagger default value for api_version/api-version parameters |

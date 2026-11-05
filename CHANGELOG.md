@@ -64,6 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Raw string request bodies** — Azure Monitor Logs, Azure Queues, Azure Tables, Azure Cosmos DB, OneNote, Power BI, and Teams now send text as raw UTF-8 rather than JSON-quoted strings. Empty text stays empty, and OneNote section requests retain `text/plain`.
 - **Scalar-map wire validation** — generated model fields reject nested objects, arrays, and undeclared nulls at construction and again during SDK serialization; declared null map entries stay in the JSON payload. Raw mapping inputs remain unrestricted. The pinned fixture also exercises generated-method dispatch against the merged async runtime with mocked network responses, not a live endpoint.
 - **Jira continuation tokens**: Treat next-page tokens as opaque values rather than continuation URLs.
 - **Initial polling URLs**: Resolve relative initial `Location` headers against the initiating request URL.
