@@ -23,6 +23,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes
 
+- PdfCo response models use `PdfUnsearchableResponse`, `PdfFromXlsXlsxResponse`,
+  and `XlsToCsvResponse`/`XlsToHtmlResponse`/`XlsToJsonResponse`/
+  `XlsToTxtResponse`/`XlsToXmlResponse` instead of the corresponding
+  `PDFUnSearchableResponse`, `PDFFromXLSXLSXResponse`, and `XLSto*Response`
+  names. Request models, operations, wire fields, and response values are unchanged.
 - Plivo model imports now use `Sms` and `SendSmsResponse` instead of `SMS` and
   `SendSMSResponse`. The async `send_sms` operation, its route, and JSON wire
   fields remain unchanged.

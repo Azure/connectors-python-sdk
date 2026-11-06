@@ -119,7 +119,7 @@ Plivo therefore exports `Sms` and `SendSmsResponse`; its async operation remains
 pre-release API correction. The sample and request-body tests use the new names.
 
 The live refresh uses generator
-`16d169d5ae28851f4056b27a6edeff8dc190cba5` from the linked active, unmerged
+`f73f866893706f4f0d017dfb2205b6539894526d` from the linked active, unmerged
 BPM PR 17700725. It fetched subscription
 `1a839f1f-10b2-4613-95ad-0800a22abbf2`, region `westus`, ARM API
 `2018-07-01-preview`, with a new empty temporary `ARMCACHE_PATH`. No stored
@@ -127,17 +127,29 @@ responses or fixtures supplied this client. The live Swagger SHA-256 is
 `85071BA3C076FC92EEF5AF2272CB2A775B9FE1B04242FDC86A7CF1429D78790A`.
 The LF-normalized generated client SHA-256 is
 `638707be3f816595ecb756c6babb30de5edf0d6c1ff60fd0523ab8be7a20d20a`.
-The latest live capture ran from `2026-11-06T20:24:42.121Z` to
-`2026-11-06T20:25:07.103Z`. A separate capture from
-`2026-11-06T20:26:10.432Z` to `2026-11-06T20:26:32.471Z` matched the
+The latest live capture ran from `2026-11-06T22:12:08.686Z` to
+`2026-11-06T22:12:32.790Z`. A separate capture from
+`2026-11-06T22:13:27.260Z` to `2026-11-06T22:13:48.603Z` matched the
 consumed Swagger and output hashes for both Plivo and PdfCo.
 PdfCo Swagger SHA-256:
 `c9fb18e541124ef0cd7d867173a4c61eabd2c7a0b0be95bcdf5d4b1c4ede3702`;
 LF-normalized output SHA-256:
-`2a7bd8f54718a11bdf65717e3ab3612d8ce785246ca64cc6bcafb7fcf34c0c01`.
-Both regenerated modules are byte-identical after LF normalization to the prior
-SDK PR iteration. The review repros establish synthetic model-shape defects,
-not a live Plivo or PdfCo transport regression.
+`42bb82298e1934ef803bdeceb54a20ae11f5ea6ec52314f24cb223a72db4a486`.
+Plivo remains byte-identical after LF normalization. PdfCo's seven response-model
+exports adopt the reviewed casing listed below; request models, operations,
+routes, JSON fields, and raw response dictionaries remain unchanged.
+
+| Previous response model | Current response model |
+|---|---|
+| `PDFUnSearchableResponse` | `PdfUnsearchableResponse` |
+| `PDFFromXLSXLSXResponse` | `PdfFromXlsXlsxResponse` |
+| `XLStoCSVResponse` | `XlsToCsvResponse` |
+| `XLStoHTMLResponse` | `XlsToHtmlResponse` |
+| `XLStoJSONResponse` | `XlsToJsonResponse` |
+| `XLStoTXTResponse` | `XlsToTxtResponse` |
+| `XLStoXMLResponse` | `XlsToXmlResponse` |
+
+These are documented preview API renames, not a live transport-regression claim.
 Only Plivo and PdfCo are refreshed; the other root clients, lazy exports, and registry
 inventory remain unchanged. The generator must integrate before the SDK fix
 merges. Tests do not send real SMS messages.
