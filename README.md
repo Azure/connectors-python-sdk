@@ -183,6 +183,32 @@ Await the `begin_*` method to create an `AsyncLROPoller`, then
 `await poller.result()` waits for completion. See the
 [long-running operations guide](docs/long-running-operations.md).
 
+### Multipart file uploads
+
+Cloudmersive Convert, DocuWare, and Zoho Sign expose multipart operations.
+Pass file bytes directly, or use `MultipartFile` to set the filename and media
+type. The client sends file bytes in MIME parts, not as JSON or base64.
+
+```python
+from azure.identity.aio import DefaultAzureCredential
+
+from azure.connectors.cloudmersiveconvert import CloudmersiveconvertClient
+from azure.connectors.sdk import MultipartFile
+
+
+async def convert_file(connection_url: str, file_content: bytes) -> bytes:
+    async with DefaultAzureCredential() as credential:
+        async with CloudmersiveconvertClient(connection_url, credential) as client:
+            return await client.convert_document_autodetect_to_pdf(
+                MultipartFile(file_content, "source.doc", "application/msword")
+            )
+```
+
+Plain bytes use the filename `blob` and media type `application/octet-stream`.
+Optional form fields remain keyword-only. The SDK buffers multipart bodies
+before dispatch, preserving the existing authentication, timeout, response-hook,
+and retry-safety behavior.
+
 ### Retry safety
 
 By default, `GET`, `HEAD`, `OPTIONS`, and `TRACE` use the configured retry settings. `POST`, `PUT`, `PATCH`, `DELETE`, and other methods make one attempt after a transient response or transport error because the connector may already have completed the side effect.

@@ -20,10 +20,13 @@ from azure.connectors.sdk import (
     ConnectorException,
     ConnectorResponseHook,
     ConnectorResponseSnapshot,
+    MultipartFile,
+    encode_multipart_form_data,
 )
 
 __all__ = [
     "ZohosignClient",
+    "CreateDocumentResponse",
     "GetDocumentResponse",
     "GetFormDataResponse",
     "GetTemplatesResponse",
@@ -91,6 +94,22 @@ class GetFormDataResponse:
     """code"""
     document_form_data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Document form data"""
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """status"""
+
+
+@dataclass
+class CreateDocumentResponse:
+    """
+    Response for Create a document for signing
+    """
+
+    code: Optional[int] = dataclass_field(default=None, kw_only=True)
+    """code"""
+    requests: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    """requests"""
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """Message"""
     status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """status"""
 
@@ -742,6 +761,69 @@ class ZohosignClient(ConnectorClientBase):
                 response.text,
                 response=response,
             )
+
+    async def create_document(
+        self,
+        file: MultipartFile | bytes,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Create a document for signing
+
+        An action to create a document for signing by uploading a file.
+
+        Swagger operation ID: `Create-Document`.
+
+        Args:
+            file: create a document.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/requests"
+        form_data: list[tuple[str, str | bytes | MultipartFile]] = []
+        if file is None:
+            raise ValueError("Parameter 'file' is required.")
+        form_data.append(("file", file))
+        multipart_body, multipart_content_type = (
+            await encode_multipart_form_data(form_data)
+        )
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=multipart_body,
+            content_type=multipart_content_type,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
 
     async def get_document(
         self,
