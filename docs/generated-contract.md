@@ -48,6 +48,26 @@ The shipped catalog contains exactly 44 LRO methods: 5 in Kusto and 39
 in Plumsail. Internal Kusto retrieval helpers and superseded Plumsail revisions
 remain filtered by the existing operation-retention rules.
 
+## Multipart form-data
+
+Swagger 2.0 `formData` parameters become typed operation arguments, not JSON
+model properties. File fields accept bytes or `MultipartFile`; optional fields
+remain keyword-only and disappear from the request when omitted. Internal
+defaults stay on the wire without becoming public arguments.
+
+The shared encoder uses a native multipart writer and forwards its complete
+boundary-bearing content type with the buffered body through Azure Core.
+Files retain their original bytes, filename, and media type. Scalar fields,
+empty strings, and repeated names remain separate MIME parts. Arrays use their
+declared `csv`, `ssv`, `tsv`, `pipes`, or `multi` collection format.
+File disposition parameters use quoted-string escaping rather than percent
+encoding, preserving spaces, Unicode, percent signs, and embedded quotes without
+requiring the receiver to URL-decode filenames.
+
+Bodyless operations remain callable when only their `consumes` metadata says
+multipart. File arrays, unknown collection formats, mixed body/form-data
+declarations, and `multipart/mixed` request payloads remain unsupported.
+
 ## Regeneration evidence
 
 Source Swagger files used during generation are not committed to this
