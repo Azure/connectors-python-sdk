@@ -119,7 +119,7 @@ Plivo therefore exports `Sms` and `SendSmsResponse`; its async operation remains
 pre-release API correction. The sample and request-body tests use the new names.
 
 The live refresh uses generator
-`edf9bb04241ccad2c52ec7a81489cdbeb2319dd4` from the linked active, unmerged
+`16d169d5ae28851f4056b27a6edeff8dc190cba5` from the linked active, unmerged
 BPM PR 17700725. It fetched subscription
 `1a839f1f-10b2-4613-95ad-0800a22abbf2`, region `westus`, ARM API
 `2018-07-01-preview`, with a new empty temporary `ARMCACHE_PATH`. No stored
@@ -127,9 +127,18 @@ responses or fixtures supplied this client. The live Swagger SHA-256 is
 `85071BA3C076FC92EEF5AF2272CB2A775B9FE1B04242FDC86A7CF1429D78790A`.
 The LF-normalized generated client SHA-256 is
 `638707be3f816595ecb756c6babb30de5edf0d6c1ff60fd0523ab8be7a20d20a`.
-The live capture ran from `2026-11-06T00:34:04.1919319Z` to
-`2026-11-06T00:34:19.6842160Z`.
-Only Plivo is refreshed; the other root clients, lazy exports, and registry
+The latest live capture ran from `2026-11-06T20:24:42.121Z` to
+`2026-11-06T20:25:07.103Z`. A separate capture from
+`2026-11-06T20:26:10.432Z` to `2026-11-06T20:26:32.471Z` matched the
+consumed Swagger and output hashes for both Plivo and PdfCo.
+PdfCo Swagger SHA-256:
+`c9fb18e541124ef0cd7d867173a4c61eabd2c7a0b0be95bcdf5d4b1c4ede3702`;
+LF-normalized output SHA-256:
+`2a7bd8f54718a11bdf65717e3ab3612d8ce785246ca64cc6bcafb7fcf34c0c01`.
+Both regenerated modules are byte-identical after LF normalization to the prior
+SDK PR iteration. The review repros establish synthetic model-shape defects,
+not a live Plivo or PdfCo transport regression.
+Only Plivo and PdfCo are refreshed; the other root clients, lazy exports, and registry
 inventory remain unchanged. The generator must integrate before the SDK fix
 merges. Tests do not send real SMS messages.
 
@@ -635,6 +644,8 @@ Track known generator issues here to prevent silent recurrence across releases.
 
 | Defect | BPM Issue | Affected Connectors | Status | Notes |
 |--------|-----------|---------------------|--------|-------|
+| Distinct retained schemas collapsed after acronym normalization | [BPM PR 17700725](https://msazure.visualstudio.com/One/_git/AzureUX-BPM/pullrequest/17700725) | Synthetic `SMSResponse` / `SmsResponse` repro; live incidence unproven | Fixed | The shared resolver reserves natural emitted names and allocates unique aliases for different shapes. Equivalent schemas still share one model; cross-language regressions preserve both declarations. |
+| Override-aware shared method names disagreed with inline-body synthesis | [BPM PR 17700725](https://msazure.visualstudio.com/One/_git/AzureUX-BPM/pullrequest/17700725) | Synthetic `pdfco` repro | Fixed | Restoring the shared one-argument simplifier keeps the coordinator and emitter projections consistent without broadening PdfCo overrides. Named response and inline request fields remain separately representable. |
 | Raw string request bodies JSON-quoted on the wire | Paired generator PR recorded in the SDK PR | `azuremonitorlogs`, `azurequeues`, `azuretables`, `documentdb`, `onenote`, `powerbi`, `teams` | Fixed | The generator encodes string-schema bodies as UTF-8 bytes and forwards the declared media type. Empty strings stay zero-length and `None` stays absent. Object and binary bodies keep their existing paths. Transport tests cover all eight affected operations. |
 | Teams template variable causes NameError at import | [BPM #TBD](https://dev.azure.com/msazure/One/_workitems/edit/TBD) | `teams` | Workaround (skip import test) | `DynamicValueLookup` references undefined variable; test skipped with issue link |
 | Void operations not checking response status | Fixed in generator | Pre-2024 connectors | Fixed | Regenerate affected connectors: `azurequeues`, `azuretables`, `commondataservice`, `eventhubs`, `excelonlinebusiness`, `office365`, `onedrive`, `outlook`, `servicebus`, `sharepointonline`, `smtp`, `azuread` |
