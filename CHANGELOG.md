@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes
 
+- Plivo model imports now use `Sms` and `SendSmsResponse` instead of `SMS` and
+  `SendSMSResponse`. The async `send_sms` operation, its route, and JSON wire
+  fields remain unchanged.
 - **Swagger-required model fields are now required constructor arguments** — generated dataclasses no longer default required properties to `None`.
 - **Read collection operations now return Azure Core pagers** — bounded read collections without continuation metadata use `AsyncItemPaged`; mutation and action arrays remain eager operation payloads.
 - **Client timeout configuration now uses `timeout`** — generated async

@@ -110,6 +110,29 @@ its success/error request path, scalar wire serialization, and mutation rejectio
 before dispatch, using mocked network responses. This is not live-backend
 validation of the synthetic endpoint.
 
+### Plivo SMS naming follow-up
+
+The shared generator normalizes an unambiguous `SMS` identifier word to `Sms`
+for every connector rather than listing individual Dataflows SMS operations.
+Plivo therefore exports `Sms` and `SendSmsResponse`; its async operation remains
+`send_sms`. Update imports from `azure.connectors.plivo` when adopting this
+pre-release API correction. The sample and request-body tests use the new names.
+
+The live refresh uses generator
+`edf9bb04241ccad2c52ec7a81489cdbeb2319dd4` from the linked active, unmerged
+BPM PR 17700725. It fetched subscription
+`1a839f1f-10b2-4613-95ad-0800a22abbf2`, region `westus`, ARM API
+`2018-07-01-preview`, with a new empty temporary `ARMCACHE_PATH`. No stored
+responses or fixtures supplied this client. The live Swagger SHA-256 is
+`85071BA3C076FC92EEF5AF2272CB2A775B9FE1B04242FDC86A7CF1429D78790A`.
+The LF-normalized generated client SHA-256 is
+`638707be3f816595ecb756c6babb30de5edf0d6c1ff60fd0523ab8be7a20d20a`.
+The live capture ran from `2026-11-06T00:34:04.1919319Z` to
+`2026-11-06T00:34:19.6842160Z`.
+Only Plivo is refreshed; the other root clients, lazy exports, and registry
+inventory remain unchanged. The generator must integrate before the SDK fix
+merges. Tests do not send real SMS messages.
+
 ### Generate C# DirectClient SDK
 
 For the .NET SDK, use `--directClient` without `--language` (defaults to C#) or explicitly specify `--language=csharp`:
