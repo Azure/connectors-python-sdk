@@ -31,6 +31,7 @@ from .cloudconvert import CloudconvertClient as CloudconvertClient
 from .cloudmersiveconvert import CloudmersiveconvertClient as CloudmersiveconvertClient
 from .commondataservice import CommondataserviceClient as CommondataserviceClient
 from .dataflows import DataflowsClient as DataflowsClient
+from .dataflowssms import DataflowssmsClient as DataflowssmsClient
 from .documentdb import DocumentdbClient as DocumentdbClient
 from .docusign import DocusignClient as DocusignClient
 from .docuware import DocuwareClient as DocuwareClient
@@ -86,6 +87,7 @@ from .salesforce import SalesforceClient as SalesforceClient
 from .seismicplanner import SeismicplannerClient as SeismicplannerClient
 from .sendgrid import SendgridClient as SendgridClient
 from .servicebus import ServicebusClient as ServicebusClient
+from .service_now import ServiceNowClient as ServiceNowClient
 from .sharepointonline import SharepointonlineClient as SharepointonlineClient
 from .shifts import ShiftsClient as ShiftsClient
 from .signinghub import SigninghubClient as SigninghubClient

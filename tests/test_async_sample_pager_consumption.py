@@ -293,7 +293,7 @@ async def test_async_sample_consumes_pages_and_reports_items(
 def test_all_async_pageable_call_sites_are_explicitly_consumed() -> None:
     """Sweep every sample using generated return types, not operation-name guesses."""
     paths = sorted(SAMPLES.glob("sample_connector_usage_*.py"))
-    assert len(paths) == 101
+    assert len(paths) == 103
     pageable_sample_count = 0
     call_count = 0
     for sample_path in paths:

@@ -111,8 +111,8 @@ def get_lro_operations(client_type: type[Any]) -> set[str]:
 
 
 def test_generated_lro_inventory_uses_async_root_pollers() -> None:
-    """Keep the retained 44-operation LRO surface exact across all 101 clients."""
-    assert len(CONNECTOR_MODULE_NAMES) == 101
+    """Keep the retained 44-operation LRO surface exact across all 103 clients."""
+    assert len(CONNECTOR_MODULE_NAMES) == 103
 
     for module_name in CONNECTOR_MODULE_NAMES:
         root_module = importlib.import_module(f"azure.connectors.{module_name}")

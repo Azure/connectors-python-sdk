@@ -263,6 +263,7 @@ The following connectors have been generated and validated with comprehensive te
 | **CloudConvert** | `azure.connectors.cloudconvert` | ✅ Complete | 🔄 SDK Generated |
 | **Cloudmersive Document Conversion** | `azure.connectors.cloudmersiveconvert` | ✅ Complete | 🔄 SDK Generated |
 | **Dataflows (Power Query)** | `azure.connectors.dataflows` | ✅ Complete | 🔄 SDK Generated |
+| **DataFlows SMS** | `azure.connectors.dataflowssms` | ✅ Complete | 🔄 SDK Generated |
 | **DocuSign** | `azure.connectors.docusign` | ✅ Complete | 🔄 SDK Generated |
 | **DocuWare** | `azure.connectors.docuware` | ✅ Complete | 🔄 SDK Generated |
 | **Dropbox** | `azure.connectors.dropbox` | ✅ Complete | 🔄 SDK Generated |
@@ -318,6 +319,7 @@ The following connectors have been generated and validated with comprehensive te
 | **Seismic Planner** | `azure.connectors.seismicplanner` | ✅ Complete | 🔄 SDK Generated |
 | **SendGrid** | `azure.connectors.sendgrid` | ✅ Complete | 🔄 SDK Generated |
 | **Service Bus** | `azure.connectors.servicebus` | ✅ Complete | 🔄 SDK Generated |
+| **ServiceNow** | `azure.connectors.service_now` | ✅ Complete | 🔄 SDK Generated |
 | **SharePoint Online** | `azure.connectors.sharepointonline` | ✅ Complete | ✅ E2E Validated |
 | **Shifts** | `azure.connectors.shifts` | ✅ Complete | 🔄 SDK Generated |
 | **SigningHub** | `azure.connectors.signinghub` | ✅ Complete | 🔄 SDK Generated |
@@ -342,7 +344,7 @@ The following connectors have been generated and validated with comprehensive te
 | **Zoho Sign** | `azure.connectors.zohosign` | ✅ Complete | 🔄 SDK Generated |
 | **Zoho ZeptoMail** | `azure.connectors.zeptomail` | ✅ Complete | 🔄 SDK Generated |
 
-**Total:** 101 connectors supported
+**Total:** 103 connectors supported
 
 See [ROADMAP.md](ROADMAP.md) for planned connector additions and [tests/README.md](tests/README.md) for detailed test coverage.
 
