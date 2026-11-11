@@ -66,7 +66,6 @@ __all__ = [
     "PDFFromImagesInput",
     "PDFFromImagesResponse",
     "PDFFromXLSXLSXInput",
-    "PDFFromXLSXLSXResponse",
     "PDFInfoReaderInput",
     "PDFInfoReaderResponse",
     "PDFRotatePagesInput",
@@ -102,9 +101,10 @@ __all__ = [
     "PDFToXMLInput",
     "PDFToXMLResponse",
     "PDFUnSearchableInput",
-    "PDFUnSearchableResponse",
     "PdfFillerInput",
     "PdfFillerResponse",
+    "PdfFromXlsXlsxResponse",
+    "PdfUnsearchableResponse",
     "SearchAndDeleteTextInput",
     "SearchAndDeleteTextResponse",
     "SearchAndReplaceInput",
@@ -118,15 +118,15 @@ __all__ = [
     "UrlToPdfInput",
     "UrlToPdfResponse",
     "XLStoCSVInput",
-    "XLStoCSVResponse",
     "XLStoHTMLInput",
-    "XLStoHTMLResponse",
     "XLStoJSONInput",
-    "XLStoJSONResponse",
     "XLStoTXTInput",
-    "XLStoTXTResponse",
     "XLStoXMLInput",
-    "XLStoXMLResponse",
+    "XlsToCsvResponse",
+    "XlsToHtmlResponse",
+    "XlsToJsonResponse",
+    "XlsToTxtResponse",
+    "XlsToXmlResponse",
 ]
 
 
@@ -1920,7 +1920,7 @@ class PDFUnSearchableInput:
 
 
 @dataclass
-class PDFUnSearchableResponse:
+class PdfUnsearchableResponse:
     """
     Response for PDF to Scanned PDF
     """
@@ -3932,7 +3932,7 @@ class PDFFromXLSXLSXInput:
 
 
 @dataclass
-class PDFFromXLSXLSXResponse:
+class PdfFromXlsXlsxResponse:
     """
     Response for PDF From Spreadsheet
     """
@@ -4027,7 +4027,7 @@ class XLStoCSVInput:
 
 
 @dataclass
-class XLStoCSVResponse:
+class XlsToCsvResponse:
     """
     Response for Spreadsheet to CSV
     """
@@ -4105,7 +4105,7 @@ class XLStoJSONInput:
 
 
 @dataclass
-class XLStoJSONResponse:
+class XlsToJsonResponse:
     """
     Response for Spreadsheet to JSON
     """
@@ -4183,7 +4183,7 @@ class XLStoHTMLInput:
 
 
 @dataclass
-class XLStoHTMLResponse:
+class XlsToHtmlResponse:
     """
     Response for Spreadsheet to HTML
     """
@@ -4261,7 +4261,7 @@ class XLStoTXTInput:
 
 
 @dataclass
-class XLStoTXTResponse:
+class XlsToTxtResponse:
     """
     Response for Spreadsheet to TXT
     """
@@ -4339,7 +4339,7 @@ class XLStoXMLInput:
 
 
 @dataclass
-class XLStoXMLResponse:
+class XlsToXmlResponse:
     """
     Response for Spreadsheet to XML
     """
