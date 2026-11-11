@@ -10,7 +10,7 @@ This directory contains samples demonstrating how to use the Azure Connectors SD
 
 ## Samples
 
-Each of the 101 connectors has one async sample in this directory. Clients and
+Each of the 103 connectors has one async sample in this directory. Clients and
 models use root connector imports and unsuffixed operation names. Run a sample with:
 
 ```bash
@@ -32,6 +32,7 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_azurevm.py` | Azure VM | `AZUREVM_CONNECTION_URL` |
 | `sample_connector_usage_commondataservice.py` | Microsoft Dataverse | `COMMONDATASERVICE_CONNECTION_URL` |
 | `sample_connector_usage_dataflows.py` | Power Query Dataflows | `DATAFLOWS_CONNECTION_URL`, `DATAFLOWS_WORKSPACE_TYPE` (optional) |
+| `sample_connector_usage_dataflowssms.py` | Dataflows SMS | `DATAFLOWSSMS_CONNECTION_URL` |
 | `sample_connector_usage_documentdb.py` | Azure Cosmos DB | `DOCUMENTDB_CONNECTION_URL` |
 | `sample_connector_usage_dropbox.py` | Dropbox | `DROPBOX_CONNECTION_URL` |
 | `sample_connector_usage_docusign.py` | DocuSign | `DOCUSIGN_CONNECTION_URL` |
@@ -81,6 +82,7 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_rss.py` | RSS | `RSS_CONNECTION_URL` |
 | `sample_connector_usage_salesforce.py` | Salesforce | `SALESFORCE_CONNECTION_URL` |
 | `sample_connector_usage_servicebus.py` | Azure Service Bus | `SERVICEBUS_CONNECTION_URL` |
+| `sample_connector_usage_service_now.py` | ServiceNow | `SERVICENOW_CONNECTION_URL`, `SERVICENOW_RECORD_ID` |
 | `sample_connector_usage_sharepoint.py` | SharePoint Online | `SHAREPOINT_CONNECTION_URL` |
 | `sample_connector_usage_shifts.py` | Shifts | `SHIFTS_CONNECTION_URL` |
 | `sample_connector_usage_slack.py` | Slack | `SLACK_CONNECTION_URL` |
