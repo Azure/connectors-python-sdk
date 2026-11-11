@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **DataFlows SMS and ServiceNow generated clients** — adds live-Swagger-generated async operations, typed models, trigger metadata where available, lazy package exports, and mocked-transport tests.
+- **DataFlows SMS and ServiceNow generated clients** — adds live-Swagger-generated async operations, typed models, trigger metadata where available, lazy package exports, and mocked-transport tests. ServiceNow knowledge search uses the lazy `list_knowledge_articles` pager and yields article items, not the response envelope.
 
 - **Multipart form-data operations** - adds file uploads for Cloudmersive Convert,
   DocuWare, and Zoho Sign, plus DocuWare's bodyless file delete. `MultipartFile`

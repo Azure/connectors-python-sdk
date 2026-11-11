@@ -6,16 +6,19 @@
 
 from __future__ import annotations
 
+from email import policy
+from email.parser import BytesParser
 import json
 from urllib.parse import parse_qs, urlsplit
 
 import pytest
+from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
 
 import azure.connectors as connectors
 from azure.connectors.dataflowssms import DataflowssmsClient, SendSmsInput
-from azure.connectors.sdk import ConnectorException
-from azure.connectors.service_now import ServiceNowClient
+from azure.connectors.sdk import ConnectorException, MultipartFile
+from azure.connectors.service_now import OrderItemInput, RecordBody, ServiceNowClient
 from tests.test_sdk_azure_core_pipeline import RecordingTransport, create_response
 
 
@@ -115,6 +118,154 @@ async def test_service_now_error_response_is_not_silently_returned() -> None:
     assert captured.value.status_code == 404
     assert "missing" in captured.value.response_body
     assert len(transport.requests) == 1
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("content", "expected_articles"),
+    [
+        (b"", []),
+        (b"{}", []),
+        (b'{"meta":{"count":0},"articles":[]}', []),
+        (b'{"meta":{"count":2},"articles":[{"sys_id":"first"},{"sys_id":"second"}]}',
+         [{"sys_id": "first"}, {"sys_id": "second"}]),
+    ],
+)
+async def test_service_now_article_search_returns_lazy_item_pager(
+    content: bytes, expected_articles: list[dict[str, str]],
+) -> None:
+    """Yield articles, not their metadata envelope, with one lazy read request."""
+    transport = RecordingTransport(create_response(content=content))
+    async with ServiceNowClient(
+        RUNTIME_URL, AzureKeyCredential("test-key"), transport=transport,
+    ) as client:
+        articles = client.list_knowledge_articles(query="network/access", limit=2)
+        assert isinstance(articles, AsyncItemPaged)
+        assert transport.requests == []
+        assert [article async for article in articles] == expected_articles
+
+    request, = transport.requests
+    assert request.method == "GET"
+    assert urlsplit(request.url).path.endswith("/api/sn_km_api/knowledge/articles")
+    assert parse_qs(urlsplit(request.url).query) == {
+        "query": ["network/access"], "limit": ["2"],
+    }
+    assert transport.closed
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("operation", ["create_record", "update_record"])
+@pytest.mark.parametrize("use_model", [False, True])
+async def test_service_now_record_writes_flatten_dynamic_body(
+    operation: str, use_model: bool,
+) -> None:
+    """Send model extension data and mapping keys at the record body's root."""
+    fields = {"short_description": "Synthetic incident", "active": False,
+              "caller_id": {"value": "synthetic-caller"}}
+    body = RecordBody(additional_properties=fields) if use_model else fields
+    transport = RecordingTransport(create_response(content=b'{"result":{"sys_id":"created"}}'))
+    async with ServiceNowClient(
+        RUNTIME_URL, AzureKeyCredential("test-key"), transport=transport,
+    ) as client:
+        if operation == "create_record":
+            await client.create_record(input=body, table_type="incident")
+        else:
+            await client.update_record(input=body, table_type="incident", sysid="record/id")
+
+    request, = transport.requests
+    assert request.method == ("POST" if operation == "create_record" else "PUT")
+    suffix = "/api/now/v2/table/incident"
+    if operation == "update_record":
+        suffix += "/record%2Fid"
+    assert urlsplit(request.url).path.endswith(suffix)
+    assert request.headers["Content-Type"] == "application/json"
+    assert json.loads(request.body) == fields
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("use_model", [False, True])
+async def test_service_now_order_sends_catalog_parameters(use_model: bool) -> None:
+    """Preserve quantity, requested user and nested variables without a wrapper."""
+    fields = {"sysparm_quantity": 2, "sysparm_requested_for": "synthetic-user",
+              "variables": {"size": "medium", "expedited": False}}
+    body = OrderItemInput(**fields) if use_model else fields
+    transport = RecordingTransport(create_response())
+    async with ServiceNowClient(
+        RUNTIME_URL, AzureKeyCredential("test-key"), transport=transport,
+    ) as client:
+        await client.order_item(input=body, sys_id="catalog/item")
+
+    request, = transport.requests
+    assert request.method == "POST"
+    assert urlsplit(request.url).path.endswith(
+        "/api/sn_sc/servicecatalog/items/catalog%2Fitem/order_now",
+    )
+    assert request.headers["Content-Type"] == "application/json"
+    assert json.loads(request.body) == fields
+
+
+@pytest.mark.asyncio
+async def test_service_now_attachment_file_preserves_raw_binary_body() -> None:
+    """Send exact binary bytes instead of a JSON string or encoded wrapper."""
+    content = b"%PDF-synthetic\x00\xff\r\n"
+    transport = RecordingTransport(create_response())
+    async with ServiceNowClient(
+        RUNTIME_URL, AzureKeyCredential("test-key"), transport=transport,
+    ) as client:
+        await client.upload_attachment_file(
+            input=content, table_name="incident", table_sys_id="record/id",
+            file_name="report copy.pdf",
+        )
+
+    request, = transport.requests
+    assert request.method == "POST"
+    assert urlsplit(request.url).path.endswith("/api/now/v1/attachment/file")
+    assert parse_qs(urlsplit(request.url).query) == {
+        "table_name": ["incident"], "table_sys_id": ["record/id"],
+        "file_name": ["report copy.pdf"],
+    }
+    assert request.headers["Content-Type"] == "application/octet-stream"
+    assert request.body == content
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("use_file_model", [False, True])
+async def test_service_now_multipart_attachment_preserves_fields_and_file(
+    use_file_model: bool,
+) -> None:
+    """Parse the outgoing MIME body and verify field names, bytes and media type."""
+    content = b"%PDF-synthetic\x00\xff\r\n"
+    attachment = MultipartFile(
+        content=content, file_name="report copy.pdf", content_type="application/pdf",
+    ) if use_file_model else content
+    transport = RecordingTransport(create_response())
+    async with ServiceNowClient(
+        RUNTIME_URL, AzureKeyCredential("test-key"), transport=transport,
+    ) as client:
+        await client.upload_attachment(
+            attachment_content=attachment, table_name="incident",
+            table_sys_id="record/id",
+        )
+
+    request, = transport.requests
+    assert request.method == "POST"
+    assert urlsplit(request.url).path.endswith("/api/now/v1/attachment/upload")
+    assert request.headers["Content-Type"].startswith("multipart/form-data; boundary=")
+    message = BytesParser(policy=policy.default).parsebytes(
+        f"Content-Type: {request.headers['Content-Type']}\r\n\r\n".encode("ascii")
+        + request.body,
+    )
+    parts = list(message.iter_parts())
+    assert [part.get_param("name", header="Content-Disposition") for part in parts] == [
+        "table_name", "table_sys_id", "attachment_content",
+    ]
+    assert [part.get_payload(decode=True) for part in parts] == [
+        b"incident", b"record/id", content,
+    ]
+    assert parts[2].get_filename() == ("report copy.pdf" if use_file_model else "blob")
+    assert parts[2].get_content_type() == (
+        "application/pdf" if use_file_model else "application/octet-stream"
+    )
 
 
 @pytest.mark.asyncio
