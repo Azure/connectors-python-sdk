@@ -28,8 +28,8 @@ __all__ = [
     "GetMessageResponse",
     "ListMessagesResponse",
     "MakeCallResponse",
-    "SMS",
-    "SendSMSResponse",
+    "SendSmsResponse",
+    "Sms",
 ]
 
 
@@ -64,7 +64,7 @@ class ListMessagesResponse:
 
 
 @dataclass
-class SendSMSResponse:
+class SendSmsResponse:
     """
     Response for Send SMS
     """
@@ -115,7 +115,7 @@ class GetMessageResponse:
 
 
 @dataclass
-class SMS:
+class Sms:
     """
     Definition: SMS
     """
@@ -427,7 +427,7 @@ class PlivoClient(ConnectorClientBase):
 
     async def send_sms(
         self,
-        input: SMS | Mapping[str, Any],
+        input: Sms | Mapping[str, Any],
         auth_id: str,
         *,
         timeout: Optional[float] = None,
