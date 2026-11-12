@@ -2311,6 +2311,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("docgenFields", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2756,6 +2759,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("tabs", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2908,6 +2914,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("tabs", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2997,6 +3006,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("envelopeDocumentFields", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -4640,6 +4652,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("loginAccounts", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -4719,6 +4734,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("envelopeTemplates", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -4869,6 +4887,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("templateDocuments", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -4954,6 +4975,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("envelopeDocuments", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -5330,6 +5354,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("recipientTabs", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -5952,6 +5979,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("organizations", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -6084,6 +6114,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("folders", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -6168,6 +6201,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("folderItems", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -6242,6 +6278,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("tabTypes", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -6316,6 +6355,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("tabTypes", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -6395,6 +6437,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("signingGroups", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -6469,6 +6514,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("tabTypes", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -6548,6 +6596,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("WorkflowDefinitions", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -6629,6 +6680,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("workflowIds", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)

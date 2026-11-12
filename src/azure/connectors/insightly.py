@@ -1852,6 +1852,9 @@ class InsightlyClient(ConnectorClientBase):
                 for item in page.get("tasks", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2050,6 +2053,9 @@ class InsightlyClient(ConnectorClientBase):
                 for item in page.get("projects", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2241,6 +2247,9 @@ class InsightlyClient(ConnectorClientBase):
                 for item in page.get("leads", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2432,6 +2441,9 @@ class InsightlyClient(ConnectorClientBase):
                 for item in page.get("contacts", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2623,6 +2635,9 @@ class InsightlyClient(ConnectorClientBase):
                 for item in page.get("users", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)

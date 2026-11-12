@@ -63,3 +63,19 @@ The Python names above describe the current generated clients; consult the
 [API reference](api/index.md) for all parameters and response types. A
 separate Swagger refresh may change operations independently of the Python
 identifier migration.
+
+## Additional paging and SMS behavior
+
+For generated pagers, `async for item in client.list_items(...)` still yields
+individual items. To retain page-level fields and HTTP metadata, iterate
+`client.list_items(...).by_page()` instead. Each yielded `ConnectorPage` is an
+async iterator of items and exposes the parsed `page_model`, immutable
+`raw_response` (`ConnectorResponseSnapshot`), and `continuation_token`. For
+example, `page.page_model["sensitivityLabelInfo"]` remains available on Excel
+Online (Business) table pages even though it is not itself a row.
+
+DataFlows SMS also offers `send_sms_get` for `GET /sms/send` in addition to
+`send_sms` for `POST /sms/send`. The GET route **sends** a message: the SDK
+never retries it, even when `retry_unsafe_http_methods=True`. Ordinary
+read-only GET calls such as `list_sms` retain their configured retry behavior.
+The raw connector identity remains `dataflowssms`.

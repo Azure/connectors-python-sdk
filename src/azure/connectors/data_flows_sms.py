@@ -41,6 +41,19 @@ __all__ = [
 # Type Definitions
 
 @dataclass
+class SmsResponse:
+    """
+    Response for Send SMS via GET (Alternative method)
+    """
+
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    """SMS report details with message ID, cost, and delivery info"""
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """Human-readable response message"""
+
+
+@dataclass
 class SendSmsInput:
     """
     Send SMS Message
@@ -62,19 +75,6 @@ class SendSmsInput:
     """Schedule message for future delivery (Y-m-d H:i format)"""
     dlt_template_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """DLT template ID for regulatory compliance"""
-
-
-@dataclass
-class SmsResponse:
-    """
-    Response for Send SMS Message
-    """
-
-    status: Optional[str] = dataclass_field(default=None, kw_only=True)
-    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
-    """SMS report details with message ID, cost, and delivery info"""
-    message: Optional[str] = dataclass_field(default=None, kw_only=True)
-    """Human-readable response message"""
 
 
 @dataclass
@@ -263,6 +263,85 @@ class DataFlowsSmsClient(ConnectorClientBase):
     @property
     def connector_name(self) -> str:
         return "dataflowssms"
+
+    async def send_sms_get(
+        self,
+        recipient: str,
+        sender_id: str,
+        message: str,
+        *,
+        type_: Optional[str] = None,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> dict[str, Any] | None:
+        """
+        Send SMS via GET (Alternative method)
+
+        Send SMS using GET parameters (for simple integrations)
+
+        Swagger operation ID: `SendSMSGet`.
+
+        Args:
+            recipient: Recipient phone number.
+            sender_id: Sender ID.
+            message: Message content.
+            type_: Message type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = f"{self._connection_runtime_url}/sms/send"
+        query_params = []
+        value = str(recipient)
+        if isinstance(recipient, bool):
+            value = value.lower()
+        query_params.append(f"recipient={quote(value, safe='')}")
+        value = str(sender_id)
+        if isinstance(sender_id, bool):
+            value = value.lower()
+        query_params.append(f"sender_id={quote(value, safe='')}")
+        value = str(message)
+        if isinstance(message, bool):
+            value = value.lower()
+        query_params.append(f"message={quote(value, safe='')}")
+        if type_ is not None:
+            value = str(type_)
+            if isinstance(type_, bool):
+                value = value.lower()
+            query_params.append(f"type={quote(value, safe='')}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send(
+            "GET", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "GET",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
 
     async def send_sms(
         self,

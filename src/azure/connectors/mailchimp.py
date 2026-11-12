@@ -1324,6 +1324,9 @@ class MailchimpClient(ConnectorClientBase):
                 for item in page.get("campaigns", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)

@@ -5,6 +5,7 @@ from .sdk.client_base import ConnectorClientBase as ConnectorClientBase
 from .sdk.exceptions import ConnectorException as ConnectorException
 from .sdk.http_client import ConnectorHttpClient as ConnectorHttpClient
 from .sdk.http_client import ConnectorResponse as ConnectorResponse
+from .sdk.response import ConnectorPage as ConnectorPage
 from .sdk.response import ConnectorResponseHook as ConnectorResponseHook
 from .sdk.response import ConnectorResponseSnapshot as ConnectorResponseSnapshot
 from .sdk.trigger_payload import TriggerCallbackBody as TriggerCallbackBody

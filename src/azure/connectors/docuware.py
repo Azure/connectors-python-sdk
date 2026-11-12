@@ -1260,6 +1260,9 @@ class DocuwareClient(ConnectorClientBase):
                 for item in page.get("FileCabinets", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -1821,6 +1824,9 @@ class DocuwareClient(ConnectorClientBase):
                 for item in page.get("Dialogs", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2119,6 +2125,9 @@ class DocuwareClient(ConnectorClientBase):
                 for item in page.get("Stamps", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2205,6 +2214,9 @@ class DocuwareClient(ConnectorClientBase):
                 for item in page.get("Fields", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2294,6 +2306,9 @@ class DocuwareClient(ConnectorClientBase):
                 for item in page.get("Fields", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2379,6 +2394,9 @@ class DocuwareClient(ConnectorClientBase):
                 for item in page.get("Fields", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2458,6 +2476,9 @@ class DocuwareClient(ConnectorClientBase):
                 for item in page.get("Documents", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)

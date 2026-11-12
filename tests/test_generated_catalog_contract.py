@@ -45,6 +45,7 @@ CONNECTOR_MODULE_NAMES = [
 
 SHARED_PACKAGE_EXPORT_NAMES = {
     "ConnectorClientBase",
+    "ConnectorPage",
     "ConnectorException",
     "ConnectorHttpClient",
     "ConnectorResponse",

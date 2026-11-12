@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Per-page parsed and raw responses** — `ConnectorPage` keeps each pager
+  page's parsed envelope in `page_model`, its immutable HTTP response in
+  `raw_response`, and the continuation token, while still yielding individual
+  items through `async for`. Import it from `azure.connectors` or
+  `azure.connectors.sdk` when consuming `by_page()`.
+- **DataFlows SMS alternate GET send** — `send_sms_get` exposes the connector's
+  `GET /sms/send` operation alongside `send_sms` (`POST /sms/send`). The GET
+  send is never retried, including when unsafe retries are explicitly enabled;
+  ordinary `list_sms` GET reads retain standard retry behavior.
+
 - **DataFlows SMS and ServiceNow generated clients** — adds live-Swagger-generated async operations, typed models, trigger metadata where available, lazy package exports, and mocked-transport tests. ServiceNow knowledge search uses the lazy `list_knowledge_articles` pager and yields article items, not the response envelope.
 
 - **Multipart form-data operations** - adds file uploads for Cloudmersive Convert,
