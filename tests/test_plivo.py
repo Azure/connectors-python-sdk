@@ -9,8 +9,9 @@ import pytest
 from azure.core.credentials import AzureKeyCredential
 import azure.connectors.plivo as plivo_module
 from azure.connectors.plivo import PlivoClient
-from azure.connectors.plivo import Call, SMS
+from azure.connectors.plivo import Call, Sms
 from azure.connectors.sdk import ConnectorException
+from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import (
     get_generated_operations,
@@ -118,14 +119,18 @@ class TestPlivoClient:
             return_value=MockResponse(status=202, text='{"message_uuid": ["id"]}'),
         ) as mock_send:
             result = await client.send_sms(
-                input=SMS(src="15550000000", dst="15551111111", text="Hello"),
+                input=Sms(src="15550000000", dst="15551111111", text="Hello"),
                 auth_id="account/id",
             )
 
         method, url = mock_send.call_args.args[:2]
         assert method == "POST"
         assert url.endswith("/v1/Account/account%2Fid/Message/")
-        assert mock_send.call_args.kwargs["body"].text == "Hello"
+        assert to_wire(mock_send.call_args.kwargs["body"]) == {
+            "src": "15550000000",
+            "dst": "15551111111",
+            "text": "Hello",
+        }
         assert result == {"message_uuid": ["id"]}
 
     @pytest.mark.asyncio

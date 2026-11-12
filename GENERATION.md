@@ -110,6 +110,50 @@ its success/error request path, scalar wire serialization, and mutation rejectio
 before dispatch, using mocked network responses. This is not live-backend
 validation of the synthetic endpoint.
 
+### Plivo SMS naming follow-up
+
+The shared generator normalizes an unambiguous `SMS` identifier word to `Sms`
+for every connector rather than listing individual Dataflows SMS operations.
+Plivo therefore exports `Sms` and `SendSmsResponse`; its async operation remains
+`send_sms`. Update imports from `azure.connectors.plivo` when adopting this
+pre-release API correction. The sample and request-body tests use the new names.
+
+The live refresh uses generator
+`f73f866893706f4f0d017dfb2205b6539894526d` from the linked active, unmerged
+BPM PR 17700725. It fetched subscription
+`1a839f1f-10b2-4613-95ad-0800a22abbf2`, region `westus`, ARM API
+`2018-07-01-preview`, with a new empty temporary `ARMCACHE_PATH`. No stored
+responses or fixtures supplied this client. The live Swagger SHA-256 is
+`85071BA3C076FC92EEF5AF2272CB2A775B9FE1B04242FDC86A7CF1429D78790A`.
+The LF-normalized generated client SHA-256 is
+`638707be3f816595ecb756c6babb30de5edf0d6c1ff60fd0523ab8be7a20d20a`.
+The latest live capture ran from `2026-11-06T22:12:08.686Z` to
+`2026-11-06T22:12:32.790Z`. A separate capture from
+`2026-11-06T22:13:27.260Z` to `2026-11-06T22:13:48.603Z` matched the
+consumed Swagger and output hashes for both Plivo and PdfCo.
+PdfCo Swagger SHA-256:
+`c9fb18e541124ef0cd7d867173a4c61eabd2c7a0b0be95bcdf5d4b1c4ede3702`;
+LF-normalized output SHA-256:
+`42bb82298e1934ef803bdeceb54a20ae11f5ea6ec52314f24cb223a72db4a486`.
+Plivo remains byte-identical after LF normalization. PdfCo's seven response-model
+exports adopt the reviewed casing listed below; request models, operations,
+routes, JSON fields, and raw response dictionaries remain unchanged.
+
+| Previous response model | Current response model |
+|---|---|
+| `PDFUnSearchableResponse` | `PdfUnsearchableResponse` |
+| `PDFFromXLSXLSXResponse` | `PdfFromXlsXlsxResponse` |
+| `XLStoCSVResponse` | `XlsToCsvResponse` |
+| `XLStoHTMLResponse` | `XlsToHtmlResponse` |
+| `XLStoJSONResponse` | `XlsToJsonResponse` |
+| `XLStoTXTResponse` | `XlsToTxtResponse` |
+| `XLStoXMLResponse` | `XlsToXmlResponse` |
+
+These are documented preview API renames, not a live transport-regression claim.
+Only Plivo and PdfCo are refreshed; the other root clients, lazy exports, and registry
+inventory remain unchanged. The generator must integrate before the SDK fix
+merges. Tests do not send real SMS messages.
+
 ### Multipart form-data refresh
 
 The 2026-11-05 merge refresh uses generator commit
@@ -651,6 +695,8 @@ Track known generator issues here to prevent silent recurrence across releases.
 
 | Defect | BPM Issue | Affected Connectors | Status | Notes |
 |--------|-----------|---------------------|--------|-------|
+| Distinct retained schemas collapsed after acronym normalization | [BPM PR 17700725](https://msazure.visualstudio.com/One/_git/AzureUX-BPM/pullrequest/17700725) | Synthetic `SMSResponse` / `SmsResponse` repro; live incidence unproven | Fixed | The shared resolver reserves natural emitted names and allocates unique aliases for different shapes. Equivalent schemas still share one model; cross-language regressions preserve both declarations. |
+| Override-aware shared method names disagreed with inline-body synthesis | [BPM PR 17700725](https://msazure.visualstudio.com/One/_git/AzureUX-BPM/pullrequest/17700725) | Synthetic `pdfco` repro | Fixed | Restoring the shared one-argument simplifier keeps the coordinator and emitter projections consistent without broadening PdfCo overrides. Named response and inline request fields remain separately representable. |
 | Multipart form-data operations excluded | Fixed in generator | `cloudmersiveconvert`, `docuware`, `zohosign` | Fixed | Emits typed file and scalar fields, preserves internal defaults and collection formats, and sends native MIME bytes through the existing pipeline. |
 | Raw string request bodies JSON-quoted on the wire | Paired generator PR recorded in the SDK PR | `azuremonitorlogs`, `azurequeues`, `azuretables`, `documentdb`, `onenote`, `powerbi`, `teams` | Fixed | The generator encodes string-schema bodies as UTF-8 bytes and forwards the declared media type. Empty strings stay zero-length and `None` stays absent. Object and binary bodies keep their existing paths. Transport tests cover all eight affected operations. |
 | Teams template variable causes NameError at import | [BPM #TBD](https://dev.azure.com/msazure/One/_workitems/edit/TBD) | `teams` | Workaround (skip import test) | `DynamicValueLookup` references undefined variable; test skipped with issue link |

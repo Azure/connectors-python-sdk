@@ -8,8 +8,10 @@ import ast
 import importlib
 import importlib.util
 import inspect
+import runpy
 import subprocess
 import sys
+from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
@@ -17,6 +19,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from azure.core.async_paging import AsyncItemPaged
 
+from azure.connectors.plivo import Sms
 from scripts.validate_connector_samples import SampleVisitor, validate_samples
 
 
@@ -320,6 +323,55 @@ def test_sample_validator_checks_consumer_principles(
     visitor.visit(ast.parse(source))
 
     assert [issue.message for issue in visitor.issues] == expected_messages
+
+
+@pytest.mark.parametrize(
+    ("messages", "sent_message"),
+    [
+        ([], None),
+        ([], {}),
+        ([{"message_uuid": "listed-message"}], {"message_uuid": ["sent-message"]}),
+    ],
+    ids=["none", "empty", "populated"],
+)
+def test_plivo_sample_main_preserves_output(
+    messages: list[dict[str, str]],
+    sent_message: dict[str, list[str]] | None,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    recwarn: pytest.WarningsRecorder,
+) -> None:
+    """Run the actual main guard with the current SMS model and nullable results."""
+    async def async_messages() -> AsyncIterator[dict[str, str]]:
+        for message in messages:
+            yield message
+
+    client = MagicMock()
+    client.__aenter__.return_value = client
+    client.list_messages.return_value = async_messages()
+    client.send_sms = AsyncMock(return_value=sent_message)
+    monkeypatch.setattr("azure.connectors.plivo.PlivoClient", MagicMock(return_value=client))
+    monkeypatch.setattr("azure.identity.aio.DefaultAzureCredential", MagicMock())
+    monkeypatch.setenv("PLIVO_CONNECTION_URL", "https://example.com/connections/plivo")
+
+    runpy.run_path(
+        str(SAMPLE_DIRECTORY / "sample_connector_usage_plivo.py"),
+        run_name="__main__",
+    )
+
+    client.list_messages.assert_called_once_with(auth_id="PLIVO_AUTH_ID")
+    client.send_sms.assert_awaited_once_with(
+        input=Sms(
+            src="15550000000",
+            dst="15551111111",
+            text="Hello from the Azure Connectors Python SDK.",
+        ),
+        auth_id="PLIVO_AUTH_ID",
+    )
+    output = capsys.readouterr()
+    assert output.out == f"Messages: {messages}\nSend result: {sent_message}\n"
+    assert output.err == ""
+    assert not recwarn.list
 
 
 @pytest.mark.parametrize("item_count", [0, 2])

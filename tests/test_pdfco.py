@@ -10,13 +10,43 @@ from azure.core.credentials import AzureKeyCredential
 from azure.connectors.pdfco import PdfcoClient
 from azure.connectors.pdfco import (
     HtmlToPdfInput,
-    UrlToPdfInput,
     PdfFillerInput,
+    PdfFromXlsXlsxResponse,
+    PdfUnsearchableResponse,
+    UrlToPdfInput,
+    XlsToCsvResponse,
+    XlsToHtmlResponse,
+    XlsToJsonResponse,
+    XlsToTxtResponse,
+    XlsToXmlResponse,
 )
 from azure.connectors.sdk import (
     ConnectorException,
 )
+from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
+
+
+@pytest.mark.parametrize(
+    "response_model",
+    [
+        PdfFromXlsXlsxResponse,
+        PdfUnsearchableResponse,
+        XlsToCsvResponse,
+        XlsToHtmlResponse,
+        XlsToJsonResponse,
+        XlsToTxtResponse,
+        XlsToXmlResponse,
+    ],
+)
+def test_reviewed_response_models_preserve_wire_names(response_model: type) -> None:
+    """Keep the corrected public model names bound to the existing wire fields."""
+    response = response_model(url="https://example.com/output", job_id="job-123")
+
+    assert to_wire(response) == {
+        "url": "https://example.com/output",
+        "jobId": "job-123",
+    }
 
 
 class TestPdfcoClientInitialization:
