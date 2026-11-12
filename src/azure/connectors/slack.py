@@ -30,7 +30,7 @@ __all__ = [
     "ListChannelsResponse",
     "PostMessageRequest",
     "PostMessageResponse",
-    "SetDNDResponse",
+    "SetDndResponse",
     "TRIGGER_OPERATIONS",
 ]
 
@@ -38,7 +38,7 @@ __all__ = [
 # Type Definitions
 
 @dataclass
-class SetDNDResponse:
+class SetDndResponse:
     """
     Response for Set do not disturb
     """
@@ -134,7 +134,11 @@ class PostMessageRequest:
     more than 40,000 characters. For formatting options, see
     https://api.slack.com/docs/formatting
     """
-    username: Optional[str] = dataclass_field(default=None, kw_only=True)
+    user_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "username"},
+    )
     """Name of the bot."""
     as_user: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """

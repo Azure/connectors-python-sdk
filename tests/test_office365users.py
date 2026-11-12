@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.office365users import Office365usersClient
-from azure.connectors.office365users import (
+from azure.connectors.office365_users import Office365UsersClient
+from azure.connectors.office365_users import (
     GraphUserUpdateable,
 )
 from azure.connectors.sdk import (
@@ -16,12 +16,12 @@ from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import resolve_generated_result
 
 
-class TestOffice365usersClientInitialization:
+class TestOffice365UsersClientInitialization:
     """Tests for Office365usersClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -30,14 +30,14 @@ class TestOffice365usersClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -46,7 +46,7 @@ class TestOffice365usersClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -57,16 +57,16 @@ class TestOffice365usersClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            Office365usersClient("", AzureKeyCredential("test-key"))
+            Office365UsersClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            Office365usersClient(None, AzureKeyCredential("test-key"))
+            Office365UsersClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'office365users'."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -74,13 +74,13 @@ class TestOffice365usersClientInitialization:
         assert client.connector_name == "office365users"
 
 
-class TestOffice365usersClientLifecycle:
+class TestOffice365UsersClientLifecycle:
     """Tests for Office365usersClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -92,12 +92,12 @@ class TestOffice365usersClientLifecycle:
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
-        with patch.object(Office365usersClient, 'close', new_callable=AsyncMock) as mock_close:
-            async with Office365usersClient(
+        with patch.object(Office365UsersClient, 'close', new_callable=AsyncMock) as mock_close:
+            async with Office365UsersClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential
             ) as client:
-                assert isinstance(client, Office365usersClient)
+                assert isinstance(client, Office365UsersClient)
 
             mock_close.assert_called_once()
 
@@ -108,7 +108,7 @@ class TestUpdateMyProfile:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful PATCH request."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -136,7 +136,7 @@ class TestUpdateMyPhoto:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful PUT request."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -164,7 +164,7 @@ class TestMyTrendingDocuments:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -190,7 +190,7 @@ class TestMyTrendingDocuments:
     @pytest.mark.asyncio
     async def test_with_filter_parameter(self, mock_credential):
         """Test GET request with filter parameter."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -213,7 +213,7 @@ class TestMyTrendingDocuments:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -234,7 +234,7 @@ class TestMyTrendingDocuments:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -261,7 +261,7 @@ class TestRelevantPeople:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -289,7 +289,7 @@ class TestRelevantPeople:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -316,7 +316,7 @@ class TestUserPhotoMetadata:
     @pytest.mark.asyncio
     async def test_success_with_user_id(self, mock_credential):
         """Test successful GET request with user_id parameter."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -342,7 +342,7 @@ class TestUserPhotoMetadata:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -365,7 +365,7 @@ class TestTrendingDocuments:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -393,7 +393,7 @@ class TestTrendingDocuments:
     @pytest.mark.asyncio
     async def test_with_filter_parameter(self, mock_credential):
         """Test GET request with filter parameter."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -419,7 +419,7 @@ class TestTrendingDocuments:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -446,7 +446,7 @@ class TestHttpRequest:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -474,7 +474,7 @@ class TestHttpRequest:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -493,7 +493,7 @@ class TestHttpRequest:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -518,7 +518,7 @@ class TestDirectReports:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -546,7 +546,7 @@ class TestDirectReports:
     @pytest.mark.asyncio
     async def test_with_select_and_top_parameters(self, mock_credential):
         """Test GET request with select and top parameters."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -574,7 +574,7 @@ class TestDirectReports:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -595,7 +595,7 @@ class TestDirectReports:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -622,7 +622,7 @@ class TestManager:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -648,7 +648,7 @@ class TestManager:
     @pytest.mark.asyncio
     async def test_with_select_parameter(self, mock_credential):
         """Test GET request with select parameter."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -669,7 +669,7 @@ class TestManager:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -694,7 +694,7 @@ class TestMyProfile:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -720,7 +720,7 @@ class TestMyProfile:
     @pytest.mark.asyncio
     async def test_with_select_parameter(self, mock_credential):
         """Test GET request with select parameter."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -741,7 +741,7 @@ class TestMyProfile:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -760,7 +760,7 @@ class TestMyProfile:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -785,7 +785,7 @@ class TestSearchUser:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -811,7 +811,7 @@ class TestSearchUser:
     @pytest.mark.asyncio
     async def test_with_all_parameters(self, mock_credential):
         """Test GET request with all parameters."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -838,7 +838,7 @@ class TestSearchUser:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -857,7 +857,7 @@ class TestSearchUser:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -882,7 +882,7 @@ class TestUserPhoto:
     @pytest.mark.asyncio
     async def test_success_returns_binary_content(self, mock_credential):
         """Test successful GET request returns binary content."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -906,7 +906,7 @@ class TestUserPhoto:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -931,7 +931,7 @@ class TestUserProfile:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -957,7 +957,7 @@ class TestUserProfile:
     @pytest.mark.asyncio
     async def test_with_select_parameter(self, mock_credential):
         """Test GET request with select parameter."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -978,7 +978,7 @@ class TestUserProfile:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -997,7 +997,7 @@ class TestUserProfile:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = Office365usersClient(
+        client = Office365UsersClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )

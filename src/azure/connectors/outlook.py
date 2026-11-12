@@ -2195,13 +2195,13 @@ class MessageWithOptions:
         metadata={"wire_name": "Attachments"},
     )
     """Attachments"""
-    use_only_h_t_m_l_message: Optional[bool] = dataclass_field(
+    use_only_html_message: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "UseOnlyHTMLMessage"},
     )
     """Use only HTML message"""
-    hide_h_t_m_l_message: Optional[bool] = dataclass_field(
+    hide_html_message: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "HideHTMLMessage"},
@@ -2211,7 +2211,7 @@ class MessageWithOptions:
     displayed. Email clients which do not support actionable messages will
     display HTML message regardless of the parameter value.
     """
-    show_h_t_m_l_confirmation_dialog: Optional[bool] = dataclass_field(
+    show_html_confirmation_dialog: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ShowHTMLConfirmationDialog"},
@@ -2305,13 +2305,13 @@ class ApprovalMessage:
         metadata={"wire_name": "Attachments"},
     )
     """Attachments"""
-    use_only_h_t_m_l_message: Optional[bool] = dataclass_field(
+    use_only_html_message: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "UseOnlyHTMLMessage"},
     )
     """Use only HTML message"""
-    hide_h_t_m_l_message: Optional[bool] = dataclass_field(
+    hide_html_message: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "HideHTMLMessage"},
@@ -2321,7 +2321,7 @@ class ApprovalMessage:
     displayed. Email clients which do not support actionable messages will
     display HTML message regardless of the parameter value.
     """
-    show_h_t_m_l_confirmation_dialog: Optional[bool] = dataclass_field(
+    show_html_confirmation_dialog: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ShowHTMLConfirmationDialog"},

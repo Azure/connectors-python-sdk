@@ -5,9 +5,9 @@
 from typing import get_type_hints
 
 from azure.connectors.sdk import MultipartFile
-import azure.connectors.zohosign as zohosign_module
-from azure.connectors.zohosign import ZohosignClient
-from azure.connectors.zohosign import TRIGGER_OPERATIONS
+import azure.connectors.zoho_sign as zohosign_module
+from azure.connectors.zoho_sign import ZohoSignClient
+from azure.connectors.zoho_sign import TRIGGER_OPERATIONS
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 
 
@@ -29,10 +29,10 @@ OPERATION_CONTRACTS = {
 }
 
 
-class TestZohosignClient(GeneratedConnectorContractTests):
+class TestZohoSignClient(GeneratedConnectorContractTests):
     """Test the generated Zoho Sign client contract."""
 
-    client_type = ZohosignClient
+    client_type = ZohoSignClient
     connector_module = zohosign_module
     connector_name = "zohosign"
     operation_contracts = OPERATION_CONTRACTS
@@ -57,19 +57,19 @@ def test_document_identifiers_use_integer_annotations() -> None:
     ]
 
     for operation in integer_request_id_operations:
-        type_hints = get_type_hints(getattr(ZohosignClient, f"{operation}"))
+        type_hints = get_type_hints(getattr(ZohoSignClient, f"{operation}"))
         assert type_hints["request_id"] is int, operation
 
-    download_file_hints = get_type_hints(ZohosignClient.download_file)
+    download_file_hints = get_type_hints(ZohoSignClient.download_file)
     assert download_file_hints["document_id"] is int
 
     for operation in ["send_sign_request", "update_document"]:
-        type_hints = get_type_hints(getattr(ZohosignClient, f"{operation}"))
+        type_hints = get_type_hints(getattr(ZohoSignClient, f"{operation}"))
         assert type_hints["request_id"] is str, operation
 
 
 def test_multipart_create_document_accepts_file_bytes_and_metadata() -> None:
     """Expose the upload without losing the file's metadata or bytes."""
-    type_hints = get_type_hints(ZohosignClient.create_document)
+    type_hints = get_type_hints(ZohoSignClient.create_document)
 
     assert type_hints["file"] == MultipartFile | bytes

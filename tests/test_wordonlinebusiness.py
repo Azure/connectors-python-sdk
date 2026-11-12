@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.wordonlinebusiness import WordonlinebusinessClient
-from azure.connectors.wordonlinebusiness import (
+from azure.connectors.word_online_business import WordOnlineBusinessClient
+from azure.connectors.word_online_business import (
     CreateFileItemInput,
     ContentBody,
     BlobMetadata,
@@ -23,12 +23,12 @@ from tests.generated_connector_test_utils import (
 )
 
 
-class TestWordonlinebusinessClientInitialization:
+class TestWordOnlineBusinessClientInitialization:
     """Tests for WordonlinebusinessClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = WordonlinebusinessClient(
+        client = WordOnlineBusinessClient(
             "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -37,14 +37,14 @@ class TestWordonlinebusinessClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = WordonlinebusinessClient(
+        client = WordOnlineBusinessClient(
             "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = WordonlinebusinessClient(
+        client = WordOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -53,7 +53,7 @@ class TestWordonlinebusinessClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = WordonlinebusinessClient(
+        client = WordOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -64,16 +64,16 @@ class TestWordonlinebusinessClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            WordonlinebusinessClient("", AzureKeyCredential("test-key"))
+            WordOnlineBusinessClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            WordonlinebusinessClient(None, AzureKeyCredential("test-key"))
+            WordOnlineBusinessClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'wordonlinebusiness'."""
-        client = WordonlinebusinessClient(
+        client = WordOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -81,13 +81,13 @@ class TestWordonlinebusinessClientInitialization:
         assert client.connector_name == "wordonlinebusiness"
 
 
-class TestWordonlinebusinessClientLifecycle:
+class TestWordOnlineBusinessClientLifecycle:
     """Tests for WordonlinebusinessClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = WordonlinebusinessClient(
+        client = WordOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -100,13 +100,13 @@ class TestWordonlinebusinessClientLifecycle:
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(
-            WordonlinebusinessClient, 'close', new_callable=AsyncMock
+            WordOnlineBusinessClient, 'close', new_callable=AsyncMock
         ) as mock_close:
-            async with WordonlinebusinessClient(
+            async with WordOnlineBusinessClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential
             ) as client:
-                assert isinstance(client, WordonlinebusinessClient)
+                assert isinstance(client, WordOnlineBusinessClient)
 
             mock_close.assert_called_once()
 
@@ -117,7 +117,7 @@ class TestCreateFileItem:
     @pytest.mark.asyncio
     async def test_create_file_item_success(self, mock_credential):
         """Test successful template population."""
-        client = WordonlinebusinessClient(
+        client = WordOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -154,7 +154,7 @@ class TestCreateFileItem:
     @pytest.mark.asyncio
     async def test_create_file_item_empty_response(self, mock_credential):
         """Test template population with empty response."""
-        client = WordonlinebusinessClient(
+        client = WordOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -179,7 +179,7 @@ class TestCreateFileItem:
     @pytest.mark.asyncio
     async def test_create_file_item_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = WordonlinebusinessClient(
+        client = WordOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -209,7 +209,7 @@ class TestCreateWordFileWithContent:
     @pytest.mark.asyncio
     async def test_create_word_file_success(self, mock_credential):
         """Test successful Word document creation."""
-        client = WordonlinebusinessClient(
+        client = WordOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -240,7 +240,7 @@ class TestCreateWordFileWithContent:
     @pytest.mark.asyncio
     async def test_create_word_file_without_filename(self, mock_credential):
         """Test Word document creation without filename parameter."""
-        client = WordonlinebusinessClient(
+        client = WordOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -265,7 +265,7 @@ class TestCreateWordFileWithContent:
     @pytest.mark.asyncio
     async def test_create_word_file_empty_response(self, mock_credential):
         """Test Word document creation with empty response."""
-        client = WordonlinebusinessClient(
+        client = WordOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -285,7 +285,7 @@ class TestCreateWordFileWithContent:
     @pytest.mark.asyncio
     async def test_create_word_file_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = WordonlinebusinessClient(
+        client = WordOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -306,7 +306,7 @@ class TestCreateWordFileWithContent:
     @pytest.mark.asyncio
     async def test_create_word_file_with_special_characters_in_name(self, mock_credential):
         """Test Word document creation with special characters in filename."""
-        client = WordonlinebusinessClient(
+        client = WordOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -338,7 +338,7 @@ class TestGetFilePDF:
     @pytest.mark.asyncio
     async def test_convert_to_pdf_success(self, mock_credential):
         """Test successful Word to PDF conversion."""
-        client = WordonlinebusinessClient(
+        client = WordOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -369,7 +369,7 @@ class TestGetFilePDF:
     @pytest.mark.asyncio
     async def test_convert_to_pdf_with_sensitivity_label(self, mock_credential):
         """Test PDF conversion with sensitivity label extraction."""
-        client = WordonlinebusinessClient(
+        client = WordOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -396,7 +396,7 @@ class TestGetFilePDF:
     @pytest.mark.asyncio
     async def test_convert_to_pdf_empty_response(self, mock_credential):
         """Test PDF conversion with empty response."""
-        client = WordonlinebusinessClient(
+        client = WordOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -419,7 +419,7 @@ class TestGetFilePDF:
     @pytest.mark.asyncio
     async def test_convert_to_pdf_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = WordonlinebusinessClient(
+        client = WordOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -443,7 +443,7 @@ class TestGetFilePDF:
     @pytest.mark.asyncio
     async def test_get_drives_injects_personal_source(self, mock_credential):
         """Test drive discovery injects the personal source value."""
-        client = WordonlinebusinessClient(
+        client = WordOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )

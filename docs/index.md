@@ -13,6 +13,10 @@ python -m pip install azure-connectors
 
 The SDK requires Python 3.10 or later and provides async-only root connector clients, typed models, and Azure Identity integration. Non-pageable responses return payload values; pageable operations return `AsyncItemPaged`. No synchronous mirror is provided, aligned with the .NET connector SDK.
 
+See the [generated Python naming migration](migration-naming.md) for updated
+module imports and public identifiers. Raw connection names and wire payloads
+remain unchanged.
+
 ## Create a client
 
 Generated clients require a caller-owned `AsyncTokenCredential` or `AzureKeyCredential`. Import clients and models from the root connector module. Operations do not use an `_async` suffix.

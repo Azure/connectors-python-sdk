@@ -84,7 +84,7 @@ def sample_cases() -> list[tuple[Path, str, str, tuple[str, ...]]]:
                     and node.func.attr in operations
                 }
                 if called_operations:
-                    if sample_path.stem == "sample_connector_usage_azureblob":
+                    if sample_path.stem == "sample_connector_usage_azure_blob":
                         for operation in sorted(called_operations):
                             cases.append((
                                 sample_path, client_name, function.name, (operation,),
@@ -220,7 +220,7 @@ async def test_async_sample_consumes_pages_and_reports_items(
     """Exercise real sample functions, including populated results after empty pages."""
     module = load_sample(sample_path)
     client = configure_sample(module, sample_path, monkeypatch)
-    if sample_path.stem == "sample_connector_usage_azureblob":
+    if sample_path.stem == "sample_connector_usage_azure_blob":
         monkeypatch.setenv(
             "TEST_FOLDER_ID", "" if operations == ("list_root_folder",) else "sample-value",
         )
@@ -279,7 +279,7 @@ async def test_async_sample_consumes_pages_and_reports_items(
             or body.count("[REDACTED]") == 2
         ), output
         if sample_path.stem in {
-            "sample_connector_usage_office365", "sample_connector_usage_office365users",
+            "sample_connector_usage_office365", "sample_connector_usage_office365_users",
         }:
             assert "pager-review-item-1" in body, output
     else:
@@ -332,14 +332,14 @@ async def test_excel_mutation_responses_remain_eager_envelopes(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     """Keep nullable mutation responses awaited and intact, not flattened as pagers."""
-    sample_path = SAMPLES / "sample_connector_usage_excelonline.py"
+    sample_path = SAMPLES / "sample_connector_usage_excel_online.py"
     module = load_sample(sample_path)
     client = configure_sample(module, sample_path, monkeypatch)
     client.list_all_worksheets.side_effect = lambda **kwargs: create_pager([], [])
     client.list_tables.side_effect = lambda **kwargs: create_pager([], [])
     client.create_worksheet = AsyncMock(return_value=response)
     client.add_row = AsyncMock(return_value=response)
-    monkeypatch.setattr(module, "ExcelonlineClient", MagicMock(return_value=client))
+    monkeypatch.setattr(module, "ExcelOnlineClient", MagicMock(return_value=client))
 
     await module.main()
 

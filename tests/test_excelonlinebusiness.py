@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.excelonlinebusiness import ExcelonlinebusinessClient
-from azure.connectors.excelonlinebusiness import (
+from azure.connectors.excel_online_business import ExcelOnlineBusinessClient
+from azure.connectors.excel_online_business import (
     TableToCreate,
     TableMetadata,
     Item,
@@ -27,12 +27,12 @@ from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import model_instance, resolve_generated_result
 
 
-class TestExcelonlinebusinessClientInitialization:
+class TestExcelOnlineBusinessClientInitialization:
     """Tests for ExcelonlinebusinessClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -41,14 +41,14 @@ class TestExcelonlinebusinessClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -57,7 +57,7 @@ class TestExcelonlinebusinessClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -68,16 +68,16 @@ class TestExcelonlinebusinessClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            ExcelonlinebusinessClient("", AzureKeyCredential("test-key"))
+            ExcelOnlineBusinessClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            ExcelonlinebusinessClient(None, AzureKeyCredential("test-key"))
+            ExcelOnlineBusinessClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'excelonlinebusiness'."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -85,13 +85,13 @@ class TestExcelonlinebusinessClientInitialization:
         assert client.connector_name == "excelonlinebusiness"
 
 
-class TestExcelonlinebusinessClientLifecycle:
+class TestExcelOnlineBusinessClientLifecycle:
     """Tests for ExcelonlinebusinessClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -103,12 +103,12 @@ class TestExcelonlinebusinessClientLifecycle:
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
-        with patch.object(ExcelonlinebusinessClient, 'close', new_callable=AsyncMock) as mock_close:
-            async with ExcelonlinebusinessClient(
+        with patch.object(ExcelOnlineBusinessClient, 'close', new_callable=AsyncMock) as mock_close:
+            async with ExcelOnlineBusinessClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential
             ) as client:
-                assert isinstance(client, ExcelonlinebusinessClient)
+                assert isinstance(client, ExcelOnlineBusinessClient)
 
             mock_close.assert_called_once()
 
@@ -119,7 +119,7 @@ class TestCreateTable:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -156,7 +156,7 @@ class TestCreateTable:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -187,7 +187,7 @@ class TestCreateIdColumn:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful POST request."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -216,7 +216,7 @@ class TestCreateIdColumn:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -247,7 +247,7 @@ class TestGetItems:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -279,7 +279,7 @@ class TestGetItems:
     @pytest.mark.asyncio
     async def test_with_query_parameters(self, mock_credential):
         """Test GET request with query parameters."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -313,7 +313,7 @@ class TestGetItems:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -343,7 +343,7 @@ class TestListComments:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -375,7 +375,7 @@ class TestListComments:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -405,7 +405,7 @@ class TestGetComment:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -436,7 +436,7 @@ class TestGetComment:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -465,7 +465,7 @@ class TestReplyComment:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -501,7 +501,7 @@ class TestReplyComment:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -532,7 +532,7 @@ class TestGetItem:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -566,7 +566,7 @@ class TestGetItem:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -598,7 +598,7 @@ class TestDeleteItem:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful DELETE request."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -628,7 +628,7 @@ class TestDeleteItem:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -660,7 +660,7 @@ class TestPatchItem:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful PATCH request."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -696,7 +696,7 @@ class TestPatchItem:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -730,7 +730,7 @@ class TestRunScriptProd:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -768,7 +768,7 @@ class TestRunScriptProd:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -802,7 +802,7 @@ class TestGetAllWorksheets:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -835,7 +835,7 @@ class TestGetAllWorksheets:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -866,7 +866,7 @@ class TestCreateWorksheet:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -899,7 +899,7 @@ class TestCreateWorksheet:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -930,7 +930,7 @@ class TestGetTables:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -963,7 +963,7 @@ class TestGetTables:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -994,7 +994,7 @@ class TestAddRow:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1028,7 +1028,7 @@ class TestAddRow:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1193,7 +1193,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_http_client_property_access(self, mock_credential):
         """Test accessing http_client property."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1204,7 +1204,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1228,7 +1228,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_multiple_consecutive_calls(self, mock_credential):
         """Test multiple consecutive API calls."""
-        client = ExcelonlinebusinessClient(
+        client = ExcelOnlineBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )

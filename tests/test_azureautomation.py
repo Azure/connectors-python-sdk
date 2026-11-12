@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.azureautomation import AzureautomationClient
-from azure.connectors.azureautomation import (
+from azure.connectors.azure_automation import AzureAutomationClient
+from azure.connectors.azure_automation import (
     CreateJobInput,
     CreateJobResponse,
     AutomationAccountResponse,
@@ -22,12 +22,12 @@ from azure.connectors.sdk import (
 from tests.conftest import MockResponse
 
 
-class TestAzureautomationClientInitialization:
+class TestAzureAutomationClientInitialization:
     """Tests for AzureautomationClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = AzureautomationClient(
+        client = AzureAutomationClient(
             "https://example.azure.com/connections/test",
             AzureKeyCredential("test-key"),
         )
@@ -42,7 +42,7 @@ class TestAzureautomationClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = AzureautomationClient(
+        client = AzureAutomationClient(
             "https://example.azure.com/connections/test/",
             AzureKeyCredential("test-key"),
         )
@@ -53,7 +53,7 @@ class TestAzureautomationClientInitialization:
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = AzureautomationClient(
+        client = AzureAutomationClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -62,7 +62,7 @@ class TestAzureautomationClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = AzureautomationClient(
+        client = AzureAutomationClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -75,18 +75,18 @@ class TestAzureautomationClientInitialization:
         with pytest.raises(
             ValueError, match="connection_runtime_url cannot be None or empty"
         ):
-            AzureautomationClient("", AzureKeyCredential("test-key"))
+            AzureAutomationClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(
             ValueError, match="connection_runtime_url cannot be None or empty"
         ):
-            AzureautomationClient(None, AzureKeyCredential("test-key"))
+            AzureAutomationClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'azureautomation'."""
-        client = AzureautomationClient(
+        client = AzureAutomationClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -94,13 +94,13 @@ class TestAzureautomationClientInitialization:
         assert client.connector_name == "azureautomation"
 
 
-class TestAzureautomationClientLifecycle:
+class TestAzureAutomationClientLifecycle:
     """Tests for AzureautomationClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = AzureautomationClient(
+        client = AzureAutomationClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -115,13 +115,13 @@ class TestAzureautomationClientLifecycle:
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(
-            AzureautomationClient, 'close', new_callable=AsyncMock
+            AzureAutomationClient, 'close', new_callable=AsyncMock
         ) as mock_close:
-            async with AzureautomationClient(
+            async with AzureAutomationClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential
             ) as client:
-                assert isinstance(client, AzureautomationClient)
+                assert isinstance(client, AzureAutomationClient)
 
             mock_close.assert_called_once()
 
@@ -219,7 +219,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_http_client_property_access(self, mock_credential):
         """Test accessing http_client property."""
-        client = AzureautomationClient(
+        client = AzureAutomationClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -239,11 +239,11 @@ class TestEdgeCases:
 
     def test_multiple_client_instances(self, mock_credential):
         """Test creating multiple client instances."""
-        client1 = AzureautomationClient(
+        client1 = AzureAutomationClient(
             "https://example1.azure.com/connections/test",
             credential=mock_credential
         )
-        client2 = AzureautomationClient(
+        client2 = AzureAutomationClient(
             "https://example2.azure.com/connections/test",
             credential=mock_credential
         )
@@ -258,7 +258,7 @@ class TestGetJobOutputAsync:
     @pytest.mark.asyncio
     async def test_success_returns_content(self, mock_credential):
         """Test successful job output retrieval returns content."""
-        client = AzureautomationClient(
+        client = AzureAutomationClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -294,7 +294,7 @@ class TestGetJobOutputAsync:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that non-2xx response raises ConnectorException."""
-        client = AzureautomationClient(
+        client = AzureAutomationClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -323,7 +323,7 @@ class TestGetJobOutputAsync:
     @pytest.mark.asyncio
     async def test_method_exists(self, mock_credential):
         """Test that get_job_output_async method exists on client."""
-        client = AzureautomationClient(
+        client = AzureAutomationClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -338,7 +338,7 @@ class TestGetStatusOfJobAsync:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful job status retrieval with JSON response."""
-        client = AzureautomationClient(
+        client = AzureAutomationClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -374,7 +374,7 @@ class TestGetStatusOfJobAsync:
     @pytest.mark.asyncio
     async def test_success_with_empty_response(self, mock_credential):
         """Test successful request with empty response body."""
-        client = AzureautomationClient(
+        client = AzureAutomationClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -399,7 +399,7 @@ class TestGetStatusOfJobAsync:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that non-2xx response raises ConnectorException."""
-        client = AzureautomationClient(
+        client = AzureAutomationClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -428,7 +428,7 @@ class TestGetStatusOfJobAsync:
     @pytest.mark.asyncio
     async def test_method_exists(self, mock_credential):
         """Test that get_status_of_job_async method exists on client."""
-        client = AzureautomationClient(
+        client = AzureAutomationClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -443,7 +443,7 @@ class TestCreateJobAsync:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful job creation with JSON response."""
-        client = AzureautomationClient(
+        client = AzureAutomationClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -481,7 +481,7 @@ class TestCreateJobAsync:
     @pytest.mark.asyncio
     async def test_success_with_wait_parameter(self, mock_credential):
         """Test job creation with wait parameter."""
-        client = AzureautomationClient(
+        client = AzureAutomationClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -517,7 +517,7 @@ class TestCreateJobAsync:
     @pytest.mark.asyncio
     async def test_success_with_empty_response(self, mock_credential):
         """Test successful job creation with empty response body."""
-        client = AzureautomationClient(
+        client = AzureAutomationClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -542,7 +542,7 @@ class TestCreateJobAsync:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that non-2xx response raises ConnectorException."""
-        client = AzureautomationClient(
+        client = AzureAutomationClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -571,7 +571,7 @@ class TestCreateJobAsync:
     @pytest.mark.asyncio
     async def test_method_exists(self, mock_credential):
         """Test that create_job_async method exists on client."""
-        client = AzureautomationClient(
+        client = AzureAutomationClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -582,7 +582,7 @@ class TestCreateJobAsync:
     @pytest.mark.asyncio
     async def test_wait_parameter_is_optional(self, mock_credential):
         """Test that wait parameter is optional."""
-        client = AzureautomationClient(
+        client = AzureAutomationClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )

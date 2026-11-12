@@ -12,13 +12,13 @@ from urllib.parse import parse_qs, urlsplit
 import pytest
 from azure.core.credentials import AzureKeyCredential
 
-from azure.connectors import visualstudioteamservices
+from azure.connectors import visual_studio_team_services
 from azure.connectors.sdk import ConnectorException
 from azure.connectors.sdk.serialization import to_wire
-from azure.connectors.visualstudioteamservices import (
+from azure.connectors.visual_studio_team_services import (
     CreateWorkItemCommentRequest,
     QueueBuildRequest,
-    VisualstudioteamservicesClient,
+    VisualStudioTeamServicesClient,
 )
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
@@ -27,11 +27,11 @@ from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 BASE_URL = "https://example.azure.com/connections/vsts"
 
 
-class TestVisualstudioteamservicesClient(GeneratedConnectorContractTests):
+class TestVisualStudioTeamServicesClient(GeneratedConnectorContractTests):
     """Check every callable operation and all generated model wire names."""
 
-    client_type = VisualstudioteamservicesClient
-    connector_module = visualstudioteamservices
+    client_type = VisualStudioTeamServicesClient
+    connector_module = visual_studio_team_services
     connector_name = "visualstudioteamservices"
     operation_contracts = {
         "search_work_items": ("POST", True),
@@ -53,7 +53,6 @@ class TestVisualstudioteamservicesClient(GeneratedConnectorContractTests):
         "list_work_item_types": ("GET", False),
         "get_work_item_details": ("GET", False),
         "update_work_item": ("PATCH", True),
-        "get_work_item_details_v2": ("GET", False),
         "list_work_item_children": ("GET", False),
         "get_work_item_attachment": ("GET", False),
         "get_work_item_comments": ("GET", False),
@@ -89,9 +88,36 @@ class TestVisualstudioteamservicesClient(GeneratedConnectorContractTests):
 
 
 @pytest.mark.asyncio
+async def test_production_work_item_details_omits_preview_route() -> None:
+    """Use the retained production operation without exposing the reviewed Preview API."""
+    assert not hasattr(VisualStudioTeamServicesClient, "get_work_item_details_v2")
+    async with VisualStudioTeamServicesClient(BASE_URL, AzureKeyCredential("test-key")) as client:
+        with patch.object(
+            client.http_client,
+            "send",
+            new_callable=AsyncMock,
+            return_value=MockResponse(200, '{"id": 42, "type": "Bug"}'),
+        ) as send:
+            item = await client.get_work_item_details(
+                id="work/42", account="organization", project="example",
+                type_name="Bug",
+            )
+
+    assert item == {"id": 42, "type": "Bug"}
+    assert send.call_args.args[0] == "GET"
+    assert urlsplit(send.call_args.args[1]).path.endswith(
+        "/_apis/wit/workitems/work%2F42"
+    )
+    assert parse_qs(urlsplit(send.call_args.args[1]).query) == {
+        "account": ["organization"], "project": ["example"], "typeName": ["Bug"],
+    }
+    assert send.call_args.kwargs["body"] is None
+
+
+@pytest.mark.asyncio
 async def test_queue_build_preserves_wire_body_and_encodes_project() -> None:
     """Serialize the pinned QueueBuildRequest schema without losing wire names."""
-    async with VisualstudioteamservicesClient(BASE_URL, AzureKeyCredential("test-key")) as client:
+    async with VisualStudioTeamServicesClient(BASE_URL, AzureKeyCredential("test-key")) as client:
         with patch.object(
             client.http_client,
             "send",
@@ -121,7 +147,7 @@ async def test_queue_build_preserves_wire_body_and_encodes_project() -> None:
 @pytest.mark.asyncio
 async def test_update_comment_preserves_patch_body_and_query() -> None:
     """Forward the required comment text and optional format on PATCH."""
-    async with VisualstudioteamservicesClient(BASE_URL, AzureKeyCredential("test-key")) as client:
+    async with VisualStudioTeamServicesClient(BASE_URL, AzureKeyCredential("test-key")) as client:
         with patch.object(
             client.http_client,
             "send",
@@ -150,7 +176,7 @@ async def test_update_comment_preserves_patch_body_and_query() -> None:
 @pytest.mark.parametrize("status", [400, 404, 500])
 async def test_delete_comment_raises_for_each_error_status(status: int) -> None:
     """Keep client, missing-target, and server failures distinct on void DELETE."""
-    async with VisualstudioteamservicesClient(BASE_URL, AzureKeyCredential("test-key")) as client:
+    async with VisualStudioTeamServicesClient(BASE_URL, AzureKeyCredential("test-key")) as client:
         with patch.object(
             client.http_client,
             "send",
@@ -168,7 +194,7 @@ async def test_delete_comment_raises_for_each_error_status(status: int) -> None:
 @pytest.mark.asyncio
 async def test_delete_comment_accepts_empty_success() -> None:
     """Check the successful void DELETE route without inventing a response body."""
-    async with VisualstudioteamservicesClient(BASE_URL, AzureKeyCredential("test-key")) as client:
+    async with VisualStudioTeamServicesClient(BASE_URL, AzureKeyCredential("test-key")) as client:
         with patch.object(
             client.http_client,
             "send",

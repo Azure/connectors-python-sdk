@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.azuredigitaltwins import AzuredigitaltwinsClient
-from azure.connectors.azuredigitaltwins import (
+from azure.connectors.azure_digital_twins import AzureDigitalTwinsClient
+from azure.connectors.azure_digital_twins import (
     AddTwinInput,
     AddRelationshipInput,
     ListModelsResponse,
@@ -72,12 +72,12 @@ WRITE_OPERATIONS = [
 ]
 
 
-class TestAzuredigitaltwinsClientInitialization:
+class TestAzureDigitalTwinsClientInitialization:
     """Tests for AzuredigitaltwinsClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test",
             AzureKeyCredential("test-key"),
         )
@@ -92,7 +92,7 @@ class TestAzuredigitaltwinsClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test/",
             AzureKeyCredential("test-key"),
         )
@@ -103,7 +103,7 @@ class TestAzuredigitaltwinsClientInitialization:
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -112,7 +112,7 @@ class TestAzuredigitaltwinsClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -125,18 +125,18 @@ class TestAzuredigitaltwinsClientInitialization:
         with pytest.raises(
             ValueError, match="connection_runtime_url cannot be None or empty"
         ):
-            AzuredigitaltwinsClient("", AzureKeyCredential("test-key"))
+            AzureDigitalTwinsClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(
             ValueError, match="connection_runtime_url cannot be None or empty"
         ):
-            AzuredigitaltwinsClient(None, AzureKeyCredential("test-key"))
+            AzureDigitalTwinsClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'azuredigitaltwins'."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -144,13 +144,13 @@ class TestAzuredigitaltwinsClientInitialization:
         assert client.connector_name == "azuredigitaltwins"
 
 
-class TestAzuredigitaltwinsClientLifecycle:
+class TestAzureDigitalTwinsClientLifecycle:
     """Tests for AzuredigitaltwinsClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -180,7 +180,7 @@ class TestWriteOperationSignatures:
         path,
     ):
         """Test each write operation sends its body to the expected route."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -221,7 +221,7 @@ class TestWriteOperationSignatures:
         path,
     ):
         """Test each write operation rejects a non-2xx response."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -244,13 +244,13 @@ class TestWriteOperationSignatures:
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(
-            AzuredigitaltwinsClient, 'close', new_callable=AsyncMock
+            AzureDigitalTwinsClient, 'close', new_callable=AsyncMock
         ) as mock_close:
-            async with AzuredigitaltwinsClient(
+            async with AzureDigitalTwinsClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential
             ) as client:
-                assert isinstance(client, AzuredigitaltwinsClient)
+                assert isinstance(client, AzureDigitalTwinsClient)
 
             mock_close.assert_called_once()
 
@@ -261,7 +261,7 @@ class TestListModelsAsync:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful models list with JSON response."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -288,7 +288,7 @@ class TestListModelsAsync:
     @pytest.mark.asyncio
     async def test_with_optional_parameters(self, mock_credential):
         """Test list models with optional parameters."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -313,7 +313,7 @@ class TestListModelsAsync:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that non-2xx response raises ConnectorException."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -338,7 +338,7 @@ class TestGetModelByIdAsync:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful model retrieval with JSON response."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -364,7 +364,7 @@ class TestGetModelByIdAsync:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that non-2xx response raises ConnectorException."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -391,7 +391,7 @@ class TestDeleteModelAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful model deletion."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -419,7 +419,7 @@ class TestGetTwinByIdAsync:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful twin retrieval with JSON response."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -445,7 +445,7 @@ class TestGetTwinByIdAsync:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that non-2xx response raises ConnectorException."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -472,7 +472,7 @@ class TestAddTwinAsync:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful twin creation with JSON response."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -506,7 +506,7 @@ class TestDeleteTwinAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful twin deletion."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -534,7 +534,7 @@ class TestGetComponentAsync:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful component retrieval with JSON response."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -566,7 +566,7 @@ class TestGetRelationshipByIdAsync:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful relationship retrieval with JSON response."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -598,7 +598,7 @@ class TestAddRelationshipAsync:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful relationship creation with JSON response."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -633,7 +633,7 @@ class TestDeleteRelationshipAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful relationship deletion."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -662,7 +662,7 @@ class TestListRelationshipsAsync:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful relationships list with JSON response."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -692,7 +692,7 @@ class TestListIncomingRelationshipsAsync:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful incoming relationships list with JSON response."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -723,7 +723,7 @@ class TestQueryTwinsAsync:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful query execution with JSON response."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -755,7 +755,7 @@ class TestQueryTwinsAsync:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that non-2xx response raises ConnectorException."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -784,7 +784,7 @@ class TestSendTelemetryAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful telemetry send."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -813,7 +813,7 @@ class TestSendComponentTelemetryAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful component telemetry send."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -958,7 +958,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_http_client_property_access(self, mock_credential):
         """Test accessing http_client property."""
-        client = AzuredigitaltwinsClient(
+        client = AzureDigitalTwinsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -978,11 +978,11 @@ class TestEdgeCases:
 
     def test_multiple_client_instances(self, mock_credential):
         """Test creating multiple client instances."""
-        client1 = AzuredigitaltwinsClient(
+        client1 = AzureDigitalTwinsClient(
             "https://example1.azure.com/connections/test",
             credential=mock_credential
         )
-        client2 = AzuredigitaltwinsClient(
+        client2 = AzureDigitalTwinsClient(
             "https://example2.azure.com/connections/test",
             credential=mock_credential
         )

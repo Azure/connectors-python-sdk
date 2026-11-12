@@ -25,6 +25,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes
 
+- **Generated Python naming migration** — all 103 clients, the lazy registry and
+  typing stub now expose canonical module, type, model, method and member names.
+  Legacy misspelled imports are not retained. Naming-only changes preserve
+  connection identities, operation IDs, routes, JSON wire fields and enum wire
+  values; see the [migration guide](docs/migration-naming.md).
+- **Reviewed Swagger operation selection** — the current Plumsail client uses
+  nondeprecated revision-2 process execution operations and the revision-2
+  process trigger metadata in place of deprecated revision-1 counterparts.
+  The Azure DevOps (VSTS) client retains the production work-item-details GET
+  but does not expose the Preview variant. These are separate contract changes,
+  not renamed Python identifiers; see the [migration guide](docs/migration-naming.md).
+
 - PdfCo response models use `PdfUnsearchableResponse`, `PdfFromXlsXlsxResponse`,
   and `XlsToCsvResponse`/`XlsToHtmlResponse`/`XlsToJsonResponse`/
   `XlsToTxtResponse`/`XlsToXmlResponse` instead of the corresponding
@@ -274,7 +286,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Azure Blob Storage** (`azureblob.py`) connector client and samples
 - **IBM MQ** (`mq.py`) connector client and samples
 - **Office 365 Users** (`office365users.py`) connector client and samples
-- Microsoft Graph Groups and Users samples (`sample_connector_usage_msgraphgroupsanduser.py`)
+- Microsoft Graph Groups and Users samples (`sample_connector_usage_ms_graph_groups_and_users.py`)
 
 ### Changed
 

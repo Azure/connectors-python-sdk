@@ -16,7 +16,7 @@ from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
 
 import azure.connectors as connectors
-from azure.connectors.dataflowssms import DataflowssmsClient, SendSmsInput
+from azure.connectors.data_flows_sms import DataFlowsSmsClient, SendSmsInput
 from azure.connectors.sdk import ConnectorException, MultipartFile
 from azure.connectors.service_now import OrderItemInput, RecordBody, ServiceNowClient
 from tests.test_sdk_azure_core_pipeline import RecordingTransport, create_response
@@ -28,7 +28,7 @@ RUNTIME_URL = "https://connector.example.test/connections/test"
 @pytest.mark.parametrize(
     ("client_name", "module_name", "client_type", "api_name"),
     [
-        ("DataflowssmsClient", "dataflowssms", DataflowssmsClient, "dataflowssms"),
+        ("DataFlowsSmsClient", "data_flows_sms", DataFlowsSmsClient, "dataflowssms"),
         ("ServiceNowClient", "service_now", ServiceNowClient, "service-now"),
     ],
 )
@@ -47,7 +47,7 @@ def test_new_clients_have_public_lazy_exports(
 async def test_dataflows_sms_serializes_wire_names_and_reads_response() -> None:
     """Exercise the generated mutation through the Azure Core pipeline, never live."""
     transport = RecordingTransport(create_response(content=b'{"status":"accepted"}'))
-    async with DataflowssmsClient(
+    async with DataFlowsSmsClient(
         RUNTIME_URL, AzureKeyCredential("test-key"), transport=transport,
     ) as client:
         response = await client.send_sms(
@@ -71,7 +71,7 @@ async def test_dataflows_sms_serializes_wire_names_and_reads_response() -> None:
 async def test_dataflows_sms_error_preserves_status_and_body() -> None:
     """Turn an actual transport error response into a connector exception."""
     transport = RecordingTransport(create_response(status=400, content=b'{"error":"invalid"}'))
-    async with DataflowssmsClient(
+    async with DataFlowsSmsClient(
         RUNTIME_URL, AzureKeyCredential("test-key"), transport=transport,
     ) as client:
         with pytest.raises(ConnectorException) as captured:
@@ -272,8 +272,8 @@ async def test_service_now_multipart_attachment_preserves_fields_and_file(
 @pytest.mark.parametrize(
     ("module_name", "result", "label"),
     [
-        ("dataflowssms", {}, "SMS balance: {}"),
-        ("dataflowssms", {"balance": 8}, "SMS balance: {'balance': 8}"),
+        ("data_flows_sms", {}, "SMS balance: {}"),
+        ("data_flows_sms", {"balance": 8}, "SMS balance: {'balance': 8}"),
         ("service_now", {}, "Incident record: {}"),
         ("service_now", {"result": {"sys_id": "abc"}},
          "Incident record: {'result': {'sys_id': 'abc'}}"),
@@ -316,7 +316,7 @@ async def test_read_only_samples_print_empty_and_populated_results(
         monkeypatch.setattr(sample, "RECORD_ID", "abc")
     monkeypatch.setattr(sample, "DefaultAzureCredential", MockAsyncContext)
     monkeypatch.setattr(
-        sample, "DataflowssmsClient" if module_name == "dataflowssms" else "ServiceNowClient",
+        sample, "DataFlowsSmsClient" if module_name == "data_flows_sms" else "ServiceNowClient",
         lambda *_args: MockAsyncContext(),
     )
     await sample.main()

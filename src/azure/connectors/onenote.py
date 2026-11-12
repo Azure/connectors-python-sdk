@@ -1182,8 +1182,8 @@ class OnenoteClient(ConnectorClientBase):
         Swagger operation ID: `GetSectionsInNotebook`.
 
         Args:
-            notebook_key: A key identifying the notebook. Note this is specific
-                to the API and cannot be hand-typed.
+            notebook_key: A key identifying the notebook. Use the exact Key
+                returned by GetNotebooks; do not hand-type or transform it.
             timeout: The request timeout in seconds.
             headers: Additional HTTP request headers.
             client_request_id: A caller-provided request identifier.

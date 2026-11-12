@@ -2,8 +2,8 @@
 
 """Contract tests for MeetingroommapClient."""
 
-import azure.connectors.meetingroommap as meetingroommap_module
-from azure.connectors.meetingroommap import MeetingroommapClient
+import azure.connectors.meeting_room_map as meetingroommap_module
+from azure.connectors.meeting_room_map import MeetingRoomMapClient
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 
 
@@ -31,10 +31,10 @@ OPERATION_CONTRACTS = {
 }
 
 
-class TestMeetingroommapClient(GeneratedConnectorContractTests):
+class TestMeetingRoomMapClient(GeneratedConnectorContractTests):
     """Test the generated Meeting Room Map client contract."""
 
-    client_type = MeetingroommapClient
+    client_type = MeetingRoomMapClient
     connector_module = meetingroommap_module
     connector_name = "meetingroommap"
     operation_contracts = OPERATION_CONTRACTS

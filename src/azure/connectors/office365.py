@@ -92,11 +92,11 @@ __all__ = [
     "ItemBody",
     "Location",
     "LocationConstraint",
-    "MCPQueryRequest",
-    "MCPQueryResponse",
     "MailTipsAutomaticReplies",
     "MailTipsClientReceive",
     "MarkAsReadInput",
+    "McpQueryRequest",
+    "McpQueryResponse",
     "MeetingTimeSuggestions",
     "MessageWithOptions",
     "ObjectEntity",
@@ -349,7 +349,7 @@ class ObjectWithoutType:
 
 
 @dataclass
-class MCPQueryResponse:
+class McpQueryResponse:
     """
     Response for Email Management MCP Server (deprecated)
     """
@@ -3231,13 +3231,13 @@ class MessageWithOptions:
         metadata={"wire_name": "Attachments"},
     )
     """Attachments"""
-    use_only_h_t_m_l_message: Optional[bool] = dataclass_field(
+    use_only_html_message: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "UseOnlyHTMLMessage"},
     )
     """Use only HTML message"""
-    hide_h_t_m_l_message: Optional[bool] = dataclass_field(
+    hide_html_message: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "HideHTMLMessage"},
@@ -3247,7 +3247,7 @@ class MessageWithOptions:
     displayed. Email clients which do not support actionable messages will
     display HTML message regardless of the parameter value.
     """
-    show_h_t_m_l_confirmation_dialog: Optional[bool] = dataclass_field(
+    show_html_confirmation_dialog: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ShowHTMLConfirmationDialog"},
@@ -3375,13 +3375,13 @@ class ApprovalMessage:
         metadata={"wire_name": "Attachments"},
     )
     """Attachments"""
-    use_only_h_t_m_l_message: Optional[bool] = dataclass_field(
+    use_only_html_message: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "UseOnlyHTMLMessage"},
     )
     """Use only HTML message"""
-    hide_h_t_m_l_message: Optional[bool] = dataclass_field(
+    hide_html_message: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "HideHTMLMessage"},
@@ -3391,7 +3391,7 @@ class ApprovalMessage:
     displayed. Email clients which do not support actionable messages will
     display HTML message regardless of the parameter value.
     """
-    show_h_t_m_l_confirmation_dialog: Optional[bool] = dataclass_field(
+    show_html_confirmation_dialog: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ShowHTMLConfirmationDialog"},
@@ -5109,7 +5109,7 @@ class SensitivityLabelMetadata:
 
 
 @dataclass
-class MCPQueryRequest:
+class McpQueryRequest:
     """
     Definition: MCPQueryRequest
     """
@@ -5897,7 +5897,7 @@ class Office365Client(ConnectorClientBase):
 
     async def mcp_emails_management(
         self,
-        input: MCPQueryRequest | Mapping[str, Any],
+        input: McpQueryRequest | Mapping[str, Any],
         *,
         session_id: Optional[str] = None,
         timeout: Optional[float] = None,
@@ -5961,7 +5961,7 @@ class Office365Client(ConnectorClientBase):
 
     async def mcp_meeting_management(
         self,
-        input: MCPQueryRequest | Mapping[str, Any],
+        input: McpQueryRequest | Mapping[str, Any],
         *,
         session_id: Optional[str] = None,
         timeout: Optional[float] = None,
@@ -6025,7 +6025,7 @@ class Office365Client(ConnectorClientBase):
 
     async def mcp_contacts_management(
         self,
-        input: MCPQueryRequest | Mapping[str, Any],
+        input: McpQueryRequest | Mapping[str, Any],
         *,
         session_id: Optional[str] = None,
         timeout: Optional[float] = None,

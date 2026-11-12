@@ -7,9 +7,9 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-import azure.connectors.seismicplanner as seismicplanner_module
-from azure.connectors.seismicplanner import SeismicplannerClient
-from azure.connectors.seismicplanner import (
+import azure.connectors.seismic_planner as seismicplanner_module
+from azure.connectors.seismic_planner import SeismicPlannerClient
+from azure.connectors.seismic_planner import (
     CustomPropertyDataDisplay,
     CustomPropertyValues,
 )
@@ -48,10 +48,10 @@ OPERATION_CONTRACTS = {
 }
 
 
-class TestSeismicplannerClient(GeneratedConnectorContractTests):
+class TestSeismicPlannerClient(GeneratedConnectorContractTests):
     """Test the generated Seismic Planner client contract."""
 
-    client_type = SeismicplannerClient
+    client_type = SeismicPlannerClient
     connector_module = seismicplanner_module
     connector_name = "seismicplanner"
     operation_contracts = OPERATION_CONTRACTS
@@ -70,7 +70,7 @@ class TestSeismicplannerClient(GeneratedConnectorContractTests):
         self, mock_credential: Any, identifiers: Any, expected_query: str | None,
     ) -> None:
         """Test generated CSV and legacy scalar-fallback paths encode complete query values."""
-        async with SeismicplannerClient(
+        async with SeismicPlannerClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         ) as client:

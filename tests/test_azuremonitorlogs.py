@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.azuremonitorlogs import AzuremonitorlogsClient
-from azure.connectors.azuremonitorlogs import (
+from azure.connectors.azure_monitor_logs import AzureMonitorLogsClient
+from azure.connectors.azure_monitor_logs import (
     QueryDataInput,
     QuerySchemaInput,
     VisualizeQueryInput,
@@ -23,12 +23,12 @@ from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import model_instance, resolve_generated_result
 
 
-class TestAzuremonitorlogsClientInitialization:
+class TestAzureMonitorLogsClientInitialization:
     """Tests for AzuremonitorlogsClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = AzuremonitorlogsClient(
+        client = AzureMonitorLogsClient(
             "https://example.azure.com/connections/test",
             AzureKeyCredential("test-key"),
         )
@@ -43,7 +43,7 @@ class TestAzuremonitorlogsClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = AzuremonitorlogsClient(
+        client = AzureMonitorLogsClient(
             "https://example.azure.com/connections/test/",
             AzureKeyCredential("test-key"),
         )
@@ -54,7 +54,7 @@ class TestAzuremonitorlogsClientInitialization:
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = AzuremonitorlogsClient(
+        client = AzureMonitorLogsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -63,7 +63,7 @@ class TestAzuremonitorlogsClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = AzuremonitorlogsClient(
+        client = AzureMonitorLogsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -77,7 +77,7 @@ class TestAzuremonitorlogsClientInitialization:
             ValueError,
             match="connection_runtime_url cannot be None or empty",
         ):
-            AzuremonitorlogsClient("", AzureKeyCredential("test-key"))
+            AzureMonitorLogsClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
@@ -85,16 +85,16 @@ class TestAzuremonitorlogsClientInitialization:
             ValueError,
             match="connection_runtime_url cannot be None or empty",
         ):
-            AzuremonitorlogsClient(None, AzureKeyCredential("test-key"))
+            AzureMonitorLogsClient(None, AzureKeyCredential("test-key"))
 
 
-class TestAzuremonitorlogsClientLifecycle:
+class TestAzureMonitorLogsClientLifecycle:
     """Tests for AzuremonitorlogsClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = AzuremonitorlogsClient(
+        client = AzureMonitorLogsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -111,15 +111,15 @@ class TestAzuremonitorlogsClientLifecycle:
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(
-            AzuremonitorlogsClient,
+            AzureMonitorLogsClient,
             "close",
             new_callable=AsyncMock,
         ) as mock_close:
-            async with AzuremonitorlogsClient(
+            async with AzureMonitorLogsClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential,
             ) as client:
-                assert isinstance(client, AzuremonitorlogsClient)
+                assert isinstance(client, AzureMonitorLogsClient)
 
             mock_close.assert_called_once()
 
@@ -177,7 +177,7 @@ class TestListSubscriptionsAsync:
     @pytest.mark.asyncio
     async def test_success_returns_json(self, mock_credential):
         """Test successful response returns parsed JSON."""
-        client = AzuremonitorlogsClient(
+        client = AzureMonitorLogsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -209,7 +209,7 @@ class TestListSubscriptionsAsync:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test non-2xx response raises ConnectorException."""
-        client = AzuremonitorlogsClient(
+        client = AzureMonitorLogsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -232,7 +232,7 @@ class TestListResourceGroupsAsync:
     @pytest.mark.asyncio
     async def test_success_appends_query_params(self, mock_credential):
         """Test subscription query parameter is appended to URL."""
-        client = AzuremonitorlogsClient(
+        client = AzureMonitorLogsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -266,7 +266,7 @@ class TestListResourcesAsync:
         mock_credential,
     ):
         """Test all resource filters are appended to URL."""
-        client = AzuremonitorlogsClient(
+        client = AzureMonitorLogsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -296,7 +296,7 @@ class TestQueryDataAsync:
     @pytest.mark.asyncio
     async def test_success_sends_body_and_returns_json(self, mock_credential):
         """Test successful query sends body and returns parsed JSON."""
-        client = AzuremonitorlogsClient(
+        client = AzureMonitorLogsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -328,7 +328,7 @@ class TestQueryDataAsync:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test successful empty response returns None."""
-        client = AzuremonitorlogsClient(
+        client = AzureMonitorLogsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -359,7 +359,7 @@ class TestQuerySchemaAsync:
         mock_credential,
     ):
         """Test schema lookup returns parsed payload."""
-        client = AzuremonitorlogsClient(
+        client = AzureMonitorLogsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -391,7 +391,7 @@ class TestVisualizeQueryAsync:
     @pytest.mark.asyncio
     async def test_success_with_vis_type(self, mock_credential):
         """Test visualize call appends visType query parameter."""
-        client = AzuremonitorlogsClient(
+        client = AzureMonitorLogsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -425,7 +425,7 @@ class TestVisualizeQueryAsync:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test non-2xx visualize response raises ConnectorException."""
-        client = AzuremonitorlogsClient(
+        client = AzureMonitorLogsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -458,7 +458,7 @@ class TestGetTimeRangeSelectionControlAsync:
     @pytest.mark.asyncio
     async def test_success_returns_control_schema(self, mock_credential):
         """Test the time-range type is encoded and the schema is returned."""
-        client = AzuremonitorlogsClient(
+        client = AzureMonitorLogsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -491,7 +491,7 @@ class TestGetTimeRangeSelectionControlAsync:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test a non-2xx response raises ConnectorException."""
-        client = AzuremonitorlogsClient(
+        client = AzureMonitorLogsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )

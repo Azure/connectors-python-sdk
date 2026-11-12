@@ -634,7 +634,11 @@ class AccountsInput:
     email: Optional[str] = dataclass_field(default=None, kw_only=True)
     first_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     last_name: Optional[str] = dataclass_field(default=None, kw_only=True)
-    username: Optional[str] = dataclass_field(default=None, kw_only=True)
+    user_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "username"},
+    )
     phone: Optional[str] = dataclass_field(default=None, kw_only=True)
     job_title: Optional[str] = dataclass_field(default=None, kw_only=True)
     job_description: Optional[str] = dataclass_field(default=None, kw_only=True)
@@ -703,7 +707,11 @@ class Asset:
     """
 
     id: Optional[str] = dataclass_field(default=None, kw_only=True)
-    filename: Optional[str] = dataclass_field(default=None, kw_only=True)
+    file_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "filename"},
+    )
     version: Optional[int] = dataclass_field(default=None, kw_only=True)
     step_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     uploaded_from: Optional[str] = dataclass_field(default=None, kw_only=True)
@@ -1780,7 +1788,11 @@ class User:
 
     id: Optional[int] = dataclass_field(default=None, kw_only=True)
     email: Optional[str] = dataclass_field(default=None, kw_only=True)
-    username: Optional[str] = dataclass_field(default=None, kw_only=True)
+    user_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "username"},
+    )
     first_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     last_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     full_name: Optional[str] = dataclass_field(default=None, kw_only=True)

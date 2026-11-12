@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.azurequeues import AzurequeuesClient
-from azure.connectors.azurequeues import (
+from azure.connectors.azure_queues import AzureQueuesClient
+from azure.connectors.azure_queues import (
     Messages,
     QueueArray,
     PutMessageInput,
@@ -25,12 +25,12 @@ from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import resolve_generated_result
 
 
-class TestAzurequeuesClientInitialization:
+class TestAzureQueuesClientInitialization:
     """Tests for AzurequeuesClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = AzurequeuesClient(
+        client = AzureQueuesClient(
             "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -39,14 +39,14 @@ class TestAzurequeuesClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = AzurequeuesClient(
+        client = AzureQueuesClient(
             "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = AzurequeuesClient(
+        client = AzureQueuesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -55,7 +55,7 @@ class TestAzurequeuesClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = AzurequeuesClient(
+        client = AzureQueuesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -66,16 +66,16 @@ class TestAzurequeuesClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            AzurequeuesClient("", AzureKeyCredential("test-key"))
+            AzureQueuesClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            AzurequeuesClient(None, AzureKeyCredential("test-key"))
+            AzureQueuesClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'azurequeues'."""
-        client = AzurequeuesClient(
+        client = AzureQueuesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -83,13 +83,13 @@ class TestAzurequeuesClientInitialization:
         assert client.connector_name == "azurequeues"
 
 
-class TestAzurequeuesClientLifecycle:
+class TestAzureQueuesClientLifecycle:
     """Tests for AzurequeuesClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = AzurequeuesClient(
+        client = AzureQueuesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -101,12 +101,12 @@ class TestAzurequeuesClientLifecycle:
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
-        with patch.object(AzurequeuesClient, 'close', new_callable=AsyncMock) as mock_close:
-            async with AzurequeuesClient(
+        with patch.object(AzureQueuesClient, 'close', new_callable=AsyncMock) as mock_close:
+            async with AzureQueuesClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential
             ) as client:
-                assert isinstance(client, AzurequeuesClient)
+                assert isinstance(client, AzureQueuesClient)
 
             mock_close.assert_called_once()
 
@@ -117,7 +117,7 @@ class TestDeleteMessage:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful DELETE request."""
-        client = AzurequeuesClient(
+        client = AzureQueuesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -147,7 +147,7 @@ class TestDeleteMessage:
     @pytest.mark.asyncio
     async def test_popreceipt_is_required(self, mock_credential):
         """Test DELETE requires a pop receipt."""
-        client = AzurequeuesClient(
+        client = AzureQueuesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -162,7 +162,7 @@ class TestDeleteMessage:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzurequeuesClient(
+        client = AzureQueuesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -192,7 +192,7 @@ class TestGetMessages:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = AzurequeuesClient(
+        client = AzureQueuesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -222,7 +222,7 @@ class TestGetMessages:
     @pytest.mark.asyncio
     async def test_with_query_parameters(self, mock_credential):
         """Test GET request with numofmessages and visibilitytimeout parameters."""
-        client = AzurequeuesClient(
+        client = AzureQueuesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -250,7 +250,7 @@ class TestGetMessages:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzurequeuesClient(
+        client = AzureQueuesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -278,7 +278,7 @@ class TestListQueues:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = AzurequeuesClient(
+        client = AzureQueuesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -307,7 +307,7 @@ class TestListQueues:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
-        client = AzurequeuesClient(
+        client = AzureQueuesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -328,7 +328,7 @@ class TestListQueues:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzurequeuesClient(
+        client = AzureQueuesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -356,8 +356,8 @@ class TestTriggerOperations:
         """Test polling triggers are metadata-only operations."""
         assert "OnMessages_V2" in TRIGGER_OPERATIONS
         assert "OnMessageThresholdReached_V2" in TRIGGER_OPERATIONS
-        assert not hasattr(AzurequeuesClient, "on_messages_async")
-        assert not hasattr(AzurequeuesClient, "on_message_threshold_reached_async")
+        assert not hasattr(AzureQueuesClient, "on_messages_async")
+        assert not hasattr(AzureQueuesClient, "on_message_threshold_reached_async")
 
 
 class TestPutMessage:
@@ -366,7 +366,7 @@ class TestPutMessage:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful POST request."""
-        client = AzurequeuesClient(
+        client = AzureQueuesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -397,7 +397,7 @@ class TestPutMessage:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzurequeuesClient(
+        client = AzureQueuesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -427,7 +427,7 @@ class TestPutQueue:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful PUT request."""
-        client = AzurequeuesClient(
+        client = AzureQueuesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -458,7 +458,7 @@ class TestPutQueue:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzurequeuesClient(
+        client = AzureQueuesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -565,7 +565,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_http_client_property_access(self, mock_credential):
         """Test accessing http_client property."""
-        client = AzurequeuesClient(
+        client = AzureQueuesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -576,7 +576,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_multiple_consecutive_calls(self, mock_credential):
         """Test multiple consecutive API calls."""
-        client = AzurequeuesClient(
+        client = AzureQueuesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -597,7 +597,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_special_characters_in_queue_name(self, mock_credential):
         """Test handling of special characters in queue name."""
-        client = AzurequeuesClient(
+        client = AzureQueuesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )

@@ -13,18 +13,18 @@ from urllib.parse import urlsplit
 import pytest
 from azure.core.async_paging import AsyncItemPaged
 
-import azure.connectors.azureautomation as azureautomation
-import azure.connectors.azureblob as azureblob
-import azure.connectors.azuredatafactory as azuredatafactory
-import azure.connectors.azurevm as azurevm
-import azure.connectors.excelonlinebusiness as excelonlinebusiness
+import azure.connectors.azure_automation as azure_automation
+import azure.connectors.azure_blob as azure_blob
+import azure.connectors.azure_data_factory as azure_data_factory
+import azure.connectors.azure_vm as azure_vm
+import azure.connectors.excel_online_business as excel_online_business
 import azure.connectors.teams as teams
 import azure.connectors.wdatp as wdatp
-from azure.connectors.azureautomation import AzureautomationClient
-from azure.connectors.azureblob import AzureblobClient
-from azure.connectors.azuredatafactory import AzuredatafactoryClient
-from azure.connectors.azurevm import AzurevmClient
-from azure.connectors.excelonlinebusiness import ExcelonlinebusinessClient
+from azure.connectors.azure_automation import AzureAutomationClient
+from azure.connectors.azure_blob import AzureBlobClient
+from azure.connectors.azure_data_factory import AzureDataFactoryClient
+from azure.connectors.azure_vm import AzureVMClient
+from azure.connectors.excel_online_business import ExcelOnlineBusinessClient
 from azure.connectors.teams import TeamsClient
 from azure.connectors.wdatp import WdatpClient
 from azure.connectors.sdk import ConnectorException
@@ -37,8 +37,8 @@ from tests.generated_connector_test_utils import (
 
 CONNECTOR_OPERATION_CASES = [
     (
-        azureautomation,
-        AzureautomationClient,
+        azure_automation,
+        AzureAutomationClient,
         [
             ("list_subscriptions", "GET", "/subscriptions?", False),
             ("list_resource_groups", "GET", "/resourcegroups?", False),
@@ -48,13 +48,13 @@ CONNECTOR_OPERATION_CASES = [
         ],
     ),
     (
-        azureblob,
-        AzureblobClient,
+        azure_blob,
+        AzureBlobClient,
         [("list_data_sets", "GET", "/v2/codeless/GetDataSets", False)],
     ),
     (
-        azuredatafactory,
-        AzuredatafactoryClient,
+        azure_data_factory,
+        AzureDataFactoryClient,
         [
             ("list_subscriptions", "GET", "/subscriptions?", False),
             ("list_resource_groups", "GET", "/resourcegroups?", False),
@@ -68,8 +68,8 @@ CONNECTOR_OPERATION_CASES = [
         ],
     ),
     (
-        azurevm,
-        AzurevmClient,
+        azure_vm,
+        AzureVMClient,
         [
             ("list_subscriptions", "GET", "/subscriptions?", False),
             ("list_resource_groups", "GET", "/resourcegroups?", False),
@@ -94,8 +94,8 @@ CONNECTOR_OPERATION_CASES = [
         ],
     ),
     (
-        excelonlinebusiness,
-        ExcelonlinebusinessClient,
+        excel_online_business,
+        ExcelOnlineBusinessClient,
         [
             ("list_sources", "GET", "/codeless/v1.0/sources?", False),
             ("list_drives", "GET", "/codeless/v1.0/drives?", False),
@@ -155,38 +155,38 @@ CASE_PARAMETER_NAMES = (
 )
 
 EXPECTED_PAGEABLE_OPERATIONS = {
-    (AzureautomationClient, "list_subscriptions"),
-    (AzureautomationClient, "list_resource_groups"),
-    (AzureautomationClient, "list_automation_accounts"),
-    (AzureautomationClient, "list_runbooks"),
-    (AzureautomationClient, "list_runbook"),
-    (AzureblobClient, "list_data_sets"),
-    (AzuredatafactoryClient, "list_subscriptions"),
-    (AzuredatafactoryClient, "list_resource_groups"),
-    (AzuredatafactoryClient, "list_data_factories"),
-    (AzuredatafactoryClient, "list_pipelines"),
-    (AzurevmClient, "list_subscriptions"),
-    (AzurevmClient, "list_resource_groups"),
-    (AzurevmClient, "list_virtual_machine_scale_sets"),
-    (AzurevmClient, "list_virtual_machines_in_scale_set"),
-    (AzurevmClient, "list_virtual_machines"),
-    (ExcelonlinebusinessClient, "list_sources"),
-    (ExcelonlinebusinessClient, "list_drives"),
-    (ExcelonlinebusinessClient, "list_columns"),
+    (AzureAutomationClient, "list_subscriptions"),
+    (AzureAutomationClient, "list_resource_groups"),
+    (AzureAutomationClient, "list_automation_accounts"),
+    (AzureAutomationClient, "list_runbooks"),
+    (AzureAutomationClient, "list_runbook"),
+    (AzureBlobClient, "list_data_sets"),
+    (AzureDataFactoryClient, "list_subscriptions"),
+    (AzureDataFactoryClient, "list_resource_groups"),
+    (AzureDataFactoryClient, "list_data_factories"),
+    (AzureDataFactoryClient, "list_pipelines"),
+    (AzureVMClient, "list_subscriptions"),
+    (AzureVMClient, "list_resource_groups"),
+    (AzureVMClient, "list_virtual_machine_scale_sets"),
+    (AzureVMClient, "list_virtual_machines_in_scale_set"),
+    (AzureVMClient, "list_virtual_machines"),
+    (ExcelOnlineBusinessClient, "list_sources"),
+    (ExcelOnlineBusinessClient, "list_drives"),
+    (ExcelOnlineBusinessClient, "list_columns"),
 }
 
 CONTINUATION_PAGEABLE_OPERATIONS = {
-    (AzureautomationClient, "list_subscriptions"),
-    (AzureautomationClient, "list_resource_groups"),
-    (AzuredatafactoryClient, "list_subscriptions"),
-    (AzuredatafactoryClient, "list_resource_groups"),
-    (AzuredatafactoryClient, "list_data_factories"),
-    (AzuredatafactoryClient, "list_pipelines"),
-    (AzurevmClient, "list_subscriptions"),
-    (AzurevmClient, "list_resource_groups"),
-    (AzurevmClient, "list_virtual_machine_scale_sets"),
-    (AzurevmClient, "list_virtual_machines_in_scale_set"),
-    (AzurevmClient, "list_virtual_machines"),
+    (AzureAutomationClient, "list_subscriptions"),
+    (AzureAutomationClient, "list_resource_groups"),
+    (AzureDataFactoryClient, "list_subscriptions"),
+    (AzureDataFactoryClient, "list_resource_groups"),
+    (AzureDataFactoryClient, "list_data_factories"),
+    (AzureDataFactoryClient, "list_pipelines"),
+    (AzureVMClient, "list_subscriptions"),
+    (AzureVMClient, "list_resource_groups"),
+    (AzureVMClient, "list_virtual_machine_scale_sets"),
+    (AzureVMClient, "list_virtual_machines_in_scale_set"),
+    (AzureVMClient, "list_virtual_machines"),
 }
 
 PAGEABLE_OPERATION_CASES = [
@@ -275,7 +275,7 @@ async def test_relative_continuation_resolves_against_current_page(
     mock_credential: Any,
 ) -> None:
     """Test a bare relative continuation keeps the current nested route."""
-    async with AzurevmClient(
+    async with AzureVMClient(
         "https://example.azure.com/connections/test",
         credential=mock_credential,
     ) as client:

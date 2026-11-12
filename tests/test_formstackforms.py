@@ -2,9 +2,9 @@
 
 """Contract tests for FormstackformsClient."""
 
-import azure.connectors.formstackforms as formstackforms_module
-from azure.connectors.formstackforms import FormstackformsClient
-from azure.connectors.formstackforms import TRIGGER_OPERATIONS
+import azure.connectors.formstack_forms as formstackforms_module
+from azure.connectors.formstack_forms import FormstackFormsClient
+from azure.connectors.formstack_forms import TRIGGER_OPERATIONS
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 
 
@@ -14,10 +14,10 @@ OPERATION_CONTRACTS = {
 }
 
 
-class TestFormstackformsClient(GeneratedConnectorContractTests):
+class TestFormstackFormsClient(GeneratedConnectorContractTests):
     """Test the generated Formstack Forms client contract."""
 
-    client_type = FormstackformsClient
+    client_type = FormstackFormsClient
     connector_module = formstackforms_module
     connector_name = "formstackforms"
     operation_contracts = OPERATION_CONTRACTS

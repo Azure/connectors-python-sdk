@@ -2,8 +2,8 @@
 
 """Contract tests for JedoxodatahubClient."""
 
-import azure.connectors.jedoxodatahub as jedoxodatahub_module
-from azure.connectors.jedoxodatahub import JedoxodatahubClient
+import azure.connectors.jedox_odata_hub as jedoxodatahub_module
+from azure.connectors.jedox_odata_hub import JedoxODataHubClient
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 
 
@@ -48,10 +48,10 @@ OPERATION_CONTRACTS = dict.fromkeys(
 )
 
 
-class TestJedoxodatahubClient(GeneratedConnectorContractTests):
+class TestJedoxODataHubClient(GeneratedConnectorContractTests):
     """Test the generated Jedox OData Hub client contract."""
 
-    client_type = JedoxodatahubClient
+    client_type = JedoxODataHubClient
     connector_module = jedoxodatahub_module
     connector_name = "jedoxodatahub"
     operation_contracts = OPERATION_CONTRACTS

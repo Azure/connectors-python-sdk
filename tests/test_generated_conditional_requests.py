@@ -12,7 +12,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from azure.core import MatchConditions
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.azuretables import AzuretablesClient
+from azure.connectors.azure_tables import AzureTablesClient
 
 from tests.conftest import MockResponse
 
@@ -20,16 +20,16 @@ from tests.conftest import MockResponse
 OPERATIONS = ("delete_entity", "merge_entity", "replace_entity")
 
 
-def create_client() -> AzuretablesClient:
+def create_client() -> AzureTablesClient:
     """Create the generated async root client."""
-    return AzuretablesClient(
+    return AzureTablesClient(
         "https://example.azure.com/connections/test",
         credential=AzureKeyCredential("test-key"),
     )
 
 
 async def invoke_operation(
-    client: AzuretablesClient,
+    client: AzureTablesClient,
     operation_name: str,
     **controls: Any,
 ) -> None:

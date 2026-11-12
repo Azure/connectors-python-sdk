@@ -5,7 +5,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.mq import MqClient
+from azure.connectors.mq import MQClient
 from azure.connectors.mq import (
     SingleGetValidOptions,
     MultipleGetValidOptions,
@@ -18,12 +18,12 @@ from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import resolve_generated_result
 
 
-class TestMqClientInitialization:
+class TestMQClientInitialization:
     """Tests for MqClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = MqClient("https://example.azure.com/connections/test",
+        client = MQClient("https://example.azure.com/connections/test",
                           AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -32,14 +32,14 @@ class TestMqClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = MqClient("https://example.azure.com/connections/test/",
+        client = MQClient("https://example.azure.com/connections/test/",
                           AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = MqClient(
+        client = MQClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -48,7 +48,7 @@ class TestMqClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = MqClient(
+        client = MQClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -59,16 +59,16 @@ class TestMqClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            MqClient("", AzureKeyCredential("test-key"))
+            MQClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            MqClient(None, AzureKeyCredential("test-key"))
+            MQClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'mq'."""
-        client = MqClient(
+        client = MQClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -76,13 +76,13 @@ class TestMqClientInitialization:
         assert client.connector_name == "mq"
 
 
-class TestMqClientLifecycle:
+class TestMQClientLifecycle:
     """Tests for MqClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = MqClient(
+        client = MQClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -94,12 +94,12 @@ class TestMqClientLifecycle:
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
-        with patch.object(MqClient, 'close', new_callable=AsyncMock) as mock_close:
-            async with MqClient(
+        with patch.object(MQClient, 'close', new_callable=AsyncMock) as mock_close:
+            async with MQClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential
             ) as client:
-                assert isinstance(client, MqClient)
+                assert isinstance(client, MQClient)
 
             mock_close.assert_called_once()
 
@@ -110,7 +110,7 @@ class TestDelete:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
-        client = MqClient(
+        client = MQClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -138,7 +138,7 @@ class TestDelete:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
-        client = MqClient(
+        client = MQClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -157,7 +157,7 @@ class TestDelete:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = MqClient(
+        client = MQClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -182,7 +182,7 @@ class TestDeleteAll:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
-        client = MqClient(
+        client = MQClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -212,7 +212,7 @@ class TestDeleteAll:
     @pytest.mark.asyncio
     async def test_empty_response_returns_empty_page(self, mock_credential):
         """Test that empty response yields no items."""
-        client = MqClient(
+        client = MQClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -233,7 +233,7 @@ class TestDeleteAll:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = MqClient(
+        client = MQClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -260,7 +260,7 @@ class TestRead:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
-        client = MqClient(
+        client = MQClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -288,7 +288,7 @@ class TestRead:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
-        client = MqClient(
+        client = MQClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -307,7 +307,7 @@ class TestRead:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = MqClient(
+        client = MQClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -332,7 +332,7 @@ class TestReadAll:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
-        client = MqClient(
+        client = MQClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -362,7 +362,7 @@ class TestReadAll:
     @pytest.mark.asyncio
     async def test_empty_response_returns_empty_page(self, mock_credential):
         """Test that empty response yields no items."""
-        client = MqClient(
+        client = MQClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -383,7 +383,7 @@ class TestReadAll:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = MqClient(
+        client = MQClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -410,7 +410,7 @@ class TestReceive:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
-        client = MqClient(
+        client = MQClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -438,7 +438,7 @@ class TestReceive:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
-        client = MqClient(
+        client = MQClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -457,7 +457,7 @@ class TestReceive:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = MqClient(
+        client = MQClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -482,7 +482,7 @@ class TestReceiveAll:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
-        client = MqClient(
+        client = MQClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -516,7 +516,7 @@ class TestReceiveAll:
     @pytest.mark.asyncio
     async def test_empty_response_returns_empty_page(self, mock_credential):
         """Test that empty response yields no items."""
-        client = MqClient(
+        client = MQClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -537,7 +537,7 @@ class TestReceiveAll:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = MqClient(
+        client = MQClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -564,7 +564,7 @@ class TestSend:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
-        client = MqClient(
+        client = MQClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -596,7 +596,7 @@ class TestSend:
     @pytest.mark.asyncio
     async def test_with_correlation_id(self, mock_credential):
         """Test send with correlation ID."""
-        client = MqClient(
+        client = MQClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -625,7 +625,7 @@ class TestSend:
     @pytest.mark.asyncio
     async def test_with_reply_to_queue(self, mock_credential):
         """Test send with reply-to queue."""
-        client = MqClient(
+        client = MQClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -652,7 +652,7 @@ class TestSend:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
-        client = MqClient(
+        client = MQClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -673,7 +673,7 @@ class TestSend:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = MqClient(
+        client = MQClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -696,7 +696,7 @@ class TestSend:
     @pytest.mark.asyncio
     async def test_queue_full_error(self, mock_credential):
         """Test that queue full error raises ConnectorException."""
-        client = MqClient(
+        client = MQClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )

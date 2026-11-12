@@ -797,7 +797,7 @@ class PassThroughNativeQueryBody:
         metadata={"wire_name": "formalParameters"},
     )
     """Formal Parameters"""
-    actual_parameters: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
+    actual_parameters: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "actualParameters"},
@@ -986,7 +986,7 @@ class SqlPassThroughNativeQueryBody:
     Definition: SqlPassThroughNativeQueryBody
     """
 
-    actual_parameters: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
+    actual_parameters: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "actualParameters"},

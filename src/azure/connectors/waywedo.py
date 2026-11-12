@@ -37,7 +37,7 @@ __all__ = [
     "CommentAddInput",
     "CompletedStep",
     "FinishChecklistWebHookInput",
-    "GenerateAcceptancePDFWebHookInput",
+    "GenerateAcceptancePdfWebHookInput",
     "GetAllChecklistInstancesResponse",
     "InviteSupervisorWebHookInput",
     "NewCommentWebHookInput",
@@ -217,6 +217,18 @@ class ChecklistStep:
     """The title of the instance step."""
     ordinal: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of the instance step."""
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """The completed status of the step."""
+    checked: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """Date and time of when the step was checked."""
+    checked_by: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "checkedBy"},
+    )
+    """The email or username of the user that completed the step."""
+    due: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """Date and time of when the step is due."""
 
 
 @dataclass
@@ -308,7 +320,17 @@ class Procedure:
         kw_only=True,
         metadata={"wire_name": "type"},
     )
-    """The type of procedure; 1 (standard) or 2 (checklist)"""
+    """
+    The type of procedure; 1 (standard), 2 (checklist), 3 (Quiz), 4 (Form)
+    """
+    version: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """The version of this procedure."""
+    last_edited: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "lastEdited"},
+    )
+    """Date and time of when the procedure was last edited."""
 
 
 @dataclass
@@ -434,7 +456,7 @@ class InviteSupervisorWebHookInput:
 
 
 @dataclass
-class GenerateAcceptancePDFWebHookInput:
+class GenerateAcceptancePdfWebHookInput:
     """
     When a procedure is accepted
     """
@@ -504,7 +526,7 @@ class CompletedStep:
     """The email address of the user that completed the checklist step."""
     due: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date and time the checklist step was due."""
-    step: Optional[ChecklistStep | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    step: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     decision_choices: Optional[List[str]] = dataclass_field(
         default=None,
         kw_only=True,

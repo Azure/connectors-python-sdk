@@ -587,7 +587,11 @@ class Member:
         metadata={"wire_name": "fullName"},
     )
     """The full name of the member."""
-    username: Optional[str] = dataclass_field(default=None, kw_only=True)
+    user_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "username"},
+    )
     """The username of the member."""
     initials: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The initials of the member."""
@@ -1118,7 +1122,7 @@ class Webhook:
         metadata={"wire_name": "idModel"},
     )
     """ID of the model to be monitored (i.e. card,board, etc.)"""
-    callback_u_r_l: Optional[str] = dataclass_field(
+    callback_url: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "callbackURL"},
@@ -1304,7 +1308,7 @@ class ClientSubscription:
     Definition: ClientSubscription
     """
 
-    notification_u_r_l: str = dataclass_field(
+    notification_url: str = dataclass_field(
         metadata={"wire_name": "NotificationURL"},
     )
     """
@@ -1321,7 +1325,7 @@ class SubscriptionResponse:
 
     id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Id of the subscription"""
-    notification_u_r_l: Optional[str] = dataclass_field(
+    notification_url: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "NotificationURL"},

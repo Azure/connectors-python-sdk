@@ -30,8 +30,8 @@ import os
 try:
     from azure.identity.aio import DefaultAzureCredential
     from azure.connectors import ConnectorException
-    from azure.connectors.sharepointonline import SharepointonlineClient
-    from azure.connectors.sharepointonline import (
+    from azure.connectors.share_point_online import SharePointOnlineClient
+    from azure.connectors.share_point_online import (
         PatchItemInput,
         PostItemInput,
         )
@@ -61,7 +61,7 @@ async def example_1_get_lists():
 
     async with DefaultAzureCredential() as credential:
 
-        async with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with SharePointOnlineClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 lists = [item async for item in client.list_tables(dataset=SHAREPOINT_SITE_URL)]
 
@@ -89,7 +89,7 @@ async def example_2_get_list_items():
 
     async with DefaultAzureCredential() as credential:
 
-        async with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with SharePointOnlineClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 items = [item async for item in client.list_items(
                     dataset=SHAREPOINT_SITE_URL,
@@ -123,7 +123,7 @@ async def example_3_create_list_item():
 
     async with DefaultAzureCredential() as credential:
 
-        async with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with SharePointOnlineClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 new_item = PostItemInput(
                     additional_properties={'Title': 'Test Task from Python SDK'},
@@ -166,7 +166,7 @@ async def example_4_update_list_item():
 
     async with DefaultAzureCredential() as credential:
 
-        async with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with SharePointOnlineClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # CREATE
                 print("Creating item...")
@@ -234,7 +234,7 @@ async def example_5_query_with_filters():
 
     async with DefaultAzureCredential() as credential:
 
-        async with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with SharePointOnlineClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Create some test items first
                 print("Creating test items...")
@@ -291,7 +291,7 @@ async def example_6_file_operations():
 
     async with DefaultAzureCredential() as credential:
 
-        async with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with SharePointOnlineClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # List root folder
                 print("Listing root folder...")
@@ -338,7 +338,7 @@ async def example_7_error_handling():
 
     async with DefaultAzureCredential() as credential:
 
-        async with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with SharePointOnlineClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Attempt to get an item with an invalid ID
                 invalid_item_id = 99999

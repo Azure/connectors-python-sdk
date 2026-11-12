@@ -415,7 +415,7 @@ class FileMetadata:
 All generated clients extend `ConnectorClientBase`:
 
 ```python
-class SharepointonlineClient(ConnectorClientBase):
+class SharePointOnlineClient(ConnectorClientBase):
     """Typed client for SharePoint Online connector."""
 
     def __init__(

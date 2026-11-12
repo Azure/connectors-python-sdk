@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.microsoftbookings import MicrosoftbookingsClient
-from azure.connectors.microsoftbookings import (
+from azure.connectors.microsoft_bookings import MicrosoftBookingsClient
+from azure.connectors.microsoft_bookings import (
     CreateAppointmentInput,
     UpdateAppointmentInput,
     CancelAppointmentInput,
@@ -27,12 +27,12 @@ from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import resolve_generated_result
 
 
-class TestMicrosoftbookingsClientInitialization:
+class TestMicrosoftBookingsClientInitialization:
     """Tests for MicrosoftbookingsClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = MicrosoftbookingsClient(
+        client = MicrosoftBookingsClient(
             "https://example.azure.com/connections/test",
             AzureKeyCredential("test-key"),
         )
@@ -47,7 +47,7 @@ class TestMicrosoftbookingsClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = MicrosoftbookingsClient(
+        client = MicrosoftBookingsClient(
             "https://example.azure.com/connections/test/",
             AzureKeyCredential("test-key"),
         )
@@ -58,7 +58,7 @@ class TestMicrosoftbookingsClientInitialization:
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = MicrosoftbookingsClient(
+        client = MicrosoftBookingsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -67,7 +67,7 @@ class TestMicrosoftbookingsClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = MicrosoftbookingsClient(
+        client = MicrosoftBookingsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -80,18 +80,18 @@ class TestMicrosoftbookingsClientInitialization:
         with pytest.raises(
             ValueError, match="connection_runtime_url cannot be None or empty"
         ):
-            MicrosoftbookingsClient("", AzureKeyCredential("test-key"))
+            MicrosoftBookingsClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(
             ValueError, match="connection_runtime_url cannot be None or empty"
         ):
-            MicrosoftbookingsClient(None, AzureKeyCredential("test-key"))
+            MicrosoftBookingsClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'microsoftbookings'."""
-        client = MicrosoftbookingsClient(
+        client = MicrosoftBookingsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -99,13 +99,13 @@ class TestMicrosoftbookingsClientInitialization:
         assert client.connector_name == "microsoftbookings"
 
 
-class TestMicrosoftbookingsClientLifecycle:
+class TestMicrosoftBookingsClientLifecycle:
     """Tests for MicrosoftbookingsClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = MicrosoftbookingsClient(
+        client = MicrosoftBookingsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -120,13 +120,13 @@ class TestMicrosoftbookingsClientLifecycle:
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(
-            MicrosoftbookingsClient, 'close', new_callable=AsyncMock
+            MicrosoftBookingsClient, 'close', new_callable=AsyncMock
         ) as mock_close:
-            async with MicrosoftbookingsClient(
+            async with MicrosoftBookingsClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential
             ) as client:
-                assert isinstance(client, MicrosoftbookingsClient)
+                assert isinstance(client, MicrosoftBookingsClient)
 
             mock_close.assert_called_once()
 
@@ -164,7 +164,7 @@ class TestListBookingsBusinessUserAsAdminAsync:
         )
         mock_response = MockResponse(status=200, text=response_json)
 
-        client = MicrosoftbookingsClient(
+        client = MicrosoftBookingsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -195,7 +195,7 @@ class TestListBookingsBusinessUserAsAdminAsync:
         """Test empty response yields no mailbox items."""
         mock_response = MockResponse(status=200, text='')
 
-        client = MicrosoftbookingsClient(
+        client = MicrosoftBookingsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -219,7 +219,7 @@ class TestListBookingsBusinessUserAsAdminAsync:
             text='{"error": {"code": "Unauthorized", "message": "Token expired"}}'
         )
 
-        client = MicrosoftbookingsClient(
+        client = MicrosoftBookingsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -333,12 +333,12 @@ class TestDataClasses:
             start_time="2026-06-10T10:00:00Z",
             end_time="2026-06-10T11:00:00Z",
             duration=60,
-            is_s_m_s_notifications_enabled=True
+            is_sms_notifications_enabled=True
         )
         assert data.id == "apt-123"
         assert data.service_name == "Consultation"
         assert data.duration == 60
-        assert data.is_s_m_s_notifications_enabled is True
+        assert data.is_sms_notifications_enabled is True
 
     def test_customer_data_defaults(self):
         """Test CustomerData dataclass with defaults."""

@@ -25,6 +25,8 @@ from azure.connectors.sdk import (
 
 __all__ = [
     "TeamsClient",
+    "AIInsightCollectionResponse",
+    "AIInsightResponse",
     "Activities",
     "AddMemberToChannelInput",
     "AddMemberToChatInput",
@@ -33,12 +35,10 @@ __all__ = [
     "AddMemberToTeamInput",
     "AddSectionItemInput",
     "AiInsightActionItem",
-    "AiInsightCollectionResponse",
     "AiInsightDetailResponse",
     "AiInsightMeetingNote",
     "AiInsightMeetingNoteSubpoint",
     "AiInsightMentionEvent",
-    "AiInsightResponse",
     "AiInsightViewpoint",
     "AiInsightWebhookResponseSchema",
     "ArchiveChannelInput",
@@ -1520,7 +1520,7 @@ class GetTagMembersResponseSchema:
 
 
 @dataclass
-class AiInsightCollectionResponse:
+class AIInsightCollectionResponse:
     """
     Response for List AI insights
     """
@@ -1531,7 +1531,7 @@ class AiInsightCollectionResponse:
         metadata={"wire_name": "@odata.context"},
     )
     value: Optional[
-        List[AiInsightResponse | Mapping[str, Any]]
+        List[AIInsightResponse | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -3815,7 +3815,7 @@ class ChannelJoinedUserWebhookResponseSchema:
 
 
 @dataclass
-class AiInsightResponse:
+class AIInsightResponse:
     """
     Definition: AiInsightResponse
     """

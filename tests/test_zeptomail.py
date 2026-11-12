@@ -5,10 +5,10 @@
 from typing import Any, Dict, List, Mapping, Optional, get_type_hints
 from unittest.mock import AsyncMock, patch
 
-import azure.connectors.zeptomail as zeptomail_module
+import azure.connectors.zepto_mail as zeptomail_module
 import pytest
-from azure.connectors.zeptomail import ZeptomailClient
-from azure.connectors.zeptomail import (
+from azure.connectors.zepto_mail import ZeptoMailClient
+from azure.connectors.zepto_mail import (
     ReplyToAddress,
     SendMailInput,
     SendTemplateMailInput,
@@ -30,10 +30,10 @@ OPERATION_CONTRACTS = {
 }
 
 
-class TestZeptomailClient(GeneratedConnectorContractTests):
+class TestZeptoMailClient(GeneratedConnectorContractTests):
     """Test the generated Zoho ZeptoMail client contract."""
 
-    client_type = ZeptomailClient
+    client_type = ZeptoMailClient
     connector_module = zeptomail_module
     connector_name = "zeptomail"
     operation_contracts = OPERATION_CONTRACTS
@@ -49,7 +49,7 @@ async def test_send_template_mail_preserves_mixed_values(
         SendTemplateMailInput,
         merge_key_detail=[{"key": "customer", "value": "Ada", "rank": 2}]
     )
-    client = ZeptomailClient(
+    client = ZeptoMailClient(
         "https://example.azure.com/connections/test",
         credential=mock_credential,
     )
@@ -95,7 +95,7 @@ async def test_get_processed_emails_uses_exact_encoded_query(
     mock_credential: Any,
 ) -> None:
     """Test the processed-email route and every encoded query key and value."""
-    client = ZeptomailClient(
+    client = ZeptoMailClient(
         "https://example.azure.com/connections/test",
         credential=mock_credential,
     )

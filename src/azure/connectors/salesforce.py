@@ -44,8 +44,8 @@ __all__ = [
     "Item",
     "ItemsList",
     "JobInfo",
-    "MCPQueryRequest",
-    "MCPQueryResponse",
+    "McpQueryRequest",
+    "McpQueryResponse",
     "ObjectEntity",
     "ObjectWithoutType",
     "PassThroughNativeQuery",
@@ -56,8 +56,8 @@ __all__ = [
     "PostItemInput",
     "PostItemResponse",
     "Procedure",
-    "SOSLSearchQueryResponse",
     "SearchRecordObject",
+    "SoslSearchQueryResponse",
     "Table",
     "TableCapabilitiesMetadata",
     "TableFilterRestrictionsMetadata",
@@ -346,7 +346,7 @@ class JobInfo:
 
 
 @dataclass
-class SOSLSearchQueryResponse:
+class SoslSearchQueryResponse:
     """
     Response for Execute SOSL search query
     """
@@ -375,7 +375,7 @@ class ObjectWithoutType:
 
 
 @dataclass
-class MCPQueryResponse:
+class McpQueryResponse:
     """
     Response for MCP server for Salesforce
     """
@@ -1070,7 +1070,7 @@ class CloseJobRequest:
 
 
 @dataclass
-class MCPQueryRequest:
+class McpQueryRequest:
     """
     Definition: MCPQueryRequest
     """
@@ -2880,7 +2880,7 @@ class SalesforceClient(ConnectorClientBase):
 
     async def mcp_salesforce_management(
         self,
-        input: MCPQueryRequest | Mapping[str, Any],
+        input: McpQueryRequest | Mapping[str, Any],
         *,
         session_id: Optional[str] = None,
         timeout: Optional[float] = None,

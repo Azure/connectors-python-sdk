@@ -148,7 +148,7 @@ class TestSendEmail:
         email_input = Email(
             from_="sender@contoso.com",
             to="recipient1@contoso.com;recipient2@contoso.com;recipient3@contoso.com",
-            c_c="cc1@contoso.com;cc2@contoso.com",
+            cc="cc1@contoso.com;cc2@contoso.com",
             bcc="bcc@contoso.com",
             subject="Team Update",
             body="Hello team, this is an update."
@@ -186,7 +186,7 @@ class TestSendEmail:
         email_input = Email(
             from_="sender@contoso.com",
             to="recipient@contoso.com",
-            c_c="cc@contoso.com",
+            cc="cc@contoso.com",
             bcc="bcc@contoso.com",
             subject="Important Document",
             body="<h1>Please review</h1><p>See attached document.</p>",
@@ -323,7 +323,7 @@ class TestDataClasses:
         email = Email(
             from_="sender@contoso.com",
             to="recipient1@contoso.com;recipient2@contoso.com",
-            c_c="cc@contoso.com",
+            cc="cc@contoso.com",
             subject="Q4 Report",
             body="Please review the attached quarterly report.",
             bcc="manager@contoso.com",
@@ -343,7 +343,7 @@ class TestDataClasses:
         email = Email(
             from_="sender@contoso.com",
             to="recipient@contoso.com",
-            c_c="copy@contoso.com",
+            cc="copy@contoso.com",
             attachments=[model_instance(Attachment, content_data="filedata")],
         )
 

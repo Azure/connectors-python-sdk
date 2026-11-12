@@ -7,10 +7,10 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-import azure.connectors.wordpress as wordpress_module
+import azure.connectors.word_press as wordpress_module
 from azure.connectors.sdk import ConnectorException
-from azure.connectors.wordpress import WordpressClient
-from azure.connectors.wordpress import (
+from azure.connectors.word_press import WordPressClient
+from azure.connectors.word_press import (
     CreatePostModel,
     TRIGGER_OPERATIONS,
 )
@@ -37,12 +37,12 @@ SUCCESS_CONTRACTS = {
 ALL_OPERATIONS = list(SUCCESS_CONTRACTS)
 
 
-class TestWordpressClient:
+class TestWordPressClient:
     """Tests for WordpressClient."""
 
     def test_init_with_defaults(self):
         """Test initialization with default authentication."""
-        client = WordpressClient("https://example.azure.com/connections/test/",
+        client = WordPressClient("https://example.azure.com/connections/test/",
                                  AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -53,23 +53,23 @@ class TestWordpressClient:
     def test_init_with_invalid_url_raises_error(self, connection_runtime_url):
         """Test invalid runtime URLs are rejected."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            WordpressClient(connection_runtime_url, AzureKeyCredential("test-key"))
+            WordPressClient(connection_runtime_url, AzureKeyCredential("test-key"))
 
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
         """Test async context manager cleanup."""
-        with patch.object(WordpressClient, "close", new_callable=AsyncMock) as mock_close:
-            async with WordpressClient(
+        with patch.object(WordPressClient, "close", new_callable=AsyncMock) as mock_close:
+            async with WordPressClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential,
             ) as client:
-                assert isinstance(client, WordpressClient)
+                assert isinstance(client, WordPressClient)
 
         mock_close.assert_called_once()
 
     def test_all_generated_operations_are_covered(self):
         """Test the expected generated operation surface."""
-        assert get_generated_operations(WordpressClient) == set(ALL_OPERATIONS)
+        assert get_generated_operations(WordPressClient) == set(ALL_OPERATIONS)
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
@@ -88,7 +88,7 @@ class TestWordpressClient:
         mock_credential,
     ):
         """Test every generated operation's successful HTTP contract."""
-        client = WordpressClient(
+        client = WordPressClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -116,7 +116,7 @@ class TestWordpressClient:
     @pytest.mark.asyncio
     async def test_create_post_success(self, mock_credential):
         """Test creating a post sends the generated request model."""
-        client = WordpressClient(
+        client = WordPressClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -142,7 +142,7 @@ class TestWordpressClient:
     @pytest.mark.asyncio
     async def test_list_sites_success(self, mock_credential):
         """Test listing sites uses the current WordPress route."""
-        client = WordpressClient(
+        client = WordPressClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -166,7 +166,7 @@ class TestWordpressClient:
         assert TRIGGER_OPERATIONS["OnTriggerNewPost"]["path"].endswith(
             "/trigger/me/posts"
         )
-        assert not hasattr(WordpressClient, "on_trigger_new_post_async")
+        assert not hasattr(WordPressClient, "on_trigger_new_post_async")
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize("operation", ALL_OPERATIONS)
@@ -176,7 +176,7 @@ class TestWordpressClient:
         mock_credential,
     ):
         """Test every generated operation raises for a non-success response."""
-        client = WordpressClient(
+        client = WordPressClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )

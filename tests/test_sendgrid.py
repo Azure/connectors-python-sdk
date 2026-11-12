@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.sendgrid import SendgridClient
-from azure.connectors.sendgrid import (
+from azure.connectors.send_grid import SendGridClient
+from azure.connectors.send_grid import (
     AddGlobalSuppressRequestAndResponse,
     EmailRequest,
 )
@@ -19,12 +19,12 @@ from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import model_instance, resolve_generated_result
 
 
-class TestSendgridClientInitialization:
+class TestSendGridClientInitialization:
     """Tests for SendgridClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = SendgridClient("https://example.azure.com/connections/test",
+        client = SendGridClient("https://example.azure.com/connections/test",
                                 AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -33,14 +33,14 @@ class TestSendgridClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = SendgridClient("https://example.azure.com/connections/test/",
+        client = SendGridClient("https://example.azure.com/connections/test/",
                                 AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = SendgridClient(
+        client = SendGridClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -49,7 +49,7 @@ class TestSendgridClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = SendgridClient(
+        client = SendGridClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -60,16 +60,16 @@ class TestSendgridClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            SendgridClient("", AzureKeyCredential("test-key"))
+            SendGridClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            SendgridClient(None, AzureKeyCredential("test-key"))
+            SendGridClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'sendgrid'."""
-        client = SendgridClient(
+        client = SendGridClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -77,13 +77,13 @@ class TestSendgridClientInitialization:
         assert client.connector_name == "sendgrid"
 
 
-class TestSendgridClientLifecycle:
+class TestSendGridClientLifecycle:
     """Tests for SendgridClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = SendgridClient(
+        client = SendGridClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -95,23 +95,23 @@ class TestSendgridClientLifecycle:
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
-        with patch.object(SendgridClient, "close", new_callable=AsyncMock) as mock_close:
-            async with SendgridClient(
+        with patch.object(SendGridClient, "close", new_callable=AsyncMock) as mock_close:
+            async with SendGridClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential,
             ) as client:
-                assert isinstance(client, SendgridClient)
+                assert isinstance(client, SendGridClient)
 
             mock_close.assert_called_once()
 
 
-class TestSendgridClientOperations:
+class TestSendGridClientOperations:
     """Tests for SendgridClient operations against expected HTTP calls."""
 
     @pytest.mark.asyncio
     async def test_add_global_suppression_success(self, mock_credential):
         """Test add global suppression issues a POST to the suppressions route."""
-        client = SendgridClient(
+        client = SendGridClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -143,7 +143,7 @@ class TestSendgridClientOperations:
     @pytest.mark.asyncio
     async def test_get_global_suppression_success(self, mock_credential):
         """Test get global suppression issues a GET to the suppressions route."""
-        client = SendgridClient(
+        client = SendGridClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -165,7 +165,7 @@ class TestSendgridClientOperations:
     @pytest.mark.asyncio
     async def test_delete_global_suppression_success(self, mock_credential):
         """Test delete global suppression issues a DELETE and returns None."""
-        client = SendgridClient(
+        client = SendGridClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -187,7 +187,7 @@ class TestSendgridClientOperations:
     @pytest.mark.asyncio
     async def test_add_recipient_to_list_success(self, mock_credential):
         """Test add recipient to list issues a POST to the recipients route."""
-        client = SendgridClient(
+        client = SendGridClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -212,7 +212,7 @@ class TestSendgridClientOperations:
     @pytest.mark.asyncio
     async def test_get_bounce_success(self, mock_credential):
         """Test get bounce issues a GET to the bounces route."""
-        client = SendgridClient(
+        client = SendGridClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -236,7 +236,7 @@ class TestSendgridClientOperations:
     @pytest.mark.asyncio
     async def test_delete_bounce_success(self, mock_credential):
         """Test delete bounce issues a DELETE and returns None."""
-        client = SendgridClient(
+        client = SendGridClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -258,7 +258,7 @@ class TestSendgridClientOperations:
     @pytest.mark.asyncio
     async def test_check_email_is_in_unsubscribes_list_success(self, mock_credential):
         """Test unsubscribe check issues a GET to the unsubscribes route."""
-        client = SendgridClient(
+        client = SendGridClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -280,7 +280,7 @@ class TestSendgridClientOperations:
     @pytest.mark.asyncio
     async def test_send_email_success(self, mock_credential):
         """Test send email issues a POST to the mail send route with a body."""
-        client = SendgridClient(
+        client = SendGridClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -310,7 +310,7 @@ class TestSendgridClientOperations:
     @pytest.mark.asyncio
     async def test_list_recipient_lists_success(self, mock_credential):
         """Test list recipient lists issues a GET to the lists route."""
-        client = SendgridClient(
+        client = SendGridClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -332,7 +332,7 @@ class TestSendgridClientOperations:
     @pytest.mark.asyncio
     async def test_list_recipients_success(self, mock_credential):
         """Test list recipients issues a GET to the recipients route."""
-        client = SendgridClient(
+        client = SendGridClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -354,7 +354,7 @@ class TestSendgridClientOperations:
     @pytest.mark.asyncio
     async def test_empty_response_body_returns_empty_page(self, mock_credential):
         """Test a paged 2xx response with no body returns no items."""
-        client = SendgridClient(
+        client = SendGridClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -371,7 +371,7 @@ class TestSendgridClientOperations:
             assert result == []
 
 
-class TestSendgridClientErrorHandling:
+class TestSendGridClientErrorHandling:
     """Error handling tests for SendgridClient operations."""
 
     @pytest.mark.asyncio
@@ -392,7 +392,7 @@ class TestSendgridClientErrorHandling:
     )
     async def test_error_response_raises_exception(self, mock_credential, operation):
         """Test non-2xx responses raise ConnectorException for every operation."""
-        client = SendgridClient(
+        client = SendGridClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )

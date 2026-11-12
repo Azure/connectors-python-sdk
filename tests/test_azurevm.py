@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.azurevm import AzurevmClient
-from azure.connectors.azurevm import (
+from azure.connectors.azure_vm import AzureVMClient
+from azure.connectors.azure_vm import (
     VirtualMachine,
     VirtualMachineProperties,
     VirtualMachineInScaleSet,
@@ -27,12 +27,12 @@ from azure.connectors.sdk import (
 from tests.conftest import MockResponse
 
 
-class TestAzurevmClientInitialization:
+class TestAzureVMClientInitialization:
     """Tests for AzurevmClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = AzurevmClient(
+        client = AzureVMClient(
             "https://example.azure.com/connections/test",
             AzureKeyCredential("test-key"),
         )
@@ -47,7 +47,7 @@ class TestAzurevmClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = AzurevmClient(
+        client = AzureVMClient(
             "https://example.azure.com/connections/test/",
             AzureKeyCredential("test-key"),
         )
@@ -58,7 +58,7 @@ class TestAzurevmClientInitialization:
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = AzurevmClient(
+        client = AzureVMClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -67,7 +67,7 @@ class TestAzurevmClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = AzurevmClient(
+        client = AzureVMClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -80,18 +80,18 @@ class TestAzurevmClientInitialization:
         with pytest.raises(
             ValueError, match="connection_runtime_url cannot be None or empty"
         ):
-            AzurevmClient("", AzureKeyCredential("test-key"))
+            AzureVMClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(
             ValueError, match="connection_runtime_url cannot be None or empty"
         ):
-            AzurevmClient(None, AzureKeyCredential("test-key"))
+            AzureVMClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'azurevm'."""
-        client = AzurevmClient(
+        client = AzureVMClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -99,13 +99,13 @@ class TestAzurevmClientInitialization:
         assert client.connector_name == "azurevm"
 
 
-class TestAzurevmClientLifecycle:
+class TestAzureVMClientLifecycle:
     """Tests for AzurevmClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = AzurevmClient(
+        client = AzureVMClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -120,13 +120,13 @@ class TestAzurevmClientLifecycle:
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(
-            AzurevmClient, 'close', new_callable=AsyncMock
+            AzureVMClient, 'close', new_callable=AsyncMock
         ) as mock_close:
-            async with AzurevmClient(
+            async with AzureVMClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential
             ) as client:
-                assert isinstance(client, AzurevmClient)
+                assert isinstance(client, AzureVMClient)
 
             mock_close.assert_called_once()
 
@@ -144,7 +144,7 @@ class TestVirtualMachineGetAsync:
         )
         mock_response = MockResponse(status=200, text=response_json)
 
-        client = AzurevmClient(
+        client = AzureVMClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -175,7 +175,7 @@ class TestVirtualMachineGetAsync:
         """Test empty response returns None."""
         mock_response = MockResponse(status=200, text='')
 
-        client = AzurevmClient(
+        client = AzureVMClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -202,7 +202,7 @@ class TestVirtualMachineGetAsync:
             text='{"error": {"code": "ResourceNotFound", "message": "VM not found"}}'
         )
 
-        client = AzurevmClient(
+        client = AzureVMClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -231,7 +231,7 @@ class TestVirtualMachineStartAsync:
         """Test successful request."""
         mock_response = MockResponse(status=202, text='')
 
-        client = AzurevmClient(
+        client = AzureVMClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -262,7 +262,7 @@ class TestVirtualMachineDeallocateAsync:
         """Test successful request."""
         mock_response = MockResponse(status=202, text='')
 
-        client = AzurevmClient(
+        client = AzureVMClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -293,7 +293,7 @@ class TestVirtualMachinePowerOffAsync:
         """Test successful request."""
         mock_response = MockResponse(status=202, text='')
 
-        client = AzurevmClient(
+        client = AzureVMClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -324,7 +324,7 @@ class TestVirtualMachineReapplyAsync:
         """Test successful request."""
         mock_response = MockResponse(status=202, text='')
 
-        client = AzurevmClient(
+        client = AzureVMClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -355,7 +355,7 @@ class TestVirtualMachineRedeployAsync:
         """Test successful request."""
         mock_response = MockResponse(status=202, text='')
 
-        client = AzurevmClient(
+        client = AzureVMClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -386,7 +386,7 @@ class TestVirtualMachineRestartAsync:
         """Test successful request."""
         mock_response = MockResponse(status=202, text='')
 
-        client = AzurevmClient(
+        client = AzureVMClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -423,7 +423,7 @@ class TestVirtualMachineInScaleSetGetAsync:
         )
         mock_response = MockResponse(status=200, text=response_json)
 
-        client = AzurevmClient(
+        client = AzureVMClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -456,7 +456,7 @@ class TestVirtualMachineInScaleSetGetAsync:
             text='{"error": {"code": "ResourceNotFound", "message": "VM not found"}}'
         )
 
-        client = AzurevmClient(
+        client = AzureVMClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -486,7 +486,7 @@ class TestVirtualMachineInScaleSetDeallocateAsync:
         """Test successful request."""
         mock_response = MockResponse(status=202, text='')
 
-        client = AzurevmClient(
+        client = AzureVMClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -518,7 +518,7 @@ class TestVirtualMachineInScaleSetPowerOffAsync:
         """Test successful request."""
         mock_response = MockResponse(status=202, text='')
 
-        client = AzurevmClient(
+        client = AzureVMClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -550,7 +550,7 @@ class TestVirtualMachineInScaleSetRedeployAsync:
         """Test successful request."""
         mock_response = MockResponse(status=202, text='')
 
-        client = AzurevmClient(
+        client = AzureVMClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -582,7 +582,7 @@ class TestVirtualMachineInScaleSetReimageAsync:
         """Test successful request."""
         mock_response = MockResponse(status=202, text='')
 
-        client = AzurevmClient(
+        client = AzureVMClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -614,7 +614,7 @@ class TestVirtualMachineInScaleSetRestartAsync:
         """Test successful request."""
         mock_response = MockResponse(status=202, text='')
 
-        client = AzurevmClient(
+        client = AzureVMClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -646,7 +646,7 @@ class TestVirtualMachineInScaleSetStartAsync:
         """Test successful request."""
         mock_response = MockResponse(status=202, text='')
 
-        client = AzurevmClient(
+        client = AzureVMClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )

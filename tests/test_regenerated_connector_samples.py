@@ -112,7 +112,7 @@ def test_sample_index_matches_connector_sample_inventory() -> None:
 
 @pytest.mark.parametrize(
     ("api_name", "module_name"),
-    [("dataflowssms", "dataflowssms"), ("service-now", "service_now")],
+    [("dataflowssms", "data_flows_sms"), ("service-now", "service_now")],
 )
 def test_catalog_parity_samples_have_setup_names_and_environment_documentation(
     api_name: str, module_name: str,
@@ -426,17 +426,17 @@ def test_plivo_sample_main_preserves_output(
 @pytest.mark.parametrize(
     "connector,function_name,client_name,operation_name,expected_noun",
     [
-        ("documentdb", "example_3_query_with_pagination", "DocumentdbClient",
+        ("document_db", "example_3_query_with_pagination", "DocumentDBClient",
          "list_query_documents", "document(s)"),
-        ("documentdb", "example_5_query_with_consistency", "DocumentdbClient",
+        ("document_db", "example_5_query_with_consistency", "DocumentDBClient",
          "list_query_documents", "document(s)"),
-        ("office365groupsmail", "main", "Office365groupsmailClient",
+        ('office365_groups_mail', "main", 'Office365GroupsMailClient',
          "list_conversations", "conversation(s)"),
         ("planner", "example_2_list_group_plans", "PlannerClient",
          "list_group_plans", "plans in group"),
         ("zendesk", "example_2_get_items", "ZendeskClient",
          "list_items", "item(s)"),
-        ("azuretables", "example_4_get_entities", "AzuretablesClient",
+        ('azure_tables', "example_4_get_entities", 'AzureTablesClient',
          "list_entities", "entity(s)"),
     ],
 )
@@ -488,18 +488,18 @@ async def test_pageable_samples_report_collected_items(
     output = capsys.readouterr().out
     assert "Error:" not in output
     assert "Connector error" not in output
-    if connector == "azuretables":
+    if connector == 'azure_tables':
         if item_count == 0:
             assert "No entities found or empty response." in output
         else:
             assert "RowKey: row-0" in output
             assert "RowKey: row-1" in output
             assert "No entities found" not in output
-    elif connector == "documentdb" and item_count == 0:
+    elif connector == "document_db" and item_count == 0:
         assert "No documents found." in output
     elif connector == "planner" and item_count == 0:
         assert "No plans found" in output
-    elif connector == "documentdb" and function_name.endswith("consistency"):
+    elif connector == "document_db" and function_name.endswith("consistency"):
         assert f"Documents retrieved: {item_count}" in output
     else:
         assert f"{item_count} {expected_noun}" in output
@@ -509,7 +509,7 @@ async def test_pageable_samples_report_collected_items(
 @pytest.mark.parametrize(
     "connector,function_name,client_name,operation_name,item_key,empty_message",
     [
-        ("azuredigitaltwins", "example_3_query_twins", "AzuredigitaltwinsClient",
+        ('azure_digital_twins', "example_3_query_twins", 'AzureDigitalTwinsClient',
          "query_twins", "value", "No twins found matching query"),
         ("wdatp", "example_3_advanced_hunting", "WdatpClient",
          "advanced_hunting", "results", "No results from query."),
@@ -566,9 +566,9 @@ async def test_nonpageable_samples_preserve_nullable_responses(
             "sample-envelope",
         ),
         (
-            "azuremonitorlogs",
+            'azure_monitor_logs',
             "example_run_query",
-            "AzuremonitorlogsClient",
+            'AzureMonitorLogsClient',
             "query_data",
             "value",
             "sample-row",
@@ -629,13 +629,13 @@ async def test_eventhubs_batch_sample_passes_send_event_list(
 ) -> None:
     """Execute the batch sample and verify its list alias is passed directly."""
     module = importlib.import_module(
-        "samples.sample_connector_usage.sample_connector_usage_eventhubs"
+        "samples.sample_connector_usage.sample_connector_usage_event_hubs"
     )
     client = MagicMock()
     operation = AsyncMock(return_value=None)
     client.send_events = operation
     client.__aenter__.return_value = client
-    monkeypatch.setattr(module, "EventhubsClient", MagicMock(return_value=client))
+    monkeypatch.setattr(module, 'EventHubsClient', MagicMock(return_value=client))
     monkeypatch.setattr(module, "DefaultAzureCredential", MagicMock())
     monkeypatch.setattr(module, "EVENT_HUB_NAME", "sample-hub")
 
@@ -659,13 +659,13 @@ async def test_azuretables_create_sample_passes_scalar_table_name(
 ) -> None:
     """Execute the create-table sample and verify its string alias is passed directly."""
     module = importlib.import_module(
-        "samples.sample_connector_usage.sample_connector_usage_azuretables"
+        "samples.sample_connector_usage.sample_connector_usage_azure_tables"
     )
     client = MagicMock()
     operation = AsyncMock(return_value={})
     client.create_table = operation
     client.__aenter__.return_value = client
-    monkeypatch.setattr(module, "AzuretablesClient", MagicMock(return_value=client))
+    monkeypatch.setattr(module, 'AzureTablesClient', MagicMock(return_value=client))
     monkeypatch.setattr(module, "DefaultAzureCredential", MagicMock())
     monkeypatch.setattr(module, "STORAGE_ACCOUNT", "sample-account")
     monkeypatch.setenv("AZURETABLES_NEW_TABLE_NAME", "SampleTable")

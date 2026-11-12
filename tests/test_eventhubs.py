@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.eventhubs import EventhubsClient
-from azure.connectors.eventhubs import (
+from azure.connectors.event_hubs import EventHubsClient
+from azure.connectors.event_hubs import (
     Event,
     SendEventsInput,
     ObjectEntity,
@@ -21,12 +21,12 @@ from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import resolve_generated_result
 
 
-class TestEventhubsClientInitialization:
+class TestEventHubsClientInitialization:
     """Tests for EventhubsClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = EventhubsClient("https://example.azure.com/connections/test",
+        client = EventHubsClient("https://example.azure.com/connections/test",
                                  AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -35,14 +35,14 @@ class TestEventhubsClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = EventhubsClient("https://example.azure.com/connections/test/",
+        client = EventHubsClient("https://example.azure.com/connections/test/",
                                  AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = EventhubsClient(
+        client = EventHubsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -51,7 +51,7 @@ class TestEventhubsClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = EventhubsClient(
+        client = EventHubsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -62,16 +62,16 @@ class TestEventhubsClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            EventhubsClient("", AzureKeyCredential("test-key"))
+            EventHubsClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            EventhubsClient(None, AzureKeyCredential("test-key"))
+            EventHubsClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'eventhubs'."""
-        client = EventhubsClient(
+        client = EventHubsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -79,13 +79,13 @@ class TestEventhubsClientInitialization:
         assert client.connector_name == "eventhubs"
 
 
-class TestEventhubsClientLifecycle:
+class TestEventHubsClientLifecycle:
     """Tests for EventhubsClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = EventhubsClient(
+        client = EventHubsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -97,12 +97,12 @@ class TestEventhubsClientLifecycle:
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
-        with patch.object(EventhubsClient, 'close', new_callable=AsyncMock) as mock_close:
-            async with EventhubsClient(
+        with patch.object(EventHubsClient, 'close', new_callable=AsyncMock) as mock_close:
+            async with EventHubsClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential
             ) as client:
-                assert isinstance(client, EventhubsClient)
+                assert isinstance(client, EventHubsClient)
 
             mock_close.assert_called_once()
 
@@ -113,12 +113,12 @@ class TestTriggerOperations:
     def test_on_new_events_is_registered_without_callable_method(self):
         """Test event polling is a metadata-only trigger."""
         assert "OnNewEvents" in TRIGGER_OPERATIONS
-        assert not hasattr(EventhubsClient, "on_new_events_async")
+        assert not hasattr(EventHubsClient, "on_new_events_async")
 
     @pytest.mark.asyncio
     async def test_generate_event_schema(self, mock_credential):
         """Test event schema discovery forwards content metadata."""
-        client = EventhubsClient(
+        client = EventHubsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -147,7 +147,7 @@ class TestSendEvent:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful POST request."""
-        client = EventhubsClient(
+        client = EventHubsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -180,7 +180,7 @@ class TestSendEvent:
     @pytest.mark.asyncio
     async def test_with_partition_key(self, mock_credential):
         """Test POST request with partition key parameter."""
-        client = EventhubsClient(
+        client = EventHubsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -207,7 +207,7 @@ class TestSendEvent:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = EventhubsClient(
+        client = EventHubsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -236,7 +236,7 @@ class TestSendEvents:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful POST request for batch events."""
-        client = EventhubsClient(
+        client = EventHubsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -267,7 +267,7 @@ class TestSendEvents:
     @pytest.mark.asyncio
     async def test_with_partition_key(self, mock_credential):
         """Test POST batch request with partition key parameter."""
-        client = EventhubsClient(
+        client = EventHubsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -295,7 +295,7 @@ class TestSendEvents:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = EventhubsClient(
+        client = EventHubsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -409,7 +409,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_http_client_property_access(self, mock_credential):
         """Test accessing http_client property."""
-        client = EventhubsClient(
+        client = EventHubsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -420,7 +420,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_multiple_consecutive_calls(self, mock_credential):
         """Test multiple consecutive API calls."""
-        client = EventhubsClient(
+        client = EventHubsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -445,7 +445,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_special_characters_in_event_hub_name(self, mock_credential):
         """Test handling of special characters in event hub name."""
-        client = EventhubsClient(
+        client = EventHubsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -471,7 +471,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_unauthorized_raises_exception(self, mock_credential):
         """Test that 401 unauthorized raises ConnectorException."""
-        client = EventhubsClient(
+        client = EventHubsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )

@@ -7,9 +7,9 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-import azure.connectors.elfsquaddata as elfsquaddata_module
-from azure.connectors.elfsquaddata import ElfsquaddataClient
-from azure.connectors.elfsquaddata import TRIGGER_OPERATIONS
+import azure.connectors.elfsquad_data as elfsquaddata_module
+from azure.connectors.elfsquad_data import ElfsquadDataClient
+from azure.connectors.elfsquad_data import TRIGGER_OPERATIONS
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import (
     GeneratedConnectorContractTests,
@@ -43,10 +43,10 @@ OPERATION_CONTRACTS = {
 }
 
 
-class TestElfsquaddataClient(GeneratedConnectorContractTests):
+class TestElfsquadDataClient(GeneratedConnectorContractTests):
     """Test the generated Elfsquad Data client contract."""
 
-    client_type = ElfsquaddataClient
+    client_type = ElfsquadDataClient
     connector_module = elfsquaddata_module
     connector_name = "elfsquaddata"
     operation_contracts = OPERATION_CONTRACTS
@@ -62,7 +62,7 @@ async def test_get_entities_serializes_query_and_response(
     mock_credential,
 ) -> None:
     """Test entity query serialization and response deserialization."""
-    client = ElfsquaddataClient(
+    client = ElfsquadDataClient(
         "https://example.azure.com/connections/test",
         credential=mock_credential,
     )
@@ -104,7 +104,7 @@ async def test_get_entities_follows_odata_pages_and_terminates(
         {"id": "product-1", "name": "First"}
     ]
     last_items = [{"id": "product-2", "details": {"name": "Second"}}]
-    async with ElfsquaddataClient(
+    async with ElfsquadDataClient(
         "https://example.azure.com/connections/test",
         credential=mock_credential,
     ) as client:
@@ -150,7 +150,7 @@ async def test_get_entities_empty_response_is_a_single_request(
     body,
 ) -> None:
     """Terminate empty Elfsquad responses without a continuation request."""
-    async with ElfsquaddataClient(
+    async with ElfsquadDataClient(
         "https://example.azure.com/connections/test",
         credential=mock_credential,
     ) as client:

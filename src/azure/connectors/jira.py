@@ -49,8 +49,8 @@ __all__ = [
     "ListIssuesResponseDatacenter",
     "ListProjectsResponse",
     "ListTransitionsResponse",
-    "MCPQueryRequest",
-    "MCPQueryResponse",
+    "McpQueryRequest",
+    "McpQueryResponse",
     "PartialIssue",
     "PriorityList",
     "Project",
@@ -188,7 +188,7 @@ class FullIssue:
 
 
 @dataclass
-class MCPQueryResponse:
+class McpQueryResponse:
     """
     Response for Jira MCP Server
     """
@@ -732,7 +732,7 @@ class TransitionInput:
 
 
 @dataclass
-class MCPQueryRequest:
+class McpQueryRequest:
     """
     Definition: MCPQueryRequest
     """
@@ -1355,7 +1355,7 @@ class JiraClient(ConnectorClientBase):
 
     async def mcp_jira_issue_management(
         self,
-        input: MCPQueryRequest | Mapping[str, Any],
+        input: McpQueryRequest | Mapping[str, Any],
         *,
         session_id: Optional[str] = None,
         timeout: Optional[float] = None,

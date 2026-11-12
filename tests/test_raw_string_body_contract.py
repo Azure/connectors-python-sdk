@@ -17,13 +17,13 @@ import pytest
 from azure.core.credentials import AzureKeyCredential
 from azure.core.pipeline.transport import HttpRequest
 
-from azure.connectors.azureblob import AzureblobClient
-from azure.connectors.azuremonitorlogs import AzuremonitorlogsClient
-from azure.connectors.azurequeues import AzurequeuesClient
-from azure.connectors.azuretables import AzuretablesClient, CreateEntityInput
-from azure.connectors.documentdb import DocumentdbClient
+from azure.connectors.azure_blob import AzureBlobClient
+from azure.connectors.azure_monitor_logs import AzureMonitorLogsClient
+from azure.connectors.azure_queues import AzureQueuesClient
+from azure.connectors.azure_tables import AzureTablesClient, CreateEntityInput
+from azure.connectors.document_db import DocumentDBClient
 from azure.connectors.onenote import OnenoteClient
-from azure.connectors.powerbi import PowerbiClient
+from azure.connectors.power_bi import PowerBIClient
 from azure.connectors.sdk import ConnectorClientBase, ConnectorException
 from azure.connectors.teams import TeamsClient
 from tests.test_sdk_azure_core_pipeline import RecordingTransport, create_response
@@ -45,7 +45,7 @@ class RawOperation:
 
 RAW_OPERATIONS = [
     RawOperation(
-        AzuremonitorlogsClient,
+        AzureMonitorLogsClient,
         "query_schema",
         {
             "subscriptions": "subscription",
@@ -55,17 +55,17 @@ RAW_OPERATIONS = [
         },
     ),
     RawOperation(
-        AzurequeuesClient,
+        AzureQueuesClient,
         "put_message",
         {"storage_account_name": "account", "queue_name": "queue"},
     ),
     RawOperation(
-        AzuretablesClient,
+        AzureTablesClient,
         "create_table",
         {"storage_account_name": "account"},
     ),
     RawOperation(
-        DocumentdbClient,
+        DocumentDBClient,
         "execute_stored_procedure",
         {
             "cosmos_db_account_name": "account",
@@ -82,7 +82,7 @@ RAW_OPERATIONS = [
     ),
     RawOperation(OnenoteClient, "create_page_in_quick_notes", {}),
     RawOperation(
-        PowerbiClient,
+        PowerBIClient,
         "goal_value_checkin_note",
         {
             "groupid": "group",
@@ -135,7 +135,7 @@ def test_generated_clients_are_loaded_from_this_checkout() -> None:
     """Guard against an editable install silently importing another checkout."""
     source_root = (Path(__file__).resolve().parents[1] / "src").resolve()
     for client_type in [
-        *(operation.client_type for operation in RAW_OPERATIONS), AzureblobClient,
+        *(operation.client_type for operation in RAW_OPERATIONS), AzureBlobClient,
     ]:
         module = import_module(client_type.__module__)
         assert module.__file__ is not None
@@ -176,7 +176,7 @@ async def test_raw_operations_preserve_body_bytes_and_media_type(
 async def test_tables_accepts_exact_raw_name() -> None:
     """Exercise the success path against a fake that rejects quoted names."""
     transport = BodyRecordingTransport(validate_table_name=True)
-    async with AzuretablesClient(
+    async with AzureTablesClient(
         RUNTIME_URL, AzureKeyCredential("test-key"), transport=transport,
     ) as client:
         response = await client.create_table(
@@ -195,7 +195,7 @@ async def test_tables_accepts_exact_raw_name() -> None:
 async def test_tables_fake_rejects_nonmatching_names(payload: str) -> None:
     """Prove the fake validates bytes rather than always returning success."""
     transport = BodyRecordingTransport(validate_table_name=True)
-    async with AzuretablesClient(
+    async with AzureTablesClient(
         RUNTIME_URL, AzureKeyCredential("test-key"), transport=transport,
     ) as client:
         with pytest.raises(ConnectorException) as error:
@@ -224,7 +224,7 @@ async def test_object_operation_still_serializes_json(as_mapping: bool) -> None:
         else CreateEntityInput(additional_properties=properties)
     )
     transport = BodyRecordingTransport()
-    async with AzuretablesClient(
+    async with AzureTablesClient(
         RUNTIME_URL, AzureKeyCredential("test-key"), transport=transport,
     ) as client:
         await client.create_entity(
@@ -249,7 +249,7 @@ async def test_binary_operation_still_sends_exact_bytes(
 ) -> None:
     """Keep the generated blob operation's bytes and media type unchanged."""
     transport = BodyRecordingTransport()
-    async with AzureblobClient(
+    async with AzureBlobClient(
         RUNTIME_URL, AzureKeyCredential("test-key"), transport=transport,
     ) as client:
         await client.create_file(
@@ -271,7 +271,7 @@ async def test_invalid_object_map_fails_before_transport(as_mapping: bool) -> No
         else CreateEntityInput(additional_properties=properties)
     )
     transport = BodyRecordingTransport()
-    async with AzuretablesClient(
+    async with AzureTablesClient(
         RUNTIME_URL, AzureKeyCredential("test-key"), transport=transport,
     ) as client:
         with pytest.raises(TypeError):

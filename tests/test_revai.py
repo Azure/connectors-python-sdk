@@ -7,9 +7,9 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-import azure.connectors.revai as revai_module
-from azure.connectors.revai import RevaiClient
-from azure.connectors.revai import AlignmentInput, TranscriptionInput
+import azure.connectors.rev_ai as revai_module
+from azure.connectors.rev_ai import RevAIClient
+from azure.connectors.rev_ai import AlignmentInput, TranscriptionInput
 from azure.connectors.sdk import ConnectorException
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import (
@@ -91,12 +91,12 @@ PAGEABLE_OPERATIONS = {
 }
 
 
-class TestRevaiClient:
+class TestRevAIClient:
     """Tests for RevaiClient."""
 
     def test_init_with_defaults(self):
         """Test initialization with default authentication."""
-        client = RevaiClient("https://example.azure.com/connections/test/",
+        client = RevAIClient("https://example.azure.com/connections/test/",
                              AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -107,23 +107,23 @@ class TestRevaiClient:
     def test_init_with_invalid_url_raises_error(self, connection_runtime_url):
         """Test invalid runtime URLs are rejected."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            RevaiClient(connection_runtime_url, AzureKeyCredential("test-key"))
+            RevAIClient(connection_runtime_url, AzureKeyCredential("test-key"))
 
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
         """Test async context manager cleanup."""
-        with patch.object(RevaiClient, "close", new_callable=AsyncMock) as mock_close:
-            async with RevaiClient(
+        with patch.object(RevAIClient, "close", new_callable=AsyncMock) as mock_close:
+            async with RevAIClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential,
             ) as client:
-                assert isinstance(client, RevaiClient)
+                assert isinstance(client, RevAIClient)
 
         mock_close.assert_called_once()
 
     def test_all_generated_operations_are_covered(self):
         """Test the expected generated operation surface."""
-        assert get_generated_operations(RevaiClient) == set(ALL_OPERATIONS)
+        assert get_generated_operations(RevAIClient) == set(ALL_OPERATIONS)
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
@@ -142,7 +142,7 @@ class TestRevaiClient:
         mock_credential,
     ):
         """Test every generated operation's successful HTTP contract."""
-        client = RevaiClient(
+        client = RevAIClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -176,7 +176,7 @@ class TestRevaiClient:
     @pytest.mark.asyncio
     async def test_create_transcription_success(self, mock_credential):
         """Test creating a transcription sends the generated request model."""
-        client = RevaiClient(
+        client = RevAIClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -204,7 +204,7 @@ class TestRevaiClient:
     @pytest.mark.asyncio
     async def test_alignment_success(self, mock_credential):
         """Test creating an alignment uses the alignment jobs route."""
-        client = RevaiClient(
+        client = RevAIClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -229,7 +229,7 @@ class TestRevaiClient:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test an empty successful response returns None."""
-        client = RevaiClient(
+        client = RevAIClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -252,7 +252,7 @@ class TestRevaiClient:
         mock_credential,
     ):
         """Test every generated operation raises for a non-success response."""
-        client = RevaiClient(
+        client = RevAIClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )

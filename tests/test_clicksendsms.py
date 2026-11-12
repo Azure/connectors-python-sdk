@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.clicksendsms import ClicksendsmsClient
-from azure.connectors.clicksendsms import (
+from azure.connectors.click_send_sms import ClickSendSmsClient
+from azure.connectors.click_send_sms import (
     CreateListContactInput,
     CreateListInput,
     DeleteListResponse,
@@ -29,12 +29,12 @@ from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import model_instance
 
 
-class TestClicksendsmsClientInitialization:
+class TestClickSendSmsClientInitialization:
     """Tests for ClicksendsmsClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = ClicksendsmsClient(
+        client = ClickSendSmsClient(
             "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -43,14 +43,14 @@ class TestClicksendsmsClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = ClicksendsmsClient(
+        client = ClickSendSmsClient(
             "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = ClicksendsmsClient(
+        client = ClickSendSmsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -59,7 +59,7 @@ class TestClicksendsmsClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = ClicksendsmsClient(
+        client = ClickSendSmsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -70,16 +70,16 @@ class TestClicksendsmsClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            ClicksendsmsClient("", AzureKeyCredential("test-key"))
+            ClickSendSmsClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            ClicksendsmsClient(None, AzureKeyCredential("test-key"))
+            ClickSendSmsClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'clicksendsms'."""
-        client = ClicksendsmsClient(
+        client = ClickSendSmsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -87,13 +87,13 @@ class TestClicksendsmsClientInitialization:
         assert client.connector_name == "clicksendsms"
 
 
-class TestClicksendsmsClientLifecycle:
+class TestClickSendSmsClientLifecycle:
     """Tests for ClicksendsmsClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = ClicksendsmsClient(
+        client = ClickSendSmsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -105,21 +105,21 @@ class TestClicksendsmsClientLifecycle:
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
-        with patch.object(ClicksendsmsClient, "close", new_callable=AsyncMock) as mock_close:
-            async with ClicksendsmsClient(
+        with patch.object(ClickSendSmsClient, "close", new_callable=AsyncMock) as mock_close:
+            async with ClickSendSmsClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential,
             ) as client:
-                assert isinstance(client, ClicksendsmsClient)
+                assert isinstance(client, ClickSendSmsClient)
 
             mock_close.assert_called_once()
 
 
-class TestClicksendsmsClientOperations:
+class TestClickSendSmsClientOperations:
     """Tests for ClicksendsmsClient operations against expected HTTP calls."""
 
     def _make_client(self, mock_credential):
-        return ClicksendsmsClient(
+        return ClickSendSmsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -396,7 +396,7 @@ class TestClicksendsmsClientOperations:
             assert result is None
 
 
-class TestClicksendsmsClientErrorHandling:
+class TestClickSendSmsClientErrorHandling:
     """Error handling tests for ClicksendsmsClient operations."""
 
     @pytest.mark.asyncio
@@ -421,7 +421,7 @@ class TestClicksendsmsClientErrorHandling:
     )
     async def test_error_response_raises_exception(self, mock_credential, operation):
         """Test non-2xx responses raise ConnectorException for every operation."""
-        client = ClicksendsmsClient(
+        client = ClickSendSmsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -490,7 +490,7 @@ class TestClicksendsmsTriggerOperations:
 
     def test_triggers_are_not_client_methods(self):
         """Test trigger operations are not emitted as callable client methods."""
-        assert not hasattr(ClicksendsmsClient, "sms_inbound_automation_async")
+        assert not hasattr(ClickSendSmsClient, "sms_inbound_automation_async")
 
 
 class TestClicksendsmsTypeSerialization:
