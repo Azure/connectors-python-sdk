@@ -109,6 +109,7 @@ def _generate_reference() -> None:
     navigation[("Guides", "Connection setup")] = "connection-setup.md"
     navigation[("Guides", "Long-running operations")] = "long-running-operations.md"
     navigation[("Guides", "Async operation migration")] = "migration-sync-aio.md"
+    navigation[("Guides", "Naming migration")] = "migration-naming.md"
     navigation[("Guides", "SDK-type bindings")] = "sdk-type-bindings.md"
     navigation[("Design", "Azure SDK guidelines")] = "azure-sdk-guidelines.md"
     navigation[("Design", "Generated contract")] = "generated-contract.md"
