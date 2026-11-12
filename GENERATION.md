@@ -154,6 +154,12 @@ Only Plivo and PdfCo are refreshed; the other root clients, lazy exports, and re
 inventory remain unchanged. The generator must integrate before the SDK fix
 merges. Tests do not send real SMS messages.
 
+The later catalog-wide naming refresh additionally aligns seven PdfCo `*Input`
+exports with the corresponding `*Response` names. The Swagger and generated
+file hashes above describe the earlier response-only refresh, not that later
+catalog-wide output. The public [naming migration guide](docs/migration-naming.md)
+lists the additional request type spellings.
+
 ### Multipart form-data refresh
 
 The 2026-11-05 merge refresh uses generator commit

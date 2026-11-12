@@ -41,7 +41,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and `XlsToCsvResponse`/`XlsToHtmlResponse`/`XlsToJsonResponse`/
   `XlsToTxtResponse`/`XlsToXmlResponse` instead of the corresponding
   `PDFUnSearchableResponse`, `PDFFromXLSXLSXResponse`, and `XLSto*Response`
-  names. Request models, operations, wire fields, and response values are unchanged.
+  names. Matching request types now use `PdfUnsearchableInput`,
+  `PdfFromXlsXlsxInput`, and `XlsToCsvInput`/`XlsToHtmlInput`/
+  `XlsToJsonInput`/`XlsToTxtInput`/`XlsToXmlInput` in place of
+  `PdfUnSearchableInput`, `PdfFromXlsxlsxInput`, and the corresponding
+  `XLSto*Input` spellings. Operations, serialized fields, and response values
+  are unchanged.
 - Plivo model imports now use `Sms` and `SendSmsResponse` instead of `SMS` and
   `SendSMSResponse`. The async `send_sms` operation, its route, and JSON wire
   fields remain unchanged.

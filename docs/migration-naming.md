@@ -22,6 +22,13 @@ names. For example, `RemoveWhitespaceFromTextRequest` is now
 Versioned operations retain their version tokens; consult the regenerated
 client signature before changing a call.
 
+PdfCo request types now use the same normalized words as their response
+counterparts: `PdfFromXlsxlsxInput` becomes `PdfFromXlsXlsxInput`,
+`PdfUnSearchableInput` becomes `PdfUnsearchableInput`, and `XLStoCsvInput`,
+`XLStoHtmlInput`, `XLStoJsonInput`, `XLStoTxtInput`, and `XLStoXmlInput`
+become `XlsToCsvInput`, `XlsToHtmlInput`, `XlsToJsonInput`, `XlsToTxtInput`,
+and `XlsToXmlInput`. Their JSON field names remain unchanged.
+
 Only Python identifiers change. Connection setup still uses raw managed-API
 IDs such as `azuread`, `dataflowssms`, and `service-now`; operation IDs, routes,
 request/response JSON keys and enum wire values do not change because of the

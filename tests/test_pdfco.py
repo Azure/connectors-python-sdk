@@ -11,13 +11,20 @@ from azure.connectors.pdf_co import PdfCoClient
 from azure.connectors.pdf_co import (
     HtmlToPdfInput,
     PdfFillerInput,
+    PdfFromXlsXlsxInput,
     PdfFromXlsXlsxResponse,
+    PdfUnsearchableInput,
     PdfUnsearchableResponse,
     UrlToPdfInput,
+    XlsToCsvInput,
     XlsToCsvResponse,
+    XlsToHtmlInput,
     XlsToHtmlResponse,
+    XlsToJsonInput,
     XlsToJsonResponse,
+    XlsToTxtInput,
     XlsToTxtResponse,
+    XlsToXmlInput,
     XlsToXmlResponse,
 )
 from azure.connectors.sdk import (
@@ -47,6 +54,30 @@ def test_reviewed_response_models_preserve_wire_names(response_model: type) -> N
         "url": "https://example.com/output",
         "jobId": "job-123",
     }
+
+
+@pytest.mark.parametrize(
+    ("request_model", "wire_options"),
+    [
+        (PdfFromXlsXlsxInput, {"worksheetIndex": 0}),
+        (PdfUnsearchableInput, {"pages": "1-2"}),
+        (XlsToCsvInput, {"worksheetIndex": 0}),
+        (XlsToHtmlInput, {"worksheetIndex": 0}),
+        (XlsToJsonInput, {"worksheetIndex": 0}),
+        (XlsToTxtInput, {"worksheetIndex": 0}),
+        (XlsToXmlInput, {"worksheetIndex": 0}),
+    ],
+)
+def test_reviewed_request_models_preserve_input_wire_contract(
+    request_model: type, wire_options: dict[str, object],
+) -> None:
+    """All corrected input type exports must retain their original serialized keys."""
+    arguments = {
+        "worksheet_index" if key == "worksheetIndex" else key: value
+        for key, value in wire_options.items()
+    }
+    request = request_model(url="https://example.com/input.xlsx", **arguments)
+    assert to_wire(request) == {"url": "https://example.com/input.xlsx", **wire_options}
 
 
 class TestPdfCoClientInitialization:

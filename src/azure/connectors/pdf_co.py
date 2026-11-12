@@ -67,8 +67,8 @@ __all__ = [
     "PdfFromEmailResponse",
     "PdfFromImagesInput",
     "PdfFromImagesResponse",
+    "PdfFromXlsXlsxInput",
     "PdfFromXlsXlsxResponse",
-    "PdfFromXlsxlsxInput",
     "PdfInfoReaderInput",
     "PdfInfoReaderResponse",
     "PdfRotatePagesInput",
@@ -103,7 +103,7 @@ __all__ = [
     "PdfToXlsxResponse",
     "PdfToXmlInput",
     "PdfToXmlResponse",
-    "PdfUnSearchableInput",
+    "PdfUnsearchableInput",
     "PdfUnsearchableResponse",
     "SearchAndDeleteTextInput",
     "SearchAndDeleteTextResponse",
@@ -117,15 +117,15 @@ __all__ = [
     "SplitPdfResponse",
     "UrlToPdfInput",
     "UrlToPdfResponse",
-    "XLStoCsvInput",
-    "XLStoHtmlInput",
-    "XLStoJsonInput",
-    "XLStoTxtInput",
-    "XLStoXmlInput",
+    "XlsToCsvInput",
     "XlsToCsvResponse",
+    "XlsToHtmlInput",
     "XlsToHtmlResponse",
+    "XlsToJsonInput",
     "XlsToJsonResponse",
+    "XlsToTxtInput",
     "XlsToTxtResponse",
+    "XlsToXmlInput",
     "XlsToXmlResponse",
 ]
 
@@ -1878,7 +1878,7 @@ class PdfSearchableResponse:
 
 
 @dataclass
-class PdfUnSearchableInput:
+class PdfUnsearchableInput:
     """
     PDF to Scanned PDF
     """
@@ -3886,7 +3886,7 @@ class PdfSecurityRemoveResponse:
 
 
 @dataclass
-class PdfFromXlsxlsxInput:
+class PdfFromXlsXlsxInput:
     """
     PDF From Spreadsheet
     """
@@ -3969,7 +3969,7 @@ class PdfFromXlsXlsxResponse:
 
 
 @dataclass
-class XLStoCsvInput:
+class XlsToCsvInput:
     """
     Spreadsheet to CSV
     """
@@ -4059,7 +4059,7 @@ class XlsToCsvResponse:
 
 
 @dataclass
-class XLStoJsonInput:
+class XlsToJsonInput:
     """
     Spreadsheet to JSON
     """
@@ -4137,7 +4137,7 @@ class XlsToJsonResponse:
 
 
 @dataclass
-class XLStoHtmlInput:
+class XlsToHtmlInput:
     """
     Spreadsheet to HTML
     """
@@ -4215,7 +4215,7 @@ class XlsToHtmlResponse:
 
 
 @dataclass
-class XLStoTxtInput:
+class XlsToTxtInput:
     """
     Spreadsheet to TXT
     """
@@ -4293,7 +4293,7 @@ class XlsToTxtResponse:
 
 
 @dataclass
-class XLStoXmlInput:
+class XlsToXmlInput:
     """
     Spreadsheet to XML
     """
@@ -6271,7 +6271,7 @@ class PdfCoClient(ConnectorClientBase):
 
     async def pdf_unsearchable(
         self,
-        input: PdfUnSearchableInput | Mapping[str, Any],
+        input: PdfUnsearchableInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7365,7 +7365,7 @@ class PdfCoClient(ConnectorClientBase):
 
     async def pdf_from_xls_xlsx(
         self,
-        input: PdfFromXlsxlsxInput | Mapping[str, Any],
+        input: PdfFromXlsXlsxInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7421,7 +7421,7 @@ class PdfCoClient(ConnectorClientBase):
 
     async def xls_to_csv(
         self,
-        input: XLStoCsvInput | Mapping[str, Any],
+        input: XlsToCsvInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7478,7 +7478,7 @@ class PdfCoClient(ConnectorClientBase):
 
     async def xls_to_json(
         self,
-        input: XLStoJsonInput | Mapping[str, Any],
+        input: XlsToJsonInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7534,7 +7534,7 @@ class PdfCoClient(ConnectorClientBase):
 
     async def xls_to_html(
         self,
-        input: XLStoHtmlInput | Mapping[str, Any],
+        input: XlsToHtmlInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7590,7 +7590,7 @@ class PdfCoClient(ConnectorClientBase):
 
     async def xls_to_txt(
         self,
-        input: XLStoTxtInput | Mapping[str, Any],
+        input: XlsToTxtInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7646,7 +7646,7 @@ class PdfCoClient(ConnectorClientBase):
 
     async def xls_to_xml(
         self,
-        input: XLStoXmlInput | Mapping[str, Any],
+        input: XlsToXmlInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
