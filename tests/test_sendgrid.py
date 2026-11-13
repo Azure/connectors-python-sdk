@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for SendgridClient."""
+"""Unit tests for SendGridClient."""
 
 from unittest.mock import AsyncMock, patch
 
@@ -20,7 +20,7 @@ from tests.generated_connector_test_utils import model_instance, resolve_generat
 
 
 class TestSendGridClientInitialization:
-    """Tests for SendgridClient initialization."""
+    """Tests for SendGridClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -78,7 +78,7 @@ class TestSendGridClientInitialization:
 
 
 class TestSendGridClientLifecycle:
-    """Tests for SendgridClient lifecycle methods."""
+    """Tests for SendGridClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
@@ -106,7 +106,7 @@ class TestSendGridClientLifecycle:
 
 
 class TestSendGridClientOperations:
-    """Tests for SendgridClient operations against expected HTTP calls."""
+    """Tests for SendGridClient operations against expected HTTP calls."""
 
     @pytest.mark.asyncio
     async def test_add_global_suppression_success(self, mock_credential):
@@ -372,7 +372,7 @@ class TestSendGridClientOperations:
 
 
 class TestSendGridClientErrorHandling:
-    """Error handling tests for SendgridClient operations."""
+    """Error handling tests for SendGridClient operations."""
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(

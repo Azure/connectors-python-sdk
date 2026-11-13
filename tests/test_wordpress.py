@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for WordpressClient."""
+"""Unit tests for WordPressClient."""
 
 from unittest.mock import AsyncMock, patch
 
@@ -38,7 +38,7 @@ ALL_OPERATIONS = list(SUCCESS_CONTRACTS)
 
 
 class TestWordPressClient:
-    """Tests for WordpressClient."""
+    """Tests for WordPressClient."""
 
     def test_init_with_defaults(self):
         """Test initialization with default authentication."""

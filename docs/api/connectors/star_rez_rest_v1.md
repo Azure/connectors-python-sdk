@@ -1,0 +1,50 @@
+# StarRezRestV1Client
+
+::: azure.connectors.star_rez_rest_v1
+    options:
+      members:
+        - SelectEntryInput
+        - CreateEntryInput
+        - CreateEntryResponse
+        - UpdateEntryInput
+        - UpdateEntryResponse
+        - DeleteResponse
+        - SelectEntryCustomFieldInput
+        - UpdateEntryCustomFieldInput
+        - UpdateEntryCustomFieldResponse
+        - SelectTermInput
+        - SelectEntryAddressInput
+        - UpdateEntryAddressInput
+        - UpdateEntryAddressResponse
+        - SelectEntryApplicationInput
+        - CreateEntryApplicationInput
+        - CreateEntryApplicationResponse
+        - UpdateEntryApplicationInput
+        - UpdateEntryApplicationResponse
+        - SelectTermSessionInput
+        - SelectEntryDetailInput
+        - UpdateEntryDetailInput
+        - UpdateEntryDetailResponse
+        - SelectEntryEnrollmentInput
+        - CreateEntryEnrollmentInput
+        - CreateEntryEnrollmentResponse
+        - UpdateEntryEnrollmentInput
+        - UpdateEntryEnrollmentResponse
+        - SelectBookingInput
+        - CreateBookingInput
+        - CreateBookingResponse
+        - UpdateBookingInput
+        - UpdateBookingResponse
+        - SelectRoomSpaceInput
+        - CreateRoomSpaceInput
+        - CreateRoomSpaceResponse
+        - SelectRoomLocationInput
+        - SelectTransactionInput
+        - CreateTransactionInput
+        - CreateTransactionResponse
+        - SelectRoomSpaceMaintenanceInput
+        - CreateRoomSpaceMaintenanceInput
+        - CreateRoomSpaceMaintenanceResponse
+        - UpdateRoomSpaceMaintenanceInput
+        - UpdateRoomSpaceMaintenanceResponse
+        - StarRezRestV1Client

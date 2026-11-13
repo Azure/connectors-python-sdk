@@ -124,11 +124,7 @@ class SendMessageByPhoneNumberResponse:
     Singular character, either R or S, denoting whether this message was
     received from the contact or sent to them, respectively.
     """
-    response_by_user_name: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "response_by_username"},
-    )
+    response_by_username: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Username of the Text Request user that last sent a message to this user.
     """

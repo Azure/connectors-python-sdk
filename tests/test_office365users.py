@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for Office365usersClient."""
+"""Unit tests for Office365UsersClient."""
 
 import pytest
 from unittest.mock import AsyncMock, patch
@@ -17,7 +17,7 @@ from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestOffice365UsersClientInitialization:
-    """Tests for Office365usersClient initialization."""
+    """Tests for Office365UsersClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -75,7 +75,7 @@ class TestOffice365UsersClientInitialization:
 
 
 class TestOffice365UsersClientLifecycle:
-    """Tests for Office365usersClient lifecycle methods."""
+    """Tests for Office365UsersClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):

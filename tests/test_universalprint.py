@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for UniversalprintClient."""
+"""Unit tests for UniversalPrintClient."""
 
 import inspect
 
@@ -31,7 +31,7 @@ async def _invoke_operation(client: UniversalPrintClient, operation: str):
 
 
 class TestUniversalPrintClientInitialization:
-    """Tests for UniversalprintClient initialization."""
+    """Tests for UniversalPrintClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -89,7 +89,7 @@ class TestUniversalPrintClientInitialization:
 
 
 class TestUniversalPrintClientLifecycle:
-    """Tests for UniversalprintClient lifecycle methods."""
+    """Tests for UniversalPrintClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):

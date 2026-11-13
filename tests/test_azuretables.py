@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for AzuretablesClient."""
+"""Unit tests for AzureTablesClient."""
 
 import json
 import pytest
@@ -31,7 +31,7 @@ from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestAzureTablesClientInitialization:
-    """Tests for AzuretablesClient initialization."""
+    """Tests for AzureTablesClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -89,7 +89,7 @@ class TestAzureTablesClientInitialization:
 
 
 class TestAzureTablesClientLifecycle:
-    """Tests for AzuretablesClient lifecycle methods."""
+    """Tests for AzureTablesClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):

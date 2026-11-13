@@ -134,11 +134,7 @@ class PostMessageRequest:
     more than 40,000 characters. For formatting options, see
     https://api.slack.com/docs/formatting
     """
-    user_name: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "username"},
-    )
+    username: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the bot."""
     as_user: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """

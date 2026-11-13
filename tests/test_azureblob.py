@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for AzureblobClient."""
+"""Unit tests for AzureBlobClient."""
 
 import pytest
 from unittest.mock import AsyncMock, patch
@@ -17,7 +17,7 @@ from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestAzureBlobClientInitialization:
-    """Tests for AzureblobClient initialization."""
+    """Tests for AzureBlobClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -75,7 +75,7 @@ class TestAzureBlobClientInitialization:
 
 
 class TestAzureBlobClientLifecycle:
-    """Tests for AzureblobClient lifecycle methods."""
+    """Tests for AzureBlobClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):

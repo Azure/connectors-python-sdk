@@ -291,7 +291,7 @@ class View:
         kw_only=True,
         metadata={"wire_name": "Id"},
     )
-    user_name: Optional[str] = dataclass_field(
+    username: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "UserName"},

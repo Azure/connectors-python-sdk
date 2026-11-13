@@ -1,0 +1,44 @@
+# MailchimpClient
+
+::: azure.connectors.mailchimp
+    options:
+      members:
+        - GetCampaignsResponse
+        - GetListsResponseModel
+        - CreateNewListResponseModel
+        - GetAddMembersBatchResponseModel
+        - GetAllMembersResponseModel
+        - MemberResponseModel
+        - GetMembersResponseModel
+        - CampaignResponseModel
+        - Recipient
+        - VariateSettings
+        - Tracking
+        - RssOpts
+        - SocialCard
+        - SegmentOpts
+        - Salesforce
+        - Highrise
+        - Capsule
+        - Schedule
+        - DailySend
+        - Settings
+        - ABSplitOpts
+        - ReportSummary
+        - DeliveryStatus
+        - Link
+        - NewCampaignRequest
+        - NewListRequest
+        - Contact
+        - CampaignDefaults
+        - Stats
+        - NewMembersInListRequest
+        - NewMemberInListRequest
+        - FirstAndLastName
+        - Location
+        - LastNote
+        - ObjectEntity
+        - UpdateMemberInListRequest
+        - AddUserResponseModel
+        - MailchimpClient
+        - TRIGGER_OPERATIONS

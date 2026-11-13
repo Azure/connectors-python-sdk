@@ -587,11 +587,7 @@ class Member:
         metadata={"wire_name": "fullName"},
     )
     """The full name of the member."""
-    user_name: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "username"},
-    )
+    username: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The username of the member."""
     initials: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The initials of the member."""

@@ -44,9 +44,9 @@ def test_canonical_import_keeps_raw_api_identity(
 
 def test_renamed_model_attribute_retains_original_wire_field() -> None:
     """Changed Python word boundaries must not alter serialized Swagger keys."""
-    model = RemoveWhiteSpaceFromTextRequest(text_containing_white_space="hello world")
+    model = RemoveWhiteSpaceFromTextRequest(text_containing_whitespace="hello world")
     attribute = next(
-        field for field in fields(model) if field.name == "text_containing_white_space"
+        field for field in fields(model) if field.name == "text_containing_whitespace"
     )
     assert attribute.metadata["wire_name"] == "TextContainingWhitespace"
     assert to_wire(model) == {"TextContainingWhitespace": "hello world"}

@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for AzuredigitaltwinsClient."""
+"""Unit tests for AzureDigitalTwinsClient."""
 
 import pytest
 from unittest.mock import AsyncMock, patch
@@ -73,7 +73,7 @@ WRITE_OPERATIONS = [
 
 
 class TestAzureDigitalTwinsClientInitialization:
-    """Tests for AzuredigitaltwinsClient initialization."""
+    """Tests for AzureDigitalTwinsClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -145,7 +145,7 @@ class TestAzureDigitalTwinsClientInitialization:
 
 
 class TestAzureDigitalTwinsClientLifecycle:
-    """Tests for AzuredigitaltwinsClient lifecycle methods."""
+    """Tests for AzureDigitalTwinsClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):

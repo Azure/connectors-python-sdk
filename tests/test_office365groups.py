@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for Office365groupsClient."""
+"""Unit tests for Office365GroupsClient."""
 
 import pytest
 from unittest.mock import AsyncMock, patch
@@ -28,7 +28,7 @@ from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestOffice365GroupsClientInitialization:
-    """Tests for Office365groupsClient initialization."""
+    """Tests for Office365GroupsClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -95,7 +95,7 @@ class TestOffice365GroupsClientInitialization:
 
 
 class TestOffice365GroupsClientLifecycle:
-    """Tests for Office365groupsClient lifecycle methods."""
+    """Tests for Office365GroupsClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):

@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for ClicksendsmsClient."""
+"""Unit tests for ClickSendSmsClient."""
 
 from unittest.mock import AsyncMock, patch
 
@@ -30,7 +30,7 @@ from tests.generated_connector_test_utils import model_instance
 
 
 class TestClickSendSmsClientInitialization:
-    """Tests for ClicksendsmsClient initialization."""
+    """Tests for ClickSendSmsClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -88,7 +88,7 @@ class TestClickSendSmsClientInitialization:
 
 
 class TestClickSendSmsClientLifecycle:
-    """Tests for ClicksendsmsClient lifecycle methods."""
+    """Tests for ClickSendSmsClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
@@ -116,7 +116,7 @@ class TestClickSendSmsClientLifecycle:
 
 
 class TestClickSendSmsClientOperations:
-    """Tests for ClicksendsmsClient operations against expected HTTP calls."""
+    """Tests for ClickSendSmsClient operations against expected HTTP calls."""
 
     def _make_client(self, mock_credential):
         return ClickSendSmsClient(
@@ -397,7 +397,7 @@ class TestClickSendSmsClientOperations:
 
 
 class TestClickSendSmsClientErrorHandling:
-    """Error handling tests for ClicksendsmsClient operations."""
+    """Error handling tests for ClickSendSmsClient operations."""
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(

@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Contract tests for JedoxodatahubClient."""
+"""Contract tests for JedoxODataHubClient."""
 
 import azure.connectors.jedox_odata_hub as jedoxodatahub_module
 from azure.connectors.jedox_odata_hub import JedoxODataHubClient

@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for GoogletasksClient."""
+"""Unit tests for GoogleTasksClient."""
 
 import pytest
 from unittest.mock import AsyncMock, patch
@@ -48,7 +48,7 @@ async def _invoke_operation(client: GoogleTasksClient, operation: str):
 
 
 class TestGoogleTasksClientInitialization:
-    """Tests for GoogletasksClient initialization."""
+    """Tests for GoogleTasksClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -106,7 +106,7 @@ class TestGoogleTasksClientInitialization:
 
 
 class TestGoogleTasksClientLifecycle:
-    """Tests for GoogletasksClient lifecycle methods."""
+    """Tests for GoogleTasksClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):

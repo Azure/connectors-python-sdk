@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for PdfcoClient."""
+"""Unit tests for PdfCoClient."""
 
 from unittest.mock import AsyncMock, patch
 
@@ -81,7 +81,7 @@ def test_reviewed_request_models_preserve_input_wire_contract(
 
 
 class TestPdfCoClientInitialization:
-    """Tests for PdfcoClient initialization."""
+    """Tests for PdfCoClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -139,7 +139,7 @@ class TestPdfCoClientInitialization:
 
 
 class TestPdfCoClientLifecycle:
-    """Tests for PdfcoClient lifecycle methods."""
+    """Tests for PdfCoClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):

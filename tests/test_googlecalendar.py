@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for GooglecalendarClient."""
+"""Unit tests for GoogleCalendarClient."""
 
 import inspect
 
@@ -69,7 +69,7 @@ async def _invoke_operation(client: GoogleCalendarClient, operation: str):
 
 
 class TestGoogleCalendarClientInitialization:
-    """Tests for GooglecalendarClient initialization."""
+    """Tests for GoogleCalendarClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -127,7 +127,7 @@ class TestGoogleCalendarClientInitialization:
 
 
 class TestGoogleCalendarClientLifecycle:
-    """Tests for GooglecalendarClient lifecycle methods."""
+    """Tests for GoogleCalendarClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):

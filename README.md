@@ -19,7 +19,7 @@ Type-safe Python clients for [Azure connectors](https://learn.microsoft.com/conn
 >
 > We welcome feedback and contributions — please [open an issue](https://github.com/Azure/connectors-python-sdk/issues) with questions, suggestions, or bug reports.
 
-For existing preview users, see [generated Python naming migration](docs/migration-naming.md)
+For existing preview users, see [generated Python naming migration](docs/naming-migration.md)
 for renamed imports, types, members, and unchanged connection identities.
 
 ## Why This SDK?
@@ -267,7 +267,7 @@ The following connectors have been generated and validated with comprehensive te
 | **Cloudmersive Document Conversion** | `azure.connectors.cloudmersive_convert` | ✅ Complete | 🔄 SDK Generated |
 | **Dataflows (Power Query)** | `azure.connectors.dataflows` | ✅ Complete | 🔄 SDK Generated |
 | **DataFlows SMS** | `azure.connectors.data_flows_sms` | ✅ Complete | 🔄 SDK Generated |
-| **DocuSign** | `azure.connectors.docusign` | ✅ Complete | 🔄 SDK Generated |
+| **Docusign** | `azure.connectors.docusign` | ✅ Complete | 🔄 SDK Generated |
 | **DocuWare** | `azure.connectors.docuware` | ✅ Complete | 🔄 SDK Generated |
 | **Dropbox** | `azure.connectors.dropbox` | ✅ Complete | 🔄 SDK Generated |
 | **Elfsquad Data** | `azure.connectors.elfsquad_data` | ✅ Complete | 🔄 SDK Generated |

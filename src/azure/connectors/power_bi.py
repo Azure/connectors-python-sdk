@@ -610,7 +610,7 @@ class QuerySpecification:
         kw_only=True,
         metadata={"wire_name": "serializerSettings"},
     )
-    impersonated_user_name: Optional[str] = dataclass_field(
+    impersonated_username: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "impersonatedUserName"},
@@ -892,7 +892,7 @@ class EffectiveIdentity:
     Definition: EffectiveIdentity
     """
 
-    user_name: str = dataclass_field(metadata={"wire_name": "username"})
+    username: str
     """
     The effective username reflected by a token for applying RLS rules (For
     OnPrem model, username can be composed of alpha-numerical characters or any

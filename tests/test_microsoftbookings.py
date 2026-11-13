@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for MicrosoftbookingsClient."""
+"""Unit tests for MicrosoftBookingsClient."""
 
 import pytest
 from unittest.mock import AsyncMock, patch
@@ -28,7 +28,7 @@ from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestMicrosoftBookingsClientInitialization:
-    """Tests for MicrosoftbookingsClient initialization."""
+    """Tests for MicrosoftBookingsClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -100,7 +100,7 @@ class TestMicrosoftBookingsClientInitialization:
 
 
 class TestMicrosoftBookingsClientLifecycle:
-    """Tests for MicrosoftbookingsClient lifecycle methods."""
+    """Tests for MicrosoftBookingsClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):

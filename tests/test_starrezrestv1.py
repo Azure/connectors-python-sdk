@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Contract tests for Starrezrestv1Client."""
+"""Contract tests for StarRezRestV1Client."""
 
 from unittest.mock import AsyncMock, patch
 

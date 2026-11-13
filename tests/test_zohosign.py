@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Contract tests for ZohosignClient."""
+"""Contract tests for ZohoSignClient."""
 
 from typing import get_type_hints
 

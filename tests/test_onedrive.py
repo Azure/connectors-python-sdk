@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for OnedriveClient."""
+"""Unit tests for OneDriveClient."""
 
 from urllib.parse import urlparse
 from unittest.mock import AsyncMock, patch
@@ -23,7 +23,7 @@ from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestOneDriveClientInitialization:
-    """Tests for OnedriveClient initialization."""
+    """Tests for OneDriveClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -81,7 +81,7 @@ class TestOneDriveClientInitialization:
 
 
 class TestOneDriveClientLifecycle:
-    """Tests for OnedriveClient lifecycle methods."""
+    """Tests for OneDriveClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):

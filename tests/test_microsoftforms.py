@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for MicrosoftformsClient."""
+"""Unit tests for MicrosoftFormsClient."""
 
 from unittest.mock import AsyncMock, patch
 
@@ -17,7 +17,7 @@ from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestMicrosoftFormsClientInitialization:
-    """Tests for MicrosoftformsClient initialization."""
+    """Tests for MicrosoftFormsClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -75,7 +75,7 @@ class TestMicrosoftFormsClientInitialization:
 
 
 class TestMicrosoftFormsClientLifecycle:
-    """Tests for MicrosoftformsClient lifecycle methods."""
+    """Tests for MicrosoftFormsClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):

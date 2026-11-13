@@ -84,8 +84,8 @@ from .rss import RssClient as RssClient
 from .salesforce import SalesforceClient as SalesforceClient
 from .seismic_planner import SeismicPlannerClient as SeismicPlannerClient
 from .send_grid import SendGridClient as SendGridClient
-from .service_now import ServiceNowClient as ServiceNowClient
 from .service_bus import ServiceBusClient as ServiceBusClient
+from .service_now import ServiceNowClient as ServiceNowClient
 from .share_point_online import SharePointOnlineClient as SharePointOnlineClient
 from .shifts import ShiftsClient as ShiftsClient
 from .signing_hub import SigningHubClient as SigningHubClient

@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for ExcelonlineClient."""
+"""Unit tests for ExcelOnlineClient."""
 
 import pytest
 from unittest.mock import AsyncMock, patch
@@ -106,7 +106,7 @@ async def _invoke_operation(client: ExcelOnlineClient, operation: str):
 
 
 class TestExcelOnlineClientInitialization:
-    """Tests for ExcelonlineClient initialization."""
+    """Tests for ExcelOnlineClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -164,7 +164,7 @@ class TestExcelOnlineClientInitialization:
 
 
 class TestExcelOnlineClientLifecycle:
-    """Tests for ExcelonlineClient lifecycle methods."""
+    """Tests for ExcelOnlineClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):

@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Contract tests for SeismicplannerClient."""
+"""Contract tests for SeismicPlannerClient."""
 
 from typing import Any, Dict, Mapping, Optional, get_type_hints
 from unittest.mock import AsyncMock, patch

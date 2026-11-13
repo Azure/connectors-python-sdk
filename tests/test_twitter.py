@@ -182,7 +182,7 @@ class TestTwitterClientOperations:
             return_value=response,
         ) as mock_send:
             result = await resolve_generated_result(
-                client.list_user_timeline(user_name="Ada Lovelace", max_results=5)
+                client.list_user_timeline(username="Ada Lovelace", max_results=5)
             )
 
         method, url = mock_send.call_args.args[:2]

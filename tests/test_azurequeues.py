@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for AzurequeuesClient."""
+"""Unit tests for AzureQueuesClient."""
 
 import pytest
 from unittest.mock import AsyncMock, patch
@@ -26,7 +26,7 @@ from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestAzureQueuesClientInitialization:
-    """Tests for AzurequeuesClient initialization."""
+    """Tests for AzureQueuesClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -84,7 +84,7 @@ class TestAzureQueuesClientInitialization:
 
 
 class TestAzureQueuesClientLifecycle:
-    """Tests for AzurequeuesClient lifecycle methods."""
+    """Tests for AzureQueuesClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):

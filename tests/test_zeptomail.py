@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Contract tests for ZeptomailClient."""
+"""Contract tests for ZeptoMailClient."""
 
 from typing import Any, Dict, List, Mapping, Optional, get_type_hints
 from unittest.mock import AsyncMock, patch

@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Contract tests for ElfsquaddataClient."""
+"""Contract tests for ElfsquadDataClient."""
 
 import json
 from unittest.mock import AsyncMock, patch

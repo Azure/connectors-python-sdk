@@ -35,7 +35,7 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_data_flows_sms.py` | Dataflows SMS | `DATAFLOWSSMS_CONNECTION_URL` |
 | `sample_connector_usage_document_db.py` | Azure Cosmos DB | `DOCUMENTDB_CONNECTION_URL` |
 | `sample_connector_usage_dropbox.py` | Dropbox | `DROPBOX_CONNECTION_URL` |
-| `sample_connector_usage_docusign.py` | DocuSign | `DOCUSIGN_CONNECTION_URL` |
+| `sample_connector_usage_docusign.py` | Docusign | `DOCUSIGN_CONNECTION_URL` |
 | `sample_connector_usage_kusto.py` | Azure Data Explorer | `KUSTO_CONNECTION_URL` |
 | `sample_connector_usage_event_hubs.py` | Azure Event Hubs | `EVENTHUBS_CONNECTION_URL` |
 | `sample_connector_usage_excel_online.py` | Excel Online | `EXCELONLINE_CONNECTION_URL` |

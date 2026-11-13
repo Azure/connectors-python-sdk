@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for GithubClient."""
+"""Unit tests for GitHubClient."""
 
 from unittest.mock import AsyncMock, patch
 
@@ -23,7 +23,7 @@ from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestGitHubClientInitialization:
-    """Tests for GithubClient initialization."""
+    """Tests for GitHubClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -81,7 +81,7 @@ class TestGitHubClientInitialization:
 
 
 class TestGitHubClientLifecycle:
-    """Tests for GithubClient lifecycle methods."""
+    """Tests for GitHubClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):

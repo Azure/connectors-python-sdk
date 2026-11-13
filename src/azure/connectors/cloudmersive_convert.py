@@ -2701,7 +2701,7 @@ class DocxInsertImageRequest:
     Definition: DocxInsertImageRequest
     """
 
-    height_in_em_us: Optional[int] = dataclass_field(
+    height_in_emus: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "HeightInEMUs"},
@@ -2777,7 +2777,7 @@ class DocxInsertImageRequest:
     object), AfterExistingObject (right after an existing object - fill in the
     InsertPath field using the Path value from an existing object)
     """
-    width_in_em_us: Optional[int] = dataclass_field(
+    width_in_emus: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "WidthInEMUs"},
@@ -5237,7 +5237,7 @@ class RemoveWhiteSpaceFromTextRequest:
     Definition: RemoveWhitespaceFromTextRequest
     """
 
-    text_containing_white_space: Optional[str] = dataclass_field(
+    text_containing_whitespace: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "TextContainingWhitespace"},

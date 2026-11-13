@@ -3479,7 +3479,7 @@ class GitHubClient(ConnectorClientBase):
         self,
         repository_owner: str,
         repository_name: str,
-        user_name: str,
+        username: str,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -3496,7 +3496,7 @@ class GitHubClient(ConnectorClientBase):
         Args:
             repository_owner: Name of the repository owner.
             repository_name: Name of the repository.
-            user_name: The handle for the GitHub user account.
+            username: The handle for the GitHub user account.
             timeout: The request timeout in seconds.
             headers: Additional HTTP request headers.
             client_request_id: A caller-provided request identifier.
@@ -3514,7 +3514,7 @@ class GitHubClient(ConnectorClientBase):
             f"/{quote(str(repository_owner), safe='')}"
             f"/{quote(str(repository_name), safe='')}"
             f"/collaborators"
-            f"/{quote(str(user_name), safe='')}"
+            f"/{quote(str(username), safe='')}"
         )
 
         response = await self.http_client.send(

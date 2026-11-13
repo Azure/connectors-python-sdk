@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for DynamicsaxClient."""
+"""Unit tests for DynamicsAXClient."""
 
 import pytest
 from unittest.mock import AsyncMock, patch
@@ -92,7 +92,7 @@ def _make_client(credential=None):
 
 
 class TestDynamicsAXClientInitialization:
-    """Tests for DynamicsaxClient initialization."""
+    """Tests for DynamicsAXClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -142,7 +142,7 @@ class TestDynamicsAXClientInitialization:
 
 
 class TestDynamicsAXClientLifecycle:
-    """Tests for DynamicsaxClient lifecycle methods."""
+    """Tests for DynamicsAXClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):

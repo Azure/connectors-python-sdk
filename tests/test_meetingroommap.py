@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Contract tests for MeetingroommapClient."""
+"""Contract tests for MeetingRoomMapClient."""
 
 import azure.connectors.meeting_room_map as meetingroommap_module
 from azure.connectors.meeting_room_map import MeetingRoomMapClient

@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for RevaiClient."""
+"""Unit tests for RevAIClient."""
 
 from unittest.mock import AsyncMock, patch
 
@@ -92,7 +92,7 @@ PAGEABLE_OPERATIONS = {
 
 
 class TestRevAIClient:
-    """Tests for RevaiClient."""
+    """Tests for RevAIClient."""
 
     def test_init_with_defaults(self):
         """Test initialization with default authentication."""

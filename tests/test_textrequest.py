@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for TextrequestClient."""
+"""Unit tests for TextRequestClient."""
 
 from unittest.mock import AsyncMock, patch
 
@@ -123,7 +123,7 @@ PAGED_OPERATIONS = {
 
 
 class TestTextRequestClientInitialization:
-    """Tests for TextrequestClient initialization."""
+    """Tests for TextRequestClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -181,7 +181,7 @@ class TestTextRequestClientInitialization:
 
 
 class TestTextRequestClientLifecycle:
-    """Tests for TextrequestClient lifecycle methods."""
+    """Tests for TextRequestClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
@@ -209,7 +209,7 @@ class TestTextRequestClientLifecycle:
 
 
 class TestTextRequestClientOperations:
-    """Tests for TextrequestClient operations against expected HTTP calls."""
+    """Tests for TextRequestClient operations against expected HTTP calls."""
 
     def _make_client(self, mock_credential):
         return TextRequestClient(
@@ -623,7 +623,7 @@ class TestTextRequestClientOperations:
 
 
 class TestTextRequestClientErrorHandling:
-    """Error handling tests for TextrequestClient operations."""
+    """Error handling tests for TextRequestClient operations."""
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(

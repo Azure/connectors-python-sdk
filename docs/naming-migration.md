@@ -17,8 +17,10 @@ fields and method references using the current generated API reference.
 Types use their documented PascalCase spelling, generated operations and
 model attributes use snake_case, and constants and enum members use uppercase
 names. For example, `RemoveWhitespaceFromTextRequest` is now
-`RemoveWhiteSpaceFromTextRequest`, and its attribute
-`text_containing_white_space` still serializes to `TextContainingWhitespace`.
+`RemoveWhiteSpaceFromTextRequest`, its attribute
+`text_containing_whitespace` still serializes to `TextContainingWhitespace`, and
+`user_name` attributes and parameters use the Python closed-word spelling
+`username` (while `file_name` remains `file_name`).
 Versioned operations retain their version tokens; consult the regenerated
 client signature before changing a call.
 

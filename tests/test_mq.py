@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for MqClient."""
+"""Unit tests for MQClient."""
 
 import pytest
 from unittest.mock import AsyncMock, patch
@@ -19,7 +19,7 @@ from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestMQClientInitialization:
-    """Tests for MqClient initialization."""
+    """Tests for MQClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -77,7 +77,7 @@ class TestMQClientInitialization:
 
 
 class TestMQClientLifecycle:
-    """Tests for MqClient lifecycle methods."""
+    """Tests for MQClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):

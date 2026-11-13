@@ -71,8 +71,8 @@ __all__ = [
     "EnvelopeCustomFieldResponse",
     "EnvelopeDocument",
     "EnvelopeDocumentField",
-    "EnvelopeIDsResponse",
     "EnvelopeIds",
+    "EnvelopeIdsResponse",
     "EnvelopeResendResponse",
     "EnvelopeTemplate",
     "EnvelopeVoidResponse",
@@ -1683,7 +1683,7 @@ class CombinedEmailBodyAndCustomFields:
 
 
 @dataclass
-class EnvelopeIDsResponse:
+class EnvelopeIdsResponse:
     """
     Definition: EnvelopeIDsResponse
     """
@@ -6603,7 +6603,7 @@ class DocusignClient(ConnectorClientBase):
 
         return AsyncItemPaged(get_next, extract_data)
 
-    def list_all_workflow_i_ds(
+    def list_all_workflow_ids(
         self,
         account_id: str,
         *,

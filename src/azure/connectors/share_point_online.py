@@ -1115,7 +1115,7 @@ class DeletedItem:
     File name with extension of the item in document libraries, same as Name of
     the item in lists
     """
-    deleted_by_user_name: Optional[str] = dataclass_field(
+    deleted_by_username: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "DeletedByUserName"},

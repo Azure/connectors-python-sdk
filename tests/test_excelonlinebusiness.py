@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for ExcelonlinebusinessClient."""
+"""Unit tests for ExcelOnlineBusinessClient."""
 
 import json
 from urllib.parse import urlsplit
@@ -33,7 +33,7 @@ from tests.generated_connector_test_utils import model_instance, resolve_generat
 
 
 class TestExcelOnlineBusinessClientInitialization:
-    """Tests for ExcelonlinebusinessClient initialization."""
+    """Tests for ExcelOnlineBusinessClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -91,7 +91,7 @@ class TestExcelOnlineBusinessClientInitialization:
 
 
 class TestExcelOnlineBusinessClientLifecycle:
-    """Tests for ExcelonlinebusinessClient lifecycle methods."""
+    """Tests for ExcelOnlineBusinessClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):

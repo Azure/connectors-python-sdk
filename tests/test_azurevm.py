@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for AzurevmClient."""
+"""Unit tests for AzureVMClient."""
 
 import pytest
 from unittest.mock import AsyncMock, patch
@@ -28,7 +28,7 @@ from tests.conftest import MockResponse
 
 
 class TestAzureVMClientInitialization:
-    """Tests for AzurevmClient initialization."""
+    """Tests for AzureVMClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -100,7 +100,7 @@ class TestAzureVMClientInitialization:
 
 
 class TestAzureVMClientLifecycle:
-    """Tests for AzurevmClient lifecycle methods."""
+    """Tests for AzureVMClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):

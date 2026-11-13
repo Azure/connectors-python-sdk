@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for OnedriveforbusinessClient."""
+"""Unit tests for OneDriveForBusinessClient."""
 
 from unittest.mock import AsyncMock, patch
 
@@ -88,7 +88,7 @@ METHOD_ARGUMENTS: list[tuple[str, dict]] = [
 
 
 class TestOneDriveForBusinessClientInitialization:
-    """Tests for OnedriveforbusinessClient initialization."""
+    """Tests for OneDriveForBusinessClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -131,7 +131,7 @@ class TestOneDriveForBusinessClientInitialization:
 
 
 class TestOneDriveForBusinessClientLifecycle:
-    """Tests for OnedriveforbusinessClient lifecycle methods."""
+    """Tests for OneDriveForBusinessClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):

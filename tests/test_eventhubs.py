@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for EventhubsClient."""
+"""Unit tests for EventHubsClient."""
 
 import pytest
 from unittest.mock import AsyncMock, patch
@@ -22,7 +22,7 @@ from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestEventHubsClientInitialization:
-    """Tests for EventhubsClient initialization."""
+    """Tests for EventHubsClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -80,7 +80,7 @@ class TestEventHubsClientInitialization:
 
 
 class TestEventHubsClientLifecycle:
-    """Tests for EventhubsClient lifecycle methods."""
+    """Tests for EventHubsClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):

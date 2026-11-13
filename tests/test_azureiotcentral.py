@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for AzureiotcentralClient."""
+"""Unit tests for AzureIoTCentralClient."""
 
 import pytest
 from unittest.mock import AsyncMock, patch
@@ -237,12 +237,12 @@ async def _invoke_operation(client: AzureIoTCentralClient, operation: str):
 
 
 def _make_client(credential=None):
-    """Create an AzureiotcentralClient for tests."""
+    """Create an AzureIoTCentralClient for tests."""
     return AzureIoTCentralClient(BASE_URL, credential=credential)
 
 
 class TestAzureIoTCentralClientInitialization:
-    """Tests for AzureiotcentralClient initialization."""
+    """Tests for AzureIoTCentralClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -294,7 +294,7 @@ class TestAzureIoTCentralClientInitialization:
 
 
 class TestAzureIoTCentralClientLifecycle:
-    """Tests for AzureiotcentralClient lifecycle methods."""
+    """Tests for AzureIoTCentralClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):

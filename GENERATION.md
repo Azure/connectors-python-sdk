@@ -157,7 +157,7 @@ merges. Tests do not send real SMS messages.
 The later catalog-wide naming refresh additionally aligns seven PdfCo `*Input`
 exports with the corresponding `*Response` names. The Swagger and generated
 file hashes above describe the earlier response-only refresh, not that later
-catalog-wide output. The public [naming migration guide](docs/migration-naming.md)
+catalog-wide output. The public [naming migration guide](docs/naming-migration.md)
 lists the additional request type spellings.
 
 ### Multipart form-data refresh
@@ -198,6 +198,18 @@ behavior without taking ownership of caller credentials or streams.
 See [multipart examples](README.md#multipart-file-uploads).
 The paired generator PR must merge before the SDK PR merges; its exact source
 and prerequisite status are recorded in the SDK PR.
+
+### 103-connector catalog parity, systematic naming, and page-envelope refresh
+
+All 103 generated connector modules, `_client_registry.py`, and `__init__.pyi`
+were regenerated from consolidated generator commit
+`3cb5968155c1854d52bf1256a3199da920029e82` in
+[BPM PR 17922280](https://msazure.visualstudio.com/One/_git/AzureUX-BPM/pullrequest/17922280)
+(merging prerequisites [#17885819](https://msazure.visualstudio.com/One/_git/AzureUX-BPM/pullrequest/17885819),
+[#17895210](https://msazure.visualstudio.com/One/_git/AzureUX-BPM/pullrequest/17895210), and
+[#17896196](https://msazure.visualstudio.com/One/_git/AzureUX-BPM/pullrequest/17896196)).
+See [`docs/naming-migration.md`](docs/naming-migration.md) for the complete
+module, client, attribute, and `ConnectorPage` migration details.
 
 ### Generate C# DirectClient SDK
 

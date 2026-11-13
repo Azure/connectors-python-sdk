@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for AzureautomationClient."""
+"""Unit tests for AzureAutomationClient."""
 
 import pytest
 from unittest.mock import AsyncMock, patch
@@ -23,7 +23,7 @@ from tests.conftest import MockResponse
 
 
 class TestAzureAutomationClientInitialization:
-    """Tests for AzureautomationClient initialization."""
+    """Tests for AzureAutomationClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -95,7 +95,7 @@ class TestAzureAutomationClientInitialization:
 
 
 class TestAzureAutomationClientLifecycle:
-    """Tests for AzureautomationClient lifecycle methods."""
+    """Tests for AzureAutomationClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):

@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for AzuremonitorlogsClient."""
+"""Unit tests for AzureMonitorLogsClient."""
 
 import pytest
 from unittest.mock import AsyncMock, patch
@@ -24,7 +24,7 @@ from tests.generated_connector_test_utils import model_instance, resolve_generat
 
 
 class TestAzureMonitorLogsClientInitialization:
-    """Tests for AzuremonitorlogsClient initialization."""
+    """Tests for AzureMonitorLogsClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -89,7 +89,7 @@ class TestAzureMonitorLogsClientInitialization:
 
 
 class TestAzureMonitorLogsClientLifecycle:
-    """Tests for AzuremonitorlogsClient lifecycle methods."""
+    """Tests for AzureMonitorLogsClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):

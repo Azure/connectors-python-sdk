@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for AzureeventgridClient."""
+"""Unit tests for AzureEventGridClient."""
 
 import pytest
 from unittest.mock import AsyncMock, patch
@@ -36,7 +36,7 @@ ALL_OPERATIONS = [
 
 
 class TestAzureEventGridClientInitialization:
-    """Tests for AzureeventgridClient initialization."""
+    """Tests for AzureEventGridClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -94,7 +94,7 @@ class TestAzureEventGridClientInitialization:
 
 
 class TestAzureEventGridClientLifecycle:
-    """Tests for AzureeventgridClient lifecycle methods."""
+    """Tests for AzureEventGridClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):

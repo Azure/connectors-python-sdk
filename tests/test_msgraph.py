@@ -20,7 +20,7 @@ from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestMsgraphClientInitialization:
-    """Tests for MsgraphgroupsanduserClient initialization."""
+    """Tests for MSGraphGroupsAndUsersClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default values."""
@@ -77,7 +77,7 @@ class TestMsgraphClientInitialization:
 
 
 class TestMsgraphClientLifecycle:
-    """Tests for MsgraphgroupsanduserClient lifecycle methods."""
+    """Tests for MSGraphGroupsAndUsersClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self):

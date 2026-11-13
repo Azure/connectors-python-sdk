@@ -337,7 +337,11 @@ class ContactResponse:
 
     id: int
     """id of the contact."""
-    user_name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    username: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "user_name"},
+    )
     """User name of the contact."""
     user_email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address of the contact."""
@@ -1126,7 +1130,11 @@ class WorkflowRecipient:
     """Order of the recipient in the workflow."""
     user_email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address of the recipient if user is not a group."""
-    user_name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    username: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "user_name"},
+    )
     """Name of the recipient if user is not a group."""
     mobile_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Mobile number"""
@@ -2263,7 +2271,11 @@ class GroupMemberResponse:
 
     user_email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address of the group member"""
-    user_name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    username: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "user_name"},
+    )
     """User name of the group member"""
 
 
@@ -2401,7 +2413,11 @@ class NextSignerEmail:
 
     user_email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address of the next signer."""
-    user_name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    username: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "user_name"},
+    )
     """Name of the next signer."""
 
 
@@ -3099,7 +3115,7 @@ class WorflowUserRequest:
 
     user_email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address of the user to be added in the workflow."""
-    user_name: str
+    username: str = dataclass_field(metadata={"wire_name": "user_name"})
     """Name of the recipient to be added in the workflow."""
     user_national_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User national id of the recipient"""
@@ -3270,7 +3286,11 @@ class WorkflowUserResponse:
 
     order: int
     """Order of the recipient in the workflow."""
-    user_name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    username: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "user_name"},
+    )
     """
     Name of the recipient if recipient is not a group. If recipient is a
     placeholder it will contain the name of the placeholder.
@@ -3506,7 +3526,11 @@ class DeclineByDetails:
     Definition: DeclineByDetails
     """
 
-    user_name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    username: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "user_name"},
+    )
     """Name of user who have declined the workflow """
     user_email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email of user who have declined the workflow              """
@@ -3844,7 +3868,11 @@ class SignDocumentRequest:
     """Locale of the signer provided by the recipient."""
     contact_information: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Contact information of the signer provided by the recipient."""
-    user_name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    username: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "user_name"},
+    )
     """
     Name of the signer provided by the recipient. Note this applies to
     in-person signing operations only.
@@ -4702,7 +4730,11 @@ class DocumentLogsActions:
     action_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     user_email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email of the user who performed the action."""
-    user_name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    username: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "user_name"},
+    )
     """Name of the user who performed the action."""
     enterprise_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
@@ -4750,7 +4782,11 @@ class WorkflowUserUpdateRequest:
     The email address of the new user to be updated in workflow. If no value is
     provided, old value will be retained.
     """
-    user_name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    username: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "user_name"},
+    )
     """
     Name of the recipient to be updated. If no value is provided, old value
     will be retained.
@@ -5803,7 +5839,11 @@ class CommentFieldRecipientResponse:
     Definition: CommentFieldRecipientResponse
     """
 
-    user_name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    username: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "user_name"},
+    )
     """User name"""
     user_email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User email"""

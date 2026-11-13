@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for GoogledriveClient."""
+"""Unit tests for GoogleDriveClient."""
 
 import pytest
 from unittest.mock import AsyncMock, patch
@@ -60,7 +60,7 @@ async def _invoke_operation(client: GoogleDriveClient, operation: str):
 
 
 class TestGoogleDriveClientInitialization:
-    """Tests for GoogledriveClient initialization."""
+    """Tests for GoogleDriveClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -118,7 +118,7 @@ class TestGoogleDriveClientInitialization:
 
 
 class TestGoogleDriveClientLifecycle:
-    """Tests for GoogledriveClient lifecycle methods."""
+    """Tests for GoogleDriveClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):

@@ -634,11 +634,7 @@ class AccountsInput:
     email: Optional[str] = dataclass_field(default=None, kw_only=True)
     first_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     last_name: Optional[str] = dataclass_field(default=None, kw_only=True)
-    user_name: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "username"},
-    )
+    username: Optional[str] = dataclass_field(default=None, kw_only=True)
     phone: Optional[str] = dataclass_field(default=None, kw_only=True)
     job_title: Optional[str] = dataclass_field(default=None, kw_only=True)
     job_description: Optional[str] = dataclass_field(default=None, kw_only=True)
@@ -1788,11 +1784,7 @@ class User:
 
     id: Optional[int] = dataclass_field(default=None, kw_only=True)
     email: Optional[str] = dataclass_field(default=None, kw_only=True)
-    user_name: Optional[str] = dataclass_field(
-        default=None,
-        kw_only=True,
-        metadata={"wire_name": "username"},
-    )
+    username: Optional[str] = dataclass_field(default=None, kw_only=True)
     first_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     last_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     full_name: Optional[str] = dataclass_field(default=None, kw_only=True)

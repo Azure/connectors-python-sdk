@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Contract tests for FormstackformsClient."""
+"""Contract tests for FormstackFormsClient."""
 
 import azure.connectors.formstack_forms as formstackforms_module
 from azure.connectors.formstack_forms import FormstackFormsClient

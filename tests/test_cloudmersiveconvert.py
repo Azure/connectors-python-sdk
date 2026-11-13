@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for CloudmersiveconvertClient."""
+"""Unit tests for CloudmersiveConvertClient."""
 
 from unittest.mock import AsyncMock, patch
 
@@ -19,7 +19,7 @@ from tests.conftest import MockResponse
 
 
 class TestCloudmersiveConvertClientInitialization:
-    """Tests for CloudmersiveconvertClient initialization."""
+    """Tests for CloudmersiveConvertClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
@@ -77,7 +77,7 @@ class TestCloudmersiveConvertClientInitialization:
 
 
 class TestCloudmersiveConvertClientLifecycle:
-    """Tests for CloudmersiveconvertClient lifecycle methods."""
+    """Tests for CloudmersiveConvertClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):

@@ -1,0 +1,43 @@
+# ExcelOnlineBusinessClient
+
+::: azure.connectors.excel_online_business
+    options:
+      members:
+        - TableMetadata
+        - ItemsList
+        - CommentsList
+        - Comment
+        - GetItemResponse
+        - Item
+        - GetAllWorksheetsResponse
+        - CreateWorksheetInput
+        - WorksheetMetadata
+        - GetTablesResponse
+        - RunScriptProdInput
+        - RunScriptProdResponse
+        - GetSourcesResponse
+        - GetDrivesResponse
+        - GetColumnsResponse
+        - GetSingleScriptResponse
+        - CreateFileMetadata
+        - DataSetsMetadata
+        - TabularDataSetsMetadata
+        - BlobDataSetsMetadata
+        - TablesList
+        - Table
+        - TableToCreate
+        - TableCapabilitiesMetadata
+        - ObjectEntity
+        - TableSortRestrictionsMetadata
+        - TableFilterRestrictionsMetadata
+        - TableSelectRestrictionsMetadata
+        - CommentDetails
+        - TabularItemsList
+        - TabularItem
+        - ScriptParameters
+        - ScriptReturnValues
+        - RawAndFormattedTableSchema
+        - BlobMetadata
+        - SensitivityLabelMetadata
+        - WorkbookRange
+        - ExcelOnlineBusinessClient
