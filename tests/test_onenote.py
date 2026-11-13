@@ -37,7 +37,7 @@ from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import resolve_generated_result
 
 
-class TestOnenoteClientInitialization:
+class TestOneNoteClientInitialization:
     """Tests for OneNoteClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
@@ -104,7 +104,7 @@ class TestOnenoteClientInitialization:
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
 
-class TestOnenoteClientLifecycle:
+class TestOneNoteClientLifecycle:
     """Tests for OneNoteClient lifecycle methods."""
 
     @pytest.mark.asyncio

@@ -30,7 +30,7 @@ OPERATION_CONTRACTS = {
 }
 
 
-class TestCloudconvertClient(GeneratedConnectorContractTests):
+class TestCloudConvertClient(GeneratedConnectorContractTests):
     """Test the generated CloudConvert client contract."""
 
     client_type = CloudConvertClient

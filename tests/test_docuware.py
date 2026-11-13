@@ -21,7 +21,7 @@ from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import resolve_generated_result
 
 
-class TestDocuwareClientInitialization:
+class TestDocuWareClientInitialization:
     """Tests for DocuWareClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
@@ -79,7 +79,7 @@ class TestDocuwareClientInitialization:
         assert client.connector_name == "docuware"
 
 
-class TestDocuwareClientLifecycle:
+class TestDocuWareClientLifecycle:
     """Tests for DocuWareClient lifecycle methods."""
 
     @pytest.mark.asyncio
@@ -425,7 +425,7 @@ async def _invoke_operation(client: DocuWareClient, operation: str):
     return await resolve_generated_result(method(**OPERATION_ARGS[operation]))
 
 
-class TestDocuwareClientAllOperations:
+class TestDocuWareClientAllOperations:
     """Success path smoke tests covering every generated operation."""
 
     @pytest.mark.asyncio
@@ -447,7 +447,7 @@ class TestDocuwareClientAllOperations:
             assert mock_send.call_args[0][1].startswith(BASE_URL)
 
 
-class TestDocuwareClientAllOperationsErrorHandling:
+class TestDocuWareClientAllOperationsErrorHandling:
     """Error handling tests that ensure every operation raises ConnectorException."""
 
     @pytest.mark.asyncio

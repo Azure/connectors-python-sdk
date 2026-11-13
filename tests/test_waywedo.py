@@ -26,7 +26,7 @@ OPERATION_CONTRACTS = {
 }
 
 
-class TestWaywedoClient(GeneratedConnectorContractTests):
+class TestWayWeDoClient(GeneratedConnectorContractTests):
     """Test the generated Way We Do client contract."""
 
     client_type = WayWeDoClient
