@@ -1,14 +1,14 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for CloudmersiveconvertClient."""
+"""Unit tests for CloudmersiveConvertClient."""
 
 from unittest.mock import AsyncMock, patch
 
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.cloudmersiveconvert import CloudmersiveconvertClient
-from azure.connectors.cloudmersiveconvert import (
+from azure.connectors.cloudmersive_convert import CloudmersiveConvertClient
+from azure.connectors.cloudmersive_convert import (
     GetDocxBodyRequest,
     GetDocxGetCommentsHierarchicalRequest,
 )
@@ -18,12 +18,12 @@ from azure.connectors.sdk import (
 from tests.conftest import MockResponse
 
 
-class TestCloudmersiveconvertClientInitialization:
-    """Tests for CloudmersiveconvertClient initialization."""
+class TestCloudmersiveConvertClientInitialization:
+    """Tests for CloudmersiveConvertClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = CloudmersiveconvertClient(
+        client = CloudmersiveConvertClient(
             "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -32,14 +32,14 @@ class TestCloudmersiveconvertClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = CloudmersiveconvertClient(
+        client = CloudmersiveConvertClient(
             "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = CloudmersiveconvertClient(
+        client = CloudmersiveConvertClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -48,7 +48,7 @@ class TestCloudmersiveconvertClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = CloudmersiveconvertClient(
+        client = CloudmersiveConvertClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -59,16 +59,16 @@ class TestCloudmersiveconvertClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            CloudmersiveconvertClient("", AzureKeyCredential("test-key"))
+            CloudmersiveConvertClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            CloudmersiveconvertClient(None, AzureKeyCredential("test-key"))
+            CloudmersiveConvertClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'cloudmersiveconvert'."""
-        client = CloudmersiveconvertClient(
+        client = CloudmersiveConvertClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -76,13 +76,13 @@ class TestCloudmersiveconvertClientInitialization:
         assert client.connector_name == "cloudmersiveconvert"
 
 
-class TestCloudmersiveconvertClientLifecycle:
-    """Tests for CloudmersiveconvertClient lifecycle methods."""
+class TestCloudmersiveConvertClientLifecycle:
+    """Tests for CloudmersiveConvertClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = CloudmersiveconvertClient(
+        client = CloudmersiveConvertClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -94,12 +94,12 @@ class TestCloudmersiveconvertClientLifecycle:
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
-        with patch.object(CloudmersiveconvertClient, "close", new_callable=AsyncMock) as mock_close:
-            async with CloudmersiveconvertClient(
+        with patch.object(CloudmersiveConvertClient, "close", new_callable=AsyncMock) as mock_close:
+            async with CloudmersiveConvertClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential,
             ) as client:
-                assert isinstance(client, CloudmersiveconvertClient)
+                assert isinstance(client, CloudmersiveConvertClient)
 
             mock_close.assert_called_once()
 
@@ -110,7 +110,7 @@ class TestEditDocumentDocxBodyAsync:
     @pytest.mark.asyncio
     async def test_success_forwards_request_body(self, mock_credential):
         """Test that the POST operation forwards the request body to send_async."""
-        client = CloudmersiveconvertClient(
+        client = CloudmersiveConvertClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -136,7 +136,7 @@ class TestEditDocumentDocxBodyAsync:
     @pytest.mark.asyncio
     async def test_error_response_raises_connector_exception(self, mock_credential):
         """Test that a non-2xx response raises ConnectorException."""
-        client = CloudmersiveconvertClient(
+        client = CloudmersiveConvertClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -160,7 +160,7 @@ class TestEditDocumentDocxGetCommentsHierarchicalAsync:
     @pytest.mark.asyncio
     async def test_success_forwards_request_body(self, mock_credential):
         """Test that the POST operation forwards the request body to send_async."""
-        client = CloudmersiveconvertClient(
+        client = CloudmersiveConvertClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -187,7 +187,7 @@ class TestEditDocumentDocxGetCommentsHierarchicalAsync:
     @pytest.mark.asyncio
     async def test_server_error_raises_connector_exception(self, mock_credential):
         """Test that a 5xx response raises ConnectorException."""
-        client = CloudmersiveconvertClient(
+        client = CloudmersiveConvertClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -269,23 +269,23 @@ ALL_OPERATIONS = sorted(OPERATION_ARGS.keys())
 def test_generated_operation_inventory_matches_contract():
     """Test all 53 supported operations are represented without multipart APIs."""
     assert len(ALL_OPERATIONS) == 53
-    assert not hasattr(CloudmersiveconvertClient, "create_document")
+    assert not hasattr(CloudmersiveConvertClient, "create_document")
 
 
-async def _invoke_operation(client: CloudmersiveconvertClient, operation: str):
+async def _invoke_operation(client: CloudmersiveConvertClient, operation: str):
     """Invoke a Cloudmersive Convert operation by name for shared method tests."""
     method = getattr(client, f"{operation}")
     return await method(**OPERATION_ARGS[operation])
 
 
-class TestCloudmersiveconvertClientAllOperations:
+class TestCloudmersiveConvertClientAllOperations:
     """Success path smoke tests covering every generated operation."""
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize("operation", ALL_OPERATIONS)
     async def test_all_operations_success(self, mock_credential, operation):
         """Test every operation issues a request and returns without error."""
-        client = CloudmersiveconvertClient(BASE_URL, credential=mock_credential)
+        client = CloudmersiveConvertClient(BASE_URL, credential=mock_credential)
         mock_response = MockResponse(status=200, text="{}")
 
         with patch.object(
@@ -300,7 +300,7 @@ class TestCloudmersiveconvertClientAllOperations:
             assert mock_send.call_args[0][1].startswith(BASE_URL)
 
 
-class TestCloudmersiveconvertClientAllOperationsErrorHandling:
+class TestCloudmersiveConvertClientAllOperationsErrorHandling:
     """Error handling tests that ensure every operation raises ConnectorException."""
 
     @pytest.mark.asyncio
@@ -311,7 +311,7 @@ class TestCloudmersiveconvertClientAllOperationsErrorHandling:
         operation,
     ):
         """Test non-2xx responses raise ConnectorException for every operation."""
-        client = CloudmersiveconvertClient(BASE_URL, credential=mock_credential)
+        client = CloudmersiveConvertClient(BASE_URL, credential=mock_credential)
         mock_response = MockResponse(status=500, text='{"error":"server failure"}')
 
         with patch.object(

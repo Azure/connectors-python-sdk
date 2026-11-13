@@ -1118,7 +1118,7 @@ class Webhook:
         metadata={"wire_name": "idModel"},
     )
     """ID of the model to be monitored (i.e. card,board, etc.)"""
-    callback_u_r_l: Optional[str] = dataclass_field(
+    callback_url: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "callbackURL"},
@@ -1304,7 +1304,7 @@ class ClientSubscription:
     Definition: ClientSubscription
     """
 
-    notification_u_r_l: str = dataclass_field(
+    notification_url: str = dataclass_field(
         metadata={"wire_name": "NotificationURL"},
     )
     """
@@ -1321,7 +1321,7 @@ class SubscriptionResponse:
 
     id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Id of the subscription"""
-    notification_u_r_l: Optional[str] = dataclass_field(
+    notification_url: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "NotificationURL"},
@@ -1667,6 +1667,9 @@ class TrelloClient(ConnectorClientBase):
                 for item in page:
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -1746,6 +1749,9 @@ class TrelloClient(ConnectorClientBase):
                 for item in page:
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2231,6 +2237,9 @@ class TrelloClient(ConnectorClientBase):
                 for item in page:
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2306,6 +2315,9 @@ class TrelloClient(ConnectorClientBase):
                 for item in page:
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2831,6 +2843,9 @@ class TrelloClient(ConnectorClientBase):
                 for item in page:
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2910,6 +2925,9 @@ class TrelloClient(ConnectorClientBase):
                 for item in page:
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -3255,6 +3273,9 @@ class TrelloClient(ConnectorClientBase):
                 for item in page:
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -3334,6 +3355,9 @@ class TrelloClient(ConnectorClientBase):
                 for item in page:
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -3413,6 +3437,9 @@ class TrelloClient(ConnectorClientBase):
                 for item in page:
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -3496,6 +3523,9 @@ class TrelloClient(ConnectorClientBase):
                 for item in page:
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -3640,6 +3670,9 @@ class TrelloClient(ConnectorClientBase):
                 for item in page:
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -3728,6 +3761,9 @@ class TrelloClient(ConnectorClientBase):
                 for item in page:
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)

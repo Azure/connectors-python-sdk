@@ -15,10 +15,10 @@ from aiohttp import web
 from aiohttp.test_utils import TestServer
 from azure.core.credentials import AzureKeyCredential
 
-from azure.connectors.cloudmersiveconvert import CloudmersiveconvertClient
-from azure.connectors.docuware import DocuwareClient
+from azure.connectors.cloudmersive_convert import CloudmersiveConvertClient
+from azure.connectors.docu_ware import DocuWareClient
 from azure.connectors.sdk import ConnectorException, MultipartFile, encode_multipart_form_data
-from azure.connectors.zohosign import ZohosignClient
+from azure.connectors.zoho_sign import ZohoSignClient
 from tests.test_sdk_azure_core_pipeline import RecordingTransport, create_response
 
 
@@ -99,7 +99,7 @@ async def test_generated_docuware_upload_round_trips_filename(file_name: str) ->
     application = web.Application()
     application.router.add_post("/FileCabinets/cabinet/Documents", receive_upload)
     async with TestServer(application) as server:
-        async with DocuwareClient(
+        async with DocuWareClient(
             str(server.make_url("/")),
             AzureKeyCredential("test-key"),
         ) as client:
@@ -146,7 +146,7 @@ async def test_generated_upload_preserves_file_and_binary_response(
         MultipartFile(content, "example.docx", "application/custom")
         if with_metadata else content
     )
-    async with CloudmersiveconvertClient(
+    async with CloudmersiveConvertClient(
         "https://example.test/connection",
         AzureKeyCredential("test-key"),
         transport=transport,
@@ -186,7 +186,7 @@ async def test_generated_docuware_upload_preserves_hidden_default(
     """Send internal defaults while omitting absent optional fields."""
     transport = RecordingTransport(create_response(content=b'{"DocumentId":123}'))
     content = b"\x00\xff"
-    async with DocuwareClient(
+    async with DocuWareClient(
         "https://example.test/connection",
         AzureKeyCredential("test-key"),
         transport=transport,
@@ -221,7 +221,7 @@ async def test_generated_docuware_upload_preserves_hidden_default(
 async def test_generated_zohosign_upload_sends_a_file_part() -> None:
     """Create a Zoho Sign document with a real multipart file request."""
     transport = RecordingTransport(create_response(content=b'{"code":0}'))
-    async with ZohosignClient(
+    async with ZohoSignClient(
         "https://example.test/connection",
         AzureKeyCredential("test-key"),
         transport=transport,
@@ -248,7 +248,7 @@ async def test_generated_multipart_errors_propagate_without_unsafe_retries(statu
         create_response(status, content=b"Upload failed"),
         create_response(content=b"unexpected retry"),
     )
-    async with CloudmersiveconvertClient(
+    async with CloudmersiveConvertClient(
         "https://example.test/connection",
         AzureKeyCredential("test-key"),
         transport=transport,
@@ -264,7 +264,7 @@ async def test_generated_multipart_errors_propagate_without_unsafe_retries(statu
 async def test_generated_upload_rejects_missing_required_file_before_dispatch() -> None:
     """A missing file must not become a text field containing None."""
     transport = RecordingTransport()
-    async with CloudmersiveconvertClient(
+    async with CloudmersiveConvertClient(
         "https://example.test/connection",
         AzureKeyCredential("test-key"),
         transport=transport,

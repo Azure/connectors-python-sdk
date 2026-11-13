@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Per-page parsed and raw responses** — `ConnectorPage` keeps each pager
+  page's parsed envelope in `page_model`, its immutable HTTP response in
+  `raw_response`, and the continuation token, while still yielding individual
+  items through `async for`. Import it from `azure.connectors` or
+  `azure.connectors.sdk` when consuming `by_page()`.
+- **DataFlows SMS alternate GET send** — `send_sms_get` exposes the connector's
+  `GET /sms/send` operation alongside `send_sms` (`POST /sms/send`). The GET
+  send is never retried, including when unsafe retries are explicitly enabled;
+  ordinary `list_sms` GET reads retain standard retry behavior.
+
+- **DataFlows SMS and ServiceNow generated clients** — adds live-Swagger-generated async operations, typed models, trigger metadata where available, lazy package exports, and mocked-transport tests. ServiceNow knowledge search uses the lazy `list_knowledge_articles` pager and yields article items, not the response envelope.
+
 - **Multipart form-data operations** - adds file uploads for Cloudmersive Convert,
   DocuWare, and Zoho Sign, plus DocuWare's bodyless file delete. `MultipartFile`
   preserves filenames and media types; plain bytes use default file metadata.
@@ -23,11 +35,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes
 
+- **Generated Python naming migration** — all 103 clients, the lazy registry and
+  typing stub now expose canonical module, type, model, method and member names.
+  Legacy misspelled imports are not retained. Naming-only changes preserve
+  connection identities, operation IDs, routes, JSON wire fields and enum wire
+  values; see the [migration guide](docs/naming-migration.md).
+- **Reviewed Swagger operation selection** — the current Plumsail client uses
+  nondeprecated revision-2 process execution operations and the revision-2
+  process trigger metadata in place of deprecated revision-1 counterparts.
+  The Azure DevOps (VSTS) client retains the production work-item-details GET
+  but does not expose the Preview variant. These are separate contract changes,
+  not renamed Python identifiers; see the [migration guide](docs/naming-migration.md).
+
 - PdfCo response models use `PdfUnsearchableResponse`, `PdfFromXlsXlsxResponse`,
   and `XlsToCsvResponse`/`XlsToHtmlResponse`/`XlsToJsonResponse`/
   `XlsToTxtResponse`/`XlsToXmlResponse` instead of the corresponding
   `PDFUnSearchableResponse`, `PDFFromXLSXLSXResponse`, and `XLSto*Response`
-  names. Request models, operations, wire fields, and response values are unchanged.
+  names. Matching request types now use `PdfUnsearchableInput`,
+  `PdfFromXlsXlsxInput`, and `XlsToCsvInput`/`XlsToHtmlInput`/
+  `XlsToJsonInput`/`XlsToTxtInput`/`XlsToXmlInput` in place of
+  `PdfUnSearchableInput`, `PdfFromXlsxlsxInput`, and the corresponding
+  `XLSto*Input` spellings. Operations, serialized fields, and response values
+  are unchanged.
 - Plivo model imports now use `Sms` and `SendSmsResponse` instead of `SMS` and
   `SendSMSResponse`. The async `send_sms` operation, its route, and JSON wire
   fields remain unchanged.
@@ -272,7 +301,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Azure Blob Storage** (`azureblob.py`) connector client and samples
 - **IBM MQ** (`mq.py`) connector client and samples
 - **Office 365 Users** (`office365users.py`) connector client and samples
-- Microsoft Graph Groups and Users samples (`sample_connector_usage_msgraphgroupsanduser.py`)
+- Microsoft Graph Groups and Users samples (`sample_connector_usage_ms_graph_groups_and_users.py`)
 
 ### Changed
 

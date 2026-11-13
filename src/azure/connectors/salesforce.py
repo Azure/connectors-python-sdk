@@ -44,8 +44,8 @@ __all__ = [
     "Item",
     "ItemsList",
     "JobInfo",
-    "MCPQueryRequest",
-    "MCPQueryResponse",
+    "McpQueryRequest",
+    "McpQueryResponse",
     "ObjectEntity",
     "ObjectWithoutType",
     "PassThroughNativeQuery",
@@ -56,8 +56,8 @@ __all__ = [
     "PostItemInput",
     "PostItemResponse",
     "Procedure",
-    "SOSLSearchQueryResponse",
     "SearchRecordObject",
+    "SoslSearchQueryResponse",
     "Table",
     "TableCapabilitiesMetadata",
     "TableFilterRestrictionsMetadata",
@@ -346,7 +346,7 @@ class JobInfo:
 
 
 @dataclass
-class SOSLSearchQueryResponse:
+class SoslSearchQueryResponse:
     """
     Response for Execute SOSL search query
     """
@@ -375,7 +375,7 @@ class ObjectWithoutType:
 
 
 @dataclass
-class MCPQueryResponse:
+class McpQueryResponse:
     """
     Response for MCP server for Salesforce
     """
@@ -1070,7 +1070,7 @@ class CloseJobRequest:
 
 
 @dataclass
-class MCPQueryRequest:
+class McpQueryRequest:
     """
     Definition: MCPQueryRequest
     """
@@ -1307,6 +1307,9 @@ class SalesforceClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -1505,6 +1508,9 @@ class SalesforceClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -1629,6 +1635,9 @@ class SalesforceClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -1753,6 +1762,9 @@ class SalesforceClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -1877,6 +1889,9 @@ class SalesforceClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2001,6 +2016,9 @@ class SalesforceClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2125,6 +2143,9 @@ class SalesforceClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2249,6 +2270,9 @@ class SalesforceClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2466,6 +2490,9 @@ class SalesforceClient(ConnectorClientBase):
                 for item in page.get("records", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2880,7 +2907,7 @@ class SalesforceClient(ConnectorClientBase):
 
     async def mcp_salesforce_management(
         self,
-        input: MCPQueryRequest | Mapping[str, Any],
+        input: McpQueryRequest | Mapping[str, Any],
         *,
         session_id: Optional[str] = None,
         timeout: Optional[float] = None,
@@ -3366,6 +3393,9 @@ class SalesforceClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)

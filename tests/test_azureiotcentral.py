@@ -1,13 +1,13 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for AzureiotcentralClient."""
+"""Unit tests for AzureIoTCentralClient."""
 
 import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.azureiotcentral import AzureiotcentralClient
-from azure.connectors.azureiotcentral import (
+from azure.connectors.azure_iot_central import AzureIoTCentralClient
+from azure.connectors.azure_iot_central import (
     Device,
     DeviceCloudProperties,
     DeviceCommand,
@@ -230,23 +230,23 @@ OPERATION_ARGS = {
 ALL_OPERATIONS = sorted(OPERATION_ARGS.keys())
 
 
-async def _invoke_operation(client: AzureiotcentralClient, operation: str):
+async def _invoke_operation(client: AzureIoTCentralClient, operation: str):
     """Invoke an IoT Central operation by name for shared method tests."""
     method = getattr(client, f"{operation}")
     return await resolve_generated_result(method(**OPERATION_ARGS[operation]))
 
 
 def _make_client(credential=None):
-    """Create an AzureiotcentralClient for tests."""
-    return AzureiotcentralClient(BASE_URL, credential=credential)
+    """Create an AzureIoTCentralClient for tests."""
+    return AzureIoTCentralClient(BASE_URL, credential=credential)
 
 
-class TestAzureiotcentralClientInitialization:
-    """Tests for AzureiotcentralClient initialization."""
+class TestAzureIoTCentralClientInitialization:
+    """Tests for AzureIoTCentralClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = AzureiotcentralClient(BASE_URL, AzureKeyCredential("test-key"))
+        client = AzureIoTCentralClient(BASE_URL, AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == BASE_URL
         assert client.connector_name == "azureiotcentral"
@@ -254,7 +254,7 @@ class TestAzureiotcentralClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = AzureiotcentralClient(
+        client = AzureIoTCentralClient(
             BASE_URL + "/", AzureKeyCredential("test-key")
         )
 
@@ -262,13 +262,13 @@ class TestAzureiotcentralClientInitialization:
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = AzureiotcentralClient(BASE_URL, credential=mock_credential)
+        client = AzureIoTCentralClient(BASE_URL, credential=mock_credential)
 
         assert client._http_client._credential is mock_credential
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = AzureiotcentralClient(
+        client = AzureIoTCentralClient(
             BASE_URL,
             credential=mock_credential,
             timeout=60.0,
@@ -279,12 +279,12 @@ class TestAzureiotcentralClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            AzureiotcentralClient("", AzureKeyCredential("test-key"))
+            AzureIoTCentralClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            AzureiotcentralClient(None, AzureKeyCredential("test-key"))
+            AzureIoTCentralClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'azureiotcentral'."""
@@ -293,8 +293,8 @@ class TestAzureiotcentralClientInitialization:
         assert client.connector_name == "azureiotcentral"
 
 
-class TestAzureiotcentralClientLifecycle:
-    """Tests for AzureiotcentralClient lifecycle methods."""
+class TestAzureIoTCentralClientLifecycle:
+    """Tests for AzureIoTCentralClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
@@ -308,17 +308,17 @@ class TestAzureiotcentralClientLifecycle:
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
-        with patch.object(AzureiotcentralClient, "close", new_callable=AsyncMock) as mock_close:
-            async with AzureiotcentralClient(
+        with patch.object(AzureIoTCentralClient, "close", new_callable=AsyncMock) as mock_close:
+            async with AzureIoTCentralClient(
                 BASE_URL,
                 credential=mock_credential,
             ) as client:
-                assert isinstance(client, AzureiotcentralClient)
+                assert isinstance(client, AzureIoTCentralClient)
 
             mock_close.assert_called_once()
 
 
-class TestAzureiotcentralClientMethods:
+class TestAzureIoTCentralClientMethods:
     """Success path tests for representative IoT Central methods."""
 
     @pytest.mark.asyncio
@@ -535,7 +535,7 @@ class TestAzureiotcentralClientMethods:
             assert mock_send.call_args[0][1].startswith(BASE_URL)
 
 
-class TestAzureiotcentralClientErrorHandling:
+class TestAzureIoTCentralClientErrorHandling:
     """Error handling tests that ensure all methods raise ConnectorException."""
 
     @pytest.mark.asyncio
@@ -602,4 +602,4 @@ class TestAzureiotcentralTriggerOperations:
 
     def test_workflow_create_trigger_not_a_client_method(self):
         """Test the trigger route is no longer exposed as a callable client method."""
-        assert not hasattr(AzureiotcentralClient, "workflow_create_trigger_async")
+        assert not hasattr(AzureIoTCentralClient, "workflow_create_trigger_async")

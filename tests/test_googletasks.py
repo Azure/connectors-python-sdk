@@ -1,13 +1,13 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for GoogletasksClient."""
+"""Unit tests for GoogleTasksClient."""
 
 import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.googletasks import GoogletasksClient
-from azure.connectors.googletasks import (
+from azure.connectors.google_tasks import GoogleTasksClient
+from azure.connectors.google_tasks import (
     TRIGGER_OPERATIONS,
     TaskCreate,
     TaskList,
@@ -27,7 +27,7 @@ from tests.generated_connector_test_utils import (
 )
 
 
-async def _invoke_operation(client: GoogletasksClient, operation: str):
+async def _invoke_operation(client: GoogleTasksClient, operation: str):
     """Invoke a Google Tasks operation by name for shared tests."""
     if operation == "list_task_lists":
         return await resolve_generated_result(client.list_task_lists())
@@ -47,12 +47,12 @@ async def _invoke_operation(client: GoogletasksClient, operation: str):
     raise ValueError(f"Unsupported operation '{operation}'.")
 
 
-class TestGoogletasksClientInitialization:
-    """Tests for GoogletasksClient initialization."""
+class TestGoogleTasksClientInitialization:
+    """Tests for GoogleTasksClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = GoogletasksClient(
+        client = GoogleTasksClient(
             "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -61,14 +61,14 @@ class TestGoogletasksClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = GoogletasksClient(
+        client = GoogleTasksClient(
             "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = GoogletasksClient(
+        client = GoogleTasksClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -77,7 +77,7 @@ class TestGoogletasksClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = GoogletasksClient(
+        client = GoogleTasksClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -88,16 +88,16 @@ class TestGoogletasksClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            GoogletasksClient("", AzureKeyCredential("test-key"))
+            GoogleTasksClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            GoogletasksClient(None, AzureKeyCredential("test-key"))
+            GoogleTasksClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'googletasks'."""
-        client = GoogletasksClient(
+        client = GoogleTasksClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -105,13 +105,13 @@ class TestGoogletasksClientInitialization:
         assert client.connector_name == "googletasks"
 
 
-class TestGoogletasksClientLifecycle:
-    """Tests for GoogletasksClient lifecycle methods."""
+class TestGoogleTasksClientLifecycle:
+    """Tests for GoogleTasksClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = GoogletasksClient(
+        client = GoogleTasksClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -123,23 +123,23 @@ class TestGoogletasksClientLifecycle:
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
-        with patch.object(GoogletasksClient, "close", new_callable=AsyncMock) as mock_close:
-            async with GoogletasksClient(
+        with patch.object(GoogleTasksClient, "close", new_callable=AsyncMock) as mock_close:
+            async with GoogleTasksClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential,
             ) as client:
-                assert isinstance(client, GoogletasksClient)
+                assert isinstance(client, GoogleTasksClient)
 
             mock_close.assert_called_once()
 
 
-class TestGoogletasksClientMethods:
+class TestGoogleTasksClientMethods:
     """Success path tests for representative Google Tasks methods."""
 
     @pytest.mark.asyncio
     async def test_list_task_lists_success(self, mock_credential):
         """Test list_task_lists_async returns parsed JSON."""
-        client = GoogletasksClient(
+        client = GoogleTasksClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -162,7 +162,7 @@ class TestGoogletasksClientMethods:
     @pytest.mark.asyncio
     async def test_create_task_list_success(self, mock_credential):
         """Test create_task_list_async sends body and returns parsed JSON."""
-        client = GoogletasksClient(
+        client = GoogleTasksClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -182,7 +182,7 @@ class TestGoogletasksClientMethods:
     @pytest.mark.asyncio
     async def test_create_task_success(self, mock_credential):
         """Test create_task_async corrects the upstream operationId spelling."""
-        client = GoogletasksClient(
+        client = GoogleTasksClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -201,12 +201,12 @@ class TestGoogletasksClientMethods:
 
             assert result["id"] == "task123"
             assert "/lists/list123/tasks" in mock_send.call_args[0][1]
-            assert not hasattr(GoogletasksClient, "craete_task_async")
+            assert not hasattr(GoogleTasksClient, "craete_task_async")
 
     @pytest.mark.asyncio
     async def test_list_task_success(self, mock_credential):
         """Test list_task_async uses list and task identifiers."""
-        client = GoogletasksClient(
+        client = GoogleTasksClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -224,7 +224,7 @@ class TestGoogletasksClientMethods:
             assert "/lists/list123/tasks/task123" in mock_send.call_args[0][1]
 
 
-class TestGoogletasksClientErrorHandling:
+class TestGoogleTasksClientErrorHandling:
     """Error handling tests that ensure all methods raise ConnectorException."""
 
     @pytest.mark.asyncio
@@ -244,7 +244,7 @@ class TestGoogletasksClientErrorHandling:
         operation,
     ):
         """Test non-2xx responses raise ConnectorException for every operation."""
-        client = GoogletasksClient(
+        client = GoogleTasksClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -276,8 +276,8 @@ class TestGoogletasksTriggerOperations:
         assert TRIGGER_OPERATIONS["OnNewTaskInList"]["required_parameters"] == [
             "taskListId"
         ]
-        assert not hasattr(GoogletasksClient, "on_new_task_in_list_async")
-        assert not hasattr(GoogletasksClient, "on_completed_task_in_list_async")
+        assert not hasattr(GoogleTasksClient, "on_new_task_in_list_async")
+        assert not hasattr(GoogleTasksClient, "on_completed_task_in_list_async")
 
 
 class TestGoogletasksTypeSerialization:

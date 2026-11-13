@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for GooglecalendarClient."""
+"""Unit tests for GoogleCalendarClient."""
 
 import inspect
 
@@ -8,8 +8,8 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.googlecalendar import GooglecalendarClient
-from azure.connectors.googlecalendar import (
+from azure.connectors.google_calendar import GoogleCalendarClient
+from azure.connectors.google_calendar import (
     CalendarEventChangedList,
     CalendarEventList,
     CalendarList,
@@ -32,7 +32,7 @@ from tests.generated_connector_test_utils import (
 )
 
 
-async def _invoke_operation(client: GooglecalendarClient, operation: str):
+async def _invoke_operation(client: GoogleCalendarClient, operation: str):
     """Invoke a Google Calendar operation by name for shared tests."""
     if operation == "list_calendars":
         return await resolve_generated_result(
@@ -68,12 +68,12 @@ async def _invoke_operation(client: GooglecalendarClient, operation: str):
     raise ValueError(f"Unsupported operation '{operation}'.")
 
 
-class TestGooglecalendarClientInitialization:
-    """Tests for GooglecalendarClient initialization."""
+class TestGoogleCalendarClientInitialization:
+    """Tests for GoogleCalendarClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = GooglecalendarClient(
+        client = GoogleCalendarClient(
             "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -82,14 +82,14 @@ class TestGooglecalendarClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = GooglecalendarClient(
+        client = GoogleCalendarClient(
             "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = GooglecalendarClient(
+        client = GoogleCalendarClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -98,7 +98,7 @@ class TestGooglecalendarClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = GooglecalendarClient(
+        client = GoogleCalendarClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -109,16 +109,16 @@ class TestGooglecalendarClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            GooglecalendarClient("", AzureKeyCredential("test-key"))
+            GoogleCalendarClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            GooglecalendarClient(None, AzureKeyCredential("test-key"))
+            GoogleCalendarClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'googlecalendar'."""
-        client = GooglecalendarClient(
+        client = GoogleCalendarClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -126,13 +126,13 @@ class TestGooglecalendarClientInitialization:
         assert client.connector_name == "googlecalendar"
 
 
-class TestGooglecalendarClientLifecycle:
-    """Tests for GooglecalendarClient lifecycle methods."""
+class TestGoogleCalendarClientLifecycle:
+    """Tests for GoogleCalendarClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = GooglecalendarClient(
+        client = GoogleCalendarClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -145,26 +145,26 @@ class TestGooglecalendarClientLifecycle:
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(
-            GooglecalendarClient,
+            GoogleCalendarClient,
             "close",
             new_callable=AsyncMock,
         ) as mock_close:
-            async with GooglecalendarClient(
+            async with GoogleCalendarClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential,
             ) as client:
-                assert isinstance(client, GooglecalendarClient)
+                assert isinstance(client, GoogleCalendarClient)
 
             mock_close.assert_called_once()
 
 
-class TestGooglecalendarClientMethods:
+class TestGoogleCalendarClientMethods:
     """Success path tests for representative Google Calendar methods."""
 
     @pytest.mark.asyncio
     async def test_list_calendars_success(self, mock_credential):
         """Test list_calendars_async returns parsed JSON and query params."""
-        client = GooglecalendarClient(
+        client = GoogleCalendarClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -192,7 +192,7 @@ class TestGooglecalendarClientMethods:
     @pytest.mark.asyncio
     async def test_list_events_success(self, mock_credential):
         """Test list_events_async serializes optional query parameters."""
-        client = GooglecalendarClient(
+        client = GoogleCalendarClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -226,7 +226,7 @@ class TestGooglecalendarClientMethods:
     @pytest.mark.asyncio
     async def test_create_event_success(self, mock_credential):
         """Test create_event_async sends request body and returns JSON."""
-        client = GooglecalendarClient(
+        client = GoogleCalendarClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -251,7 +251,7 @@ class TestGooglecalendarClientMethods:
     @pytest.mark.asyncio
     async def test_list_writable_calendars_success(self, mock_credential):
         """Test list_writable_calendars_async includes fixed writer query."""
-        client = GooglecalendarClient(
+        client = GoogleCalendarClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -276,7 +276,7 @@ class TestGooglecalendarClientMethods:
             assert result == [{"ok": True}]
 
 
-class TestGooglecalendarClientErrorHandling:
+class TestGoogleCalendarClientErrorHandling:
     """Error handling tests for all Google Calendar operations."""
 
     @pytest.mark.asyncio
@@ -298,7 +298,7 @@ class TestGooglecalendarClientErrorHandling:
         operation,
     ):
         """Test non-2xx responses raise ConnectorException for every operation."""
-        client = GooglecalendarClient(
+        client = GoogleCalendarClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -342,7 +342,7 @@ class TestGooglecalendarApiSurface:
         }
         actual_signatures = {
             name: tuple(inspect.signature(method).parameters)
-            for name, method in vars(GooglecalendarClient).items()
+            for name, method in vars(GoogleCalendarClient).items()
             if not name.startswith("_")
             and name != "close"
             and callable(method)

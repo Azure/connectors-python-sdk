@@ -49,9 +49,9 @@ __all__ = [
     "NewMemberInListRequest",
     "NewMembersInListRequest",
     "ObjectEntity",
-    "RSSOpts",
     "Recipient",
     "ReportSummary",
+    "RssOpts",
     "Salesforce",
     "Schedule",
     "SegmentOpts",
@@ -202,7 +202,7 @@ class MemberResponseModel:
     email_address: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address for a subscriber"""
     unique_email_id: Optional[str] = dataclass_field(default=None, kw_only=True)
-    """An identifier for the address across all of MailChimp"""
+    """An identifier for the address across all of Mailchimp"""
     email_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Type of email this member asked to get ('html' or 'text')."""
     status: Optional[str] = dataclass_field(default=None, kw_only=True)
@@ -280,7 +280,7 @@ class CampaignResponseModel:
         metadata={"wire_name": "type"},
     )
     """
-    There are four types of campaigns you can create in MailChimp. A/B Split
+    There are four types of campaigns you can create in Mailchimp. A/B Split
     campaigns have been deprecated and variate campaigns should be used instead
     """
     create_time: Optional[str] = dataclass_field(default=None, kw_only=True)
@@ -313,7 +313,7 @@ class CampaignResponseModel:
         kw_only=True,
     )
     tracking: Optional[Tracking | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
-    rss_opts: Optional[RSSOpts | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    rss_opts: Optional[RssOpts | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     ab_split_opts: Optional[
         ABSplitOpts | Mapping[str, Any]
     ] = dataclass_field(
@@ -375,7 +375,7 @@ class VariateSettings:
     manually based on the reporting data you find the most valuable. For
     Multivariate Campaigns testing send_time, winner_criteria is ignored. For
     Multivariate Campaigns with 'manual' as the winner_criteria, the winner
-    must be chosen in the MailChimp web application
+    must be chosen in the Mailchimp web application
     """
     wait_time: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
@@ -453,7 +453,7 @@ class Tracking:
 
 
 @dataclass
-class RSSOpts:
+class RssOpts:
     """
     Definition: RSS_Opts
     """
@@ -606,15 +606,15 @@ class Settings:
     reply_to: str
     """The reply-to email address for the campaign"""
     use_conversation: Optional[bool] = dataclass_field(default=None, kw_only=True)
-    """Use MailChimp Conversation feature to manage out-of-office replies"""
+    """Use Mailchimp Conversation feature to manage out-of-office replies"""
     to_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The campaign's custom 'To' name. Typically the first name merge field"""
     folder_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """If the campaign is listed in a folder, the id for that folder"""
     authenticate: Optional[bool] = dataclass_field(default=None, kw_only=True)
-    """Whether MailChimp authenticated the campaign. Defaults to true"""
+    """Whether Mailchimp authenticated the campaign. Defaults to true"""
     auto_footer: Optional[bool] = dataclass_field(default=None, kw_only=True)
-    """Automatically append MailChimp's default footer to the campaign"""
+    """Automatically append Mailchimp's default footer to the campaign"""
     inline_css: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Automatically inline the CSS included with the campaign content"""
     auto_tweet: Optional[bool] = dataclass_field(default=None, kw_only=True)
@@ -766,7 +766,7 @@ class NewCampaignRequest:
 
     type_: str = dataclass_field(metadata={"wire_name": "type"})
     """
-    There are four types of campaigns you can create in MailChimp. A/B Split
+    There are four types of campaigns you can create in Mailchimp. A/B Split
     campaigns have been deprecated and variate campaigns should be used
     instead. Possible Values: regular, plaintext, absplit, rss, variate
     """
@@ -779,7 +779,7 @@ class NewCampaignRequest:
         kw_only=True,
     )
     tracking: Optional[Tracking | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
-    rss_opts: Optional[RSSOpts | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    rss_opts: Optional[RssOpts | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     social_card: Optional[
         SocialCard | Mapping[str, Any]
     ] = dataclass_field(
@@ -978,13 +978,13 @@ class FirstAndLastName:
     Definition: FirstAndLastName
     """
 
-    f_n_a_m_e: Optional[str] = dataclass_field(
+    fname: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "FNAME"},
     )
     """First name of the subscriber"""
-    l_n_a_m_e: Optional[str] = dataclass_field(
+    lname: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "LNAME"},
@@ -1072,7 +1072,7 @@ class AddUserResponseModel:
     email_address: str
     """Email address for a subscriber"""
     unique_email_id: Optional[str] = dataclass_field(default=None, kw_only=True)
-    """An identifier for the address across all of MailChimp"""
+    """An identifier for the address across all of Mailchimp"""
     email_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Type of email this member asked to get ('html' or 'text')."""
     status: Optional[str] = dataclass_field(default=None, kw_only=True)
@@ -1324,6 +1324,9 @@ class MailchimpClient(ConnectorClientBase):
                 for item in page.get("campaigns", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -1461,7 +1464,7 @@ class MailchimpClient(ConnectorClientBase):
         """
         New List
 
-        Create a new list in your MailChimp account
+        Create a new list in your Mailchimp account
 
         Swagger operation ID: `newlist`.
 

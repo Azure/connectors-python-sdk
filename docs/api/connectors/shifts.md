@@ -1,0 +1,64 @@
+# ShiftsClient
+
+::: azure.connectors.shifts
+    options:
+      members:
+        - ScheduleResponse
+        - ListTimesOffResponse
+        - TimeOffResponse
+        - ListShiftsResponse
+        - ShiftResponse
+        - ListOpenShiftsResponse
+        - OpenShiftResponse
+        - GetTimeOffReasonsResponse
+        - ListSchedulingGroupsResponse
+        - SchedulingGroupResponse
+        - ListTimeOffRequestsResponse
+        - TimeOffRequestResponse
+        - TimeOffRequestApproveInput
+        - TimeOffRequestApproveResponse
+        - TimeOffRequestDeclineInput
+        - TimeOffRequestDeclineResponse
+        - ListOfferShiftRequestsResponse
+        - OfferShiftRequestResponse
+        - OfferShiftRequestApproveInput
+        - OfferShiftRequestApproveResponse
+        - OfferShiftRequestDeclineInput
+        - OfferShiftRequestDeclineResponse
+        - ListSwapShiftsChangeRequestsResponse
+        - SwapShiftsChangeRequestResponse
+        - SwapShiftsChangeRequestApproveInput
+        - SwapShiftsChangeRequestApproveResponse
+        - SwapShiftsChangeRequestDeclineInput
+        - SwapShiftsChangeRequestDeclineResponse
+        - ListOpenShiftChangeRequestsResponse
+        - OpenShiftChangeRequestResponse
+        - OpenShiftChangeRequestApproveInput
+        - OpenShiftChangeRequestApproveResponse
+        - OpenShiftChangeRequestDeclineInput
+        - OpenShiftChangeRequestDeclineResponse
+        - ListOpenShiftsCrossTeamResponse
+        - ListShiftsCrossTeamResponse
+        - ListTimesOffCrossTeamResponse
+        - GetAllTeamsResponse
+        - WebHookRequest
+        - WebhookPushResponse
+        - WebhookNotificationEntity
+        - WebhookPushResponseResourceEntity
+        - Subscription
+        - SharedTimeOff
+        - DraftTimeOff
+        - SharedShift
+        - DraftShift
+        - Theme
+        - Activities
+        - SchedulingGroupInfo
+        - UserInfo
+        - TeamInfo
+        - EditOpenShiftRequest
+        - SharedOpenShift
+        - DraftOpenShift
+        - CreateShiftRequest
+        - CreateTimeOffRequest
+        - ShiftsClient
+        - TRIGGER_OPERATIONS

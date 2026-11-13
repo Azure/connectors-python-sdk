@@ -21,7 +21,10 @@ import pytest
             "dataflows", "DataflowsClient", "list_groups_for_refresh_dataflow",
             "Workspaces or environments",
         ),
-        ("visualstudioteamservices", "VisualstudioteamservicesClient", "list_projects", "Projects"),
+        (
+            "visual_studio_team_services", "VisualStudioTeamServicesClient",
+            "list_projects", "Projects",
+        ),
     ],
     ids=["dataflows", "azure-devops"],
 )
@@ -63,7 +66,7 @@ async def test_sample_prints_collected_items(
     monkeypatch.setattr(
         module, "CONNECTION_RUNTIME_URL", "https://example.azure.com/connections/test",
     )
-    if connector == "visualstudioteamservices":
+    if connector == "visual_studio_team_services":
         monkeypatch.setattr(module, "ORGANIZATION", "organization")
 
     await module.main()
@@ -72,7 +75,7 @@ async def test_sample_prints_collected_items(
     getattr(client, operation).assert_called_once_with(
         **(
             {"account": "organization"}
-            if connector == "visualstudioteamservices"
+            if connector == "visual_studio_team_services"
             else {"workspace_type": "Workspace"}
         )
     )

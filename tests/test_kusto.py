@@ -12,7 +12,7 @@ from azure.connectors.kusto import (
     ControlCommandAndListSchema,
     QueryAndVisualizeSchema,
     CommandAndVisualizeSchema,
-    MCPQueryRequest,
+    McpQueryRequest,
 )
 from azure.connectors.sdk import (
     ConnectorException,
@@ -558,7 +558,7 @@ class TestMCPKustoQueryManagement:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            input_request = MCPQueryRequest(
+            input_request = McpQueryRequest(
                 jsonrpc="2.0",
                 id="1",
                 method="query",
@@ -597,7 +597,7 @@ class TestMCPKustoQueryManagement:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            input_request = MCPQueryRequest(jsonrpc="2.0", id="2", method="init")
+            input_request = McpQueryRequest(jsonrpc="2.0", id="2", method="init")
             result = await client.mcp_kusto_query_management(
                 input_request,
                 session_id="session-123"
@@ -633,7 +633,7 @@ class TestMCPKustoQueryManagement:
             return_value=mock_response
         ) as mock_send:
             await client.mcp_kusto_query_management(
-                MCPQueryRequest(),
+                McpQueryRequest(),
                 session_id="session with spaces"
             )
 
@@ -657,7 +657,7 @@ class TestMCPKustoQueryManagement:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.mcp_kusto_query_management(MCPQueryRequest())
+            result = await client.mcp_kusto_query_management(McpQueryRequest())
 
             assert result is None
 
@@ -681,7 +681,7 @@ class TestMCPKustoQueryManagement:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.mcp_kusto_query_management(MCPQueryRequest())
+                await client.mcp_kusto_query_management(McpQueryRequest())
 
             assert exc_info.value.status_code == 500
 
@@ -743,7 +743,7 @@ class TestDataClasses:
 
     def test_mcp_query_request_creation(self):
         """Test MCPQueryRequest dataclass creation."""
-        request = MCPQueryRequest(
+        request = McpQueryRequest(
             jsonrpc="2.0",
             id="123",
             method="query",

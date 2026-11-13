@@ -1,12 +1,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for CommondataserviceClient."""
+"""Unit tests for CommonDataServiceClient."""
 
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.commondataservice import CommondataserviceClient
-from azure.connectors.commondataservice import (
+from azure.connectors.common_data_service import CommonDataServiceClient
+from azure.connectors.common_data_service import (
     TRIGGER_OPERATIONS,
     AssociateRecordsPatchItemInput,
     ItemsList,
@@ -21,12 +21,12 @@ from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import resolve_generated_result
 
 
-class TestCommondataserviceClientInitialization:
-    """Tests for CommondataserviceClient initialization."""
+class TestCommonDataServiceClientInitialization:
+    """Tests for CommonDataServiceClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = CommondataserviceClient(
+        client = CommonDataServiceClient(
             "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -35,14 +35,14 @@ class TestCommondataserviceClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = CommondataserviceClient(
+        client = CommonDataServiceClient(
             "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = CommondataserviceClient(
+        client = CommonDataServiceClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -51,7 +51,7 @@ class TestCommondataserviceClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = CommondataserviceClient(
+        client = CommonDataServiceClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -62,16 +62,16 @@ class TestCommondataserviceClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            CommondataserviceClient("", AzureKeyCredential("test-key"))
+            CommonDataServiceClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            CommondataserviceClient(None, AzureKeyCredential("test-key"))
+            CommonDataServiceClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'commondataservice'."""
-        client = CommondataserviceClient(
+        client = CommonDataServiceClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -91,13 +91,13 @@ class TestCommondataserviceTypeSerialization:
         }
 
 
-class TestCommondataserviceClientLifecycle:
-    """Tests for CommondataserviceClient lifecycle methods."""
+class TestCommonDataServiceClientLifecycle:
+    """Tests for CommonDataServiceClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = CommondataserviceClient(
+        client = CommonDataServiceClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -110,20 +110,20 @@ class TestCommondataserviceClientLifecycle:
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(
-            CommondataserviceClient, 'close', new_callable=AsyncMock
+            CommonDataServiceClient, 'close', new_callable=AsyncMock
         ) as mock_close:
-            async with CommondataserviceClient(
+            async with CommonDataServiceClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential
             ) as client:
-                assert isinstance(client, CommondataserviceClient)
+                assert isinstance(client, CommonDataServiceClient)
 
             mock_close.assert_called_once()
 
 
 def _make_client(mock_credential):
     """Create a client with a mocked token provider for method tests."""
-    return CommondataserviceClient(
+    return CommonDataServiceClient(
         "https://example.azure.com/connections/test",
         credential=mock_credential,
     )
@@ -427,7 +427,7 @@ class TestGetItems:
         next_link,
     ):
         """Test explicit port zero is validated rather than defaulted."""
-        client = CommondataserviceClient(
+        client = CommonDataServiceClient(
             connection_runtime_url,
             credential=mock_credential,
         )
@@ -458,7 +458,7 @@ class TestGetItems:
         next_link,
     ):
         """Test both continuation and runtime URLs require hostnames."""
-        client = CommondataserviceClient(
+        client = CommonDataServiceClient(
             connection_runtime_url,
             credential=mock_credential,
         )
@@ -1571,4 +1571,4 @@ class TestCommondataserviceTriggerOperations:
         # NOTE(victoriahall): x-ms-trigger routes belong in the TRIGGER_OPERATIONS
         # registry, not on the client. Guards against a regression that re-emits
         # them as callable methods (mirrors the .NET CommondataserviceTriggers split).
-        assert not hasattr(CommondataserviceClient, method_name)
+        assert not hasattr(CommonDataServiceClient, method_name)

@@ -1,15 +1,15 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for TextrequestClient."""
+"""Unit tests for TextRequestClient."""
 
 from unittest.mock import AsyncMock, patch
 
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-import azure.connectors.textrequest as textrequest_module
-from azure.connectors.textrequest import TextrequestClient
-from azure.connectors.textrequest import (
+import azure.connectors.text_request as textrequest_module
+from azure.connectors.text_request import TextRequestClient
+from azure.connectors.text_request import (
     CreateContactInput,
     CreateDashboardInput,
     CreateGroupInput,
@@ -122,12 +122,12 @@ PAGED_OPERATIONS = {
 }
 
 
-class TestTextrequestClientInitialization:
-    """Tests for TextrequestClient initialization."""
+class TestTextRequestClientInitialization:
+    """Tests for TextRequestClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = TextrequestClient(
+        client = TextRequestClient(
             "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -136,14 +136,14 @@ class TestTextrequestClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = TextrequestClient(
+        client = TextRequestClient(
             "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = TextrequestClient(
+        client = TextRequestClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -152,7 +152,7 @@ class TestTextrequestClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = TextrequestClient(
+        client = TextRequestClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -163,16 +163,16 @@ class TestTextrequestClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            TextrequestClient("", AzureKeyCredential("test-key"))
+            TextRequestClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            TextrequestClient(None, AzureKeyCredential("test-key"))
+            TextRequestClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'textrequest'."""
-        client = TextrequestClient(
+        client = TextRequestClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -180,13 +180,13 @@ class TestTextrequestClientInitialization:
         assert client.connector_name == "textrequest"
 
 
-class TestTextrequestClientLifecycle:
-    """Tests for TextrequestClient lifecycle methods."""
+class TestTextRequestClientLifecycle:
+    """Tests for TextRequestClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = TextrequestClient(
+        client = TextRequestClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -198,28 +198,28 @@ class TestTextrequestClientLifecycle:
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
-        with patch.object(TextrequestClient, "close", new_callable=AsyncMock) as mock_close:
-            async with TextrequestClient(
+        with patch.object(TextRequestClient, "close", new_callable=AsyncMock) as mock_close:
+            async with TextRequestClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential,
             ) as client:
-                assert isinstance(client, TextrequestClient)
+                assert isinstance(client, TextRequestClient)
 
             mock_close.assert_called_once()
 
 
-class TestTextrequestClientOperations:
-    """Tests for TextrequestClient operations against expected HTTP calls."""
+class TestTextRequestClientOperations:
+    """Tests for TextRequestClient operations against expected HTTP calls."""
 
     def _make_client(self, mock_credential):
-        return TextrequestClient(
+        return TextRequestClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
 
     def test_all_generated_operations_are_covered(self):
         """Test the expected generated operation surface."""
-        assert get_generated_operations(TextrequestClient) == set(ALL_OPERATIONS)
+        assert get_generated_operations(TextRequestClient) == set(ALL_OPERATIONS)
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
@@ -622,8 +622,8 @@ class TestTextrequestClientOperations:
             assert result == []
 
 
-class TestTextrequestClientErrorHandling:
-    """Error handling tests for TextrequestClient operations."""
+class TestTextRequestClientErrorHandling:
+    """Error handling tests for TextRequestClient operations."""
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
@@ -661,7 +661,7 @@ class TestTextrequestClientErrorHandling:
     )
     async def test_error_response_raises_exception(self, mock_credential, operation):
         """Test non-2xx responses raise ConnectorException for every operation."""
-        client = TextrequestClient(
+        client = TextRequestClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -701,7 +701,7 @@ class TestTextrequestTriggerOperations:
 
     def test_triggers_are_not_client_methods(self):
         """Test trigger operations are not emitted as callable client methods."""
-        assert not hasattr(TextrequestClient, "texting_webhook_async")
+        assert not hasattr(TextRequestClient, "texting_webhook_async")
 
 
 class TestTextrequestTypeSerialization:

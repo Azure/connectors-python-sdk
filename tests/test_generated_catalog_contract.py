@@ -45,6 +45,7 @@ CONNECTOR_MODULE_NAMES = [
 
 SHARED_PACKAGE_EXPORT_NAMES = {
     "ConnectorClientBase",
+    "ConnectorPage",
     "ConnectorException",
     "ConnectorHttpClient",
     "ConnectorResponse",
@@ -55,39 +56,39 @@ SHARED_PACKAGE_EXPORT_NAMES = {
 }
 
 PRIMITIVE_STRING_PAGER_OPERATIONS = [
-    ("azuread", "list_member_groups"),
-    ("eventhubs", "list_consumer_groups"),
-    ("eventhubs", "list_content_types"),
-    ("eventhubs", "list_event_hubs"),
-    ("eventhubs", "list_partition_keys"),
-    ("meetingroommap", "list_categories"),
-    ("msgraphgroupsanduser", "list_member_groups"),
-    ("onedrive", "list_file_tags"),
-    ("servicebus", "list_queues"),
-    ("servicebus", "list_session_options"),
-    ("servicebus", "list_subscriptions"),
-    ("servicebus", "list_system_properties"),
-    ("servicebus", "list_topics"),
+    ('azure_ad', "list_member_groups"),
+    ('event_hubs', "list_consumer_groups"),
+    ('event_hubs', "list_content_types"),
+    ('event_hubs', "list_event_hubs"),
+    ('event_hubs', "list_partition_keys"),
+    ("meeting_room_map", "list_categories"),
+    ("ms_graph_groups_and_users", "list_member_groups"),
+    ('one_drive', "list_file_tags"),
+    ('service_bus', "list_queues"),
+    ('service_bus', "list_session_options"),
+    ('service_bus', "list_subscriptions"),
+    ('service_bus', "list_system_properties"),
+    ('service_bus', "list_topics"),
 ]
 
 EAGER_MUTATION_OPERATIONS = [
-    ("azuread", "check_member_groups"),
+    ('azure_ad', "check_member_groups"),
     ("docusign", "add_recipient_tabs"),
     ("mq", "delete_all"),
     ("mq", "read_all"),
     ("mq", "receive_all"),
-    ("onedrive", "add_file_tag"),
-    ("powerbi", "execute_dataset_query"),
+    ('one_drive', "add_file_tag"),
+    ('power_bi', "execute_dataset_query"),
     ("replicon", "bulk_get_project_details3"),
     ("replicon", "bulk_get_time_entered_summary"),
     ("replicon", "create_task_hierarchy_or_apply_modifications"),
-    ("sendgrid", "add_global_suppression"),
+    ("send_grid", "add_global_suppression"),
     ("yammer", "post_message"),
 ]
 
 NOT_FOUND_CONTRACT_OPERATIONS = [
     ("arm", "deployments_delete", "DELETE", True),
-    ("zohosign", "delete_document", "PUT", False),
+    ("zoho_sign", "delete_document", "PUT", False),
 ]
 
 
@@ -109,7 +110,7 @@ def get_generated_client_type(connector_module: ModuleType) -> type[Any]:
 def test_package_exports_use_only_the_async_root_runtime() -> None:
     """Expose one async runtime without sync or aio namespace duplicates."""
     connector_directory = Path(connectors_package.__file__).parent
-    assert len(CONNECTOR_MODULE_NAMES) == 101
+    assert len(CONNECTOR_MODULE_NAMES) == 103
     for directory in (
         connector_directory,
         connector_directory / "sdk",

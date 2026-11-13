@@ -1,13 +1,13 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for AzuretablesClient."""
+"""Unit tests for AzureTablesClient."""
 
 import json
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.azuretables import AzuretablesClient
-from azure.connectors.azuretables import (
+from azure.connectors.azure_tables import AzureTablesClient
+from azure.connectors.azure_tables import (
     CreateEntityInput,
     InsertEntityResponse,
     CreateTableInput,
@@ -30,12 +30,12 @@ from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import resolve_generated_result
 
 
-class TestAzuretablesClientInitialization:
-    """Tests for AzuretablesClient initialization."""
+class TestAzureTablesClientInitialization:
+    """Tests for AzureTablesClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -44,14 +44,14 @@ class TestAzuretablesClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -60,7 +60,7 @@ class TestAzuretablesClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -71,16 +71,16 @@ class TestAzuretablesClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            AzuretablesClient("", AzureKeyCredential("test-key"))
+            AzureTablesClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            AzuretablesClient(None, AzureKeyCredential("test-key"))
+            AzureTablesClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'azuretables'."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -88,13 +88,13 @@ class TestAzuretablesClientInitialization:
         assert client.connector_name == "azuretables"
 
 
-class TestAzuretablesClientLifecycle:
-    """Tests for AzuretablesClient lifecycle methods."""
+class TestAzureTablesClientLifecycle:
+    """Tests for AzureTablesClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -106,12 +106,12 @@ class TestAzuretablesClientLifecycle:
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
-        with patch.object(AzuretablesClient, 'close', new_callable=AsyncMock) as mock_close:
-            async with AzuretablesClient(
+        with patch.object(AzureTablesClient, 'close', new_callable=AsyncMock) as mock_close:
+            async with AzureTablesClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential
             ) as client:
-                assert isinstance(client, AzuretablesClient)
+                assert isinstance(client, AzureTablesClient)
 
             mock_close.assert_called_once()
 
@@ -122,7 +122,7 @@ class TestCreateEntity:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -156,7 +156,7 @@ class TestCreateEntity:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -186,7 +186,7 @@ class TestCreateTable:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -217,7 +217,7 @@ class TestCreateTable:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -246,7 +246,7 @@ class TestDeleteEntity:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful DELETE request."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -274,7 +274,7 @@ class TestDeleteEntity:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -304,7 +304,7 @@ class TestDeleteTable:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful DELETE request."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -330,7 +330,7 @@ class TestDeleteTable:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -358,7 +358,7 @@ class TestGetEntities:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -391,7 +391,7 @@ class TestGetEntities:
     @pytest.mark.asyncio
     async def test_with_query_parameters(self, mock_credential):
         """Test GET request with query parameters."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -419,7 +419,7 @@ class TestGetEntities:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -447,7 +447,7 @@ class TestGetEntity:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -479,7 +479,7 @@ class TestGetEntity:
     @pytest.mark.asyncio
     async def test_with_select_parameter(self, mock_credential):
         """Test GET request with select parameter."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -507,7 +507,7 @@ class TestGetEntity:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -537,7 +537,7 @@ class TestGetTable:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -567,7 +567,7 @@ class TestGetTable:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -595,7 +595,7 @@ class TestGetTables:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -624,7 +624,7 @@ class TestGetTables:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -645,7 +645,7 @@ class TestGetTables:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -672,7 +672,7 @@ class TestInsertMergeEntity:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful PATCH request (upsert merge)."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -704,7 +704,7 @@ class TestInsertMergeEntity:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -736,7 +736,7 @@ class TestInsertReplaceEntity:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful PUT request (upsert replace)."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -768,7 +768,7 @@ class TestInsertReplaceEntity:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -800,7 +800,7 @@ class TestMergeEntity:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful PATCH request."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -832,7 +832,7 @@ class TestMergeEntity:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -864,7 +864,7 @@ class TestReplaceEntity:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful PUT request."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -896,7 +896,7 @@ class TestReplaceEntity:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1067,7 +1067,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_http_client_property_access(self, mock_credential):
         """Test accessing http_client property."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1078,7 +1078,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_multiple_consecutive_calls(self, mock_credential):
         """Test multiple consecutive API calls."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1103,7 +1103,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_special_characters_in_keys(self, mock_credential):
         """Test handling of special characters in partition/row keys."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1133,7 +1133,7 @@ class TestGetStorageAccounts:
     @pytest.mark.asyncio
     async def test_success_returns_storage_accounts(self, mock_credential):
         """Test successful storage-account discovery."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1163,7 +1163,7 @@ class TestGetStorageAccounts:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test a non-2xx response raises ConnectorException."""
-        client = AzuretablesClient(
+        client = AzureTablesClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1193,7 +1193,7 @@ async def test_entities_continuation_yields_later_entities(
     later_items = [
         {"PartitionKey": "pk", "RowKey": "row-2", "Value": {"count": 2}}
     ]
-    async with AzuretablesClient(
+    async with AzureTablesClient(
         "https://example.azure.com/connections/test",
         credential=mock_credential,
     ) as client:

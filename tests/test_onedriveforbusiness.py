@@ -1,14 +1,14 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for OnedriveforbusinessClient."""
+"""Unit tests for OneDriveForBusinessClient."""
 
 from unittest.mock import AsyncMock, patch
 
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.onedriveforbusiness import OnedriveforbusinessClient
-from azure.connectors.onedriveforbusiness import (
+from azure.connectors.one_drive_for_business import OneDriveForBusinessClient
+from azure.connectors.one_drive_for_business import (
     BlobMetadata,
     BlobMetadataPage,
     ForASelectedFileResponse,
@@ -87,12 +87,12 @@ METHOD_ARGUMENTS: list[tuple[str, dict]] = [
 ]
 
 
-class TestOnedriveforbusinessClientInitialization:
-    """Tests for OnedriveforbusinessClient initialization."""
+class TestOneDriveForBusinessClientInitialization:
+    """Tests for OneDriveForBusinessClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = OnedriveforbusinessClient(
+        client = OneDriveForBusinessClient(
             "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -101,7 +101,7 @@ class TestOnedriveforbusinessClientInitialization:
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = OnedriveforbusinessClient(
+        client = OneDriveForBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -110,7 +110,7 @@ class TestOnedriveforbusinessClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = OnedriveforbusinessClient(
+        client = OneDriveForBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -121,22 +121,22 @@ class TestOnedriveforbusinessClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            OnedriveforbusinessClient("", AzureKeyCredential("test-key"))
+            OneDriveForBusinessClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            OnedriveforbusinessClient(None, AzureKeyCredential(
+            OneDriveForBusinessClient(None, AzureKeyCredential(
                 "test-key"))  # type: ignore[arg-type]
 
 
-class TestOnedriveforbusinessClientLifecycle:
-    """Tests for OnedriveforbusinessClient lifecycle methods."""
+class TestOneDriveForBusinessClientLifecycle:
+    """Tests for OneDriveForBusinessClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = OnedriveforbusinessClient(
+        client = OneDriveForBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -148,23 +148,23 @@ class TestOnedriveforbusinessClientLifecycle:
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
-        with patch.object(OnedriveforbusinessClient, "close", new_callable=AsyncMock) as mock_close:
-            async with OnedriveforbusinessClient(
+        with patch.object(OneDriveForBusinessClient, "close", new_callable=AsyncMock) as mock_close:
+            async with OneDriveForBusinessClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential,
             ) as client:
-                assert isinstance(client, OnedriveforbusinessClient)
+                assert isinstance(client, OneDriveForBusinessClient)
 
             mock_close.assert_called_once()
 
 
-class TestOnedriveforbusinessClientMethods:
+class TestOneDriveForBusinessClientMethods:
     """Tests for representative connector methods."""
 
     @pytest.mark.asyncio
     async def test_get_file_metadata_success(self, mock_credential):
         """Test successful JSON response for file metadata."""
-        client = OnedriveforbusinessClient(
+        client = OneDriveForBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -186,7 +186,7 @@ class TestOnedriveforbusinessClientMethods:
     @pytest.mark.asyncio
     async def test_get_file_content_returns_bytes(self, mock_credential):
         """Test that content endpoints return bytes."""
-        client = OnedriveforbusinessClient(
+        client = OneDriveForBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -216,7 +216,7 @@ class TestOnedriveforbusinessClientMethods:
         mock_credential,
     ):
         """Test that all generated methods raise ConnectorException on HTTP errors."""
-        client = OnedriveforbusinessClient(
+        client = OneDriveForBusinessClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )

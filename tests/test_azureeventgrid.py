@@ -1,13 +1,13 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for AzureeventgridClient."""
+"""Unit tests for AzureEventGridClient."""
 
 import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.azureeventgrid import AzureeventgridClient
-from azure.connectors.azureeventgrid import (
+from azure.connectors.azure_event_grid import AzureEventGridClient
+from azure.connectors.azure_event_grid import (
     EventRequest,
     EventSchema,
     EventTypesResponse,
@@ -24,7 +24,7 @@ from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import model_instance, resolve_generated_result
 
 
-async def _invoke_operation(client: AzureeventgridClient, operation: str):
+async def _invoke_operation(client: AzureEventGridClient, operation: str):
     """Invoke an Event Grid operation by name for shared error-handling tests."""
     return await resolve_generated_result(getattr(client, operation)())
 
@@ -35,12 +35,12 @@ ALL_OPERATIONS = [
 ]
 
 
-class TestAzureeventgridClientInitialization:
-    """Tests for AzureeventgridClient initialization."""
+class TestAzureEventGridClientInitialization:
+    """Tests for AzureEventGridClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = AzureeventgridClient(
+        client = AzureEventGridClient(
             "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -49,14 +49,14 @@ class TestAzureeventgridClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = AzureeventgridClient(
+        client = AzureEventGridClient(
             "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = AzureeventgridClient(
+        client = AzureEventGridClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -65,7 +65,7 @@ class TestAzureeventgridClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = AzureeventgridClient(
+        client = AzureEventGridClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -76,16 +76,16 @@ class TestAzureeventgridClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            AzureeventgridClient("", AzureKeyCredential("test-key"))
+            AzureEventGridClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            AzureeventgridClient(None, AzureKeyCredential("test-key"))
+            AzureEventGridClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'azureeventgrid'."""
-        client = AzureeventgridClient(
+        client = AzureEventGridClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -93,13 +93,13 @@ class TestAzureeventgridClientInitialization:
         assert client.connector_name == "azureeventgrid"
 
 
-class TestAzureeventgridClientLifecycle:
-    """Tests for AzureeventgridClient lifecycle methods."""
+class TestAzureEventGridClientLifecycle:
+    """Tests for AzureEventGridClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = AzureeventgridClient(
+        client = AzureEventGridClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -111,23 +111,23 @@ class TestAzureeventgridClientLifecycle:
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
-        with patch.object(AzureeventgridClient, "close", new_callable=AsyncMock) as mock_close:
-            async with AzureeventgridClient(
+        with patch.object(AzureEventGridClient, "close", new_callable=AsyncMock) as mock_close:
+            async with AzureEventGridClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential,
             ) as client:
-                assert isinstance(client, AzureeventgridClient)
+                assert isinstance(client, AzureEventGridClient)
 
             mock_close.assert_called_once()
 
 
-class TestAzureeventgridClientMethods:
+class TestAzureEventGridClientMethods:
     """Success path tests for Event Grid methods."""
 
     @pytest.mark.asyncio
     async def test_subscriptions_list_success(self, mock_credential):
         """Test subscriptions_list_async returns parsed JSON and targets /subscriptions."""
-        client = AzureeventgridClient(
+        client = AzureEventGridClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -149,7 +149,7 @@ class TestAzureeventgridClientMethods:
     @pytest.mark.asyncio
     async def test_topic_types_list_success(self, mock_credential):
         """Test topic_types_list_async targets the topicTypes endpoint."""
-        client = AzureeventgridClient(
+        client = AzureEventGridClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -171,7 +171,7 @@ class TestAzureeventgridClientMethods:
     @pytest.mark.asyncio
     async def test_topic_types_list_empty_body_returns_empty_page(self, mock_credential):
         """Test topic_types_list_async returns an empty page for an empty body."""
-        client = AzureeventgridClient(
+        client = AzureEventGridClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -188,7 +188,7 @@ class TestAzureeventgridClientMethods:
             assert result == []
 
 
-class TestAzureeventgridClientErrorHandling:
+class TestAzureEventGridClientErrorHandling:
     """Error handling tests that ensure all methods raise ConnectorException."""
 
     @pytest.mark.asyncio
@@ -199,7 +199,7 @@ class TestAzureeventgridClientErrorHandling:
         operation,
     ):
         """Test non-2xx responses raise ConnectorException for every operation."""
-        client = AzureeventgridClient(
+        client = AzureEventGridClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -254,4 +254,4 @@ class TestAzureeventgridTriggerOperations:
 
     def test_create_subscription_not_a_client_method(self):
         """Test the trigger route is no longer exposed as a callable client method."""
-        assert not hasattr(AzureeventgridClient, "create_subscription_async")
+        assert not hasattr(AzureEventGridClient, "create_subscription_async")

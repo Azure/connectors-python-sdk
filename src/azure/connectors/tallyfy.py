@@ -703,7 +703,11 @@ class Asset:
     """
 
     id: Optional[str] = dataclass_field(default=None, kw_only=True)
-    filename: Optional[str] = dataclass_field(default=None, kw_only=True)
+    file_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "filename"},
+    )
     version: Optional[int] = dataclass_field(default=None, kw_only=True)
     step_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     uploaded_from: Optional[str] = dataclass_field(default=None, kw_only=True)
@@ -2976,6 +2980,9 @@ class TallyfyClient(ConnectorClientBase):
                 for item in page.get("data", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)

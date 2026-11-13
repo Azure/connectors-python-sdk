@@ -2068,7 +2068,7 @@ class WhenIndividualCreatedInput:
     """Type Name."""
     secret: str
     """Secret."""
-    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
+    callback_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
     description: str
     """Description."""
@@ -2084,7 +2084,7 @@ class WhenIndividualDeletedInput:
     """Type Name."""
     secret: str
     """Secret."""
-    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
+    callback_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
     description: str
     """Description."""
@@ -2100,7 +2100,7 @@ class WhenIndividualRequestForgottenInput:
     """Type Name."""
     secret: str
     """Secret."""
-    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
+    callback_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
     description: str
     """Description."""
@@ -2120,7 +2120,7 @@ class WhenProductPurchasedInput:
     """Filters."""
     secret: str
     """Secret."""
-    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
+    callback_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
     description: str
     """Description."""
@@ -2136,7 +2136,7 @@ class WhenCommitteeMemberUpdatedInput:
     """Type Name."""
     secret: str
     """Secret."""
-    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
+    callback_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
     description: str
     """Description."""
@@ -2156,7 +2156,7 @@ class WhenPurchaseCancelledInput:
     """Filters."""
     secret: str
     """Secret."""
-    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
+    callback_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
     description: str
     """Description."""
@@ -2172,7 +2172,7 @@ class WhenRequestUpdatedInput:
     """Type Name."""
     secret: str
     """Secret."""
-    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
+    callback_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
     description: str
     """Description."""
@@ -2188,7 +2188,7 @@ class WhenEmailUpdatedInput:
     """Type Name."""
     secret: str
     """Secret."""
-    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
+    callback_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
     description: str
     """Description."""
@@ -2206,7 +2206,7 @@ class WhenCustomerCustomFieldValueUpdatedInput:
     """Filters."""
     secret: str
     """Secret."""
-    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
+    callback_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
     description: str
     """Description."""
@@ -2222,7 +2222,7 @@ class WhenCustomerIsMergedInput:
     """Type Name."""
     secret: str
     """Secret."""
-    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
+    callback_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
     description: str
     """Description."""
@@ -2238,7 +2238,7 @@ class WhenCustomerRelationshipUpdatedInput:
     """Type Name."""
     secret: str
     """Secret."""
-    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
+    callback_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
     description: str
     """Description."""
@@ -2254,7 +2254,7 @@ class WhenCustomerPhoneUpdatedInput:
     """Type Name."""
     secret: str
     """Secret."""
-    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
+    callback_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
     description: str
     """Description."""
@@ -2270,7 +2270,7 @@ class WhenCustomerAddressUpdatedInput:
     """Type Name."""
     secret: str
     """Secret."""
-    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
+    callback_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
     description: str
     """Description."""
@@ -2288,7 +2288,7 @@ class WhenEventRegistrationSubstitutedInput:
     """Filters."""
     secret: str
     """Secret."""
-    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
+    callback_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
     description: str
     """Description."""
@@ -2306,7 +2306,7 @@ class WhenPurchasePaidInput:
     """Filters."""
     secret: str
     """Secret."""
-    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
+    callback_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
     description: str
     """Description."""
@@ -2324,7 +2324,7 @@ class WhenMembershipTerminatedInput:
     """Type Name."""
     secret: str
     """Secret."""
-    call_back_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
+    callback_url: str = dataclass_field(metadata={"wire_name": "callBackUrl"})
     """Callback URL."""
     description: str
     """Description."""
@@ -3269,7 +3269,7 @@ class RelationshipTypeData:
         metadata={"wire_name": "canPurchaseForOrganization"},
     )
     """Can Purchase For Organization."""
-    can_manage_p_a_c: Optional[bool] = dataclass_field(
+    can_manage_pac: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "canManagePAC"},
@@ -5081,6 +5081,9 @@ class ImpexiumClient(ConnectorClientBase):
                 for item in page.get("dataList", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -5209,6 +5212,9 @@ class ImpexiumClient(ConnectorClientBase):
                 for item in page.get("dataList", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -5319,6 +5325,9 @@ class ImpexiumClient(ConnectorClientBase):
                 for item in page.get("dataList", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -5787,6 +5796,9 @@ class ImpexiumClient(ConnectorClientBase):
                 for item in page:
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -5946,6 +5958,9 @@ class ImpexiumClient(ConnectorClientBase):
                 for item in page.get("dataList", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -6121,6 +6136,9 @@ class ImpexiumClient(ConnectorClientBase):
                 for item in page.get("dataList", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -6208,6 +6226,9 @@ class ImpexiumClient(ConnectorClientBase):
                 for item in page.get("dataList", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -6454,6 +6475,9 @@ class ImpexiumClient(ConnectorClientBase):
                 for item in page.get("dataList", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -6597,6 +6621,9 @@ class ImpexiumClient(ConnectorClientBase):
                 for item in page.get("dataList", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -6898,6 +6925,9 @@ class ImpexiumClient(ConnectorClientBase):
                 for item in page.get("dataList", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -6977,6 +7007,9 @@ class ImpexiumClient(ConnectorClientBase):
                 for item in page.get("dataList", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -7799,6 +7832,9 @@ class ImpexiumClient(ConnectorClientBase):
                 for item in page.get("dataList", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -7991,6 +8027,9 @@ class ImpexiumClient(ConnectorClientBase):
                 for item in page.get("dataList", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -8458,6 +8497,9 @@ class ImpexiumClient(ConnectorClientBase):
                 for item in page.get("dataList", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -9741,6 +9783,9 @@ class ImpexiumClient(ConnectorClientBase):
                 for item in page:
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -9825,6 +9870,9 @@ class ImpexiumClient(ConnectorClientBase):
                 for item in page:
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -9984,6 +10032,9 @@ class ImpexiumClient(ConnectorClientBase):
                 for item in page:
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -11746,6 +11797,9 @@ class ImpexiumClient(ConnectorClientBase):
                 for item in page.get("dataList", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)

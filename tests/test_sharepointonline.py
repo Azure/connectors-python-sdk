@@ -1,13 +1,13 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for SharepointonlineClient."""
+"""Unit tests for SharePointOnlineClient."""
 
 import json
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.sharepointonline import SharepointonlineClient
-from azure.connectors.sharepointonline import (
+from azure.connectors.share_point_online import SharePointOnlineClient
+from azure.connectors.share_point_online import (
     PostItemInput,
     PatchItemInput,
     CreateApprovalRequestInput,
@@ -29,12 +29,12 @@ from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import model_instance, resolve_generated_result
 
 
-class TestSharepointonlineClientInitialization:
-    """Tests for SharepointonlineClient initialization."""
+class TestSharePointOnlineClientInitialization:
+    """Tests for SharePointOnlineClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -43,14 +43,14 @@ class TestSharepointonlineClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -59,7 +59,7 @@ class TestSharepointonlineClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -70,16 +70,16 @@ class TestSharepointonlineClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            SharepointonlineClient("", AzureKeyCredential("test-key"))
+            SharePointOnlineClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            SharepointonlineClient(None, AzureKeyCredential("test-key"))
+            SharePointOnlineClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'sharepointonline'."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -87,13 +87,13 @@ class TestSharepointonlineClientInitialization:
         assert client.connector_name == "sharepointonline"
 
 
-class TestSharepointonlineClientLifecycle:
-    """Tests for SharepointonlineClient lifecycle methods."""
+class TestSharePointOnlineClientLifecycle:
+    """Tests for SharePointOnlineClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -105,12 +105,12 @@ class TestSharepointonlineClientLifecycle:
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
-        with patch.object(SharepointonlineClient, 'close', new_callable=AsyncMock) as mock_close:
-            async with SharepointonlineClient(
+        with patch.object(SharePointOnlineClient, 'close', new_callable=AsyncMock) as mock_close:
+            async with SharePointOnlineClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential
             ) as client:
-                assert isinstance(client, SharepointonlineClient)
+                assert isinstance(client, SharePointOnlineClient)
 
             mock_close.assert_called_once()
 
@@ -121,7 +121,7 @@ class TestGetAllTables:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request with dataset parameter."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -153,7 +153,7 @@ class TestGetAllTables:
     @pytest.mark.asyncio
     async def test_dataset_url_encoding(self, mock_credential):
         """Test that dataset URL is properly encoded."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -180,7 +180,7 @@ class TestGetAllTables:
     @pytest.mark.asyncio
     async def test_empty_response_returns_empty_page(self, mock_credential):
         """Test that an empty paged response returns no items."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -201,7 +201,7 @@ class TestGetAllTables:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -233,7 +233,7 @@ class TestFileOperations:
     @pytest.mark.asyncio
     async def test_create_file_success(self, mock_credential):
         """Test successful file creation."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -268,7 +268,7 @@ class TestFileOperations:
     @pytest.mark.asyncio
     async def test_get_file_metadata(self, mock_credential):
         """Test getting file metadata."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -296,7 +296,7 @@ class TestFileOperations:
     @pytest.mark.asyncio
     async def test_update_file(self, mock_credential):
         """Test updating file."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -326,7 +326,7 @@ class TestFileOperations:
     @pytest.mark.asyncio
     async def test_delete_file(self, mock_credential):
         """Test deleting file."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -351,7 +351,7 @@ class TestFileOperations:
     @pytest.mark.asyncio
     async def test_get_file_content(self, mock_credential):
         """Test getting file content."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -378,7 +378,7 @@ class TestFileOperations:
     @pytest.mark.asyncio
     async def test_create_file_error_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -407,7 +407,7 @@ class TestFileOperations:
     @pytest.mark.asyncio
     async def test_get_file_metadata_error_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -434,7 +434,7 @@ class TestFileOperations:
     @pytest.mark.asyncio
     async def test_delete_file_error_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -465,7 +465,7 @@ class TestFolderOperations:
     @pytest.mark.asyncio
     async def test_create_new_folder(self, mock_credential):
         """Test creating new folder."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -493,7 +493,7 @@ class TestFolderOperations:
     @pytest.mark.asyncio
     async def test_get_folder_metadata(self, mock_credential):
         """Test getting folder metadata."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -519,7 +519,7 @@ class TestFolderOperations:
     @pytest.mark.asyncio
     async def test_create_folder_error_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -548,7 +548,7 @@ class TestFolderOperations:
     @pytest.mark.asyncio
     async def test_get_folder_metadata_error_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -579,7 +579,7 @@ class TestItemOperations:
     @pytest.mark.asyncio
     async def test_get_items(self, mock_credential):
         """Test getting list items."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -606,7 +606,7 @@ class TestItemOperations:
     @pytest.mark.asyncio
     async def test_post_item(self, mock_credential):
         """Test creating list item."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -636,7 +636,7 @@ class TestItemOperations:
     @pytest.mark.asyncio
     async def test_get_item(self, mock_credential):
         """Test getting single list item."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -664,7 +664,7 @@ class TestItemOperations:
     @pytest.mark.asyncio
     async def test_patch_item(self, mock_credential):
         """Test updating list item."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -695,7 +695,7 @@ class TestItemOperations:
     @pytest.mark.asyncio
     async def test_delete_item(self, mock_credential):
         """Test deleting list item."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -721,7 +721,7 @@ class TestItemOperations:
     @pytest.mark.asyncio
     async def test_get_items_error_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -748,7 +748,7 @@ class TestItemOperations:
     @pytest.mark.asyncio
     async def test_post_item_error_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -776,7 +776,7 @@ class TestItemOperations:
     @pytest.mark.asyncio
     async def test_delete_item_error_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -808,7 +808,7 @@ class TestSharingOperations:
     @pytest.mark.asyncio
     async def test_create_sharing_link(self, mock_credential):
         """Test creating sharing link."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -837,7 +837,7 @@ class TestSharingOperations:
     @pytest.mark.asyncio
     async def test_grant_access(self, mock_credential):
         """Test granting access to item."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -850,7 +850,7 @@ class TestSharingOperations:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            from azure.connectors.sharepointonline import ItemGrantAccessBody
+            from azure.connectors.share_point_online import ItemGrantAccessBody
             input_data = model_instance(ItemGrantAccessBody)
             result = await client.grant_access(
                 input_data,
@@ -866,7 +866,7 @@ class TestSharingOperations:
     @pytest.mark.asyncio
     async def test_create_sharing_link_error_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -895,7 +895,7 @@ class TestSharingOperations:
     @pytest.mark.asyncio
     async def test_grant_access_error_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -928,7 +928,7 @@ class TestCopyMoveOperations:
     @pytest.mark.asyncio
     async def test_copy_file(self, mock_credential):
         """Test copying file."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -960,7 +960,7 @@ class TestCopyMoveOperations:
     @pytest.mark.asyncio
     async def test_copy_file_async_route_is_preserved(self, mock_credential):
         """Test the current copy-file route uses its typed request body."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1008,7 +1008,7 @@ class TestCopyMoveOperations:
         mock_credential,
     ):
         """Test the current copy-file route raises on a non-success response."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1038,7 +1038,7 @@ class TestCopyMoveOperations:
     @pytest.mark.asyncio
     async def test_move_file(self, mock_credential):
         """Test moving file."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1054,7 +1054,7 @@ class TestCopyMoveOperations:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            from azure.connectors.sharepointonline import MoveFileParameters
+            from azure.connectors.share_point_online import MoveFileParameters
             input_data = model_instance(MoveFileParameters)
             result = await client.move_file(
                 input_data,
@@ -1066,7 +1066,7 @@ class TestCopyMoveOperations:
     @pytest.mark.asyncio
     async def test_copy_folder(self, mock_credential):
         """Test copying folder."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1090,7 +1090,7 @@ class TestCopyMoveOperations:
     @pytest.mark.asyncio
     async def test_copy_file_error_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1118,7 +1118,7 @@ class TestCopyMoveOperations:
     @pytest.mark.asyncio
     async def test_move_file_error_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1149,7 +1149,7 @@ class TestApprovalOperations:
     @pytest.mark.asyncio
     async def test_create_approval_request(self, mock_credential):
         """Test creating approval request."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1179,7 +1179,7 @@ class TestApprovalOperations:
     @pytest.mark.asyncio
     async def test_set_approval_status(self, mock_credential):
         """Test setting approval status."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1204,7 +1204,7 @@ class TestApprovalOperations:
     @pytest.mark.asyncio
     async def test_create_approval_request_error_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1234,7 +1234,7 @@ class TestApprovalOperations:
     @pytest.mark.asyncio
     async def test_set_approval_status_error_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1281,7 +1281,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_multiple_consecutive_calls(self, mock_credential):
         """Test multiple consecutive API calls work correctly."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1311,7 +1311,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_json_parse_error_raises_exception(self, mock_credential):
         """Test that invalid JSON in response raises an error."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1334,7 +1334,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_url_construction_with_multiple_trailing_slashes(self):
         """Test URL construction handles multiple trailing slashes."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test///",
             credential=AzureKeyCredential("test-key")
         )
@@ -1343,7 +1343,7 @@ class TestEdgeCases:
 
     def test_http_client_property_access(self, mock_credential):
         """Test that http_client property is accessible."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1354,7 +1354,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_dataset_with_special_characters(self, mock_credential):
         """Test handling of dataset URLs with special characters."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1379,7 +1379,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_server_error_raises_exception(self, mock_credential):
         """Test that 500 error raises ConnectorException."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1411,7 +1411,7 @@ class TestCheckInOutOperations:
     @pytest.mark.asyncio
     async def test_check_out_file(self, mock_credential):
         """Test checking out a file."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1437,7 +1437,7 @@ class TestCheckInOutOperations:
     @pytest.mark.asyncio
     async def test_check_in_file(self, mock_credential):
         """Test checking in a file."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1465,7 +1465,7 @@ class TestCheckInOutOperations:
     @pytest.mark.asyncio
     async def test_discard_check_out(self, mock_credential):
         """Test discarding a file check-out."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1491,7 +1491,7 @@ class TestCheckInOutOperations:
     @pytest.mark.asyncio
     async def test_check_out_file_error_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1523,7 +1523,7 @@ class TestAttachmentOperations:
     @pytest.mark.asyncio
     async def test_get_item_attachments(self, mock_credential):
         """Test getting attachments for a list item."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1552,7 +1552,7 @@ class TestAttachmentOperations:
     @pytest.mark.asyncio
     async def test_create_attachment(self, mock_credential):
         """Test creating an attachment."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1586,7 +1586,7 @@ class TestAttachmentOperations:
     @pytest.mark.asyncio
     async def test_delete_attachment(self, mock_credential):
         """Test deleting an attachment."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1612,7 +1612,7 @@ class TestAttachmentOperations:
     @pytest.mark.asyncio
     async def test_get_attachment_content(self, mock_credential):
         """Test getting attachment content."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1641,7 +1641,7 @@ class TestAttachmentOperations:
     @pytest.mark.asyncio
     async def test_create_attachment_error_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1675,7 +1675,7 @@ class TestSearchOperations:
     @pytest.mark.asyncio
     async def test_search_for_user(self, mock_credential):
         """Test searching for a user."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1703,7 +1703,7 @@ class TestSearchOperations:
     @pytest.mark.asyncio
     async def test_search_for_user_error_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1736,7 +1736,7 @@ class TestFileItemOperations:
     @pytest.mark.asyncio
     async def test_get_file_item(self, mock_credential):
         """Test getting file item properties."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1763,7 +1763,7 @@ class TestFileItemOperations:
     @pytest.mark.asyncio
     async def test_patch_file_item(self, mock_credential):
         """Test updating file item properties."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1794,7 +1794,7 @@ class TestFileItemOperations:
     @pytest.mark.asyncio
     async def test_unshare_item(self, mock_credential):
         """Test unsharing an item."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1820,7 +1820,7 @@ class TestFileItemOperations:
     @pytest.mark.asyncio
     async def test_get_file_item_error_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1852,7 +1852,7 @@ class TestMoveFolderOperations:
     @pytest.mark.asyncio
     async def test_move_folder(self, mock_credential):
         """Test moving a folder."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1879,7 +1879,7 @@ class TestMoveFolderOperations:
     @pytest.mark.asyncio
     async def test_move_folder_error_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1911,8 +1911,8 @@ class TestTriggerOperations:
         """Test polling triggers are metadata-only operations."""
         assert "GetOnNewItems" in TRIGGER_OPERATIONS
         assert "GetOnUpdatedItems" in TRIGGER_OPERATIONS
-        assert not hasattr(SharepointonlineClient, "get_on_new_items_async")
-        assert not hasattr(SharepointonlineClient, "get_on_updated_items_async")
+        assert not hasattr(SharePointOnlineClient, "get_on_new_items_async")
+        assert not hasattr(SharePointOnlineClient, "get_on_updated_items_async")
 
 
 class TestGeneratedContractSurface:
@@ -1920,7 +1920,7 @@ class TestGeneratedContractSurface:
 
     def test_day_of_week_discovery_is_generated(self):
         """Test day-of-week option discovery is callable."""
-        assert hasattr(SharepointonlineClient, "get_day_of_week_options")
+        assert hasattr(SharePointOnlineClient, "get_day_of_week_options")
 
 
 class TestByPathOperations:
@@ -1929,7 +1929,7 @@ class TestByPathOperations:
     @pytest.mark.asyncio
     async def test_get_file_metadata_by_path(self, mock_credential):
         """Test getting file metadata by path."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1956,7 +1956,7 @@ class TestByPathOperations:
     @pytest.mark.asyncio
     async def test_get_file_content_by_path(self, mock_credential):
         """Test getting file content by path."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1983,7 +1983,7 @@ class TestByPathOperations:
     @pytest.mark.asyncio
     async def test_get_folder_metadata_by_path(self, mock_credential):
         """Test getting folder metadata by path."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -2009,7 +2009,7 @@ class TestByPathOperations:
     @pytest.mark.asyncio
     async def test_get_file_metadata_by_path_error_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = SharepointonlineClient(
+        client = SharePointOnlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )

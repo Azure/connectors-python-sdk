@@ -211,7 +211,7 @@ BASE_URL = "https://example.azure.com/connections/test"
 
 IMMEDIATE_OPERATION_ARGS = {
     "flow_v1_documents_flow_schema_add_watermark_to_pdf": {"type_": "test"},
-    "flow_v1_documents_flow_schema_parse_csv": {"headers_parameter": "test"},
+    "flow_v1_documents_flow_schema_parse_csv_body": {"input": "csv body"},
     "flow_v1_documents_flow_schema_reg_exp_match": {"pattern": "test"},
     "flow_v1_documents_flow_schema_split_pdf": {"type_": "test"},
     "flow_v1_documents_jobs_add_watermark_to_pdf": {"input": {}, "type_": "test"},
@@ -251,14 +251,23 @@ IMMEDIATE_OPERATION_ARGS = {
     "flow_v1_documents_jobs_split_pdf_v2": {"input": {}, "type_": "test"},
     "flow_v1_documents_jobs_xls2_xlsx": {"input": {}},
     "flow_v1_documents_jobs_xslx2_pdf": {"input": {}},
-    "flow_v1_processes_flow_jobs_execute_process": {"input": {}, "process_id": "test"},
-    "flow_v1_processes_flow_jobs_execute_process_with_generated_data": {
+    "flow_v1_processes_flow_jobs_execute_process_v2": {
+        "input": {}, "process_id": "test", "output_files_as": "array",
+    },
+    "flow_v1_processes_flow_jobs_execute_process_with_generated_data_multiple_outputs": {
         "input": {},
         "process_id": "test",
+        "output_files_as": "array",
     },
     "flow_v1_processes_flow_schema_get_json_data": {"process_id": "test"},
-    "flow_v1_processes_flow_schema_get_processes": {},
-    "flow_v1_processes_flow_triggers_by_process_id_schema_get": {"process_id": "test"},
+    "flow_v1_processes_flow_schema_get_user_processes": {},
+    "flow_v1_processes_flow_schema_get_start_process_output_files_as": {},
+    "flow_v1_processes_flow_schema_get_start_process_output_schema": {
+        "process_id": "test", "output_files_as": "array",
+    },
+    "flow_v1_processes_flow_triggers_by_process_id_schema_v2_get": {
+        "process_id": "test", "output_files_as": "array",
+    },
     "profiles_me_get": {},
 }
 
@@ -339,12 +348,13 @@ class TestPlumsailTriggerOperations:
 
     def test_processes_flow_triggers_registered_as_trigger(self):
         """Test the processes flow triggers route is registered as a trigger operation."""
-        assert "FlowV1ProcessesFlowTriggersPost" in TRIGGER_OPERATIONS
-        trigger = TRIGGER_OPERATIONS["FlowV1ProcessesFlowTriggersPost"]
+        assert "FlowV1ProcessesFlowTriggersV2Post" in TRIGGER_OPERATIONS
+        trigger = TRIGGER_OPERATIONS["FlowV1ProcessesFlowTriggersV2Post"]
 
-        assert trigger["operation_id"] == "FlowV1ProcessesFlowTriggersPost"
+        assert trigger["operation_id"] == "FlowV1ProcessesFlowTriggersV2Post"
         assert trigger["method"] == "post"
-        assert trigger["path"].endswith("/flow/v1/ProcessesFlow/triggers")
+        assert trigger["path"].endswith("/flow/v1/ProcessesFlow/triggers/v2")
+        assert "FlowV1ProcessesFlowTriggersPost" not in TRIGGER_OPERATIONS
 
     def test_processes_flow_triggers_not_a_client_method(self):
         """Test the trigger route is no longer exposed as a callable client method."""

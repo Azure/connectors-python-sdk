@@ -8,6 +8,7 @@ import ast
 import importlib
 import inspect
 from pathlib import Path
+from urllib.parse import parse_qs, urlsplit
 from types import ModuleType
 from typing import Any, get_args, get_origin, get_type_hints
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -70,9 +71,19 @@ EXPECTED_LRO_OPERATIONS = {
         "begin_flow_v1_documents_jobs_split_pdf_v2",
         "begin_flow_v1_documents_jobs_xls2_xlsx",
         "begin_flow_v1_documents_jobs_xslx2_pdf",
-        "begin_flow_v1_processes_flow_jobs_execute_process",
-        "begin_flow_v1_processes_flow_jobs_execute_process_with_generated_data",
+        "begin_flow_v1_processes_flow_jobs_execute_process_v2",
+        "begin_flow_v1_processes_flow_jobs_execute_process_with_generated_data_multiple_outputs",
     },
+}
+
+
+PLUMSAIL_V2_PROCESS_ROUTES = {
+    "begin_flow_v1_processes_flow_jobs_execute_process_v2": (
+        "/flow/v1/ProcessesFlow/jobs/ExecuteProcessV2"
+    ),
+    "begin_flow_v1_processes_flow_jobs_execute_process_with_generated_data_multiple_outputs": (
+        "/flow/v1/ProcessesFlow/jobs/ExecuteProcessWithGeneratedDataMultipleOutputs"
+    ),
 }
 
 
@@ -111,8 +122,8 @@ def get_lro_operations(client_type: type[Any]) -> set[str]:
 
 
 def test_generated_lro_inventory_uses_async_root_pollers() -> None:
-    """Keep the retained 44-operation LRO surface exact across all 101 clients."""
-    assert len(CONNECTOR_MODULE_NAMES) == 101
+    """Keep the retained 44-operation LRO surface exact across all 103 clients."""
+    assert len(CONNECTOR_MODULE_NAMES) == 103
 
     for module_name in CONNECTOR_MODULE_NAMES:
         root_module = importlib.import_module(f"azure.connectors.{module_name}")
@@ -135,6 +146,12 @@ def test_generated_lro_inventory_uses_async_root_pollers() -> None:
             ), operation_name
 
     assert sum(map(len, EXPECTED_LRO_OPERATIONS.values())) == 44
+    assert not {
+        "begin_flow_v1_processes_flow_jobs_execute_process",
+        "begin_flow_v1_processes_flow_jobs_execute_process_with_generated_data",
+    } & get_generated_operations(
+        get_generated_client_type(importlib.import_module("azure.connectors.plumsail"))
+    )
 
 
 def test_generated_lro_operations_use_only_location_polling() -> None:
@@ -238,6 +255,15 @@ async def test_generated_lro_follows_location_and_preserves_controls(
                     assert result == {"ok": True}
 
         assert send.await_count == send.call_count == 2
+        if module_name == "plumsail" and operation_name in PLUMSAIL_V2_PROCESS_ROUTES:
+            method, initial_url = send.await_args_list[0].args
+            assert method == "POST"
+            assert urlsplit(initial_url).path.endswith(
+                PLUMSAIL_V2_PROCESS_ROUTES[operation_name]
+            )
+            assert parse_qs(urlsplit(initial_url).query) == {
+                "processId": ["value"], "outputFilesAs": ["value"],
+            }
         assert send.await_args_list[1].args == (
             "GET", "https://example.azure.com/connections/test/jobs/42",
         )

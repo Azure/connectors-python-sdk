@@ -1,0 +1,47 @@
+# WdatpClient
+
+::: azure.connectors.wdatp
+    options:
+      members:
+        - AdvancedHuntingInput
+        - AdvancedHuntingResponse
+        - CreateAlertByReferenceInput
+        - Alert
+        - GetAlertsResponse
+        - PatchAlertInput
+        - InitiateInvestigationInput
+        - InitiateInvestigationResponse
+        - StartInvestigationInput
+        - Investigation
+        - MachineAction
+        - CancelSingleMachineActionInput
+        - GetLiveResponseDownloadLinkResponse
+        - GetMachineActionsResponse
+        - FileStats
+        - DomainStats
+        - IpStats
+        - GetInvestigationsResponse
+        - CollectInvestigationPackageInput
+        - GetInvestigationPackageUriResponse
+        - IsolateMachineInput
+        - UnisolateMachineInput
+        - RestrictAppExecutionInput
+        - UnrestrictAppExecutionInput
+        - RunAntivirusScanInput
+        - RunLiveResponseInput
+        - GetRemediationActivitiesResponse
+        - RemediationActivity
+        - GetRemediationActivityMachineListResponse
+        - GetMachinesResponse
+        - Machine
+        - MachineTagInput
+        - WebHookSubscriptionTableEntity
+        - OnNewRemediationActivityResponse
+        - AdvancedHuntingSchemaInput
+        - AdvancedHuntingSchemaResponse
+        - LiveResponseCommandStatus
+        - LiveResponseCommand
+        - WebHookSubscriptionRequest
+        - WebHookNotification
+        - WdatpClient
+        - TRIGGER_OPERATIONS

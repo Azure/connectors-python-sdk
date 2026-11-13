@@ -1,0 +1,46 @@
+# GitHubClient
+
+::: azure.connectors.git_hub
+    options:
+      members:
+        - IssueDetailsModel
+        - MultipleFetchModel
+        - ActionsPublicKey
+        - RepositoryDetails
+        - GitReference
+        - PullRequestMergeResult
+        - PullRequest
+        - PullRequestFile
+        - CommitComparison
+        - WebhookCreationResponse
+        - Milestone
+        - UserDetailsModel
+        - GeneralApiModel
+        - MultipleSearchFetchModel
+        - IssueBasicDetailsModel
+        - SingleSearchFetchModel
+        - IssueUpdateModel
+        - MilestoneUpdateModel
+        - Verification
+        - GitUser
+        - GraphQlQuery
+        - DiffEntry
+        - Commit
+        - RepositoryDispatchEvent
+        - CreateRepositorySecretRequest
+        - CreateRepositoryUsingTemplateRequest
+        - LicenseDetails
+        - RepositoryMiniDetails
+        - CreateReferenceRequest
+        - PullRequestCreateRequest
+        - PullRequestMergeRequest
+        - PullRequestUpdateRequest
+        - Label
+        - TeamDetails
+        - Link
+        - WebhookPullRequestResponse
+        - WebhookRequestBody
+        - RequestReviewersBody
+        - QueryRequest
+        - GitHubClient
+        - TRIGGER_OPERATIONS

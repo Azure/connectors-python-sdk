@@ -25,6 +25,8 @@ from azure.connectors.sdk import (
 
 __all__ = [
     "TeamsClient",
+    "AIInsightCollectionResponse",
+    "AIInsightResponse",
     "Activities",
     "AddMemberToChannelInput",
     "AddMemberToChatInput",
@@ -33,12 +35,10 @@ __all__ = [
     "AddMemberToTeamInput",
     "AddSectionItemInput",
     "AiInsightActionItem",
-    "AiInsightCollectionResponse",
     "AiInsightDetailResponse",
     "AiInsightMeetingNote",
     "AiInsightMeetingNoteSubpoint",
     "AiInsightMentionEvent",
-    "AiInsightResponse",
     "AiInsightViewpoint",
     "AiInsightWebhookResponseSchema",
     "ArchiveChannelInput",
@@ -1520,7 +1520,7 @@ class GetTagMembersResponseSchema:
 
 
 @dataclass
-class AiInsightCollectionResponse:
+class AIInsightCollectionResponse:
     """
     Response for List AI insights
     """
@@ -1531,7 +1531,7 @@ class AiInsightCollectionResponse:
         metadata={"wire_name": "@odata.context"},
     )
     value: Optional[
-        List[AiInsightResponse | Mapping[str, Any]]
+        List[AIInsightResponse | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -3815,7 +3815,7 @@ class ChannelJoinedUserWebhookResponseSchema:
 
 
 @dataclass
-class AiInsightResponse:
+class AIInsightResponse:
     """
     Definition: AiInsightResponse
     """
@@ -4252,6 +4252,9 @@ class TeamsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -4329,6 +4332,9 @@ class TeamsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -4427,6 +4433,9 @@ class TeamsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -4779,6 +4788,9 @@ class TeamsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -4868,6 +4880,9 @@ class TeamsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -5088,6 +5103,9 @@ class TeamsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -5257,6 +5275,9 @@ class TeamsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -5354,6 +5375,9 @@ class TeamsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -5693,6 +5717,9 @@ class TeamsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -5902,6 +5929,9 @@ class TeamsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -6879,6 +6909,9 @@ class TeamsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -7089,6 +7122,9 @@ class TeamsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -7289,6 +7325,9 @@ class TeamsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -7632,6 +7671,9 @@ class TeamsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -7947,6 +7989,9 @@ class TeamsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -8342,6 +8387,9 @@ class TeamsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -8482,6 +8530,9 @@ class TeamsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -8685,6 +8736,9 @@ class TeamsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -8927,6 +8981,9 @@ class TeamsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -9042,6 +9099,9 @@ class TeamsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -9127,6 +9187,9 @@ class TeamsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -9278,6 +9341,9 @@ class TeamsClient(ConnectorClientBase):
                 for item in page.get("locations", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)

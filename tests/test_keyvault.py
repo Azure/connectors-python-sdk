@@ -1,12 +1,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for KeyvaultClient."""
+"""Unit tests for KeyVaultClient."""
 
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.keyvault import KeyvaultClient
-from azure.connectors.keyvault import (
+from azure.connectors.key_vault import KeyVaultClient
+from azure.connectors.key_vault import (
     KeyMetadataCollection,
     KeyMetadata,
     KeyEncryptOutput,
@@ -23,12 +23,12 @@ from azure.connectors.sdk import (
 from tests.conftest import MockResponse
 
 
-class TestKeyvaultClientInitialization:
-    """Tests for KeyvaultClient initialization."""
+class TestKeyVaultClientInitialization:
+    """Tests for KeyVaultClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = KeyvaultClient(
+        client = KeyVaultClient(
             "https://example.azure.com/connections/test",
             AzureKeyCredential("test-key"),
         )
@@ -43,7 +43,7 @@ class TestKeyvaultClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = KeyvaultClient(
+        client = KeyVaultClient(
             "https://example.azure.com/connections/test/",
             AzureKeyCredential("test-key"),
         )
@@ -54,7 +54,7 @@ class TestKeyvaultClientInitialization:
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = KeyvaultClient(
+        client = KeyVaultClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -63,7 +63,7 @@ class TestKeyvaultClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = KeyvaultClient(
+        client = KeyVaultClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -76,18 +76,18 @@ class TestKeyvaultClientInitialization:
         with pytest.raises(
             ValueError, match="connection_runtime_url cannot be None or empty"
         ):
-            KeyvaultClient("", AzureKeyCredential("test-key"))
+            KeyVaultClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(
             ValueError, match="connection_runtime_url cannot be None or empty"
         ):
-            KeyvaultClient(None, AzureKeyCredential("test-key"))
+            KeyVaultClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'keyvault'."""
-        client = KeyvaultClient(
+        client = KeyVaultClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -95,13 +95,13 @@ class TestKeyvaultClientInitialization:
         assert client.connector_name == "keyvault"
 
 
-class TestKeyvaultClientLifecycle:
-    """Tests for KeyvaultClient lifecycle methods."""
+class TestKeyVaultClientLifecycle:
+    """Tests for KeyVaultClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = KeyvaultClient(
+        client = KeyVaultClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -116,13 +116,13 @@ class TestKeyvaultClientLifecycle:
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
         with patch.object(
-            KeyvaultClient, 'close', new_callable=AsyncMock
+            KeyVaultClient, 'close', new_callable=AsyncMock
         ) as mock_close:
-            async with KeyvaultClient(
+            async with KeyVaultClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential
             ) as client:
-                assert isinstance(client, KeyvaultClient)
+                assert isinstance(client, KeyVaultClient)
 
             mock_close.assert_called_once()
 
@@ -139,7 +139,7 @@ class TestListKeysAsync:
         )
         mock_response = MockResponse(status=200, text=response_json)
 
-        client = KeyvaultClient(
+        client = KeyVaultClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -163,7 +163,7 @@ class TestListKeysAsync:
         """Test empty response returns an empty page."""
         mock_response = MockResponse(status=200, text='')
 
-        client = KeyvaultClient(
+        client = KeyVaultClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -185,7 +185,7 @@ class TestListKeysAsync:
             text='{"error": {"code": "Forbidden", "message": "Access denied"}}'
         )
 
-        client = KeyvaultClient(
+        client = KeyVaultClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -211,7 +211,7 @@ class TestListKeyVersionsAsync:
         response_json = '{"value": [{"version": "v1"}, {"version": "v2"}]}'
         mock_response = MockResponse(status=200, text=response_json)
 
-        client = KeyvaultClient(
+        client = KeyVaultClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -247,7 +247,7 @@ class TestGetKeyMetadataAsync:
         )
         mock_response = MockResponse(status=200, text=response_json)
 
-        client = KeyvaultClient(
+        client = KeyVaultClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -272,7 +272,7 @@ class TestGetKeyMetadataAsync:
         """Test that error response raises ConnectorException."""
         mock_response = MockResponse(status=404, text='{"error": "Not found"}')
 
-        client = KeyvaultClient(
+        client = KeyVaultClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -298,7 +298,7 @@ class TestGetKeyVersionMetadataAsync:
         response_json = '{"name": "mykey", "version": "v1", "is_enabled": true}'
         mock_response = MockResponse(status=200, text=response_json)
 
-        client = KeyvaultClient(
+        client = KeyVaultClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -330,7 +330,7 @@ class TestEncryptDataAsync:
         response_json = '{"encrypted_data": "base64encodeddata=="}'
         mock_response = MockResponse(status=200, text=response_json)
 
-        client = KeyvaultClient(
+        client = KeyVaultClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -366,7 +366,7 @@ class TestEncryptDataAsync:
             text='{"error": "Invalid algorithm"}'
         )
 
-        client = KeyvaultClient(
+        client = KeyVaultClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -400,7 +400,7 @@ class TestEncryptDataWithVersionAsync:
         response_json = '{"encrypted_data": "encryptedwithv1=="}'
         mock_response = MockResponse(status=200, text=response_json)
 
-        client = KeyvaultClient(
+        client = KeyVaultClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -438,7 +438,7 @@ class TestDecryptDataAsync:
         response_json = '{"raw_data": "Hello, World!"}'
         mock_response = MockResponse(status=200, text=response_json)
 
-        client = KeyvaultClient(
+        client = KeyVaultClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -476,7 +476,7 @@ class TestDecryptDataWithVersionAsync:
         response_json = '{"raw_data": "Decrypted data"}'
         mock_response = MockResponse(status=200, text=response_json)
 
-        client = KeyvaultClient(
+        client = KeyVaultClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -514,7 +514,7 @@ class TestListSecretsAsync:
         response_json = '{"value": [{"name": "secret1"}, {"name": "secret2"}]}'
         mock_response = MockResponse(status=200, text=response_json)
 
-        client = KeyvaultClient(
+        client = KeyVaultClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -538,7 +538,7 @@ class TestListSecretsAsync:
         """Test that error response raises ConnectorException."""
         mock_response = MockResponse(status=403, text='{"error": "Forbidden"}')
 
-        client = KeyvaultClient(
+        client = KeyVaultClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -564,7 +564,7 @@ class TestListSecretVersionsAsync:
         response_json = '{"value": [{"version": "v1"}, {"version": "v2"}]}'
         mock_response = MockResponse(status=200, text=response_json)
 
-        client = KeyvaultClient(
+        client = KeyVaultClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -600,7 +600,7 @@ class TestGetSecretMetadataAsync:
         )
         mock_response = MockResponse(status=200, text=response_json)
 
-        client = KeyvaultClient(
+        client = KeyVaultClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -632,7 +632,7 @@ class TestGetSecretVersionMetadataAsync:
         response_json = '{"name": "mysecret", "version": "v1", "is_enabled": true}'
         mock_response = MockResponse(status=200, text=response_json)
 
-        client = KeyvaultClient(
+        client = KeyVaultClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -667,7 +667,7 @@ class TestGetSecretAsync:
         )
         mock_response = MockResponse(status=200, text=response_json)
 
-        client = KeyvaultClient(
+        client = KeyVaultClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -692,7 +692,7 @@ class TestGetSecretAsync:
         """Test that error response raises ConnectorException."""
         mock_response = MockResponse(status=404, text='{"error": "Not found"}')
 
-        client = KeyvaultClient(
+        client = KeyVaultClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -718,7 +718,7 @@ class TestGetSecretVersionAsync:
         response_json = '{"value": "secretvaluev1", "name": "mysecret"}'
         mock_response = MockResponse(status=200, text=response_json)
 
-        client = KeyvaultClient(
+        client = KeyVaultClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )

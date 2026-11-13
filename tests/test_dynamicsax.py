@@ -1,13 +1,13 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for DynamicsaxClient."""
+"""Unit tests for DynamicsAXClient."""
 
 import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.dynamicsax import DynamicsaxClient
-from azure.connectors.dynamicsax import (
+from azure.connectors.dynamics_ax import DynamicsAXClient
+from azure.connectors.dynamics_ax import (
     AxOnlineProcedureResult,
     BusinessEventSubscription,
     BusinessEventSubscriptionResponse,
@@ -79,7 +79,7 @@ NO_JSON_OPERATIONS = {"delete_item"}
 ALL_OPERATIONS = sorted(OPERATION_ARGS.keys())
 
 
-async def _invoke_operation(client: DynamicsaxClient, operation: str):
+async def _invoke_operation(client: DynamicsAXClient, operation: str):
     """Invoke a Dynamics AX operation by name for shared parametrized tests."""
     return await resolve_generated_result(
         getattr(client, f"{operation}")(**OPERATION_ARGS[operation])
@@ -88,15 +88,15 @@ async def _invoke_operation(client: DynamicsaxClient, operation: str):
 
 def _make_client(credential=None):
     """Create a client for testing."""
-    return DynamicsaxClient(BASE_URL, credential=credential)
+    return DynamicsAXClient(BASE_URL, credential=credential)
 
 
-class TestDynamicsaxClientInitialization:
-    """Tests for DynamicsaxClient initialization."""
+class TestDynamicsAXClientInitialization:
+    """Tests for DynamicsAXClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = DynamicsaxClient(BASE_URL, AzureKeyCredential("test-key"))
+        client = DynamicsAXClient(BASE_URL, AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == BASE_URL
         assert client.connector_name == "dynamicsax"
@@ -104,7 +104,7 @@ class TestDynamicsaxClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = DynamicsaxClient(BASE_URL + "/", AzureKeyCredential("test-key"))
+        client = DynamicsAXClient(BASE_URL + "/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == BASE_URL
 
@@ -116,7 +116,7 @@ class TestDynamicsaxClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = DynamicsaxClient(
+        client = DynamicsAXClient(
             BASE_URL,
             credential=mock_credential,
             timeout=60.0,
@@ -127,12 +127,12 @@ class TestDynamicsaxClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            DynamicsaxClient("", AzureKeyCredential("test-key"))
+            DynamicsAXClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            DynamicsaxClient(None, AzureKeyCredential("test-key"))
+            DynamicsAXClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'dynamicsax'."""
@@ -141,8 +141,8 @@ class TestDynamicsaxClientInitialization:
         assert client.connector_name == "dynamicsax"
 
 
-class TestDynamicsaxClientLifecycle:
-    """Tests for DynamicsaxClient lifecycle methods."""
+class TestDynamicsAXClientLifecycle:
+    """Tests for DynamicsAXClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
@@ -156,14 +156,14 @@ class TestDynamicsaxClientLifecycle:
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
-        with patch.object(DynamicsaxClient, "close", new_callable=AsyncMock) as mock_close:
+        with patch.object(DynamicsAXClient, "close", new_callable=AsyncMock) as mock_close:
             async with _make_client(credential=mock_credential) as client:
-                assert isinstance(client, DynamicsaxClient)
+                assert isinstance(client, DynamicsAXClient)
 
             mock_close.assert_called_once()
 
 
-class TestDynamicsaxClientMethods:
+class TestDynamicsAXClientMethods:
     """Success path tests for Dynamics AX methods."""
 
     @pytest.mark.asyncio
@@ -347,7 +347,7 @@ class TestDynamicsaxClientMethods:
             assert result is None
 
 
-class TestDynamicsaxClientErrorHandling:
+class TestDynamicsAXClientErrorHandling:
     """Error handling tests that ensure all methods raise ConnectorException."""
 
     @pytest.mark.asyncio
@@ -411,4 +411,4 @@ class TestDynamicsaxTriggerOperations:
 
     def test_subscribe_on_a_business_event_not_a_client_method(self):
         """Test the trigger route is no longer exposed as a callable client method."""
-        assert not hasattr(DynamicsaxClient, "subscribe_on_a_business_event_async")
+        assert not hasattr(DynamicsAXClient, "subscribe_on_a_business_event_async")

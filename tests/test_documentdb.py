@@ -1,12 +1,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for DocumentdbClient."""
+"""Unit tests for DocumentDBClient."""
 
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.documentdb import DocumentdbClient
-from azure.connectors.documentdb import (
+from azure.connectors.document_db import DocumentDBClient
+from azure.connectors.document_db import (
     PostDocumentsResponse,
     CreateStoredProcedureInput,
     CreateStoredProcedureResponse,
@@ -42,12 +42,12 @@ from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import resolve_generated_result
 
 
-class TestDocumentdbClientInitialization:
-    """Tests for DocumentdbClient initialization."""
+class TestDocumentDBClientInitialization:
+    """Tests for DocumentDBClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = DocumentdbClient("https://example.azure.com/connections/test",
+        client = DocumentDBClient("https://example.azure.com/connections/test",
                                   AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -56,14 +56,14 @@ class TestDocumentdbClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = DocumentdbClient(
+        client = DocumentDBClient(
             "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = DocumentdbClient(
+        client = DocumentDBClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -72,7 +72,7 @@ class TestDocumentdbClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = DocumentdbClient(
+        client = DocumentDBClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -83,16 +83,16 @@ class TestDocumentdbClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            DocumentdbClient("", AzureKeyCredential("test-key"))
+            DocumentDBClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            DocumentdbClient(None, AzureKeyCredential("test-key"))
+            DocumentDBClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'documentdb'."""
-        client = DocumentdbClient(
+        client = DocumentDBClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -100,13 +100,13 @@ class TestDocumentdbClientInitialization:
         assert client.connector_name == "documentdb"
 
 
-class TestDocumentdbClientLifecycle:
-    """Tests for DocumentdbClient lifecycle methods."""
+class TestDocumentDBClientLifecycle:
+    """Tests for DocumentDBClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = DocumentdbClient(
+        client = DocumentDBClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -118,12 +118,12 @@ class TestDocumentdbClientLifecycle:
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
-        with patch.object(DocumentdbClient, 'close', new_callable=AsyncMock) as mock_close:
-            async with DocumentdbClient(
+        with patch.object(DocumentDBClient, 'close', new_callable=AsyncMock) as mock_close:
+            async with DocumentDBClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential
             ) as client:
-                assert isinstance(client, DocumentdbClient)
+                assert isinstance(client, DocumentDBClient)
 
             mock_close.assert_called_once()
 
@@ -134,7 +134,7 @@ class TestQueryDocuments:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = DocumentdbClient(
+        client = DocumentDBClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -165,7 +165,7 @@ class TestQueryDocuments:
     @pytest.mark.asyncio
     async def test_with_query_text(self, mock_credential):
         """Test GET request with query text parameter."""
-        client = DocumentdbClient(
+        client = DocumentDBClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -195,7 +195,7 @@ class TestQueryDocuments:
     @pytest.mark.asyncio
     async def test_with_partition_key(self, mock_credential):
         """Test GET request with partition key parameter."""
-        client = DocumentdbClient(
+        client = DocumentDBClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -222,7 +222,7 @@ class TestQueryDocuments:
     @pytest.mark.asyncio
     async def test_with_public_query_parameters(self, mock_credential):
         """Test GET request with public query parameters."""
-        client = DocumentdbClient(
+        client = DocumentDBClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -261,7 +261,7 @@ class TestQueryDocuments:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = DocumentdbClient(
+        client = DocumentDBClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -286,7 +286,7 @@ class TestQueryDocuments:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
-        client = DocumentdbClient(
+        client = DocumentDBClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -309,7 +309,7 @@ class TestQueryDocuments:
     @pytest.mark.asyncio
     async def test_unauthorized_raises_exception(self, mock_credential):
         """Test that 401 unauthorized raises ConnectorException."""
-        client = DocumentdbClient(
+        client = DocumentDBClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -338,7 +338,7 @@ class TestListDocuments:
     @pytest.mark.asyncio
     async def test_ignores_auxiliary_metadata_array(self, mock_credential):
         """Test the pager yields documents rather than auxiliary metadata."""
-        client = DocumentdbClient(
+        client = DocumentDBClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -663,7 +663,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_http_client_property_access(self, mock_credential):
         """Test accessing http_client property."""
-        client = DocumentdbClient(
+        client = DocumentDBClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -674,7 +674,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_multiple_consecutive_calls(self, mock_credential):
         """Test multiple consecutive API calls."""
-        client = DocumentdbClient(
+        client = DocumentDBClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -703,7 +703,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_special_characters_in_ids(self, mock_credential):
         """Test handling of special characters in database/container IDs."""
-        client = DocumentdbClient(
+        client = DocumentDBClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )

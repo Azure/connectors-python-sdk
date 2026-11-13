@@ -13,7 +13,7 @@ from .exceptions import ConnectorException
 from .http_client import ConnectorHttpClient, ConnectorResponse
 from .multipart import MultipartFile, encode_multipart_form_data
 from .polling import ConnectorPollingMethod
-from .response import ConnectorResponseHook, ConnectorResponseSnapshot
+from .response import ConnectorPage, ConnectorResponseHook, ConnectorResponseSnapshot
 from .trigger_payload import TriggerCallbackPayload, TriggerCallbackBody
 
 __version__ = "0.1.0"
@@ -24,6 +24,7 @@ __all__ = [
     "ConnectorHttpClient",
     "ConnectorPollingMethod",
     "ConnectorResponse",
+    "ConnectorPage",
     "ConnectorResponseHook",
     "ConnectorResponseSnapshot",
     "MultipartFile",

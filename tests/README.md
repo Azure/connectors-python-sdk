@@ -59,6 +59,28 @@ Generated connector tests should cover:
 - Trigger metadata without exposing trigger routes as client methods.
 - Request and response model serialization, including wire-name mappings.
 
+For new clients, assert the outgoing Azure Core request body, not only that a
+model serializes. `test_catalog_parity_clients.py` covers ServiceNow dynamic
+record fields, order parameters, raw file bytes and parsed multipart parts.
+Its article-search tests also check lazy pager creation and empty or populated
+item results; a passing catalog inventory alone does not prove these contracts.
+
+### Catalog parity review lessons
+
+| Finding and original input | Observed coverage gap | Fix and regression |
+| --- | --- | --- |
+| [Article pager review](https://github.com/Azure/connectors-python-sdk/pull/114#discussion_r4529486933), PR head `25415290`, live `GetArticlesResponse` with `meta` and `articles` | The generator's primary-collection names omitted `articles`; the SDK tests never consumed this operation. | Fix the generator and regenerate the complete ServiceNow module. SDK tests must fail on the old client and check lazy creation, empty bodies, empty envelopes and populated article results. Generator controls retain eager mutation and DELETE results. |
+| [Write/upload review](https://github.com/Azure/connectors-python-sdk/pull/114#discussion_r4529487024), same head | Generic catalog coverage checked only that the serialized body was non-null, not the outgoing request. | Assert exact model/mapping JSON for create, update and order; exact raw bytes for binary upload; and parsed MIME field names, bytes, filename and content type for multipart upload. These checks use synthetic transport responses, not live connector actions. |
+| [Setup/sample index review](https://github.com/Azure/connectors-python-sdk/pull/114#pullrequestreview-5861172942), head `c19186c`; the omission also existed at `25415290` | The sample validator checked executable APIs, not the setup list, advertised sample count or documentation rows. | Update both indexes. Three regression cases check the actual sample-file inventory, both canonical API names and the environment variables read by each new sample. All three failed before the documentation fix and passed afterward; the combined sample/client suite passed 188 tests. |
+
+Local replay on 2026-11-11: all four article cases failed against the original
+client; all 23 focused client cases passed after regeneration, including nine
+new write/upload cases. The full SDK suite passed 5,368 tests. The generator's
+read case failed before the fix while its two eager-response controls passed;
+all 1,125 generator check-in tests passed after the fix. David Burg owns this
+PR's review follow-up. These results prove the mocked contracts, not live
+ServiceNow action behavior.
+
 ## Writing Tests
 
 ### Test Organization

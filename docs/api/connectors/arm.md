@@ -1,0 +1,53 @@
+# ArmClient
+
+::: azure.connectors.arm
+    options:
+      members:
+        - LocationListResult
+        - Subscription
+        - SubscriptionListResult
+        - DeploymentExtended
+        - DeploymentValidateResult
+        - DeploymentExportResult
+        - DeploymentListResult
+        - DeploymentOperation
+        - DeploymentOperationsListResult
+        - Provider
+        - ProviderListResult
+        - ResourceListResult
+        - ResourceGroup
+        - ResourceGroupExportResult
+        - ResourceGroupListResult
+        - GenericResource
+        - ResourcesInvokeInput
+        - ResourcesInvokeResponse
+        - ProviderResourcesInvokeInput
+        - ProviderResourcesInvokeResponse
+        - TagValue
+        - TagDetails
+        - TagsListResult
+        - Location
+        - SubscriptionPolicies
+        - TemplateLink
+        - ParametersLink
+        - DeploymentProperties
+        - DebugSetting
+        - Deployment
+        - ResourceManagementErrorWithDetails
+        - AliasPathType
+        - AliasType
+        - ProviderResourceType
+        - BasicDependency
+        - Dependency
+        - DeploymentPropertiesExtended
+        - Plan
+        - Sku
+        - Identity
+        - ResourceGroupProperties
+        - ExportTemplateRequest
+        - TagCount
+        - TargetResource
+        - HttpMessage
+        - DeploymentOperationProperties
+        - ObjectWithoutType
+        - ArmClient

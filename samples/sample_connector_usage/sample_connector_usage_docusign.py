@@ -1,11 +1,11 @@
 """
-DocuSign sample for the Azure Connectors Python SDK
+Docusign sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the DocuSign client from the Azure Connectors Python SDK.
+This sample demonstrates how to use the Docusign client from the Azure Connectors Python SDK.
 
 Prerequisites:
-1. Azure subscription with DocuSign connection
-2. DocuSign connection in Connector Namespaces
+1. Azure subscription with Docusign connection
+2. Docusign connection in Connector Namespaces
 3. Connection runtime URL from Azure Portal
 
 Installation:
@@ -33,7 +33,7 @@ CONNECTION_RUNTIME_URL = os.environ.get("DOCUSIGN_CONNECTION_URL", "")
 
 
 async def example_1_get_login_accounts() -> list[dict]:
-    """Example 1: Get available DocuSign accounts."""
+    """Example 1: Get available Docusign accounts."""
     print("\n=== Example 1: Get Login Accounts ===")
 
     async with DefaultAzureCredential() as credential:
@@ -74,7 +74,7 @@ async def main() -> None:
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("DocuSign sample usage for the Azure Connectors Python SDK")
+    print("Docusign sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:

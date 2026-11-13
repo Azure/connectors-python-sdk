@@ -23,6 +23,9 @@ contract. There is no synchronous mirror or separate aio catalog.
 - Read-collection operations return `AsyncItemPaged`. This includes bounded read collections
   without a continuation-link contract. Arrays returned by mutations and other
   actions remain eager operation payloads.
+  ServiceNow knowledge search yields the `articles` array through
+  `list_knowledge_articles`; the `meta` object is not an item. Its Swagger
+  declares no continuation link, so iteration makes one request.
 - Dataclasses, type aliases, enums, and `TRIGGER_OPERATIONS` are declared in
   the root connector module alongside the async client.
 - Swagger-required dataclass properties are required constructor arguments;

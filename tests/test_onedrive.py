@@ -1,14 +1,14 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for OnedriveClient."""
+"""Unit tests for OneDriveClient."""
 
 from urllib.parse import urlparse
 from unittest.mock import AsyncMock, patch
 
 import pytest
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.onedrive import OnedriveClient
-from azure.connectors.onedrive import (
+from azure.connectors.one_drive import OneDriveClient
+from azure.connectors.one_drive import (
     BlobMetadata,
     BlobMetadataPage,
     SharingLink,
@@ -22,12 +22,12 @@ from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import resolve_generated_result
 
 
-class TestOnedriveClientInitialization:
-    """Tests for OnedriveClient initialization."""
+class TestOneDriveClientInitialization:
+    """Tests for OneDriveClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = OnedriveClient("https://example.azure.com/connections/test",
+        client = OneDriveClient("https://example.azure.com/connections/test",
                                 AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -36,14 +36,14 @@ class TestOnedriveClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = OnedriveClient("https://example.azure.com/connections/test/",
+        client = OneDriveClient("https://example.azure.com/connections/test/",
                                 AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -52,7 +52,7 @@ class TestOnedriveClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -63,16 +63,16 @@ class TestOnedriveClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            OnedriveClient("", AzureKeyCredential("test-key"))
+            OneDriveClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            OnedriveClient(None, AzureKeyCredential("test-key"))
+            OneDriveClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'onedrive'."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -80,13 +80,13 @@ class TestOnedriveClientInitialization:
         assert client.connector_name == "onedrive"
 
 
-class TestOnedriveClientLifecycle:
-    """Tests for OnedriveClient lifecycle methods."""
+class TestOneDriveClientLifecycle:
+    """Tests for OneDriveClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -98,12 +98,12 @@ class TestOnedriveClientLifecycle:
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
-        with patch.object(OnedriveClient, 'close', new_callable=AsyncMock) as mock_close:
-            async with OnedriveClient(
+        with patch.object(OneDriveClient, 'close', new_callable=AsyncMock) as mock_close:
+            async with OneDriveClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential
             ) as client:
-                assert isinstance(client, OnedriveClient)
+                assert isinstance(client, OneDriveClient)
 
             mock_close.assert_called_once()
 
@@ -114,7 +114,7 @@ class TestGetFileMetadata:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -141,7 +141,7 @@ class TestGetFileMetadata:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -161,7 +161,7 @@ class TestGetFileMetadata:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -186,7 +186,7 @@ class TestGetFileContent:
     @pytest.mark.asyncio
     async def test_success_returns_binary_content(self, mock_credential):
         """Test successful GET request returns binary content."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -212,7 +212,7 @@ class TestGetFileContent:
     @pytest.mark.asyncio
     async def test_with_infer_content_type_parameter(self, mock_credential):
         """Test GET request with inferContentType parameter."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -237,7 +237,7 @@ class TestGetFileContent:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -262,7 +262,7 @@ class TestGetFileContentByPath:
     @pytest.mark.asyncio
     async def test_success_returns_binary_content(self, mock_credential):
         """Test successful GET request returns binary content."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -290,7 +290,7 @@ class TestGetFileContentByPath:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -315,7 +315,7 @@ class TestCreateFile:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -348,7 +348,7 @@ class TestCreateFile:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -377,7 +377,7 @@ class TestUpdateFile:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful PUT request."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -408,7 +408,7 @@ class TestUpdateFile:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -436,7 +436,7 @@ class TestDeleteFile:
     @pytest.mark.asyncio
     async def test_success_returns_none(self, mock_credential):
         """Test successful DELETE request."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -459,7 +459,7 @@ class TestDeleteFile:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -484,7 +484,7 @@ class TestCopyFile:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -516,7 +516,7 @@ class TestCopyFile:
     @pytest.mark.asyncio
     async def test_with_overwrite_parameter(self, mock_credential):
         """Test POST request with overwrite parameter."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -541,7 +541,7 @@ class TestCopyFile:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -569,7 +569,7 @@ class TestCopyDriveFile:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -600,7 +600,7 @@ class TestCopyDriveFile:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -628,7 +628,7 @@ class TestMoveFile:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -659,7 +659,7 @@ class TestMoveFile:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -687,7 +687,7 @@ class TestListFolder:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -719,7 +719,7 @@ class TestListRootFolder:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -753,7 +753,7 @@ class TestFindFiles:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -791,7 +791,7 @@ class TestCreateShareLink:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -826,7 +826,7 @@ class TestGetFileTags:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -859,7 +859,7 @@ class TestAddFileTag:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -895,7 +895,7 @@ class TestRemoveFileTag:
     @pytest.mark.asyncio
     async def test_success_returns_none(self, mock_credential):
         """Test successful DELETE request."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -926,7 +926,7 @@ class TestGetFileThumbnail:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -961,7 +961,7 @@ class TestConvertFile:
     @pytest.mark.asyncio
     async def test_success_returns_binary_content(self, mock_credential):
         """Test successful GET request returns binary content."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -995,7 +995,7 @@ class TestExtractFolder:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1089,7 +1089,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_special_characters_in_path(self, mock_credential):
         """Test handling of special characters in file paths."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1113,7 +1113,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_multiple_consecutive_calls(self, mock_credential):
         """Test multiple consecutive API calls."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1135,7 +1135,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_http_client_property_access(self, mock_credential):
         """Test that http_client property is accessible."""
-        client = OnedriveClient(
+        client = OneDriveClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )

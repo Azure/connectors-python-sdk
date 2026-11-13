@@ -19,6 +19,9 @@ Type-safe Python clients for [Azure connectors](https://learn.microsoft.com/conn
 >
 > We welcome feedback and contributions — please [open an issue](https://github.com/Azure/connectors-python-sdk/issues) with questions, suggestions, or bug reports.
 
+For existing preview users, see [generated Python naming migration](docs/naming-migration.md)
+for renamed imports, types, members, and unchanged connection identities.
+
 ## Why This SDK?
 
 Azure provides a rich ecosystem of [managed connectors](https://learn.microsoft.com/connectors/connector-reference/) that bridge your code to SaaS services, PaaS resources, and on-premises systems. Originally powering Azure Logic Apps and Power Automate, these connectors are now available as **standalone, strongly-typed Python clients** for any Python application — no workflow service required.
@@ -105,14 +108,14 @@ async def send_email_example():
 ```python
 from azure.identity.aio import DefaultAzureCredential
 
-from azure.connectors.sharepointonline import SharepointonlineClient
+from azure.connectors.share_point_online import SharePointOnlineClient
 
 
 async def list_sharepoint_items():
     connection_url = "https://example.azure.com/connections/sharepointonline"
 
     async with DefaultAzureCredential() as credential:
-        async with SharepointonlineClient(connection_url, credential) as client:
+        async with SharePointOnlineClient(connection_url, credential) as client:
             items = [
                 item
                 async for item in client.list_items(
@@ -192,13 +195,13 @@ type. The client sends file bytes in MIME parts, not as JSON or base64.
 ```python
 from azure.identity.aio import DefaultAzureCredential
 
-from azure.connectors.cloudmersiveconvert import CloudmersiveconvertClient
+from azure.connectors.cloudmersive_convert import CloudmersiveConvertClient
 from azure.connectors.sdk import MultipartFile
 
 
 async def convert_file(connection_url: str, file_content: bytes) -> bytes:
     async with DefaultAzureCredential() as credential:
-        async with CloudmersiveconvertClient(connection_url, credential) as client:
+        async with CloudmersiveConvertClient(connection_url, credential) as client:
             return await client.convert_document_autodetect_to_pdf(
                 MultipartFile(file_content, "source.doc", "application/msword")
             )
@@ -241,108 +244,110 @@ The following connectors have been generated and validated with comprehensive te
 | Connector | Package | Status | Coverage |
 |-----------|---------|--------|----------|
 | **ARM (Azure Resource Manager)** | `azure.connectors.arm` | ✅ Complete | 🔄 SDK Generated |
-| **Azure AD** | `azure.connectors.azuread` | ✅ Complete | 🔄 SDK Generated |
-| **Azure Automation** | `azure.connectors.azureautomation` | ✅ Complete | 🔄 SDK Generated |
-| **Azure Blob Storage** | `azure.connectors.azureblob` | ✅ Complete | ✅ E2E Validated |
-| **Azure Cosmos DB** | `azure.connectors.documentdb` | ✅ Complete | 🔄 SDK Generated |
+| **Azure AD** | `azure.connectors.azure_ad` | ✅ Complete | 🔄 SDK Generated |
+| **Azure Automation** | `azure.connectors.azure_automation` | ✅ Complete | 🔄 SDK Generated |
+| **Azure Blob Storage** | `azure.connectors.azure_blob` | ✅ Complete | ✅ E2E Validated |
+| **Azure Cosmos DB** | `azure.connectors.document_db` | ✅ Complete | 🔄 SDK Generated |
 | **Azure Data Explorer** | `azure.connectors.kusto` | ✅ Complete | ✅ E2E Validated |
-| **Azure Data Factory** | `azure.connectors.azuredatafactory` | ✅ Complete | 🔄 SDK Generated |
-| **Azure DevOps (VSTS)** | `azure.connectors.visualstudioteamservices` | ✅ Complete | 🔄 SDK Generated |
-| **Azure Digital Twins** | `azure.connectors.azuredigitaltwins` | ✅ Complete | 🔄 SDK Generated |
-| **Azure Event Grid** | `azure.connectors.azureeventgrid` | ✅ Complete | 🔄 SDK Generated |
-| **Azure Event Hubs** | `azure.connectors.eventhubs` | ✅ Complete | 🔄 SDK Generated |
-| **Azure IoT Central** | `azure.connectors.azureiotcentral` | ✅ Complete | 🔄 SDK Generated |
-| **Azure Key Vault** | `azure.connectors.keyvault` | ✅ Complete | 🔄 SDK Generated |
-| **Azure Monitor Logs** | `azure.connectors.azuremonitorlogs` | ✅ Complete | 🔄 SDK Generated |
-| **Azure Queues** | `azure.connectors.azurequeues` | ✅ Complete | 🔄 SDK Generated |
-| **Azure Tables** | `azure.connectors.azuretables` | ✅ Complete | 🔄 SDK Generated |
-| **Azure VM** | `azure.connectors.azurevm` | ✅ Complete | 🔄 SDK Generated |
+| **Azure Data Factory** | `azure.connectors.azure_data_factory` | ✅ Complete | 🔄 SDK Generated |
+| **Azure DevOps (VSTS)** | `azure.connectors.visual_studio_team_services` | ✅ Complete | 🔄 SDK Generated |
+| **Azure Digital Twins** | `azure.connectors.azure_digital_twins` | ✅ Complete | 🔄 SDK Generated |
+| **Azure Event Grid** | `azure.connectors.azure_event_grid` | ✅ Complete | 🔄 SDK Generated |
+| **Azure Event Hubs** | `azure.connectors.event_hubs` | ✅ Complete | 🔄 SDK Generated |
+| **Azure IoT Central** | `azure.connectors.azure_iot_central` | ✅ Complete | 🔄 SDK Generated |
+| **Azure Key Vault** | `azure.connectors.key_vault` | ✅ Complete | 🔄 SDK Generated |
+| **Azure Monitor Logs** | `azure.connectors.azure_monitor_logs` | ✅ Complete | 🔄 SDK Generated |
+| **Azure Queues** | `azure.connectors.azure_queues` | ✅ Complete | 🔄 SDK Generated |
+| **Azure Tables** | `azure.connectors.azure_tables` | ✅ Complete | 🔄 SDK Generated |
+| **Azure VM** | `azure.connectors.azure_vm` | ✅ Complete | 🔄 SDK Generated |
 | **Box** | `azure.connectors.box` | ✅ Complete | 🔄 SDK Generated |
 | **Campfire** | `azure.connectors.campfire` | ✅ Complete | 🔄 SDK Generated |
-| **ClickSend SMS** | `azure.connectors.clicksendsms` | ✅ Complete | 🔄 SDK Generated |
-| **CloudConvert** | `azure.connectors.cloudconvert` | ✅ Complete | 🔄 SDK Generated |
-| **Cloudmersive Document Conversion** | `azure.connectors.cloudmersiveconvert` | ✅ Complete | 🔄 SDK Generated |
+| **ClickSend SMS** | `azure.connectors.click_send_sms` | ✅ Complete | 🔄 SDK Generated |
+| **CloudConvert** | `azure.connectors.cloud_convert` | ✅ Complete | 🔄 SDK Generated |
+| **Cloudmersive Document Conversion** | `azure.connectors.cloudmersive_convert` | ✅ Complete | 🔄 SDK Generated |
 | **Dataflows (Power Query)** | `azure.connectors.dataflows` | ✅ Complete | 🔄 SDK Generated |
-| **DocuSign** | `azure.connectors.docusign` | ✅ Complete | 🔄 SDK Generated |
-| **DocuWare** | `azure.connectors.docuware` | ✅ Complete | 🔄 SDK Generated |
+| **DataFlows SMS** | `azure.connectors.data_flows_sms` | ✅ Complete | 🔄 SDK Generated |
+| **Docusign** | `azure.connectors.docusign` | ✅ Complete | 🔄 SDK Generated |
+| **DocuWare** | `azure.connectors.docu_ware` | ✅ Complete | 🔄 SDK Generated |
 | **Dropbox** | `azure.connectors.dropbox` | ✅ Complete | 🔄 SDK Generated |
-| **Elfsquad Data** | `azure.connectors.elfsquaddata` | ✅ Complete | 🔄 SDK Generated |
+| **Elfsquad Data** | `azure.connectors.elfsquad_data` | ✅ Complete | 🔄 SDK Generated |
 | **Etsy** | `azure.connectors.etsy` | ✅ Complete | 🔄 SDK Generated |
 | **Eventbrite** | `azure.connectors.eventbrite` | ✅ Complete | 🔄 SDK Generated |
-| **Excel Online** | `azure.connectors.excelonline` | ✅ Complete | 🔄 SDK Generated |
-| **Excel Online (Business)** | `azure.connectors.excelonlinebusiness` | ✅ Complete | 🔄 SDK Generated |
-| **Fin & Ops Apps (Dynamics 365)** | `azure.connectors.dynamicsax` | ✅ Complete | 🔄 SDK Generated |
-| **Formstack Forms** | `azure.connectors.formstackforms` | ✅ Complete | 🔄 SDK Generated |
+| **Excel Online** | `azure.connectors.excel_online` | ✅ Complete | 🔄 SDK Generated |
+| **Excel Online (Business)** | `azure.connectors.excel_online_business` | ✅ Complete | 🔄 SDK Generated |
+| **Fin & Ops Apps (Dynamics 365)** | `azure.connectors.dynamics_ax` | ✅ Complete | 🔄 SDK Generated |
+| **Formstack Forms** | `azure.connectors.formstack_forms` | ✅ Complete | 🔄 SDK Generated |
 | **Freshservice** | `azure.connectors.freshservice` | ✅ Complete | 🔄 SDK Generated |
 | **FTP** | `azure.connectors.ftp` | ✅ Complete | 🔄 SDK Generated |
-| **GitHub** | `azure.connectors.github` | ✅ Complete | 🔄 SDK Generated |
-| **Google Calendar** | `azure.connectors.googlecalendar` | ✅ Complete | 🔄 SDK Generated |
-| **Google Drive** | `azure.connectors.googledrive` | ✅ Complete | 🔄 SDK Generated |
-| **Google Tasks** | `azure.connectors.googletasks` | ✅ Complete | 🔄 SDK Generated |
+| **GitHub** | `azure.connectors.git_hub` | ✅ Complete | 🔄 SDK Generated |
+| **Google Calendar** | `azure.connectors.google_calendar` | ✅ Complete | 🔄 SDK Generated |
+| **Google Drive** | `azure.connectors.google_drive` | ✅ Complete | 🔄 SDK Generated |
+| **Google Tasks** | `azure.connectors.google_tasks` | ✅ Complete | 🔄 SDK Generated |
 | **IBM MQ** | `azure.connectors.mq` | ✅ Complete | ✅ E2E Validated |
 | **Impexium** | `azure.connectors.impexium` | ✅ Complete | 🔄 SDK Generated |
 | **Infusionsoft (Keap)** | `azure.connectors.infusionsoft` | ✅ Complete | 🔄 SDK Generated |
 | **Insightly** | `azure.connectors.insightly` | ✅ Complete | 🔄 SDK Generated |
-| **Jedox OData Hub** | `azure.connectors.jedoxodatahub` | ✅ Complete | 🔄 SDK Generated |
+| **Jedox OData Hub** | `azure.connectors.jedox_odata_hub` | ✅ Complete | 🔄 SDK Generated |
 | **Jira** | `azure.connectors.jira` | ✅ Complete | 🔄 SDK Generated |
 | **Mailchimp** | `azure.connectors.mailchimp` | ✅ Complete | 🔄 SDK Generated |
-| **Meeting Room Map** | `azure.connectors.meetingroommap` | ✅ Complete | 🔄 SDK Generated |
-| **Microsoft Bookings** | `azure.connectors.microsoftbookings` | ✅ Complete | 🔄 SDK Generated |
-| **Microsoft Dataverse** | `azure.connectors.commondataservice` | ✅ Complete | 🔄 SDK Generated |
+| **Meeting Room Map** | `azure.connectors.meeting_room_map` | ✅ Complete | 🔄 SDK Generated |
+| **Microsoft Bookings** | `azure.connectors.microsoft_bookings` | ✅ Complete | 🔄 SDK Generated |
+| **Microsoft Dataverse** | `azure.connectors.common_data_service` | ✅ Complete | 🔄 SDK Generated |
 | **Microsoft Defender ATP** | `azure.connectors.wdatp` | ✅ Complete | 🔄 SDK Generated |
-| **Microsoft Forms** | `azure.connectors.microsoftforms` | ✅ Complete | 🔄 SDK Generated |
-| **Microsoft Graph** | `azure.connectors.msgraphgroupsanduser` | ✅ Complete | ✅ E2E Validated |
+| **Microsoft Forms** | `azure.connectors.microsoft_forms` | ✅ Complete | 🔄 SDK Generated |
+| **Microsoft Graph** | `azure.connectors.ms_graph_groups_and_users` | ✅ Complete | ✅ E2E Validated |
 | **Microsoft Teams** | `azure.connectors.teams` | ✅ Complete | ✅ E2E Validated |
 | **Microsoft To Do** | `azure.connectors.todo` | ✅ Complete | 🔄 SDK Generated |
 | **Monday.com** | `azure.connectors.monday` | ✅ Complete | 🔄 SDK Generated |
-| **Office 365 Groups** | `azure.connectors.office365groups` | ✅ Complete | 🔄 SDK Generated |
-| **Office 365 Groups Mail** | `azure.connectors.office365groupsmail` | ✅ Complete | 🔄 SDK Generated |
+| **Office 365 Groups** | `azure.connectors.office365_groups` | ✅ Complete | 🔄 SDK Generated |
+| **Office 365 Groups Mail** | `azure.connectors.office365_groups_mail` | ✅ Complete | 🔄 SDK Generated |
 | **Office 365 Outlook** | `azure.connectors.office365` | ✅ Complete | ✅ E2E Validated |
-| **Office 365 Users** | `azure.connectors.office365users` | ✅ Complete | ✅ E2E Validated |
-| **OneDrive (Personal)** | `azure.connectors.onedrive` | ✅ Complete | 🔄 SDK Generated |
-| **OneDrive for Business** | `azure.connectors.onedriveforbusiness` | ✅ Complete | 🔄 SDK Generated |
-| **OneNote** | `azure.connectors.onenote` | ✅ Complete | 🔄 SDK Generated |
+| **Office 365 Users** | `azure.connectors.office365_users` | ✅ Complete | ✅ E2E Validated |
+| **OneDrive (Personal)** | `azure.connectors.one_drive` | ✅ Complete | 🔄 SDK Generated |
+| **OneDrive for Business** | `azure.connectors.one_drive_for_business` | ✅ Complete | 🔄 SDK Generated |
+| **OneNote** | `azure.connectors.one_note` | ✅ Complete | 🔄 SDK Generated |
 | **Orderful** | `azure.connectors.orderful` | ✅ Complete | 🔄 SDK Generated |
 | **Outlook.com** | `azure.connectors.outlook` | ✅ Complete | 🔄 SDK Generated |
-| **PDF.co** | `azure.connectors.pdfco` | ✅ Complete | 🔄 SDK Generated |
+| **PDF.co** | `azure.connectors.pdf_co` | ✅ Complete | 🔄 SDK Generated |
 | **Pipedrive** | `azure.connectors.pipedrive` | ✅ Complete | 🔄 SDK Generated |
 | **Planner** | `azure.connectors.planner` | ✅ Complete | 🔄 SDK Generated |
 | **Plivo** | `azure.connectors.plivo` | ✅ Complete | 🔄 SDK Generated |
 | **Plumsail Documents** | `azure.connectors.plumsail` | ✅ Complete | 🔄 SDK Generated |
-| **Power BI** | `azure.connectors.powerbi` | ✅ Complete | 🔄 SDK Generated |
+| **Power BI** | `azure.connectors.power_bi` | ✅ Complete | 🔄 SDK Generated |
 | **Projectplace** | `azure.connectors.projectplace` | ✅ Complete | 🔄 SDK Generated |
 | **Replicon** | `azure.connectors.replicon` | ✅ Complete | 🔄 SDK Generated |
-| **Rev.ai** | `azure.connectors.revai` | ✅ Complete | 🔄 SDK Generated |
+| **Rev.ai** | `azure.connectors.rev_ai` | ✅ Complete | 🔄 SDK Generated |
 | **RSS** | `azure.connectors.rss` | ✅ Complete | 🔄 SDK Generated |
 | **Salesforce** | `azure.connectors.salesforce` | ✅ Complete | 🔄 SDK Generated |
-| **Seismic Planner** | `azure.connectors.seismicplanner` | ✅ Complete | 🔄 SDK Generated |
-| **SendGrid** | `azure.connectors.sendgrid` | ✅ Complete | 🔄 SDK Generated |
-| **Service Bus** | `azure.connectors.servicebus` | ✅ Complete | 🔄 SDK Generated |
-| **SharePoint Online** | `azure.connectors.sharepointonline` | ✅ Complete | ✅ E2E Validated |
+| **Seismic Planner** | `azure.connectors.seismic_planner` | ✅ Complete | 🔄 SDK Generated |
+| **SendGrid** | `azure.connectors.send_grid` | ✅ Complete | 🔄 SDK Generated |
+| **Service Bus** | `azure.connectors.service_bus` | ✅ Complete | 🔄 SDK Generated |
+| **ServiceNow** | `azure.connectors.service_now` | ✅ Complete | 🔄 SDK Generated |
+| **SharePoint Online** | `azure.connectors.share_point_online` | ✅ Complete | ✅ E2E Validated |
 | **Shifts** | `azure.connectors.shifts` | ✅ Complete | 🔄 SDK Generated |
-| **SigningHub** | `azure.connectors.signinghub` | ✅ Complete | 🔄 SDK Generated |
+| **SigningHub** | `azure.connectors.signing_hub` | ✅ Complete | 🔄 SDK Generated |
 | **Slack** | `azure.connectors.slack` | ✅ Complete | 🔄 SDK Generated |
 | **SMTP** | `azure.connectors.smtp` | ✅ Complete | 🔄 SDK Generated |
 | **SQL Server** | `azure.connectors.sql` | ✅ Complete | 🔄 SDK Generated |
 | **Starmind** | `azure.connectors.starmind` | ✅ Complete | 🔄 SDK Generated |
-| **StarRez REST V1** | `azure.connectors.starrezrestv1` | ✅ Complete | 🔄 SDK Generated |
+| **StarRez REST V1** | `azure.connectors.star_rez_rest_v1` | ✅ Complete | 🔄 SDK Generated |
 | **Tallyfy** | `azure.connectors.tallyfy` | ✅ Complete | 🔄 SDK Generated |
-| **TextRequest** | `azure.connectors.textrequest` | ✅ Complete | 🔄 SDK Generated |
+| **TextRequest** | `azure.connectors.text_request` | ✅ Complete | 🔄 SDK Generated |
 | **Ticketmaster** | `azure.connectors.ticketmaster` | ✅ Complete | 🔄 SDK Generated |
 | **Trello** | `azure.connectors.trello` | ✅ Complete | 🔄 SDK Generated |
 | **Twitter** | `azure.connectors.twitter` | ✅ Complete | 🔄 SDK Generated |
 | **Typeform** | `azure.connectors.typeform` | ✅ Complete | 🔄 SDK Generated |
-| **Universal Print** | `azure.connectors.universalprint` | ✅ Complete | 🔄 SDK Generated |
-| **Way We Do** | `azure.connectors.waywedo` | ✅ Complete | 🔄 SDK Generated |
+| **Universal Print** | `azure.connectors.universal_print` | ✅ Complete | 🔄 SDK Generated |
+| **Way We Do** | `azure.connectors.way_we_do` | ✅ Complete | 🔄 SDK Generated |
 | **Webex** | `azure.connectors.webex` | ✅ Complete | 🔄 SDK Generated |
-| **Word Online (Business)** | `azure.connectors.wordonlinebusiness` | ✅ Complete | 🔄 SDK Generated |
-| **WordPress** | `azure.connectors.wordpress` | ✅ Complete | 🔄 SDK Generated |
+| **Word Online (Business)** | `azure.connectors.word_online_business` | ✅ Complete | 🔄 SDK Generated |
+| **WordPress** | `azure.connectors.word_press` | ✅ Complete | 🔄 SDK Generated |
 | **Yammer** | `azure.connectors.yammer` | ✅ Complete | 🔄 SDK Generated |
 | **Zendesk** | `azure.connectors.zendesk` | ✅ Complete | 🔄 SDK Generated |
-| **Zoho Sign** | `azure.connectors.zohosign` | ✅ Complete | 🔄 SDK Generated |
-| **Zoho ZeptoMail** | `azure.connectors.zeptomail` | ✅ Complete | 🔄 SDK Generated |
+| **Zoho Sign** | `azure.connectors.zoho_sign` | ✅ Complete | 🔄 SDK Generated |
+| **Zoho ZeptoMail** | `azure.connectors.zepto_mail` | ✅ Complete | 🔄 SDK Generated |
 
-**Total:** 101 connectors supported
+**Total:** 103 connectors supported
 
 See [ROADMAP.md](ROADMAP.md) for planned connector additions and [tests/README.md](tests/README.md) for detailed test coverage.
 

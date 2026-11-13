@@ -35,8 +35,8 @@ __all__ = [
     "AddVerificationToRecipientResponse",
     "AdditionalRecipientData",
     "AdditionalRecipientParamsSchema",
-    "AdditionalURL",
-    "AdditionalURLForSenderView",
+    "AdditionalUrl",
+    "AdditionalUrlForSenderView",
     "AnchorTabSchema",
     "ApiError",
     "ApplyTemplatesToDocumentsInput",
@@ -71,8 +71,8 @@ __all__ = [
     "EnvelopeCustomFieldResponse",
     "EnvelopeDocument",
     "EnvelopeDocumentField",
-    "EnvelopeIDsResponse",
     "EnvelopeIds",
+    "EnvelopeIdsResponse",
     "EnvelopeResendResponse",
     "EnvelopeTemplate",
     "EnvelopeVoidResponse",
@@ -308,7 +308,7 @@ class CompositeTemplatesResponse:
     )
     """The datetime the status was set."""
     uri: Optional[str] = dataclass_field(default=None, kw_only=True)
-    """The URI for the envelope in DocuSign."""
+    """The URI for the envelope in Docusign."""
 
 
 @dataclass
@@ -362,7 +362,7 @@ class CreateEnvelopeResponse:
     )
     """The datetime the status was set."""
     uri: Optional[str] = dataclass_field(default=None, kw_only=True)
-    """The URI for the envelope in DocuSign."""
+    """The URI for the envelope in Docusign."""
 
 
 @dataclass
@@ -1272,7 +1272,7 @@ class AdditionalRecipientData:
 
 
 @dataclass
-class AdditionalURLForSenderView:
+class AdditionalUrlForSenderView:
     """
     Definition: AdditionalURLForSenderView
     """
@@ -1285,7 +1285,7 @@ class AdditionalURLForSenderView:
 
 
 @dataclass
-class AdditionalURL:
+class AdditionalUrl:
     """
     Definition: AdditionalURL
     """
@@ -1628,7 +1628,7 @@ class Envelope:
         kw_only=True,
         metadata={"wire_name": "documentsUri"},
     )
-    """The URI for the document in DocuSign."""
+    """The URI for the document in Docusign."""
     envelope_id: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
@@ -1640,7 +1640,7 @@ class Envelope:
         kw_only=True,
         metadata={"wire_name": "envelopeUri"},
     )
-    """The URI for the envelope in DocuSign."""
+    """The URI for the envelope in Docusign."""
     notification_uri: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
@@ -1652,7 +1652,7 @@ class Envelope:
         kw_only=True,
         metadata={"wire_name": "recipientsUri"},
     )
-    """The URI for the recipients of the envelope in DocuSign."""
+    """The URI for the recipients of the envelope in Docusign."""
     status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The status of the envelope."""
     status_changed_date_time: Optional[str] = dataclass_field(
@@ -1683,7 +1683,7 @@ class CombinedEmailBodyAndCustomFields:
 
 
 @dataclass
-class EnvelopeIDsResponse:
+class EnvelopeIdsResponse:
     """
     Definition: EnvelopeIDsResponse
     """
@@ -2311,6 +2311,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("docgenFields", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2756,6 +2759,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("tabs", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2908,6 +2914,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("tabs", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2997,6 +3006,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("envelopeDocumentFields", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -3726,7 +3738,7 @@ class DocusignClient(ConnectorClientBase):
 
     async def generate_embedded_sender_url(
         self,
-        input: AdditionalURLForSenderView | Mapping[str, Any],
+        input: AdditionalUrlForSenderView | Mapping[str, Any],
         account_id: str,
         envelope_id: str,
         open_in: str,
@@ -4196,7 +4208,7 @@ class DocusignClient(ConnectorClientBase):
         *,
         signature_type: Optional[str] = None,
         client_user_id: Optional[str] = None,
-        embedded_recipient_start_u_r_l: Optional[str] = None,
+        embedded_recipient_start_url: Optional[str] = None,
         routing_order: Optional[str] = None,
         email_notification_language: Optional[str] = None,
         email_notification_subject: Optional[str] = None,
@@ -4225,9 +4237,9 @@ class DocusignClient(ConnectorClientBase):
             envelope_id: Enter an envelope ID.
             recipient_id: Enter a recipient ID.
             recipient_type: Recipient type.
-            signature_type: DocuSign standards-based-signature (SBS) types.
+            signature_type: Docusign standards-based-signature (SBS) types.
             client_user_id: Client user ID for embedded signer.
-            embedded_recipient_start_u_r_l: A sender-provided URL string for
+            embedded_recipient_start_url: A sender-provided URL string for
                 redirecting an embedded recipient.
             routing_order: The signing order of the recipient.
             email_notification_language: Language for the email notification.
@@ -4279,9 +4291,9 @@ class DocusignClient(ConnectorClientBase):
             if isinstance(client_user_id, bool):
                 value = value.lower()
             query_params.append(f"clientUserId={quote(value, safe='')}")
-        if embedded_recipient_start_u_r_l is not None:
-            value = str(embedded_recipient_start_u_r_l)
-            if isinstance(embedded_recipient_start_u_r_l, bool):
+        if embedded_recipient_start_url is not None:
+            value = str(embedded_recipient_start_url)
+            if isinstance(embedded_recipient_start_url, bool):
                 value = value.lower()
             query_params.append(f"embeddedRecipientStartURL={quote(value, safe='')}")
         if routing_order is not None:
@@ -4640,6 +4652,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("loginAccounts", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -4719,6 +4734,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("envelopeTemplates", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -4869,6 +4887,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("templateDocuments", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -4954,6 +4975,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("envelopeDocuments", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -5330,6 +5354,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("recipientTabs", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -5473,7 +5500,7 @@ class DocusignClient(ConnectorClientBase):
         *,
         client_user_id: Optional[str] = None,
         recipient_id: Optional[str] = None,
-        embedded_recipient_start_u_r_l: Optional[str] = None,
+        embedded_recipient_start_url: Optional[str] = None,
         routing_order: Optional[str] = None,
         email_notification_language: Optional[str] = None,
         email_notification_subject: Optional[str] = None,
@@ -5505,7 +5532,7 @@ class DocusignClient(ConnectorClientBase):
             recipient_type: Enter or select a recipient type.
             client_user_id: Client user ID for embedded signer.
             recipient_id: Enter a recipient ID.
-            embedded_recipient_start_u_r_l: A sender-provided URL string for
+            embedded_recipient_start_url: A sender-provided URL string for
                 redirecting an embedded recipient.
             routing_order: The signing order of the recipient.
             email_notification_language: Language for the email notification.
@@ -5518,7 +5545,7 @@ class DocusignClient(ConnectorClientBase):
             phone_number: Signer email or SMS phone required. Exclude country
                 code for phone number.
             signing_group_id: Signing Group.
-            signature_type: DocuSign standards-based-signature (SBS) types.
+            signature_type: Docusign standards-based-signature (SBS) types.
             workflow_id: IDV workflows with pen signature types must be
                 selected here.
             timeout: The request timeout in seconds.
@@ -5556,9 +5583,9 @@ class DocusignClient(ConnectorClientBase):
             if isinstance(recipient_id, bool):
                 value = value.lower()
             query_params.append(f"recipientId={quote(value, safe='')}")
-        if embedded_recipient_start_u_r_l is not None:
-            value = str(embedded_recipient_start_u_r_l)
-            if isinstance(embedded_recipient_start_u_r_l, bool):
+        if embedded_recipient_start_url is not None:
+            value = str(embedded_recipient_start_url)
+            if isinstance(embedded_recipient_start_url, bool):
                 value = value.lower()
             query_params.append(f"embeddedRecipientStartURL={quote(value, safe='')}")
         if routing_order is not None:
@@ -5952,6 +5979,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("organizations", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -6084,6 +6114,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("folders", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -6168,6 +6201,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("folderItems", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -6242,6 +6278,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("tabTypes", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -6316,6 +6355,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("tabTypes", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -6395,6 +6437,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("signingGroups", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -6469,6 +6514,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("tabTypes", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -6548,11 +6596,14 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("WorkflowDefinitions", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
 
-    def list_all_workflow_i_ds(
+    def list_all_workflow_ids(
         self,
         account_id: str,
         *,
@@ -6629,6 +6680,9 @@ class DocusignClient(ConnectorClientBase):
                 for item in page.get("workflowIds", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)

@@ -1,0 +1,41 @@
+# DynamicsAXClient
+
+::: azure.connectors.dynamics_ax
+    options:
+      members:
+        - BusinessEventSubscriptionResponse
+        - ExecuteProcedureInput
+        - AxOnlineProcedureResult
+        - ItemsList
+        - PostItemInput
+        - PostItemResponse
+        - GetItemResponse
+        - PatchItemInput
+        - PatchItemResponse
+        - TablesList
+        - DataSetsList
+        - TriggerFieldDataList
+        - BusinessEventsList
+        - ProceduresList
+        - ProcedureMetadata
+        - TableMetadata
+        - ObjectEntity
+        - DataSetsMetadata
+        - TabularDataSetsMetadata
+        - BlobDataSetsMetadata
+        - TableCapabilitiesMetadata
+        - TableSortRestrictionsMetadata
+        - TableFilterRestrictionsMetadata
+        - TableSelectRestrictionsMetadata
+        - BusinessEventSubscription
+        - BusinessEventData
+        - TriggerFieldData
+        - Procedure
+        - DataSet
+        - Table
+        - PassThroughNativeQuery
+        - Item
+        - ExportableItemsList
+        - ExportableItem
+        - DynamicsAXClient
+        - TRIGGER_OPERATIONS

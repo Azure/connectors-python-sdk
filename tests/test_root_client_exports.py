@@ -77,6 +77,7 @@ def test_root_runtime_exports_are_the_async_sdk_types() -> None:
     """Keep runtime exports identical to the single async SDK implementation."""
     assert connectors.ConnectorClientBase is sdk.ConnectorClientBase
     assert connectors.ConnectorHttpClient is sdk.ConnectorHttpClient
+    assert connectors.ConnectorPage is sdk.ConnectorPage
     assert inspect.iscoroutinefunction(connectors.ConnectorClientBase.close)
     assert inspect.iscoroutinefunction(connectors.ConnectorHttpClient.send)
     assert inspect.iscoroutinefunction(connectors.ConnectorHttpClient.close)

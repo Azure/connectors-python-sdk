@@ -1,15 +1,15 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Contract tests for Starrezrestv1Client."""
+"""Contract tests for StarRezRestV1Client."""
 
 from unittest.mock import AsyncMock, patch
 
 import pytest
 
-import azure.connectors.starrezrestv1 as starrezrestv1_module
+import azure.connectors.star_rez_rest_v1 as starrezrestv1_module
 from azure.connectors.sdk.serialization import to_wire
-from azure.connectors.starrezrestv1 import Starrezrestv1Client
-from azure.connectors.starrezrestv1 import SelectBookingInput
+from azure.connectors.star_rez_rest_v1 import StarRezRestV1Client
+from azure.connectors.star_rez_rest_v1 import SelectBookingInput
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import (
     GeneratedConnectorContractTests,
@@ -51,10 +51,10 @@ OPERATION_CONTRACTS = {
 }
 
 
-class TestStarrezrestv1Client(GeneratedConnectorContractTests):
+class TestStarRezRestV1Client(GeneratedConnectorContractTests):
     """Test the generated StarRez REST V1 client contract."""
 
-    client_type = Starrezrestv1Client
+    client_type = StarRezRestV1Client
     connector_module = starrezrestv1_module
     connector_name = "starrezrestv1"
     operation_contracts = OPERATION_CONTRACTS
@@ -65,7 +65,7 @@ async def test_select_booking_sends_filter_and_deserializes_response(
     mock_credential,
 ) -> None:
     """Test a bounded booking query sends a meaningful request body."""
-    client = Starrezrestv1Client(
+    client = StarRezRestV1Client(
         "https://example.azure.com/connections/test",
         credential=mock_credential,
     )
