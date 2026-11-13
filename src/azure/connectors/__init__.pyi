@@ -25,14 +25,14 @@ from .azure_vm import AzureVMClient as AzureVMClient
 from .box import BoxClient as BoxClient
 from .campfire import CampfireClient as CampfireClient
 from .click_send_sms import ClickSendSmsClient as ClickSendSmsClient
-from .cloudconvert import CloudconvertClient as CloudconvertClient
+from .cloud_convert import CloudConvertClient as CloudConvertClient
 from .cloudmersive_convert import CloudmersiveConvertClient as CloudmersiveConvertClient
 from .common_data_service import CommonDataServiceClient as CommonDataServiceClient
 from .dataflows import DataflowsClient as DataflowsClient
 from .data_flows_sms import DataFlowsSmsClient as DataFlowsSmsClient
 from .document_db import DocumentDBClient as DocumentDBClient
 from .docusign import DocusignClient as DocusignClient
-from .docuware import DocuwareClient as DocuwareClient
+from .docu_ware import DocuWareClient as DocuWareClient
 from .dropbox import DropboxClient as DropboxClient
 from .dynamics_ax import DynamicsAXClient as DynamicsAXClient
 from .elfsquad_data import ElfsquadDataClient as ElfsquadDataClient
@@ -68,7 +68,7 @@ from .office365_groups_mail import Office365GroupsMailClient as Office365GroupsM
 from .office365_users import Office365UsersClient as Office365UsersClient
 from .one_drive import OneDriveClient as OneDriveClient
 from .one_drive_for_business import OneDriveForBusinessClient as OneDriveForBusinessClient
-from .onenote import OnenoteClient as OnenoteClient
+from .one_note import OneNoteClient as OneNoteClient
 from .orderful import OrderfulClient as OrderfulClient
 from .outlook import OutlookClient as OutlookClient
 from .pdf_co import PdfCoClient as PdfCoClient
@@ -104,7 +104,7 @@ from .twitter import TwitterClient as TwitterClient
 from .typeform import TypeformClient as TypeformClient
 from .universal_print import UniversalPrintClient as UniversalPrintClient
 from .visual_studio_team_services import VisualStudioTeamServicesClient as VisualStudioTeamServicesClient
-from .waywedo import WaywedoClient as WaywedoClient
+from .way_we_do import WayWeDoClient as WayWeDoClient
 from .wdatp import WdatpClient as WdatpClient
 from .webex import WebexClient as WebexClient
 from .word_online_business import WordOnlineBusinessClient as WordOnlineBusinessClient

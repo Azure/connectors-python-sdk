@@ -10,9 +10,13 @@ fields and method references using the current generated API reference.
 | `azure.connectors.azuread.AzureadClient` | `azure.connectors.azure_ad.AzureADClient` |
 | `azure.connectors.azuredatafactory.AzuredatafactoryClient` | `azure.connectors.azure_data_factory.AzureDataFactoryClient` |
 | `azure.connectors.azureiotcentral.AzureiotcentralClient` | `azure.connectors.azure_iot_central.AzureIoTCentralClient` |
+| `azure.connectors.cloudconvert.CloudconvertClient` | `azure.connectors.cloud_convert.CloudConvertClient` |
 | `azure.connectors.dataflowssms.DataflowssmsClient` | `azure.connectors.data_flows_sms.DataFlowsSmsClient` |
+| `azure.connectors.docuware.DocuwareClient` | `azure.connectors.docu_ware.DocuWareClient` |
 | `azure.connectors.jedoxodatahub.JedoxodatahubClient` | `azure.connectors.jedox_odata_hub.JedoxODataHubClient` |
 | `azure.connectors.msgraphgroupsanduser.MsgraphgroupsanduserClient` | `azure.connectors.ms_graph_groups_and_users.MSGraphGroupsAndUsersClient` |
+| `azure.connectors.onenote.OnenoteClient` | `azure.connectors.one_note.OneNoteClient` |
+| `azure.connectors.waywedo.WaywedoClient` | `azure.connectors.way_we_do.WayWeDoClient` |
 
 Types use their documented PascalCase spelling, generated operations and
 model attributes use snake_case, and constants and enum members use uppercase
@@ -23,6 +27,13 @@ names. For example, `RemoveWhitespaceFromTextRequest` is now
 `username` (while `file_name` remains `file_name`).
 Versioned operations retain their version tokens; consult the regenerated
 client signature before changing a call.
+
+Model fields whose wire names are SCREAMING_SNAKE_CASE now keep each word
+instead of splitting every letter. For example, Insightly
+`p_u_b_l_i_c_l_y_v_i_s_i_b_l_e`, `o_w_n_e_r_u_s_e_r_id`, `v_i_s_i_b_l_e_t_o` and
+`d_a_t_e_c_r_e_a_t_e_d_u_t_c` become `publicly_visible`, `owner_user_id`,
+`visible_to` and `date_created_utc`; their wire names (`PUBLICLY_VISIBLE`,
+`OWNER_USER_ID`, `VISIBLE_TO`, `DATE_CREATED_UTC`) are unchanged.
 
 PdfCo request types now use the same normalized words as their response
 counterparts: `PdfFromXlsxlsxInput` becomes `PdfFromXlsXlsxInput`,

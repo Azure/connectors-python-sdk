@@ -85,7 +85,7 @@ class TaskObject:
         metadata={"wire_name": "TITLE"},
     )
     """The title of the task."""
-    duedate: Optional[str] = dataclass_field(
+    due_date: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "DUE_DATE"},
@@ -97,7 +97,7 @@ class TaskObject:
         metadata={"wire_name": "CATEGORY_ID"},
     )
     """The unique identifier of the category."""
-    completeddateutc: Optional[str] = dataclass_field(
+    completed_date_utc: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "COMPLETED_DATE_UTC"},
@@ -127,7 +127,7 @@ class TaskObject:
         metadata={"wire_name": "PRIORITY"},
     )
     """The priority of the task."""
-    startdate: Optional[str] = dataclass_field(
+    start_date: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "START_DATE"},
@@ -163,25 +163,25 @@ class TaskObject:
         metadata={"wire_name": "STAGE_ID"},
     )
     """The unique identifier of the stage."""
-    percentcomplete: Optional[int] = dataclass_field(
+    percent_complete: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "PERCENT_COMPLETE"},
     )
     """The task completed value in percent."""
-    owneruser_id: Optional[int] = dataclass_field(
+    owner_user_id: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "OWNER_USER_ID"},
     )
     """The unique identifier of the task owner."""
-    responsibleuser_id: Optional[int] = dataclass_field(
+    responsible_user_id: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "RESPONSIBLE_USER_ID"},
     )
     """The unique identifier of the user assigned to the task."""
-    publiclyvisible: Optional[bool] = dataclass_field(
+    publicly_visible: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "PUBLICLY_VISIBLE"},
@@ -189,31 +189,31 @@ class TaskObject:
     """
     A boolean value determining whether or not the task is publicly visible.
     """
-    datecreatedutc: Optional[str] = dataclass_field(
+    date_created_utc: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "DATE_CREATED_UTC"},
     )
     """yyyy-MM-dd HH:mm:ss"""
-    dateupdatedutc: Optional[str] = dataclass_field(
+    date_updated_utc: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "DATE_UPDATED_UTC"},
     )
     """yyyy-MM-dd HH:mm:ss"""
-    assignedbyuser_id: Optional[int] = dataclass_field(
+    assigned_by_user_id: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ASSIGNED_BY_USER_ID"},
     )
     """The unique identifier of the assigned by user."""
-    parenttask_id: Optional[int] = dataclass_field(
+    parent_task_id: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "PARENT_TASK_ID"},
     )
     """The unique identifier of the parent task."""
-    ownervisible: Optional[bool] = dataclass_field(
+    owner_visible: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "OWNER_VISIBLE"},
@@ -221,25 +221,25 @@ class TaskObject:
     """
     A boolean value determining whether or not the owner is publicly visible.
     """
-    assignedteam_id: Optional[int] = dataclass_field(
+    assigned_team_id: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ASSIGNED_TEAM_ID"},
     )
     """The unique identifier of the assigned team."""
-    assigneddateutc: Optional[str] = dataclass_field(
+    assigned_date_utc: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ASSIGNED_DATE_UTC"},
     )
     """yyyy-MM-dd HH:mm:ss"""
-    reminderdateutc: Optional[str] = dataclass_field(
+    reminder_date_utc: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "REMINDER_DATE_UTC"},
     )
     """yyyy-MM-dd HH:mm:ss"""
-    remindersent: Optional[bool] = dataclass_field(
+    reminder_sent: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "REMINDER_SENT"},
@@ -251,13 +251,13 @@ class TaskObject:
         metadata={"wire_name": "RECURRENCE"},
     )
     """Recurrence"""
-    canedit: Optional[bool] = dataclass_field(
+    can_edit: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CAN_EDIT"},
     )
     """Can edit."""
-    candelete: Optional[bool] = dataclass_field(
+    can_delete: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CAN_DELETE"},
@@ -298,7 +298,7 @@ class Project:
         metadata={"wire_name": "PROJECT_ID"},
     )
     """The unique identifier of the project."""
-    projectname: Optional[str] = dataclass_field(
+    project_name: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "PROJECT_NAME"},
@@ -310,55 +310,55 @@ class Project:
         metadata={"wire_name": "STATUS"},
     )
     """The status of the project."""
-    projectdetails: Optional[str] = dataclass_field(
+    project_details: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "PROJECT_DETAILS"},
     )
     """The details of the project."""
-    imageurl: Optional[str] = dataclass_field(
+    image_url: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "IMAGE_URL"},
     )
     """The image URL of the project."""
-    datecreatedutc: Optional[str] = dataclass_field(
+    date_created_utc: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "DATE_CREATED_UTC"},
     )
     """yyyy-MM-dd HH:mm:ss"""
-    visibleto: Optional[str] = dataclass_field(
+    visible_to: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "VISIBLE_TO"},
     )
     """Project Visibility."""
-    dateupdatedutc: Optional[str] = dataclass_field(
+    date_updated_utc: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "DATE_UPDATED_UTC"},
     )
     """yyyy-MM-dd HH:mm:ss"""
-    starteddate: Optional[str] = dataclass_field(
+    started_date: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "STARTED_DATE"},
     )
     """yyyy-MM-dd HH:mm:ss"""
-    completeddate: Optional[str] = dataclass_field(
+    completed_date: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "COMPLETED_DATE"},
     )
     """yyyy-MM-dd HH:mm:ss"""
-    owneruser_id: Optional[int] = dataclass_field(
+    owner_user_id: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "OWNER_USER_ID"},
     )
     """The unique identifier of the project owner."""
-    responsibleuser_id: Optional[int] = dataclass_field(
+    responsible_user_id: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "RESPONSIBLE_USER_ID"},
@@ -388,25 +388,25 @@ class Project:
         metadata={"wire_name": "CATEGORY_ID"},
     )
     """The unique identifier of the category."""
-    visibleteam_id: Optional[int] = dataclass_field(
+    visible_team_id: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "VISIBLE_TEAM_ID"},
     )
     """The unique identifier of the team."""
-    visibleuser_ids: Optional[int] = dataclass_field(
+    visible_user_ids: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "VISIBLE_USER_IDS"},
     )
     """The unique identifiers of the users."""
-    canedit: Optional[bool] = dataclass_field(
+    can_edit: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CAN_EDIT"},
     )
     """Can edit"""
-    candelete: Optional[bool] = dataclass_field(
+    can_delete: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CAN_DELETE"},
@@ -453,73 +453,73 @@ class Lead:
         metadata={"wire_name": "TITLE"},
     )
     """The title of the lead."""
-    firstname: Optional[str] = dataclass_field(
+    first_name: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "FIRST_NAME"},
     )
     """First name of the lead."""
-    lastname: Optional[str] = dataclass_field(
+    last_name: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "LAST_NAME"},
     )
     """Last name of the lead."""
-    leaddescription: Optional[str] = dataclass_field(
+    lead_description: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "LEAD_DESCRIPTION"},
     )
     """A brief description of the lead."""
-    datecreatedutc: Optional[str] = dataclass_field(
+    date_created_utc: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "DATE_CREATED_UTC"},
     )
     """yyyy-MM-dd HH:mm:ss"""
-    dateupdatedutc: Optional[str] = dataclass_field(
+    date_updated_utc: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "DATE_UPDATED_UTC"},
     )
     """yyyy-MM-dd HH:mm:ss"""
-    converteddateutc: Optional[str] = dataclass_field(
+    converted_date_utc: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CONVERTED_DATE_UTC"},
     )
     """yyyy-MM-dd HH:mm:ss"""
-    leadstatus_id: Optional[int] = dataclass_field(
+    lead_status_id: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "LEAD_STATUS_ID"},
     )
     """The status Id of the lead."""
-    visibleto: Optional[str] = dataclass_field(
+    visible_to: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "VISIBLE_TO"},
     )
     """Lead visibility."""
-    organizationname: Optional[str] = dataclass_field(
+    organization_name: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ORGANIZATION_NAME"},
     )
     """The name of the organization."""
-    phonenumber: Optional[str] = dataclass_field(
+    phone_number: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "PHONE_NUMBER"},
     )
     """Lead phone number."""
-    mobilephonenumber: Optional[str] = dataclass_field(
+    mobile_phone_number: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "MOBILE_PHONE_NUMBER"},
     )
     """Lead mobile phone number."""
-    emailaddress: Optional[str] = dataclass_field(
+    email_address: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "EMAIL_ADDRESS"},
@@ -531,31 +531,31 @@ class Lead:
         metadata={"wire_name": "CONVERTED"},
     )
     """A boolean value determining whether or not the lead is converted."""
-    websiteurl: Optional[str] = dataclass_field(
+    website_url: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "WEBSITE_URL"},
     )
     """Lead website URL"""
-    owneruser_id: Optional[int] = dataclass_field(
+    owner_user_id: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "OWNER_USER_ID"},
     )
     """The unique identifier of the lead owner."""
-    responsibleuser_id: Optional[int] = dataclass_field(
+    responsible_user_id: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "RESPONSIBLE_USER_ID"},
     )
     """The unique identifier of the responsible user."""
-    employeecount: Optional[int] = dataclass_field(
+    employee_count: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "EMPLOYEE_COUNT"},
     )
     """The employee count of the lead."""
-    leadrating: Optional[int] = dataclass_field(
+    lead_rating: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "LEAD_RATING"},
@@ -567,91 +567,91 @@ class Lead:
         metadata={"wire_name": "INDUSTRY"},
     )
     """The industry of the lead."""
-    addressstreet: Optional[str] = dataclass_field(
+    address_street: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ADDRESS_STREET"},
     )
     """Address street."""
-    addresscity: Optional[str] = dataclass_field(
+    address_city: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ADDRESS_CITY"},
     )
     """Address city."""
-    addressstate: Optional[str] = dataclass_field(
+    address_state: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ADDRESS_STATE"},
     )
     """Address state."""
-    addresspostcode: Optional[str] = dataclass_field(
+    address_postcode: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ADDRESS_POSTCODE"},
     )
     """Address postcode."""
-    addresscountry: Optional[str] = dataclass_field(
+    address_country: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ADDRESS_COUNTRY"},
     )
     """Address country."""
-    faxnumber: Optional[str] = dataclass_field(
+    fax_number: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "FAX_NUMBER"},
     )
     """Lead fax number."""
-    convertedcontact_id: Optional[int] = dataclass_field(
+    converted_contact_id: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CONVERTED_CONTACT_ID"},
     )
     """The unique identifier of the converted contact."""
-    convertedorganization_id: Optional[int] = dataclass_field(
+    converted_organization_id: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CONVERTED_ORGANIZATION_ID"},
     )
     """The unique identifier of the converted organization."""
-    convertedopportunity_id: Optional[int] = dataclass_field(
+    converted_opportunity_id: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CONVERTED_OPPORTUNITY_ID"},
     )
     """The unique identifier of the opportunity."""
-    leadsource_id: Optional[int] = dataclass_field(
+    lead_source_id: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "LEAD_SOURCE_ID"},
     )
     """The unique identifier of the lead source."""
-    visibleteam_id: Optional[int] = dataclass_field(
+    visible_team_id: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "VISIBLE_TEAM_ID"},
     )
     """The unique identifier of the team."""
-    visibleuser_ids: Optional[int] = dataclass_field(
+    visible_user_ids: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "VISIBLE_USER_IDS"},
     )
     """The unique identifiers of the users."""
-    imageurl: Optional[str] = dataclass_field(
+    image_url: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "IMAGE_URL"},
     )
     """Lead Image URL"""
-    canedit: Optional[bool] = dataclass_field(
+    can_edit: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CAN_EDIT"},
     )
     """Can edit"""
-    candelete: Optional[bool] = dataclass_field(
+    can_delete: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CAN_DELETE"},
@@ -680,74 +680,74 @@ class Contact:
     Response for Update contact
     """
 
-    addresswork: Optional[Dict[str, Any]] = dataclass_field(
+    address_work: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ADDRESS_WORK"},
     )
-    addresshome: Optional[Dict[str, Any]] = dataclass_field(
+    address_home: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ADDRESS_HOME"},
     )
-    addresspostal: Optional[Dict[str, Any]] = dataclass_field(
+    address_postal: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ADDRESS_POSTAL"},
     )
-    addressprimary: Optional[Dict[str, Any]] = dataclass_field(
+    address_primary: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ADDRESS_PRIMARY"},
     )
-    addressother: Optional[Dict[str, Any]] = dataclass_field(
+    address_other: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ADDRESS_OTHER"},
     )
-    emailwork: Optional[str] = dataclass_field(
+    email_work: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "EMAIL_WORK"},
     )
     """The work email of the contact."""
-    emailhome: Optional[str] = dataclass_field(
+    email_home: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "EMAIL_HOME"},
     )
     """The home email of the contact."""
-    emailpersonal: Optional[str] = dataclass_field(
+    email_personal: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "EMAIL_PERSONAL"},
     )
     """The personal email of the contact."""
-    emailother: Optional[str] = dataclass_field(
+    email_other: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "EMAIL_OTHER"},
     )
     """The other email of the contact."""
-    phonework: Optional[str] = dataclass_field(
+    phone_work: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "PHONE_WORK"},
     )
     """The work phone number of the contact."""
-    phonehome: Optional[str] = dataclass_field(
+    phone_home: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "PHONE_HOME"},
     )
     """The home phone number of the contact."""
-    phonemobile: Optional[str] = dataclass_field(
+    phone_mobile: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "PHONE_MOBILE"},
     )
     """The mobile phone number of the contact."""
-    phoneother: Optional[str] = dataclass_field(
+    phone_other: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "PHONE_OTHER"},
@@ -765,31 +765,31 @@ class Contact:
         metadata={"wire_name": "SALUTATION"},
     )
     """The salutation of the contact."""
-    firstname: Optional[str] = dataclass_field(
+    first_name: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "FIRST_NAME"},
     )
     """First name of the contact."""
-    lastname: Optional[str] = dataclass_field(
+    last_name: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "LAST_NAME"},
     )
     """Last name of the contact."""
-    imageurl: Optional[str] = dataclass_field(
+    image_url: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "IMAGE_URL"},
     )
     """Contact image URL."""
-    datecreatedutc: Optional[str] = dataclass_field(
+    date_created_utc: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "DATE_CREATED_UTC"},
     )
     """yyyy-MM-dd HH:mm:ss"""
-    visibleto: Optional[str] = dataclass_field(
+    visible_to: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "VISIBLE_TO"},
@@ -801,61 +801,61 @@ class Contact:
         metadata={"wire_name": "BACKGROUND"},
     )
     """Background"""
-    defaultlinkedorganisation: Optional[int] = dataclass_field(
+    default_linked_organisation: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "DEFAULT_LINKED_ORGANISATION"},
     )
     """Default linked organization."""
-    owneruser_id: Optional[int] = dataclass_field(
+    owner_user_id: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "OWNER_USER_ID"},
     )
     """The unique identifier of the owner."""
-    dateupdatedutc: Optional[str] = dataclass_field(
+    date_updated_utc: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "DATE_UPDATED_UTC"},
     )
     """yyyy-MM-dd HH:mm:ss"""
-    visibleteam_id: Optional[int] = dataclass_field(
+    visible_team_id: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "VISIBLE_TEAM_ID"},
     )
     """The unique identifier of the team."""
-    visibleuser_ids: Optional[int] = dataclass_field(
+    visible_user_ids: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "VISIBLE_USER_IDS"},
     )
     """The unique identifiers of the users."""
-    canedit: Optional[bool] = dataclass_field(
+    can_edit: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CAN_EDIT"},
     )
     """Can edit"""
-    candelete: Optional[bool] = dataclass_field(
+    can_delete: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CAN_DELETE"},
     )
     """Can delete"""
-    sociallinkedin: Optional[str] = dataclass_field(
+    social_linkedin: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "SOCIAL_LINKEDIN"},
     )
     """Social LinkedIn."""
-    socialfacebook: Optional[str] = dataclass_field(
+    social_facebook: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "SOCIAL_FACEBOOK"},
     )
     """Social Facebook."""
-    socialtwitter: Optional[str] = dataclass_field(
+    social_twitter: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "SOCIAL_TWITTER"},
@@ -918,37 +918,37 @@ class Organization:
         metadata={"wire_name": "ORGANISATION_ID"},
     )
     """The unique identifier of the organization."""
-    organisationbackground: Optional[str] = dataclass_field(
+    organisation_background: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ORGANISATION_BACKGROUND"},
     )
     """The background of the organization."""
-    organisationname: Optional[str] = dataclass_field(
+    organisation_name: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ORGANISATION_NAME"},
     )
     """The name of the organization."""
-    datecreatedutc: Optional[str] = dataclass_field(
+    date_created_utc: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "DATE_CREATED_UTC"},
     )
     """yyyy-MM-dd HH:mm:ss"""
-    dateupdatedutc: Optional[str] = dataclass_field(
+    date_updated_utc: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "DATE_UPDATED_UTC"},
     )
     """yyyy-MM-dd HH:mm:ss"""
-    owneruser_id: Optional[int] = dataclass_field(
+    owner_user_id: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "OWNER_USER_ID"},
     )
     """The unique identifier of the owner."""
-    visibleto: Optional[str] = dataclass_field(
+    visible_to: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "VISIBLE_TO"},
@@ -972,19 +972,19 @@ class Organization:
         metadata={"wire_name": "BACKGROUND"},
     )
     """The background of the organization."""
-    imageurl: Optional[str] = dataclass_field(
+    image_url: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "IMAGE_URL"},
     )
     """Organization image URL."""
-    visibleteam_id: Optional[int] = dataclass_field(
+    visible_team_id: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "VISIBLE_TEAM_ID"},
     )
     """The unique identifier of the team."""
-    visibleuser_ids: Optional[int] = dataclass_field(
+    visible_user_ids: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "VISIBLE_USER_IDS"},
@@ -1000,7 +1000,7 @@ class TaskRequest:
 
     title: str = dataclass_field(metadata={"wire_name": "TITLE"})
     """The title of the task."""
-    duedate: Optional[str] = dataclass_field(
+    due_date: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "DUE_DATE"},
@@ -1022,7 +1022,7 @@ class TaskRequest:
         metadata={"wire_name": "PRIORITY"},
     )
     """The priority of the task."""
-    publiclyvisible: bool = dataclass_field(
+    publicly_visible: bool = dataclass_field(
         metadata={"wire_name": "PUBLICLY_VISIBLE"},
     )
     """
@@ -1036,7 +1036,7 @@ class Tag:
     Definition: Tag
     """
 
-    tagname: Optional[str] = dataclass_field(
+    tag_name: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "TAG_NAME"},
@@ -1050,9 +1050,9 @@ class ProjectRequest:
     Definition: ProjectRequest
     """
 
-    projectname: str = dataclass_field(metadata={"wire_name": "PROJECT_NAME"})
+    project_name: str = dataclass_field(metadata={"wire_name": "PROJECT_NAME"})
     """The name of the project."""
-    projectdetails: Optional[str] = dataclass_field(
+    project_details: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "PROJECT_DETAILS"},
@@ -1060,25 +1060,25 @@ class ProjectRequest:
     """The details of the project."""
     status: str = dataclass_field(metadata={"wire_name": "STATUS"})
     """The status of the project."""
-    imageurl: Optional[str] = dataclass_field(
+    image_url: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "IMAGE_URL"},
     )
     """The image URL of the project."""
-    visibleto: Optional[str] = dataclass_field(
+    visible_to: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "VISIBLE_TO"},
     )
     """Project Visibility."""
-    visibleteam_id: Optional[int] = dataclass_field(
+    visible_team_id: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "VISIBLE_TEAM_ID"},
     )
     """Visible Team Id (Required when team visibility state is selected)"""
-    visibleuser_ids: Optional[int] = dataclass_field(
+    visible_user_ids: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "VISIBLE_USER_IDS"},
@@ -1124,39 +1124,39 @@ class LeadRequest:
         metadata={"wire_name": "TITLE"},
     )
     """The title of the lead."""
-    firstname: Optional[str] = dataclass_field(
+    first_name: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "FIRST_NAME"},
     )
     """First name of the lead."""
-    lastname: str = dataclass_field(metadata={"wire_name": "LAST_NAME"})
+    last_name: str = dataclass_field(metadata={"wire_name": "LAST_NAME"})
     """Last name of the lead."""
-    leaddescription: Optional[str] = dataclass_field(
+    lead_description: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "LEAD_DESCRIPTION"},
     )
     """A brief description of the lead."""
-    converteddateutc: Optional[str] = dataclass_field(
+    converted_date_utc: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CONVERTED_DATE_UTC"},
     )
     """yyyy-MM-dd HH:mm:ss"""
-    visibleto: Optional[str] = dataclass_field(
+    visible_to: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "VISIBLE_TO"},
     )
     """Lead Visibility"""
-    visibleteam_id: Optional[int] = dataclass_field(
+    visible_team_id: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "VISIBLE_TEAM_ID"},
     )
     """Visible Team Id (Required when team visibility state is selected)"""
-    visibleuser_ids: Optional[int] = dataclass_field(
+    visible_user_ids: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "VISIBLE_USER_IDS"},
@@ -1164,25 +1164,25 @@ class LeadRequest:
     """
     Visible User IDs (Required when individuals visibility state is selected)
     """
-    organizationname: Optional[str] = dataclass_field(
+    organization_name: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ORGANIZATION_NAME"},
     )
     """The name of the organization."""
-    phonenumber: Optional[str] = dataclass_field(
+    phone_number: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "PHONE_NUMBER"},
     )
     """Lead phone number."""
-    mobilephonenumber: Optional[str] = dataclass_field(
+    mobile_phone_number: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "MOBILE_PHONE_NUMBER"},
     )
     """Lead mobile phone number."""
-    emailaddress: Optional[str] = dataclass_field(
+    email_address: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "EMAIL_ADDRESS"},
@@ -1194,31 +1194,31 @@ class LeadRequest:
         metadata={"wire_name": "CONVERTED"},
     )
     """A boolean value determining whether or not the lead is converted."""
-    websiteurl: Optional[str] = dataclass_field(
+    website_url: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "WEBSITE_URL"},
     )
     """Lead website URL"""
-    owneruser_id: Optional[int] = dataclass_field(
+    owner_user_id: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "OWNER_USER_ID"},
     )
     """The unique identifier of the lead owner."""
-    responsibleuser_id: Optional[int] = dataclass_field(
+    responsible_user_id: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "RESPONSIBLE_USER_ID"},
     )
     """The unique identifier of the responsible user."""
-    employeecount: Optional[int] = dataclass_field(
+    employee_count: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "EMPLOYEE_COUNT"},
     )
     """The employee count of the lead."""
-    leadrating: Optional[int] = dataclass_field(
+    lead_rating: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "LEAD_RATING"},
@@ -1250,7 +1250,7 @@ class Address:
         metadata={"wire_name": "ADDRESS_ID"},
     )
     """The unique identifier of the address."""
-    addresstype: Optional[str] = dataclass_field(
+    address_type: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ADDRESS_TYPE"},
@@ -1294,7 +1294,7 @@ class ContactInfo:
     Definition: ContactInfo
     """
 
-    contactinfo_id: Optional[int] = dataclass_field(
+    contact_info_id: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CONTACT_INFO_ID"},
@@ -1338,9 +1338,9 @@ class ContactRequest:
         metadata={"wire_name": "SALUTATION"},
     )
     """The salutation of the contact."""
-    firstname: str = dataclass_field(metadata={"wire_name": "FIRST_NAME"})
+    first_name: str = dataclass_field(metadata={"wire_name": "FIRST_NAME"})
     """First name of the contact."""
-    lastname: str = dataclass_field(metadata={"wire_name": "LAST_NAME"})
+    last_name: str = dataclass_field(metadata={"wire_name": "LAST_NAME"})
     """Last name of the lead."""
     background: Optional[str] = dataclass_field(
         default=None,
@@ -1348,19 +1348,19 @@ class ContactRequest:
         metadata={"wire_name": "BACKGROUND"},
     )
     """Background"""
-    visibleto: Optional[str] = dataclass_field(
+    visible_to: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "VISIBLE_TO"},
     )
     """Contact Visibility"""
-    visibleteam_id: Optional[int] = dataclass_field(
+    visible_team_id: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "VISIBLE_TEAM_ID"},
     )
     """Visible Team Id (Required when team visibility state is selected)"""
-    visibleuser_ids: Optional[int] = dataclass_field(
+    visible_user_ids: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "VISIBLE_USER_IDS"},
@@ -1400,19 +1400,19 @@ class User:
         metadata={"wire_name": "CONTACT_ID"},
     )
     """The unique identifier of the contact."""
-    firstname: Optional[str] = dataclass_field(
+    first_name: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "FIRST_NAME"},
     )
     """First name of the user."""
-    lastname: Optional[str] = dataclass_field(
+    last_name: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "LAST_NAME"},
     )
     """Last name of the user."""
-    emailaddress: Optional[str] = dataclass_field(
+    email_address: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "EMAIL_ADDRESS"},
@@ -1424,13 +1424,13 @@ class User:
         metadata={"wire_name": "TIMEZONE_ID"},
     )
     """The unique identifier of the timezone."""
-    emaildropboxidentifier: Optional[str] = dataclass_field(
+    email_dropbox_identifier: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "EMAIL_DROPBOX_IDENTIFIER"},
     )
     """The unique identifier of the email dropbox."""
-    emaildropboxaddress: Optional[str] = dataclass_field(
+    email_dropbox_address: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "EMAIL_DROPBOX_ADDRESS"},
@@ -1444,7 +1444,7 @@ class User:
     """
     A boolean value determining whether or not the user is an administrator.
     """
-    accountowner: Optional[bool] = dataclass_field(
+    account_owner: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ACCOUNT_OWNER"},
@@ -1458,37 +1458,37 @@ class User:
         metadata={"wire_name": "ACTIVE"},
     )
     """A boolean value determining whether or not the user is active."""
-    datecreatedutc: Optional[str] = dataclass_field(
+    date_created_utc: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "DATE_CREATED_UTC"},
     )
     """yyyy-MM-dd HH:mm:ss"""
-    dateupdatedutc: Optional[str] = dataclass_field(
+    date_updated_utc: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "DATE_UPDATED_UTC"},
     )
     """yyyy-MM-dd HH:mm:ss"""
-    usercurrency: Optional[str] = dataclass_field(
+    user_currency: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "USER_CURRENCY"},
     )
     """User currency."""
-    contactdisplay: Optional[str] = dataclass_field(
+    contact_display: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CONTACT_DISPLAY"},
     )
     """Contact display."""
-    contactorder: Optional[str] = dataclass_field(
+    contact_order: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CONTACT_ORDER"},
     )
     """Contact order."""
-    taskweekstart: Optional[int] = dataclass_field(
+    task_week_start: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "TASK_WEEK_START"},
@@ -1520,49 +1520,49 @@ class Event:
         metadata={"wire_name": "TITLE"},
     )
     """The title of the event."""
-    startdateutc: Optional[str] = dataclass_field(
+    start_date_utc: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "START_DATE_UTC"},
     )
     """yyyy-MM-dd HH:mm:ss"""
-    enddateutc: Optional[str] = dataclass_field(
+    end_date_utc: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "END_DATE_UTC"},
     )
     """yyyy-MM-dd HH:mm:ss"""
-    datecreatedutc: Optional[str] = dataclass_field(
+    date_created_utc: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "DATE_CREATED_UTC"},
     )
     """yyyy-MM-dd HH:mm:ss"""
-    dateupdatedutc: Optional[str] = dataclass_field(
+    date_updated_utc: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "DATE_UPDATED_UTC"},
     )
     """yyyy-MM-dd HH:mm:ss"""
-    owneruser_id: Optional[int] = dataclass_field(
+    owner_user_id: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "OWNER_USER_ID"},
     )
     """The unique identifier of the owner."""
-    remindersent: Optional[bool] = dataclass_field(
+    reminder_sent: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "REMINDER_SENT"},
     )
     """A boolean value determining whether or not the reminder was sent."""
-    allday: Optional[bool] = dataclass_field(
+    all_day: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ALL_DAY"},
     )
     """A boolean value determining whether or not the event is all day."""
-    publiclyvisible: Optional[bool] = dataclass_field(
+    publicly_visible: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "PUBLICLY_VISIBLE"},
@@ -1570,13 +1570,13 @@ class Event:
     """
     A boolean value determining whether or not the event is publicly visible.
     """
-    canedit: Optional[bool] = dataclass_field(
+    can_edit: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CAN_EDIT"},
     )
     """Can edit"""
-    candelete: Optional[bool] = dataclass_field(
+    can_delete: Optional[bool] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CAN_DELETE"},
@@ -1590,29 +1590,29 @@ class OrganizationRequest:
     Definition: OrganizationRequest
     """
 
-    organisationname: str = dataclass_field(
+    organisation_name: str = dataclass_field(
         metadata={"wire_name": "ORGANISATION_NAME"},
     )
     """The name of the organization."""
-    organisationbackground: Optional[str] = dataclass_field(
+    organisation_background: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ORGANISATION_BACKGROUND"},
     )
     """The background of the organization."""
-    visibleto: Optional[str] = dataclass_field(
+    visible_to: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "VISIBLE_TO"},
     )
     """Organization visibility."""
-    visibleteam_id: Optional[int] = dataclass_field(
+    visible_team_id: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "VISIBLE_TEAM_ID"},
     )
     """Visible Team Id (Required when team visibility state is selected)"""
-    visibleuser_ids: Optional[int] = dataclass_field(
+    visible_user_ids: Optional[int] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "VISIBLE_USER_IDS"},

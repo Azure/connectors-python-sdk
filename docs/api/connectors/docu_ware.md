@@ -1,6 +1,6 @@
-# DocuwareClient
+# DocuWareClient
 
-::: azure.connectors.docuware
+::: azure.connectors.docu_ware
     options:
       members:
         - StoreToFileCabinetResponse
@@ -24,4 +24,4 @@
         - GetFileCabinetFieldsResponse
         - GetDialogFieldsResponse
         - ListDocumentsInDocumentTrayResponse
-        - DocuwareClient
+        - DocuWareClient

@@ -1,6 +1,6 @@
-# OnenoteClient
+# OneNoteClient
 
-::: azure.connectors.onenote
+::: azure.connectors.one_note
     options:
       members:
         - CreateSectionInNotebookResponse
@@ -23,5 +23,5 @@
         - SectionListItem
         - SectionResponse
         - SectionGroupResponse
-        - OnenoteClient
+        - OneNoteClient
         - TRIGGER_OPERATIONS

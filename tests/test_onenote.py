@@ -1,13 +1,13 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for OnenoteClient."""
+"""Unit tests for OneNoteClient."""
 
 import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.onenote import OnenoteClient
-from azure.connectors.onenote import (
+from azure.connectors.one_note import OneNoteClient
+from azure.connectors.one_note import (
     CreateSectionInNotebookResponse,
     CreatePageInSectionInput,
     Page,
@@ -38,11 +38,11 @@ from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestOnenoteClientInitialization:
-    """Tests for OnenoteClient initialization."""
+    """Tests for OneNoteClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = OnenoteClient("https://example.azure.com/connections/test",
+        client = OneNoteClient("https://example.azure.com/connections/test",
                                AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -51,14 +51,14 @@ class TestOnenoteClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = OnenoteClient("https://example.azure.com/connections/test/",
+        client = OneNoteClient("https://example.azure.com/connections/test/",
                                AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = OnenoteClient(
+        client = OneNoteClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -67,7 +67,7 @@ class TestOnenoteClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = OnenoteClient(
+        client = OneNoteClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -78,16 +78,16 @@ class TestOnenoteClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            OnenoteClient("", AzureKeyCredential("test-key"))
+            OneNoteClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            OnenoteClient(None, AzureKeyCredential("test-key"))
+            OneNoteClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'onenote'."""
-        client = OnenoteClient(
+        client = OneNoteClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -96,7 +96,7 @@ class TestOnenoteClientInitialization:
 
     def test_init_preserves_url_without_trailing_slash(self, mock_credential):
         """Test that URL without trailing slash is preserved."""
-        client = OnenoteClient(
+        client = OneNoteClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -105,12 +105,12 @@ class TestOnenoteClientInitialization:
 
 
 class TestOnenoteClientLifecycle:
-    """Tests for OnenoteClient lifecycle methods."""
+    """Tests for OneNoteClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = OnenoteClient(
+        client = OneNoteClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -122,12 +122,12 @@ class TestOnenoteClientLifecycle:
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
-        with patch.object(OnenoteClient, 'close', new_callable=AsyncMock) as mock_close:
-            async with OnenoteClient(
+        with patch.object(OneNoteClient, 'close', new_callable=AsyncMock) as mock_close:
+            async with OneNoteClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential
             ) as client:
-                assert isinstance(client, OnenoteClient)
+                assert isinstance(client, OneNoteClient)
 
             mock_close.assert_called_once()
 
@@ -138,7 +138,7 @@ class TestGetNotebooksAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful get notebooks request."""
-        client = OnenoteClient(
+        client = OneNoteClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -162,7 +162,7 @@ class TestGetNotebooksAsync:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
-        client = OnenoteClient(
+        client = OneNoteClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -181,7 +181,7 @@ class TestGetNotebooksAsync:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = OnenoteClient(
+        client = OneNoteClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -204,7 +204,7 @@ class TestGetSectionsInNotebookAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful get sections request."""
-        client = OnenoteClient(
+        client = OneNoteClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -232,7 +232,7 @@ class TestGetSectionsInNotebookAsync:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = OnenoteClient(
+        client = OneNoteClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -257,7 +257,7 @@ class TestCreateSectionInNotebookAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful create section request."""
-        client = OnenoteClient(
+        client = OneNoteClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -289,7 +289,7 @@ class TestCreateSectionInNotebookAsync:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
-        client = OnenoteClient(
+        client = OneNoteClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -317,7 +317,7 @@ class TestGetPagesInSectionAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful get pages request."""
-        client = OnenoteClient(
+        client = OneNoteClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -348,7 +348,7 @@ class TestGetPagesInSectionAsync:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = OnenoteClient(
+        client = OneNoteClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -374,7 +374,7 @@ class TestCreatePageInSectionAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful create page in section request."""
-        client = OnenoteClient(
+        client = OneNoteClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -410,7 +410,7 @@ class TestCreatePageInQuickNotesAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful create page in quick notes request."""
-        client = OnenoteClient(
+        client = OneNoteClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -438,7 +438,7 @@ class TestCreatePageInQuickNotesAsync:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = OnenoteClient(
+        client = OneNoteClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -463,7 +463,7 @@ class TestDeletePageAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful delete page request."""
-        client = OnenoteClient(
+        client = OneNoteClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -497,7 +497,7 @@ class TestGetPageContentAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful get page content request."""
-        client = OnenoteClient(
+        client = OneNoteClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -528,7 +528,7 @@ class TestGetPageContentAsync:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = OnenoteClient(
+        client = OneNoteClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -555,7 +555,7 @@ class TestUpdatePageContentAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful update page content request."""
-        client = OnenoteClient(
+        client = OneNoteClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )

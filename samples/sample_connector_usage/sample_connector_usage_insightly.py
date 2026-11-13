@@ -74,7 +74,7 @@ async def example_3_add_task() -> None:
                 details="Created from insightly SDK sample.",
                 status="NOT STARTED",
                 completed=False,
-                publiclyvisible=False,
+                publicly_visible=False,
             )
 
             created = await client.add_task(input=request)

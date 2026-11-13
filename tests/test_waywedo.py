@@ -1,10 +1,10 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Contract tests for WaywedoClient."""
+"""Contract tests for WayWeDoClient."""
 
-import azure.connectors.waywedo as waywedo_module
-from azure.connectors.waywedo import WaywedoClient
-from azure.connectors.waywedo import TRIGGER_OPERATIONS
+import azure.connectors.way_we_do as waywedo_module
+from azure.connectors.way_we_do import WayWeDoClient
+from azure.connectors.way_we_do import TRIGGER_OPERATIONS
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 
 
@@ -29,7 +29,7 @@ OPERATION_CONTRACTS = {
 class TestWaywedoClient(GeneratedConnectorContractTests):
     """Test the generated Way We Do client contract."""
 
-    client_type = WaywedoClient
+    client_type = WayWeDoClient
     connector_module = waywedo_module
     connector_name = "waywedo"
     operation_contracts = OPERATION_CONTRACTS

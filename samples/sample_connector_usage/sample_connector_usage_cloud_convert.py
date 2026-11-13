@@ -6,7 +6,7 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.cloudconvert import CloudconvertClient
+from azure.connectors.cloud_convert import CloudConvertClient
 
 
 CONNECTION_RUNTIME_URL = os.environ.get("CLOUDCONVERT_CONNECTION_URL", "")
@@ -20,7 +20,7 @@ async def main() -> None:
 
     async with DefaultAzureCredential() as credential:
         try:
-            async with CloudconvertClient(CONNECTION_RUNTIME_URL, credential) as client:
+            async with CloudConvertClient(CONNECTION_RUNTIME_URL, credential) as client:
                 options = await client.get_convert_options()
                 print(f"Conversion options: {options}")
         except ConnectorException as ex:

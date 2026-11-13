@@ -6,7 +6,7 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.waywedo import WaywedoClient
+from azure.connectors.way_we_do import WayWeDoClient
 
 
 CONNECTION_RUNTIME_URL = os.environ.get("WAYWEDO_CONNECTION_URL", "")
@@ -20,7 +20,7 @@ async def main() -> None:
 
     async with DefaultAzureCredential() as credential:
         try:
-            async with WaywedoClient(CONNECTION_RUNTIME_URL, credential) as client:
+            async with WayWeDoClient(CONNECTION_RUNTIME_URL, credential) as client:
                 checklists = [item async for item in client.list_find_checklist()]
                 print(f"Checklists: {checklists}")
         except ConnectorException as ex:

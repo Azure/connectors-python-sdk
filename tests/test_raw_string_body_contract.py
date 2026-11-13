@@ -22,7 +22,7 @@ from azure.connectors.azure_monitor_logs import AzureMonitorLogsClient
 from azure.connectors.azure_queues import AzureQueuesClient
 from azure.connectors.azure_tables import AzureTablesClient, CreateEntityInput
 from azure.connectors.document_db import DocumentDBClient
-from azure.connectors.onenote import OnenoteClient
+from azure.connectors.one_note import OneNoteClient
 from azure.connectors.power_bi import PowerBIClient
 from azure.connectors.sdk import ConnectorClientBase, ConnectorException
 from azure.connectors.teams import TeamsClient
@@ -75,12 +75,12 @@ RAW_OPERATIONS = [
         },
     ),
     RawOperation(
-        OnenoteClient,
+        OneNoteClient,
         "create_page_in_section",
         {"notebook_key": "notebook", "section_id": "section"},
         "text/plain",
     ),
-    RawOperation(OnenoteClient, "create_page_in_quick_notes", {}),
+    RawOperation(OneNoteClient, "create_page_in_quick_notes", {}),
     RawOperation(
         PowerBIClient,
         "goal_value_checkin_note",

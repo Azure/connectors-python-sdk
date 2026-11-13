@@ -1,6 +1,6 @@
-# CloudconvertClient
+# CloudConvertClient
 
-::: azure.connectors.cloudconvert
+::: azure.connectors.cloud_convert
     options:
       members:
         - ConvertFileInput
@@ -12,4 +12,4 @@
         - GetCaptureWebsiteOptionsResponse
         - GetMergeInputsResponse
         - GetMergeOptionsResponse
-        - CloudconvertClient
+        - CloudConvertClient

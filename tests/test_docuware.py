@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for DocuwareClient."""
+"""Unit tests for DocuWareClient."""
 
 from collections.abc import Mapping
 from typing import Any, get_args, get_origin, get_type_hints
@@ -9,8 +9,8 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.docuware import DocuwareClient
-from azure.connectors.docuware import (
+from azure.connectors.docu_ware import DocuWareClient
+from azure.connectors.docu_ware import (
     SearchForDocumentsInFileCabinetInput,
     UpdateIndexFieldsInput,
 )
@@ -22,11 +22,11 @@ from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestDocuwareClientInitialization:
-    """Tests for DocuwareClient initialization."""
+    """Tests for DocuWareClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = DocuwareClient("https://example.azure.com/connections/test",
+        client = DocuWareClient("https://example.azure.com/connections/test",
                                 AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -35,14 +35,14 @@ class TestDocuwareClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = DocuwareClient("https://example.azure.com/connections/test/",
+        client = DocuWareClient("https://example.azure.com/connections/test/",
                                 AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = DocuwareClient(
+        client = DocuWareClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -51,7 +51,7 @@ class TestDocuwareClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = DocuwareClient(
+        client = DocuWareClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -62,16 +62,16 @@ class TestDocuwareClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            DocuwareClient("", AzureKeyCredential("test-key"))
+            DocuWareClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            DocuwareClient(None, AzureKeyCredential("test-key"))
+            DocuWareClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'docuware'."""
-        client = DocuwareClient(
+        client = DocuWareClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -80,12 +80,12 @@ class TestDocuwareClientInitialization:
 
 
 class TestDocuwareClientLifecycle:
-    """Tests for DocuwareClient lifecycle methods."""
+    """Tests for DocuWareClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = DocuwareClient(
+        client = DocuWareClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -97,12 +97,12 @@ class TestDocuwareClientLifecycle:
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
-        with patch.object(DocuwareClient, "close", new_callable=AsyncMock) as mock_close:
-            async with DocuwareClient(
+        with patch.object(DocuWareClient, "close", new_callable=AsyncMock) as mock_close:
+            async with DocuWareClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential,
             ) as client:
-                assert isinstance(client, DocuwareClient)
+                assert isinstance(client, DocuWareClient)
 
             mock_close.assert_called_once()
 
@@ -113,7 +113,7 @@ class TestGetOrganizationAsync:
     @pytest.mark.asyncio
     async def test_success_sends_get(self, mock_credential):
         """Test that the operation issues a GET and returns parsed JSON."""
-        client = DocuwareClient(
+        client = DocuWareClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -138,7 +138,7 @@ class TestGetOrganizationAsync:
     @pytest.mark.asyncio
     async def test_error_response_raises_connector_exception(self, mock_credential):
         """Test that a non-2xx response raises ConnectorException."""
-        client = DocuwareClient(
+        client = DocuWareClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -162,7 +162,7 @@ class TestGetFileCabinetsAsync:
     @pytest.mark.asyncio
     async def test_success_appends_query_parameter(self, mock_credential):
         """Test that the query parameter is appended to the request URL."""
-        client = DocuwareClient(
+        client = DocuWareClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -192,7 +192,7 @@ class TestSearchForDocumentsInFileCabinetAsync:
     def test_input_annotation_accepts_model_or_mapping(self):
         """Test dynamic search criteria support typed models and wire mappings."""
         input_annotation = get_type_hints(
-            DocuwareClient.search_for_documents_in_file_cabinet
+            DocuWareClient.search_for_documents_in_file_cabinet
         )["input"]
         annotation_members = get_args(input_annotation)
 
@@ -207,7 +207,7 @@ class TestSearchForDocumentsInFileCabinetAsync:
     @pytest.mark.asyncio
     async def test_success_forwards_request_body(self, mock_credential):
         """Test that the POST operation forwards the request body to send_async."""
-        client = DocuwareClient(
+        client = DocuWareClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -238,7 +238,7 @@ class TestSearchForDocumentsInFileCabinetAsync:
     @pytest.mark.asyncio
     async def test_error_response_raises_connector_exception(self, mock_credential):
         """Test that a non-2xx response raises ConnectorException."""
-        client = DocuwareClient(
+        client = DocuWareClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -267,7 +267,7 @@ class TestUpdateIndexFieldsAsync:
     @pytest.mark.asyncio
     async def test_success_forwards_request_body(self, mock_credential):
         """Test that the PUT operation forwards the request body to send_async."""
-        client = DocuwareClient(
+        client = DocuWareClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -296,7 +296,7 @@ class TestDeleteDocumentAsync:
     @pytest.mark.asyncio
     async def test_success_sends_delete(self, mock_credential):
         """Test that the operation issues a DELETE and returns None."""
-        client = DocuwareClient(
+        client = DocuWareClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -322,7 +322,7 @@ class TestDeleteDocumentAsync:
     @pytest.mark.asyncio
     async def test_error_response_raises_connector_exception(self, mock_credential):
         """Test that a non-2xx response raises ConnectorException."""
-        client = DocuwareClient(
+        client = DocuWareClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -349,7 +349,7 @@ class TestDownloadFileAsync:
     @pytest.mark.asyncio
     async def test_success_returns_content_bytes(self, mock_credential):
         """Test that the operation returns the raw response content."""
-        client = DocuwareClient(
+        client = DocuWareClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -419,7 +419,7 @@ OPERATION_ARGS = {
 ALL_OPERATIONS = sorted(OPERATION_ARGS.keys())
 
 
-async def _invoke_operation(client: DocuwareClient, operation: str):
+async def _invoke_operation(client: DocuWareClient, operation: str):
     """Invoke a DocuWare operation by name for shared method tests."""
     method = getattr(client, f"{operation}")
     return await resolve_generated_result(method(**OPERATION_ARGS[operation]))
@@ -432,7 +432,7 @@ class TestDocuwareClientAllOperations:
     @pytest.mark.parametrize("operation", ALL_OPERATIONS)
     async def test_all_operations_success(self, mock_credential, operation):
         """Test every operation issues a request and returns without error."""
-        client = DocuwareClient(BASE_URL, credential=mock_credential)
+        client = DocuWareClient(BASE_URL, credential=mock_credential)
         mock_response = MockResponse(status=200, text="{}")
 
         with patch.object(
@@ -458,7 +458,7 @@ class TestDocuwareClientAllOperationsErrorHandling:
         operation,
     ):
         """Test non-2xx responses raise ConnectorException for every operation."""
-        client = DocuwareClient(BASE_URL, credential=mock_credential)
+        client = DocuWareClient(BASE_URL, credential=mock_credential)
         mock_response = MockResponse(status=500, text='{"error":"server failure"}')
 
         with patch.object(

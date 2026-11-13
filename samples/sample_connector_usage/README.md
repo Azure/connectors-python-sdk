@@ -75,7 +75,7 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_office365_users.py` | Office 365 Users | `OFFICE365USERS_CONNECTION_URL` |
 | `sample_connector_usage_one_drive.py` | OneDrive (Personal) | `ONEDRIVE_CONNECTION_URL` |
 | `sample_connector_usage_one_drive_for_business.py` | OneDrive for Business | `ONEDRIVEFORBUSINESS_CONNECTION_URL` |
-| `sample_connector_usage_onenote.py` | OneNote | `ONENOTE_CONNECTION_URL` |
+| `sample_connector_usage_one_note.py` | OneNote | `ONENOTE_CONNECTION_URL` |
 | `sample_connector_usage_outlook.py` | Outlook.com | `OUTLOOK_CONNECTION_URL` |
 | `sample_connector_usage_planner.py` | Microsoft Planner | `PLANNER_CONNECTION_URL` |
 | `sample_connector_usage_power_bi.py` | Power BI | `POWERBI_CONNECTION_URL` |
@@ -96,7 +96,7 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_yammer.py` | Yammer (Viva Engage) | `YAMMER_CONNECTION_URL` |
 | `sample_connector_usage_azure_event_grid.py` | Azure Event Grid | `AZUREEVENTGRID_CONNECTION_URL` |
 | `sample_connector_usage_azure_iot_central.py` | Azure IoT Central | `AZUREIOTCENTRAL_CONNECTION_URL` |
-| `sample_connector_usage_cloudconvert.py` | CloudConvert | `CLOUDCONVERT_CONNECTION_URL` |
+| `sample_connector_usage_cloud_convert.py` | CloudConvert | `CLOUDCONVERT_CONNECTION_URL` |
 | `sample_connector_usage_cloudmersive_convert.py` | Cloudmersive Document Conversion | `CLOUDMERSIVECONVERT_CONNECTION_URL` |
 | `sample_connector_usage_dynamics_ax.py` | Fin & Ops Apps (Dynamics 365) | `DYNAMICSAX_CONNECTION_URL` |
 | `sample_connector_usage_pdf_co.py` | PDF.co | `PDFCO_CONNECTION_URL` |
@@ -104,7 +104,7 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_sql.py` | SQL Server | `SQL_CONNECTION_URL` |
 | `sample_connector_usage_zendesk.py` | Zendesk | `ZENDESK_CONNECTION_URL` |
 | `sample_connector_usage_pipedrive.py` | Pipedrive | `PIPEDRIVE_CONNECTION_URL` |
-| `sample_connector_usage_docuware.py` | DocuWare | `DOCUWARE_CONNECTION_URL` |
+| `sample_connector_usage_docu_ware.py` | DocuWare | `DOCUWARE_CONNECTION_URL` |
 | `sample_connector_usage_signing_hub.py` | SigningHub | `SIGNINGHUB_CONNECTION_URL` |
 | `sample_connector_usage_eventbrite.py` | Eventbrite | `EVENTBRITE_CONNECTION_URL` |
 | `sample_connector_usage_formstack_forms.py` | Formstack Forms | `FORMSTACKFORMS_CONNECTION_URL` |
@@ -112,7 +112,7 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_ticketmaster.py` | Ticketmaster | `TICKETMASTER_CONNECTION_URL` |
 | `sample_connector_usage_seismic_planner.py` | Seismic Planner | `SEISMICPLANNER_CONNECTION_URL`, `SEISMICPLANNER_SPACE_ID` |
 | `sample_connector_usage_zepto_mail.py` | Zoho ZeptoMail | `ZEPTOMAIL_CONNECTION_URL` |
-| `sample_connector_usage_waywedo.py` | Way We Do | `WAYWEDO_CONNECTION_URL` |
+| `sample_connector_usage_way_we_do.py` | Way We Do | `WAYWEDO_CONNECTION_URL` |
 | `sample_connector_usage_meeting_room_map.py` | Meeting Room Map | `MEETINGROOMMAP_CONNECTION_URL` |
 | `sample_connector_usage_star_rez_rest_v1.py` | StarRez REST V1 | `STARREZRESTV1_CONNECTION_URL` |
 | `sample_connector_usage_replicon.py` | Replicon | `REPLICON_CONNECTION_URL` |

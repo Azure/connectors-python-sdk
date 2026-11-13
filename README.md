@@ -263,12 +263,12 @@ The following connectors have been generated and validated with comprehensive te
 | **Box** | `azure.connectors.box` | ✅ Complete | 🔄 SDK Generated |
 | **Campfire** | `azure.connectors.campfire` | ✅ Complete | 🔄 SDK Generated |
 | **ClickSend SMS** | `azure.connectors.click_send_sms` | ✅ Complete | 🔄 SDK Generated |
-| **CloudConvert** | `azure.connectors.cloudconvert` | ✅ Complete | 🔄 SDK Generated |
+| **CloudConvert** | `azure.connectors.cloud_convert` | ✅ Complete | 🔄 SDK Generated |
 | **Cloudmersive Document Conversion** | `azure.connectors.cloudmersive_convert` | ✅ Complete | 🔄 SDK Generated |
 | **Dataflows (Power Query)** | `azure.connectors.dataflows` | ✅ Complete | 🔄 SDK Generated |
 | **DataFlows SMS** | `azure.connectors.data_flows_sms` | ✅ Complete | 🔄 SDK Generated |
 | **Docusign** | `azure.connectors.docusign` | ✅ Complete | 🔄 SDK Generated |
-| **DocuWare** | `azure.connectors.docuware` | ✅ Complete | 🔄 SDK Generated |
+| **DocuWare** | `azure.connectors.docu_ware` | ✅ Complete | 🔄 SDK Generated |
 | **Dropbox** | `azure.connectors.dropbox` | ✅ Complete | 🔄 SDK Generated |
 | **Elfsquad Data** | `azure.connectors.elfsquad_data` | ✅ Complete | 🔄 SDK Generated |
 | **Etsy** | `azure.connectors.etsy` | ✅ Complete | 🔄 SDK Generated |
@@ -305,7 +305,7 @@ The following connectors have been generated and validated with comprehensive te
 | **Office 365 Users** | `azure.connectors.office365_users` | ✅ Complete | ✅ E2E Validated |
 | **OneDrive (Personal)** | `azure.connectors.one_drive` | ✅ Complete | 🔄 SDK Generated |
 | **OneDrive for Business** | `azure.connectors.one_drive_for_business` | ✅ Complete | 🔄 SDK Generated |
-| **OneNote** | `azure.connectors.onenote` | ✅ Complete | 🔄 SDK Generated |
+| **OneNote** | `azure.connectors.one_note` | ✅ Complete | 🔄 SDK Generated |
 | **Orderful** | `azure.connectors.orderful` | ✅ Complete | 🔄 SDK Generated |
 | **Outlook.com** | `azure.connectors.outlook` | ✅ Complete | 🔄 SDK Generated |
 | **PDF.co** | `azure.connectors.pdf_co` | ✅ Complete | 🔄 SDK Generated |
@@ -338,7 +338,7 @@ The following connectors have been generated and validated with comprehensive te
 | **Twitter** | `azure.connectors.twitter` | ✅ Complete | 🔄 SDK Generated |
 | **Typeform** | `azure.connectors.typeform` | ✅ Complete | 🔄 SDK Generated |
 | **Universal Print** | `azure.connectors.universal_print` | ✅ Complete | 🔄 SDK Generated |
-| **Way We Do** | `azure.connectors.waywedo` | ✅ Complete | 🔄 SDK Generated |
+| **Way We Do** | `azure.connectors.way_we_do` | ✅ Complete | 🔄 SDK Generated |
 | **Webex** | `azure.connectors.webex` | ✅ Complete | 🔄 SDK Generated |
 | **Word Online (Business)** | `azure.connectors.word_online_business` | ✅ Complete | 🔄 SDK Generated |
 | **WordPress** | `azure.connectors.word_press` | ✅ Complete | 🔄 SDK Generated |

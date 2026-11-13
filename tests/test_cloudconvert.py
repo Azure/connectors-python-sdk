@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Contract tests for CloudconvertClient."""
+"""Contract tests for CloudConvertClient."""
 
-import azure.connectors.cloudconvert as cloudconvert_module
-from azure.connectors.cloudconvert import CloudconvertClient
+import azure.connectors.cloud_convert as cloudconvert_module
+from azure.connectors.cloud_convert import CloudConvertClient
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 
 
@@ -33,7 +33,7 @@ OPERATION_CONTRACTS = {
 class TestCloudconvertClient(GeneratedConnectorContractTests):
     """Test the generated CloudConvert client contract."""
 
-    client_type = CloudconvertClient
+    client_type = CloudConvertClient
     connector_module = cloudconvert_module
     connector_name = "cloudconvert"
     operation_contracts = OPERATION_CONTRACTS

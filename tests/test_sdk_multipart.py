@@ -16,7 +16,7 @@ from aiohttp.test_utils import TestServer
 from azure.core.credentials import AzureKeyCredential
 
 from azure.connectors.cloudmersive_convert import CloudmersiveConvertClient
-from azure.connectors.docuware import DocuwareClient
+from azure.connectors.docu_ware import DocuWareClient
 from azure.connectors.sdk import ConnectorException, MultipartFile, encode_multipart_form_data
 from azure.connectors.zoho_sign import ZohoSignClient
 from tests.test_sdk_azure_core_pipeline import RecordingTransport, create_response
@@ -99,7 +99,7 @@ async def test_generated_docuware_upload_round_trips_filename(file_name: str) ->
     application = web.Application()
     application.router.add_post("/FileCabinets/cabinet/Documents", receive_upload)
     async with TestServer(application) as server:
-        async with DocuwareClient(
+        async with DocuWareClient(
             str(server.make_url("/")),
             AzureKeyCredential("test-key"),
         ) as client:
@@ -186,7 +186,7 @@ async def test_generated_docuware_upload_preserves_hidden_default(
     """Send internal defaults while omitting absent optional fields."""
     transport = RecordingTransport(create_response(content=b'{"DocumentId":123}'))
     content = b"\x00\xff"
-    async with DocuwareClient(
+    async with DocuWareClient(
         "https://example.test/connection",
         AzureKeyCredential("test-key"),
         transport=transport,

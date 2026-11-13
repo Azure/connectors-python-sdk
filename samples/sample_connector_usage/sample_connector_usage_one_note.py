@@ -18,15 +18,15 @@ Usage:
     Set environment variable:
     $env:ONENOTE_CONNECTION_URL = "<connection-url>"
 
-    python sample_connector_usage_onenote.py
+    python sample_connector_usage_one_note.py
 """
 
 import asyncio
 import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
-from azure.connectors.onenote import OnenoteClient
-from azure.connectors.onenote import (
+from azure.connectors.one_note import OneNoteClient
+from azure.connectors.one_note import (
     CreateSectionRequest,
 )
 
@@ -44,7 +44,7 @@ async def example_1_list_notebooks():
 
     async with DefaultAzureCredential() as credential:
 
-        async with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with OneNoteClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 items = [item async for item in client.list_notebooks()]
 
@@ -71,7 +71,7 @@ async def example_2_list_sections():
 
     async with DefaultAzureCredential() as credential:
 
-        async with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with OneNoteClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 items = [item async for item in client.list_sections_in_notebook(
                     notebook_key=NOTEBOOK_KEY
@@ -101,7 +101,7 @@ async def example_3_get_pages_in_section():
 
     async with DefaultAzureCredential() as credential:
 
-        async with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with OneNoteClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 pages = [item async for item in client.list_pages_in_section(
                     notebook_key=NOTEBOOK_KEY,
@@ -130,7 +130,7 @@ async def example_4_create_section():
 
     async with DefaultAzureCredential() as credential:
 
-        async with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with OneNoteClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 section_request = CreateSectionRequest(name="SDK Test Section")
 
@@ -158,7 +158,7 @@ async def example_5_create_quick_note():
 
     async with DefaultAzureCredential() as credential:
 
-        async with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with OneNoteClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 page_input = (
                     "<html><head><title>Quick Note</title></head>"
@@ -191,7 +191,7 @@ async def example_6_get_page_content():
 
     async with DefaultAzureCredential() as credential:
 
-        async with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with OneNoteClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 result = await client.get_page_content(
                     notebook_key=NOTEBOOK_KEY,

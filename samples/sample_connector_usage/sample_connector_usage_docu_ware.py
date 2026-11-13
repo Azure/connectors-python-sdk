@@ -18,7 +18,7 @@ Usage:
     $env:DOCUWARE_CONNECTION_URL =
         "https://[region].azure-apihub.net/apim/docuware/[connection-id]"
 
-    python sample_connector_usage_docuware.py
+    python sample_connector_usage_docu_ware.py
 """
 
 import asyncio
@@ -27,8 +27,8 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.docuware import DocuwareClient
-from azure.connectors.docuware import (
+from azure.connectors.docu_ware import DocuWareClient
+from azure.connectors.docu_ware import (
     SearchForDocumentsInFileCabinetInput,
 )
 
@@ -43,7 +43,7 @@ async def example_1_get_file_cabinets():
 
     async with DefaultAzureCredential() as credential:
 
-        async with DocuwareClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with DocuWareClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 items = [item async for item in client.list_file_cabinets(
                     file_cabinet_type="<file-cabinet-type>",
@@ -63,7 +63,7 @@ async def example_2_search_documents():
 
     async with DefaultAzureCredential() as credential:
 
-        async with DocuwareClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with DocuWareClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 request = SearchForDocumentsInFileCabinetInput()
 
