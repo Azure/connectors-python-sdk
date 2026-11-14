@@ -1,6 +1,6 @@
-# ProjectplaceClient
+# ProjectPlaceClient
 
-::: azure.connectors.projectplace
+::: azure.connectors.project_place
     options:
       members:
         - SetWebhookCardCreateInput
@@ -10,5 +10,5 @@
         - CreateCardResponse
         - MoveCardInput
         - MoveCardResponse
-        - ProjectplaceClient
+        - ProjectPlaceClient
         - TRIGGER_OPERATIONS

@@ -96,7 +96,7 @@ class TestSigningHubClientLifecycle:
             mock_close.assert_called_once()
 
 
-class TestSigninghubModelSerialization:
+class TestSigningHubModelSerialization:
     """Tests for distinct SigningHub wire names that normalize alike."""
 
     def test_upload_document_preserves_colliding_document_ids(self):

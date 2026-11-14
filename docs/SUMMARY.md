@@ -86,7 +86,7 @@
         * [PlivoClient](api/connectors/plivo.md)
         * [PlumsailClient](api/connectors/plumsail.md)
         * [PowerBIClient](api/connectors/power_bi.md)
-        * [ProjectplaceClient](api/connectors/projectplace.md)
+        * [ProjectPlaceClient](api/connectors/project_place.md)
         * [RepliconClient](api/connectors/replicon.md)
         * [RevAIClient](api/connectors/rev_ai.md)
         * [RssClient](api/connectors/rss.md)

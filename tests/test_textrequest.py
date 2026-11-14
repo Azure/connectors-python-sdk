@@ -681,7 +681,7 @@ class TestTextRequestClientErrorHandling:
             assert exc_info.value.status_code == 500
 
 
-class TestTextrequestTriggerOperations:
+class TestTextRequestTriggerOperations:
     """Tests for the module-level TRIGGER_OPERATIONS registry."""
 
     def test_all_expected_triggers_registered(self):
@@ -704,7 +704,7 @@ class TestTextrequestTriggerOperations:
         assert not hasattr(TextRequestClient, "texting_webhook_async")
 
 
-class TestTextrequestTypeSerialization:
+class TestTextRequestTypeSerialization:
     """Tests for TextRequest dataclass defaults."""
 
     def test_dataclass_defaults(self):

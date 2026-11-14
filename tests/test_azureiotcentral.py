@@ -561,7 +561,7 @@ class TestAzureIoTCentralClientErrorHandling:
             assert exc_info.value.status_code == 500
 
 
-class TestAzureiotcentralTypeSerialization:
+class TestAzureIoTCentralTypeSerialization:
     """Tests for IoT Central connector dataclass defaults."""
 
     def test_dataclass_instances_initialize_expected_defaults(self):
@@ -589,7 +589,7 @@ class TestAzureiotcentralTypeSerialization:
         assert trigger.id is None
 
 
-class TestAzureiotcentralTriggerOperations:
+class TestAzureIoTCentralTriggerOperations:
     """Tests for the module-level trigger registration metadata."""
 
     def test_workflow_create_trigger_registered_as_trigger(self):

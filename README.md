@@ -314,7 +314,7 @@ The following connectors have been generated and validated with comprehensive te
 | **Plivo** | `azure.connectors.plivo` | ✅ Complete | 🔄 SDK Generated |
 | **Plumsail Documents** | `azure.connectors.plumsail` | ✅ Complete | 🔄 SDK Generated |
 | **Power BI** | `azure.connectors.power_bi` | ✅ Complete | 🔄 SDK Generated |
-| **Projectplace** | `azure.connectors.projectplace` | ✅ Complete | 🔄 SDK Generated |
+| **ProjectPlace** | `azure.connectors.project_place` | ✅ Complete | 🔄 SDK Generated |
 | **Replicon** | `azure.connectors.replicon` | ✅ Complete | 🔄 SDK Generated |
 | **Rev.ai** | `azure.connectors.rev_ai` | ✅ Complete | 🔄 SDK Generated |
 | **RSS** | `azure.connectors.rss` | ✅ Complete | 🔄 SDK Generated |

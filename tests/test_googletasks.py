@@ -262,7 +262,7 @@ class TestGoogleTasksClientErrorHandling:
             assert exc_info.value.status_code == 500
 
 
-class TestGoogletasksTriggerOperations:
+class TestGoogleTasksTriggerOperations:
     """Tests for Google Tasks trigger registration metadata."""
 
     def test_triggers_are_registered_without_callable_methods(self):
@@ -280,8 +280,8 @@ class TestGoogletasksTriggerOperations:
         assert not hasattr(GoogleTasksClient, "on_completed_task_in_list_async")
 
 
-class TestGoogletasksTypeSerialization:
-    """Tests for Googletasks connector dataclass defaults."""
+class TestGoogleTasksTypeSerialization:
+    """Tests for GoogleTasks connector dataclass defaults."""
 
     def test_dataclass_instances_initialize_expected_defaults(self):
         """Test generated dataclasses initialize with expected default values."""

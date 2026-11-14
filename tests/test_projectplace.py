@@ -1,14 +1,14 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for ProjectplaceClient."""
+"""Unit tests for ProjectPlaceClient."""
 
 from unittest.mock import AsyncMock, patch
 
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.projectplace import ProjectplaceClient
-from azure.connectors.projectplace import (
+from azure.connectors.project_place import ProjectPlaceClient
+from azure.connectors.project_place import (
     CreateCardInput,
     MoveCardInput,
     TRIGGER_OPERATIONS,
@@ -20,12 +20,12 @@ from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import resolve_generated_result
 
 
-class TestProjectplaceClientInitialization:
-    """Tests for ProjectplaceClient initialization."""
+class TestProjectPlaceClientInitialization:
+    """Tests for ProjectPlaceClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = ProjectplaceClient(
+        client = ProjectPlaceClient(
             "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -34,14 +34,14 @@ class TestProjectplaceClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = ProjectplaceClient(
+        client = ProjectPlaceClient(
             "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = ProjectplaceClient(
+        client = ProjectPlaceClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -50,7 +50,7 @@ class TestProjectplaceClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = ProjectplaceClient(
+        client = ProjectPlaceClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -61,16 +61,16 @@ class TestProjectplaceClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            ProjectplaceClient("", AzureKeyCredential("test-key"))
+            ProjectPlaceClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            ProjectplaceClient(None, AzureKeyCredential("test-key"))
+            ProjectPlaceClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'projectplace'."""
-        client = ProjectplaceClient(
+        client = ProjectPlaceClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -78,13 +78,13 @@ class TestProjectplaceClientInitialization:
         assert client.connector_name == "projectplace"
 
 
-class TestProjectplaceClientLifecycle:
-    """Tests for ProjectplaceClient lifecycle methods."""
+class TestProjectPlaceClientLifecycle:
+    """Tests for ProjectPlaceClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = ProjectplaceClient(
+        client = ProjectPlaceClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -96,23 +96,23 @@ class TestProjectplaceClientLifecycle:
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
-        with patch.object(ProjectplaceClient, "close", new_callable=AsyncMock) as mock_close:
-            async with ProjectplaceClient(
+        with patch.object(ProjectPlaceClient, "close", new_callable=AsyncMock) as mock_close:
+            async with ProjectPlaceClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential,
             ) as client:
-                assert isinstance(client, ProjectplaceClient)
+                assert isinstance(client, ProjectPlaceClient)
 
             mock_close.assert_called_once()
 
 
-class TestProjectplaceClientOperations:
-    """Tests for ProjectplaceClient operations against expected HTTP calls."""
+class TestProjectPlaceClientOperations:
+    """Tests for ProjectPlaceClient operations against expected HTTP calls."""
 
     @pytest.mark.asyncio
     async def test_create_card_success(self, mock_credential):
         """Test create card issues a POST to the create_card route with a body."""
-        client = ProjectplaceClient(
+        client = ProjectPlaceClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -138,7 +138,7 @@ class TestProjectplaceClientOperations:
     @pytest.mark.asyncio
     async def test_move_card_success(self, mock_credential):
         """Test move card issues a POST to the move_card route with a body."""
-        client = ProjectplaceClient(
+        client = ProjectPlaceClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -164,7 +164,7 @@ class TestProjectplaceClientOperations:
     @pytest.mark.asyncio
     async def test_list_boards_success(self, mock_credential):
         """Test list boards issues a GET to the list_boards route."""
-        client = ProjectplaceClient(
+        client = ProjectPlaceClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -186,7 +186,7 @@ class TestProjectplaceClientOperations:
     @pytest.mark.asyncio
     async def test_empty_response_body_returns_none(self, mock_credential):
         """Test a 2xx response with no body returns None."""
-        client = ProjectplaceClient(
+        client = ProjectPlaceClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -206,8 +206,8 @@ class TestProjectplaceClientOperations:
             assert result is None
 
 
-class TestProjectplaceClientErrorHandling:
-    """Error handling tests for ProjectplaceClient operations."""
+class TestProjectPlaceClientErrorHandling:
+    """Error handling tests for ProjectPlaceClient operations."""
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
@@ -216,7 +216,7 @@ class TestProjectplaceClientErrorHandling:
     )
     async def test_error_response_raises_exception(self, mock_credential, operation):
         """Test non-2xx responses raise ConnectorException for every operation."""
-        client = ProjectplaceClient(
+        client = ProjectPlaceClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -245,11 +245,11 @@ class TestProjectplaceClientErrorHandling:
             assert exc_info.value.status_code == 500
 
 
-class TestProjectplaceTriggerOperations:
+class TestProjectPlaceTriggerOperations:
     """Tests for the module-level TRIGGER_OPERATIONS registry."""
 
     def test_all_expected_triggers_registered(self):
-        """Test the registry exposes every Projectplace trigger operation."""
+        """Test the registry exposes every ProjectPlace trigger operation."""
         assert set(TRIGGER_OPERATIONS) == {
             "set_webhook_card_create",
             "set_webhook_properties_change",
@@ -269,13 +269,13 @@ class TestProjectplaceTriggerOperations:
 
     def test_triggers_are_not_client_methods(self):
         """Test trigger operations are not emitted as callable client methods."""
-        assert not hasattr(ProjectplaceClient, "set_webhook_card_create_async")
-        assert not hasattr(ProjectplaceClient, "set_webhook_properties_change_async")
-        assert not hasattr(ProjectplaceClient, "set_webhook_card_due_date_async")
+        assert not hasattr(ProjectPlaceClient, "set_webhook_card_create_async")
+        assert not hasattr(ProjectPlaceClient, "set_webhook_properties_change_async")
+        assert not hasattr(ProjectPlaceClient, "set_webhook_card_due_date_async")
 
 
-class TestProjectplaceTypeSerialization:
-    """Tests for Projectplace connector dataclass defaults."""
+class TestProjectPlaceTypeSerialization:
+    """Tests for ProjectPlace connector dataclass defaults."""
 
     def test_request_dataclasses_instantiate(self):
         """Test generated request dataclasses preserve required values and defaults."""

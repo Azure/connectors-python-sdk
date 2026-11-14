@@ -346,7 +346,7 @@ class TestOnNewEmailInGroupTrigger:
         assert not hasattr(Office365GroupsMailClient, "on_new_email_in_group_async")
 
 
-class TestOffice365groupsmailTypeSerialization:
+class TestOffice365GroupsMailTypeSerialization:
     """Tests for generated dataclass defaults and wire names."""
 
     def test_dataclass_instances_initialize_expected_defaults(self):

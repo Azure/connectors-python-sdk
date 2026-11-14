@@ -470,7 +470,7 @@ class TestClickSendSmsClientErrorHandling:
             assert exc_info.value.status_code == 500
 
 
-class TestClicksendsmsTriggerOperations:
+class TestClickSendSmsTriggerOperations:
     """Tests for the module-level TRIGGER_OPERATIONS registry."""
 
     def test_all_expected_triggers_registered(self):
@@ -493,7 +493,7 @@ class TestClicksendsmsTriggerOperations:
         assert not hasattr(ClickSendSmsClient, "sms_inbound_automation_async")
 
 
-class TestClicksendsmsTypeSerialization:
+class TestClickSendSmsTypeSerialization:
     """Tests for ClickSend SMS dataclass defaults."""
 
     def test_dataclass_defaults(self):

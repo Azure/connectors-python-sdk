@@ -235,7 +235,7 @@ class TestOneDriveForBusinessClientMethods:
             assert exc_info.value.status_code == 500
 
 
-class TestOnedriveforbusinessTypeDefinitions:
+class TestOneDriveForBusinessTypeDefinitions:
     """Tests for generated type definitions."""
 
     def test_type_instantiation(self):

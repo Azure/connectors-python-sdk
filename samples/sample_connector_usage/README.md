@@ -50,7 +50,7 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_infusionsoft.py` | Infusionsoft (Keap) | `INFUSIONSOFT_CONNECTION_URL` |
 | `sample_connector_usage_insightly.py` | Insightly | `INSIGHTLY_CONNECTION_URL` |
 | `sample_connector_usage_monday.py` | Monday.com | `MONDAY_CONNECTION_URL` |
-| `sample_connector_usage_projectplace.py` | Projectplace | `PROJECTPLACE_CONNECTION_URL` |
+| `sample_connector_usage_project_place.py` | ProjectPlace | `PROJECTPLACE_CONNECTION_URL` |
 | `sample_connector_usage_mailchimp.py` | Mailchimp | `MAILCHIMP_CONNECTION_URL` |
 | `sample_connector_usage_send_grid.py` | SendGrid | `SENDGRID_CONNECTION_URL` |
 | `sample_connector_usage_webex.py` | Webex | `WEBEX_CONNECTION_URL` |

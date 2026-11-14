@@ -71,7 +71,7 @@ CLIENT_REGISTRY: Final[dict[str, str]] = {
     "PlivoClient": "plivo",
     "PlumsailClient": "plumsail",
     "PowerBIClient": "power_bi",
-    "ProjectplaceClient": "projectplace",
+    "ProjectPlaceClient": "project_place",
     "RepliconClient": "replicon",
     "RevAIClient": "rev_ai",
     "RssClient": "rss",

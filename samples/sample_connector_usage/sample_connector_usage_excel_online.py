@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Sample usage for the Excelonline connector client."""
+"""Sample usage for the ExcelOnline connector client."""
 
 import asyncio
 import os

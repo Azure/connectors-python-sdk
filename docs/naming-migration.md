@@ -16,6 +16,7 @@ fields and method references using the current generated API reference.
 | `azure.connectors.jedoxodatahub.JedoxodatahubClient` | `azure.connectors.jedox_odata_hub.JedoxODataHubClient` |
 | `azure.connectors.msgraphgroupsanduser.MsgraphgroupsanduserClient` | `azure.connectors.ms_graph_groups_and_users.MSGraphGroupsAndUsersClient` |
 | `azure.connectors.onenote.OnenoteClient` | `azure.connectors.one_note.OneNoteClient` |
+| `azure.connectors.projectplace.ProjectplaceClient` | `azure.connectors.project_place.ProjectPlaceClient` |
 | `azure.connectors.waywedo.WaywedoClient` | `azure.connectors.way_we_do.WayWeDoClient` |
 
 Types use their documented PascalCase spelling, generated operations and

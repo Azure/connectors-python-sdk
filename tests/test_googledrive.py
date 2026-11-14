@@ -261,7 +261,7 @@ class TestGoogleDriveClientErrorHandling:
             assert exc_info.value.status_code == 500
 
 
-class TestGoogledriveTypeSerialization:
+class TestGoogleDriveTypeSerialization:
     """Tests for Google Drive connector dataclass type behavior."""
 
     def test_dataclass_instances_initialize_expected_defaults(self):

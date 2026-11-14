@@ -367,7 +367,7 @@ class TestExcelOnlineClientErrorHandling:
             assert exc_info.value.status_code == 500
 
 
-class TestExcelonlineTypeSerialization:
+class TestExcelOnlineTypeSerialization:
     """Tests for Excel Online generated dataclass defaults."""
 
     def test_dataclass_instances_initialize_expected_defaults(self):

@@ -79,7 +79,7 @@ class TestCommonDataServiceClientInitialization:
         assert client.connector_name == "commondataservice"
 
 
-class TestCommondataserviceTypeSerialization:
+class TestCommonDataServiceTypeSerialization:
     """Tests generated Dataverse model wire names."""
 
     def test_items_list_next_link_uses_odata_wire_name(self):
@@ -1517,7 +1517,7 @@ class TestPathParameterEncoding:
             assert "https%3A%2F%2Forg12345.crm.dynamics.com" not in url
 
 
-class TestCommondataserviceTriggerOperations:
+class TestCommonDataServiceTriggerOperations:
     """Tests for the module-level trigger registration metadata."""
 
     @pytest.mark.parametrize(
@@ -1570,5 +1570,5 @@ class TestCommondataserviceTriggerOperations:
         """Test trigger routes are not exposed as callable client methods."""
         # NOTE(victoriahall): x-ms-trigger routes belong in the TRIGGER_OPERATIONS
         # registry, not on the client. Guards against a regression that re-emits
-        # them as callable methods (mirrors the .NET CommondataserviceTriggers split).
+        # them as callable methods (mirrors the .NET CommonDataServiceTriggers split).
         assert not hasattr(CommonDataServiceClient, method_name)

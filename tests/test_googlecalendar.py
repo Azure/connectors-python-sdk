@@ -316,7 +316,7 @@ class TestGoogleCalendarClientErrorHandling:
             assert exc_info.value.status_code == 500
 
 
-class TestGooglecalendarApiSurface:
+class TestGoogleCalendarApiSurface:
     """Tests for the generated callable and trigger operation surfaces."""
 
     def test_callable_method_signatures(self):
@@ -391,7 +391,7 @@ class TestGooglecalendarApiSurface:
         }
 
 
-class TestGooglecalendarTypeSerialization:
+class TestGoogleCalendarTypeSerialization:
     """Tests for Google Calendar connector dataclass defaults."""
 
     def test_dataclass_instances_initialize_expected_defaults(self):

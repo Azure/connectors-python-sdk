@@ -77,7 +77,7 @@ from .planner import PlannerClient as PlannerClient
 from .plivo import PlivoClient as PlivoClient
 from .plumsail import PlumsailClient as PlumsailClient
 from .power_bi import PowerBIClient as PowerBIClient
-from .projectplace import ProjectplaceClient as ProjectplaceClient
+from .project_place import ProjectPlaceClient as ProjectPlaceClient
 from .replicon import RepliconClient as RepliconClient
 from .rev_ai import RevAIClient as RevAIClient
 from .rss import RssClient as RssClient

@@ -373,7 +373,7 @@ class TestDynamicsAXClientErrorHandling:
             assert exc_info.value.status_code == 500
 
 
-class TestDynamicsaxTypeSerialization:
+class TestDynamicsAXTypeSerialization:
     """Tests for Dynamics AX connector dataclass defaults."""
 
     def test_dataclass_instances_initialize_expected_defaults(self):
@@ -398,7 +398,7 @@ class TestDynamicsaxTypeSerialization:
         assert Table().name is None
 
 
-class TestDynamicsaxTriggerOperations:
+class TestDynamicsAXTriggerOperations:
     """Tests for the module-level trigger registration metadata."""
 
     def test_subscribe_on_a_business_event_registered_as_trigger(self):

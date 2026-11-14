@@ -323,12 +323,12 @@ async def main(connection_url: str):
 ```python
 from azure.identity.aio import DefaultAzureCredential
 
-from azure.connectors.sharepointonline import SharepointonlineClient
+from azure.connectors.share_point_online import SharePointOnlineClient
 
 
 async def list_items(connection_url: str):
     async with DefaultAzureCredential() as credential:
-        async with SharepointonlineClient(connection_url, credential) as client:
+        async with SharePointOnlineClient(connection_url, credential) as client:
             items = [
                 item
                 async for item in client.list_items(
@@ -350,7 +350,7 @@ Use credentials from `azure.identity.aio`. Use `AzureKeyCredential` from `azure.
 | Connector | Package | Status |
 |-----------|---------|--------|
 | Office 365 Outlook | `azure.connectors.office365` | ✅ Complete |
-| SharePoint Online | `azure.connectors.sharepointonline` | ✅ Complete |
+| SharePoint Online | `azure.connectors.share_point_online` | ✅ Complete |
 | Microsoft Teams | `azure.connectors.teams` | ✅ Complete |
 | Azure Data Explorer | `azure.connectors.kusto` | ✅ Complete |
 | MS Graph Groups & Users | `azure.connectors.msgraphgroupsanduser` | ✅ Complete |

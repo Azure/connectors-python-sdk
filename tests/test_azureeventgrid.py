@@ -217,7 +217,7 @@ class TestAzureEventGridClientErrorHandling:
             assert exc_info.value.status_code == 500
 
 
-class TestAzureeventgridTypeSerialization:
+class TestAzureEventGridTypeSerialization:
     """Tests for Event Grid connector dataclass defaults."""
 
     def test_dataclass_instances_initialize_expected_defaults(self):
@@ -239,7 +239,7 @@ class TestAzureeventgridTypeSerialization:
         assert subscription.subscription_id is None
 
 
-class TestAzureeventgridTriggerOperations:
+class TestAzureEventGridTriggerOperations:
     """Tests for the module-level trigger registration metadata."""
 
     def test_create_subscription_registered_as_trigger(self):

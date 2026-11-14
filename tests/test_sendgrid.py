@@ -437,7 +437,7 @@ class TestSendGridClientErrorHandling:
             assert exc_info.value.status_code == 500
 
 
-class TestSendgridTypeSerialization:
+class TestSendGridTypeSerialization:
     """Tests for SendGrid dataclass defaults and reserved-name field renames."""
 
     def test_dataclass_defaults(self):
