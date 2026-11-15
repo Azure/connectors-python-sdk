@@ -22,10 +22,10 @@ from azure.connectors.sdk.serialization import to_wire
     [
         ("azure_ad", "AzureADClient", "azuread"),
         ("azure_iot_central", "AzureIoTCentralClient", "azureiotcentral"),
-        ("data_flows_sms", "DataFlowsSmsClient", "dataflowssms"),
+        ("dataflows_sms", "DataFlowsSmsClient", "dataflowssms"),
         ("jedox_odata_hub", "JedoxODataHubClient", "jedoxodatahub"),
         ("ms_graph_groups_and_users", "MSGraphGroupsAndUsersClient", "msgraphgroupsanduser"),
-        ("service_now", "ServiceNowClient", "service-now"),
+        ("servicenow", "ServiceNowClient", "service-now"),
     ],
 )
 def test_canonical_import_keeps_raw_api_identity(

@@ -6,8 +6,8 @@ import json
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.share_point_online import SharePointOnlineClient
-from azure.connectors.share_point_online import (
+from azure.connectors.sharepoint_online import SharePointOnlineClient
+from azure.connectors.sharepoint_online import (
     PostItemInput,
     PatchItemInput,
     CreateApprovalRequestInput,
@@ -850,7 +850,7 @@ class TestSharingOperations:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            from azure.connectors.share_point_online import ItemGrantAccessBody
+            from azure.connectors.sharepoint_online import ItemGrantAccessBody
             input_data = model_instance(ItemGrantAccessBody)
             result = await client.grant_access(
                 input_data,
@@ -1054,7 +1054,7 @@ class TestCopyMoveOperations:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            from azure.connectors.share_point_online import MoveFileParameters
+            from azure.connectors.sharepoint_online import MoveFileParameters
             input_data = model_instance(MoveFileParameters)
             result = await client.move_file(
                 input_data,

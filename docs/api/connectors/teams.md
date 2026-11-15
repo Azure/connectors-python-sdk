@@ -57,7 +57,7 @@
         - AddMemberToTagResponseSchema
         - GetTagMembersResponseSchema
         - AIInsightCollectionResponse
-        - AiInsightDetailResponse
+        - AIInsightDetailResponse
         - GetMessageLocationsResponse
         - GetMessageDetailsSchema
         - ListMembersSchema
@@ -94,7 +94,7 @@
         - TeamsIdentitySet
         - CallEventWebhookResponseSchema
         - TranscriptWebhookResponseSchema
-        - AiInsightWebhookResponseSchema
+        - AIInsightWebhookResponseSchema
         - RecordingWebhookResponseSchema
         - ChatMessageWebhookResponseSchema
         - DynamicWebhookTriggerRequestSchema
@@ -147,7 +147,7 @@
         - SectionItemConflictError
         - DynamicCallEventTriggerRequest
         - DynamicTranscriptTriggerRequest
-        - DynamicAiInsightTriggerRequest
+        - DynamicAIInsightTriggerRequest
         - DynamicRecordingTriggerRequest
         - SingleTagTriggerRequest
         - SingleTagMemberTriggerRequest
@@ -156,10 +156,10 @@
         - ChannelJoinedUserTriggerRequest
         - ChannelJoinedUserWebhookResponseSchema
         - AIInsightResponse
-        - AiInsightMeetingNote
-        - AiInsightMeetingNoteSubpoint
-        - AiInsightActionItem
-        - AiInsightViewpoint
-        - AiInsightMentionEvent
+        - AIInsightMeetingNote
+        - AIInsightMeetingNoteSubpoint
+        - AIInsightActionItem
+        - AIInsightViewpoint
+        - AIInsightMentionEvent
         - TeamsClient
         - TRIGGER_OPERATIONS

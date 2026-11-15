@@ -7,10 +7,10 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-import azure.connectors.word_press as wordpress_module
+import azure.connectors.wordpress as wordpress_module
 from azure.connectors.sdk import ConnectorException
-from azure.connectors.word_press import WordPressClient
-from azure.connectors.word_press import (
+from azure.connectors.wordpress import WordPressClient
+from azure.connectors.wordpress import (
     CreatePostModel,
     TRIGGER_OPERATIONS,
 )

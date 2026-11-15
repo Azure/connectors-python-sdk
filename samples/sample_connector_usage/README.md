@@ -32,15 +32,15 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_azure_vm.py` | Azure VM | `AZUREVM_CONNECTION_URL` |
 | `sample_connector_usage_common_data_service.py` | Microsoft Dataverse | `COMMONDATASERVICE_CONNECTION_URL` |
 | `sample_connector_usage_dataflows.py` | Power Query Dataflows | `DATAFLOWS_CONNECTION_URL`, `DATAFLOWS_WORKSPACE_TYPE` (optional) |
-| `sample_connector_usage_data_flows_sms.py` | Dataflows SMS | `DATAFLOWSSMS_CONNECTION_URL` |
-| `sample_connector_usage_document_db.py` | Azure Cosmos DB | `DOCUMENTDB_CONNECTION_URL` |
+| `sample_connector_usage_dataflows_sms.py` | Dataflows SMS | `DATAFLOWSSMS_CONNECTION_URL` |
+| `sample_connector_usage_documentdb.py` | Azure Cosmos DB | `DOCUMENTDB_CONNECTION_URL` |
 | `sample_connector_usage_dropbox.py` | Dropbox | `DROPBOX_CONNECTION_URL` |
 | `sample_connector_usage_docusign.py` | Docusign | `DOCUSIGN_CONNECTION_URL` |
 | `sample_connector_usage_kusto.py` | Azure Data Explorer | `KUSTO_CONNECTION_URL` |
 | `sample_connector_usage_event_hubs.py` | Azure Event Hubs | `EVENTHUBS_CONNECTION_URL` |
 | `sample_connector_usage_excel_online.py` | Excel Online | `EXCELONLINE_CONNECTION_URL` |
 | `sample_connector_usage_ftp.py` | FTP | `FTP_CONNECTION_URL` |
-| `sample_connector_usage_git_hub.py` | GitHub | `GITHUB_CONNECTION_URL` |
+| `sample_connector_usage_github.py` | GitHub | `GITHUB_CONNECTION_URL` |
 | `sample_connector_usage_google_calendar.py` | Google Calendar | `GOOGLECALENDAR_CONNECTION_URL` |
 | `sample_connector_usage_google_tasks.py` | Google Tasks | `GOOGLETASKS_CONNECTION_URL` |
 | `sample_connector_usage_google_drive.py` | Google Drive | `GOOGLEDRIVE_CONNECTION_URL` |
@@ -50,16 +50,16 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_infusionsoft.py` | Infusionsoft (Keap) | `INFUSIONSOFT_CONNECTION_URL` |
 | `sample_connector_usage_insightly.py` | Insightly | `INSIGHTLY_CONNECTION_URL` |
 | `sample_connector_usage_monday.py` | Monday.com | `MONDAY_CONNECTION_URL` |
-| `sample_connector_usage_project_place.py` | ProjectPlace | `PROJECTPLACE_CONNECTION_URL` |
+| `sample_connector_usage_projectplace.py` | ProjectPlace | `PROJECTPLACE_CONNECTION_URL` |
 | `sample_connector_usage_mailchimp.py` | Mailchimp | `MAILCHIMP_CONNECTION_URL` |
-| `sample_connector_usage_send_grid.py` | SendGrid | `SENDGRID_CONNECTION_URL` |
+| `sample_connector_usage_sendgrid.py` | SendGrid | `SENDGRID_CONNECTION_URL` |
 | `sample_connector_usage_webex.py` | Webex | `WEBEX_CONNECTION_URL` |
 | `sample_connector_usage_campfire.py` | Campfire | `CAMPFIRE_CONNECTION_URL` |
-| `sample_connector_usage_click_send_sms.py` | ClickSend SMS | `CLICKSENDSMS_CONNECTION_URL` |
+| `sample_connector_usage_clicksend_sms.py` | ClickSend SMS | `CLICKSENDSMS_CONNECTION_URL` |
 | `sample_connector_usage_text_request.py` | TextRequest | `TEXTREQUEST_CONNECTION_URL` |
 | `sample_connector_usage_trello.py` | Trello | `TRELLO_CONNECTION_URL` |
 | `sample_connector_usage_twitter.py` | Twitter | `TWITTER_CONNECTION_URL` |
-| `sample_connector_usage_word_press.py` | WordPress | `WORDPRESS_CONNECTION_URL` |
+| `sample_connector_usage_wordpress.py` | WordPress | `WORDPRESS_CONNECTION_URL` |
 | `sample_connector_usage_plivo.py` | Plivo | `PLIVO_CONNECTION_URL` |
 | `sample_connector_usage_rev_ai.py` | Rev.ai | `REVAI_CONNECTION_URL` |
 | `sample_connector_usage_starmind.py` | Starmind | `STARMIND_CONNECTION_URL` |
@@ -73,16 +73,16 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_office365_groups.py` | Office 365 Groups | `OFFICE365GROUPS_CONNECTION_URL` |
 | `sample_connector_usage_office365_groups_mail.py` | Office 365 Groups Mail | `OFFICE365GROUPSMAIL_CONNECTION_URL` |
 | `sample_connector_usage_office365_users.py` | Office 365 Users | `OFFICE365USERS_CONNECTION_URL` |
-| `sample_connector_usage_one_drive.py` | OneDrive (Personal) | `ONEDRIVE_CONNECTION_URL` |
-| `sample_connector_usage_one_drive_for_business.py` | OneDrive for Business | `ONEDRIVEFORBUSINESS_CONNECTION_URL` |
-| `sample_connector_usage_one_note.py` | OneNote | `ONENOTE_CONNECTION_URL` |
+| `sample_connector_usage_onedrive.py` | OneDrive (Personal) | `ONEDRIVE_CONNECTION_URL` |
+| `sample_connector_usage_onedrive_for_business.py` | OneDrive for Business | `ONEDRIVEFORBUSINESS_CONNECTION_URL` |
+| `sample_connector_usage_onenote.py` | OneNote | `ONENOTE_CONNECTION_URL` |
 | `sample_connector_usage_outlook.py` | Outlook.com | `OUTLOOK_CONNECTION_URL` |
 | `sample_connector_usage_planner.py` | Microsoft Planner | `PLANNER_CONNECTION_URL` |
 | `sample_connector_usage_power_bi.py` | Power BI | `POWERBI_CONNECTION_URL` |
 | `sample_connector_usage_rss.py` | RSS | `RSS_CONNECTION_URL` |
 | `sample_connector_usage_salesforce.py` | Salesforce | `SALESFORCE_CONNECTION_URL` |
 | `sample_connector_usage_service_bus.py` | Azure Service Bus | `SERVICEBUS_CONNECTION_URL` |
-| `sample_connector_usage_service_now.py` | ServiceNow | `SERVICENOW_CONNECTION_URL`, `SERVICENOW_RECORD_ID` |
+| `sample_connector_usage_servicenow.py` | ServiceNow | `SERVICENOW_CONNECTION_URL`, `SERVICENOW_RECORD_ID` |
 | `sample_connector_usage_sharepoint.py` | SharePoint Online | `SHAREPOINT_CONNECTION_URL` |
 | `sample_connector_usage_shifts.py` | Shifts | `SHIFTS_CONNECTION_URL` |
 | `sample_connector_usage_slack.py` | Slack | `SLACK_CONNECTION_URL` |
@@ -96,7 +96,7 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_yammer.py` | Yammer (Viva Engage) | `YAMMER_CONNECTION_URL` |
 | `sample_connector_usage_azure_event_grid.py` | Azure Event Grid | `AZUREEVENTGRID_CONNECTION_URL` |
 | `sample_connector_usage_azure_iot_central.py` | Azure IoT Central | `AZUREIOTCENTRAL_CONNECTION_URL` |
-| `sample_connector_usage_cloud_convert.py` | CloudConvert | `CLOUDCONVERT_CONNECTION_URL` |
+| `sample_connector_usage_cloudconvert.py` | CloudConvert | `CLOUDCONVERT_CONNECTION_URL` |
 | `sample_connector_usage_cloudmersive_convert.py` | Cloudmersive Document Conversion | `CLOUDMERSIVECONVERT_CONNECTION_URL` |
 | `sample_connector_usage_dynamics_ax.py` | Fin & Ops Apps (Dynamics 365) | `DYNAMICSAX_CONNECTION_URL` |
 | `sample_connector_usage_pdf_co.py` | PDF.co | `PDFCO_CONNECTION_URL` |
@@ -104,17 +104,17 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_sql.py` | SQL Server | `SQL_CONNECTION_URL` |
 | `sample_connector_usage_zendesk.py` | Zendesk | `ZENDESK_CONNECTION_URL` |
 | `sample_connector_usage_pipedrive.py` | Pipedrive | `PIPEDRIVE_CONNECTION_URL` |
-| `sample_connector_usage_docu_ware.py` | DocuWare | `DOCUWARE_CONNECTION_URL` |
-| `sample_connector_usage_signing_hub.py` | SigningHub | `SIGNINGHUB_CONNECTION_URL` |
+| `sample_connector_usage_docuware.py` | DocuWare | `DOCUWARE_CONNECTION_URL` |
+| `sample_connector_usage_signinghub.py` | SigningHub | `SIGNINGHUB_CONNECTION_URL` |
 | `sample_connector_usage_eventbrite.py` | Eventbrite | `EVENTBRITE_CONNECTION_URL` |
 | `sample_connector_usage_formstack_forms.py` | Formstack Forms | `FORMSTACKFORMS_CONNECTION_URL` |
 | `sample_connector_usage_typeform.py` | Typeform | `TYPEFORM_CONNECTION_URL` |
 | `sample_connector_usage_ticketmaster.py` | Ticketmaster | `TICKETMASTER_CONNECTION_URL` |
 | `sample_connector_usage_seismic_planner.py` | Seismic Planner | `SEISMICPLANNER_CONNECTION_URL`, `SEISMICPLANNER_SPACE_ID` |
-| `sample_connector_usage_zepto_mail.py` | Zoho ZeptoMail | `ZEPTOMAIL_CONNECTION_URL` |
-| `sample_connector_usage_way_we_do.py` | Way We Do | `WAYWEDO_CONNECTION_URL` |
+| `sample_connector_usage_zeptomail.py` | Zoho ZeptoMail | `ZEPTOMAIL_CONNECTION_URL` |
+| `sample_connector_usage_waywedo.py` | Way We Do | `WAYWEDO_CONNECTION_URL` |
 | `sample_connector_usage_meeting_room_map.py` | Meeting Room Map | `MEETINGROOMMAP_CONNECTION_URL` |
-| `sample_connector_usage_star_rez_rest_v1.py` | StarRez REST V1 | `STARREZRESTV1_CONNECTION_URL` |
+| `sample_connector_usage_starrez_rest_v1.py` | StarRez REST V1 | `STARREZRESTV1_CONNECTION_URL` |
 | `sample_connector_usage_replicon.py` | Replicon | `REPLICON_CONNECTION_URL` |
 | `sample_connector_usage_elfsquad_data.py` | Elfsquad Data | `ELFSQUADDATA_CONNECTION_URL`, `ELFSQUADDATA_ENTITY_NAME` |
 | `sample_connector_usage_etsy.py` | Etsy | `ETSY_CONNECTION_URL` |

@@ -847,7 +847,7 @@ class IndividualData:
     """Image URI."""
     twitter: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Twitter."""
-    linked_in: Optional[str] = dataclass_field(
+    linkedin: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "linkedIn"},
@@ -1801,7 +1801,7 @@ class OrganizationData:
     """Image URI."""
     twitter: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Twitter."""
-    linked_in: Optional[str] = dataclass_field(
+    linkedin: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "linkedIn"},
@@ -2753,7 +2753,7 @@ class ContactData:
     """Image Uri."""
     twitter: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Twitter."""
-    linked_in: Optional[str] = dataclass_field(
+    linkedin: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "linkedIn"},

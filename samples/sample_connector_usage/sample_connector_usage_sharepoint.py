@@ -30,8 +30,8 @@ import os
 try:
     from azure.identity.aio import DefaultAzureCredential
     from azure.connectors import ConnectorException
-    from azure.connectors.share_point_online import SharePointOnlineClient
-    from azure.connectors.share_point_online import (
+    from azure.connectors.sharepoint_online import SharePointOnlineClient
+    from azure.connectors.sharepoint_online import (
         PatchItemInput,
         PostItemInput,
         )

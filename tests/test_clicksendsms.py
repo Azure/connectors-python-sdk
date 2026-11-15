@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.click_send_sms import ClickSendSmsClient
-from azure.connectors.click_send_sms import (
+from azure.connectors.clicksend_sms import ClickSendSmsClient
+from azure.connectors.clicksend_sms import (
     CreateListContactInput,
     CreateListInput,
     DeleteListResponse,

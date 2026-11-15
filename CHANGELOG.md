@@ -37,7 +37,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Generated Python naming migration** — all 103 clients, the lazy registry and
   typing stub now expose canonical module, type, model, method and member names.
-  Legacy misspelled imports are not retained. Naming-only changes preserve
+  Legacy misspelled imports are not retained. Brands written as one word stay
+  one token (`github`, `sharepoint_online`, `clicksend_sms`), and Teams AI
+  insight types use `AIInsight` throughout. Naming-only changes preserve
   connection identities, operation IDs, routes, JSON wire fields and enum wire
   values; see the [migration guide](docs/naming-migration.md).
 - **Reviewed Swagger operation selection** — the current Plumsail client uses

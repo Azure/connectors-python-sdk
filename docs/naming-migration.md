@@ -2,22 +2,80 @@
 
 This early-preview update corrects Python module word boundaries and generated
 identifiers. The old module and type spellings are not compatibility aliases.
-Update both direct imports and package-root client imports, then update model
-fields and method references using the current generated API reference.
+The table lists every client whose import changes, compared with the previous
+release. Update direct imports (`from azure.connectors.azure_blob import
+AzureBlobClient`) to the new module and class. Package-root imports
+(`from azure.connectors import AzureBlobClient`) do not name a module, so they
+only need the new class name. Then update model fields and method references
+using the current generated API reference.
+
+A brand written as one word or in PascalCase stays one Python token, and a
+brand is split only where its own name has a space, hyphen or dot. GitHub is
+`github`, SharePoint Online is `sharepoint_online` and ClickSend SMS is
+`clicksend_sms`, but PDF.co is `pdf_co`. Modules such as `cloudconvert`,
+`github` and `onenote` therefore keep their previous name; only their client
+class changes.
 
 | Before | After |
 |---|---|
 | `azure.connectors.azuread.AzureadClient` | `azure.connectors.azure_ad.AzureADClient` |
+| `azure.connectors.azureautomation.AzureautomationClient` | `azure.connectors.azure_automation.AzureAutomationClient` |
+| `azure.connectors.azureblob.AzureblobClient` | `azure.connectors.azure_blob.AzureBlobClient` |
 | `azure.connectors.azuredatafactory.AzuredatafactoryClient` | `azure.connectors.azure_data_factory.AzureDataFactoryClient` |
+| `azure.connectors.azuredigitaltwins.AzuredigitaltwinsClient` | `azure.connectors.azure_digital_twins.AzureDigitalTwinsClient` |
+| `azure.connectors.azureeventgrid.AzureeventgridClient` | `azure.connectors.azure_event_grid.AzureEventGridClient` |
 | `azure.connectors.azureiotcentral.AzureiotcentralClient` | `azure.connectors.azure_iot_central.AzureIoTCentralClient` |
-| `azure.connectors.cloudconvert.CloudconvertClient` | `azure.connectors.cloud_convert.CloudConvertClient` |
-| `azure.connectors.dataflowssms.DataflowssmsClient` | `azure.connectors.data_flows_sms.DataFlowsSmsClient` |
-| `azure.connectors.docuware.DocuwareClient` | `azure.connectors.docu_ware.DocuWareClient` |
+| `azure.connectors.azuremonitorlogs.AzuremonitorlogsClient` | `azure.connectors.azure_monitor_logs.AzureMonitorLogsClient` |
+| `azure.connectors.azurequeues.AzurequeuesClient` | `azure.connectors.azure_queues.AzureQueuesClient` |
+| `azure.connectors.azuretables.AzuretablesClient` | `azure.connectors.azure_tables.AzureTablesClient` |
+| `azure.connectors.azurevm.AzurevmClient` | `azure.connectors.azure_vm.AzureVMClient` |
+| `azure.connectors.clicksendsms.ClicksendsmsClient` | `azure.connectors.clicksend_sms.ClickSendSmsClient` |
+| `azure.connectors.cloudconvert.CloudconvertClient` | `azure.connectors.cloudconvert.CloudConvertClient` |
+| `azure.connectors.cloudmersiveconvert.CloudmersiveconvertClient` | `azure.connectors.cloudmersive_convert.CloudmersiveConvertClient` |
+| `azure.connectors.commondataservice.CommondataserviceClient` | `azure.connectors.common_data_service.CommonDataServiceClient` |
+| `azure.connectors.documentdb.DocumentdbClient` | `azure.connectors.documentdb.DocumentDBClient` |
+| `azure.connectors.docuware.DocuwareClient` | `azure.connectors.docuware.DocuWareClient` |
+| `azure.connectors.dynamicsax.DynamicsaxClient` | `azure.connectors.dynamics_ax.DynamicsAXClient` |
+| `azure.connectors.elfsquaddata.ElfsquaddataClient` | `azure.connectors.elfsquad_data.ElfsquadDataClient` |
+| `azure.connectors.eventhubs.EventhubsClient` | `azure.connectors.event_hubs.EventHubsClient` |
+| `azure.connectors.excelonline.ExcelonlineClient` | `azure.connectors.excel_online.ExcelOnlineClient` |
+| `azure.connectors.excelonlinebusiness.ExcelonlinebusinessClient` | `azure.connectors.excel_online_business.ExcelOnlineBusinessClient` |
+| `azure.connectors.formstackforms.FormstackformsClient` | `azure.connectors.formstack_forms.FormstackFormsClient` |
+| `azure.connectors.github.GithubClient` | `azure.connectors.github.GitHubClient` |
+| `azure.connectors.googlecalendar.GooglecalendarClient` | `azure.connectors.google_calendar.GoogleCalendarClient` |
+| `azure.connectors.googledrive.GoogledriveClient` | `azure.connectors.google_drive.GoogleDriveClient` |
+| `azure.connectors.googletasks.GoogletasksClient` | `azure.connectors.google_tasks.GoogleTasksClient` |
 | `azure.connectors.jedoxodatahub.JedoxodatahubClient` | `azure.connectors.jedox_odata_hub.JedoxODataHubClient` |
+| `azure.connectors.keyvault.KeyvaultClient` | `azure.connectors.key_vault.KeyVaultClient` |
+| `azure.connectors.meetingroommap.MeetingroommapClient` | `azure.connectors.meeting_room_map.MeetingRoomMapClient` |
+| `azure.connectors.microsoftbookings.MicrosoftbookingsClient` | `azure.connectors.microsoft_bookings.MicrosoftBookingsClient` |
+| `azure.connectors.microsoftforms.MicrosoftformsClient` | `azure.connectors.microsoft_forms.MicrosoftFormsClient` |
+| `azure.connectors.mq.MqClient` | `azure.connectors.mq.MQClient` |
 | `azure.connectors.msgraphgroupsanduser.MsgraphgroupsanduserClient` | `azure.connectors.ms_graph_groups_and_users.MSGraphGroupsAndUsersClient` |
-| `azure.connectors.onenote.OnenoteClient` | `azure.connectors.one_note.OneNoteClient` |
-| `azure.connectors.projectplace.ProjectplaceClient` | `azure.connectors.project_place.ProjectPlaceClient` |
-| `azure.connectors.waywedo.WaywedoClient` | `azure.connectors.way_we_do.WayWeDoClient` |
+| `azure.connectors.office365groups.Office365groupsClient` | `azure.connectors.office365_groups.Office365GroupsClient` |
+| `azure.connectors.office365groupsmail.Office365groupsmailClient` | `azure.connectors.office365_groups_mail.Office365GroupsMailClient` |
+| `azure.connectors.office365users.Office365usersClient` | `azure.connectors.office365_users.Office365UsersClient` |
+| `azure.connectors.onedrive.OnedriveClient` | `azure.connectors.onedrive.OneDriveClient` |
+| `azure.connectors.onedriveforbusiness.OnedriveforbusinessClient` | `azure.connectors.onedrive_for_business.OneDriveForBusinessClient` |
+| `azure.connectors.onenote.OnenoteClient` | `azure.connectors.onenote.OneNoteClient` |
+| `azure.connectors.pdfco.PdfcoClient` | `azure.connectors.pdf_co.PdfCoClient` |
+| `azure.connectors.powerbi.PowerbiClient` | `azure.connectors.power_bi.PowerBIClient` |
+| `azure.connectors.projectplace.ProjectplaceClient` | `azure.connectors.projectplace.ProjectPlaceClient` |
+| `azure.connectors.revai.RevaiClient` | `azure.connectors.rev_ai.RevAIClient` |
+| `azure.connectors.seismicplanner.SeismicplannerClient` | `azure.connectors.seismic_planner.SeismicPlannerClient` |
+| `azure.connectors.sendgrid.SendgridClient` | `azure.connectors.sendgrid.SendGridClient` |
+| `azure.connectors.servicebus.ServicebusClient` | `azure.connectors.service_bus.ServiceBusClient` |
+| `azure.connectors.sharepointonline.SharepointonlineClient` | `azure.connectors.sharepoint_online.SharePointOnlineClient` |
+| `azure.connectors.signinghub.SigninghubClient` | `azure.connectors.signinghub.SigningHubClient` |
+| `azure.connectors.starrezrestv1.Starrezrestv1Client` | `azure.connectors.starrez_rest_v1.StarRezRestV1Client` |
+| `azure.connectors.textrequest.TextrequestClient` | `azure.connectors.text_request.TextRequestClient` |
+| `azure.connectors.universalprint.UniversalprintClient` | `azure.connectors.universal_print.UniversalPrintClient` |
+| `azure.connectors.visualstudioteamservices.VisualstudioteamservicesClient` | `azure.connectors.visual_studio_team_services.VisualStudioTeamServicesClient` |
+| `azure.connectors.waywedo.WaywedoClient` | `azure.connectors.waywedo.WayWeDoClient` |
+| `azure.connectors.wordonlinebusiness.WordonlinebusinessClient` | `azure.connectors.word_online_business.WordOnlineBusinessClient` |
+| `azure.connectors.wordpress.WordpressClient` | `azure.connectors.wordpress.WordPressClient` |
+| `azure.connectors.zeptomail.ZeptomailClient` | `azure.connectors.zeptomail.ZeptoMailClient` |
+| `azure.connectors.zohosign.ZohosignClient` | `azure.connectors.zoho_sign.ZohoSignClient` |
 
 Types use their documented PascalCase spelling, generated operations and
 model attributes use snake_case, and constants and enum members use uppercase
@@ -36,6 +94,20 @@ instead of splitting every letter. For example, Insightly
 `visible_to` and `date_created_utc`; their wire names (`PUBLICLY_VISIBLE`,
 `OWNER_USER_ID`, `VISIBLE_TO`, `DATE_CREATED_UTC`) are unchanged.
 
+Fields and parameters follow the same brand rule where the wire name writes the
+brand as one word: Impexium `linked_in` becomes `linkedin` (wire `linkedIn`),
+and OneNote `one_note_client_url` and `one_note_web_url` become
+`onenote_client_url` and `onenote_web_url`. A wire name that already separates
+the words, such as SigningHub `one_drive`, keeps its spelling.
+
+Teams AI insight types now spell `AIInsight` consistently:
+`AiInsightDetailResponse`, `AiInsightActionItem`, `AiInsightMeetingNote`,
+`AiInsightMeetingNoteSubpoint`, `AiInsightMentionEvent`, `AiInsightViewpoint`,
+`AiInsightWebhookResponseSchema` and `DynamicAiInsightTriggerRequest` become
+`AIInsightDetailResponse`, `AIInsightActionItem`, `AIInsightMeetingNote`,
+`AIInsightMeetingNoteSubpoint`, `AIInsightMentionEvent`, `AIInsightViewpoint`,
+`AIInsightWebhookResponseSchema` and `DynamicAIInsightTriggerRequest`, matching
+`AIInsightResponse` and `AIInsightCollectionResponse`.
 PdfCo request types now use the same normalized words as their response
 counterparts: `PdfFromXlsxlsxInput` becomes `PdfFromXlsXlsxInput`,
 `PdfUnSearchableInput` becomes `PdfUnsearchableInput`, and `XLStoCsvInput`,

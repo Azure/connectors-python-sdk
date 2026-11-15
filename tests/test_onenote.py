@@ -6,8 +6,8 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.one_note import OneNoteClient
-from azure.connectors.one_note import (
+from azure.connectors.onenote import OneNoteClient
+from azure.connectors.onenote import (
     CreateSectionInNotebookResponse,
     CreatePageInSectionInput,
     Page,
@@ -744,11 +744,11 @@ class TestDataclasses:
         client_url = OneNoteClientUrl(href="onenote:https://example.com/notebook")
         web_url = OneNoteWebUrl(href="https://example.com/notebook")
         link = Link(
-            one_note_client_url=client_url,
-            one_note_web_url=web_url,
+            onenote_client_url=client_url,
+            onenote_web_url=web_url,
         )
-        assert link.one_note_client_url is client_url
-        assert link.one_note_web_url is web_url
+        assert link.onenote_client_url is client_url
+        assert link.onenote_web_url is web_url
 
     def test_one_note_client_url_required_value(self):
         """Test OneNoteClientUrl required value."""

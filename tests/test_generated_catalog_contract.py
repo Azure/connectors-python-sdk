@@ -63,7 +63,7 @@ PRIMITIVE_STRING_PAGER_OPERATIONS = [
     ('event_hubs', "list_partition_keys"),
     ("meeting_room_map", "list_categories"),
     ("ms_graph_groups_and_users", "list_member_groups"),
-    ('one_drive', "list_file_tags"),
+    ('onedrive', "list_file_tags"),
     ('service_bus', "list_queues"),
     ('service_bus', "list_session_options"),
     ('service_bus', "list_subscriptions"),
@@ -77,12 +77,12 @@ EAGER_MUTATION_OPERATIONS = [
     ("mq", "delete_all"),
     ("mq", "read_all"),
     ("mq", "receive_all"),
-    ('one_drive', "add_file_tag"),
+    ('onedrive', "add_file_tag"),
     ('power_bi', "execute_dataset_query"),
     ("replicon", "bulk_get_project_details3"),
     ("replicon", "bulk_get_time_entered_summary"),
     ("replicon", "create_task_hierarchy_or_apply_modifications"),
-    ("send_grid", "add_global_suppression"),
+    ("sendgrid", "add_global_suppression"),
     ("yammer", "post_message"),
 ]
 

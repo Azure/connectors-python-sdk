@@ -6,10 +6,10 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-import azure.connectors.star_rez_rest_v1 as starrezrestv1_module
+import azure.connectors.starrez_rest_v1 as starrezrestv1_module
 from azure.connectors.sdk.serialization import to_wire
-from azure.connectors.star_rez_rest_v1 import StarRezRestV1Client
-from azure.connectors.star_rez_rest_v1 import SelectBookingInput
+from azure.connectors.starrez_rest_v1 import StarRezRestV1Client
+from azure.connectors.starrez_rest_v1 import SelectBookingInput
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import (
     GeneratedConnectorContractTests,

@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.send_grid import SendGridClient
-from azure.connectors.send_grid import (
+from azure.connectors.sendgrid import SendGridClient
+from azure.connectors.sendgrid import (
     AddGlobalSuppressRequestAndResponse,
     EmailRequest,
 )

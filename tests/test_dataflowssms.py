@@ -12,7 +12,7 @@ import pytest
 from azure.core.credentials import AzureKeyCredential
 from azure.core.exceptions import ServiceRequestError
 
-from azure.connectors.data_flows_sms import DataFlowsSmsClient
+from azure.connectors.dataflows_sms import DataFlowsSmsClient
 from azure.connectors.sdk import ConnectorException
 from tests.test_sdk_azure_core_pipeline import RecordingTransport, create_response
 

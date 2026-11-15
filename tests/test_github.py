@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.git_hub import GitHubClient
-from azure.connectors.git_hub import (
+from azure.connectors.github import GitHubClient
+from azure.connectors.github import (
     CreateRepositorySecretRequest,
     IssueBasicDetailsModel,
     PullRequestUpdateRequest,

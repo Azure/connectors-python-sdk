@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.document_db import DocumentDBClient
-from azure.connectors.document_db import (
+from azure.connectors.documentdb import DocumentDBClient
+from azure.connectors.documentdb import (
     PostDocumentsResponse,
     CreateStoredProcedureInput,
     CreateStoredProcedureResponse,

@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.signing_hub import SigningHubClient
-from azure.connectors.signing_hub import (
+from azure.connectors.signinghub import SigningHubClient
+from azure.connectors.signinghub import (
     CheckBoxFieldRequest,
     UploadDocument,
     UpdateCheckBoxFieldRequest,

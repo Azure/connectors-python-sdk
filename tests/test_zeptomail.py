@@ -5,10 +5,10 @@
 from typing import Any, Dict, List, Mapping, Optional, get_type_hints
 from unittest.mock import AsyncMock, patch
 
-import azure.connectors.zepto_mail as zeptomail_module
+import azure.connectors.zeptomail as zeptomail_module
 import pytest
-from azure.connectors.zepto_mail import ZeptoMailClient
-from azure.connectors.zepto_mail import (
+from azure.connectors.zeptomail import ZeptoMailClient
+from azure.connectors.zeptomail import (
     ReplyToAddress,
     SendMailInput,
     SendTemplateMailInput,

@@ -21,8 +21,8 @@ from azure.connectors.azure_blob import AzureBlobClient
 from azure.connectors.azure_monitor_logs import AzureMonitorLogsClient
 from azure.connectors.azure_queues import AzureQueuesClient
 from azure.connectors.azure_tables import AzureTablesClient, CreateEntityInput
-from azure.connectors.document_db import DocumentDBClient
-from azure.connectors.one_note import OneNoteClient
+from azure.connectors.documentdb import DocumentDBClient
+from azure.connectors.onenote import OneNoteClient
 from azure.connectors.power_bi import PowerBIClient
 from azure.connectors.sdk import ConnectorClientBase, ConnectorException
 from azure.connectors.teams import TeamsClient

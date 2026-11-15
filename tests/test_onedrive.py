@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.one_drive import OneDriveClient
-from azure.connectors.one_drive import (
+from azure.connectors.onedrive import OneDriveClient
+from azure.connectors.onedrive import (
     BlobMetadata,
     BlobMetadataPage,
     SharingLink,

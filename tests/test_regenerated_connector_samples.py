@@ -112,7 +112,7 @@ def test_sample_index_matches_connector_sample_inventory() -> None:
 
 @pytest.mark.parametrize(
     ("api_name", "module_name"),
-    [("dataflowssms", "data_flows_sms"), ("service-now", "service_now")],
+    [("dataflowssms", "dataflows_sms"), ("service-now", "servicenow")],
 )
 def test_catalog_parity_samples_have_setup_names_and_environment_documentation(
     api_name: str, module_name: str,
@@ -426,9 +426,9 @@ def test_plivo_sample_main_preserves_output(
 @pytest.mark.parametrize(
     "connector,function_name,client_name,operation_name,expected_noun",
     [
-        ("document_db", "example_3_query_with_pagination", "DocumentDBClient",
+        ("documentdb", "example_3_query_with_pagination", "DocumentDBClient",
          "list_query_documents", "document(s)"),
-        ("document_db", "example_5_query_with_consistency", "DocumentDBClient",
+        ("documentdb", "example_5_query_with_consistency", "DocumentDBClient",
          "list_query_documents", "document(s)"),
         ('office365_groups_mail', "main", 'Office365GroupsMailClient',
          "list_conversations", "conversation(s)"),
@@ -495,11 +495,11 @@ async def test_pageable_samples_report_collected_items(
             assert "RowKey: row-0" in output
             assert "RowKey: row-1" in output
             assert "No entities found" not in output
-    elif connector == "document_db" and item_count == 0:
+    elif connector == "documentdb" and item_count == 0:
         assert "No documents found." in output
     elif connector == "planner" and item_count == 0:
         assert "No plans found" in output
-    elif connector == "document_db" and function_name.endswith("consistency"):
+    elif connector == "documentdb" and function_name.endswith("consistency"):
         assert f"Documents retrieved: {item_count}" in output
     else:
         assert f"{item_count} {expected_noun}" in output

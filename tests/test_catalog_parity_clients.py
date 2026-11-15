@@ -16,9 +16,9 @@ from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
 
 import azure.connectors as connectors
-from azure.connectors.data_flows_sms import DataFlowsSmsClient, SendSmsInput
+from azure.connectors.dataflows_sms import DataFlowsSmsClient, SendSmsInput
 from azure.connectors.sdk import ConnectorException, MultipartFile
-from azure.connectors.service_now import OrderItemInput, RecordBody, ServiceNowClient
+from azure.connectors.servicenow import OrderItemInput, RecordBody, ServiceNowClient
 from tests.test_sdk_azure_core_pipeline import RecordingTransport, create_response
 
 
@@ -28,8 +28,8 @@ RUNTIME_URL = "https://connector.example.test/connections/test"
 @pytest.mark.parametrize(
     ("client_name", "module_name", "client_type", "api_name"),
     [
-        ("DataFlowsSmsClient", "data_flows_sms", DataFlowsSmsClient, "dataflowssms"),
-        ("ServiceNowClient", "service_now", ServiceNowClient, "service-now"),
+        ("DataFlowsSmsClient", "dataflows_sms", DataFlowsSmsClient, "dataflowssms"),
+        ("ServiceNowClient", "servicenow", ServiceNowClient, "service-now"),
     ],
 )
 def test_new_clients_have_public_lazy_exports(
@@ -272,10 +272,10 @@ async def test_service_now_multipart_attachment_preserves_fields_and_file(
 @pytest.mark.parametrize(
     ("module_name", "result", "label"),
     [
-        ("data_flows_sms", {}, "SMS balance: {}"),
-        ("data_flows_sms", {"balance": 8}, "SMS balance: {'balance': 8}"),
-        ("service_now", {}, "Incident record: {}"),
-        ("service_now", {"result": {"sys_id": "abc"}},
+        ("dataflows_sms", {}, "SMS balance: {}"),
+        ("dataflows_sms", {"balance": 8}, "SMS balance: {'balance': 8}"),
+        ("servicenow", {}, "Incident record: {}"),
+        ("servicenow", {"result": {"sys_id": "abc"}},
          "Incident record: {'result': {'sys_id': 'abc'}}"),
     ],
 )
@@ -312,11 +312,11 @@ async def test_read_only_samples_print_empty_and_populated_results(
             return result
 
     monkeypatch.setattr(sample, "CONNECTION_RUNTIME_URL", RUNTIME_URL)
-    if module_name == "service_now":
+    if module_name == "servicenow":
         monkeypatch.setattr(sample, "RECORD_ID", "abc")
     monkeypatch.setattr(sample, "DefaultAzureCredential", MockAsyncContext)
     monkeypatch.setattr(
-        sample, "DataFlowsSmsClient" if module_name == "data_flows_sms" else "ServiceNowClient",
+        sample, "DataFlowsSmsClient" if module_name == "dataflows_sms" else "ServiceNowClient",
         lambda *_args: MockAsyncContext(),
     )
     await sample.main()

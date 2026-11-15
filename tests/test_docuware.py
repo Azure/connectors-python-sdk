@@ -9,8 +9,8 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.docu_ware import DocuWareClient
-from azure.connectors.docu_ware import (
+from azure.connectors.docuware import DocuWareClient
+from azure.connectors.docuware import (
     SearchForDocumentsInFileCabinetInput,
     UpdateIndexFieldsInput,
 )

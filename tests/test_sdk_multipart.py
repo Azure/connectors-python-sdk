@@ -16,7 +16,7 @@ from aiohttp.test_utils import TestServer
 from azure.core.credentials import AzureKeyCredential
 
 from azure.connectors.cloudmersive_convert import CloudmersiveConvertClient
-from azure.connectors.docu_ware import DocuWareClient
+from azure.connectors.docuware import DocuWareClient
 from azure.connectors.sdk import ConnectorException, MultipartFile, encode_multipart_form_data
 from azure.connectors.zoho_sign import ZohoSignClient
 from tests.test_sdk_azure_core_pipeline import RecordingTransport, create_response
