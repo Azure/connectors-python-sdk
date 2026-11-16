@@ -7,7 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-16
+
 ### Added
+
+- **General availability** - first stable release of `azure-connectors`, with
+  the `Production/Stable` package classifier and a packaged PyPI README.
 
 - **Per-page parsed and raw responses** — `ConnectorPage` keeps each pager
   page's parsed envelope in `page_model`, its immutable HTTP response in
@@ -369,7 +374,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - EditorConfig and VSCode settings
 - Pyproject.toml packaging configuration
 
-[Unreleased]: https://github.com/Azure/connectors-python-sdk/compare/0.5.0b1...HEAD
+[Unreleased]: https://github.com/Azure/connectors-python-sdk/compare/1.0.0...HEAD
+[1.0.0]: https://github.com/Azure/connectors-python-sdk/compare/0.5.0b1...1.0.0
 [0.5.0b1]: https://github.com/Azure/connectors-python-sdk/compare/0.4.0b1...0.5.0b1
 [0.4.0b1]: https://github.com/Azure/connectors-python-sdk/compare/0.3.0b2...0.4.0b1
 [0.3.0b2]: https://github.com/Azure/connectors-python-sdk/compare/0.2.0b2...0.3.0b2

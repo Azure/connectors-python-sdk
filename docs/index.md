@@ -2,8 +2,8 @@
 
 Build type-safe Python integrations with Azure managed connectors for services such as Microsoft 365, Azure, Salesforce, and GitHub.
 
-!!! warning "Early preview"
-    This SDK is under active development and is not intended for production use. Breaking API and model changes should be expected before the first stable release.
+!!! note "General availability"
+    Version 1.0.0 is the first stable SDK release. These docs describe the current `main` branch, which may differ from the version published on PyPI.
 
 ## Install
 
