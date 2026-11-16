@@ -1,7 +1,7 @@
 # Migrate generated Python names
 
-This early-preview update corrects Python module word boundaries and generated
-identifiers. The old module and type spellings are not compatibility aliases.
+Version 1.0.0 corrects Python module word boundaries and generated identifiers
+from the preview releases. The old module and type spellings are not compatibility aliases.
 The table lists every client whose import changes, compared with the previous
 release. Update direct imports (`from azure.connectors.azure_blob import
 AzureBlobClient`) to the new module and class. Package-root imports

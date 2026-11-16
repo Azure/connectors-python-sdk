@@ -1,7 +1,7 @@
 # Azure SDK guideline alignment
 
 This SDK follows the Azure SDK Design Guidelines for Python where they fit the
-managed connector execution model. The table records intentional Phase 2
+managed connector execution model. The table records the 1.0.0 design
 decisions so future changes preserve the public contract.
 
 | Area | Decision | Status |
@@ -42,6 +42,10 @@ internal version defaults instead of accepting one constructor-level
 `api_version` that could override unrelated routes.
 
 ## Compatibility policy
+
+Starting with 1.0.0, SDK releases follow [Semantic Versioning](https://semver.org/).
+The SDK version does not set the availability or API versions of the managed
+connector services it calls.
 
 Async-only does not restore the old preview API. Operations no longer use
 `_async` suffixes, optional parameters and request controls remain keyword-only,

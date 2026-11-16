@@ -2,8 +2,12 @@
 
 Build type-safe Python integrations with Azure managed connectors for services such as Microsoft 365, Azure, Salesforce, and GitHub.
 
-!!! warning "Early preview"
-    This SDK is under active development and is not intended for production use. Breaking API and model changes should be expected before the first stable release.
+!!! note "1.0.0 — General availability"
+    The first stable SDK release includes 103 async connector clients for Python 3.10+.
+    When upgrading from a preview, follow the [API migration](migration-sync-aio.md)
+    and [generated naming migration](naming-migration.md) guides.
+    SDK general availability does not change the availability or service limits
+    of the Azure connector resources and services your app uses.
 
 ## Install
 

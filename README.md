@@ -8,16 +8,15 @@
 
 Type-safe Python clients for [Azure connectors](https://learn.microsoft.com/connectors/connector-reference/) — call Office 365, SharePoint, Teams, Dataverse, and 1,000+ connectors directly from Azure Functions and other Python apps.
 
-> [!CAUTION]
-> **Early Preview — Not for Production Use**
+> [!NOTE]
+> **1.0.0 — General availability**
 >
-> This SDK is currently in early preview and is under active development. It is intended for evaluation, experimentation, and feedback purposes only.
->
-> - **Do not use this SDK in production environments.**
-> - **Breaking changes should be expected** across APIs, data models, and behavior in future releases.
-> - Features may be added, modified, or removed without prior notice.
->
-> We welcome feedback and contributions — please [open an issue](https://github.com/Azure/connectors-python-sdk/issues) with questions, suggestions, or bug reports.
+> The first stable release includes 103 async connector clients for Python 3.10+.
+> Upgrading from a preview? Review the [1.0.0 release notes](CHANGELOG.md#100---2026-11-16),
+> [API migration guide](docs/migration-sync-aio.md), and
+> [generated naming migration](docs/naming-migration.md) before upgrading.
+> SDK general availability does not change the availability, permissions, or
+> service limits of the Azure connector resources and services your app uses.
 
 For existing preview users, see [generated Python naming migration](docs/naming-migration.md)
 for renamed imports, types, members, and unchanged connection identities.
@@ -438,7 +437,7 @@ azure-connectors/
 │   │   ├── response.py         # Immutable response hook contracts
 │   │   └── exceptions.py       # Exception types
 │   ├── office365.py            # Async client and models
-│   ├── sharepointonline.py     # SharePoint generated client
+│   ├── sharepoint_online.py    # SharePoint generated client
 │   └── teams.py                # Teams generated client
 ├── tests/                      # Comprehensive test suite
 ├── samples/                    # Usage examples

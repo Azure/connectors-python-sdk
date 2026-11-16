@@ -13,7 +13,7 @@ from .sdk.response import ConnectorPage, ConnectorResponseHook, ConnectorRespons
 from .sdk.trigger_payload import TriggerCallbackBody, TriggerCallbackPayload
 
 
-__version__ = "0.6.0b1"
+__version__ = "1.0.0"
 
 
 def __getattr__(name: str) -> Any:
