@@ -16,7 +16,7 @@ from .polling import ConnectorPollingMethod
 from .response import ConnectorPage, ConnectorResponseHook, ConnectorResponseSnapshot
 from .trigger_payload import TriggerCallbackPayload, TriggerCallbackBody
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 
 __all__ = [
     "ConnectorClientBase",
