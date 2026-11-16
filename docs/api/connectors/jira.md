@@ -1,0 +1,50 @@
+# JiraClient
+
+::: azure.connectors.jira
+    options:
+      members:
+        - Sites
+        - ListIssuesResponse
+        - ListIssuesResponseDatacenter
+        - ListTransitionsResponse
+        - UpdateTransitionResponse
+        - GetCurrentUserResponse
+        - FullIssue
+        - McpQueryResponse
+        - CommentResponse
+        - CancelTaskResponse
+        - CreateIssueInput
+        - CreateIssueResponse
+        - CreateProjectInput
+        - CreateProjectResponse
+        - CreateProjectCategoryInput
+        - CreateProjectCategoryResponse
+        - EditIssueInput
+        - EditIssueResponse
+        - GetTaskResponse
+        - GetUserResponse
+        - ListFiltersResponse
+        - ListProjectsResponse
+        - UserList
+        - UpdateProjectInput
+        - UpdateProjectResponse
+        - IssueTypes
+        - Project
+        - ProjectArray
+        - PartialIssue
+        - Creator
+        - Assignee
+        - User
+        - Reporter
+        - FilterArray
+        - CreateIssueRequest
+        - UpdateIssueRequest
+        - StatusList
+        - PriorityList
+        - Comment
+        - Transition
+        - TransitionStatus
+        - TransitionInput
+        - McpQueryRequest
+        - JiraClient
+        - TRIGGER_OPERATIONS

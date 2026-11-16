@@ -797,7 +797,7 @@ class PassThroughNativeQueryBody:
         metadata={"wire_name": "formalParameters"},
     )
     """Formal Parameters"""
-    actual_parameters: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
+    actual_parameters: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "actualParameters"},
@@ -986,7 +986,7 @@ class SqlPassThroughNativeQueryBody:
     Definition: SqlPassThroughNativeQueryBody
     """
 
-    actual_parameters: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
+    actual_parameters: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "actualParameters"},
@@ -1848,6 +1848,9 @@ class SqlClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -1953,6 +1956,9 @@ class SqlClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2172,6 +2178,9 @@ class SqlClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2255,6 +2264,9 @@ class SqlClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2350,6 +2362,9 @@ class SqlClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2506,6 +2521,9 @@ class SqlClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2669,6 +2687,9 @@ class SqlClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2850,6 +2871,9 @@ class SqlClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2945,6 +2969,9 @@ class SqlClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -3040,6 +3067,9 @@ class SqlClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -3204,6 +3234,9 @@ class SqlClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -3340,6 +3373,9 @@ class SqlClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)

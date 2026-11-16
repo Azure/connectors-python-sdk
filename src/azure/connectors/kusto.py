@@ -30,8 +30,8 @@ __all__ = [
     "CommandAndVisualizeSchema",
     "ControlCommandAndListSchema",
     "DatabaseName",
-    "MCPQueryRequest",
-    "MCPQueryResponse",
+    "McpQueryRequest",
+    "McpQueryResponse",
     "ObjectEntity",
     "Query",
     "QueryAndListSchema",
@@ -111,7 +111,7 @@ class AsyncCommandResult:
 
 
 @dataclass
-class MCPQueryResponse:
+class McpQueryResponse:
     """
     Response for Kusto Query MCP Server
     """
@@ -215,7 +215,7 @@ ChartType = Literal["Html Table", "Pie Chart", "Time Chart", "Bar Chart"]
 
 
 @dataclass
-class MCPQueryRequest:
+class McpQueryRequest:
     """
     Definition: MCPQueryRequest
     """
@@ -670,7 +670,7 @@ class KustoClient(ConnectorClientBase):
 
     async def mcp_kusto_query_management(
         self,
-        input: MCPQueryRequest | Mapping[str, Any],
+        input: McpQueryRequest | Mapping[str, Any],
         *,
         session_id: Optional[str] = None,
         timeout: Optional[float] = None,

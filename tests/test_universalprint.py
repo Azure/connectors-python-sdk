@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for UniversalprintClient."""
+"""Unit tests for UniversalPrintClient."""
 
 import inspect
 
@@ -8,7 +8,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.universalprint import UniversalprintClient
+from azure.connectors.universal_print import UniversalPrintClient
 from azure.connectors.sdk import (
     ConnectorException,
 )
@@ -16,7 +16,7 @@ from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import resolve_generated_result
 
 
-async def _invoke_operation(client: UniversalprintClient, operation: str):
+async def _invoke_operation(client: UniversalPrintClient, operation: str):
     """Invoke a Universal Print operation by name for shared tests."""
     if operation == "print_file":
         return await client.print_file(
@@ -30,12 +30,12 @@ async def _invoke_operation(client: UniversalprintClient, operation: str):
     raise ValueError(f"Unsupported operation '{operation}'.")
 
 
-class TestUniversalprintClientInitialization:
-    """Tests for UniversalprintClient initialization."""
+class TestUniversalPrintClientInitialization:
+    """Tests for UniversalPrintClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = UniversalprintClient(
+        client = UniversalPrintClient(
             "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -44,14 +44,14 @@ class TestUniversalprintClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = UniversalprintClient(
+        client = UniversalPrintClient(
             "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = UniversalprintClient(
+        client = UniversalPrintClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -60,7 +60,7 @@ class TestUniversalprintClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = UniversalprintClient(
+        client = UniversalPrintClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -71,16 +71,16 @@ class TestUniversalprintClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            UniversalprintClient("", AzureKeyCredential("test-key"))
+            UniversalPrintClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            UniversalprintClient(None, AzureKeyCredential("test-key"))
+            UniversalPrintClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'universalprint'."""
-        client = UniversalprintClient(
+        client = UniversalPrintClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -88,13 +88,13 @@ class TestUniversalprintClientInitialization:
         assert client.connector_name == "universalprint"
 
 
-class TestUniversalprintClientLifecycle:
-    """Tests for UniversalprintClient lifecycle methods."""
+class TestUniversalPrintClientLifecycle:
+    """Tests for UniversalPrintClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = UniversalprintClient(
+        client = UniversalPrintClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -106,23 +106,23 @@ class TestUniversalprintClientLifecycle:
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
-        with patch.object(UniversalprintClient, "close", new_callable=AsyncMock) as mock_close:
-            async with UniversalprintClient(
+        with patch.object(UniversalPrintClient, "close", new_callable=AsyncMock) as mock_close:
+            async with UniversalPrintClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential,
             ) as client:
-                assert isinstance(client, UniversalprintClient)
+                assert isinstance(client, UniversalPrintClient)
 
             mock_close.assert_called_once()
 
 
-class TestUniversalprintClientMethods:
+class TestUniversalPrintClientMethods:
     """Success path tests for Universal Print methods."""
 
     @pytest.mark.asyncio
     async def test_print_file_success(self, mock_credential):
         """Test print_file_async posts the body to the shares endpoint."""
-        client = UniversalprintClient(
+        client = UniversalPrintClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -153,7 +153,7 @@ class TestUniversalprintClientMethods:
     @pytest.mark.asyncio
     async def test_print_file_includes_query_params(self, mock_credential):
         """Test print_file_async serializes printer, file name, and configuration params."""
-        client = UniversalprintClient(
+        client = UniversalPrintClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -182,7 +182,7 @@ class TestUniversalprintClientMethods:
     @pytest.mark.asyncio
     async def test_list_recent_shares_success(self, mock_credential):
         """Test list_recent_shares_async returns parsed JSON."""
-        client = UniversalprintClient(
+        client = UniversalPrintClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -203,7 +203,7 @@ class TestUniversalprintClientMethods:
     @pytest.mark.asyncio
     async def test_list_recent_shares_empty_returns_none(self, mock_credential):
         """Test list_recent_shares_async returns None for an empty body."""
-        client = UniversalprintClient(
+        client = UniversalPrintClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -220,7 +220,7 @@ class TestUniversalprintClientMethods:
             assert result == []
 
 
-class TestUniversalprintClientErrorHandling:
+class TestUniversalPrintClientErrorHandling:
     """Error handling tests that ensure all methods raise ConnectorException."""
 
     @pytest.mark.asyncio
@@ -237,7 +237,7 @@ class TestUniversalprintClientErrorHandling:
         operation,
     ):
         """Test non-2xx responses raise ConnectorException for every operation."""
-        client = UniversalprintClient(
+        client = UniversalPrintClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -253,26 +253,26 @@ class TestUniversalprintClientErrorHandling:
                 await _invoke_operation(client, operation)
 
 
-class TestUniversalprintClientSignatures:
+class TestUniversalPrintClientSignatures:
     """Tests that verify required/optional parameter semantics on public methods."""
 
     def test_print_file_required_params_have_no_default(self):
         """Test printer and file_name are required (no default value)."""
-        signature = inspect.signature(UniversalprintClient.print_file)
+        signature = inspect.signature(UniversalPrintClient.print_file)
 
         assert signature.parameters["printer"].default is inspect.Parameter.empty
         assert signature.parameters["file_name"].default is inspect.Parameter.empty
 
     def test_print_file_required_params_annotated_as_str(self):
         """Test printer and file_name are annotated as str, not Optional."""
-        signature = inspect.signature(UniversalprintClient.print_file)
+        signature = inspect.signature(UniversalPrintClient.print_file)
 
         assert signature.parameters["printer"].annotation == "str"
         assert signature.parameters["file_name"].annotation == "str"
 
     def test_print_file_optional_params_default_to_none(self):
         """Test optional configuration params default to None."""
-        signature = inspect.signature(UniversalprintClient.print_file)
+        signature = inspect.signature(UniversalPrintClient.print_file)
 
         assert signature.parameters["configuration_copies"].default is None
         assert signature.parameters["configuration_color_mode"].default is None
@@ -280,7 +280,7 @@ class TestUniversalprintClientSignatures:
     @pytest.mark.asyncio
     async def test_print_file_missing_required_param_raises_type_error(self, mock_credential):
         """Test omitting a required query param raises TypeError."""
-        client = UniversalprintClient(
+        client = UniversalPrintClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )

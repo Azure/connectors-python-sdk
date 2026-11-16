@@ -130,7 +130,7 @@ class UserDetailsModel:
         metadata={"wire_name": "Id"},
     )
     """X id (handle) of the user"""
-    user_name: str = dataclass_field(metadata={"wire_name": "UserName"})
+    username: str = dataclass_field(metadata={"wire_name": "UserName"})
     """Screen name of the user"""
     followers_count: Optional[int] = dataclass_field(
         default=None,
@@ -205,7 +205,7 @@ class UserMentionsModel:
         metadata={"wire_name": "FullName"},
     )
     """Full name of the user"""
-    user_name: Optional[str] = dataclass_field(
+    username: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "UserName"},
@@ -301,7 +301,7 @@ class OriginalTweetUserMentionsModel:
         metadata={"wire_name": "FullName"},
     )
     """Full name of the user"""
-    user_name: Optional[str] = dataclass_field(
+    username: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "UserName"},
@@ -325,7 +325,7 @@ class OriginalTweetUserDetailsModel:
         metadata={"wire_name": "Id"},
     )
     """X id (handle) of the user"""
-    user_name: str = dataclass_field(metadata={"wire_name": "UserName"})
+    username: str = dataclass_field(metadata={"wire_name": "UserName"})
     """Screen name of the user"""
     followers_count: Optional[int] = dataclass_field(
         default=None,
@@ -505,7 +505,7 @@ class TwitterClient(ConnectorClientBase):
 
     def list_user_timeline(
         self,
-        user_name: str,
+        username: str,
         *,
         max_results: Optional[int] = None,
         timeout: Optional[float] = None,
@@ -524,7 +524,7 @@ class TwitterClient(ConnectorClientBase):
         Swagger operation ID: `UserTimeline`.
 
         Args:
-            user_name: X handle for the user.
+            username: X handle for the user.
             max_results: Maximum number of tweets to return.
             timeout: The request timeout in seconds.
             headers: Additional HTTP request headers.
@@ -540,8 +540,8 @@ class TwitterClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/usertimeline"
         query_params = []
-        value = str(user_name)
-        if isinstance(user_name, bool):
+        value = str(username)
+        if isinstance(username, bool):
             value = value.lower()
         query_params.append(f"userName={quote(value, safe='')}")
         if max_results is not None:
@@ -590,6 +590,9 @@ class TwitterClient(ConnectorClientBase):
                 for item in page:
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -675,6 +678,9 @@ class TwitterClient(ConnectorClientBase):
                 for item in page:
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -774,13 +780,16 @@ class TwitterClient(ConnectorClientBase):
                 for item in page:
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
 
     def list_followers(
         self,
-        user_name: str,
+        username: str,
         *,
         max_results: Optional[int] = None,
         timeout: Optional[float] = None,
@@ -798,7 +807,7 @@ class TwitterClient(ConnectorClientBase):
         Swagger operation ID: `Followers`.
 
         Args:
-            user_name: X handle for the user.
+            username: X handle for the user.
             max_results: Maximum number of users to return.
             timeout: The request timeout in seconds.
             headers: Additional HTTP request headers.
@@ -814,8 +823,8 @@ class TwitterClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/followers"
         query_params = []
-        value = str(user_name)
-        if isinstance(user_name, bool):
+        value = str(username)
+        if isinstance(username, bool):
             value = value.lower()
         query_params.append(f"userName={quote(value, safe='')}")
         if max_results is not None:
@@ -864,6 +873,9 @@ class TwitterClient(ConnectorClientBase):
                 for item in page:
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -948,13 +960,16 @@ class TwitterClient(ConnectorClientBase):
                 for item in page:
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
 
     def list_following(
         self,
-        user_name: str,
+        username: str,
         *,
         max_results: Optional[int] = None,
         timeout: Optional[float] = None,
@@ -972,7 +987,7 @@ class TwitterClient(ConnectorClientBase):
         Swagger operation ID: `Following`.
 
         Args:
-            user_name: X handle for the user.
+            username: X handle for the user.
             max_results: Maximum number of users to return.
             timeout: The request timeout in seconds.
             headers: Additional HTTP request headers.
@@ -988,8 +1003,8 @@ class TwitterClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/friends"
         query_params = []
-        value = str(user_name)
-        if isinstance(user_name, bool):
+        value = str(username)
+        if isinstance(username, bool):
             value = value.lower()
         query_params.append(f"userName={quote(value, safe='')}")
         if max_results is not None:
@@ -1038,6 +1053,9 @@ class TwitterClient(ConnectorClientBase):
                 for item in page:
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -1122,13 +1140,16 @@ class TwitterClient(ConnectorClientBase):
                 for item in page:
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)
 
     async def user(
         self,
-        user_name: str,
+        username: str,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1144,7 +1165,7 @@ class TwitterClient(ConnectorClientBase):
         Swagger operation ID: `User`.
 
         Args:
-            user_name: X handle for the user.
+            username: X handle for the user.
             timeout: The request timeout in seconds.
             headers: Additional HTTP request headers.
             client_request_id: A caller-provided request identifier.
@@ -1158,8 +1179,8 @@ class TwitterClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/user"
         query_params = []
-        value = str(user_name)
-        if isinstance(user_name, bool):
+        value = str(username)
+        if isinstance(username, bool):
             value = value.lower()
         query_params.append(f"userName={quote(value, safe='')}")
         if query_params:

@@ -100,7 +100,7 @@ async def example_2_send_email_with_cc_bcc():
                 email = Email(
                     from_=sender,
                     to=recipient,
-                    c_c=cc_recipient if cc_recipient else None,
+                    cc=cc_recipient if cc_recipient else None,
                     bcc=bcc_recipient if bcc_recipient else None,
                     subject="Test Email with CC/BCC",
                     body="This email demonstrates CC and BCC functionality.",

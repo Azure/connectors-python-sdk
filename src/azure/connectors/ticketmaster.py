@@ -445,8 +445,8 @@ class TicketmasterClient(ConnectorClientBase):
         market_id: Optional[str] = None,
         start_date_time: Optional[str] = None,
         end_date_time: Optional[str] = None,
-        include_t_b_a: Optional[str] = None,
-        include_t_b_d: Optional[str] = None,
+        include_tba: Optional[str] = None,
+        include_tbd: Optional[str] = None,
         include_test: Optional[str] = None,
         page: Optional[str] = None,
         sort: Optional[str] = None,
@@ -511,10 +511,10 @@ class TicketmasterClient(ConnectorClientBase):
             market_id: The filter by market identifier.
             start_date_time: The filter with a start date after this date.
             end_date_time: The filter with a start date before this date.
-            include_t_b_a: Indicates whether to include events with date to be
+            include_tba: Indicates whether to include events with date to be
                 announced (TBA).
-            include_t_b_d: Indicates whether to include events with a date to
-                be defined (TBD).
+            include_tbd: Indicates whether to include events with a date to be
+                defined (TBD).
             include_test: Indicates whether to include entities flagged as test
                 in the response.
             page: The page number.
@@ -647,14 +647,14 @@ class TicketmasterClient(ConnectorClientBase):
             if isinstance(end_date_time, bool):
                 value = value.lower()
             query_params.append(f"endDateTime={quote(value, safe='')}")
-        if include_t_b_a is not None:
-            value = str(include_t_b_a)
-            if isinstance(include_t_b_a, bool):
+        if include_tba is not None:
+            value = str(include_tba)
+            if isinstance(include_tba, bool):
                 value = value.lower()
             query_params.append(f"includeTBA={quote(value, safe='')}")
-        if include_t_b_d is not None:
-            value = str(include_t_b_d)
-            if isinstance(include_t_b_d, bool):
+        if include_tbd is not None:
+            value = str(include_tbd)
+            if isinstance(include_tbd, bool):
                 value = value.lower()
             query_params.append(f"includeTBD={quote(value, safe='')}")
         if include_test is not None:
@@ -2339,8 +2339,8 @@ class TicketmasterClient(ConnectorClientBase):
         unit: Optional[str] = None,
         source: Optional[str] = None,
         locale: Optional[str] = None,
-        include_t_b_a: Optional[str] = None,
-        include_t_b_d: Optional[str] = None,
+        include_tba: Optional[str] = None,
+        include_tbd: Optional[str] = None,
         include_test: Optional[str] = None,
         size: Optional[str] = None,
         country_code: Optional[str] = None,
@@ -2377,11 +2377,11 @@ class TicketmasterClient(ConnectorClientBase):
                 publishing source name.
             locale: The locale in ISO code format. Multiple comma-separated
                 values can be provided.
-            include_t_b_a: Indicates whether to include events with date to be
+            include_tba: Indicates whether to include events with date to be
                 announced (TBA). Defaults to no if date parameter sent, yes
                 otherwise.
-            include_t_b_d: Indicates whether to include events with a date to
-                be defined (TBD). Defaults to no if date parameter sent, yes
+            include_tbd: Indicates whether to include events with a date to be
+                defined (TBD). Defaults to no if date parameter sent, yes
                 otherwise.
             include_test: Indicates whether to include entities flagged as test
                 in the response.
@@ -2444,14 +2444,14 @@ class TicketmasterClient(ConnectorClientBase):
             if isinstance(locale, bool):
                 value = value.lower()
             query_params.append(f"locale={quote(value, safe='')}")
-        if include_t_b_a is not None:
-            value = str(include_t_b_a)
-            if isinstance(include_t_b_a, bool):
+        if include_tba is not None:
+            value = str(include_tba)
+            if isinstance(include_tba, bool):
                 value = value.lower()
             query_params.append(f"includeTBA={quote(value, safe='')}")
-        if include_t_b_d is not None:
-            value = str(include_t_b_d)
-            if isinstance(include_t_b_d, bool):
+        if include_tbd is not None:
+            value = str(include_tbd)
+            if isinstance(include_tbd, bool):
                 value = value.lower()
             query_params.append(f"includeTBD={quote(value, safe='')}")
         if include_test is not None:

@@ -17,7 +17,7 @@ async def list_user_timeline() -> None:
     async with DefaultAzureCredential() as credential:
         async with TwitterClient(CONNECTION_RUNTIME_URL, credential) as client:
             timeline = [item async for item in client.list_user_timeline(
-                user_name="Azure",
+                username="Azure",
                 max_results=10,
             )]
             print(f"Timeline: {timeline}")

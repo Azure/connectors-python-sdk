@@ -9,7 +9,7 @@ import pytest
 from azure.core.credentials import AzureKeyCredential
 from azure.connectors.docusign import DocusignClient
 from azure.connectors.docusign import (
-    AdditionalURLForSenderView,
+    AdditionalUrlForSenderView,
     CombinedEmailBodyAndCustomFields,
     DynamicSigningUrlFields,
     DynamicSigners,
@@ -142,7 +142,7 @@ class TestEmbeddedUrlOperationNames:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        payload = AdditionalURLForSenderView()
+        payload = AdditionalUrlForSenderView()
         mock_response = MockResponse(status=200, text='{"url": "https://example.com/send"}')
 
         with patch.object(

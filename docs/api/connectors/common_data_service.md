@@ -1,0 +1,51 @@
+# CommonDataServiceClient
+
+::: azure.connectors.common_data_service
+    options:
+      members:
+        - DataSetsMetadata
+        - AssociateRecordsPatchItemInput
+        - Item
+        - ItemsList
+        - DataSetsList
+        - GetItemResponse
+        - TableMetadata
+        - ObjectEntity
+        - TablesList
+        - PatchItemInput
+        - PatchItemResponse
+        - PostItemInput
+        - PostItemResponse
+        - TabularDataSetsMetadata
+        - BlobDataSetsMetadata
+        - TableCapabilitiesMetadata
+        - TableSortRestrictionsMetadata
+        - TableFilterRestrictionsMetadata
+        - TableSelectRestrictionsMetadata
+        - SubscriptionRequest
+        - SubscriptionResponse
+        - UpdateTriggerSubscriptionRequest
+        - DataSet
+        - Table
+        - Procedure
+        - PassThroughNativeQuery
+        - DisplayCollectionName
+        - EntitiesDynamicValuesList
+        - EntitiesDynamicValuesListItem
+        - OrganizationsDynamicValuesList
+        - OrganizationsDynamicValuesListItem
+        - EntityMetadata
+        - EntityItemList
+        - EntityItem
+        - CallbackRegistration
+        - UserLocalizedLabel
+        - WebhookNotificationContent
+        - EntityRelationshipsDynamicValuesList
+        - AssociateEntityRequest
+        - ActionsDynamicValuesList
+        - SearchRequestBody
+        - SearchOutput
+        - WhenAnActionIsPerformedSubscriptionRequest
+        - WebhookNotificationContentForWhenAnActionIsPerformed
+        - CommonDataServiceClient
+        - TRIGGER_OPERATIONS

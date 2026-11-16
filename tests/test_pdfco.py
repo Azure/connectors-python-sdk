@@ -1,23 +1,30 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for PdfcoClient."""
+"""Unit tests for PdfCoClient."""
 
 from unittest.mock import AsyncMock, patch
 
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.pdfco import PdfcoClient
-from azure.connectors.pdfco import (
+from azure.connectors.pdf_co import PdfCoClient
+from azure.connectors.pdf_co import (
     HtmlToPdfInput,
     PdfFillerInput,
+    PdfFromXlsXlsxInput,
     PdfFromXlsXlsxResponse,
+    PdfUnsearchableInput,
     PdfUnsearchableResponse,
     UrlToPdfInput,
+    XlsToCsvInput,
     XlsToCsvResponse,
+    XlsToHtmlInput,
     XlsToHtmlResponse,
+    XlsToJsonInput,
     XlsToJsonResponse,
+    XlsToTxtInput,
     XlsToTxtResponse,
+    XlsToXmlInput,
     XlsToXmlResponse,
 )
 from azure.connectors.sdk import (
@@ -49,12 +56,36 @@ def test_reviewed_response_models_preserve_wire_names(response_model: type) -> N
     }
 
 
-class TestPdfcoClientInitialization:
-    """Tests for PdfcoClient initialization."""
+@pytest.mark.parametrize(
+    ("request_model", "wire_options"),
+    [
+        (PdfFromXlsXlsxInput, {"worksheetIndex": 0}),
+        (PdfUnsearchableInput, {"pages": "1-2"}),
+        (XlsToCsvInput, {"worksheetIndex": 0}),
+        (XlsToHtmlInput, {"worksheetIndex": 0}),
+        (XlsToJsonInput, {"worksheetIndex": 0}),
+        (XlsToTxtInput, {"worksheetIndex": 0}),
+        (XlsToXmlInput, {"worksheetIndex": 0}),
+    ],
+)
+def test_reviewed_request_models_preserve_input_wire_contract(
+    request_model: type, wire_options: dict[str, object],
+) -> None:
+    """All corrected input type exports must retain their original serialized keys."""
+    arguments = {
+        "worksheet_index" if key == "worksheetIndex" else key: value
+        for key, value in wire_options.items()
+    }
+    request = request_model(url="https://example.com/input.xlsx", **arguments)
+    assert to_wire(request) == {"url": "https://example.com/input.xlsx", **wire_options}
+
+
+class TestPdfCoClientInitialization:
+    """Tests for PdfCoClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = PdfcoClient("https://example.azure.com/connections/test",
+        client = PdfCoClient("https://example.azure.com/connections/test",
                              AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -63,14 +94,14 @@ class TestPdfcoClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = PdfcoClient("https://example.azure.com/connections/test/",
+        client = PdfCoClient("https://example.azure.com/connections/test/",
                              AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = PdfcoClient(
+        client = PdfCoClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -79,7 +110,7 @@ class TestPdfcoClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = PdfcoClient(
+        client = PdfCoClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -90,16 +121,16 @@ class TestPdfcoClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            PdfcoClient("", AzureKeyCredential("test-key"))
+            PdfCoClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            PdfcoClient(None, AzureKeyCredential("test-key"))
+            PdfCoClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'pdfco'."""
-        client = PdfcoClient(
+        client = PdfCoClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -107,13 +138,13 @@ class TestPdfcoClientInitialization:
         assert client.connector_name == "pdfco"
 
 
-class TestPdfcoClientLifecycle:
-    """Tests for PdfcoClient lifecycle methods."""
+class TestPdfCoClientLifecycle:
+    """Tests for PdfCoClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = PdfcoClient(
+        client = PdfCoClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -125,12 +156,12 @@ class TestPdfcoClientLifecycle:
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
-        with patch.object(PdfcoClient, "close", new_callable=AsyncMock) as mock_close:
-            async with PdfcoClient(
+        with patch.object(PdfCoClient, "close", new_callable=AsyncMock) as mock_close:
+            async with PdfCoClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential,
             ) as client:
-                assert isinstance(client, PdfcoClient)
+                assert isinstance(client, PdfCoClient)
 
             mock_close.assert_called_once()
 
@@ -141,7 +172,7 @@ class TestHtmlToPdfAsync:
     @pytest.mark.asyncio
     async def test_success_forwards_request_body(self, mock_credential):
         """Test that the POST operation forwards the request body to send_async."""
-        client = PdfcoClient(
+        client = PdfCoClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -167,7 +198,7 @@ class TestHtmlToPdfAsync:
     @pytest.mark.asyncio
     async def test_error_response_raises_connector_exception(self, mock_credential):
         """Test that a non-2xx response raises ConnectorException."""
-        client = PdfcoClient(
+        client = PdfCoClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -191,7 +222,7 @@ class TestUrlToPdfAsync:
     @pytest.mark.asyncio
     async def test_success_forwards_request_body(self, mock_credential):
         """Test that the POST operation forwards the request body to send_async."""
-        client = PdfcoClient(
+        client = PdfCoClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -216,7 +247,7 @@ class TestUrlToPdfAsync:
     @pytest.mark.asyncio
     async def test_server_error_raises_connector_exception(self, mock_credential):
         """Test that a 5xx response raises ConnectorException."""
-        client = PdfcoClient(
+        client = PdfCoClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -240,7 +271,7 @@ class TestPdfFillerAsync:
     @pytest.mark.asyncio
     async def test_success_forwards_request_body(self, mock_credential):
         """Test that the POST operation forwards the request body to send_async."""
-        client = PdfcoClient(
+        client = PdfCoClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -265,7 +296,7 @@ class TestPdfFillerAsync:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test that an empty 2xx response body returns None."""
-        client = PdfcoClient(
+        client = PdfCoClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -286,7 +317,7 @@ class TestPdfFillerAsync:
     @pytest.mark.asyncio
     async def test_error_response_raises_connector_exception(self, mock_credential):
         """Test that a non-2xx response raises ConnectorException."""
-        client = PdfcoClient(
+        client = PdfCoClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -365,13 +396,13 @@ OPERATION_ARGS = {
 ALL_OPERATIONS = sorted(OPERATION_ARGS.keys())
 
 
-async def _invoke_operation(client: PdfcoClient, operation: str):
+async def _invoke_operation(client: PdfCoClient, operation: str):
     """Invoke a PDF.co operation by name for shared method tests."""
     method = getattr(client, f"{operation}")
     return await method(**OPERATION_ARGS[operation])
 
 
-class TestPdfcoClientAllOperations:
+class TestPdfCoClientAllOperations:
     """Success path smoke tests covering every generated operation."""
 
     def test_malformed_operation_names_are_not_generated(self):
@@ -388,13 +419,13 @@ class TestPdfcoClientAllOperations:
         ]
 
         for method_name in malformed_method_names:
-            assert not hasattr(PdfcoClient, method_name)
+            assert not hasattr(PdfCoClient, method_name)
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize("operation", ALL_OPERATIONS)
     async def test_all_operations_success(self, mock_credential, operation):
         """Test every operation issues a request and returns without error."""
-        client = PdfcoClient(BASE_URL, credential=mock_credential)
+        client = PdfCoClient(BASE_URL, credential=mock_credential)
         mock_response = MockResponse(status=200, text="{}")
 
         with patch.object(
@@ -409,7 +440,7 @@ class TestPdfcoClientAllOperations:
             assert mock_send.call_args[0][1].startswith(BASE_URL)
 
 
-class TestPdfcoClientAllOperationsErrorHandling:
+class TestPdfCoClientAllOperationsErrorHandling:
     """Error handling tests that ensure every operation raises ConnectorException."""
 
     @pytest.mark.asyncio
@@ -420,7 +451,7 @@ class TestPdfcoClientAllOperationsErrorHandling:
         operation,
     ):
         """Test non-2xx responses raise ConnectorException for every operation."""
-        client = PdfcoClient(BASE_URL, credential=mock_credential)
+        client = PdfCoClient(BASE_URL, credential=mock_credential)
         mock_response = MockResponse(status=500, text='{"error":"server failure"}')
 
         with patch.object(

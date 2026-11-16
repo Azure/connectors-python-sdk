@@ -6,7 +6,7 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.zeptomail import ZeptomailClient
+from azure.connectors.zeptomail import ZeptoMailClient
 
 
 CONNECTION_RUNTIME_URL = os.environ.get("ZEPTOMAIL_CONNECTION_URL", "")
@@ -20,7 +20,7 @@ async def main() -> None:
 
     async with DefaultAzureCredential() as credential:
         try:
-            async with ZeptomailClient(
+            async with ZeptoMailClient(
                 CONNECTION_RUNTIME_URL,
                 credential,
             ) as client:

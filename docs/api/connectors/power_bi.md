@@ -1,0 +1,51 @@
+# PowerBIClient
+
+::: azure.connectors.power_bi
+    options:
+      members:
+        - ListedScorecards
+        - CreatedScorecard
+        - FetchedGoals
+        - CreateGoalResponse
+        - FetchedGoal
+        - GoalsAssigned
+        - GoalChanged
+        - GoalStatusChanged
+        - GoalValueChanged
+        - GoalRefreshIssues
+        - GoalValueOrNoteUpserted
+        - EvaluatedAlert
+        - QueryExecutionResults
+        - ExecuteDatasetQueriesJsonInput
+        - ExecuteDatasetQueriesJsonResponse
+        - GoalValueCheckinNoteInput
+        - GetGoalCheckinsResponse
+        - GetGoalCheckinResponse
+        - Groups
+        - Alert
+        - Datasets
+        - Tables
+        - Reports
+        - Columns
+        - QuerySpecification
+        - CreateScorecardRequest
+        - ListedScorecard
+        - CreateGoalRequest
+        - UpdateGoalRequest
+        - GoalRefreshIssue
+        - GoalValueCheckinRequest
+        - GoalValueCheckinUpdateRequest
+        - GoalNotes
+        - Payload
+        - ExportPayloadPowerBIReport
+        - ExportPayloadPaginatedReport
+        - ExportReportSettings
+        - PageBookmark
+        - ExportFilter
+        - ExportReportPage
+        - EffectiveIdentity
+        - IdentityBlob
+        - DynamicPowerBiButtonClickedTriggerResult
+        - PowerBiButtonClickedOutputs
+        - PowerBIClient
+        - TRIGGER_OPERATIONS

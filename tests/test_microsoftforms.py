@@ -1,14 +1,14 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for MicrosoftformsClient."""
+"""Unit tests for MicrosoftFormsClient."""
 
 from unittest.mock import AsyncMock, patch
 
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.microsoftforms import MicrosoftformsClient
-from azure.connectors.microsoftforms import TRIGGER_OPERATIONS
+from azure.connectors.microsoft_forms import MicrosoftFormsClient
+from azure.connectors.microsoft_forms import TRIGGER_OPERATIONS
 from azure.connectors.sdk import (
     ConnectorException,
 )
@@ -16,12 +16,12 @@ from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import resolve_generated_result
 
 
-class TestMicrosoftformsClientInitialization:
-    """Tests for MicrosoftformsClient initialization."""
+class TestMicrosoftFormsClientInitialization:
+    """Tests for MicrosoftFormsClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = MicrosoftformsClient(
+        client = MicrosoftFormsClient(
             "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -30,14 +30,14 @@ class TestMicrosoftformsClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = MicrosoftformsClient(
+        client = MicrosoftFormsClient(
             "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = MicrosoftformsClient(
+        client = MicrosoftFormsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -46,7 +46,7 @@ class TestMicrosoftformsClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = MicrosoftformsClient(
+        client = MicrosoftFormsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -57,16 +57,16 @@ class TestMicrosoftformsClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            MicrosoftformsClient("", AzureKeyCredential("test-key"))
+            MicrosoftFormsClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            MicrosoftformsClient(None, AzureKeyCredential("test-key"))
+            MicrosoftFormsClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'microsoftforms'."""
-        client = MicrosoftformsClient(
+        client = MicrosoftFormsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -74,13 +74,13 @@ class TestMicrosoftformsClientInitialization:
         assert client.connector_name == "microsoftforms"
 
 
-class TestMicrosoftformsClientLifecycle:
-    """Tests for MicrosoftformsClient lifecycle methods."""
+class TestMicrosoftFormsClientLifecycle:
+    """Tests for MicrosoftFormsClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = MicrosoftformsClient(
+        client = MicrosoftFormsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -92,12 +92,12 @@ class TestMicrosoftformsClientLifecycle:
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
-        with patch.object(MicrosoftformsClient, "close", new_callable=AsyncMock) as mock_close:
-            async with MicrosoftformsClient(
+        with patch.object(MicrosoftFormsClient, "close", new_callable=AsyncMock) as mock_close:
+            async with MicrosoftFormsClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential,
             ) as client:
-                assert isinstance(client, MicrosoftformsClient)
+                assert isinstance(client, MicrosoftFormsClient)
 
             mock_close.assert_called_once()
 
@@ -108,7 +108,7 @@ class TestTriggerOperations:
     def test_form_webhook_is_registered_without_callable_method(self):
         """Test the form webhook is a metadata-only trigger."""
         assert "CreateFormWebhook" in TRIGGER_OPERATIONS
-        assert not hasattr(MicrosoftformsClient, "create_form_webhook_async")
+        assert not hasattr(MicrosoftFormsClient, "create_form_webhook_async")
 
 
 class TestListFormsAsync:
@@ -117,7 +117,7 @@ class TestListFormsAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful form listing."""
-        client = MicrosoftformsClient(
+        client = MicrosoftFormsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -141,7 +141,7 @@ class TestListFormsAsync:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = MicrosoftformsClient(
+        client = MicrosoftFormsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -163,7 +163,7 @@ class TestGetFormDetailsByIdAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful details retrieval."""
-        client = MicrosoftformsClient(
+        client = MicrosoftFormsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -188,7 +188,7 @@ class TestGetFormDetailsByIdAsync:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = MicrosoftformsClient(
+        client = MicrosoftFormsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -210,7 +210,7 @@ class TestGetQuestionsAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful questions retrieval."""
-        client = MicrosoftformsClient(
+        client = MicrosoftFormsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
@@ -234,7 +234,7 @@ class TestGetQuestionsAsync:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = MicrosoftformsClient(
+        client = MicrosoftFormsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )

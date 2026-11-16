@@ -1,13 +1,13 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for Office365groupsClient."""
+"""Unit tests for Office365GroupsClient."""
 
 import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.office365groups import Office365groupsClient
-from azure.connectors.office365groups import (
+from azure.connectors.office365_groups import Office365GroupsClient
+from azure.connectors.office365_groups import (
     ListGroupMembersResponse,
     OnGroupMemberAddedOrRemovedResponse,
     ListGroupsResponse,
@@ -18,7 +18,7 @@ from azure.connectors.office365groups import (
     SensitivityLabelMetadata,
     TRIGGER_OPERATIONS,
     UpdateCalendarEventRequest,
-    UpdateCalendarEventHTMLRequest,
+    UpdateCalendarEventHtmlRequest,
 )
 from azure.connectors.sdk import (
     ConnectorException,
@@ -27,12 +27,12 @@ from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import resolve_generated_result
 
 
-class TestOffice365groupsClientInitialization:
-    """Tests for Office365groupsClient initialization."""
+class TestOffice365GroupsClientInitialization:
+    """Tests for Office365GroupsClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = Office365groupsClient(
+        client = Office365GroupsClient(
             "https://example.azure.com/connections/test", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -41,14 +41,14 @@ class TestOffice365groupsClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = Office365groupsClient(
+        client = Office365GroupsClient(
             "https://example.azure.com/connections/test/", AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = Office365groupsClient(
+        client = Office365GroupsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -57,7 +57,7 @@ class TestOffice365groupsClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = Office365groupsClient(
+        client = Office365GroupsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -68,16 +68,16 @@ class TestOffice365groupsClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            Office365groupsClient("", AzureKeyCredential("test-key"))
+            Office365GroupsClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            Office365groupsClient(None, AzureKeyCredential("test-key"))
+            Office365GroupsClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'office365groups'."""
-        client = Office365groupsClient(
+        client = Office365GroupsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -86,7 +86,7 @@ class TestOffice365groupsClientInitialization:
 
     def test_init_preserves_url_without_trailing_slash(self, mock_credential):
         """Test that URL without trailing slash is preserved."""
-        client = Office365groupsClient(
+        client = Office365GroupsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -94,13 +94,13 @@ class TestOffice365groupsClientInitialization:
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
 
-class TestOffice365groupsClientLifecycle:
-    """Tests for Office365groupsClient lifecycle methods."""
+class TestOffice365GroupsClientLifecycle:
+    """Tests for Office365GroupsClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = Office365groupsClient(
+        client = Office365GroupsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -112,12 +112,12 @@ class TestOffice365groupsClientLifecycle:
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
-        with patch.object(Office365groupsClient, 'close', new_callable=AsyncMock) as mock_close:
-            async with Office365groupsClient(
+        with patch.object(Office365GroupsClient, 'close', new_callable=AsyncMock) as mock_close:
+            async with Office365GroupsClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential
             ) as client:
-                assert isinstance(client, Office365groupsClient)
+                assert isinstance(client, Office365GroupsClient)
 
             mock_close.assert_called_once()
 
@@ -128,7 +128,7 @@ class TestListGroupMembersAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful list group members request."""
-        client = Office365groupsClient(
+        client = Office365GroupsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -156,7 +156,7 @@ class TestListGroupMembersAsync:
     @pytest.mark.asyncio
     async def test_with_top_parameter(self, mock_credential):
         """Test list group members with top parameter."""
-        client = Office365groupsClient(
+        client = Office365GroupsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -182,7 +182,7 @@ class TestListGroupMembersAsync:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
-        client = Office365groupsClient(
+        client = Office365GroupsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -203,7 +203,7 @@ class TestListGroupMembersAsync:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = Office365groupsClient(
+        client = Office365GroupsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -228,7 +228,7 @@ class TestListGroupsAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful list groups request."""
-        client = Office365groupsClient(
+        client = Office365GroupsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -253,7 +253,7 @@ class TestListGroupsAsync:
     @pytest.mark.asyncio
     async def test_with_filter_parameter(self, mock_credential):
         """Test list groups with filter parameter."""
-        client = Office365groupsClient(
+        client = Office365GroupsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -276,7 +276,7 @@ class TestListGroupsAsync:
     @pytest.mark.asyncio
     async def test_with_pagination_parameters(self, mock_credential):
         """Test list groups with top and skiptoken parameters."""
-        client = Office365groupsClient(
+        client = Office365GroupsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -303,7 +303,7 @@ class TestAddMemberToGroupAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful add member to group request."""
-        client = Office365groupsClient(
+        client = Office365GroupsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -333,7 +333,7 @@ class TestRemoveMemberFromGroupAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful remove member from group request."""
-        client = Office365groupsClient(
+        client = Office365GroupsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -362,7 +362,7 @@ class TestCreateCalendarEventAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful create calendar event request."""
-        client = Office365groupsClient(
+        client = Office365GroupsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -372,7 +372,7 @@ class TestCreateCalendarEventAsync:
             text='{"id": "event-123", "subject": "Team Meeting"}'
         )
 
-        event_input = UpdateCalendarEventHTMLRequest(
+        event_input = UpdateCalendarEventHtmlRequest(
             subject="Team Meeting",
             start={"dateTime": "2026-10-12T09:00:00Z"},
             end={"dateTime": "2026-10-12T10:00:00Z"},
@@ -401,7 +401,7 @@ class TestUpdateCalendarEventAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful update calendar event request."""
-        client = Office365groupsClient(
+        client = Office365GroupsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -411,7 +411,7 @@ class TestUpdateCalendarEventAsync:
             text='{"id": "event-123", "subject": "Updated Meeting"}'
         )
 
-        event_input = UpdateCalendarEventHTMLRequest(
+        event_input = UpdateCalendarEventHtmlRequest(
             subject="Updated Meeting",
             start={"dateTime": "2026-10-12T09:00:00Z"},
             end={"dateTime": "2026-10-12T10:00:00Z"},
@@ -441,7 +441,7 @@ class TestCalendarDeleteItemAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful delete calendar event request."""
-        client = Office365groupsClient(
+        client = Office365GroupsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -470,7 +470,7 @@ class TestListDeletedGroupsAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful list deleted groups request."""
-        client = Office365groupsClient(
+        client = Office365GroupsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -495,7 +495,7 @@ class TestListDeletedGroupsAsync:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
-        client = Office365groupsClient(
+        client = Office365GroupsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -518,7 +518,7 @@ class TestRestoreDeletedGroupAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful restore deleted group request."""
-        client = Office365groupsClient(
+        client = Office365GroupsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -545,7 +545,7 @@ class TestListOwnedGroupsAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful list owned groups request."""
-        client = Office365groupsClient(
+        client = Office365GroupsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -573,7 +573,7 @@ class TestHttpRequestAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful HTTP request."""
-        client = Office365groupsClient(
+        client = Office365GroupsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -599,7 +599,7 @@ class TestHttpRequestAsync:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = Office365groupsClient(
+        client = Office365GroupsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -648,7 +648,7 @@ class TestListDeletedGroupsByOwnerAsync:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful list deleted groups by owner request."""
-        client = Office365groupsClient(
+        client = Office365GroupsClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -792,7 +792,7 @@ class TestDataclasses:
 
     def test_update_calendar_event_html_request_optional_defaults(self):
         """Test UpdateCalendarEventHTMLRequest optional default values."""
-        request = UpdateCalendarEventHTMLRequest(
+        request = UpdateCalendarEventHtmlRequest(
             subject="HTML Meeting",
             start={"dateTime": "2026-10-12T09:00:00Z"},
             end={"dateTime": "2026-10-12T10:00:00Z"},
@@ -802,7 +802,7 @@ class TestDataclasses:
 
     def test_update_calendar_event_html_request_with_values(self):
         """Test UpdateCalendarEventHTMLRequest with values."""
-        request = UpdateCalendarEventHTMLRequest(
+        request = UpdateCalendarEventHtmlRequest(
             subject="HTML Meeting",
             start={"dateTime": "2026-10-12T09:00:00Z"},
             end={"dateTime": "2026-10-12T10:00:00Z"},
@@ -824,7 +824,7 @@ async def test_pageable_group_operation_empty_response_yields_no_items(
     operation,
 ):
     """Yield no group items for an empty successful response."""
-    client = Office365groupsClient(
+    client = Office365GroupsClient(
         "https://example.azure.com/connections/test",
         credential=mock_credential,
     )

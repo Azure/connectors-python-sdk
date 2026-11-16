@@ -24,7 +24,7 @@ import asyncio
 import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
-from azure.connectors.onedrive import OnedriveClient
+from azure.connectors.onedrive import OneDriveClient
 
 # Connection runtime URL format:
 # https://[region].azure-apihub.net/apim/onedrive/[connection-id]
@@ -40,7 +40,7 @@ async def example_1_list_root_folder():
 
     async with DefaultAzureCredential() as credential:
 
-        async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with OneDriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             items = [item async for item in client.list_root_folder()]
 
             if items:
@@ -64,7 +64,7 @@ async def example_2_get_file_metadata():
 
     async with DefaultAzureCredential() as credential:
 
-        async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with OneDriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 metadata = await client.get_file_metadata_by_path(path=file_path)
 
@@ -92,7 +92,7 @@ async def example_3_download_file():
 
     async with DefaultAzureCredential() as credential:
 
-        async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with OneDriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 content = await client.get_file_content_by_path(path=file_path)
 
@@ -122,7 +122,7 @@ async def example_4_list_folder():
 
     async with DefaultAzureCredential() as credential:
 
-        async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with OneDriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 entries = [
                     item async for item in client.list_folder(id=folder_id)
@@ -153,7 +153,7 @@ async def example_5_search_files():
 
     async with DefaultAzureCredential() as credential:
 
-        async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with OneDriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 items = [item async for item in client.list_find_files(
                     id=folder_id,
@@ -182,7 +182,7 @@ async def example_6_create_share_link():
 
     async with DefaultAzureCredential() as credential:
 
-        async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with OneDriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 result = await client.create_share_link(
                     id=file_id,
@@ -209,7 +209,7 @@ async def example_7_file_tags():
 
     async with DefaultAzureCredential() as credential:
 
-        async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with OneDriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Get existing tags
                 tags_items = [item async for item in client.list_file_tags(id=file_id)]
@@ -246,7 +246,7 @@ async def example_8_copy_file():
 
     async with DefaultAzureCredential() as credential:
 
-        async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with OneDriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 result = await client.copy_drive_file(
                     id=file_id,

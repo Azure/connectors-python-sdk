@@ -1,11 +1,11 @@
 """
-Projectplace sample for the Azure Connectors Python SDK
+ProjectPlace sample for the Azure Connectors Python SDK
 
-This sample demonstrates how to use the Projectplace client from the Azure Connectors Python SDK.
+This sample demonstrates how to use the ProjectPlace client from the Azure Connectors Python SDK.
 
 Prerequisites:
-1. Azure subscription with a Projectplace connection
-2. Projectplace connection in Connector Namespaces
+1. Azure subscription with a ProjectPlace connection
+2. ProjectPlace connection in Connector Namespaces
 3. Connection runtime URL from Azure Portal
 
 Installation:
@@ -24,7 +24,7 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.projectplace import ProjectplaceClient
+from azure.connectors.projectplace import ProjectPlaceClient
 from azure.connectors.projectplace import (
     CreateCardInput,
     MoveCardInput,
@@ -41,7 +41,7 @@ async def example_1_list_boards() -> None:
     print("\n=== Example 1: List Boards ===")
 
     async with DefaultAzureCredential() as credential:
-        async with ProjectplaceClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with ProjectPlaceClient(CONNECTION_RUNTIME_URL, credential) as client:
             boards = [item async for item in client.list_boards()]
             print(f"Boards: {boards}")
 
@@ -51,7 +51,7 @@ async def example_2_create_card() -> None:
     print("\n=== Example 2: Create Card ===")
 
     async with DefaultAzureCredential() as credential:
-        async with ProjectplaceClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with ProjectPlaceClient(CONNECTION_RUNTIME_URL, credential) as client:
             card = await client.create_card(
                 input=CreateCardInput(
                     column_id=123456,
@@ -68,7 +68,7 @@ async def example_3_move_card() -> None:
     print("\n=== Example 3: Move Card ===")
 
     async with DefaultAzureCredential() as credential:
-        async with ProjectplaceClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with ProjectPlaceClient(CONNECTION_RUNTIME_URL, credential) as client:
             card = await client.move_card(
                 input=MoveCardInput(card_id=123456, column_id=654321),
                 board_id=789012,
@@ -77,17 +77,17 @@ async def example_3_move_card() -> None:
 
 
 async def main() -> None:
-    """Run Projectplace connector examples."""
+    """Run ProjectPlace connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: PROJECTPLACE_CONNECTION_URL environment variable not set.")
         print("Set it to your connection runtime URL from Azure Portal.")
         return
 
-    print("Projectplace sample usage for the Azure Connectors Python SDK")
+    print("ProjectPlace sample usage for the Azure Connectors Python SDK")
     print("=" * 50)
 
     try:
-        # Uncomment to list boards, create cards, or move cards in Projectplace.
+        # Uncomment to list boards, create cards, or move cards in ProjectPlace.
         # await example_1_list_boards()
         # await example_2_create_card()
         # await example_3_move_card()

@@ -37,7 +37,7 @@ __all__ = [
     "Csv2XlsxColumnMapping",
     "Csv2XlsxRequest",
     "Doc2DocxRequest",
-    "DocumentContentWithFilenameResponse",
+    "DocumentContentWithFileNameResponse",
     "DocumentProcessingResponse",
     "DocumentsArrayResponse",
     "DocumentsWithFilenamesResponse",
@@ -46,6 +46,7 @@ __all__ = [
     "ExtractArchiveRequest",
     "FileData",
     "FillInPdfFormRequest",
+    "FlowDocumentsFlowSchemaParseCsvBodyInput",
     "FlowDocumentsJobsAddWatermarkToPdfInput",
     "FlowDocumentsJobsGetPdfFormPostResponse",
     "FlowDocumentsJobsSplitPdfInput",
@@ -81,6 +82,7 @@ __all__ = [
     "RegExpReplaceRequest",
     "RegExpTestRequest",
     "SplitPdfRequest",
+    "StartProcessOutputDynamicSchemaResponse",
     "StringResultResponse",
     "Xls2XlsxRequest",
     "Xlsx2PdfRequest",
@@ -168,7 +170,7 @@ class DocumentsWithFilenamesResponse:
     """
 
     result_files: Optional[
-        List[DocumentContentWithFilenameResponse | Mapping[str, Any]]
+        List[DocumentContentWithFileNameResponse | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -265,12 +267,16 @@ class BooleanResultResponse:
 
 
 @dataclass
-class DocumentContentWithFilenameResponse:
+class DocumentContentWithFileNameResponse:
     """
     Response for Create Archive
     """
 
-    filename: Optional[str] = dataclass_field(default=None, kw_only=True)
+    file_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "filename"},
+    )
     """Name of the file"""
     file_content: Optional[str] = dataclass_field(
         default=None,
@@ -294,6 +300,22 @@ class FlowProcessesFlowJobsExecuteProcessInput:
 
 
 @dataclass
+class StartProcessOutputDynamicSchemaResponse:
+    """
+    Response for Start document generation process with json
+    """
+
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
+    """
+    Dynamic properties determined at runtime
+    (similar to .NET [JsonExtensionData])
+    """
+
+
+FlowDocumentsFlowSchemaParseCsvBodyInput = str
+
+
+@dataclass
 class AddPowerAutomateWebhookData:
     """
     Definition: AddPowerAutomateWebhookData
@@ -303,6 +325,13 @@ class AddPowerAutomateWebhookData:
     """Name of the process that, when finished, will trigger the flow"""
     hook_url: str = dataclass_field(metadata={"wire_name": "hookUrl"})
     """HookUrl"""
+    output_files_as: str = dataclass_field(
+        metadata={"wire_name": "outputFilesAs"},
+    )
+    """
+    Choose whether output files are returned as separate variables or as an
+    array of files
+    """
 
 
 @dataclass
@@ -393,6 +422,8 @@ class ApplyXlsxTemplateRequest:
     """The locale that will be applyed to the document"""
     timezone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The time zone of the document"""
+    engine: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """The engine that will process the template"""
 
 
 @dataclass
@@ -963,7 +994,7 @@ class Pdf2ImageRequest:
         metadata={"wire_name": "documentContent"},
     )
     """Raw content of PDF document"""
-    filename_prefix: Optional[str] = dataclass_field(
+    file_name_prefix: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "filenamePrefix"},
@@ -4088,16 +4119,17 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    async def begin_flow_v1_processes_flow_jobs_execute_process(
+    async def begin_flow_v1_processes_flow_jobs_execute_process_v2(
         self,
         input: FlowProcessesFlowJobsExecuteProcessInput | Mapping[str, Any],
         process_id: str,
+        output_files_as: str,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncLROPoller[bytes]:
+    ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Start document generation process with json
 
@@ -4108,33 +4140,39 @@ class PlumsailClient(ConnectorClientBase):
 
         Returns an Azure Core async poller for the connector operation.
 
-        Swagger operation ID: `FlowV1ProcessesFlowJobsExecuteProcessPost`.
+        Swagger operation ID: `FlowV1ProcessesFlowJobsExecuteProcessV2Post`.
 
         Args:
             input: The request body. Mapping keys use serialized Swagger wire
                 names.
             process_id: The name of process to be started.
+            output_files_as: Choose whether output files are returned as
+                separate variables or as an array of files.
             timeout: The request timeout in seconds.
             headers: Additional HTTP request headers.
             client_request_id: A caller-provided request identifier.
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            AsyncLROPoller[bytes]: An Azure Core poller for the connector
-                operation.
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
 
         Raises:
             ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/flow/v1/ProcessesFlow/jobs/ExecuteProcess"
+            f"/flow/v1/ProcessesFlow/jobs/ExecuteProcessV2"
         )
         query_params = []
         value = str(process_id)
         if isinstance(process_id, bool):
             value = value.lower()
         query_params.append(f"processId={quote(value, safe='')}")
+        value = str(output_files_as)
+        if isinstance(output_files_as, bool):
+            value = value.lower()
+        query_params.append(f"outputFilesAs={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4158,7 +4196,11 @@ class PlumsailClient(ConnectorClientBase):
         return AsyncLROPoller(
             client=self,
             initial_response=response,
-            deserialization_callback=lambda polling_response: polling_response.content,
+            deserialization_callback=lambda polling_response: (
+                json.loads(polling_response.text)
+                if polling_response.text
+                else None
+            ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
                 request_url=request_url,
@@ -4170,16 +4212,18 @@ class PlumsailClient(ConnectorClientBase):
             ),
         )
 
-    async def begin_flow_v1_processes_flow_jobs_execute_process_with_generated_data(
-        self,
-        input: ProcessJsonData | Mapping[str, Any],
-        process_id: str,
-        *,
-        timeout: Optional[float] = None,
-        headers: Optional[Mapping[str, str]] = None,
-        client_request_id: Optional[str] = None,
-        response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncLROPoller[bytes]:
+    async def \
+            begin_flow_v1_processes_flow_jobs_execute_process_with_generated_data_multiple_outputs(
+                self,
+                input: ProcessJsonData | Mapping[str, Any],
+                process_id: str,
+                output_files_as: str,
+                *,
+                timeout: Optional[float] = None,
+                headers: Optional[Mapping[str, str]] = None,
+                client_request_id: Optional[str] = None,
+                response_hook: Optional[ConnectorResponseHook] = None,
+            ) -> AsyncLROPoller[dict[str, Any] | None]:
         """
         Start document generation process
 
@@ -4191,33 +4235,43 @@ class PlumsailClient(ConnectorClientBase):
         Returns an Azure Core async poller for the connector operation.
 
         Swagger operation ID:
-        `FlowV1ProcessesFlowJobsExecuteProcessWithGeneratedDataPost`.
+        `FlowV1ProcessesFlowJobsExecuteProcessWithGeneratedDataMultipleOutputsPost`.
 
         Args:
             input: The request body. Mapping keys use serialized Swagger wire
                 names.
             process_id: The name of process to be started.
+            output_files_as: Choose whether output files are returned as
+                separate variables or as an array of files.
             timeout: The request timeout in seconds.
             headers: Additional HTTP request headers.
             client_request_id: A caller-provided request identifier.
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            AsyncLROPoller[bytes]: An Azure Core poller for the connector
-                operation.
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
 
         Raises:
             ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/flow/v1/ProcessesFlow/jobs/ExecuteProcessWithGeneratedData"
+            f"/flow"
+            f"/v1"
+            f"/ProcessesFlow"
+            f"/jobs"
+            f"/ExecuteProcessWithGeneratedDataMultipleOutputs"
         )
         query_params = []
         value = str(process_id)
         if isinstance(process_id, bool):
             value = value.lower()
         query_params.append(f"processId={quote(value, safe='')}")
+        value = str(output_files_as)
+        if isinstance(output_files_as, bool):
+            value = value.lower()
+        query_params.append(f"outputFilesAs={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
@@ -4241,7 +4295,11 @@ class PlumsailClient(ConnectorClientBase):
         return AsyncLROPoller(
             client=self,
             initial_response=response,
-            deserialization_callback=lambda polling_response: polling_response.content,
+            deserialization_callback=lambda polling_response: (
+                json.loads(polling_response.text)
+                if polling_response.text
+                else None
+            ),
             polling_method=ConnectorPollingMethod(
                 http_client=self.http_client,
                 request_url=request_url,
@@ -4369,7 +4427,7 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-    async def flow_v1_processes_flow_schema_get_processes(
+    async def flow_v1_processes_flow_schema_get_user_processes(
         self,
         *,
         timeout: Optional[float] = None,
@@ -4378,11 +4436,11 @@ class PlumsailClient(ConnectorClientBase):
         response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
-        GetProcessesSchema
+        GetUserProcessesSchema
 
         System
 
-        Swagger operation ID: `FlowV1ProcessesFlowSchemaGetProcessesPost`.
+        Swagger operation ID: `FlowV1ProcessesFlowSchemaGetUserProcessesPost`.
 
         Args:
             timeout: The request timeout in seconds.
@@ -4398,7 +4456,7 @@ class PlumsailClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/flow/v1/ProcessesFlow/Schema/GetProcesses"
+            f"/flow/v1/ProcessesFlow/Schema/GetUserProcesses"
         )
 
         response = await self.http_client.send(
@@ -4418,9 +4476,8 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-    async def flow_v1_documents_flow_schema_parse_csv(
+    async def flow_v1_processes_flow_schema_get_start_process_output_files_as(
         self,
-        headers_parameter: str,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -4428,14 +4485,14 @@ class PlumsailClient(ConnectorClientBase):
         response_hook: Optional[ConnectorResponseHook] = None,
     ) -> None:
         """
-        ParseCsv
+        GetStartProcessOutputFilesAs
 
         System
 
-        Swagger operation ID: `FlowV1DocumentsFlowSchemaParseCsvPost`.
+        Swagger operation ID:
+        `FlowV1ProcessesFlowSchemaGetStartProcessOutputFilesAsPost`.
 
         Args:
-            headers_parameter: headers.
             timeout: The request timeout in seconds.
             headers: Additional HTTP request headers.
             client_request_id: A caller-provided request identifier.
@@ -4449,18 +4506,66 @@ class PlumsailClient(ConnectorClientBase):
         """
         request_url = (
             f"{self._connection_runtime_url}"
-            f"/flow/v1/DocumentsFlow/Schema/ParseCsv"
+            f"/flow/v1/ProcessesFlow/Schema/GetStartProcessOutputFilesAs"
         )
-        query_params = []
-        value = str(headers_parameter)
-        if isinstance(headers_parameter, bool):
-            value = value.lower()
-        query_params.append(f"headers={quote(value, safe='')}")
-        if query_params:
-            request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send(
             "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
+    async def flow_v1_documents_flow_schema_parse_csv_body(
+        self,
+        input: FlowDocumentsFlowSchemaParseCsvBodyInput,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> None:
+        """
+        ParseCsvBody
+
+        System
+
+        Swagger operation ID: `FlowV1DocumentsFlowSchemaParseCsvBodyPost`.
+
+        Args:
+            input: The request body.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/flow/v1/DocumentsFlow/Schema/ParseCsvBody"
+        )
+        request_body = input.encode("utf-8") if input is not None else None
+
+        response = await self.http_client.send(
+            "POST",
+            request_url,
+            body=request_body,
+            content_type="application/json",
             timeout=timeout,
             headers=headers,
             client_request_id=client_request_id,
@@ -4534,10 +4639,11 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
-    async def flow_v1_processes_flow_triggers_by_process_id_schema_get(
+    async def flow_v1_processes_flow_triggers_by_process_id_schema_v2_get(
         self,
         process_id: str,
         *,
+        output_files_as: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
@@ -4549,10 +4655,11 @@ class PlumsailClient(ConnectorClientBase):
         Returns schema of a process
 
         Swagger operation ID:
-        `FlowV1ProcessesFlowTriggersByProcessIdSchemaGet`.
+        `FlowV1ProcessesFlowTriggersByProcessIdSchemaV2Get`.
 
         Args:
             process_id: processId.
+            output_files_as: outputFilesAs.
             timeout: The request timeout in seconds.
             headers: Additional HTTP request headers.
             client_request_id: A caller-provided request identifier.
@@ -4571,8 +4678,16 @@ class PlumsailClient(ConnectorClientBase):
             f"/ProcessesFlow"
             f"/triggers"
             f"/{quote(str(process_id), safe='')}"
-            f"/schema"
+            f"/schemaV2"
         )
+        query_params = []
+        if output_files_as is not None:
+            value = str(output_files_as)
+            if isinstance(output_files_as, bool):
+                value = value.lower()
+            query_params.append(f"outputFilesAs={quote(value, safe='')}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
 
         response = await self.http_client.send(
             "GET", request_url, body=None,
@@ -4649,6 +4764,72 @@ class PlumsailClient(ConnectorClientBase):
                 response=response,
             )
 
+    async def flow_v1_processes_flow_schema_get_start_process_output_schema(
+        self,
+        process_id: str,
+        output_files_as: str,
+        *,
+        timeout: Optional[float] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        client_request_id: Optional[str] = None,
+        response_hook: Optional[ConnectorResponseHook] = None,
+    ) -> None:
+        """
+        GetStartProcessOutputSchema
+
+        System
+
+        Swagger operation ID:
+        `FlowV1ProcessesFlowSchemaGetStartProcessOutputSchemaPost`.
+
+        Args:
+            process_id: The name of process to be started.
+            output_files_as: Choose whether output files are returned as
+                separate variables or as an array of files.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
+        """
+        request_url = (
+            f"{self._connection_runtime_url}"
+            f"/flow/v1/ProcessesFlow/Schema/GetStartProcessOutputSchema"
+        )
+        query_params = []
+        value = str(process_id)
+        if isinstance(process_id, bool):
+            value = value.lower()
+        query_params.append(f"processId={quote(value, safe='')}")
+        value = str(output_files_as)
+        if isinstance(output_files_as, bool):
+            value = value.lower()
+        query_params.append(f"outputFilesAs={quote(value, safe='')}")
+        if query_params:
+            request_url += '?' + '&'.join(query_params)
+
+        response = await self.http_client.send(
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
+                response=response,
+            )
+
 
 # Trigger Operations
 #
@@ -4658,9 +4839,9 @@ class PlumsailClient(ConnectorClientBase):
 # fires. When the callback body has a JSON schema, ``callback_payload_type``
 # names the generated dataclass to deserialize the callback payload into.
 TRIGGER_OPERATIONS: Dict[str, Dict[str, Any]] = {
-    "FlowV1ProcessesFlowTriggersPost": {
-        "operation_id": "FlowV1ProcessesFlowTriggersPost",
-        "path": "/{connectionId}/flow/v1/ProcessesFlow/triggers",
+    "FlowV1ProcessesFlowTriggersV2Post": {
+        "operation_id": "FlowV1ProcessesFlowTriggersV2Post",
+        "path": "/{connectionId}/flow/v1/ProcessesFlow/triggers/v2",
         "method": "post",
         "required_parameters": ["data"],
         "callback_payload_type": None,

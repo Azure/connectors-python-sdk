@@ -32,7 +32,7 @@ import asyncio
 import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
-from azure.connectors.documentdb import DocumentdbClient
+from azure.connectors.documentdb import DocumentDBClient
 
 # Connection runtime URL format:
 # https://[region].azure-apihub.net/apim/documentdb/[connection-id]
@@ -64,7 +64,7 @@ async def example_1_query_all_documents():
 
     async with DefaultAzureCredential() as credential:
 
-        async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with DocumentDBClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 documents = [item async for item in client.list_query_documents(
                     cosmos_db_account_name=COSMOS_DB_ACCOUNT,
@@ -100,7 +100,7 @@ async def example_2_query_with_filter():
 
     async with DefaultAzureCredential() as credential:
 
-        async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with DocumentDBClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Query with WHERE clause - adjust field names for your schema
                 documents = [item async for item in client.list_query_documents(
@@ -136,7 +136,7 @@ async def example_3_query_with_pagination():
 
     async with DefaultAzureCredential() as credential:
 
-        async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with DocumentDBClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # The iterator follows continuation links until all pages are consumed.
                 documents = [item async for item in client.list_query_documents(
@@ -177,7 +177,7 @@ async def example_4_query_with_partition_key():
 
     async with DefaultAzureCredential() as credential:
 
-        async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with DocumentDBClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Query within a specific partition
                 documents = [item async for item in client.list_query_documents(
@@ -211,7 +211,7 @@ async def example_5_query_with_consistency():
 
     async with DefaultAzureCredential() as credential:
 
-        async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with DocumentDBClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Query with Session consistency (common for read-your-writes)
                 # Valid levels: Strong, BoundedStaleness, Session, Eventual

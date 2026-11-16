@@ -45,7 +45,7 @@ __all__ = [
     "UserListServiceGetDataInput",
     "UserListServiceGetDataResponse",
     "WebhookSubscriptionResponse",
-    "WebhookSubscriptionsRestAPIInput",
+    "WebhookSubscriptionsRestApiInput",
     "TRIGGER_OPERATIONS",
 ]
 
@@ -318,7 +318,7 @@ class BulkGetTimeEnteredSummaryResponse:
 
 
 @dataclass
-class WebhookSubscriptionsRestAPIInput:
+class WebhookSubscriptionsRestApiInput:
     """
     Subscribe to Event triggers
     """

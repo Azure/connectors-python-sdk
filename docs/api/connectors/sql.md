@@ -1,0 +1,62 @@
+# SqlClient
+
+::: azure.connectors.sql
+    options:
+      members:
+        - ExecutePassThroughNativeQueryResponse
+        - ExecuteProcedureInput
+        - ExecuteProcedureResponse
+        - GetItemResponse
+        - GetItemsResponse
+        - SqlItemsList
+        - GetTablesResponse
+        - PatchItemInput
+        - PatchItemResponse
+        - PostItemInput
+        - PostItemResponse
+        - ODataServersList
+        - DatabasesList
+        - TablesList
+        - PassThroughNativeQueryMetadata
+        - ProceduresList
+        - ProcedureMetadata
+        - TableMetadata
+        - BlobDataSetsMetadata
+        - Database
+        - DataSet
+        - DataSetParameter
+        - DataSetsList
+        - DataSetsMetadata
+        - DataWithSensitivityLabelInfo
+        - DynamicTree
+        - DynamicTreeOpenBrowse
+        - DynamicTreeSettings
+        - DynamicValues
+        - Item
+        - ItemsList
+        - NoNaturalKeyColumnConnectorMetadata
+        - ObjectEntity
+        - PassThroughNativeQuery
+        - PassThroughNativeQueryBody
+        - PassThroughNativeQueryResult
+        - Procedure
+        - ProcedureResult
+        - SensitivityLabelMetadata
+        - Server
+        - SqlItem
+        - SqlPassThroughNativeQueryBody
+        - SqlPassThroughNativeQueryResult
+        - Table
+        - TableCapabilitiesMetadata
+        - TableFilterRestrictionsMetadata
+        - TableSelectRestrictionsMetadata
+        - TableCountRestrictionsMetadata
+        - TableSortRestrictionsMetadata
+        - TabularDataSetsMetadata
+        - PassThroughPQBody
+        - PQMetadata
+        - PQMetadataValue
+        - PassThroughPQResult
+        - PQRows
+        - SqlClient
+        - TRIGGER_OPERATIONS

@@ -16,7 +16,7 @@ from azure.connectors.office365 import (
     GraphClientReceiveFileAttachment,
     GraphClientReceiveMessage,
     MarkAsReadInput,
-    MCPQueryRequest,
+    McpQueryRequest,
     ResponseToEventInvite,
     GraphCalendarEventClient,
     GetAttachmentResponse,
@@ -764,7 +764,7 @@ class TestMCPEmailsManagement:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            request = MCPQueryRequest(jsonrpc="2.0", id="1", method="list")
+            request = McpQueryRequest(jsonrpc="2.0", id="1", method="list")
             result = await client.mcp_emails_management(request)
 
             mock_send.assert_called_once_with(
@@ -797,7 +797,7 @@ class TestMCPEmailsManagement:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            request = MCPQueryRequest(jsonrpc="2.0", id="2", method="init")
+            request = McpQueryRequest(jsonrpc="2.0", id="2", method="init")
             await client.mcp_emails_management(
                 request,
                 session_id="session-abc"

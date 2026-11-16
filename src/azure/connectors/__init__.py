@@ -9,7 +9,7 @@ from ._client_registry import CLIENT_REGISTRY
 from .sdk.client_base import ConnectorClientBase
 from .sdk.exceptions import ConnectorException
 from .sdk.http_client import ConnectorHttpClient, ConnectorResponse
-from .sdk.response import ConnectorResponseHook, ConnectorResponseSnapshot
+from .sdk.response import ConnectorPage, ConnectorResponseHook, ConnectorResponseSnapshot
 from .sdk.trigger_payload import TriggerCallbackBody, TriggerCallbackPayload
 
 
@@ -37,6 +37,7 @@ __all__ = [
     "ConnectorException",
     "ConnectorHttpClient",
     "ConnectorResponse",
+    "ConnectorPage",
     "ConnectorResponseHook",
     "ConnectorResponseSnapshot",
     "TriggerCallbackBody",

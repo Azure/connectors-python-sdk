@@ -1,12 +1,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Unit tests for AzureblobClient."""
+"""Unit tests for AzureBlobClient."""
 
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.azureblob import AzureblobClient
-from azure.connectors.azureblob import (
+from azure.connectors.azure_blob import AzureBlobClient
+from azure.connectors.azure_blob import (
     SharedAccessSignatureBlobPolicy,
 )
 from azure.connectors.sdk import (
@@ -16,12 +16,12 @@ from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import resolve_generated_result
 
 
-class TestAzureblobClientInitialization:
-    """Tests for AzureblobClient initialization."""
+class TestAzureBlobClientInitialization:
+    """Tests for AzureBlobClient initialization."""
 
     def test_init_with_valid_url_and_defaults(self):
         """Test initialization with valid URL and default parameters."""
-        client = AzureblobClient("https://example.azure.com/connections/test",
+        client = AzureBlobClient("https://example.azure.com/connections/test",
                                  AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
@@ -30,14 +30,14 @@ class TestAzureblobClientInitialization:
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from URL."""
-        client = AzureblobClient("https://example.azure.com/connections/test/",
+        client = AzureBlobClient("https://example.azure.com/connections/test/",
                                  AzureKeyCredential("test-key"))
 
         assert client._connection_runtime_url == "https://example.azure.com/connections/test"
 
     def test_init_with_custom_credential(self, mock_credential):
         """Test initialization with custom token provider."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -46,7 +46,7 @@ class TestAzureblobClientInitialization:
 
     def test_init_with_custom_settings(self, mock_credential):
         """Test initialization with custom pipeline settings."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
             timeout=60.0,
@@ -57,16 +57,16 @@ class TestAzureblobClientInitialization:
     def test_init_with_empty_url_raises_error(self):
         """Test that empty URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            AzureblobClient("", AzureKeyCredential("test-key"))
+            AzureBlobClient("", AzureKeyCredential("test-key"))
 
     def test_init_with_none_url_raises_error(self):
         """Test that None URL raises ValueError."""
         with pytest.raises(ValueError, match="connection_runtime_url cannot be None or empty"):
-            AzureblobClient(None, AzureKeyCredential("test-key"))
+            AzureBlobClient(None, AzureKeyCredential("test-key"))
 
     def test_connector_name_property(self, mock_credential):
         """Test connector_name property returns 'azureblob'."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -74,13 +74,13 @@ class TestAzureblobClientInitialization:
         assert client.connector_name == "azureblob"
 
 
-class TestAzureblobClientLifecycle:
-    """Tests for AzureblobClient lifecycle methods."""
+class TestAzureBlobClientLifecycle:
+    """Tests for AzureBlobClient lifecycle methods."""
 
     @pytest.mark.asyncio
     async def test_close(self, mock_credential):
         """Test close method calls http_client.close."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -92,12 +92,12 @@ class TestAzureblobClientLifecycle:
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential):
         """Test async context manager functionality."""
-        with patch.object(AzureblobClient, 'close', new_callable=AsyncMock) as mock_close:
-            async with AzureblobClient(
+        with patch.object(AzureBlobClient, 'close', new_callable=AsyncMock) as mock_close:
+            async with AzureBlobClient(
                 "https://example.azure.com/connections/test",
                 credential=mock_credential
             ) as client:
-                assert isinstance(client, AzureblobClient)
+                assert isinstance(client, AzureBlobClient)
 
             mock_close.assert_called_once()
 
@@ -108,7 +108,7 @@ class TestCopyFile:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -141,7 +141,7 @@ class TestCopyFile:
     @pytest.mark.asyncio
     async def test_with_overwrite_parameter(self, mock_credential):
         """Test POST request with overwrite parameter."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -167,7 +167,7 @@ class TestCopyFile:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -190,7 +190,7 @@ class TestCopyFile:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -219,7 +219,7 @@ class TestCreateBlockBlob:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful POST request."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -254,7 +254,7 @@ class TestCreateFile:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -287,7 +287,7 @@ class TestCreateFile:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -317,7 +317,7 @@ class TestCreateShareLinkByPath:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -349,7 +349,7 @@ class TestCreateShareLinkByPath:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -378,7 +378,7 @@ class TestDeleteFile:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful DELETE request."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -408,7 +408,7 @@ class TestExtractFolder:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful POST request."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -441,7 +441,7 @@ class TestExtractFolder:
     @pytest.mark.asyncio
     async def test_with_overwrite_parameter(self, mock_credential):
         """Test POST request with overwrite parameter."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -469,7 +469,7 @@ class TestExtractFolder:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -500,7 +500,7 @@ class TestGetAccessPolicies:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -532,7 +532,7 @@ class TestGetAccessPolicies:
     @pytest.mark.asyncio
     async def test_empty_response_returns_empty_page(self, mock_credential):
         """Test that an empty response returns an empty page."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -556,7 +556,7 @@ class TestGetAccessPolicies:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -586,7 +586,7 @@ class TestGetFileContent:
     @pytest.mark.asyncio
     async def test_success_returns_binary_content(self, mock_credential):
         """Test successful GET request returns binary content."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -615,7 +615,7 @@ class TestGetFileContent:
     @pytest.mark.asyncio
     async def test_with_infer_content_type_parameter(self, mock_credential):
         """Test GET request with inferContentType parameter."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -641,7 +641,7 @@ class TestGetFileContent:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -669,7 +669,7 @@ class TestGetFileContentByPath:
     @pytest.mark.asyncio
     async def test_success_returns_binary_content(self, mock_credential):
         """Test successful GET request returns binary content."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -698,7 +698,7 @@ class TestGetFileContentByPath:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -726,7 +726,7 @@ class TestGetFileMetadata:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -757,7 +757,7 @@ class TestGetFileMetadata:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -779,7 +779,7 @@ class TestGetFileMetadata:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -807,7 +807,7 @@ class TestGetFileMetadataByPath:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -837,7 +837,7 @@ class TestGetFileMetadataByPath:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -859,7 +859,7 @@ class TestGetFileMetadataByPath:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -887,7 +887,7 @@ class TestListFolder:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -917,7 +917,7 @@ class TestListFolder:
     @pytest.mark.asyncio
     async def test_with_optional_parameters(self, mock_credential):
         """Test GET request with public optional parameters."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -943,7 +943,7 @@ class TestListFolder:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -965,7 +965,7 @@ class TestListFolder:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -993,7 +993,7 @@ class TestListRootFolder:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful GET request."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1022,7 +1022,7 @@ class TestListRootFolder:
     @pytest.mark.asyncio
     async def test_hides_continuation_parameter(self, mock_credential):
         """Test that paging continuation is managed internally."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1045,7 +1045,7 @@ class TestListRootFolder:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1066,7 +1066,7 @@ class TestListRootFolder:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1091,7 +1091,7 @@ class TestSetBlobTierByPath:
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
         """Test successful POST request."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1123,7 +1123,7 @@ class TestUpdateFile:
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
         """Test successful PUT request."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1155,7 +1155,7 @@ class TestUpdateFile:
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
         """Test that empty response returns None."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
@@ -1178,7 +1178,7 @@ class TestUpdateFile:
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
         """Test that error response raises ConnectorException."""
-        client = AzureblobClient(
+        client = AzureBlobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )

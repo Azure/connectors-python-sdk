@@ -1,0 +1,49 @@
+# SalesforceClient
+
+::: azure.connectors.salesforce
+    options:
+      members:
+        - TablesList
+        - GetItemByExternalIdResponse
+        - ItemsList
+        - ObjectEntity
+        - GetAllJobsResponse
+        - CheckJobResponse
+        - JobInfo
+        - SoslSearchQueryResponse
+        - ObjectWithoutType
+        - McpQueryResponse
+        - CreateJobResponse
+        - GetItemResponse
+        - PatchItemInput
+        - PatchItemResponse
+        - PatchItemByExternalIdInput
+        - PatchItemByExternalIdResponse
+        - PostItemInput
+        - PostItemResponse
+        - ExternalIdFieldsList
+        - TableMetadata
+        - BlobDataSetsMetadata
+        - CreateJobParameters
+        - DataSet
+        - DataSetsList
+        - DataSetsMetadata
+        - ExecuteSoqlQueryParameters
+        - ExternalIdField
+        - Item
+        - PassThroughNativeQuery
+        - Procedure
+        - Table
+        - TableCapabilitiesMetadata
+        - TableFilterRestrictionsMetadata
+        - TableSelectRestrictionsMetadata
+        - TableSortRestrictionsMetadata
+        - TabularDataSetsMetadata
+        - CreateJobRequest
+        - InstanceUrlResponse
+        - GetCurrentUserInfoResponse
+        - SearchRecordObject
+        - CloseJobRequest
+        - McpQueryRequest
+        - SalesforceClient
+        - TRIGGER_OPERATIONS
