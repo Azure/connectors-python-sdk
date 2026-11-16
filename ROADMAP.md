@@ -10,13 +10,32 @@ This document tracks the development roadmap for the Azure Connectors Python SDK
 
 ## Current Status
 
+**Release target:** 1.0.0 general availability.
+Release preparation does not publish the package; the official release pipeline
+and partner-release/PyPI step remain required.
+
 | Component | Status |
 |-----------|--------|
-| Core SDK | ✅ Complete — Async Azure Core pipelines, credentials, retries, and paging |
-| Connectors | ✅ 101 connectors — See [README.md](README.md#validated-connectors) |
-| CI/CD | ✅ Complete — GitHub Actions for pytest, flake8, build |
-| PyPI Publishing | ✅ Complete — Release workflow ready |
+| Core SDK | ✅ Complete — Async Azure Core pipelines, credentials, retries, paging, and polling |
+| Connectors | ✅ 103 connectors — See [README.md](README.md#validated-connectors) for per-connector validation status |
+| CI/CD | ✅ Complete — Automated tests, code quality checks, and package builds |
+| PyPI Publishing | Release workflow available; 1.0.0 publication pending |
 | Documentation | ✅ Complete — README, samples, test docs, API reference docs |
+
+### 1.0.0 Release Scope
+
+- Async-only clients and typed models in `azure.connectors.<connector>`.
+- Caller-owned async Azure Identity or Azure Core API key credentials.
+- Azure Core paging, Location-backed long-running operations, and response hooks.
+- Safe-method retries by default, with explicit opt-in for replaying unsafe methods.
+- Lazy package-root client exports, type stubs, and generated API documentation.
+- Preview migration guides for [API contracts](docs/migration-sync-aio.md) and
+  [Python names](docs/naming-migration.md).
+
+SDK general availability does not change the availability or service limits of
+Azure connector resources and services. Azure Functions trigger hosting and
+SDK-type conversion belong to the separate Functions connector extension; see
+[SDK-type bindings](docs/sdk-type-bindings.md).
 
 ---
 
@@ -47,15 +66,15 @@ This document tracks the development roadmap for the Azure Connectors Python SDK
 
 ## Phase 2: PyPI Publication & Ecosystem
 
-**Target:** Q2 2026
+**Target:** 1.0.0 general availability, November 2026
 
 ### Goals
 
-- [ ] Publish `azure-connectors` to PyPI
+- [ ] Publish the first stable `azure-connectors` release to PyPI
   - [x] Package metadata and classifiers
   - [x] Version management workflow
   - [x] PyPI authentication setup
-  - [ ] First stable release (v1..0)
+  - [ ] First stable release (1.0.0), after release pipeline approval and publication
 - [x] Package distribution
   - [x] Wheel and source distribution builds
   - [x] GitHub Releases with artifacts
@@ -69,14 +88,15 @@ This document tracks the development roadmap for the Azure Connectors Python SDK
 
 | Milestone | Target Date | Status |
 |-----------|-------------|--------|
-| Documentation site launched | July 2026 | 📋 Planned |
-| v1.0.0 stable release to PyPI | August 2026 | 📋 Planned |
+| Documentation site and generated API reference | Available | ✅ Implemented |
+| 1.0.0 release preparation | November 16, 2026 | Version and release documentation updated |
+| 1.0.0 stable release to PyPI | November 2026 | Publication pending |
 
 ---
 
 ## Phase 3: Additional High-Priority Connectors
 
-**Status:** In Progress (Q2-Q3 2026)
+**Status:** Listed connectors complete for 1.0.0; future additions follow demand.
 
 > See [README.md](README.md#validated-connectors) for the complete list of implemented connectors.
 
@@ -89,8 +109,8 @@ This document tracks the development roadmap for the Azure Connectors Python SDK
 | Excel Online (Business) | ✅ Complete |
 | Outlook.com | ✅ Complete |
 | Word Online (Business) | ✅ Complete |
-| Office 365 Groups | 📋 Planned |
-| Planner | 📋 Planned |
+| Office 365 Groups | ✅ Complete |
+| Planner | ✅ Complete |
 
 ### Azure Services
 
@@ -104,14 +124,14 @@ This document tracks the development roadmap for the Azure Connectors Python SDK
 | Azure Event Grid | ✅ Complete |
 | Service Bus | ✅ Complete |
 | ARM (Resource Manager) | ✅ Complete |
-| Azure Log Analytics | 📋 Planned |
+| Azure Monitor Logs (Log Analytics) | ✅ Complete |
 
 ### Data & Integration
 
 | Connector | Status |
 |-----------|--------|
 | Microsoft Dataverse | ✅ Complete |
-| SQL Server | 📋 Planned |
+| SQL Server | ✅ Complete |
 
 ### Security & Identity
 
@@ -130,7 +150,7 @@ This document tracks the development roadmap for the Azure Connectors Python SDK
 
 ## Phase 4: Python Samples & Best Practices
 
-**Target:** Q3 2026
+**Target:** Ongoing after 1.0.0; unchecked items are not GA requirements.
 
 ### Sample Projects
 
@@ -164,13 +184,14 @@ This document tracks the development roadmap for the Azure Connectors Python SDK
 
 ## Phase 5: Advanced Features
 
-**Target:** Q4 2026
+**Target:** Future releases; no committed dates.
 
 ### SDK Enhancements
 
-- [ ] **Trigger support**
-  - [ ] Polling triggers (webhooks where supported)
-  - [ ] Connector Namespace integration
+- [ ] **Trigger ecosystem enhancements**
+  - [x] Generated trigger metadata and payload models
+  - [x] Connector Namespace connection setup guidance
+  - [ ] Broader trigger coverage through the separate Azure Functions connector extension
   - [ ] Event Grid integration
 - [ ] **Batch operations**
   - [ ] Bulk send for email
@@ -193,9 +214,9 @@ This document tracks the development roadmap for the Azure Connectors Python SDK
   - [ ] IntelliSense for connector operations
   - [ ] Code snippets
   - [ ] Connection manager
-- [ ] **Type stub generation**
-  - [ ] PEP 561 compliance
-  - [ ] Mypy compatibility
+- [x] **Package typing**
+  - [x] PEP 561 marker and generated package-root type stubs
+  - [x] Mypy validation
 
 ---
 
@@ -244,7 +265,8 @@ Based on usage data, agentic solution value, and community requests:
 | **Tier 2** | OneDrive, Excel, Dataverse, Outlook, Word Online | ✅ Complete |
 | **Tier 3** | Azure Storage (Blob, Queues, Tables), Cosmos DB, Event Hubs, Service Bus | ✅ Complete |
 | **Tier 4** | Azure AD, Defender ATP, SMTP, ARM | ✅ Complete |
-| **Backlog** | SQL Server, Dynamics 365, Salesforce, SFTP, ServiceNow, Snowflake | 📋 Planned |
+| **Additional shipped clients** | SQL Server, Dynamics 365, Salesforce, ServiceNow | ✅ Complete |
+| **Backlog** | SFTP, Snowflake | 📋 Planned |
 
 ---
 
@@ -285,6 +307,14 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on:
 
 For questions and discussions, visit [GitHub Discussions](https://github.com/Azure/LogicApps/discussions).
 
+---
+
+## Historical Cross-Language Planning Notes (March 2026)
+
+The notes below record early design options, questions, and C# proof-of-concept
+tasks. They are not the current Python SDK release checklist or a statement of
+current Azure service availability. Use the status above and the linked guides
+for 1.0.0 scope and setup.
 
 1. **Function app registers** a callback URL with the connector service at deployment time (cloud) or F5 time (local)
 2. **Connector service monitors** for events on its own compute (Logic Apps multi-tenant infrastructure)
