@@ -27,7 +27,7 @@ import asyncio
 import os
 from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
-from azure.connectors.mq import MqClient
+from azure.connectors.mq import MQClient
 from azure.connectors.mq import (
     SendValidDataOptions,
     SingleGetValidOptions,
@@ -56,7 +56,7 @@ async def example_1_send_message():
 
     async with DefaultAzureCredential() as credential:
 
-        async with MqClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with MQClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 options = SendValidDataOptions(
                     message=message_content,
@@ -84,7 +84,7 @@ async def example_2_browse_message():
 
     async with DefaultAzureCredential() as credential:
 
-        async with MqClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with MQClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 options = SingleGetValidOptions(
                     queue=DEFAULT_QUEUE,
@@ -117,7 +117,7 @@ async def example_3_browse_messages_batch():
 
     async with DefaultAzureCredential() as credential:
 
-        async with MqClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with MQClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 options = MultipleGetValidOptions(
                     queue=DEFAULT_QUEUE,
@@ -150,7 +150,7 @@ async def example_4_receive_message():
 
     async with DefaultAzureCredential() as credential:
 
-        async with MqClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with MQClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 options = SingleGetValidOptions(
                     queue=DEFAULT_QUEUE,
@@ -181,7 +181,7 @@ async def example_5_delete_message():
 
     async with DefaultAzureCredential() as credential:
 
-        async with MqClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with MQClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 options = SingleGetValidOptions(
                     queue=DEFAULT_QUEUE,

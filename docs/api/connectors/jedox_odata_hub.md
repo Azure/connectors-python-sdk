@@ -1,0 +1,51 @@
+# JedoxODataHubClient
+
+::: azure.connectors.jedox_odata_hub
+    options:
+      members:
+        - DatabasesResponse
+        - Database
+        - CubesResponse
+        - Cube
+        - CubeCellsResponse
+        - DimensionsResponse
+        - Dimension
+        - ElementsResponse
+        - Element
+        - ViewsResponse
+        - View
+        - ViewCellsResponse
+        - IntegratorProjectGroupsResponse
+        - IntegratorProjectGroup
+        - IntegratorProjectsResponse
+        - IntegratorProject
+        - ExtractsResponse
+        - IntegratorComponent
+        - ExtractRowsResponse
+        - JobsResponse
+        - IntegratorRunResult
+        - LoadsResponse
+        - TransformsResponse
+        - TransformRowsResponse
+        - GetCubeCellResultSchemaResponse
+        - GetExtractRowsResultSchemaResponse
+        - GetTransformRowsResultSchemaResponse
+        - GetViewCellResultSchemaResponse
+        - Cell
+        - CellArray
+        - CubeArray
+        - DatabaseArray
+        - DimensionArray
+        - ElementArray
+        - Error
+        - IntegratorComponentArray
+        - IntegratorExtractComponentRow
+        - IntegratorExtractComponentRowArray
+        - IntegratorProjectArray
+        - IntegratorProjectGroupArray
+        - IntegratorTransformComponentRow
+        - IntegratorTransformComponentRowArray
+        - ViewArray
+        - ViewCell
+        - ViewCellArray
+        - JedoxODataHubClient

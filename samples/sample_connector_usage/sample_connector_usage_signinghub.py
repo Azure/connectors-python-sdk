@@ -27,7 +27,7 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.signinghub import SigninghubClient
+from azure.connectors.signinghub import SigningHubClient
 from azure.connectors.signinghub import (
     CheckBoxFieldRequest,
     FieldDimension,
@@ -44,7 +44,7 @@ async def example_1_get_contacts():
 
     async with DefaultAzureCredential() as credential:
 
-        async with SigninghubClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with SigningHubClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 items = [item async for item in client.list_contacts_get(
                     record_per_page=10,
@@ -65,7 +65,7 @@ async def example_2_add_check_box_field():
 
     async with DefaultAzureCredential() as credential:
 
-        async with SigninghubClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with SigningHubClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 request = CheckBoxFieldRequest(
                     order=1,
@@ -96,7 +96,7 @@ async def example_3_delete_attachment():
 
     async with DefaultAzureCredential() as credential:
 
-        async with SigninghubClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with SigningHubClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 await client.attachment_delete_attachment(
                     package_id=12345,

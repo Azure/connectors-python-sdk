@@ -3,13 +3,14 @@
 """Abstract base class for generated connector clients."""
 
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Any, AsyncIterator, Optional
 
 from azure.core.credentials import AzureKeyCredential
 from azure.core.credentials_async import AsyncTokenCredential
 from azure.core.pipeline.transport import AsyncHttpTransport
 
 from .http_client import ConnectorHttpClient
+from .response import ConnectorPage, ConnectorResponseSnapshot
 
 
 class ConnectorClientBase(ABC):
@@ -66,6 +67,21 @@ class ConnectorClientBase(ABC):
     def http_client(self) -> ConnectorHttpClient:
         """Get the HTTP client for making connector requests."""
         return self._http_client
+
+    def _wrap_page(
+        self,
+        items: AsyncIterator[Any],
+        page_model: Any,
+        raw_response: ConnectorResponseSnapshot,
+        continuation_token: Optional[str] = None,
+    ) -> ConnectorPage[Any]:
+        """Retain parsed and raw page envelopes alongside yielded items."""
+        return ConnectorPage(
+            items,
+            page_model=page_model,
+            raw_response=raw_response,
+            continuation_token=continuation_token,
+        )
 
     async def close(self) -> None:
         """Close the HTTP client and release resources."""

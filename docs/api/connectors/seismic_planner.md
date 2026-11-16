@@ -1,0 +1,44 @@
+# SeismicPlannerClient
+
+::: azure.connectors.seismic_planner
+    options:
+      members:
+        - CommentQueryResponse
+        - Comment
+        - PlannerProjectQueryResponse
+        - AsyncOperationResponse
+        - PlannerProject
+        - PlannerRequestQueryResponse
+        - PlannerRequest
+        - StatusSchemaQueryResponse
+        - StatusSchema
+        - PlannerTaskQueryResponse
+        - PlannerTask
+        - Association
+        - AssociationReq
+        - ContentRef
+        - CreateCommentModel
+        - CreateProject
+        - CreateRequest
+        - CreateTask
+        - CustomProperty
+        - CustomPropertyDataDisplay
+        - CustomPropertyValues
+        - CustomPropertyValuesInput
+        - CustomPropertyValuesValues
+        - DeleteRequest
+        - Follower
+        - Meta
+        - MetaQueryInfo
+        - PlannerSubTask
+        - PossibleValuesItem
+        - ProblemDetails
+        - ProjectAssociatedNodes
+        - RequestFormCustomProperties
+        - ScopeSettingsItemDefinition
+        - UpdateCommentModel
+        - UpdateProject
+        - UpdateRequest
+        - UpdateTask
+        - ValueSchemaPropertyDefinition
+        - SeismicPlannerClient

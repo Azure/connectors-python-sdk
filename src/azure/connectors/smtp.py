@@ -72,7 +72,7 @@ class Email:
     Specify email addresses separated by semicolons like
     recipient1@domain.com;recipient2@domain.com
     """
-    c_c: Optional[str] = dataclass_field(
+    cc: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CC"},

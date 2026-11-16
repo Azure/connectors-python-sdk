@@ -1944,6 +1944,9 @@ class ShiftsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2235,6 +2238,9 @@ class ShiftsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2526,6 +2532,9 @@ class ShiftsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2873,6 +2882,9 @@ class ShiftsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -2973,6 +2985,9 @@ class ShiftsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -3144,6 +3159,9 @@ class ShiftsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -3448,6 +3466,9 @@ class ShiftsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -3753,6 +3774,9 @@ class ShiftsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -4057,6 +4081,9 @@ class ShiftsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -4362,6 +4389,9 @@ class ShiftsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -4371,7 +4401,7 @@ class ShiftsClient(ConnectorClientBase):
         *,
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
-        assigned_to_user_name: Optional[str] = None,
+        assigned_to_username: Optional[str] = None,
         top: Optional[int] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -4391,7 +4421,7 @@ class ShiftsClient(ConnectorClientBase):
         Args:
             start_time: yyyy-MM-ddTHH:mm:ss.fffZ (UTC format).
             end_time: yyyy-MM-ddTHH:mm:ss.fffZ (UTC format).
-            assigned_to_user_name: Assigned to user with name.
+            assigned_to_username: Assigned to user with name.
             top: Items per page (enable Pagination under .../Settings).
             timeout: The request timeout in seconds.
             headers: Additional HTTP request headers.
@@ -4419,9 +4449,9 @@ class ShiftsClient(ConnectorClientBase):
             if isinstance(end_time, bool):
                 value = value.lower()
             query_params.append(f"endTime={quote(value, safe='')}")
-        if assigned_to_user_name is not None:
-            value = str(assigned_to_user_name)
-            if isinstance(assigned_to_user_name, bool):
+        if assigned_to_username is not None:
+            value = str(assigned_to_username)
+            if isinstance(assigned_to_username, bool):
                 value = value.lower()
             query_params.append(f"assignedToUserName={quote(value, safe='')}")
         if top is not None:
@@ -4476,6 +4506,9 @@ class ShiftsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -4485,7 +4518,7 @@ class ShiftsClient(ConnectorClientBase):
         *,
         start_time: Optional[str] = None,
         end_time: Optional[str] = None,
-        assigned_to_user_name: Optional[str] = None,
+        assigned_to_username: Optional[str] = None,
         top: Optional[int] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -4505,7 +4538,7 @@ class ShiftsClient(ConnectorClientBase):
         Args:
             start_time: yyyy-MM-ddTHH:mm:ss.fffZ (UTC format).
             end_time: yyyy-MM-ddTHH:mm:ss.fffZ (UTC format).
-            assigned_to_user_name: Assigned to user with name.
+            assigned_to_username: Assigned to user with name.
             top: How many times off to fetch.
             timeout: The request timeout in seconds.
             headers: Additional HTTP request headers.
@@ -4533,9 +4566,9 @@ class ShiftsClient(ConnectorClientBase):
             if isinstance(end_time, bool):
                 value = value.lower()
             query_params.append(f"endTime={quote(value, safe='')}")
-        if assigned_to_user_name is not None:
-            value = str(assigned_to_user_name)
-            if isinstance(assigned_to_user_name, bool):
+        if assigned_to_username is not None:
+            value = str(assigned_to_username)
+            if isinstance(assigned_to_username, bool):
                 value = value.lower()
             query_params.append(f"assignedToUserName={quote(value, safe='')}")
         if top is not None:
@@ -4590,6 +4623,9 @@ class ShiftsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return continuation_token, wrap_page(items(), page, response, continuation_token)
             return continuation_token, items()
 
         return AsyncItemPaged(get_next, extract_data)
@@ -4665,6 +4701,9 @@ class ShiftsClient(ConnectorClientBase):
                 for item in page.get("value", []):
                     yield item
 
+            wrap_page = getattr(self, "_wrap_page", None)
+            if wrap_page is not None:
+                return None, wrap_page(items(), page, response, None)
             return None, items()
 
         return AsyncItemPaged(get_next, extract_data)

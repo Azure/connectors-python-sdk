@@ -7,6 +7,7 @@ import json
 import random
 from importlib.metadata import PackageNotFoundError, version
 from typing import Any, Dict, Generic, List, Mapping, Optional, TypeVar
+from urllib.parse import urlsplit
 
 from azure.core.credentials import AzureKeyCredential
 from azure.core.credentials_async import AsyncTokenCredential
@@ -386,6 +387,14 @@ class ConnectorHttpClient:
                 )
             else:
                 request_options["retry_total"] = 0
+        request_path = urlsplit(url).path
+        if (
+            normalized_method == "GET"
+            and request_path.endswith("/sms/send")
+            and "dataflowssms" in request_path.split("/")
+        ):
+            # This GET sends an SMS; never replay it, even with unsafe opt-in.
+            request_options["retry_total"] = 0
         if client_request_id is not None:
             request_options["request_id"] = client_request_id
 

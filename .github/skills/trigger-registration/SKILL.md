@@ -323,12 +323,12 @@ async def main(connection_url: str):
 ```python
 from azure.identity.aio import DefaultAzureCredential
 
-from azure.connectors.sharepointonline import SharepointonlineClient
+from azure.connectors.sharepoint_online import SharePointOnlineClient
 
 
 async def list_items(connection_url: str):
     async with DefaultAzureCredential() as credential:
-        async with SharepointonlineClient(connection_url, credential) as client:
+        async with SharePointOnlineClient(connection_url, credential) as client:
             items = [
                 item
                 async for item in client.list_items(
@@ -350,12 +350,12 @@ Use credentials from `azure.identity.aio`. Use `AzureKeyCredential` from `azure.
 | Connector | Package | Status |
 |-----------|---------|--------|
 | Office 365 Outlook | `azure.connectors.office365` | ✅ Complete |
-| SharePoint Online | `azure.connectors.sharepointonline` | ✅ Complete |
+| SharePoint Online | `azure.connectors.sharepoint_online` | ✅ Complete |
 | Microsoft Teams | `azure.connectors.teams` | ✅ Complete |
 | Azure Data Explorer | `azure.connectors.kusto` | ✅ Complete |
-| MS Graph Groups & Users | `azure.connectors.msgraphgroupsanduser` | ✅ Complete |
-| Office 365 Users | `azure.connectors.office365users` | ✅ Complete |
-| Azure Blob Storage | `azure.connectors.azureblob` | ✅ Complete |
+| MS Graph Groups & Users | `azure.connectors.ms_graph_groups_and_users` | ✅ Complete |
+| Office 365 Users | `azure.connectors.office365_users` | ✅ Complete |
+| Azure Blob Storage | `azure.connectors.azure_blob` | ✅ Complete |
 | IBM MQ | `azure.connectors.mq` | ✅ Complete |
 
 > All SDKs support generating clients for any of the 1,000+ Azure managed connectors.

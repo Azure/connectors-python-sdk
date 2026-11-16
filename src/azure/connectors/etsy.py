@@ -1615,7 +1615,7 @@ class ShopListingFile:
     The numeric index of the display order position of this file in the
     listing, starting at 1.
     """
-    filename: str
+    file_name: str = dataclass_field(metadata={"wire_name": "filename"})
     """The file name string for a file associated with a digital listing."""
     filesize: str
     """A human-readable format size string for the size of a file."""

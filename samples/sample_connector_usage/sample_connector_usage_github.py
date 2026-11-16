@@ -24,7 +24,7 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.github import GithubClient
+from azure.connectors.github import GitHubClient
 from azure.connectors.github import IssueBasicDetailsModel
 
 
@@ -38,7 +38,7 @@ async def example_1_get_authenticated_user() -> None:
     print("\n=== Example 1: Get Authenticated User ===")
 
     async with DefaultAzureCredential() as credential:
-        async with GithubClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with GitHubClient(CONNECTION_RUNTIME_URL, credential) as client:
             user = await client.get_user()
             print(f"Authenticated as: {user.get('login') if user else 'unknown'}")
 
@@ -48,7 +48,7 @@ async def example_2_list_issues(repository_owner: str, repository_name: str) -> 
     print("\n=== Example 2: List Issues ===")
 
     async with DefaultAzureCredential() as credential:
-        async with GithubClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with GitHubClient(CONNECTION_RUNTIME_URL, credential) as client:
             issues = [item async for item in client.list_issues(
                 repository_owner=repository_owner,
                 repository_name=repository_name,
@@ -67,7 +67,7 @@ async def example_3_create_issue(repository_owner: str, repository_name: str) ->
     print("\n=== Example 3: Create Issue ===")
 
     async with DefaultAzureCredential() as credential:
-        async with GithubClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with GitHubClient(CONNECTION_RUNTIME_URL, credential) as client:
             request = IssueBasicDetailsModel(
                 title="SDK sample issue",
                 body="Created from github Python SDK sample.",

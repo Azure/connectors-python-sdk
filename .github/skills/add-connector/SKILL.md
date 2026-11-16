@@ -30,7 +30,7 @@ Collect the following details from the user:
 | Field | Description | Example |
 |-------|-------------|---------|
 | `connector_name` | Snake_case module name | `dynamics365`, `servicenow` |
-| `client_class_name` | PascalCase client class | `Dynamics365Client`, `ServicenowClient` |
+| `client_class_name` | PascalCase client class | `Dynamics365Client`, `ServiceNowClient` |
 | `display_name` | Human-readable name | `Dynamics 365`, `ServiceNow` |
 | `package_path` | Import path | `azure.connectors.dynamics365` |
 | `env_var_name` | Environment variable | `DYNAMICS365_CONNECTION_URL` |

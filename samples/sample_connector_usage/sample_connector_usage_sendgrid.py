@@ -24,7 +24,7 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.sendgrid import SendgridClient
+from azure.connectors.sendgrid import SendGridClient
 from azure.connectors.sendgrid import (
     EmailRequest,
     )
@@ -40,7 +40,7 @@ async def example_1_send_email() -> None:
     print("\n=== Example 1: Send Email ===")
 
     async with DefaultAzureCredential() as credential:
-        async with SendgridClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with SendGridClient(CONNECTION_RUNTIME_URL, credential) as client:
             result = await client.send_email(
                 input=EmailRequest(
                     from_="sender@example.com",
@@ -58,7 +58,7 @@ async def example_2_list_recipient_lists() -> None:
     print("\n=== Example 2: List Recipient Lists ===")
 
     async with DefaultAzureCredential() as credential:
-        async with SendgridClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with SendGridClient(CONNECTION_RUNTIME_URL, credential) as client:
             lists = [item async for item in client.list_recipient_lists()]
             print(f"Recipient lists: {lists}")
 
@@ -68,7 +68,7 @@ async def example_3_list_recipients() -> None:
     print("\n=== Example 3: List Recipients ===")
 
     async with DefaultAzureCredential() as credential:
-        async with SendgridClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with SendGridClient(CONNECTION_RUNTIME_URL, credential) as client:
             recipients = [item async for item in client.list_recipients()]
             print(f"Recipients: {recipients}")
 
@@ -78,7 +78,7 @@ async def example_4_get_bounce() -> None:
     print("\n=== Example 4: Get Bounce ===")
 
     async with DefaultAzureCredential() as credential:
-        async with SendgridClient(CONNECTION_RUNTIME_URL, credential) as client:
+        async with SendGridClient(CONNECTION_RUNTIME_URL, credential) as client:
             bounce = [item async for item in client.list_bounce(email="recipient@example.com")]
             print(f"Bounce: {bounce}")
 
