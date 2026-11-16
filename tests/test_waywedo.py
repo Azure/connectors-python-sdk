@@ -2,9 +2,9 @@
 
 """Contract tests for WayWeDoClient."""
 
-import azure.connectors.waywedo as waywedo_module
-from azure.connectors.waywedo import WayWeDoClient
-from azure.connectors.waywedo import TRIGGER_OPERATIONS
+import azure.connectors.way_we_do as waywedo_module
+from azure.connectors.way_we_do import WayWeDoClient
+from azure.connectors.way_we_do import TRIGGER_OPERATIONS
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 
 

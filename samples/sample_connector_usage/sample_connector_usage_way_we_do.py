@@ -6,7 +6,7 @@ import os
 from azure.identity.aio import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
-from azure.connectors.waywedo import WayWeDoClient
+from azure.connectors.way_we_do import WayWeDoClient
 
 
 CONNECTION_RUNTIME_URL = os.environ.get("WAYWEDO_CONNECTION_URL", "")

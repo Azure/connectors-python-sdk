@@ -338,7 +338,7 @@ The following connectors have been generated and validated with comprehensive te
 | **Twitter** | `azure.connectors.twitter` | ✅ Complete | 🔄 SDK Generated |
 | **Typeform** | `azure.connectors.typeform` | ✅ Complete | 🔄 SDK Generated |
 | **Universal Print** | `azure.connectors.universal_print` | ✅ Complete | 🔄 SDK Generated |
-| **Way We Do** | `azure.connectors.waywedo` | ✅ Complete | 🔄 SDK Generated |
+| **Way We Do** | `azure.connectors.way_we_do` | ✅ Complete | 🔄 SDK Generated |
 | **Webex** | `azure.connectors.webex` | ✅ Complete | 🔄 SDK Generated |
 | **Word Online (Business)** | `azure.connectors.word_online_business` | ✅ Complete | 🔄 SDK Generated |
 | **WordPress** | `azure.connectors.wordpress` | ✅ Complete | 🔄 SDK Generated |

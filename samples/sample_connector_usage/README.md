@@ -112,7 +112,7 @@ python sample_connector_usage_<connector>.py
 | `sample_connector_usage_ticketmaster.py` | Ticketmaster | `TICKETMASTER_CONNECTION_URL` |
 | `sample_connector_usage_seismic_planner.py` | Seismic Planner | `SEISMICPLANNER_CONNECTION_URL`, `SEISMICPLANNER_SPACE_ID` |
 | `sample_connector_usage_zeptomail.py` | Zoho ZeptoMail | `ZEPTOMAIL_CONNECTION_URL` |
-| `sample_connector_usage_waywedo.py` | Way We Do | `WAYWEDO_CONNECTION_URL` |
+| `sample_connector_usage_way_we_do.py` | Way We Do | `WAYWEDO_CONNECTION_URL` |
 | `sample_connector_usage_meeting_room_map.py` | Meeting Room Map | `MEETINGROOMMAP_CONNECTION_URL` |
 | `sample_connector_usage_starrez_rest_v1.py` | StarRez REST V1 | `STARREZRESTV1_CONNECTION_URL` |
 | `sample_connector_usage_replicon.py` | Replicon | `REPLICON_CONNECTION_URL` |

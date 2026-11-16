@@ -12,7 +12,7 @@ using the current generated API reference.
 A brand written as one word or in PascalCase stays one Python token, and a
 brand is split only where its own name has a space, hyphen or dot. GitHub is
 `github`, SharePoint Online is `sharepoint_online` and ClickSend SMS is
-`clicksend_sms`, but PDF.co is `pdf_co`. Modules such as `cloudconvert`,
+`clicksend_sms`, but PDF.co is `pdf_co` and Way We Do is `way_we_do`. Modules such as `cloudconvert`,
 `github` and `onenote` therefore keep their previous name; only their client
 class changes.
 
@@ -71,7 +71,7 @@ class changes.
 | `azure.connectors.textrequest.TextrequestClient` | `azure.connectors.text_request.TextRequestClient` |
 | `azure.connectors.universalprint.UniversalprintClient` | `azure.connectors.universal_print.UniversalPrintClient` |
 | `azure.connectors.visualstudioteamservices.VisualstudioteamservicesClient` | `azure.connectors.visual_studio_team_services.VisualStudioTeamServicesClient` |
-| `azure.connectors.waywedo.WaywedoClient` | `azure.connectors.waywedo.WayWeDoClient` |
+| `azure.connectors.waywedo.WaywedoClient` | `azure.connectors.way_we_do.WayWeDoClient` |
 | `azure.connectors.wordonlinebusiness.WordonlinebusinessClient` | `azure.connectors.word_online_business.WordOnlineBusinessClient` |
 | `azure.connectors.wordpress.WordpressClient` | `azure.connectors.wordpress.WordPressClient` |
 | `azure.connectors.zeptomail.ZeptomailClient` | `azure.connectors.zeptomail.ZeptoMailClient` |

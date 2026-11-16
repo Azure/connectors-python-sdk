@@ -104,7 +104,7 @@ from .twitter import TwitterClient as TwitterClient
 from .typeform import TypeformClient as TypeformClient
 from .universal_print import UniversalPrintClient as UniversalPrintClient
 from .visual_studio_team_services import VisualStudioTeamServicesClient as VisualStudioTeamServicesClient
-from .waywedo import WayWeDoClient as WayWeDoClient
+from .way_we_do import WayWeDoClient as WayWeDoClient
 from .wdatp import WdatpClient as WdatpClient
 from .webex import WebexClient as WebexClient
 from .word_online_business import WordOnlineBusinessClient as WordOnlineBusinessClient

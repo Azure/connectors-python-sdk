@@ -113,7 +113,7 @@
         * [TypeformClient](api/connectors/typeform.md)
         * [UniversalPrintClient](api/connectors/universal_print.md)
         * [VisualStudioTeamServicesClient](api/connectors/visual_studio_team_services.md)
-        * [WayWeDoClient](api/connectors/waywedo.md)
+        * [WayWeDoClient](api/connectors/way_we_do.md)
         * [WdatpClient](api/connectors/wdatp.md)
         * [WebexClient](api/connectors/webex.md)
         * [WordOnlineBusinessClient](api/connectors/word_online_business.md)

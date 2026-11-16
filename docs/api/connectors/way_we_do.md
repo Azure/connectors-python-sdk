@@ -1,6 +1,6 @@
 # WayWeDoClient
 
-::: azure.connectors.waywedo
+::: azure.connectors.way_we_do
     options:
       members:
         - CommentAddInput

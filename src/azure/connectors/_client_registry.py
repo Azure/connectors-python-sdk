@@ -98,7 +98,7 @@ CLIENT_REGISTRY: Final[dict[str, str]] = {
     "TypeformClient": "typeform",
     "UniversalPrintClient": "universal_print",
     "VisualStudioTeamServicesClient": "visual_studio_team_services",
-    "WayWeDoClient": "waywedo",
+    "WayWeDoClient": "way_we_do",
     "WdatpClient": "wdatp",
     "WebexClient": "webex",
     "WordOnlineBusinessClient": "word_online_business",
