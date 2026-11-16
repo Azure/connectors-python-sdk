@@ -203,7 +203,7 @@ and prerequisite status are recorded in the SDK PR.
 
 All 103 generated connector modules, `_client_registry.py`, and `__init__.pyi`
 were regenerated from consolidated generator commit
-`39a439a059e86a865ea0f132b6d1f989468cd032` in
+`8ccd4eb78950cf031c8f611fcaaae4e6c5dcb118` in
 [BPM PR 17922280](https://msazure.visualstudio.com/One/_git/AzureUX-BPM/pullrequest/17922280)
 (merging prerequisites [#17885819](https://msazure.visualstudio.com/One/_git/AzureUX-BPM/pullrequest/17885819),
 [#17895210](https://msazure.visualstudio.com/One/_git/AzureUX-BPM/pullrequest/17895210), and
